@@ -5,7 +5,7 @@
 2) Installed node.js & got MagicMirror software running
 
 Commands:
-To run:
+To run (cd MagicMirror):
 - npm run start
 - npm run start:dev (to start with Dev Tools enabled)
 ALT+F4 to escape fullscreen?
