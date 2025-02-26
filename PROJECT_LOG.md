@@ -11,3 +11,7 @@ To run (cd MagicMirror):
 ALT+F4 to escape fullscreen?
 ALT to access toolbar menu when in mirror mode
 CTRL+SHIFT+I to toggle (web) developer tools from mirror mode
+
+To exit:
+CTRL+ALT+T to open new terminal
+```killall node```
