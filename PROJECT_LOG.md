@@ -3,6 +3,7 @@
 ## Mittwoch 26.02.25
 1) Installed RaspberryPi OS on Raspberry Pi 4 Model B
 2) Installed node.js & got MagicMirror software running
+3) Set up remote control to use web app to tweak MagicMirror layout/config using MMM-Remote-Control, installed dependencies using npm install within ~/modules/MMM-Remote-Control
 
 Commands:
 To run (cd MagicMirror):
