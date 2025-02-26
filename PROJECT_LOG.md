@@ -4,10 +4,12 @@
 1) Installed RaspberryPi OS on Raspberry Pi 4 Model B
 2) Installed node.js & got MagicMirror software running
 3) Set up remote control to use web app to tweak MagicMirror layout/config using MMM-Remote-Control, installed dependencies using npm install within ~/modules/MMM-Remote-Control
+4) Whitelisted all local IPs to enable access from laptop/etc on same local network
 
 To use MMM-Remote-Control:
-1) Start with npm run start on Pi
+1) Start with npm run start on Pi (or npm run server to access through browsers alone)
 2) On other computer on same network, go to http://<Rasp Pi's IP address>:8080/remote.html
+
 
 Commands:
 To run (cd MagicMirror):
