@@ -22,3 +22,13 @@ CTRL+SHIFT+I to toggle (web) developer tools from mirror mode
 To exit:
 CTRL+ALT+T to open new terminal
 ```killall node```
+
+## [Sonntag 02.03.25] Pomodoro Timer Prototype
+
+Goal(s): Build a Pomodoro timer that:
+1. Runs locally on desktop (first test version)
+2. Has a start, stop, & reset function
+3. Tracks work vs break sessions
+4. Later, can be ported to Magic Mirror on Raspberry Pi
+
+
