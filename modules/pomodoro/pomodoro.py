@@ -8,7 +8,8 @@ import threading
 class Pomodoro:
     def start(self):
         self.running = True
-        self.currentTime = 0
+        self.start_time = time.time() # Store precise start time
+        self.current_time = 0
         # Modified this one line below into being several to enable multithreading
         # self.run_timer()
         timer_thread = threading.Thread(target=self.run_timer)
@@ -16,9 +17,10 @@ class Pomodoro:
         timer_thread.start()
 
     def run_timer(self):
+        # Updated to actually calculated elapsed time properly
         while self.running:
-            self.currentTime += 1
-            time.sleep(1)
+            elapsed_time = time.time() - self.start_time
+            self.current_time = int(elapsed_time)
 
     def stop(self):
         self.running = False
