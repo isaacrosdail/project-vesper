@@ -31,4 +31,13 @@ Goal(s): Build a Pomodoro timer that:
 3. Tracks work vs break sessions
 4. Later, can be ported to Magic Mirror on Raspberry Pi
 
+What I did this session:
+- Added SSH key for new PC && cloned Vesper repo to Desktop/Projects
+- Installed Python 3.13 to C:\Program Files\Python313
+- Added basic file structure & files
+- Implemented basic pomodoro prototype with pomodoro.py as logic for timer and cli.py for start/stop/print/etc for now
+-     As part of above, added basic multithreading for timer logic
+
+What to do next time!:
+1. Fix user input to enable typing "stop" during the countdown to stop
 
