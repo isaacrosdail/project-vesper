@@ -7,23 +7,24 @@ import time
 '''
 
 def cli(pomodoro):
-    command = input()
 
-    match command:
-        case "start":
-            print("Timer started!")
-            pomodoro.start()
-            while pomodoro.running:
-                print(pomodoro.currentTime)
-                time.sleep(1)
+    while True:
+        command = input()
 
-        case "stop":
-            pomodoro.stop()
-            print("Timer stopped!")
+        match command:
+            case "start":
+                print("Timer started!")
+                pomodoro.start()
+            case "stop":
+                pomodoro.stop()
+                print("Timer stopped!")
+            # Default case
+            case _:
+                return "Please enter start or stop"
 
-        # Default case
-        case _:
-            return "Please enter start or stop"
+        while pomodoro.running:
+            print(pomodoro.current_time)
+            time.sleep(1)
 
 # Main lives here for now
 def main():
