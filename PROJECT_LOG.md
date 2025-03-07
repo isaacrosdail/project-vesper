@@ -41,3 +41,12 @@ What I did this session:
 What to do next time!:
 1. Fix user input to enable typing "stop" during the countdown to stop
 
+## [Friday 07.03.25] 
+
+What I did this session:
+- Made desktop shortcut on Pi to initiate MagicMirror
+- Added hotkey (CTRL+Q) using xbindkeys to killall node to exit MagicMirror
+-     Added line to bottom of ~/.xbindkeysrc
+- Made a scripts folder on Pi 4B
+-     Then used crontab -e (Nano as editor) to add this to start xbindkeys on startup: @reboot /home/pi/scripts/start_xbindkeys.sh
+
