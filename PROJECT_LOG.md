@@ -53,4 +53,4 @@ What I did this session:
 ## [Saturday 08.03.25]
 
 What I did this session:
-- Installed (Python) setuptools, wheel, PyTorch (for GPU support) -> XTTS v2 Coqui to user/tools dir
+- Installed OpenVoice to user/tools dir, made venv myvenv and installed requirements.txt -> Uses Python 3.10 (Users/Name/Python310)
