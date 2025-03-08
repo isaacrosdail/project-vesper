@@ -50,3 +50,7 @@ What I did this session:
 - Made a scripts folder on Pi 4B
 -     Then used crontab -e (Nano as editor) to add this to start xbindkeys on startup: @reboot /home/pi/scripts/start_xbindkeys.sh
 
+## [Saturday 08.03.25]
+
+What I did this session:
+- Installed (Python) setuptools, wheel, PyTorch (for GPU support) -> XTTS v2 Coqui to user/tools dir
