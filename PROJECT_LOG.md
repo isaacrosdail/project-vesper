@@ -54,3 +54,8 @@ What I did this session:
 
 What I did this session:
 - Installed OpenVoice to user/tools dir, made venv myvenv and installed requirements.txt -> Uses Python 3.10 (Users/Name/Python310)
+-    Installed MeloTTS (multi-lang lib?), unidic
+
+
+# Notes for usage of OpenVoice TTS
+
