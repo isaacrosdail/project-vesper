@@ -31,4 +31,31 @@ Goal(s): Build a Pomodoro timer that:
 3. Tracks work vs break sessions
 4. Later, can be ported to Magic Mirror on Raspberry Pi
 
+What I did this session:
+- Added SSH key for new PC && cloned Vesper repo to Desktop/Projects
+- Installed Python 3.13 to C:\Program Files\Python313
+- Added basic file structure & files
+- Implemented basic pomodoro prototype with pomodoro.py as logic for timer and cli.py for start/stop/print/etc for now
+-     As part of above, added basic multithreading for timer logic
+
+What to do next time!:
+1. Fix user input to enable typing "stop" during the countdown to stop
+
+## [Friday 07.03.25] 
+
+What I did this session:
+- Made desktop shortcut on Pi to initiate MagicMirror
+- Added hotkey (CTRL+Q) using xbindkeys to killall node to exit MagicMirror
+-     Added line to bottom of ~/.xbindkeysrc
+- Made a scripts folder on Pi 4B
+-     Then used crontab -e (Nano as editor) to add this to start xbindkeys on startup: @reboot /home/pi/scripts/start_xbindkeys.sh
+
+## [Saturday 08.03.25]
+
+What I did this session:
+- Installed OpenVoice to user/tools dir, made venv myvenv and installed requirements.txt -> Uses Python 3.10 (Users/Name/Python310)
+-    Installed MeloTTS (multi-lang lib?), unidic
+
+
+# Notes for usage of OpenVoice TTS
 
