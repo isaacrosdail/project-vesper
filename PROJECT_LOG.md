@@ -56,6 +56,8 @@ What I did this session:
 - Installed OpenVoice to user/tools dir, made venv myvenv and installed requirements.txt -> Uses Python 3.10 (Users/Name/Python310)
 -    Installed MeloTTS (multi-lang lib?), unidic
 
+## [Tuesday 18.03.25] Start at 15:00
+Goal: Get barcode scanner functionality up and running, at least in CLI for now, to scan groceries & add/update to DB
 
-# Notes for usage of OpenVoice TTS
-
+Log:
+- Installed Flask, requests (for API calls) in venv, SQLAlchemy (for easier potential migration to PostreSQL later)
