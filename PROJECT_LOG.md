@@ -56,6 +56,17 @@ What I did this session:
 - Installed OpenVoice to user/tools dir, made venv myvenv and installed requirements.txt -> Uses Python 3.10 (Users/Name/Python310)
 -    Installed MeloTTS (multi-lang lib?), unidic
 
+## [Tuesday 18.03.25] Start at 15:00
+Goal: Get barcode scanner functionality up and running, at least in CLI for now, to scan groceries & add/update to DB
 
-# Notes for usage of OpenVoice TTS
+Log:
+- Installed Flask, requests (for API calls) in venv, SQLAlchemy (for easier potential migration to PostreSQL later)
 
+## [Thursday 20.03.25]
+Goal: Basic Flask web app UI to function as "homepage" (equivalent to Magic Mirror) and display current time
+
+Log:
+- Basic Flask web app in app.py, made index.html template and got it to display static date & time
+
+## [Saturday 22.03.25] Start 20:20
+Goal: Add grocery.html template where I can add a new product to database
