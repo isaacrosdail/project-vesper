@@ -61,3 +61,11 @@ Goal: Get barcode scanner functionality up and running, at least in CLI for now,
 
 Log:
 - Installed Flask, requests (for API calls) in venv, SQLAlchemy (for easier potential migration to PostreSQL later)
+
+## [Thursday 20.03.25]
+Goal: Basic Flask web app UI to function as "homepage" (equivalent to Magic Mirror) and display current time
+
+Log:
+- Basic Flask web app in app.py, made index.html template and got it to display static date & time
+
+NEXT: Look into Fetch API with Javascript to dynamically update time without reloading entire page
