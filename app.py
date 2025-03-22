@@ -3,6 +3,13 @@
 from flask import Flask, redirect, url_for, render_template
 import datetime
 
+## Database handling stuff
+import core.database
+from modules.groceries import models as grocery_models
+
+## Set up all database schema
+grocery_models.setup_schema()
+
 # Display current time on splash screen
 current_time = datetime.datetime.now()
 time_display = current_time.strftime("%H:%M:%S")
