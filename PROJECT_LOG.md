@@ -70,3 +70,7 @@ Log:
 
 ## [Saturday 22.03.25] Start 20:20
 Goal: Add grocery.html template where I can add a new product to database
+
+Log:
+- Added templates for grocery.html (to list grocery database?) & add_product.html (as form to add product to grocery db) <- UNFINISHED
+- Quick side quest: Need to change to one unified database under core/database.py rather than segregated databases
