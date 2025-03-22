@@ -14,5 +14,9 @@ app = Flask(__name__, template_folder="../templates")
 def home():
     return render_template("index.html", time_display=time_display, date_display=date_display)
 
+@app.route("/add_product")
+def add_product():
+    return render_template("barcode_scanner/add.product.html")
+
 if __name__ == "__main__":
     app.run()
