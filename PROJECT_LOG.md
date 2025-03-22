@@ -68,4 +68,5 @@ Goal: Basic Flask web app UI to function as "homepage" (equivalent to Magic Mirr
 Log:
 - Basic Flask web app in app.py, made index.html template and got it to display static date & time
 
-NEXT: Look into Fetch API with Javascript to dynamically update time without reloading entire page
+## [Saturday 22.03.25] Start 20:20
+Goal: Add grocery.html template where I can add a new product to database
