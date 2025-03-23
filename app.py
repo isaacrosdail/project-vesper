@@ -23,11 +23,13 @@ def home():
 
 @app.route("/grocery")
 def grocery():
-    return render_template("barcode_scanner/grocery.html")
+    grocery_models.add_product("Strawberry Jam", 5.49, 200) # try this out to add item each time i load the route?
+    products = grocery_models.get_all_products() # Fetch products from grocery DB, then pass into render_template so our template has the info too
+    return render_template("groceries/grocery.html", products = products)
 
 @app.route("/add_product")
 def add_product():
-    return render_template("barcode_scanner/add.product.html")
+    return render_template("groceries/add.product.html")
 
 if __name__ == "__main__":
     app.run()
