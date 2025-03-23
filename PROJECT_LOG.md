@@ -74,3 +74,7 @@ Goal: Add grocery.html template where I can add a new product to database
 Log:
 - Added templates for grocery.html (to list grocery database?) & add_product.html (as form to add product to grocery db) <- UNFINISHED
 - Quick side quest: Need to change to one unified database under core/database.py rather than segregated databases
+- Implemented super basic barcode scanning input that prints to terminal to confirm. Can't really run as a background daemon on Windows, but will use evdev on Linux to grab input directly and specifically from the barcode scanner, so this won't be an issue there.
+
+Tomorrow: Write function to add product to grocery database from barcode
+Stretch goal: Make Vesper recognize repeat scans and increase a product's quantity accordingly instead of duplicating it
