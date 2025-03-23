@@ -2,10 +2,12 @@
 
 from flask import Flask, redirect, url_for, render_template
 import datetime
+import threading  ## For now, used for running background scanner input daemon
 
 ## Database handling stuff
 import core.database
 from modules.groceries import models as grocery_models
+from modules.scanner import scan_input ## For now, used for running background scanner input
 
 ## Set up all database schema
 grocery_models.setup_schema()
@@ -14,6 +16,17 @@ grocery_models.setup_schema()
 current_time = datetime.datetime.now()
 time_display = current_time.strftime("%H:%M:%S")
 date_display = current_time.strftime("%A, %B %d")
+
+# Prototyping BARCODE SCANNER logic/handling
+def handle_barcode(barcode):
+    print(f"[Scanner] Got: {barcode}")
+
+scanner_thread = threading.Thread(
+    target=lambda: scan_input.simulate_scan_loop(handle_barcode),
+    daemon=True
+)
+scanner_thread.start()
+##############
 
 app = Flask(__name__)
 
