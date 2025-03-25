@@ -35,12 +35,16 @@ def home():
 
 @app.route("/grocery")
 def grocery():
+    column_names = [
+        grocery_models.Product.COLUMN_LABELS.get(col, col)
+        for col in grocery_models.Product.__table__.columns.keys()
+    ]
     products = grocery_models.get_all_products() # Fetch products from grocery DB, then pass into render_template so our template has the info too
-    return render_template("groceries/grocery.html", products = products)
+    return render_template("groceries/grocery.html", products = products, column_names = column_names)
 
 @app.route("/add_product")
 def add_product():
     return render_template("groceries/add.product.html")
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

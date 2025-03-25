@@ -1,0 +1,14 @@
+
+.wrapper {
+    margin-inline: auto;
+}
+
+table {
+    background: rgb(190, 185, 185);
+    padding: 1rem;
+}
+
+th, td {
+    padding: .2rem;
+    text-align: left;
+}
