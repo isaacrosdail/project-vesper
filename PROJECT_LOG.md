@@ -90,3 +90,12 @@ Log:
 Next time:
 1. Previous stretch goal: Tweak add_product logic to recognize repeat scans and increase product's quantity accordingly instead of duplicating it
 2. Fix grocery.html template such that table headers for columns are dynamically made
+
+## [Tuesday 25.03.25] Start 18:30
+
+Goals:
+1. Tweak add_product logic to recognize repeat scans and increase product's quantity accordingly instead of duplicating it
+2. Fix grocery.html template such that table headers for columns are dynamically made
+
+Log:
+- Forgot to log, but above goals were done
