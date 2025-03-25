@@ -21,6 +21,7 @@ date_display = current_time.strftime("%A, %B %d")
 def handle_barcode(barcode):
     print(f"[Scanner] Got: {barcode}")
 
+# Start daemon so that Vesper listens in background for a barcode to be scanned
 scanner_thread = threading.Thread(
     target=lambda: scan_input.simulate_scan_loop(handle_barcode),
     daemon=True

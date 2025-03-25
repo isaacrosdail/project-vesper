@@ -1,6 +1,22 @@
 # Handles DB setup/functionality & grocery related DB functions
 from core.database import get_session, engine
-from sqlalchemy import text
+from sqlalchemy import text, select
+from sqlalchemy.orm import declarative_base
+
+# Making a model for Product (use base classes later but stick with this for now)
+## Metadata needed to register the table properly? Investigate later
+from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float
+
+Base = declarative_base()
+
+class Product(Base):
+	__tablename__ = "product"
+
+	product_id = Column(Integer, primary_key=True)
+	product_name = Column(String(100), nullable=False)
+	price = Column(DECIMAL(10,2), nullable=False)
+	net_weight = Column(Float, nullable=False)
+
 
 # Setup function for groceries portion of database
 ## Run this once upon boot up
@@ -13,18 +29,16 @@ def setup_schema():
 	conn.commit() # applies change(s) to database
 	print("[groceries] Table creation committed.")
 
+# ORM style:
 def get_all_products():
 	session = get_session()
-	result = session.execute(text("SELECT * FROM groceries"))
-	session.close()
-	return result
+	products = session.query(Product).all()
+	session.close
+	return products
 
-def add_product(name, price, grams):
-	# Starts a session with the respective database
+def add_product(barcode):
 	session = get_session()
-	session.execute(
-		text('INSERT INTO groceries (name, price, grams) VALUES (:name, :price, :grams)'),
-		{"name": name, "price": price, "grams": grams}
-	)
+	new_product = Product(product_id=barcode, product_name="Jam", price=1.29, net_weight=20)
+	session.add(new_product)
 	session.commit()
 	session.close()
