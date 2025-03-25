@@ -4,6 +4,7 @@
 <head>
     <title>Groceries</title>
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')}}">
 </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -20,23 +21,29 @@
             </div>
         </nav>
         <h1>Groceries Page for Vesper</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Header 1</th>
-                    <th>Header 2</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr>
-                    <td>{{ product.product_id }}</td>
-                    <td>{{ product.product_name }}</td>
-                    <td>£{{ product.price }}</td>
-                    <td>{{ product.net_weight }} grams</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="wrapper">
+            <table class="caption-top">
+                <caption>
+                    Grocery - Products in my Inventory
+                </caption>
+                <thead>
+                    <tr>
+                        {% for column_name in column_names %}
+                        <th>{{ column_name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.product_id }}</td>
+                        <td>{{ product.product_name }}</td>
+                        <td>£{{ product.price }}</td>
+                        <td>{{ product.net_weight }} grams</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </body>
 </html>
