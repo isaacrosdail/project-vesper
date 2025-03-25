@@ -78,3 +78,15 @@ Log:
 
 Tomorrow: Write function to add product to grocery database from barcode
 Stretch goal: Make Vesper recognize repeat scans and increase a product's quantity accordingly instead of duplicating it
+
+## [Monday 24.03.25] Start 22:35
+Goal (from yesterday): Write function to add product to grocery database from barcode. Stretch goal: Make Vesper recognize repeat scans and increase a product's quantity accordingly instead of duplicating it
+
+Log:
+- Switched to ORM style for database / queries / etc
+- Made model for Product using ORM Base class (will flesh out as we go)
+- Did not reach stretch goal (big sad)
+
+Next time:
+1. Previous stretch goal: Tweak add_product logic to recognize repeat scans and increase product's quantity accordingly instead of duplicating it
+2. Fix grocery.html template such that table headers for columns are dynamically made

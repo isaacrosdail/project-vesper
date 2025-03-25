@@ -30,9 +30,10 @@
             <tbody>
                 {% for product in products %}
                 <tr>
-                    <td>{{ product[0] }}</td>
-                    <td>{{ product[1] }}</td>
-                    <td>{{ product[2] }}</td>
+                    <td>{{ product.product_id }}</td>
+                    <td>{{ product.product_name }}</td>
+                    <td>£{{ product.price }}</td>
+                    <td>{{ product.net_weight }} grams</td>
                 </tr>
                 {% endfor %}
             </tbody>

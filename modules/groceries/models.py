@@ -1,6 +1,5 @@
 # Handles DB setup/functionality & grocery related DB functions
 from core.database import get_session, engine
-from sqlalchemy import text, select
 from sqlalchemy.orm import declarative_base
 
 # Making a model for Product (use base classes later but stick with this for now)
@@ -17,23 +16,13 @@ class Product(Base):
 	price = Column(DECIMAL(10,2), nullable=False)
 	net_weight = Column(Float, nullable=False)
 
-
-# Setup function for groceries portion of database
-## Run this once upon boot up
-def setup_schema():
-	print("[groceries] Running schema setup...")
-	conn = engine.connect()  # Handshake - encapsulates DBAPI, connection string, pooling config?
-	conn.execute(text(
-		"CREATE TABLE IF NOT EXISTS groceries (name str, price float, grams int)"
-		)) # executes statement
-	conn.commit() # applies change(s) to database
-	print("[groceries] Table creation committed.")
+Base.metadata.create_all(engine) # Replaces our old Core style setup_schema function for database setup
 
 # ORM style:
 def get_all_products():
 	session = get_session()
 	products = session.query(Product).all()
-	session.close
+	session.close()
 	return products
 
 def add_product(barcode):
