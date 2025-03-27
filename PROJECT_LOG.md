@@ -99,3 +99,12 @@ Goals:
 
 Log:
 - Forgot to log, but above goals were done
+
+## Wednesday [26.03.25] Start 22:00?
+
+Log:
+- Got Remote Development extension on VSCode to test on Raspberry Pi via SSH
+
+Next Time:
+1. Implement add_product route: Accept a scanned barcode, enter rest of info, then add it to the DB and show it in the UI
+2. Set up Flask-Migrate: Initialize migrations, create & apply first schema version, and confirm it works with Product model
