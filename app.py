@@ -44,7 +44,7 @@ def grocery():
 
 @app.route("/add_product")
 def add_product():
-    return render_template("groceries/add.product.html")
+    return render_template("groceries/add_product.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
