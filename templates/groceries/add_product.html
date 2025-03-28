@@ -1,11 +1,22 @@
 <!-- Page to add new grocery item once scanned -->
 
+{% extends "base.html" %}
+
+{% block title %}Add New Product{% endblock %}
+
+{% block content %}
+    <h1>Add new item: </h1>
+{% endblock %}
+<!--
 <html>
 <head>
-    <title>Home</title>
+    <title>Add Product</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')}}">
 </head>
     <body>
         <h1>Add new item:</h1>
         <p></p>
     </body>
 </html>
+-->
