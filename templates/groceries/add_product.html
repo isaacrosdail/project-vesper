@@ -1,4 +1,4 @@
-<!-- Page to add new grocery item once scanned -->
+<!-- Page to add new product if it doesn't exist yet -->
 
 {% extends "base.html" %}
 
@@ -6,11 +6,20 @@
 
 {% block content %}
     <h1>Add new item: </h1>
-    <form method="POST" action="submit">
+    <form method="POST" action="submit_product">
+
+        <label for="barcode">Barcode:</label><br>
+        <input type="text" id="barcode" name="barcode"><br>
+        
         <label for="product_name">Product Name:</label><br>
         <input type="text" id="product_name" name="product_name"><br>
+        
         <label for="price">Price:</label><br>
-        <input type="text" id="price" name="price"></label><br>
+        <input type="text" id="price" name="price"><br>
+        
+        <label for="net_weight">Net Weight:</label><br>
+        <input type="text" id="price" name="price"><br>
+        
         <button type="submit">Submit</button>
     </form>
 {% endblock %}

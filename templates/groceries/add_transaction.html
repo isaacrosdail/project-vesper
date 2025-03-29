@@ -1,0 +1,29 @@
+<!-- Page to log a new transaction -->
+
+{% extends "base.html" %}
+
+{% block title %}Log New Transaction{% endblock %}
+
+{% block content %}
+    <h1>Add new transaction: </h1>
+    <form method="POST" action="/submit_transaction">
+
+        <label for="barcode">Barcode:</label><br>
+        <input type="text" id="barcode" name="barcode"
+            {% if barcode %} value="{{ barcode }}" {% endif %}
+            placeholder="Scan or enter barcode"><br>
+        
+            <label for="product_name">Product Name</label><br>
+            <input type="text" id="barcode" name="product_name"><br>
+        
+            <label for="price_at_scan">Price:</label><br> <!-- HAVE THIS AUTOFILL WITH KNOWN PRICE IF EXISTS -->
+            <input type="text" id="price_at_scan" name="price_at_scan"><br>
+        
+            <label for="quantity">Quantity:</label><br>
+            <input type="text" id="quantity" name="quantity"><br>
+
+            <button type="submit" name="action" value="submit">Submit</button>
+            <button type="submit" name="action" value="next_item">Add Next Item</button>
+    </form>
+
+{% endblock %}
