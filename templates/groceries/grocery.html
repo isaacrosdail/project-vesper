@@ -12,15 +12,45 @@
             </caption>
             <thead>
                 <tr>
-                    {% for column_name in column_names %}
-                    <th>{{ column_name }}</th>
-                    {% endfor %}
+                    <th>Barcode</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Date Scanned</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.product.barcode }}</td>
+                    <td>{{ transaction.product.product_name }}</td>
+                    <td>{{ transaction.price_at_scan }}</td>
+                    <td>{{ transaction.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ url_for('add_transaction')}}">
+        <button>Log New Transaction</button>
+    </a>
+    <div class="wrapper">
+        <table class="caption-top">
+            <caption>
+                Lifetime Products Scanned In
+            </caption>
+            <thead>
+                <tr>
+                    <th>Barcode</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Net Weight</th>
                 </tr>
             </thead>
             <tbody>
                 {% for product in products %}
                 <tr>
-                    <td>{{ product.product_id }}</td>
+                    <td>{{ product.barcode }}</td>
                     <td>{{ product.product_name }}</td>
                     <td>£{{ product.price }}</td>
                     <td>{{ product.net_weight }} grams</td>
@@ -30,6 +60,6 @@
         </table>
     </div>
     <a href="{{ url_for('add_product')}}">
-        <button>Click Me</button>
+        <button>Add New Product</button>
     </a>
 {% endblock %}

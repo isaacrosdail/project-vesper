@@ -108,3 +108,25 @@ Log:
 Next Time:
 1. Implement add_product route: Accept a scanned barcode, enter rest of info, then add it to the DB and show it in the UI
 2. Set up Flask-Migrate: Initialize migrations, create & apply first schema version, and confirm it works with Product model
+
+## Friday [28.03.25] Start 21:00
+Log:
+- Made Product model to act as permanent record tying barcodes to products, Transaction model will store data for individual scans
+- Fixed barcode being used as primary key
+Next Time:
+1. When barcode is scanned, check if it exists in Product table. If not, prompt for product name and price. Then add it to Product and add a matching Transaction. If yes, just add a Transaction. Need to sort out add_product and add_transaction functions
+
+## Saturday [29.03.25] Start 11:25
+Goal: Sort out logic for add_product and add_transaction
+
+Log:
+- Updated logic for add_product and add_transaction, messy so need to add tests
+- Installed pytest & pytest-mock
+Tests to add:
+- Validation for db entries (prices are actually prices, etc)
+      Also make said fields in add_product and add_transaction forms mandatory
+
+## Sunday [30.03.25] Start 11:55
+Goal: Begin implementing tests with pytest/pytest-mock
+Log:
+-
