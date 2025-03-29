@@ -1,6 +1,6 @@
 # Main Flask app -- import grocery module
 
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, request, render_template
 import datetime
 import threading  ## For now, used for running background scanner input daemon
 
@@ -35,16 +35,34 @@ def home():
 
 @app.route("/grocery")
 def grocery():
-    column_names = [
+    # Column names for Products model
+    column_names1 = [
         grocery_models.Product.COLUMN_LABELS.get(col, col)
         for col in grocery_models.Product.__table__.columns.keys()
     ]
+    # Column names for Transactions model
+    column_names2 = [
+        grocery_models.Transaction.COLUMN_LABELS.get(col, col)
+        for col in grocery_models.Transaction.__table__.columns.keys()
+    ]
     products = grocery_models.get_all_products() # Fetch products from grocery DB, then pass into render_template so our template has the info too
-    return render_template("groceries/grocery.html", products = products, column_names = column_names)
+    transactions = grocery_models.get_all_transactions() # Fetch transactions from grocery DB
+    return render_template("groceries/grocery.html", products = products, transactions = transactions, column_names1 = column_names1, column_names2 = column_names2)
 
-@app.route("/add_product")
+@app.route("/add_product", methods=["GET"])
 def add_product():
     return render_template("groceries/add_product.html")
+
+# Route to save form data from add_product
+@app.route('/submit', methods=["POST"])
+def submit_product():
+    name = request.form.get("product_name")
+    price = request.form.get("price")
+
+    # Save to db
+    grocery_models.add_product(111, name, price)
+
+    return redirect(url_for("grocery"))
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -6,4 +6,11 @@
 
 {% block content %}
     <h1>Add new item: </h1>
+    <form method="POST" action="submit">
+        <label for="product_name">Product Name:</label><br>
+        <input type="text" id="product_name" name="product_name"><br>
+        <label for="price">Price:</label><br>
+        <input type="text" id="price" name="price"></label><br>
+        <button type="submit">Submit</button>
+    </form>
 {% endblock %}

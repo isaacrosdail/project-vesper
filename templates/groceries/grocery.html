@@ -12,7 +12,7 @@
             </caption>
             <thead>
                 <tr>
-                    {% for column_name in column_names %}
+                    {% for column_name in column_names1 %}
                     <th>{{ column_name }}</th>
                     {% endfor %}
                 </tr>
@@ -29,7 +29,31 @@
             </tbody>
         </table>
     </div>
+    <div class="wrapper">
+        <table class="caption-top">
+            <caption>
+                Lifetime Products Scanned In
+            </caption>
+            <thead>
+                <tr>
+                    {% for column_name in column_names2 %}
+                    <th>{{ column_name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.transaction_id }}</td>
+                    <td>{{ transaction.product.product_name }}</td>
+                    <td>{{ transaction.price_at_scan }}</td>
+                    <td>{{ transaction.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     <a href="{{ url_for('add_product')}}">
-        <button>Click Me</button>
+        <button>Add Product</button>
     </a>
 {% endblock %}
