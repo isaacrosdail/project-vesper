@@ -126,7 +126,13 @@ Tests to add:
 - Validation for db entries (prices are actually prices, etc)
       Also make said fields in add_product and add_transaction forms mandatory
 
-## Sunday [30.03.25] Start 11:55
+## Sunday [30.03.25] 11:55-15:00
 Goal: Begin implementing tests with pytest/pytest-mock
 Log:
--
+- Cleaned up DB functions in models.py to compartmentalize function jobs
+- Renamed handle_barcode to process_scanned_barcode and retooled to add transaction upon scan. Need to figure out way to enable it to pull up add_product page if product doesn't exist.
+- Starting with unit tests:
+	- conftest.py: Sets up in-memory db via fixtures
+	- test_models.py: Made 1 test for add_product
+Next Time:
+- Add WebSocket support to enable real-time redirect to /add_product when a scanned barcode doesn't exist.
