@@ -4,8 +4,6 @@ from sqlalchemy.orm import declarative_base, relationship, joinedload
 from sqlalchemy import ForeignKey
 from datetime import date
 
-# Making a model for Product (use base classes later but stick with this for now)
-## Metadata needed to register the table properly? Investigate later
 from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date
 
 Base = declarative_base()
@@ -19,7 +17,6 @@ class Product(Base):
 	barcode = Column(String(64), unique=True, nullable=False)
 	price = Column(DECIMAL(10,2), nullable=False)
 	net_weight = Column(Float, nullable=False)
-	#quantity = Column(Integer, nullable=False)
 
 	# Human-readable column names
 	COLUMN_LABELS = {
@@ -51,69 +48,64 @@ class Transaction(Base):
 
 Base.metadata.create_all(engine) # Replaces our old Core style setup_schema function for database setup
 
-# ORM style:
-def get_all_products():
-	session = get_session()
-	products = session.query(Product).all()
-	session.close()
-	return products
+# Lookup barcode function to centralize a bit
+def lookup_barcode(session, barcode):
+	return session.query(Product).filter_by(barcode=barcode).first()
 
-# Eager load the 'product' relationship using joinedload
-# so we can safely access transaction.product.* fields in templates
-# after the session is closed (avoids DetachedInstanceError)
-def get_all_transactions():
-	session = get_session()
-	transactions = session.query(Transaction).options(joinedload(Transaction.product)).all()
-	session.close()
-	return transactions
+def get_all_products(session):
+	return session.query(Product).all()
 
-def handle_barcode(barcode, **product_data): # Uses **kwargs to take in optional data (ie., from forms)
-	session = get_session()
-	product = session.query(Product).filter_by(barcode=barcode).first()
+# Eager load 'product' relationship using joinedload so we can safely access transaction.product.* fields in templates
+# after session is closed (avoids DetachedInstanceError)
+def get_all_transactions(session):
+	return session.query(Transaction).options(joinedload(Transaction.product)).all()
+
+# Uses **kwargs to take in optional data (ie., from forms)
+def handle_barcode(session, barcode, **product_data):
+	product = lookup_barcode(session, barcode)
 
 	# If not in Product table, then add it
 	if not product:
-		product_name = product_data.get("product_name")
-		price= product_data.get("price_at_scan")
-		net_weight = product_data.get("net_weight")
-
 		add_product(session, barcode, **product_data)
-		product = session.query(Product).filter_by(barcode=barcode).first()
+		product = lookup_barcode(session, barcode)
+
 	# Then add product to our transaction table
 	add_transaction(session, product, **product_data)
 
-	session.commit()
-	session.close()
+	# session.commit() # Remove?
 
 # Handles new barcodes
 def add_product(session, barcode, **product_data):
-	#session = get_session()
 
-	product_name = product_data.get("product_name")
-	price_at_scan = product_data.get("price_at_scan")
-	net_weight = product_data.get("net_weight")
+	product = Product(
+		barcode=barcode,
+		product_name=product_data["product_name"], 
+		price=product_data["price_at_scan"],
+		net_weight=product_data["net_weight"]
+	)
 
-	product = Product(barcode=barcode, product_name=product_name, price=price_at_scan, net_weight=net_weight)
 	session.add(product)
-
-	session.commit()
-	session.close()
+	# session.commit() # Keep here or remove?
 
 def add_transaction(session, product, **product_data):
 	today = date.today()
-
-	price_at_scan = product_data.get("price_at_scan")
-	net_weight = product_data.get("net_weight")
 	quantity = int(product_data.get("quantity") or 1)
-
-	# session = get_session()
+	
 	# Check transaction table to see if we need to increment quantity for today's scans or add new instance of given product
-	transaction = session.query(Transaction).filter_by(product_id=product.product_id, date_scanned=today).first()
+	transaction = session.query(Transaction).filter_by(
+		product_id=product.product_id,
+		date_scanned=today
+	).first()
+	
 	if transaction:
 		transaction.quantity += quantity
 	else:
-		transaction = Transaction(product_id=product.product_id, price_at_scan=price_at_scan, quantity=quantity, date_scanned=today)
+		transaction = Transaction(
+			product_id=product.product_id,
+			price_at_scan=product_data["price_at_scan"],
+			quantity=quantity,
+			date_scanned=today
+		)
 		session.add(transaction)
 
-	session.commit()
-	session.close()
+	# session.commit() # Remove too?

@@ -8,7 +8,7 @@ import threading  ## For now, used for running background scanner input daemon
 import core.database
 from modules.groceries import models as grocery_models
 from modules.scanner import scan_input ## For now, used for running background scanner input
-from modules.groceries.models import Product, Transaction, get_session
+from modules.groceries.models import Product, Transaction, get_session, lookup_barcode
 
 import random # For dummy barcodes for now, delete later (Added 29.03.25)
 
@@ -19,17 +19,19 @@ date_display = current_time.strftime("%A, %B %d")
 
 # Prototyping BARCODE SCANNER logic/handling
 def handle_barcode_first(barcode):
-    # print(f"[Scanner] Got: {barcode}")
     # Check if barcode is already in Product table
     session = session.get_session()
-    product = session.query(Product).filter_by(barcode=barcode).first()
-    session.close()
+    try:
+        product = lookup_barcode(session, barcode)
 
-    if product:
-        # Product exists -> go to Add Transaction page with pre-filled info
-        return redirect(url_for("add_transaction", barcode=barcode))
-
-    grocery_models.handle_barcode(barcode)
+        if product:
+            # Product exists -> go to Add Transaction page with pre-filled info
+            return redirect(url_for("add_transaction", barcode=barcode))
+        
+        grocery_models.handle_barcode(barcode)
+        session.commit()
+    finally:
+        session.close()
 
 # Start daemon so that Vesper listens in background for a barcode to be scanned
 scanner_thread = threading.Thread(
@@ -47,6 +49,7 @@ def home():
 
 @app.route("/grocery")
 def grocery():
+    session = get_session()
     # Column names for Transactions model
     transaction_column_names = [
         grocery_models.Transaction.COLUMN_LABELS.get(col, col)
@@ -58,8 +61,8 @@ def grocery():
         for col in grocery_models.Product.__table__.columns.keys()
     ]
 
-    products = grocery_models.get_all_products() # Fetch products from grocery DB, then pass into render_template so our template has the info too
-    transactions = grocery_models.get_all_transactions() # Fetch transactions from grocery DB
+    products = grocery_models.get_all_products(session) # Fetch products from grocery DB, then pass into render_template so our template has the info too
+    transactions = grocery_models.get_all_transactions(session) # Fetch transactions from grocery DB
     return render_template("groceries/grocery.html", products = products, transactions = transactions, product_column_names = product_column_names, transaction_column_names = transaction_column_names)
 
 @app.route("/add_product", methods=["GET"])
@@ -93,7 +96,6 @@ def submit_transaction():
         return redirect("/grocery")
     elif action == "next_item":
         return redirect("/add_transaction")
-
 
 
 # Route to save form data from add_product
