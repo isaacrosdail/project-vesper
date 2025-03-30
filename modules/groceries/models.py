@@ -3,6 +3,7 @@ from core.database import get_session, engine
 from sqlalchemy.orm import declarative_base, relationship, joinedload
 from sqlalchemy import ForeignKey
 from datetime import date
+from decimal import Decimal
 
 from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date
 
@@ -62,16 +63,15 @@ def get_all_transactions(session):
 
 #####################################
 # Uses **kwargs to take in optional data (ie., from forms)
-def handle_barcode(session, barcode, **product_data):
+# Now used for scanner barcode input only
+def process_scanned_barcode(session, barcode, **product_data):
 	product = lookup_barcode(session, barcode)
 
-	# If not in Product table, then add it
-	if not product:
-		add_product(session, barcode, **product_data)
-		product = lookup_barcode(session, barcode)
+	if product:
+		add_transaction(session, product, quantity=1, price_at_scan=product.price, net_weight=product.net_weight)
+		return "added_transaction"
 
-	# Then add product to our transaction table
-	add_transaction(session, product, **product_data)
+	return "new_product"
 ####################################
 
 def ensure_product_exists(session, barcode, **product_data):
@@ -84,8 +84,8 @@ def add_product(session, barcode, **product_data):
 	product = Product(
 		barcode=barcode,
 		product_name=product_data["product_name"], 
-		price=product_data["price_at_scan"],
-		net_weight=product_data["net_weight"]
+		price=Decimal(product_data["price_at_scan"]),
+		net_weight=float(product_data["net_weight"])
 	)
 
 	session.add(product)
@@ -106,7 +106,7 @@ def add_transaction(session, product, **product_data):
 	else:
 		transaction = Transaction(
 			product_id=product.product_id,
-			price_at_scan=product_data["price_at_scan"],
+			price_at_scan=Decimal(product_data["price_at_scan"]),
 			quantity=quantity,
 			date_scanned=today
 		)

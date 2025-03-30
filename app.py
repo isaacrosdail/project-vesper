@@ -9,6 +9,7 @@ import core.database
 from modules.groceries import models as grocery_models
 from modules.scanner import scan_input ## For now, used for running background scanner input
 from modules.groceries.models import Product, Transaction, get_session, lookup_barcode
+from decimal import Decimal
 
 import random # For dummy barcodes for now, delete later (Added 29.03.25)
 
@@ -19,14 +20,16 @@ date_display = current_time.strftime("%A, %B %d")
 
 # Prototyping BARCODE SCANNER logic/handling
 def handle_barcode_first(barcode):
-    # Check if barcode is already in Product table
     session = session.get_session()
     try:
-        product = lookup_barcode(session, barcode)
+        result = grocery_models.handle_barcode(session, barcode)
 
-        if product:
-            # Product exists -> go to Add Transaction page with pre-filled info
-            return redirect(url_for("add_transaction", barcode=barcode))
+        if result == "added_transaction":
+            session.commit()
+            return
+        elif result == "new_product":
+            session.close()
+            # Redirect to 
         
         grocery_models.handle_barcode(barcode)
         session.commit()
@@ -79,7 +82,7 @@ def add_transaction():
     barcode = request.args.get("barcode")
     return render_template("groceries/add_transaction.html", barcode=barcode)
 
-@app.route("/submit_transaction")
+@app.route("/submit_transaction", methods=["POST"])
 def submit_transaction():
     action = request.form.get("action")
     barcode = request.form.get("barcode")
@@ -87,9 +90,9 @@ def submit_transaction():
     # Parse & sanitize form data
     product_data = {
         "product_name": request.form.get("product_name"),
-        "price": request.form.get("price_at_scan"),
-        "net_weight": request.form.get("net_weight"),
-        "quantity": request.form.get("quantity")
+        "price": Decimal(request.form.get("price_at_scan", "0")),
+        "net_weight": float(request.form.get("net_weight", 0)),
+        "quantity": int(request.form.get("quantity") or 1)
     }
 
     session = get_session()
@@ -118,8 +121,8 @@ def submit_product():
     product_data = {
         "barcode": request.form.get("barcode"),
         "product_name": request.form.get("product_name"),
-        "price": request.form.get("price"),
-        "net_weight":request.form.get("net_weight")
+        "price": Decimal(request.form.get("price", "0")),
+        "net_weight": float(request.form.get("net_weight", 0))
     }
 
     session = get_session()
