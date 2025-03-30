@@ -8,7 +8,8 @@ import threading  ## For now, used for running background scanner input daemon
 import core.database
 from modules.groceries import models as grocery_models
 from modules.scanner import scan_input ## For now, used for running background scanner input
-from modules.groceries.models import Product, Transaction, get_session
+from modules.groceries.models import Product, Transaction, get_session, lookup_barcode
+from decimal import Decimal
 
 import random # For dummy barcodes for now, delete later (Added 29.03.25)
 
@@ -19,25 +20,29 @@ date_display = current_time.strftime("%A, %B %d")
 
 # Prototyping BARCODE SCANNER logic/handling
 def handle_barcode_first(barcode):
-    # print(f"[Scanner] Got: {barcode}")
-    # Check if barcode is already in Product table
     session = session.get_session()
-    product = session.query(Product).filter_by(barcode=barcode).first()
-    session.close()
+    try:
+        result = grocery_models.handle_barcode(session, barcode)
 
-    if product:
-        # Product exists -> go to Add Transaction page with pre-filled info
-        return redirect(url_for("add_transaction", barcode=barcode))
+        if result == "added_transaction":
+            session.commit()
+            return
+        elif result == "new_product":
+            session.close()
+            # Redirect to 
+        
+        grocery_models.handle_barcode(barcode)
+        session.commit()
+    finally:
+        session.close()
 
-    grocery_models.handle_barcode(barcode)
-
-# Start daemon so that Vesper listens in background for a barcode to be scanned
+# Start daemon to listen in background for barcode(s)
 scanner_thread = threading.Thread(
     target=lambda: scan_input.simulate_scan_loop(handle_barcode_first),
     daemon=True
 )
 scanner_thread.start()
-##############
+# # # # #
 
 app = Flask(__name__)
 
@@ -47,6 +52,7 @@ def home():
 
 @app.route("/grocery")
 def grocery():
+    session = get_session()
     # Column names for Transactions model
     transaction_column_names = [
         grocery_models.Transaction.COLUMN_LABELS.get(col, col)
@@ -58,9 +64,14 @@ def grocery():
         for col in grocery_models.Product.__table__.columns.keys()
     ]
 
-    products = grocery_models.get_all_products() # Fetch products from grocery DB, then pass into render_template so our template has the info too
-    transactions = grocery_models.get_all_transactions() # Fetch transactions from grocery DB
-    return render_template("groceries/grocery.html", products = products, transactions = transactions, product_column_names = product_column_names, transaction_column_names = transaction_column_names)
+    # Fetch products and transactions, pass into render_template
+    products = grocery_models.get_all_products(session)
+    transactions = grocery_models.get_all_transactions(session)
+    return render_template("groceries/grocery.html", products = products,
+                           transactions = transactions, 
+                           product_column_names = product_column_names,
+                           transaction_column_names = transaction_column_names
+                        )
 
 @app.route("/add_product", methods=["GET"])
 def add_product():
@@ -71,42 +82,55 @@ def add_transaction():
     barcode = request.args.get("barcode")
     return render_template("groceries/add_transaction.html", barcode=barcode)
 
-@app.route("/submit_transaction")
+@app.route("/submit_transaction", methods=["POST"])
 def submit_transaction():
     action = request.form.get("action")
-    
-    # Process form data
     barcode = request.form.get("barcode")
 
-    # product_info dictionary
+    # Parse & sanitize form data
     product_data = {
         "product_name": request.form.get("product_name"),
-        "price": request.form.get("price_at_scan"),
-        "net_weight": request.form.get("net_weight"),
-        "quantity": request.form.get("quantity")
+        "price": Decimal(request.form.get("price_at_scan", "0")),
+        "net_weight": float(request.form.get("net_weight", 0)),
+        "quantity": int(request.form.get("quantity") or 1)
     }
 
-    grocery_models.handle_barcode(barcode, **product_data)
+    session = get_session()
+    try:
+        grocery_models.ensure_product_exists(session, barcode, **product_data)
+        product = grocery_models.lookup_barcode(session, barcode)
+        grocery_models.add_transaction(session, product, **product_data)
+        # grocery_models.handle_barcode(session, barcode, **product_data)
+        session.commit()
+    finally:
+        session.close()
 
-    # Redirect based on which button was pressed
+    # Redirect accordingly
     if action == "submit":
         return redirect("/grocery")
     elif action == "next_item":
         return redirect("/add_transaction")
 
 
-
 # Route to save form data from add_product
 @app.route('/submit_product', methods=["POST"])
 def submit_product():
-    name = request.form.get("product_name")
-    price = request.form.get("price")
+    barcode = request.form.get("barcode")
 
-    # For dummy barcodes, delete later (29.03.25)
-    barcode = str(random.randint(1, 9999))
+    # Parse & sanitize form data
+    product_data = {
+        "barcode": request.form.get("barcode"),
+        "product_name": request.form.get("product_name"),
+        "price": Decimal(request.form.get("price", "0")),
+        "net_weight": float(request.form.get("net_weight", 0))
+    }
 
-    # Save to db
-    grocery_models.handle_barcode(barcode)
+    session = get_session()
+    try:
+        grocery_models.ensure_product_exists(session, barcode, **product_data)
+        session.commit()
+    finally:
+        session.close()
 
     return redirect(url_for("grocery"))
 
