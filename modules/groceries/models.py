@@ -8,7 +8,7 @@ from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date
 
 Base = declarative_base()
 
-# Product Model to link products to barcodes, etc
+# Product Model for database of products known
 class Product(Base):
 	__tablename__ = "product"
 
@@ -27,7 +27,7 @@ class Product(Base):
 		"net_weight": "Net Weight (g)",
 	}
 
-# Transaction Model for logging what I bought
+# Transaction Model for 'inventory'
 class Transaction(Base):
 	__tablename__ = "transaction"
 
@@ -46,7 +46,7 @@ class Transaction(Base):
 		"quantity": "Quantity",
 	}
 
-Base.metadata.create_all(engine) # Replaces our old Core style setup_schema function for database setup
+Base.metadata.create_all(engine)
 
 # Lookup barcode function to centralize a bit
 def lookup_barcode(session, barcode):
@@ -60,6 +60,7 @@ def get_all_products(session):
 def get_all_transactions(session):
 	return session.query(Transaction).options(joinedload(Transaction.product)).all()
 
+#####################################
 # Uses **kwargs to take in optional data (ie., from forms)
 def handle_barcode(session, barcode, **product_data):
 	product = lookup_barcode(session, barcode)
@@ -71,12 +72,15 @@ def handle_barcode(session, barcode, **product_data):
 
 	# Then add product to our transaction table
 	add_transaction(session, product, **product_data)
+####################################
 
-	# session.commit() # Remove?
+def ensure_product_exists(session, barcode, **product_data):
+	product = lookup_barcode(session, barcode)
+	if not product:
+		add_product(session, barcode, **product_data)
 
-# Handles new barcodes
+# Add not-previously-encountered product
 def add_product(session, barcode, **product_data):
-
 	product = Product(
 		barcode=barcode,
 		product_name=product_data["product_name"], 
@@ -85,13 +89,13 @@ def add_product(session, barcode, **product_data):
 	)
 
 	session.add(product)
-	# session.commit() # Keep here or remove?
 
+# Add product to 'inventory'
 def add_transaction(session, product, **product_data):
 	today = date.today()
 	quantity = int(product_data.get("quantity") or 1)
 	
-	# Check transaction table to see if we need to increment quantity for today's scans or add new instance of given product
+	# Check to determine whether to increment qty or add new instance
 	transaction = session.query(Transaction).filter_by(
 		product_id=product.product_id,
 		date_scanned=today
@@ -107,5 +111,3 @@ def add_transaction(session, product, **product_data):
 			date_scanned=today
 		)
 		session.add(transaction)
-
-	# session.commit() # Remove too?
