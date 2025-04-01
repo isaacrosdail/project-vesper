@@ -1,8 +1,19 @@
 
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
 .wrapper {
     margin-inline: auto;
 }
-
+.navbar {
+    height: 3.5rem;
+}
+.tether-card {
+    background-color: rgb(187, 187, 187);
+    text-align: center;
+}
 table {
     background: rgb(190, 185, 185);
     padding: 1rem;
