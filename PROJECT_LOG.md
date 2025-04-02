@@ -136,3 +136,19 @@ Log:
 	- test_models.py: Made 1 test for add_product
 Next Time:
 - Add WebSocket support to enable real-time redirect to /add_product when a scanned barcode doesn't exist.
+
+## Tuesday [01.04.25] Start 14:10
+Goal(s): Add "daily tether(s)" into dashboard page
+  Reqs:
+    - Use Flexbox
+    - Make a card that is centered, add hover effects, add state for editing, style it clean
+  Later:
+    - Add padding, spacing
+Log:
+- Altered index.html to have a div for tether-card, started styling
+
+## Wednesday [02.04.25] Start 11:56
+Goal(s): Finish adding JS function for tether-card input
+  Reqs:
+    - Make a card that's centered, add hover effects, add state for editing, style it clean
+    - Add padding, spacing
