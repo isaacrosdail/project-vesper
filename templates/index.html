@@ -6,10 +6,16 @@
 
 {% block content %}
     <h1>Main Dashboard</h1><br><br>
+
     <div class="tether-card">
         <h2>Tether</h2>
-        <p>If I do one thing today, it'll be ______</p>
+
+        <label>If I do one thing today, it'll be: </label>
+        <input id="tether">
+        <button id="tether-submit">submit</button>
+
     </div>
+    
     <p>{{time_display}}</p>
     <p>{{date_display}}</p>
 {% endblock %}
