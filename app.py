@@ -7,8 +7,9 @@ import threading  ## For now, used for running background scanner input daemon
 ## Database handling stuff
 import core.database
 from modules.groceries import models as grocery_models
+from modules.groceries import repository as grocery_repo
 from modules.scanner import scan_input ## For now, used for running background scanner input
-from modules.groceries.models import Product, Transaction, get_session, lookup_barcode
+from modules.groceries.models import get_session
 from decimal import Decimal
 
 import random # For dummy barcodes for now, delete later (Added 29.03.25)
@@ -17,7 +18,7 @@ import random # For dummy barcodes for now, delete later (Added 29.03.25)
 def handle_barcode_first(barcode):
     session = session.get_session()
     try:
-        result = grocery_models.handle_barcode(session, barcode)
+        result = grocery_repo.handle_barcode(session, barcode)
 
         if result == "added_transaction":
             session.commit()
@@ -26,7 +27,7 @@ def handle_barcode_first(barcode):
             session.close()
             # Redirect to 
         
-        grocery_models.handle_barcode(barcode)
+        grocery_repo.handle_barcode(barcode)
         session.commit()
     finally:
         session.close()
@@ -64,8 +65,8 @@ def grocery():
     ]
 
     # Fetch products and transactions, pass into render_template
-    products = grocery_models.get_all_products(session)
-    transactions = grocery_models.get_all_transactions(session)
+    products = grocery_repo.get_all_products(session)
+    transactions = grocery_repo.get_all_transactions(session)
     return render_template("groceries/grocery.html", products = products,
                            transactions = transactions, 
                            product_column_names = product_column_names,
@@ -84,10 +85,10 @@ def add_transaction():
 @app.route("/submit_transaction", methods=["POST"])
 def submit_transaction():
     action = request.form.get("action")
-    barcode = request.form.get("barcode")
 
     # Parse & sanitize form data
     product_data = {
+        "barcode": request.form.get("barcode"),
         "product_name": request.form.get("product_name"),
         "price": Decimal(request.form.get("price_at_scan", "0")),
         "net_weight": float(request.form.get("net_weight", 0)),
@@ -96,10 +97,10 @@ def submit_transaction():
 
     session = get_session()
     try:
-        grocery_models.ensure_product_exists(session, barcode, **product_data)
-        product = grocery_models.lookup_barcode(session, barcode)
-        grocery_models.add_transaction(session, product, **product_data)
-        # grocery_models.handle_barcode(session, barcode, **product_data)
+        grocery_repo.ensure_product_exists(session, **product_data)
+        product = grocery_repo.lookup_barcode(session, product_data["barcode"])
+        grocery_repo.add_transaction(session, product, **product_data)
+        # grocery_repo.handle_barcode(session, barcode, **product_data)
         session.commit()
     finally:
         session.close()
@@ -126,7 +127,7 @@ def submit_product():
 
     session = get_session()
     try:
-        grocery_models.ensure_product_exists(session, barcode, **product_data)
+        grocery_repo.ensure_product_exists(session, **product_data)
         session.commit()
     finally:
         session.close()
