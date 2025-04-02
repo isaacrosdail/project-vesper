@@ -8,7 +8,7 @@ from decimal import Decimal
 # Lookup barcode function to centralize a bit
 def lookup_barcode(session, barcode):
 	return session.query(Product).filter_by(barcode=barcode).first()
-
+  
 def get_all_products(session):
 	return session.query(Product).all()
 
