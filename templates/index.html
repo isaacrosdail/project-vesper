@@ -11,11 +11,16 @@
         <h2>Tether</h2>
 
         <label>If I do one thing today, it'll be: </label>
-        <input id="tether">
+        <p id="tether-result">Test</p>
+        <input id="tether-text">
         <button id="tether-submit">submit</button>
 
     </div>
     
     <p>{{time_display}}</p>
     <p>{{date_display}}</p>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename = 'js/index.js') }}"></script>
 {% endblock %}
