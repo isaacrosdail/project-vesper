@@ -13,11 +13,6 @@ from decimal import Decimal
 
 import random # For dummy barcodes for now, delete later (Added 29.03.25)
 
-# Display current time on splash screen
-current_time = datetime.datetime.now()
-time_display = current_time.strftime("%H:%M:%S")
-date_display = current_time.strftime("%A, %B %d")
-
 # Prototyping BARCODE SCANNER logic/handling
 def handle_barcode_first(barcode):
     session = session.get_session()
@@ -48,6 +43,10 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
+    # Display current time on splash screen
+    current_time = datetime.datetime.now()
+    time_display = current_time.strftime("%H:%M:%S")
+    date_display = current_time.strftime("%A, %B %d")
     return render_template("index.html", time_display=time_display, date_display=date_display)
 
 @app.route("/grocery")
