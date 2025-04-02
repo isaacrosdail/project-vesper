@@ -11,7 +11,7 @@ body {
     height: 3.5rem;
 }
 .tether-card {
-    background-color: grey;
+    background-color: rgb(187, 187, 187);
     text-align: center;
 }
 table {
