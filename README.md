@@ -7,6 +7,11 @@ Vesper is a personal dashboard + home assistant hybrid focused on intelligent ha
 - Future: Voice, barcode, and gesture control
 - Modular, expandable system
 
+## Modules
+- Pomodoro Timer
+- Grocery scanning with database to enable shopping tracking, etc (eventually budgeting & calories, TBD)
+- Scanning module (centralized functions for other modules in future)
+  
 ## Tech Stack
 - Frontend: HTML/CSS/JS (Bootstrap for styling)
 - Backend: Python (Flask)
