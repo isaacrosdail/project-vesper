@@ -147,8 +147,18 @@ Goal(s): Add "daily tether(s)" into dashboard page
 Log:
 - Altered index.html to have a div for tether-card, started styling
 
-## Wednesday [02.04.25] Start 11:56
+## Wednesday [02.04.25] 11:56 - 14:00, 17:00 - 18:00 ish
 Goal(s): Finish adding JS function for tether-card input
   Reqs:
     - Make a card that's centered, add hover effects, add state for editing, style it clean
     - Add padding, spacing
+Log:
+- Block 1: Add JS to handle tether-card input
+- Block 2: Add JS function to hide button/input field once tether text is added
+- Got sidetracked adding a couple unit tests for functions, should flesh that out after finish above goals regarding styling for JS stuff from today
+
+ Next Steps:
+ - Finish JS styling from today
+ - Unit tests for each function in groceries/repository.py
+ - Add DB model so tether-card information can be stored somehow if desired?
+ - Add WebSocket support to enable real-time redirect to /add_product when a scanned barcode doesn't exist
