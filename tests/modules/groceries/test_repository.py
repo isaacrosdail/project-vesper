@@ -25,6 +25,7 @@ def test_lookup_barcode_not_found(db_session):
     assert result is None
 # endregion
 
+# Happy path test
 def test_add_product(db_session):
     product_data = {
         "barcode": "1234567",
@@ -42,3 +43,32 @@ def test_add_product(db_session):
     assert result.product_name == product_data["product_name"]
     assert result.price == product_data["price"]
     assert result.net_weight == product_data["net_weight"]
+
+# Missing data test
+def test_add_product_missing_data_raises_error(db_session):
+    incomplete_data = {
+        "barcode":"1234567",
+        "price": Decimal("5.99"),
+        "net_weight": 200
+    }
+
+    # Ensure ValueError is raised
+    with pytest.raises(ValueError) as excinfo:
+        add_product(db_session, **incomplete_data)
+    
+    assert "Product name is required" in str(excinfo.value)
+
+# Invalid range for price
+def test_add_product_invalid_range(db_session):
+    invalid_range_data = {
+        "barcode":"1234567",
+        "product_name":"Test Product2",
+        "price": "-12.99",
+        "net_weight": 200
+    }
+
+    # Ensure ValueError is raised
+    with pytest.raises(ValueError) as excinfo:
+        add_product(db_session, **invalid_range_data)
+
+    assert "Price must be provided and non-negative." in str(excinfo.value)
