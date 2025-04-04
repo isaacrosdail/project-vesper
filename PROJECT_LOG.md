@@ -162,3 +162,15 @@ Log:
  - Unit tests for each function in groceries/repository.py
  - Add DB model so tether-card information can be stored somehow if desired?
  - Add WebSocket support to enable real-time redirect to /add_product when a scanned barcode doesn't exist
+
+## Friday [04.04.25] 17:35 - 19:12
+Goal(s): Expand unit testing coverage, starting with db logic functions in groceries/repository.py
+
+Log:
+- Add input validation to add_product function
+- Add test functions for add_product which test for happy path, missing data, & invalid range for price
+- Add test functions for get_all_products which test for no entries & with entries
+- Add test functions for get_all_transactions which test for no entries, an entry for a pre-existing transaction, & to ensure joinedload works (can still get_all_transactions after session close)
+
+Next Time:
+1. Expand tests to finish coverage for add_product/add_transaction, as well as cover process_scanned_barcode, ensure_product_exists.
