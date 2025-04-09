@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        <table class="caption-top">
+            <caption>
+                Tasks
+            </caption>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Type</th>
+                    <th>Created</th>
+                    <th>Completed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.id }}</td>
+                    <td>{{ task.title }}</td>
+                    <td>
+                        {% if task.is_done == True %}
+                            <td>&#9745;</td> <!-- Checked -->
+                        {% else %}
+                            <td>&#9744;</td> <!-- Empty checkbox -->
+                        {% endif %}
+                    </td>
+                    <td>{{ task.type }}</td>
+                    <td>{{ task.created_at }}</td>
+                    <td>{{ task.completed_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ url_for('tasks.add_task')}}">
+        <button type="button">Add New Task</button>
+    </a>
+{% endblock %}

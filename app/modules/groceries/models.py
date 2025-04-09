@@ -1,11 +1,11 @@
-# Handles DB setup/functionality & grocery related DB functions
-from core.database import get_session, engine
-from sqlalchemy.orm import declarative_base, relationship, joinedload
+# Handles DB models for grocery module
+
+from app.database import engine
+from sqlalchemy.orm import relationship, joinedload
 from sqlalchemy import ForeignKey
+from app.database import Base
 
 from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date
-
-Base = declarative_base()
 
 # Product Model for database of products known
 class Product(Base):
