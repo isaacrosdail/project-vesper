@@ -3,7 +3,7 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from modules.groceries.models import Base
+from app.modules.groceries.models import Base
 
 @pytest.fixture
 def in_memory_db():
