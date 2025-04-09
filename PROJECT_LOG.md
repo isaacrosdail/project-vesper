@@ -174,3 +174,14 @@ Log:
 
 Next Time:
 1. Expand tests to finish coverage for add_product/add_transaction, as well as cover process_scanned_barcode, ensure_product_exists.
+
+## Wednesday [09.04.25]
+Goals: Add tasks module & template
+Log:
+- Migrate to Blueprint architecture for routes (main, grocery, & tasks, auth to be added)
+- Restructure app/
+- Add pytest config
+
+## Thursday [10.04.25] 13:27 - 
+Goals: Flesh out tasks.html, implement 3 basic recurring habits (Stretch goal: Habit streak/streak UI)
+

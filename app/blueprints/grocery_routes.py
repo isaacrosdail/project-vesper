@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from app.modules.groceries.models import get_session
+from app.database import get_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
