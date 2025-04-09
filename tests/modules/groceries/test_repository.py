@@ -1,5 +1,5 @@
-from modules.groceries.models import Product, Transaction
-from modules.groceries.repository import add_product, add_transaction, lookup_barcode, get_all_products, get_all_transactions
+from app.modules.groceries.models import Product, Transaction
+from app.modules.groceries.repository import add_product, add_transaction, lookup_barcode, get_all_products, get_all_transactions
 from decimal import Decimal
 import pytest
 
