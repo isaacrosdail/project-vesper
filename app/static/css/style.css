@@ -27,3 +27,16 @@ th, td {
     padding: .2rem;
     text-align: left;
 }
+
+/* Custom button stylings for both button & anchor attributes for consistency */
+.button {
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: #eee; /* your actual button color */
+    color: #000; /* your actual button text color */
+    text-decoration: none;
+    border: 1px solid #ccc; /* your actual button border */
+    border-radius: 4px;
+    cursor: pointer;
+    max-width: fit-content;
+}
