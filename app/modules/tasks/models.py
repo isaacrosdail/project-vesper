@@ -12,6 +12,7 @@ class Task(Base):
     title = Column(String(255))
     is_done = Column(Boolean, default=False)
     type = Column(String(50), default='todo')
+    is_anchor = Column(Boolean, default=False)
     created_at = (Column(DateTime, default=datetime.now))
     completed_at = (Column(DateTime, nullable=True))
 
@@ -21,6 +22,7 @@ class Task(Base):
         "title": "Task",
         "is_done": "Status",
         "type": "Type",
+        "is_anchor": "Anchor Habit?",
         "created_at": "Created",
         "completed_at": "Completed"
     }

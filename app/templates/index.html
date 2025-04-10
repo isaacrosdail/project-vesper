@@ -5,20 +5,34 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <h1>Main Dashboard</h1><br><br>
+    <h1>Main Dashboard</h1><br>
+    <p>{{time_display}} | {{date_display}}</p>
 
+    <!-- Habits Display -->
+    <div class="anchor-habits-card">
+        <h2>Anchor Habits</h2>
+        <!-- Just print names in UL for now -->
+        <ul>
+        {% for anchor_habit in anchor_habits %}
+            <li>
+                {{ anchor_habit.title }}
+                <input type="checkbox" 
+                    {% if anchor_habit.completed_at == today %}checked{% endif %}
+                    onchange="markHabitComplete({{ anchor_habit.id }})">
+            </li>
+        {% endfor %}
+        </ul>
+
+    </div>
+    <!-- Tether Card-->
     <div class="tether-card">
         <h2>Tether</h2>
-
         <label>If I do one thing today, it'll be: </label>
         <p id="tether-result">Test</p>
         <input id="tether-text">
         <button class="button" id="tether-submit">submit</button>
-
     </div>
-    
-    <p>{{time_display}}</p>
-    <p>{{date_display}}</p>
+
 {% endblock %}
 
 {% block scripts %}
