@@ -41,12 +41,17 @@ def add_task():
         task_data = {
             "title": request.form.get("title"),
             "type": request.form.get("type"),
+            # Value for checkbox is irrelevant
+            # If checked, then value is not None, so bool=True (ie, it exists)
+            # Otherwise it is None, in which case bool=False 
+            "is_anchor": bool(request.form.get("is_anchor"))
         }
         # Creating new task Task object
         new_task = Task(
             title=task_data["title"],
             type=task_data["type"],
             is_done=False,
+            is_anchor=task_data["is_anchor"],
             created_at=datetime.now(),
             completed_at=None
         )
@@ -59,3 +64,12 @@ def add_task():
         return render_template("tasks/tasks.html")
     else:
         return render_template("tasks/add_task.html")
+    
+@tasks_bp.route("/complete_habit/<int:task_id>", methods=["POST"])
+def complete_task(task_id):
+    # Get corresponding task from db    
+    task = Task.query.get(task_id)
+
+    # Get data from the fetch() request
+    data = request.get_json()
+    is_checked = data.get("completed", False)

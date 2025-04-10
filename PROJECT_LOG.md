@@ -182,9 +182,29 @@ Log:
 - Restructure app/
 - Add pytest config
 
-## Thursday [10.04.25] 13:27 - 
+## Thursday [10.04.25] 
+Session 1: 13:27 - 15ish?
 Goals: Flesh out tasks.html, implement 3 basic recurring habits (Stretch goal: Habit streak/streak UI)
 Log:
 - Add add_task template
 - Add modules/tasks/repository.py for db logic for tasks module
 - Use GET/POST in tasks_routes.py to handle form data & display table of tasks in tasks.html
+
+Session 2: 19:00ish - 21:55
+Log:
+- Render “Today’s Habits” list on dashboard (Currently just Tasks filtered by habit type and is_anchor bool
+- Add checkbox to dashboard display to enable marking as complete
+    - Learned fetch() to enable JS to POST to db immediately when checkbox is clicked. Checkbox has onclick event
+    - Loose ends:
+	- This feature DOES NOT WORK YET
+	- Need to finish complete_task function in tasks_routes.py to grab corresponding task, get data from fetch             request, then change task's is_done to True and add completed_at to be today's date
+	- JS function only marks complete when checked, but unchecking does not "un-complete" the habit
+	- Sanitize completed_at to be a date
+Next for this feature:
+- Mark habit complete → update timestamp
+- Auto-reset daily (cronjob or first-run check)
+
+## Friday [11.04.25]
+Session 1: 14:40 - 
+Log:
+- 
