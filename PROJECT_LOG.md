@@ -184,4 +184,7 @@ Log:
 
 ## Thursday [10.04.25] 13:27 - 
 Goals: Flesh out tasks.html, implement 3 basic recurring habits (Stretch goal: Habit streak/streak UI)
-
+Log:
+- Add add_task template
+- Add modules/tasks/repository.py for db logic for tasks module
+- Use GET/POST in tasks_routes.py to handle form data & display table of tasks in tasks.html
