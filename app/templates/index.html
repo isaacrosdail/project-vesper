@@ -16,9 +16,9 @@
         {% for anchor_habit in anchor_habits %}
             <li>
                 {{ anchor_habit.title }}
-                <input type="checkbox" 
+                <input type="checkbox"
                     {% if anchor_habit.completed_at == today %}checked{% endif %}
-                    onchange="markHabitComplete({{ anchor_habit.id }})">
+                    onchange="markHabitComplete({{ task.id }})">
             </li>
         {% endfor %}
         </ul>

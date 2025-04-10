@@ -64,3 +64,12 @@ def add_task():
         return render_template("tasks/tasks.html")
     else:
         return render_template("tasks/add_task.html")
+    
+@tasks_bp.route("/complete_habit/<int:task_id>", methods=["POST"])
+def complete_task(task_id):
+    # Get corresponding task from db    
+    task = Task.query.get(task_id)
+
+    # Get data from the fetch() request
+    data = request.get_json()
+    is_checked = data.get("completed", False)
