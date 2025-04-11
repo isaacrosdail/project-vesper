@@ -3,7 +3,7 @@
 from sqlalchemy.orm import relationship, joinedload
 from sqlalchemy import ForeignKey
 #from app.database import Base
-from app.base import Base
+from app.db_base import Base
 
 from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date
 

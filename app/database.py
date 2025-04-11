@@ -3,27 +3,18 @@
 from flask import current_app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.base import Base
+from app.db_base import Base
 import app.modules.groceries.models
 import app.modules.tasks.models
-from sqlalchemy.pool import StaticPool # To prevent in-memory db shenanigans
-# Define base class for models
-#Base = declarative_base()
-_engine = None
+
+_engine = None # Global connection cache
 
 # Function to get engine from the config
 def get_engine(config):
     global _engine
     if _engine is None:
-        db_uri = config.get('SQLALCHEMY_DATABASE_URI')
-        if db_uri.startswith("sqlite"):
-            _engine = create_engine(
-                db_uri,
-                connect_args={"check_same_thread": False},
-                poolclass=StaticPool
-            )
-        else:
-            _engine = create_engine(db_uri)
+        db_uri = config.get("SQLALCHEMY_DATABASE_URI")
+        _engine = create_engine(db_uri)
     return _engine
 
 # Function to get a session bound to the engine
@@ -40,6 +31,4 @@ def get_db_session():
 def init_db():
     engine = get_engine(current_app.config)
     print("Engine ID:", id(engine))
-    import app.modules.groceries.models
-    import app.modules.tasks.models
     Base.metadata.create_all(engine)
