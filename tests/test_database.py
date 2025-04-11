@@ -9,13 +9,13 @@ from app.base import Base
 def test_engine_creation(app):
     # Ensure engine is correctly created for testing config
     engine = get_engine(app.config)
-    assert "sqlite" in str(engine.url)
+    assert "5432" in str(engine.url)
 
 def test_db_session(app):
     # Ensure session is correctly tied to the engine
     session = get_db_session()
     assert session is not None # Session should be created successfully
-    assert "sqlite" in str(session.bind.url)
+    assert "5432" in str(session.bind.url)
 
 def test_init_db(app):
     # Ensure db tables are created after calling init_db()
