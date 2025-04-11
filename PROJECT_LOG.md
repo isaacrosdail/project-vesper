@@ -205,6 +205,17 @@ Next for this feature:
 - Auto-reset daily (cronjob or first-run check)
 
 ## Friday [11.04.25]
-Session 1: 14:40 - 
+Session 1: 14:40 - 22:02
 Log:
-- 
+- complete_task grabs corresponding task, updates is_done to True & adds completed_at as today's date, returns success to JS function via jsonify
+- Retool create_app to take parameters (testing vs dev, etc)
+	Add config.py (DevConfig, TestConfig extending from BaseConfig)
+- Install Docker for Postgres to replace SQLite
+- Created both vesper & vesper_test DBs in docker Postgres container and tweaked Vesper config file to point to them correctly too
+- Install Postgres driver (psycopg2-binary) in venv & added to requirements.txt
+- All tests now run against PostgreSQL test DB for accurate datetime + schema validation
+
+## Saturday [12.04.25]
+Session 1: 16:58 - 
+Goal(s):
+1. 

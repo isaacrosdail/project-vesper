@@ -3,26 +3,35 @@
 import pytest
 from app import create_app
 from app.database import get_engine, get_db_session, init_db
-from app.base import Base
+from app.db_base import Base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+# Injected by pytest-postgresql
+@pytest.fixture
+def engine(postgresql_proc):
+    return create_engine(postgresql_proc.dsn()) # Gives us a test DB per session
 
 # Create app once and use it for all tests
 @pytest.fixture
-def app():
-    app = create_app("testing")  # Create app with 'testing' config
+def app(engine):
+    app = create_app("testing")  # Create with 'testing' config
+
+    # Override or patch the DB connection if needed
+    # This line ensures we point to testing db 
+    app.config['SQLALCHEMY_DATABASE_URI'] = str(engine.url)
+
     with app.app_context():
-        init_db()
+        Base.metadata.create_all(engine)
         yield app
 
 @pytest.fixture
-def db_session(app):
-    with app.app_context():
-        engine = get_engine(app.config)
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-        session = get_db_session()
-        yield session
-        session.rollback()
-        session.close()
+def db_session(engine):
+    Session = sessionmaker(bind=engine)
+    session = Session
+    yield session
+    session.rollback()
+    session.close()
 
 # Gives us a fake browser to send requests from
 @pytest.fixture
