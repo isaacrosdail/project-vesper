@@ -1,20 +1,30 @@
-# Holds fixtures and test config, automatically loaded by pytest (no need to import manually)
+# Holds fixtures & test config, automatically loaded by pytest (import not req'd)
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.modules.groceries.models import Base
+from app import create_app
+from app.database import get_engine, get_db_session, init_db
+from app.base import Base
+
+# Create app once and use it for all tests
+@pytest.fixture
+def app():
+    app = create_app("testing")  # Create app with 'testing' config
+    with app.app_context():
+        init_db()
+        yield app
 
 @pytest.fixture
-def in_memory_db():
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    yield engine
-    engine.dispose()
+def db_session(app):
+    with app.app_context():
+        engine = get_engine(app.config)
+        Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
+        session = get_db_session()
+        yield session
+        session.rollback()
+        session.close()
 
+# Gives us a fake browser to send requests from
 @pytest.fixture
-def db_session(in_memory_db):
-    Session = sessionmaker(bind=in_memory_db)
-    session = Session()
-    yield session
-    session.close()
+def client(app):
+    return app.test_client()

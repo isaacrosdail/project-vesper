@@ -1,9 +1,9 @@
 # Handles DB models for grocery module
 
-from app.database import engine
 from sqlalchemy.orm import relationship, joinedload
 from sqlalchemy import ForeignKey
-from app.database import Base
+#from app.database import Base
+from app.base import Base
 
 from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date
 
@@ -44,5 +44,3 @@ class Transaction(Base):
 		"price_at_scan": "Price",
 		"quantity": "Quantity",
 	}
-
-Base.metadata.create_all(engine)

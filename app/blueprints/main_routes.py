@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template
-from app.database import get_session
+from app.database import get_db_session
 from app.modules.tasks import repository as tasks_repo
 # Other imports
-from datetime import datetime
+from datetime import datetime, timezone
+from flask import current_app
 
 main_bp = Blueprint('main', __name__)
 
@@ -10,7 +11,7 @@ main_bp = Blueprint('main', __name__)
 def home():
 
     # Display current time on splash screen
-    current_time = datetime.now()
+    current_time = datetime.now(timezone.utc)
     time_display = current_time.strftime("%H:%M:%S")
     date_display = current_time.strftime("%A, %B %d")
     
@@ -18,7 +19,7 @@ def home():
     today = datetime.today()
     
     # Get Tasks to pass Anchor Habits to display
-    session = get_session()
+    session = get_db_session()
 
     # Get all tasks
     tasks = tasks_repo.get_all_tasks(session)
