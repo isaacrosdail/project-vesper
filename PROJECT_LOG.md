@@ -203,3 +203,8 @@ Log:
 Next for this feature:
 - Mark habit complete → update timestamp
 - Auto-reset daily (cronjob or first-run check)
+
+## Friday [11.04.25]
+Session 1: 14:40 - 
+Log:
+- 
