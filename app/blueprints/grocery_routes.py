@@ -1,14 +1,15 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from app.database import get_session
+from app.database import get_db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
+from flask import current_app
 
 grocery_bp = Blueprint('grocery', __name__)
 
 @grocery_bp.route("/grocery")
 def grocery():
-    session = get_session()
+    session = get_db_session()
     # Column names for Transactions model
     transaction_column_names = [
         grocery_models.Transaction.COLUMN_LABELS.get(col, col)
@@ -51,7 +52,7 @@ def submit_transaction():
         "quantity": int(request.form.get("quantity") or 1)
     }
 
-    session = get_session()
+    session = get_db_session()
     try:
         grocery_repo.ensure_product_exists(session, **product_data)
         product = grocery_repo.lookup_barcode(session, product_data["barcode"])
@@ -81,7 +82,7 @@ def submit_product():
         "net_weight": float(request.form.get("net_weight", 0))
     }
 
-    session = get_session()
+    session = get_db_session()
     try:
         grocery_repo.ensure_product_exists(session, **product_data)
         session.commit()
