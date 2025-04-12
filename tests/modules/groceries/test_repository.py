@@ -6,6 +6,7 @@ import pytest
 # region lookup_barcode
 # Return a Product if barcode exists, None if barcode doesn't exist
 def test_lookup_barcode_found(db_session):
+    print("Test started...")
     product_data = {
         "barcode": "1234567",
         "product_name": "Test Product",
