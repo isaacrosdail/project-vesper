@@ -1,7 +1,7 @@
 from flask import Flask
 from .config import DevConfig, TestConfig
 #from .database import get_db_session, Base
-from app.base import Base
+from app.db_base import Base
 from .config import config_map
 
 # Import DB stuff

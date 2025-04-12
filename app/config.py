@@ -1,3 +1,4 @@
+# Defines environments for database/app stuff (dev vs testing)
 
 class BaseConfig:
     SECRET_KEY = "change-me"
@@ -8,7 +9,8 @@ class DevConfig(BaseConfig):
     DEBUG = True
 
 class TestConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = "postgresql://vesper:vesperpass@localhost:5432/vesper_test"
+    # Remove the URI below since PostgreSQL uses dynamic URIs for DBs for testing, not the static one like below
+    # SQLALCHEMY_DATABASE_URI = "postgresql://vesper:vesperpass@localhost:5432/vesper_test"
     TESTING = True
 
 config_map = {

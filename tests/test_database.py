@@ -4,7 +4,7 @@ from app.database import get_engine, get_db_session, init_db
 from app import create_app
 from app.modules.tasks.models import Task
 from app.modules.groceries.models import Product
-from app.base import Base
+from app.db_base import Base
 
 def test_engine_creation(app):
     # Ensure engine is correctly created for testing config
