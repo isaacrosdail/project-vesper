@@ -5,7 +5,7 @@ from sqlalchemy import ForeignKey
 #from app.database import Base
 from app.db_base import Base
 
-from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date
+from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date, Numeric
 
 # Product Model for database of products known
 class Product(Base):
@@ -14,7 +14,7 @@ class Product(Base):
 	product_id = Column(Integer, primary_key=True)
 	product_name = Column(String(100), nullable=False)
 	barcode = Column(String(64), unique=True, nullable=False)
-	price = Column(DECIMAL(10,2), nullable=False)
+	price = Column(Numeric(10,2), nullable=False)
 	net_weight = Column(Float, nullable=False)
 
 	# Human-readable column names
@@ -32,7 +32,7 @@ class Transaction(Base):
 
 	transaction_id = Column(Integer, primary_key=True)
 	product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
-	price_at_scan = Column(DECIMAL(10,2), nullable=False)
+	price_at_scan = Column(Numeric(10,2), nullable=False)
 	quantity = Column(Integer, nullable=False)
 	date_scanned = Column(Date)
 

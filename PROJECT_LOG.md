@@ -216,6 +216,12 @@ Log:
 - All tests now run against PostgreSQL test DB for accurate datetime + schema validation
 
 ## Saturday [12.04.25]
-Session 1: 16:58 - 
-Goal(s):
-1. 
+Session 1: 16:58 - 23:15
+Log:
+- Move entirely to PostgreSQL, installed pytest-postgresql for testing (added to requirements.txt)
+- Uninstalled psycopg2-binary and installed psycopg[binary] (backend something?)
+- Installed Postgres locally for pytest-postgresql (local for tests, then Docker postgres container for dev/regular db)
+- Ditched pytest-postgresl! Seems broken & non-maintained. Will hook tests directly into container connections
+- Now stuck trying to get pytest to be able to authenticate to connect
+	- It insists the password authentication is failing but it literally cannot be the password being wrong
+		- Not sure what it could be, tried changing the pg_hba.conf file to allow local connections to authenticate using password (md5) but no luck
