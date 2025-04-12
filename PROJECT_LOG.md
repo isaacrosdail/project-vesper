@@ -214,3 +214,8 @@ Log:
 - Created both vesper & vesper_test DBs in docker Postgres container and tweaked Vesper config file to point to them correctly too
 - Install Postgres driver (psycopg2-binary) in venv & added to requirements.txt
 - All tests now run against PostgreSQL test DB for accurate datetime + schema validation
+
+## Saturday [12.04.25]
+Session 1: 16:58 - 
+Goal(s):
+1. 
