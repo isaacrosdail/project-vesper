@@ -1,0 +1,19 @@
+# Uses existing container name & credentials
+# Keeps current dbs we already have set up
+services:
+  db:
+    image: postgres
+    container_name: vesper-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: vesper
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: vesper
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
+
+volumes:
+  pgdata:

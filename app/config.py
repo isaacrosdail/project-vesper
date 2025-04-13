@@ -5,12 +5,11 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = "postgresql://vesper:vesperpass@localhost:5432/vesper" # Using Postgres
+    SQLALCHEMY_DATABASE_URI = "postgresql://vesper:pass@localhost:5432/vesper" # Using Postgres
     DEBUG = True
 
 class TestConfig(BaseConfig):
-    # Remove the URI below since PostgreSQL uses dynamic URIs for DBs for testing, not the static one like below
-    # SQLALCHEMY_DATABASE_URI = "postgresql://vesper:vesperpass@localhost:5432/vesper_test"
+    SQLALCHEMY_DATABASE_URI = "postgresql://vesper:pass@localhost:5432/vesper_test"
     TESTING = True
 
 config_map = {
