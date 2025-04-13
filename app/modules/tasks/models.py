@@ -10,7 +10,7 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True)
-    title = Column(String(255), nullable=False)
+    title = Column(String(255), unique=True, nullable=False)
     is_done = Column(Boolean, default=False)
     type = Column(String(50), default='todo')
     is_anchor = Column(Boolean, default=False)

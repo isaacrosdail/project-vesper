@@ -15,4 +15,4 @@ Vesper is a personal dashboard + home assistant hybrid focused on intelligent ha
 ## Tech Stack
 - Frontend: HTML/CSS/JS (Bootstrap for styling)
 - Backend: Flask/Python
-- Database: PostgreSQL (originally SQLite)
+- Database: PostgreSQL (May use Redis in tandem in future for performance-heavy features;; originally SQLite)
