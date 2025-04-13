@@ -8,7 +8,11 @@ import threading  ## For now, used for running background scanner input daemon
 ## Database handling stuff
 from app.modules.groceries import repository as grocery_repo
 from app.modules.scanner import scan_input ## For now, used for running background scanner input
-from app.database import get_db_session
+from app.core.database import get_db_session
+
+# Import DB stuff
+from app.modules.groceries import models as grocery_models
+from app.modules.tasks import models as tasks_models
 
 # Prototyping BARCODE SCANNER logic/handling
 def handle_barcode_first(barcode):

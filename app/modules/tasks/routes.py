@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
-from app.database import get_db_session
+from app.core.database import get_db_session
 from flask import current_app
 
 # Import Task model
@@ -11,11 +11,11 @@ from app.modules.tasks import repository as tasks_repo
 # For created_at / completed_at
 from datetime import datetime, timezone
 
-tasks_bp = Blueprint('tasks', __name__)
+tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
-@tasks_bp.route("/tasks")
-def tasks():
-
+@tasks_bp.route("/")
+def dashboard():
+    print("Rendering TASKS dashboard")
     # Fetch Tasks & pass into template
     session = get_db_session()
     # Column names for Task model
@@ -26,7 +26,7 @@ def tasks():
 
     tasks = tasks_repo.get_all_tasks(session)
 
-    return render_template("tasks/tasks.html",
+    return render_template("tasks/dashboard.html",
                            task_column_names = task_column_names,
                            tasks = tasks)
 
@@ -61,12 +61,15 @@ def add_task():
         session.add(new_task)
         session.commit()
 
-        return render_template("tasks/tasks.html")
+        return render_template("tasks/dashboard.html")
     else:
         return render_template("tasks/add_task.html")
     
 @tasks_bp.route("/complete_task/<int:task_id>", methods=["POST"])
 def complete_task(task_id):
+
+    # Debug print
+    print(" complete_task route HIT")
     session = get_db_session()
     #print(f"Session in route: {id(session)}")
     # Get corresponding task from db  
@@ -76,5 +79,6 @@ def complete_task(task_id):
     task.is_done = True
     task.completed_at = datetime.now(timezone.utc)
     session.commit()
+    session.close()
 
     return jsonify(success=True)

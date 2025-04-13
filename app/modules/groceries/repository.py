@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session, joinedload
 from datetime import date
 from decimal import Decimal
 
+# Debug print
+print(" grocery_repo.py imported")
+
 # Lookup barcode function to centralize a bit
 def lookup_barcode(session, barcode):
 	return session.query(Product).filter_by(barcode=barcode).first()

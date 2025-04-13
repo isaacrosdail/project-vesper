@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import inspect, text
 
 from sqlalchemy.orm import sessionmaker
-from app.database import get_engine
+from app.core.database import get_engine
 
 # Import Models
 from app.modules.tasks.models import Task

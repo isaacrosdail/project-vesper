@@ -1,14 +1,17 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from app.database import get_db_session
+from app.core.database import get_db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
-from flask import current_app
 
-grocery_bp = Blueprint('grocery', __name__)
+groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
 
-@grocery_bp.route("/grocery")
-def grocery():
+# Debug print
+print(" groceries routes.py imported")
+
+@groceries_bp.route("/")
+def dashboard():
+    print("Rendering GROCERIES dashboard")
     session = get_db_session()
     # Column names for Transactions model
     transaction_column_names = [
@@ -21,16 +24,20 @@ def grocery():
         for col in grocery_models.Product.__table__.columns.keys()
     ]
 
-    # Fetch products and transactions, pass into render_template
-    products = grocery_repo.get_all_products(session)
-    transactions = grocery_repo.get_all_transactions(session)
-    return render_template("groceries/grocery.html", products = products,
+    try:
+            # Fetch products and transactions, pass into render_template
+        products = grocery_repo.get_all_products(session)
+        transactions = grocery_repo.get_all_transactions(session)
+    finally:
+        session.close()
+        
+    return render_template("groceries/dashboard.html", products = products,
                            transactions = transactions, 
                            product_column_names = product_column_names,
                            transaction_column_names = transaction_column_names
                         )
 
-@grocery_bp.route("/add_product", methods=["GET", "POST"])
+@groceries_bp.route("/add_product", methods=["GET", "POST"])
 def add_product():
     if request.method == "POST":
         # Parse & sanitize form data
@@ -47,16 +54,16 @@ def add_product():
         finally:
             session.close()
 
-        return redirect(url_for("grocery.grocery"))
+        return redirect(url_for("groceries.dashboard"))
     else:
         return render_template("groceries/add_product.html")
 
-@grocery_bp.route("/add_transaction", methods=["GET"])
+@groceries_bp.route("/add_transaction", methods=["GET"])
 def add_transaction():
     barcode = request.args.get("barcode")
     return render_template("groceries/add_transaction.html", barcode=barcode)
 
-@grocery_bp.route("/submit_transaction", methods=["POST"])
+@groceries_bp.route("/submit_transaction", methods=["POST"])
 def submit_transaction():
     action = request.form.get("action")
 
@@ -81,6 +88,6 @@ def submit_transaction():
 
     # Redirect accordingly
     if action == "submit":
-        return redirect("/grocery")
+        return redirect("/groceries")
     elif action == "next_item":
         return redirect("/add_transaction")

@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template
-from app.database import get_db_session
+from app.core.database import get_db_session
 from app.modules.tasks import repository as tasks_repo
 # Other imports
 from datetime import datetime, timezone
 from flask import current_app
 
-main_bp = Blueprint('main', __name__)
+main_bp = Blueprint('main', __name__, template_folder="templates")
 
 @main_bp.route("/")
 def home():

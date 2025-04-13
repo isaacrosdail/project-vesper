@@ -26,7 +26,7 @@ def test_complete_task(client, db_session, sample_task):
     # Route exists in Flask: /complete_task/<task_id>, method: POST
 
     print(f"Session in test: {id(db_session)}")
-    response = client.post(f"/complete_task/{sample_task.id}")
+    response = client.post(f"/tasks/complete_task/{sample_task.id}")
 
     assert response.status_code == 200
     assert response.json["success"] is True
