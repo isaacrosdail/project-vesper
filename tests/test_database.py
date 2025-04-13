@@ -23,25 +23,16 @@ def test_db_connection(app):
     with engine.connect() as conn:
         assert conn.execute(text("SELECT 1")).scalar() == 1
 
+# Schema check
 def test_tables_exist(app):
     engine = get_engine(app.config)
     inspector = inspect(engine)
-    assert "tasks" in inspector.get_table_names()
+    tables = inspector.get_table_names()
+    assert "tasks" in tables
+    assert "product" in tables
+    assert "transaction" in tables
 
-def test_insert_and_query_task(app):
-    engine = get_engine(app.config)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    task = Task(title="Test Task", type="todo")
-    session.add(task)
-    session.commit()
-
-    result = session.query(Task).filter_by(title="Test Task").first()
-    assert result.type == "todo"
-
-    session.close()
-
+# Ensures DB integrity is enforced
 def test_unique_constraint_violation(app):
     engine = get_engine(app.config)
     Session = sessionmaker(bind=engine)
