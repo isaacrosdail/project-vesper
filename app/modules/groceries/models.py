@@ -1,11 +1,10 @@
 # Handles DB models for grocery module
+from app.core.db_base import Base
+from sqlalchemy import Column, Integer, String, Float, Date, Numeric, ForeignKey
+from sqlalchemy.orm import relationship
 
-from sqlalchemy.orm import relationship, joinedload
-from sqlalchemy import ForeignKey
-#from app.database import Base
-from app.db_base import Base
-
-from sqlalchemy import Table, Column, Integer, String, DECIMAL, Float, Date, Numeric
+# Debug print
+print(" grocery_models.py imported")
 
 # Product Model for database of products known
 class Product(Base):

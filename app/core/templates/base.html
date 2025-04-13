@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vesper{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css')}}">
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
 </head>
 <body>
     <div>
@@ -17,11 +17,11 @@
                     <li class="nav-item {% if request.path == '/' %}active{% endif %}">
                         <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
                     </li>
-                    <li class="nav-item {% if request.path == '/task' %}active{% endif %}">
-                        <a class="nav-link" href="{{ url_for('tasks.tasks') }}">Tasks</a>
+                    <li class="nav-item {% if request.path == '/tasks' %}active{% endif %}">
+                        <a class="nav-link" href="{{ url_for('tasks.dashboard') }}">Tasks</a>
                     </li>
                     <li class="nav-item {% if request.path == '/grocery' %}active{% endif %}">
-                        <a class="nav-link" href="{{ url_for('grocery.grocery') }}">Groceries</a>
+                        <a class="nav-link" href="{{ url_for('groceries.dashboard') }}">Groceries</a>
                     </li>
                 </ul>
             </div>

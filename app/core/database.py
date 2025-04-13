@@ -3,7 +3,7 @@
 from flask import current_app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.db_base import Base
+from app.core.db_base import Base
 import app.modules.groceries.models
 import app.modules.tasks.models
 
@@ -11,9 +11,14 @@ _engine = None # Global connection cache
 
 # Function to get engine from the config
 def get_engine(config):
+
+    # Debug print
+    print(" get_engine() CALLED")
+    
     global _engine
     if _engine is None:
         db_uri = config.get("SQLALCHEMY_DATABASE_URI")
+        print(db_uri) # DEBUG PRINT
         _engine = create_engine(db_uri)
     return _engine
 
@@ -23,6 +28,10 @@ def get_session(engine):
     return Session()
 
 def get_db_session():
+
+    # Debug print
+    print(" get_db_session CALLED")
+
     # Get engine based on current app's configuration
     engine = get_engine(current_app.config)
     # Get & return the session bound to that engine
