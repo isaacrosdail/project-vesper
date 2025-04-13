@@ -20,7 +20,7 @@ def test_db_session(app):
 def test_init_db(app):
     # Ensure db tables are created after calling init_db()
     with app.app_context():
-        init_db() # Initialize db (create tables)
+        init_db(app.config) # Initialize db (create tables)
         # Verify if the tasks table exists
         engine = get_engine(app.config)
 

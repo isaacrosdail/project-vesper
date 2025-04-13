@@ -21,7 +21,7 @@ def create_app(config_name="dev"): # Default to DevConfig if nothing is passed i
     app.config.from_object(config_map[config_name])
 
     with app.app_context():
-        init_db()
+        init_db(app.config)
 
     app.register_blueprint(main_bp)
     app.register_blueprint(grocery_bp)
