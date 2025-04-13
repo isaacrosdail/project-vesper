@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session, joinedload
 from datetime import date
 from decimal import Decimal
 
+# Debug print
+print(" grocery_repo.py imported")
+
 # Lookup barcode function to centralize a bit
 def lookup_barcode(session, barcode):
 	return session.query(Product).filter_by(barcode=barcode).first()
@@ -60,6 +63,10 @@ def add_product(session, **product_data):
 
 # Add product to 'inventory'
 def add_transaction(session, product, **product_data):
+
+	if product is None:
+		raise ValueError("Product must be provided for transaction.")
+	
 	today = date.today()
 	quantity = int(product_data.get("quantity") or 1)
 	

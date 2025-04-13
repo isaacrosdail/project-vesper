@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
-from app.database import get_db_session
+from app.core.database import get_db_session
 from flask import current_app
 
 # Import Task model
@@ -11,11 +11,13 @@ from app.modules.tasks import repository as tasks_repo
 # For created_at / completed_at
 from datetime import datetime, timezone
 
-tasks_bp = Blueprint('tasks', __name__)
+import time
 
-@tasks_bp.route("/tasks")
-def tasks():
+tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
+@tasks_bp.route("/")
+def dashboard():
+    print("Rendering TASKS dashboard")
     # Fetch Tasks & pass into template
     session = get_db_session()
     # Column names for Task model
@@ -24,9 +26,12 @@ def tasks():
         for col in Task.__table__.columns.keys()
     ]
 
-    tasks = tasks_repo.get_all_tasks(session)
+    try:
+        tasks = tasks_repo.get_all_tasks(session)
+    finally:
+        session.close()
 
-    return render_template("tasks/tasks.html",
+    return render_template("tasks/dashboard.html",
                            task_column_names = task_column_names,
                            tasks = tasks)
 
@@ -61,20 +66,30 @@ def add_task():
         session.add(new_task)
         session.commit()
 
-        return render_template("tasks/tasks.html")
+        return redirect(url_for("tasks.dashboard")) # Redirect after POST - NOT render_template
+        # Using redirect here after the form POST follows the best practice of
+        # Post/Redirect/Get (PRG) pattern - standard for handling form submissions in web apps
     else:
         return render_template("tasks/add_task.html")
     
 @tasks_bp.route("/complete_task/<int:task_id>", methods=["POST"])
 def complete_task(task_id):
+
+    # Debug print
+    print(" complete_task route HIT")
     session = get_db_session()
+    print(f"Session in route: {id(session)}")
+    time.sleep(2)
     #print(f"Session in route: {id(session)}")
     # Get corresponding task from db  
     task = session.get(Task, task_id)
+    print("Fetched task:", task)
+    time.sleep(2)
 
     # Update task to be completed, incl. completed_at
     task.is_done = True
     task.completed_at = datetime.now(timezone.utc)
     session.commit()
+    session.close()
 
     return jsonify(success=True)

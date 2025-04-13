@@ -1,7 +1,6 @@
 # Handles DB models for tasks module
 
-#from app.database import Base
-from app.db_base import Base
+from app.core.db_base import Base
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime, timezone
 
