@@ -1,7 +1,5 @@
 from sqlalchemy.orm import joinedload
 
-
-
 def test_groceries_dashboard(client):
     response = client.get("/groceries/")
     assert response.status_code == 200
@@ -39,7 +37,9 @@ def test_add_transaction_submission_creates_transaction(client, db_session):
         net_weight=0.8
     )
     db_session.add(product)
-    db_session.commit()
+    db_session.commit() # Can't use flush here due to client.post below
+    # Since Flask treats that as a new transaction under the hood (separate request context)
+    # it's technically in its own session regardless, hence the commit
 
     # POST transaction data
     response = client.post("/groceries/add_transaction", data={
