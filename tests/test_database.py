@@ -1,39 +1,72 @@
+## DB infrastructure & schema tests
+## Structure, lifecycle, connection tests go here
+
+# region Imports
+# Basic imports
 import pytest
-from sqlalchemy import inspect
-from app.database import get_engine, get_db_session, init_db
-from app import create_app
+from sqlalchemy import inspect, text
+
+from sqlalchemy.orm import sessionmaker
+from app.database import get_engine
+
+# Import Models
 from app.modules.tasks.models import Task
 from app.modules.groceries.models import Product
-from app.db_base import Base
 
-def test_engine_creation(app):
-    # Ensure engine is correctly created for testing config
+# Imports for exceptions
+from sqlalchemy.exc import IntegrityError
+
+# endregion
+
+def test_db_connection(app):
     engine = get_engine(app.config)
-    assert "5432" in str(engine.url)
+    with engine.connect() as conn:
+        assert conn.execute(text("SELECT 1")).scalar() == 1
 
-def test_db_session(app):
-    # Ensure session is correctly tied to the engine
-    session = get_db_session()
-    assert session is not None # Session should be created successfully
-    assert "5432" in str(session.bind.url)
+def test_tables_exist(app):
+    engine = get_engine(app.config)
+    inspector = inspect(engine)
+    assert "tasks" in inspector.get_table_names()
 
-def test_init_db(app):
-    # Ensure db tables are created after calling init_db()
-    with app.app_context():
-        init_db(app.config) # Initialize db (create tables)
-        # Verify if the tasks table exists
-        engine = get_engine(app.config)
+def test_insert_and_query_task(app):
+    engine = get_engine(app.config)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-        # SANITY CHECK
-        print("Engine ID:", id(engine))
+    task = Task(title="Test Task", type="todo")
+    session.add(task)
+    session.commit()
 
-        print("Expected DB URI:", app.config["SQLALCHEMY_DATABASE_URI"])
-        print("Engine:", engine)
+    result = session.query(Task).filter_by(title="Test Task").first()
+    assert result.type == "todo"
 
-        print("Base.metadata.tables:", list(Base.metadata.tables.keys()))
+    session.close()
 
-        inspector = inspect(engine)
-        tables = inspector.get_table_names()
-        print("Inspector sees tables:", tables)
+def test_unique_constraint_violation(app):
+    engine = get_engine(app.config)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-        assert "tasks" in tables
+    task1 = Task(title="Dupe Task", type="todo")
+    task2 = Task(title="Dupe Task", type="todo")
+
+    session.add_all([task1, task2])
+
+    with pytest.raises(IntegrityError):
+        session.commit()
+
+    session.rollback()
+    session.close()
+
+def test_rollback_behavior(app):
+    engine = get_engine(app.config)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    task = Task(title="rollback", type="todo")
+    session.add(task)
+    session.rollback()
+
+    result = session.query(Task).filter_by(title="rollback").first()
+    assert result is None
+    session.close()
