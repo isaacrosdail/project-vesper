@@ -1,11 +1,12 @@
 from app.modules.groceries.models import Product, Transaction
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
+from app.core.database import db_session
 import pytest
 
 # region lookup_barcode
 # Return a Product if barcode exists, None if barcode doesn't exist
-def test_lookup_barcode_found(db_session):
+def test_lookup_barcode_found():
     print("Test started...")
     product_data = {
         "barcode": "1234567",
@@ -27,18 +28,18 @@ def test_lookup_barcode_found(db_session):
     assert isinstance(result, Product)
     assert result.product_name == "Test Product"
 
-def test_lookup_barcode_not_found(db_session):
+def test_lookup_barcode_not_found():
     result = grocery_repo.lookup_barcode(db_session, "9999999")
     assert result is None
 # endregion
 
 # region get_all_products
 
-def test_get_all_products_empty(db_session):
+def test_get_all_products_empty():
     products = grocery_repo.get_all_products(db_session)
     assert products == []
 
-def test_get_all_products_with_entries(db_session):
+def test_get_all_products_with_entries():
     grocery_repo.add_product(db_session, barcode="123", product_name="Milk", price="1.50", net_weight="20.0")
     db_session.flush()
 
@@ -50,11 +51,11 @@ def test_get_all_products_with_entries(db_session):
 
 # region get_all_transactions
 
-def test_get_all_transactions_empty(db_session):
+def test_get_all_transactions_empty():
     transactions = grocery_repo.get_all_transactions(db_session)
     assert transactions == []
 
-def test_get_all_transactions_existing_product(db_session):
+def test_get_all_transactions_existing_product():
     product_data = {
         "barcode": "1234567",
         "product_name": "Test Product",
@@ -84,7 +85,7 @@ def test_get_all_transactions_existing_product(db_session):
     assert transactions[0].product.product_name == "Test Product"
 
 # Test to ensure it works after session close?
-def test_get_all_transactions_ensure_joinedload(db_session):
+def test_get_all_transactions_ensure_joinedload():
     grocery_repo.add_product(db_session,
         barcode="111",
         product_name="PostSession Item",
@@ -117,7 +118,7 @@ def test_get_all_transactions_ensure_joinedload(db_session):
 
 # region add_product
 # Happy path test
-def test_add_product(db_session):
+def test_add_product():
     product_data = {
         "barcode": "1234567",
         "product_name":"Test Product",
@@ -136,7 +137,7 @@ def test_add_product(db_session):
     assert result.net_weight == product_data["net_weight"]
 
 # Missing data test
-def test_add_product_missing_data_raises_error(db_session):
+def test_add_product_missing_data_raises_error():
     incomplete_data = {
         "barcode":"1234567",
         "price": Decimal("5.99"),
@@ -150,7 +151,7 @@ def test_add_product_missing_data_raises_error(db_session):
     assert "Product name is required" in str(excinfo.value)
 
 # Invalid range for price
-def test_add_product_invalid_range(db_session):
+def test_add_product_invalid_range():
     invalid_range_data = {
         "barcode":"1234567",
         "product_name":"Test Product2",
@@ -168,7 +169,7 @@ def test_add_product_invalid_range(db_session):
 
 # region add_transaction
 
-def test_add_transaction_requires_product(db_session):
+def test_add_transaction_requires_product():
     with pytest.raises(ValueError, match="Product must be provided for transaction."):
         grocery_repo.add_transaction(db_session, None, price="2.50", quantity=1)
 

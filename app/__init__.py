@@ -1,8 +1,6 @@
 from flask import Flask
 from app.core.config import config_map
-#from app.core.config import DevConfig, TestConfig
-from app.core.database import init_db
-
+from app.core.database import init_db, db_session
 
 # Import DB stuff
 from app.modules.groceries import models as grocery_models
@@ -19,8 +17,13 @@ def create_app(config_name="dev"): # Default to DevConfig if nothing is passed i
     # Load appropriate config based on environment
     app.config.from_object(config_map[config_name])
 
-    #with app.app_context():
-    #    init_db(app.config)
+    with app.app_context():
+        init_db(app.config)
+
+    # Remove session after each request or app context teardown
+    @app.teardown_appcontext
+    def remove_session(exception=None):
+        db_session.remove()
 
     app.register_blueprint(main_bp)
     app.register_blueprint(groceries_bp)
