@@ -27,10 +27,12 @@ def get_session(engine):
     Session = sessionmaker(bind=engine)
     return Session()
 
-def get_db_session():
-
+def get_db_session(override_session=None):
     # Debug print
     print(" get_db_session CALLED")
+
+    if override_session:
+        return override_session
 
     # Get engine based on current app's configuration
     engine = get_engine(current_app.config)

@@ -58,6 +58,14 @@ def reset_db(app):
     print("Creating tables...")
     Base.metadata.create_all(engine)
 
+# Fixture to clear all table data between tests
+# Necessary now that tests and app share the same session via monkeypatching
+@pytest.fixture(autouse=True)
+def clear_tables(db_session):
+    for table in reversed(Base.metadata.sorted_tables):
+        db_session.execute(table.delete())
+    db_session.flush()
+
 ## TRY THIS OUT
 @pytest.fixture(scope="session")
 def engine(app):
@@ -79,6 +87,12 @@ def db_session(engine):
     finally:
         trans.rollback()
         session.close()
+
+# monkeypatches get_db_session() to use our test session
+@pytest.fixture(autouse=True)
+def patch_db_session(monkeypatch, db_session):
+    from app.core import database
+    monkeypatch.setattr(database, "get_db_session", lambda *_: db_session)
 
 # Fake browser to test routes (lets us send requests from a fake browser/client)
 @pytest.fixture
