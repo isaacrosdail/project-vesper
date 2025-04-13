@@ -1,5 +1,5 @@
 from app.modules.groceries.models import Product, Transaction
-from app.modules.groceries.repository import add_product, add_transaction, lookup_barcode, get_all_products, get_all_transactions
+from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
 import pytest
 
@@ -14,31 +14,35 @@ def test_lookup_barcode_found(db_session):
         "net_weight": 200
     }
     
-    add_product(db_session, **product_data)
-    db_session.commit()
+    grocery_repo.add_product(db_session, **product_data)
+    
+    # almost never commit in test code now!
+    # Committing breaks rollback isolation
+    #db_session.commit()
+    db_session.flush()
 
-    result = lookup_barcode(db_session, "1234567")
+    result = grocery_repo.lookup_barcode(db_session, "1234567")
 
     assert result is not None
     assert isinstance(result, Product)
     assert result.product_name == "Test Product"
 
 def test_lookup_barcode_not_found(db_session):
-    result = lookup_barcode(db_session, "9999999")
+    result = grocery_repo.lookup_barcode(db_session, "9999999")
     assert result is None
 # endregion
 
 # region get_all_products
 
 def test_get_all_products_empty(db_session):
-    products = get_all_products(db_session)
+    products = grocery_repo.get_all_products(db_session)
     assert products == []
 
 def test_get_all_products_with_entries(db_session):
-    add_product(db_session, barcode="123", product_name="Milk", price="1.50", net_weight="20.0")
-    db_session.commit()
+    grocery_repo.add_product(db_session, barcode="123", product_name="Milk", price="1.50", net_weight="20.0")
+    db_session.flush()
 
-    products = get_all_products(db_session)
+    products = grocery_repo.get_all_products(db_session)
     assert len(products) == 1
     assert products[0].product_name == "Milk"
 
@@ -47,7 +51,7 @@ def test_get_all_products_with_entries(db_session):
 # region get_all_transactions
 
 def test_get_all_transactions_empty(db_session):
-    transactions = get_all_transactions(db_session)
+    transactions = grocery_repo.get_all_transactions(db_session)
     assert transactions == []
 
 def test_get_all_transactions_existing_product(db_session):
@@ -58,48 +62,58 @@ def test_get_all_transactions_existing_product(db_session):
         "net_weight": "0.5"
     }
 
-    add_product(db_session, **product_data)
-    db_session.commit()
+    grocery_repo.add_product(db_session, **product_data)
+    
+    # Use flush instead of commit
+    db_session.flush()
 
-    product = lookup_barcode(db_session, "1234567")
+    product = grocery_repo.lookup_barcode(db_session, "1234567")
 
-    add_transaction(
+    grocery_repo.add_transaction(
         db_session,
         product,
         price="3.50",
         quantity=2
     )
-    db_session.commit()
+    db_session.flush() # Again, flush instead of commit
 
-    transactions = get_all_transactions(db_session)
+    transactions = grocery_repo.get_all_transactions(db_session)
+
     assert len(transactions) == 1
     assert transactions[0].quantity == 2
     assert transactions[0].product.product_name == "Test Product"
 
 # Test to ensure it works after session close?
 def test_get_all_transactions_ensure_joinedload(db_session):
-    add_product(db_session,
+    grocery_repo.add_product(db_session,
         barcode="111",
         product_name="PostSession Item",
         price="2.00",
         net_weight="0.3"
     )
-    db_session.commit()
+    db_session.flush() # instead of commit
 
-    product = lookup_barcode(db_session, "111")
-    add_transaction(
+    product = grocery_repo.lookup_barcode(db_session, "111")
+    grocery_repo.add_transaction(
         db_session,
         product,
         price="2.00",
         quantity=1
     )
-    db_session.commit()
+    db_session.flush() # again, instead of commit
 
-    transactions = get_all_transactions(db_session)
-    db_session.close() # simulate session teardown
+    transactions = grocery_repo.get_all_transactions(db_session)
 
+    # expunge_all instead of .close() here to simulate teardown without breaking rollback
+    db_session.expunge_all() # simulate session teardown
+
+    # Debug print
+    print(transactions[0].__dict__)
+    print(transactions[0].product.__dict__)
     # Won't work unless joinedload is present
     assert transactions[0].product.product_name == "PostSession Item"
+
+# endregion
 
 # region add_product
 # Happy path test
@@ -111,7 +125,7 @@ def test_add_product(db_session):
         "net_weight": 200
     }
 
-    add_product(db_session, **product_data)
+    grocery_repo.add_product(db_session, **product_data)
 
     # Query DB to verify
     result = db_session.query(Product).filter_by(barcode=product_data["barcode"]).first()
@@ -131,7 +145,7 @@ def test_add_product_missing_data_raises_error(db_session):
 
     # Ensure ValueError is raised
     with pytest.raises(ValueError) as excinfo:
-        add_product(db_session, **incomplete_data)
+        grocery_repo.add_product(db_session, **incomplete_data)
     
     assert "Product name is required" in str(excinfo.value)
 
@@ -146,9 +160,17 @@ def test_add_product_invalid_range(db_session):
 
     # Ensure ValueError is raised
     with pytest.raises(ValueError) as excinfo:
-        add_product(db_session, **invalid_range_data)
+        grocery_repo.add_product(db_session, **invalid_range_data)
 
     assert "Price must be provided and non-negative." in str(excinfo.value)
 
 # endregion
 
+# region add_transaction
+
+def test_add_transaction_requires_product(db_session):
+    with pytest.raises(ValueError, match="Product must be provided for transaction."):
+        grocery_repo.add_transaction(db_session, None, price="2.50", quantity=1)
+
+
+# endregion

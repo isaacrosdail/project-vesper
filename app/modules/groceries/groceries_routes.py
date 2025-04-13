@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, flash, render_template, redirect, url_for, request
 from app.core.database import get_db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
+
+import time
 
 groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
 
@@ -58,36 +60,46 @@ def add_product():
     else:
         return render_template("groceries/add_product.html")
 
-@groceries_bp.route("/add_transaction", methods=["GET"])
+@groceries_bp.route("/add_transaction", methods=["GET", "POST"])
 def add_transaction():
-    barcode = request.args.get("barcode")
-    return render_template("groceries/add_transaction.html", barcode=barcode)
-
-@groceries_bp.route("/submit_transaction", methods=["POST"])
-def submit_transaction():
-    action = request.form.get("action")
-
-    # Parse & sanitize form data
-    product_data = {
-        "barcode": request.form.get("barcode"),
-        "product_name": request.form.get("product_name"),
-        "price": Decimal(request.form.get("price_at_scan", "0")),
-        "net_weight": float(request.form.get("net_weight", 0)),
-        "quantity": int(request.form.get("quantity") or 1)
-    }
-
+    print("Add_transaction route HIT")
+    time.sleep(2)
     session = get_db_session()
-    try:
-        grocery_repo.ensure_product_exists(session, **product_data)
-        product = grocery_repo.lookup_barcode(session, product_data["barcode"])
-        grocery_repo.add_transaction(session, product, **product_data)
-        # grocery_repo.handle_barcode(session, barcode, **product_data)
-        session.commit()
-    finally:
-        session.close()
 
-    # Redirect accordingly
-    if action == "submit":
-        return redirect("/groceries")
-    elif action == "next_item":
-        return redirect("/add_transaction")
+    if request.method == "POST":
+        action = request.form.get("action")
+
+        # Parse & sanitize form data
+        product_data = {
+            "barcode": request.form.get("barcode"),
+            "product_name": request.form.get("product_name"),
+            "price": Decimal(request.form.get("price_at_scan", "0")),
+            "net_weight": float(request.form.get("net_weight", 0)),
+            "quantity": int(request.form.get("quantity") or 1)
+        }
+
+        print("lookup_barcode HIT")
+        time.sleep(1)
+        # Lookup barcode first
+        product = grocery_repo.lookup_barcode(session, product_data["barcode"])
+        if not product:
+            flash("Product not found. Please add it first.")
+            return redirect(url_for("groceries.add_product", barcode=product_data["barcode"]))
+        
+        print("logging transaction...")
+        time.sleep(1)
+        # Log transaction
+        grocery_repo.add_transaction(session, product, price=product_data["price"], quantity=product_data["quantity"])
+        session.commit()
+
+        # Redirect accordingly
+        if action == "submit":
+            session.close()
+            return redirect(url_for("groceries.dashboard"))
+        elif action == "next_item":
+            session.close()
+            return redirect("/add_transaction")
+    # GET
+    else:
+        barcode = request.args.get("barcode")
+        return render_template("groceries/add_transaction.html", barcode=barcode)

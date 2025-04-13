@@ -63,6 +63,10 @@ def add_product(session, **product_data):
 
 # Add product to 'inventory'
 def add_transaction(session, product, **product_data):
+
+	if product is None:
+		raise ValueError("Product must be provided for transaction.")
+	
 	today = date.today()
 	quantity = int(product_data.get("quantity") or 1)
 	
