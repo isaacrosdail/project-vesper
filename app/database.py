@@ -28,7 +28,8 @@ def get_db_session():
     # Get & return the session bound to that engine
     return get_session(engine)
 
-def init_db():
-    engine = get_engine(current_app.config)
+def init_db(config):
+    engine = get_engine(config) # Changed from current_app.config to decouple context :P
+    # Debug print
     print("Engine ID:", id(engine))
     Base.metadata.create_all(engine)
