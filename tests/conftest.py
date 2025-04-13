@@ -2,12 +2,14 @@
 
 import pytest
 from app import create_app
-from app.core.database import get_engine
+from app.core.database import get_engine, db_session
 from app.core.db_base import Base
 from sqlalchemy import text
-from sqlalchemy.orm import sessionmaker
 import time
 import subprocess
+
+#session = db_session()
+
 print("conftest loaded!")
 
 ############### Ensure Docker PostgreSQL container is running before tests start
@@ -29,14 +31,7 @@ def ensure_docker_postgres():
 # Create app once and use it for all tests
 @pytest.fixture(scope="session")
 def app():
-    print("Starting app function in conftest...")
     app = create_app("testing")  # Create with 'testing' config
-    print("TEST DB URI:", app.config["SQLALCHEMY_DATABASE_URI"])
-    time.sleep(2)
-    #with app.app_context():
-        #engine = get_engine(app.config)
-        #Base.metadata.create_all(engine)
-        #yield app
     yield app
 
 # Fixture to reset the database before each test (optional, for clean slate)
@@ -45,54 +40,45 @@ def reset_db(app):
     engine = get_engine(app.config)
     with engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT") # Study this later!!
-
-        print("Dropping schema...")
         conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE;"))
-
-        print("Recreating schema...")
         conn.execute(text("CREATE SCHEMA public;"))
 
     # Import DB stuff
     from app.modules.groceries import models as grocery_models
     from app.modules.tasks import models as tasks_models
-    print("Creating tables...")
     Base.metadata.create_all(engine)
 
 # Fixture to clear all table data between tests
 # Necessary now that tests and app share the same session via monkeypatching
 @pytest.fixture(autouse=True)
-def clear_tables(db_session):
-    for table in reversed(Base.metadata.sorted_tables):
-        db_session.execute(table.delete())
-    db_session.flush()
+def clear_tables(app):
+    sess = db_session()
+    try:
+        for table in reversed(Base.metadata.sorted_tables):
+            sess.execute(table.delete())
+        sess.flush()
+        yield
+    finally:
+        sess.rollback()
+        sess.close() # Optional with scoped_session but safe here
+        db_session.remove()
 
 ## TRY THIS OUT
 @pytest.fixture(scope="session")
 def engine(app):
     return get_engine(app.config)
 
-# Fixture to provide SQLAlchemy session
-@pytest.fixture
-def db_session(engine):
-    #def db_session(app):
-    #engine = get_engine(app.config)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    # added
-    trans = session.begin_nested() # < nested = rollbackable data
-    # Try/finally here ensures we only rollback AFTER a test completes
-    try:
-        yield session
-    #session.rollback()
-    finally:
-        trans.rollback()
-        session.close()
+# Fixture to cleanup session (replaces db_session we had before)
+@pytest.fixture(autouse=True)
+def cleanup_session():
+    yield
+    db_session.remove()
 
 # monkeypatches get_db_session() to use our test session
 @pytest.fixture(autouse=True)
-def patch_db_session(monkeypatch, db_session):
-    from app.core import database
-    monkeypatch.setattr(database, "get_db_session", lambda *_: db_session)
+def patch_db_session(monkeypatch):
+    from app.core.database import db_session as global_session
+    monkeypatch.setattr("app.core.database.get_db_session", lambda *_: global_session())
 
 # Fake browser to test routes (lets us send requests from a fake browser/client)
 @pytest.fixture

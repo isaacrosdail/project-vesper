@@ -1,5 +1,5 @@
 from flask import Blueprint, flash, render_template, redirect, url_for, request
-from app.core.database import get_db_session
+from app.core.database import get_db_session, db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
@@ -14,7 +14,7 @@ print(" groceries routes.py imported")
 @groceries_bp.route("/")
 def dashboard():
     print("Rendering GROCERIES dashboard")
-    session = get_db_session()
+    session = db_session()
     # Column names for Transactions model
     transaction_column_names = [
         grocery_models.Transaction.COLUMN_LABELS.get(col, col)
@@ -31,7 +31,8 @@ def dashboard():
         products = grocery_repo.get_all_products(session)
         transactions = grocery_repo.get_all_transactions(session)
     finally:
-        session.close()
+        #session.close()
+        pass
         
     return render_template("groceries/dashboard.html", products = products,
                            transactions = transactions, 
@@ -49,12 +50,13 @@ def add_product():
             "price": Decimal(request.form.get("price", "0")),
             "net_weight": float(request.form.get("net_weight", 0))
         }
-        session = get_db_session()
+        session = db_session()
         try:
             grocery_repo.ensure_product_exists(session, **product_data)
             session.commit()
         finally:
-            session.close()
+            #session.close()
+            pass
 
         return redirect(url_for("groceries.dashboard"))
     else:
@@ -64,7 +66,7 @@ def add_product():
 def add_transaction():
     print("Add_transaction route HIT")
     time.sleep(2)
-    session = get_db_session()
+    session = db_session()
 
     if request.method == "POST":
         action = request.form.get("action")
@@ -94,10 +96,10 @@ def add_transaction():
 
         # Redirect accordingly
         if action == "submit":
-            session.close()
+            #session.close()
             return redirect(url_for("groceries.dashboard"))
         elif action == "next_item":
-            session.close()
+            #session.close()
             return redirect("/add_transaction")
     # GET
     else:

@@ -225,3 +225,24 @@ Log:
 - Now stuck trying to get pytest to be able to authenticate to connect
 	- It insists the password authentication is failing but it literally cannot be the password being wrong
 		- Not sure what it could be, tried changing the pg_hba.conf file to allow local connections to authenticate using password (md5) but no luck
+
+## Sunday [13.04.25]
+Session 1: 14:00 - 00:41
+Log:
+- Set up PostgreSQL via Docker using docker-compose.yml and init.sql; integrated with Flask app.
+- Verified DB integration with connection, table, rollback, and constraint tests.
+- Structured tests into unit/ and integration/; configured pytest.ini accordingly.
+- Wrote first integration test covering full task creation + completion flow.
+- Merged GET/POST logic into single /add_transaction route for groceries.
+- Refactored DB handling to use scoped_session with automatic teardown (no more manual .close()).
+- Monkeypatched get_db_session() in tests to unify app/test sessions and avoid DetachedInstanceError.
+- Replaced unnecessary .commit()s in tests with .flush() for cleaner, isolated state.
+- Achieved full test pass rate post-refactor, including all edge cases.
+- Hit 100% test coverage (or near enough); enforced clean, idiomatic test structure.
+- Used test failures to uncover and fix real bugs via test-first iteration.
+- Removed dead comments, renamed helpers clearly, and standardized naming across all modules.
+
+TODOs:
+- Add toggle logic to tasks checkbox to mark complete/incomplete (/tasks/toggle/<id> maybe?).
+- Design anchor habit model (e.g., is_anchor: bool) and write full repo/route/test flow.
+- Keep test coverage at 100% (track coverage deltas after each commit)

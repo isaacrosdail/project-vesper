@@ -2,7 +2,7 @@
 
 from flask import current_app
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from app.core.db_base import Base
 import app.modules.groceries.models
 import app.modules.tasks.models
@@ -22,25 +22,14 @@ def get_engine(config):
         _engine = create_engine(db_uri)
     return _engine
 
-# Function to get a session bound to the engine
-def get_session(engine):
-    Session = sessionmaker(bind=engine)
-    return Session()
-
-def get_db_session(override_session=None):
-    # Debug print
-    print(" get_db_session CALLED")
-
-    if override_session:
-        return override_session
-
-    # Get engine based on current app's configuration
-    engine = get_engine(current_app.config)
-    # Get & return the session bound to that engine
-    return get_session(engine)
+# Trying out scoped session and session manager pattern to reduce .close() headaches
+db_session = scoped_session(sessionmaker())
 
 def init_db(config):
-    engine = get_engine(config) # Changed from current_app.config to decouple context :P
-    # Debug print
-    print("Engine ID:", id(engine))
+    engine = get_engine(config)
+    db_session.configure(bind=engine) # Binds Session globally
     Base.metadata.create_all(engine)
+
+# Optional, can delete
+def get_db_session():
+    return db_session()

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
-from app.core.database import get_db_session
+from app.core.database import get_db_session, db_session
 from flask import current_app
 
 # Import Task model
@@ -26,10 +26,12 @@ def dashboard():
         for col in Task.__table__.columns.keys()
     ]
 
+    ## FIX ME LATER
     try:
         tasks = tasks_repo.get_all_tasks(session)
     finally:
-        session.close()
+        #session.close()
+        pass
 
     return render_template("tasks/dashboard.html",
                            task_column_names = task_column_names,
@@ -74,13 +76,7 @@ def add_task():
     
 @tasks_bp.route("/complete_task/<int:task_id>", methods=["POST"])
 def complete_task(task_id):
-
-    # Debug print
-    print(" complete_task route HIT")
     session = get_db_session()
-    print(f"Session in route: {id(session)}")
-    time.sleep(2)
-    #print(f"Session in route: {id(session)}")
     # Get corresponding task from db  
     task = session.get(Task, task_id)
     print("Fetched task:", task)
@@ -90,6 +86,5 @@ def complete_task(task_id):
     task.is_done = True
     task.completed_at = datetime.now(timezone.utc)
     session.commit()
-    session.close()
 
     return jsonify(success=True)

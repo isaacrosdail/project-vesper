@@ -1,5 +1,6 @@
+from app.core.database import db_session
 
-def test_task_creation_and_completion(client, db_session):
+def test_task_creation_and_completion(client):
     # 1. Add new task
     response = client.post("/tasks/add_task", data={"title": "Integration Task"})
     assert response.status_code == 302 # Expect redirect
@@ -7,16 +8,16 @@ def test_task_creation_and_completion(client, db_session):
     # Fetch from DB
     from app.modules.tasks.models import Task
     task = db_session.query(Task).filter_by(title="Integration Task").first()
+    task_id = task.id
     assert task is not None
     assert task.is_done is False
 
     # Mark it complete
-    response = client.post(f"/tasks/complete_task/{task.id}")
+    response = client.post(f"/tasks/complete_task/{task_id}")
     assert response.status_code == 200
     assert response.json["success"] is True
 
-    db_session.expire_all() # Ensure fresh read from DB
-    updated_task = db_session.get(Task, task.id)
+    updated_task = db_session.get(Task, task_id)
     assert updated_task.is_done is True
     assert updated_task.completed_at is not None
     
