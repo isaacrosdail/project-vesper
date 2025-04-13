@@ -30,9 +30,26 @@ def grocery():
                            transaction_column_names = transaction_column_names
                         )
 
-@grocery_bp.route("/add_product", methods=["GET"])
+@grocery_bp.route("/add_product", methods=["GET", "POST"])
 def add_product():
-    return render_template("groceries/add_product.html")
+    if request.method == "POST":
+        # Parse & sanitize form data
+        product_data = {
+            "barcode": request.form.get("barcode"),
+            "product_name": request.form.get("product_name"),
+            "price": Decimal(request.form.get("price", "0")),
+            "net_weight": float(request.form.get("net_weight", 0))
+        }
+        session = get_db_session()
+        try:
+            grocery_repo.ensure_product_exists(session, **product_data)
+            session.commit()
+        finally:
+            session.close()
+
+        return redirect(url_for("grocery.grocery"))
+    else:
+        return render_template("groceries/add_product.html")
 
 @grocery_bp.route("/add_transaction", methods=["GET"])
 def add_transaction():
@@ -67,26 +84,3 @@ def submit_transaction():
         return redirect("/grocery")
     elif action == "next_item":
         return redirect("/add_transaction")
-
-
-# Route to save form data from add_product
-@grocery_bp.route('/submit_product', methods=["POST"])
-def submit_product():
-    barcode = request.form.get("barcode")
-
-    # Parse & sanitize form data
-    product_data = {
-        "barcode": request.form.get("barcode"),
-        "product_name": request.form.get("product_name"),
-        "price": Decimal(request.form.get("price", "0")),
-        "net_weight": float(request.form.get("net_weight", 0))
-    }
-
-    session = get_db_session()
-    try:
-        grocery_repo.ensure_product_exists(session, **product_data)
-        session.commit()
-    finally:
-        session.close()
-
-    return redirect(url_for("grocery.grocery"))
