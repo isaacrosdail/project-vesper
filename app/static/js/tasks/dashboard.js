@@ -89,3 +89,9 @@ function updateFieldDisplay(td, newValue) {
     newFieldElement.textContent = newValue; // Set the new field value
     td.appendChild(newFieldElement); // Append to the td
 }
+
+// Make function(s) exportable for testing using Jest
+module.exports = {
+    updateFieldDisplay
+    // export others if needed
+}
