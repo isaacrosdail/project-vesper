@@ -102,12 +102,16 @@ def update_task(task_id):
         if 'title' in data: # If we're updating the title
             task.title = data['title']
 
+            # Save changes & return succes message
+            session.commit()
+            return jsonify(success=True)
+
         if 'is_done' in data: # If we're marking task as complete/incomplete
             # Handle task completion
             task.is_done = True
             task.completed_at = datetime.now(timezone.utc)
 
-            # Save changes to db & redirect to homepage
+            # Save changes to db & return success message
             session.commit()
             return jsonify(success=True)
         
