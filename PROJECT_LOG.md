@@ -246,3 +246,13 @@ TODOs:
 - Add toggle logic to tasks checkbox to mark complete/incomplete (/tasks/toggle/<id> maybe?).
 - Design anchor habit model (e.g., is_anchor: bool) and write full repo/route/test flow.
 - Keep test coverage at 100% (track coverage deltas after each commit)
+
+## Tuesday [15.04.25]
+Pre-Session:
+Log:
+- Created backup directory for PostgreSQL container DB backups under User.
+- Centralized scripts by creating a Scripts folder under User, adding it to PATH (now "vesper-db-backup" can be run from anywhere in PowerShell to generate backups in Backups\Vesper).
+-- TODO: Confirm the data folder in the backup properly stores the volume (still figuring out how to check this).
+  
+Session 1: 14:32 - 
+Goal: 
