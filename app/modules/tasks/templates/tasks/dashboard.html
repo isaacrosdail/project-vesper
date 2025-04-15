@@ -22,7 +22,9 @@
                 {% for task in tasks %}
                 <tr>
                     <td>{{ task.id }}</td>
-                    <td>{{ task.title }}</td>
+                    <td ondblclick="editTableField('tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
+                        <span class="task-title">{{ task.title }}</span>
+                    </td>
                     <td>
                         {% if task.is_done == True %}
                             <td>&#9745;</td> <!-- Checked -->
@@ -41,4 +43,8 @@
     <a href="{{ url_for('tasks.add_task')}}" class="button">
         Add New Task
     </a>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename = 'js/tasks/dashboard.js') }}"></script>
 {% endblock %}

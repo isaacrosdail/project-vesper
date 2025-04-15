@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template
-from app.core.database import get_db_session, db_session
+from app.core.database import db_session
 from app.modules.tasks import repository as tasks_repo
 # Other imports
 from datetime import datetime, timezone
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
-@main_bp.route("/")
+@main_bp.route("/", methods=["GET", "POST"])
 def home():
 
     # Display current time on splash screen
@@ -32,4 +32,5 @@ def home():
                            time_display=time_display, 
                            date_display=date_display,
                            today=today,
+                           tasks=tasks,
                            anchor_habits = anchor_habits)
