@@ -34,9 +34,9 @@ function markHabitComplete(taskId, is_done) {
     // Determine the body based on the current task's completion state
     let body;
     if (is_done = True) {
-        body: JSON.stringify({ "is_done": False }) // If task is completed, mark as incomplete
+        body = JSON.stringify({ "is_done": False }) // If task is completed, mark as incomplete
     } else {
-        body: JSON.stringify({ "is_done": True })  // If task is not completed, mark it as completed
+        body = JSON.stringify({ "is_done": True })  // If task is not completed, mark it as completed
     }
     // Now make fetch request with the body
     fetch(`/update_task/${taskId}`, { 
@@ -61,6 +61,6 @@ function markHabitComplete(taskId, is_done) {
     // If network fails or Flask throws an error, you'll see it here
     // Could later show a popup, retry, etc.
     .catch(error => {
-        console.error('Error marking anchor habit (task) complete:', error)
+        console.error('Error marking anchor habit (task) complete:', error);
     });
 }

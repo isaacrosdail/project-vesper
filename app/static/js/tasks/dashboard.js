@@ -46,9 +46,26 @@ function saveUpdatedTitle(taskId, td, newTitle) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Task title updated to:', data)
+        if (data.succes) {
+            updateTaskTitleDisplay(newTitle)
+            console.log('Task title updated to:', data);
+        } else {
+            console.error('Failed to update task.');
+        }
     })
     .catch(error => {
-        console.error('Error updating task title:', error)
+        console.error('Error updating task title:', error);
     });
+}
+
+// Another function to handle "clean up"
+// Remove the input field & display the new title after changes
+function updateTaskTitleDisplay(newTitle) {
+    // Remove the input element
+    td.innerHTML = ''; // Clear the cell content
+
+    // Append the new title
+    const newTitleElement = document.createElement('span');
+    newTitleElement.textContent = newTitle; // Set the new title
+    td.appendChild(newTitleElement); // Append to the td
 }
