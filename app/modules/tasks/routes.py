@@ -88,3 +88,28 @@ def complete_task(task_id):
     session.commit()
 
     return jsonify(success=True)
+
+@tasks_bp.route("/update_task/<int:task_id>", methods=["PUT", "PATCH"])
+def update_task(task_id):
+    session = db_session()
+    task = session.get(Task, task_id) # Grab task by id from db
+
+    ## HANDLE CASE WHERE TASK IS NOT FOUND ##
+
+    if request.method == "PATCH":
+        data = request.get_json() # Get request body
+
+        if 'title' in data: # If we're updating the title
+            task.title = data['title']
+
+        if 'is_done' in data: # If we're marking task as complete/incomplete
+            # Handle task completion
+            task.is_done = True
+            task.completed_at = datetime.now(timezone.utc)
+
+            # Save changes to db & redirect to homepage
+            session.commit()
+            return jsonify(success=True)
+        
+    else:
+        pass

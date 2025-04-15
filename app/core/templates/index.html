@@ -16,9 +16,10 @@
         {% for anchor_habit in anchor_habits %}
             <li>
                 {{ anchor_habit.title }}
+                <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
                 <input type="checkbox"
                     {% if anchor_habit.completed_at == today %}checked{% endif %}
-                    onchange="markHabitComplete({{ task.id }})">
+                    onchange="markHabitComplete({{ anchor_habit.id }}, {{ anchor_habit.is_done }})">
             </li>
         {% endfor %}
         </ul>
