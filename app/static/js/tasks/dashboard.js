@@ -1,17 +1,18 @@
 
-function editTableTask(module, field, itemId, currentValue) {
-    
-    // Get the task title
-    const taskTitle = td.querySelector('.task-title').textContent;
+function editTableField(td, module, field, itemId, currentValue) {
+
+    alert("Module: " + module + " Field: " + field + " itemId: " + itemId + " CurrentValue: " + currentValue);
+    // Select <td> element to edit (based on passed field)
+    //const td = this; // This refers to the clicked <td> element
 
     // Create an input element to replace text with
     const input = document.createElement('input');
     input.type = 'text';
-    input.value = taskTitle; // Sets the current title as the input's value
+    input.value = currentValue; // Sets current value as the input's value
 
     // Clear the cell & append the input field
     td.innerHTML = '';     // Clears the content of the dblclicked <td>
-    td.appendChild(input); // Add the input field now
+    td.appendChild(input); // Add the input field to the <td>
 
     // Focus on the input field for editing
     input.focus()
@@ -21,7 +22,8 @@ function editTableTask(module, field, itemId, currentValue) {
     // This is good: It isolates the "real change" portion of our logic to only being in one place
     // Imagine what might occur if the user hits enter AND clicks away in rapid succession? This helps avoid potential issues
     input.addEventListener('blur', function() {
-        saveUpdatedTitle(taskId, td, input.value);
+        const td = this.parentElement; // 'this' refers to the input, so we get the parent <td>
+        saveUpdatedField(module, field, itemId, input.value, td); // Pass td along with other data
     });
 
     input.addEventListener('keydown', function(event) {
@@ -35,37 +37,55 @@ function editTableTask(module, field, itemId, currentValue) {
 // 1. Get the value from the input field (represents our edited title)
 // 2. Send it to the backend to update the task in the db
 // 3. Once updated, replace the input with the new title and hide the input field
-function saveUpdatedTitle(taskId, td, newTitle) {
-    // fetch() request to PATCH via update_task
-    fetch(`/update_task/${taskId}`, {
-        method: "PATCH",
+function saveUpdatedField(module, field, itemId, newValue, td) {
+    // Map plural module names to singular
+    const modelMap = {
+        "tasks": "task",
+        "groceries": "grocery"
+    }
+
+    // Use the modules (eg., tasks) to get the singular form (eg., task)
+    const singularModule = modelMap[module] || module; // Fallback to original if no map found?
+
+    // Construct URL dynamically based on the singular module
+    const url = `/${module}/update_${singularModule}/${itemId}`;
+    //alert(url)
+
+    // Prep data to send in body
+    const data = {}
+    data[field] = newValue; // Dynamically update the specific field
+    alert(newValue)
+
+    // Send PATCH request via fetch with field data
+    fetch(url, {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ "title": newTitle }) // Send the new title to the server
+        body: JSON.stringify(data) // Send the updated field and value
     })
     .then(response => response.json())
     .then(data => {
-        if (data.succes) {
-            updateTaskTitleDisplay(newTitle)
-            console.log('Task title updated to:', data);
+        if (data.success) {
+            updateFieldDisplay(td, newValue)
+            console.log(`${field} updated to:`, newValue);
         } else {
-            console.error('Failed to update task.');
+            console.error('Error updating field:', data.message);
         }
     })
     .catch(error => {
-        console.error('Error updating task title:', error);
+        console.error('Error during fetch request:', error);
     });
 }
 
 // Another function to handle "clean up"
 // Remove the input field & display the new title after changes
-function updateTaskTitleDisplay(newTitle) {
+function updateFieldDisplay(td, newValue) {
     // Remove the input element
     td.innerHTML = ''; // Clear the cell content
 
     // Append the new title
-    const newTitleElement = document.createElement('span');
-    newTitleElement.textContent = newTitle; // Set the new title
-    td.appendChild(newTitleElement); // Append to the td
+    const newFieldElement = document.createElement('span');
+    newFieldElement.textContent = newValue; // Set the new field value
+    td.appendChild(newFieldElement); // Append to the td
 }

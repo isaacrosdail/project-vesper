@@ -43,7 +43,7 @@ function markHabitComplete(taskId, is_done) {
         // Request config
         // Making a POST request | Set Content-Type to application/json even if 
         // we're not sending a body (good habit)
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json' // Good habit to set this, research why later
         },
