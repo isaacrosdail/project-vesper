@@ -49,14 +49,10 @@ def test_add_task_creates_task(client):
     assert task is not None
     assert task.is_done is False # Default behavior check
 
-
+# Test marking an anchor_habit (task) as complete via the checkbox on home & JS function
 def test_complete_task(client):
-    # To test: is_done = True, completed_at is set correctly, Route returns {"success": True}
-    # Assumes we have:
-    # A Task model
-    # A working client fixture
-    # A working db_session fixture
-    # Route exists in Flask: /complete_task/<task_id>, method: POST
+    # To test: is_done = True, completed_at is set correctly
+    # Route returns {"success": True}
 
     # Create task via actual route
     response = client.post("/tasks/add_task", data={"title": "Complete Me"})
@@ -68,7 +64,7 @@ def test_complete_task(client):
     task_id = task.id # Grab ID, don't reuse instance
 
     # Now test the real completion route
-    response = client.post(f"/tasks/complete_task/{task_id}")
+    response = client.patch(f"/tasks/update_task/{task_id}")
     assert response.status_code == 200
     assert response.json["success"] is True
 
