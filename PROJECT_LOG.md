@@ -1,4 +1,4 @@
-## Use this file for tracking progress / steps / challenges per session/day worked
+## Used to track daily/per-session progress
 
 ## Mittwoch 26.02.25
 1) Installed RaspberryPi OS on Raspberry Pi 4 Model B
@@ -254,5 +254,15 @@ Log:
 - Centralized scripts by creating a Scripts folder under User, adding it to PATH (now "vesper-db-backup" can be run from anywhere in PowerShell to generate backups in Backups\Vesper).
 -- TODO: Confirm the data folder in the backup properly stores the volume (still figuring out how to check this).
   
-Session 1: 14:32 - 
-Goal: 
+Session 1: 14:32 - 22:18
+Log:
+- Implemented CRUD for task routes (barring DELETE). Merged the complete_task route into the PATCH section of the new update_task route
+- Added tasks/dashboard.js, enabling user to click on a table cell & directly edit the content. Changes are sent to the backend via JS fetch() PATCH requests to update the database.
+- Started generalizing the editTableField JavaScript function to make it reusable across any table in Vesper
+- Initialized npm and set up Jest for JavaScript testing. Chose the node environment, selected v8 as the coverage provider, disabled coverage reports for now, and enabled automatic clearing of mock calls, instances, contexts, and results before each test.
+- Installed the jsdom environment using: npm install --save-dev jest-environment-jsdom
+- Confirmed that tests can be run via npm test from the project root. Also tested npx jest --watch, which reruns tests on every file save and performs efficiently
+
+NOTE:
+- Adding JS testing: Jest for unit testing, then Cypress for end-to-end to simulate user interactions?
+- Generalize CRUD stuff to something like crud_routes.py eventually?
