@@ -22,7 +22,7 @@
                 {% for task in tasks %}
                 <tr>
                     <td>{{ task.id }}</td>
-                    <td ondblclick="editTableField('tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
+                    <td ondblclick="editTableField(this, 'tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
                         <span class="task-title">{{ task.title }}</span>
                     </td>
                     <td>
