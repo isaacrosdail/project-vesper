@@ -65,7 +65,7 @@ def test_complete_task(client):
 
     # Now test the real completion route
     response = client.patch(
-        f"/tasks/update_task/{task_id}",
+        f"/tasks/{task_id}",
         json={"is_done": True})
     assert response.status_code == 200
     assert response.json["success"] is True

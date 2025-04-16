@@ -1,4 +1,11 @@
 
+
+// DELETE fetch request when clicking delete button
+function deleteTableRow() {
+    pass
+}
+
+// Allows us to double-click a table cell and change its value
 function editTableField(td, module, field, itemId, currentValue) {
 
     alert("Module: " + module + " Field: " + field + " itemId: " + itemId + " CurrentValue: " + currentValue);
@@ -38,18 +45,9 @@ function editTableField(td, module, field, itemId, currentValue) {
 // 2. Send it to the backend to update the task in the db
 // 3. Once updated, replace the input with the new title and hide the input field
 function saveUpdatedField(module, field, itemId, newValue, td) {
-    // Map plural module names to singular
-    const modelMap = {
-        "tasks": "task",
-        "groceries": "grocery"
-    }
 
-    // Use the modules (eg., tasks) to get the singular form (eg., task)
-    const singularModule = modelMap[module] || module; // Fallback to original if no map found?
-
-    // Construct URL dynamically based on the singular module
-    const url = `/${module}/update_${singularModule}/${itemId}`;
-    //alert(url)
+    // Construct URL dynamically based on given module
+    const url = `/${module}/${itemId}`;
 
     // Prep data to send in body
     const data = {}
@@ -88,6 +86,11 @@ function updateFieldDisplay(td, newValue) {
     const newFieldElement = document.createElement('span');
     newFieldElement.textContent = newValue; // Set the new field value
     td.appendChild(newFieldElement); // Append to the td
+}
+
+// Functions to run on page load
+window.onload = () => {
+    deleteTableRow();
 }
 
 // Make function(s) exportable for testing using Jest

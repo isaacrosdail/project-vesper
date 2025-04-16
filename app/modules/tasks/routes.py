@@ -89,7 +89,8 @@ def complete_task(task_id):
 
     return jsonify(success=True)
 
-@tasks_bp.route("/update_task/<int:task_id>", methods=["PUT", "PATCH"])
+# UPDATE
+@tasks_bp.route("/<int:task_id>", methods=["PUT", "PATCH"])
 def update_task(task_id):
     session = db_session()
     task = session.get(Task, task_id) # Grab task by id from db
@@ -117,3 +118,18 @@ def update_task(task_id):
         
     else:
         pass
+
+# DELETE
+@tasks_bp.route("/<int:task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    session = db_session()
+    task = session.get(Task, task_id) # Grab task by id from db
+
+    # If task doesn't exist
+    if not task:
+        return {"error": "Task not found."}, 404
+    
+    db_session.delete(task)
+    db_session.commit()
+    
+    return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
