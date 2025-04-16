@@ -19,7 +19,7 @@ table {
     background: rgb(190, 185, 185);
     padding: 1rem;
 }
-/* Currently used for tether-card stuff in JS (Added 02.04.25) */
+/* Currently used for tether-card stuff in JS (Added 02.04.25) && for making delete button appear on hover next to table rows */
 .hidden {
     display: none;
 }
