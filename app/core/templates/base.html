@@ -5,25 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vesper{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css') }}"> -->
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/output.css') }}"> <!-- For Tailwind styling -->
 </head>
 <body>
     <div>
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-            <span class="navbar-brand mb-0 h1">Vesper</span>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item {% if request.path == '/' %}active{% endif %}">
-                        <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
-                    </li>
-                    <li class="nav-item {% if request.path == '/tasks' %}active{% endif %}">
-                        <a class="nav-link" href="{{ url_for('tasks.dashboard') }}">Tasks</a>
-                    </li>
-                    <li class="nav-item {% if request.path == '/grocery' %}active{% endif %}">
-                        <a class="nav-link" href="{{ url_for('groceries.dashboard') }}">Groceries</a>
-                    </li>
-                </ul>
+        <nav class="bg-gray-800 p-4">
+            <div class="max-w-7xl mx-auto">
+                <!-- Mobile / Desktop layout -->
+                <div class="flex items-center">
+                    <!-- Brand Logo -->
+                    <span class="text-2xl font-semibold text-gray-300 mr-6">Vesper</span>
+
+                    <!-- Navbar Links -->
+                    <div class="flex space-x-6">
+                        <a href="{{ url_for('main.home') }}"
+                            class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'main.home' %}bg-gray-700{% endif %}">
+                                Home
+                        </a>
+                        <a href="{{ url_for('tasks.dashboard') }}" 
+                                class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
+                                Tasks
+                        </a>
+                        <a href="{{ url_for('groceries.dashboard') }}" 
+                                class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
+                                Groceries
+                        </a>
+                    </div>
+
+                </div>
+
+
+
             </div>
         </nav>
     </div>

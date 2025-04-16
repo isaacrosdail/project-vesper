@@ -1,9 +1,15 @@
 {
   "devDependencies": {
+    "autoprefixer": "^10.4.21",
     "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0"
+    "jest-environment-jsdom": "^29.7.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4"
   },
   "scripts": {
     "test": "jest"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.4"
   }
 }
