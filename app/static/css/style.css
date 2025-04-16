@@ -1,8 +1,13 @@
+@import "tailwindcss";
 
 body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+}
+a {
+    text-decoration: none;
+    /* color: inherit; */
 }
 .wrapper {
     margin-inline: auto;
