@@ -23,7 +23,34 @@ modelMap = {
     ("tasks", "none"): tasks_models.Task,
 }
 
-# DELETE (Product)
+# ADD
+@crud_bp.route("/<module>/<subtype>", methods=["GET", "POST"])
+def add_item(module, subtype):
+    if request.method == "GET":
+        # Render correct template dynamically
+        return render_template(f"{module}/add_{subtype}.html")
+    
+    elif request.method == "POST":
+        # Handle form submission for creating new item
+        model = modelMap.get((module, subtype))
+        if not model:
+            return {"error": "Invalid module or subtype"}, 400 # 400 Invalid input
+
+        # Extract form data (from HTML form submission for new_[item])
+        # If the form contains fields like title, type, and is_anchor,
+        # this will create a dictionary like:
+        # {"title": "Task Title", "type": "Feature", "is_anchor": "True"}
+        data = request.form.to_dict() # originally used specific fields like request.form.get("title")
+
+        # Create item dynamically based on the model
+        item = model(**data)
+        db_session.add(item)
+        db_session.commit()
+
+        return redirect(url_for(f"{module}.dashboard")) # Redirect after to corresponding dashboard template
+
+
+# DELETE
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["DELETE"])
 def delete_item(module, subtype, item_id):
     session = db_session()
