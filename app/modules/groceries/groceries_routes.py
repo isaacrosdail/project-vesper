@@ -1,5 +1,5 @@
 from flask import Blueprint, flash, render_template, redirect, url_for, request
-from app.core.database import get_db_session, db_session
+from app.core.database import db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
@@ -105,3 +105,33 @@ def add_transaction():
     else:
         barcode = request.args.get("barcode")
         return render_template("groceries/add_transaction.html", barcode=barcode)
+    
+# DELETE (Product)
+@groceries_bp.route("/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    session = db_session()
+    product = session.get(grocery_models.Product, product_id) # Grab product by id from db
+
+    # If product doesn't exist
+    if not product:
+        return {"error": "Product not found."}, 404
+    
+    db_session.delete(product)
+    db_session.commit()
+    
+    return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
+
+# DELETE (Transaction)
+@groceries_bp.route("/<int:transaction_id>", methods=["DELETE"])
+def delete_transaction(transaction_id):
+    session = db_session()
+    transaction = session.get(grocery_models.Transaction, transaction_id) # Grab transaction by id from db
+
+    # If product doesn't exist
+    if not transaction:
+        return {"error": "Transaction not found."}, 404
+    
+    db_session.delete(transaction)
+    db_session.commit()
+    
+    return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
