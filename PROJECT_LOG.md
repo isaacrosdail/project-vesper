@@ -266,3 +266,17 @@ Log:
 NOTE:
 - Adding JS testing: Jest for unit testing, then Cypress for end-to-end to simulate user interactions?
 - Generalize CRUD stuff to something like crud_routes.py eventually?
+
+## Wednesday [16.04.25]
+Log:
+- Adding DELETE route for tasks, JS to dynamically display delete button on row hover
+- Switch off Bootstrap to Tailwind for styling
+	- npm install -D tailwindcss postcss autoprefixer
+	- npx tailwindcss init -p
+- Re-created navbar styling (mostly) with Tailwind
+
+## Thursday [17.04.25]
+Session 1: 
+Goal(s):
+Log:
+- 
