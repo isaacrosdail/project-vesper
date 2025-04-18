@@ -5,7 +5,7 @@
 {% block title %}Groceries{% endblock %}
 
 {% block content %}
-    <div class="wrapper">
+    <div class="table-wrapper">
         <table class="caption-top">
             <caption>
                 Grocery - Products in my Inventory
@@ -20,21 +20,29 @@
                 </tr>
             </thead>
             <tbody>
-                {% for transaction in transactions %}
-                <tr>
-                    <td>{{ transaction.product.barcode }}</td>
-                    <td>{{ transaction.product.product_name }}</td>
-                    <td>{{ transaction.price_at_scan }}</td>
-                    <td>{{ transaction.quantity }}</td>
-                </tr>
-                {% endfor %}
+                {% if transactions %}
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.product.barcode }}</td>
+                        <td>{{ transaction.product.product_name }}</td>
+                        <td>{{ transaction.price_at_scan }}</td>
+                        <td>{{ transaction.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-gray-500 italic py-2">
+                            No transactions yet.
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
     <a href="{{ url_for('groceries.add_transaction')}}" class="button">
         Log New Transaction
     </a>
-    <div class="wrapper">
+    <div class="table-wrapper">
         <table class="caption-top">
             <caption>
                 Lifetime Products Scanned In
@@ -48,14 +56,22 @@
                 </tr>
             </thead>
             <tbody>
-                {% for product in products %}
-                <tr>
-                    <td>{{ product.barcode }}</td>
-                    <td>{{ product.product_name }}</td>
-                    <td>£{{ product.price }}</td>
-                    <td>{{ product.net_weight }} grams</td>
-                </tr>
-                {% endfor %}
+                {% if products %}
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.barcode }}</td>
+                        <td>{{ product.product_name }}</td>
+                        <td>£{{ product.price }}</td>
+                        <td>{{ product.net_weight }} grams</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-gray-500 italic py-2">
+                            No products yet.
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

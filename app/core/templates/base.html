@@ -5,46 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vesper{% endblock %}</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename = 'css/bootstrap.min.css') }}"> -->
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/output.css') }}"> <!-- For Tailwind styling -->
 </head>
-<body>
-    <div>
-        <nav class="bg-gray-800 p-4">
-            <div class="max-w-7xl mx-auto">
-                <!-- Mobile / Desktop layout -->
-                <div class="flex items-center">
-                    <!-- Brand Logo -->
-                    <span class="text-2xl font-semibold text-gray-300 mr-6">Vesper</span>
+<body class="h-full">
+    <div class="wrapper">
+        {% include 'navbar.html' %}
 
-                    <!-- Navbar Links -->
-                    <div class="flex space-x-6">
-                        <a href="{{ url_for('main.home') }}"
-                            class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'main.home' %}bg-gray-700{% endif %}">
-                                Home
-                        </a>
-                        <a href="{{ url_for('tasks.dashboard') }}" 
-                                class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
-                                Tasks
-                        </a>
-                        <a href="{{ url_for('groceries.dashboard') }}" 
-                                class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
-                                Groceries
-                        </a>
-                    </div>
-
-                </div>
-
-
-
-            </div>
-        </nav>
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+            
+        <footer class="bg-gray-100 text-center text-sm py-4">
+            &copy; 2025
+        </footer>
     </div>
-    {% block content %}{% endblock %}
+
     {% block scripts %}{% endblock %}
-    <footer>
-        <p>&copy; 2025</p>
-    </footer>
 </body>
 </html>

@@ -8,20 +8,21 @@ const tetherSubmitBtn = document.getElementById("tether-submit");
 let tetherText = document.getElementById("tether-text");
 let tetherResult = document.getElementById("tether-result");
 
+// Want the value of tether-text to become tether-result, then hide tether-edit again
 tetherSubmitBtn.onclick = () => {
     // Get tether text from input using element id
     tether = document.getElementById("tether-text").value;
-    // Now want to display said text instead of input box
-    document.getElementById("tether-result").textContent = tether;
+    // Set tether-result = tether
+    document.getElementById("tether-result-text").textContent = tether;
     // And hide the input text box and submit button
-    tetherText.classList.add("hidden");
-    tetherSubmitBtn.classList.add("hidden");
+    document.getElementById("tether-result").classList.remove("hidden");
+    document.getElementById("tether-edit").classList.add("hidden");
 }
 
-tetherResult.onclick = () => {
-    tetherResult.classList.remove("hidden");
-    tetherText.classList.remove("hidden");
-    tetherSubmitBtn.classList.remove("hidden");
+function enableEdit() {
+    document.getElementById("tether-result").classList.add("hidden");
+    document.getElementById("tether-edit").classList.remove("hidden");
+    document.getElementById("tether-text").focus();
 }
 
 // Function that activates when checkbox for anchor habits are checked, indicating completion
@@ -57,9 +58,8 @@ function markHabitComplete(taskId, is_done) {
         console.log('Anchor habit (task) marked complete:', data);
         // Optional, update UI here later
     })
-    // Error Catching
+    // Error Catching (eg, network fails, Flask throws error) // Could later show a popup, retry, etc.
     // If network fails or Flask throws an error, you'll see it here
-    // Could later show a popup, retry, etc.
     .catch(error => {
         console.error('Error marking anchor habit (task) complete:', error);
     });

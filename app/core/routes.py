@@ -2,20 +2,22 @@ from flask import Blueprint, render_template
 from app.core.database import db_session
 from app.modules.tasks import repository as tasks_repo
 # Other imports
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time
+from zoneinfo import ZoneInfo
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
 @main_bp.route("/", methods=["GET", "POST"])
 def home():
 
-    # Display current time on splash screen
-    current_time = datetime.now(timezone.utc)
-    time_display = current_time.strftime("%H:%M:%S")
-    date_display = current_time.strftime("%A, %B %d")
-    
-    # Enable checking whether completed_at == today
-    today = datetime.today()
+    # Set reference time once
+    now = datetime.now(ZoneInfo("Europe/London"))
+
+    # Today's 00:00 in Europe/London time
+    start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
+
+    # Convert to UTC for DB comparison
+    start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
     
     # Get Tasks to pass Anchor Habits to display
     session = db_session()
@@ -28,9 +30,8 @@ def home():
         if task.type == "habit" and task.is_anchor
     ]
 
-    return render_template("index.html", 
-                           time_display=time_display, 
-                           date_display=date_display,
-                           today=today,
+    return render_template("index.html",
                            tasks=tasks,
+                           now=now,
+                           start_of_day_utc=start_of_day_utc,
                            anchor_habits = anchor_habits)
