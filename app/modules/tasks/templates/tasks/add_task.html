@@ -4,19 +4,29 @@
 
 {% block content %}
     <h1>Add new Task:</h1>
-    <form method="POST">
+    <div class="bg-white shadow-md p-4 rounded-md max-w-md">
+        <form method="POST">
 
-        <label for="title">Task:</label><br>
-        <input type="text" id="title" name="title"><br>
-
-        <label for="type">Type:</label><br>
-        <select name="type">
-            <option value="todo">ToDo</option>
-            <option value="habit">Habit</option>
-        </select><br>
-
-        <input type="checkbox" name="is_anchor" value="True">Anchor Habit?<br>
-
-        <button class="button" type="submit">Submit</button>
-    </form>
+            <div class="mb-4">
+                <label for="title">Task:</label><br>
+                <input type="text" id="title" name="title"><br>
+            </div>
+            <div class="mb-4">
+                <label for="type">Type:</label><br>
+                <select name="type">
+                    <option value="todo">ToDo</option>
+                    <option value="habit">Habit</option>
+                </select><br>
+            </div>
+            <div class="mb-4 flex items-center">
+                <input type="checkbox" name="is_anchor" value="True" class="mr-2">
+                <label for="anchor" class="text-sm">Anchor Habit?</label>
+            </div>
+            <div class="mb-4">
+                <button class="" type="submit">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
 {% endblock %}

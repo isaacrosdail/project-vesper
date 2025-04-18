@@ -64,8 +64,6 @@ def add_product():
 
 @groceries_bp.route("/add_transaction", methods=["GET", "POST"])
 def add_transaction():
-    print("Add_transaction route HIT")
-    time.sleep(2)
     session = db_session()
 
     if request.method == "POST":
@@ -80,16 +78,12 @@ def add_transaction():
             "quantity": int(request.form.get("quantity") or 1)
         }
 
-        print("lookup_barcode HIT")
-        time.sleep(1)
         # Lookup barcode first
         product = grocery_repo.lookup_barcode(session, product_data["barcode"])
         if not product:
             flash("Product not found. Please add it first.")
             return redirect(url_for("groceries.add_product", barcode=product_data["barcode"]))
-        
-        print("logging transaction...")
-        time.sleep(1)
+
         # Log transaction
         grocery_repo.add_transaction(session, product, price=product_data["price"], quantity=product_data["quantity"])
         session.commit()

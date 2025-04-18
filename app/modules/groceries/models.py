@@ -3,9 +3,6 @@ from app.core.db_base import Base
 from sqlalchemy import Column, Integer, String, Float, Date, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 
-# Debug print
-print(" grocery_models.py imported")
-
 # Product Model for database of products known
 class Product(Base):
 	__tablename__ = "product"

@@ -17,5 +17,5 @@
         ".venv/": true,
         ".pytest_cache/": true,
         ".coverage": true
-    }  
+    }
 }
