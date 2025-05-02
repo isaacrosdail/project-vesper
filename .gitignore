@@ -68,6 +68,9 @@ db.sqlite3-journal
 instance/
 .webassets-cache
 
+# Tailwind output file
+output.css
+
 # Scrapy stuff:
 .scrapy
 

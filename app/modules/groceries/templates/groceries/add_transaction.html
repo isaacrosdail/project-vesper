@@ -6,24 +6,34 @@
 
 {% block content %}
     <h1>Add new transaction: </h1>
-    <form method="POST">
-
-        <label for="barcode">Barcode:</label><br>
-        <input type="text" id="barcode" name="barcode"
-            {% if barcode %} value="{{ barcode }}" {% endif %}
-            placeholder="Scan or enter barcode"><br>
-        
-            <label for="product_name">Product Name</label><br>
-            <input type="text" id="barcode" name="product_name"><br>
-        
-            <label for="price_at_scan">Price:</label><br> <!-- HAVE THIS AUTOFILL WITH KNOWN PRICE IF EXISTS -->
-            <input type="text" id="price_at_scan" name="price_at_scan"><br>
-        
-            <label for="quantity">Quantity:</label><br>
-            <input type="text" id="quantity" name="quantity"><br>
-
-            <button class="button" type="submit" name="action" value="submit">Submit</button>
-            <button class="button" type="submit" name="action" value="next_item">Add Next Item</button>
-    </form>
-
+    <div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
+        <form method="POST">
+            <div class="mb-4">
+                <label for="barcode">Barcode:</label>
+                <input type="text" id="barcode" name="barcode"
+                    {% if barcode %} value="{{ barcode }}" {% endif %}
+                    placeholder="Scan or enter barcode"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="mb-4">
+                <label for="product_name">Product Name</label>
+                <input type="text" id="barcode" name="product_name"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="mb-4">
+                <label for="price_at_scan">Price:</label>   <!-- HAVE THIS AUTOFILL WITH KNOWN PRICE IF EXISTS -->
+                <input type="text" id="price_at_scan" name="price_at_scan"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="mb-4">
+                <label for="quantity">Quantity:</label>
+                <input type="text" id="quantity" name="quantity"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="flex gap-4 mb-4">
+                <button class="{{ submit_classes }}" type="submit" name="action" value="submit">Submit</button>
+                <button class="{{ submit_classes }}" type="submit" name="action" value="next_item">Add Next Item</button>
+            </div>
+        </form>
+</div>
 {% endblock %}
