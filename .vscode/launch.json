@@ -5,11 +5,31 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Run All Tests",
+            "name": "Python Debugger: Flask",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/tests",
-            "cwd": "${workspaceFolder}"
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "app:create_app()",
+                "FLASK_DEBUG": "1"
+            },
+            "args": [
+                "run",
+                "--no-debugger",
+                "--no-reload"
+            ],
+            "jinja": true,
+            "autoStartBrowser": false
+        },
+        {
+            "name": "Python: Run All Tests (pytest)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/venv/bin/pytest", // Path to pytest exe in venv
+            "args": [
+                "${workspaceFolder}/tests" // Dir where tests are located
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }
