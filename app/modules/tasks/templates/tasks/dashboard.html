@@ -40,7 +40,7 @@
                         <td>{{ task.type }}</td>
                         <td>{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
                         <td>{{ task.completed_at }}</td>
-                        <td><button class="delete-btn group-hover:visible invisible">Delete</button></td>
+                        <td onclick="deleteTableItem('tasks', '{{ task.id }}')"><button id="" class="delete-btn group-hover:visible invisible">Delete</button></td>
                     </tr>
                     {% endfor %}
                 {% else %}
