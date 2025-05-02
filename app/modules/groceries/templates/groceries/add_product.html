@@ -6,20 +6,31 @@
 
 {% block content %}
     <h1>Add new product:</h1>
-    <form method="POST">
-
-        <label for="barcode">Barcode:</label><br>
-        <input type="text" id="barcode" name="barcode"><br>
-        
-        <label for="product_name">Product Name:</label><br>
-        <input type="text" id="product_name" name="product_name"><br>
-        
-        <label for="price">Price:</label><br>
-        <input type="text" id="price" name="price"><br>
-        
-        <label for="net_weight">Net Weight:</label><br>
-        <input type="text" id="price" name="price"><br>
-        
-        <button class="button" type="submit">Submit</button>
-    </form>
+    <div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
+        <form method="POST">
+            <div class="mb-4">
+                <label for="barcode">Barcode:</label>
+                <input type="text" id="barcode" name="barcode"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="mb-4">
+                <label for="product_name">Product Name:</label>
+                <input type="text" id="product_name" name="product_name"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="mb-4">
+                <label for="price">Price:</label>
+                <input type="text" id="price" name="price"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="mb-4">
+                <label for="net_weight">Net Weight:</label>
+                <input type="text" id="price" name="price"
+                    class="{{ input_classes }}">
+            </div>
+            <div class="mb-4">
+                <button class="{{ submit_classes }}" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
 {% endblock %}

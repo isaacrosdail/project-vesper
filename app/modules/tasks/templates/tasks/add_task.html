@@ -13,11 +13,11 @@
                     type="text"
                     id="title" 
                     name="title"
-                    class="border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm"><br>
+                    class="{{ input_classes }}"><br> <!-- Now here we can reference input_classes styling which is defined in our base.html -->
             </div>
             <div class="mb-4">
                 <label for="type">Type:</label><br>
-                <select name="type" class="border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm">
+                <select name="type" class="{{ input_classes }}"> <!-- Again, referencing styling from base.html -->
                     <option value="todo">ToDo</option>
                     <option value="habit">Habit</option>
                 </select><br>
@@ -27,7 +27,7 @@
                 <label for="anchor" class="font-medium text-gray-700 block mb-1">Anchor Habit?</label>
             </div>
             <div class="mb-4">
-                <button class="border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm" type="submit">
+                <button class="{{ submit_classes }}" type="submit">
                     Submit
                 </button>
             </div>
