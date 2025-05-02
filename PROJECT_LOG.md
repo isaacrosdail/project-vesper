@@ -275,8 +275,21 @@ Log:
 	- npx tailwindcss init -p
 - Re-created navbar styling (mostly) with Tailwind
 
-## Thursday [17.04.25]
-Session 1: 
-Goal(s):
+## Friday [02.05.25]
+Session 1: 17:00 - 20:55
 Log:
-- 
+- Refactor/rename "Tether" to "Critical Task"
+- Discovered I just need to manually restart Flask server whenever Tailwind styles are updated in order to see them. so..yay!
+- Fixed launch.json to point to the right place so we can use F5 to Run Debug mode and also use breakpoints to better debug
+- Implement Delete on row hover functionality for Tasks table
+
+Remaining Stuff before hosting:
+- Make "hover over table row to delete item" on Tasks dashboard fuctional & stylize it so it's visually clearer
+- Ensure checking off anchor habits actually works
+- Input validation & warnings for the "add_X" templates! (Currently: task, product, transaction)
+- Add placeholders to forms (Remember: Need one for English and one for German for lang toggle)
+- Copy lang toggle into Vesper from Resume Site
+- Get "editTableField" function to work for / apply to all fields in Tasks dashboard (except ID obv)
+
+Next Time:
+1. Tweak groceries dashboard table to accommodate the "delete option on row hover" function there
