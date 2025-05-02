@@ -117,7 +117,7 @@ function updateFieldDisplay(td, newValue) {
 
 // Functions to run on page load
 window.onload = () => {
-    deleteTableRow();
+    // Useful for event listeners, UI/form initialization, dynamic content loading (like for a weather widget?)
 }
 
 // Make function(s) exportable for testing using Jest
