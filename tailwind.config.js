@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     content: [
       './app/**/*.{html,js}',
       './static/**/*.{css,js}',

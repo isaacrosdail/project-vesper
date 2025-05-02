@@ -43,7 +43,7 @@ footer {
 .navbar {
     height: 3.5rem;
 }
-.tether-card {
+.critical-task-card {
     background-color: rgb(187, 187, 187);
     text-align: center;
 }
@@ -52,7 +52,7 @@ table {
     background: rgb(190, 185, 185);
     padding: 1rem;
 }
-/* Currently used for tether-card stuff in JS (Added 02.04.25) && for making delete button appear on hover next to table rows */
+/* Currently used for critical-task-card stuff in JS (Added 02.04.25) && for making delete button appear on hover next to table rows */
 .hidden {
     display: none;
 }
