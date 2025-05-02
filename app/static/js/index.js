@@ -1,28 +1,28 @@
 
-// Variable for tether text input
-let tether;
+// Variable for critical-task text input
+let criticalTask;
 
-// Constant for tether-submit button
-const tetherSubmitBtn = document.getElementById("tether-submit");
-// Variables for tether-text and tether-result
-let tetherText = document.getElementById("tether-text");
-let tetherResult = document.getElementById("tether-result");
+// Constant for critical-task-submit button
+const criticalTaskSubmitBtn = document.getElementById("critical-task-submit");
+// Variables for critical-task-text and critical-task-result
+let criticalTaskText = document.getElementById("critical-task-text");
+let criticalTaskResult = document.getElementById("critical-task-result");
 
-// Want the value of tether-text to become tether-result, then hide tether-edit again
-tetherSubmitBtn.onclick = () => {
-    // Get tether text from input using element id
-    tether = document.getElementById("tether-text").value;
-    // Set tether-result = tether
-    document.getElementById("tether-result-text").textContent = tether;
+// Want the value of critical-task-text to become critical-task-result, then hide critical-task-edit again
+criticalTaskSubmitBtn.onclick = () => {
+    // Get critical-task text from input using element id
+    criticalTask = document.getElementById("critical-task-text").value;
+    // Set critical-task-result = critical-task
+    document.getElementById("critical-task-result-text").textContent = criticalTask;
     // And hide the input text box and submit button
-    document.getElementById("tether-result").classList.remove("hidden");
-    document.getElementById("tether-edit").classList.add("hidden");
+    document.getElementById("critical-task-result").classList.remove("hidden");
+    document.getElementById("critical-task-edit").classList.add("hidden");
 }
 
 function enableEdit() {
-    document.getElementById("tether-result").classList.add("hidden");
-    document.getElementById("tether-edit").classList.remove("hidden");
-    document.getElementById("tether-text").focus();
+    document.getElementById("critical-task-result").classList.add("hidden");
+    document.getElementById("critical-task-edit").classList.remove("hidden");
+    document.getElementById("critical-task-text").focus();
 }
 
 // Function that activates when checkbox for anchor habits are checked, indicating completion
