@@ -3,6 +3,7 @@
 from app.core.db_base import Base
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 # Task Model for database of tasks, with varying types (task vs habit, etc)
 class Task(Base):
@@ -16,6 +17,12 @@ class Task(Base):
     created_at = (Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)))
     completed_at = (Column(DateTime(timezone=True), nullable=True))
 
+    # Lets us convert to London time simply by doing task.created_at_local
+    # as if it were a column in the table / property of the object
+    @property
+    def created_at_local(self):
+        return self.created_at.astimezone(ZoneInfo("Europe/London"))
+    
     # Human-readable column names
     COLUMN_LABELS = {
         "id": "Task ID",

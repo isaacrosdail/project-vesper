@@ -12,12 +12,12 @@ from app.modules.tasks import repository as tasks_repo
 from datetime import datetime, timezone
 
 import time
+from zoneinfo import ZoneInfo
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
 @tasks_bp.route("/")
 def dashboard():
-    print("Rendering TASKS dashboard")
     # Fetch Tasks & pass into template
     session = get_db_session()
     # Column names for Task model
@@ -26,12 +26,8 @@ def dashboard():
         for col in Task.__table__.columns.keys()
     ]
 
-    ## FIX ME LATER
-    try:
-        tasks = tasks_repo.get_all_tasks(session)
-    finally:
-        #session.close()
-        pass
+    # Fetch tasks list
+    tasks = tasks_repo.get_all_tasks(session)
 
     return render_template("tasks/dashboard.html",
                            task_column_names = task_column_names,
@@ -79,8 +75,6 @@ def complete_task(task_id):
     session = get_db_session()
     # Get corresponding task from db  
     task = session.get(Task, task_id)
-    print("Fetched task:", task)
-    time.sleep(2)
 
     # Update task to be completed, incl. completed_at
     task.is_done = True

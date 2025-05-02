@@ -5,8 +5,17 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <h1>Main Dashboard</h1><br>
-    <p>{{time_display}} | {{date_display}}</p>
+    <h1>
+        {% if now.hour < 12 %}
+            Good morning!
+        {% elif now.hour < 18 %}
+            Good afternoon!
+        {% else %}
+            Good evening!
+        {% endif %}
+    </h1><br>
+
+    <p>{{ now.strftime("%H:%M:%S") }} | {{ now.strftime("%A, %B %d") }}</p>
 
     <!-- Habits Display -->
     <div class="anchor-habits-card">
@@ -18,7 +27,7 @@
                 {{ anchor_habit.title }}
                 <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
                 <input type="checkbox"
-                    {% if anchor_habit.completed_at == today %}checked{% endif %}
+                    {% if anchor_habit.completed_at == start_of_day_utc %}checked{% endif %}
                     onchange="markHabitComplete({{ anchor_habit.id }}, {{ anchor_habit.is_done }})">
             </li>
         {% endfor %}
@@ -28,10 +37,22 @@
     <!-- Tether Card-->
     <div class="tether-card">
         <h2>Tether</h2>
-        <label>If I do one thing today, it'll be: </label>
-        <p id="tether-result">Test</p>
-        <input id="tether-text">
-        <button class="button" id="tether-submit">submit</button>
+        <p>
+            <span>Today's Intention: </span>
+            <span class="relative group" id="tether-result" ondblclick="enableEdit()">
+                <span id="tether-result-text">[text]</span>
+
+                <!-- Tooltip -->
+                <span class="absolute opacity-0 group-hover:opacity-100 bg-black text-white text-xs px-1 rounded whitespace-nowrap transition-opacity duration-150">
+                    Double-click to edit
+                </span>
+            </span>
+        </p>
+        
+        <div id="tether-edit" class="hidden">
+            <input id="tether-text">
+            <button class="button" id="tether-submit">submit</button>
+        </div>
     </div>
 
 {% endblock %}
