@@ -5,19 +5,22 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <h1>
-        {% if now.hour < 12 %}
-            Good morning!
-        {% elif now.hour < 18 %}
-            Good afternoon!
-        {% else %}
-            Good evening!
-        {% endif %}
-    </h1><br>
+    <!-- Greeting & Time/Date Card -->
+    <div class="card">
+        <h1>
+            {% if now.hour < 12 %}
+                Good morning!
+            {% elif now.hour < 18 %}
+                Good afternoon!
+            {% else %}
+                Good evening!
+            {% endif %}
+        </h1>
 
-    <p>{{ now.strftime("%H:%M:%S") }} | {{ now.strftime("%A, %B %d") }}</p>
+        <p>{{ now.strftime("%H:%M:%S") }} | {{ now.strftime("%A, %B %d") }}</p><br>
+    </div>
 
-    <!-- Habits Display -->
+    <!-- Anchor Habits Card -->
     <div class="anchor-habits-card">
         <h2>Anchor Habits</h2>
         <!-- Just print names in UL for now -->
@@ -34,13 +37,13 @@
         </ul>
 
     </div>
-    <!-- Tether Card-->
-    <div class="tether-card">
-        <h2>Tether</h2>
+    <!-- Critical Task Card -->
+    <div class="critical-task-card">
+        <h2>Critical Task</h2>
         <p>
             <span>Today's Intention: </span>
-            <span class="relative group" id="tether-result" ondblclick="enableEdit()">
-                <span id="tether-result-text">[text]</span>
+            <span class="relative group" id="critical-task-result" ondblclick="enableEdit()">
+                <span id="critical-task-result-text">[text]</span>
 
                 <!-- Tooltip -->
                 <span class="absolute opacity-0 group-hover:opacity-100 bg-black text-white text-xs px-1 rounded whitespace-nowrap transition-opacity duration-150">
@@ -49,9 +52,9 @@
             </span>
         </p>
         
-        <div id="tether-edit" class="hidden">
-            <input id="tether-text">
-            <button class="button" id="tether-submit">submit</button>
+        <div id="critical-task-edit" class="hidden">
+            <input id="critical-task-text">
+            <button class="button" id="critical-task-submit">submit</button>
         </div>
     </div>
 
