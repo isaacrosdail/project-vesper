@@ -13,8 +13,8 @@ Vesper is a personal dashboard + home assistant hybrid focused on intelligent ha
 - Scanning module (centralized functions for other modules in future)
   
 ## Tech Stack
-**Languages & Frameworks**: Python, Flask/Jinja2, SQLAlchemy
-**Frontend**: HTML, JS, TailwindCSS
-**Database**: PostgreSQL (via Docker; originally SQLite)
-**Testing**: Pytest (with coverage via pytest-cov)
-**Tools**: VScode, Git, Docker
+**Languages & Frameworks**: Python, Flask/Jinja2, SQLAlchemy  
+**Frontend**: HTML, JS, TailwindCSS  
+**Database**: PostgreSQL (via Docker; originally SQLite)  
+**Testing**: Pytest (with coverage via pytest-cov)  
+**Tools**: VScode, Git, Docker  
