@@ -1,5 +1,6 @@
 
-
+/*
+Now in static/js/utils.js
 // DELETE fetch request when clicking delete button
 function deleteTableItem(module, itemId, subtype = "none") { // Default to none if not passed
     // Confirm delete
@@ -31,7 +32,7 @@ function deleteTableItem(module, itemId, subtype = "none") { // Default to none 
         console.error('Error:', error);
     })
 }
-
+*/
 // Allows us to double-click a table cell and change its value
 function editTableField(td, module, field, itemId, currentValue) {
 
