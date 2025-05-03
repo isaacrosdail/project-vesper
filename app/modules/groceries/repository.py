@@ -47,16 +47,22 @@ def add_product(session, **product_data):
 		raise ValueError("Barcode is required.")
 	if not product_data.get("product_name"):
 		raise ValueError("Product name is required.")
-	if "price" not in product_data or Decimal(product_data["price"]) < 0:
-		raise ValueError("Price must be provided and non-negative.")
 	if "net_weight" not in product_data or float(product_data["net_weight"]) <= 0:
 		raise ValueError("Net weight must be positive.")
+	
+	# TEMPORARY price hack to avoid issues if field still exists (Need to sort later)
+	price = product_data.get("price")
+	if "price" in Product.__table__.columns:
+		if price is None:
+			price = Decimal("0.00")
+		else:
+			price = Decimal(price)
 
 	product = Product(
 		barcode=product_data["barcode"],
 		product_name=product_data["product_name"],
-		price=Decimal(product_data["price"]),
-		net_weight=float(product_data["net_weight"])
+		net_weight=float(product_data["net_weight"]),
+		price=price if "price" in Product.__table__.columns else None  # ← handles the zombie field
 	)
 
 	session.add(product)

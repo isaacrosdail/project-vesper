@@ -11,23 +11,34 @@
             <div class="mb-4">
                 <label for="barcode">Barcode:</label>
                 <input type="text" id="barcode" name="barcode"
-                    {% if barcode %} value="{{ barcode }}" {% endif %}
+                    value="{{ transaction_data.barcode or '' }}"
                     placeholder="Scan or enter barcode"
                     class="{{ input_classes }}">
             </div>
             <div class="mb-4">
                 <label for="product_name">Product Name</label>
                 <input type="text" id="barcode" name="product_name"
+                    value="{{ transaction_data.product_name or '' }}"
                     class="{{ input_classes }}">
             </div>
             <div class="mb-4">
                 <label for="price_at_scan">Price:</label>   <!-- HAVE THIS AUTOFILL WITH KNOWN PRICE IF EXISTS -->
                 <input type="text" id="price_at_scan" name="price_at_scan"
+                    value="{{ transaction_data.price_at_scan or '' }}"
                     class="{{ input_classes }}">
             </div>
             <div class="mb-4">
                 <label for="quantity">Quantity:</label>
                 <input type="text" id="quantity" name="quantity"
+                    value="{{ transaction_data.quantity or '' }}"
+                    class="{{ input_classes }}">
+            </div>
+            <!-- net_weight to be conditionally shown depending on whether we need to add_product from here -->
+            <!-- Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing -->
+            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+                <label for="net_weight">Net Weight:</label>
+                <input type="text" id="net_weight" name="net_weight"
+                    {% if not show_product_fields%}disabled{% endif %}
                     class="{{ input_classes }}">
             </div>
             <div class="flex gap-4 mb-4">
