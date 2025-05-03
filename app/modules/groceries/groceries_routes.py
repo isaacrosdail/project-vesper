@@ -129,7 +129,7 @@ def add_transaction():
                 product = grocery_repo.lookup_barcode(session, product_data["barcode"])
         
         # Product exists -> Add transaction & commit
-        grocery_repo.add_transaction(session, product, transaction_data)
+        grocery_repo.add_transaction(session, product, **transaction_data)
         session.commit()
 
         # Redirect logic based on user action submitted

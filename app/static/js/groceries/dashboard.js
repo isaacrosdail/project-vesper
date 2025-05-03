@@ -19,7 +19,7 @@ function deleteTableItem(module, itemId, subtype = "none") { // Default to none 
             // Handle success (eg., remove item from DOM)
             // Need to grab the itemRow to remove visually by finding the
             // custom data attribute data-task-id that matches our itemId
-            const itemRow = document.querySelector(`[data-task-id="${itemId}"]`);
+            const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
             if (itemRow) itemRow.remove();
         } else {
             console.error('Failed to delete item.');

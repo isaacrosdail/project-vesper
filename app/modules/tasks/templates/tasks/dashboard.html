@@ -23,7 +23,7 @@
                     {% for task in tasks %}
                     <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                     <!-- Using display: none works here as well but causes layout shift -->
-                    <tr class="task-row group" data-task-id="{{ task.id }}">
+                    <tr class="task-row group" data-item-id="{{ task.id }}">
                         <td>{{ task.id }}</td>
                         <td ondblclick="editTableField(this, 'tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
                             <span class="task-title">{{ task.title }}</span>
@@ -36,7 +36,9 @@
                         <td>{{ task.type }}</td>
                         <td>{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
                         <td>{{ task.completed_at }}</td>
-                        <td onclick="deleteTableItem('tasks', '{{ task.id }}')"><button id="" class="delete-btn group-hover:visible invisible">Delete</button></td>
+                        <td onclick="deleteTableItem('tasks', '{{ task.id }}')">
+                            <button id="" class="delete-btn group-hover:visible invisible">Delete</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 {% else %}

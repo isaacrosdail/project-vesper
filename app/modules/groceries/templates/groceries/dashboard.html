@@ -22,12 +22,16 @@
             <tbody>
                 {% if transactions %}
                     {% for transaction in transactions %}
-                    <tr>
+                    <tr class="group" data-item-id="{{ transaction.transaction_id }}">
                         <td>{{ transaction.product.barcode }}</td>
-                        <td>{{ transaction.product.product_name }}</td>
+                        <td>
+                            <span class="product-name">{{ transaction.product.product_name }}</span>
+                        </td>
                         <td>{{ transaction.price_at_scan }}</td>
                         <td>{{ transaction.quantity }}</td>
-                        <td><button>Delete</button></td>
+                        <td onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
+                            <button class="delete-btn group-hover:visible invisible">Delete</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -59,11 +63,14 @@
             <tbody>
                 {% if products %}
                     {% for product in products %}
-                    <tr>
+                    <tr class="group" data-item-id="{{ product.product_id }}">
                         <td>{{ product.barcode }}</td>
                         <td>{{ product.product_name }}</td>
                         <td>£{{ product.price }}</td>
                         <td>{{ product.net_weight }} grams</td>
+                        <td onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
+                            <button class="delete-btn group-hover:visible invisible">Delete</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -79,4 +86,8 @@
     <a href="{{ url_for('groceries.add_product')}}" class="button">
         Add New Product
     </a>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename = 'js/groceries/dashboard.js') }}"></script>
 {% endblock %}
