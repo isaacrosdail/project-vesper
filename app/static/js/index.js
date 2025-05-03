@@ -27,20 +27,17 @@ function enableEdit() {
 
 // Function that activates when checkbox for anchor habits are checked, indicating completion
 // Function will then use fetch() to trigger POST to tell Flask to update DB
-function markHabitComplete(taskId, is_done) {
+function markHabitComplete(checkbox, habitId) {
     // Fetch sends a request to flask server
     // POSTing to a dynamic URL like /complete_habit/7
     // Translation: "Hey, mark habit 7 as complete"
 
-    // Determine the body based on the current task's completion state
-    let body;
-    if (is_done = True) {
-        body = JSON.stringify({ "is_done": False }) // If task is completed, mark as incomplete
-    } else {
-        body = JSON.stringify({ "is_done": True })  // If task is not completed, mark it as completed
-    }
-    // Now make fetch request with the body
-    fetch(`/update_task/${taskId}`, { 
+    // If .checked == True  -> user just checked it
+    // If .checked == False -> user just un-checked it
+    const isDone = checkbox.checked;
+
+    // Fetch PATCH request to update is_done
+    fetch(`/tasks/${habitId}`, { 
         // Request config
         // Making a POST request | Set Content-Type to application/json even if 
         // we're not sending a body (good habit)
@@ -48,7 +45,7 @@ function markHabitComplete(taskId, is_done) {
         headers: {
             'Content-Type': 'application/json' // Good habit to set this, research why later
         },
-        body: body // Pass the body we set earlier
+        body: JSON.stringify({ is_done: isDone })
     })
     // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
     .then(response => response.json())

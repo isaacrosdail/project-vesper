@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
-@tasks_bp.route("/")
+@tasks_bp.route("/", methods=["GET"])
 def dashboard():
     # Fetch Tasks & pass into template
     session = get_db_session()
@@ -29,12 +29,13 @@ def dashboard():
     # Fetch tasks list
     tasks = tasks_repo.get_all_tasks(session)
 
-    return render_template("tasks/dashboard.html",
-                           task_column_names = task_column_names,
-                           tasks = tasks)
+    return render_template(
+        "tasks/dashboard.html",
+        task_column_names = task_column_names,
+        tasks = tasks)
 
 # Create a new task
-@tasks_bp.route("/add_task", methods=["GET", "POST"])
+@tasks_bp.route("/add", methods=["GET", "POST"])
 def add_task():
 
     # Process form data and add new task to db
@@ -69,7 +70,8 @@ def add_task():
         # Post/Redirect/Get (PRG) pattern - standard for handling form submissions in web apps
     else:
         return render_template("tasks/add_task.html")
-    
+
+# REMOVE THIS ROUTE? deprecated by update_task route
 @tasks_bp.route("/complete_task/<int:task_id>", methods=["POST"])
 def complete_task(task_id):
     session = get_db_session()
@@ -102,9 +104,13 @@ def update_task(task_id):
             return jsonify(success=True)
 
         if 'is_done' in data: # If we're marking task as complete/incomplete
+            is_done = data["is_done"]
+
             # Handle task completion
-            task.is_done = True
-            task.completed_at = datetime.now(timezone.utc)
+            task.is_done = is_done
+            task.completed_at = (
+                datetime.now(timezone.utc) if is_done else None
+            )
 
             # Save changes to db & return success message
             session.commit()
