@@ -31,7 +31,7 @@
                 <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
                 <input type="checkbox"
                     {% if anchor_habit.completed_at == start_of_day_utc %}checked{% endif %}
-                    onchange="markHabitComplete({{ anchor_habit.id }}, {{ anchor_habit.is_done }})">
+                    onchange="markHabitComplete(this, {{ anchor_habit.id }})">
             </li>
         {% endfor %}
         </ul>
