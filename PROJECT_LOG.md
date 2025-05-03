@@ -293,3 +293,17 @@ Remaining Stuff before hosting:
 
 Next Time:
 1. Tweak groceries dashboard table to accommodate the "delete option on row hover" function there
+
+## Saturday [03.05.25] Session 1: 12:00 - 20:55
+Log:
+- Add conditional product creation flow to add_transaction route
+- Normalize & parse form data, allow re-submission of add_transaction form with net_weight if product not found
+- Cleanly split product & transaction data
+- Gracefully handle 'price' fallback in product creation (temp hack - price for Product model will later be removed)
+- Use show_product_fields flag to dynamically reveal needed inputs
+- Centralize deleteTableItem JS function inside js/utils.js
+- Enable marking anchor habit complete via dashboard checkbox, also appears checked on refresh/reload!
+- Make endpoints RESTful & adjust tests accordingly
+- Add style sets in base.html for tables, unify styling (also polish date completed display for task table)
+- Add flash() for add_task, add_product, & add_transaction
+

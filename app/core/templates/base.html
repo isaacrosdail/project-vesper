@@ -23,6 +23,17 @@
         {% set label_classes = "border" %}
         {% set submit_classes = "bg-white border border-gray-400 rounded px-4 py-2 text-gray-800 hover:bg-blue-400 cursor-pointer w-full" %}
 
+        <!-- For flash() -->
+        {% with messages = get_flashed_messages() %}  <!-- "if flask has any msgs saved, pull them into this variable called messages" -->
+            {% if messages %}
+            <div id="flash-message" class="bg-green-100 text-green-800 px-4 py-2 rounded shadow mb-4">
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
         <div class="content">
             {% block content %}{% endblock %}
         </div>
@@ -32,6 +43,21 @@
         </footer>
     </div>
 
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    <!-- Script to add listener that allows flash() messages to auto-fade & then disappears -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("flash script running");
+            const flash = document.getElementById('flash-message');
+            if (flash) {
+                setTimeout(() => {
+                    flash.style.opacity = '0'; // fade?
+                    flash.style.pointerEvents = 'none'; // ?
+                    setTimeout(() => flash.remove(), 1000); // then remove after fade
+                }, 2000);
+            }
+        });
+    </script>
+    {% endblock %}
 </body>
 </html>

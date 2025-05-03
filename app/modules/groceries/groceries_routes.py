@@ -53,6 +53,10 @@ def add_product():
         try:
             grocery_repo.ensure_product_exists(session, **product_data)
             session.commit()
+
+            # Flash message to confirm
+            flash("Product added successfully.")
+            
         finally:
             pass
 
@@ -129,6 +133,9 @@ def add_transaction():
         # Product exists -> Add transaction & commit
         grocery_repo.add_transaction(session, product, **transaction_data)
         session.commit()
+
+        # Flash message to confirm
+        flash("Transaction added successfully.")
 
         # Redirect logic based on user action submitted
         action = request.form.get("action")

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, flash
 from app.core.database import get_db_session, db_session
 from flask import current_app
 
@@ -65,6 +65,9 @@ def add_task():
         session.add(new_task)
         session.commit()
 
+        # Display flash() for add confirmation
+        flash(f"Task added successfully.")
+        
         return redirect(url_for("tasks.dashboard")) # Redirect after POST - NOT render_template
         # Using redirect here after the form POST follows the best practice of
         # Post/Redirect/Get (PRG) pattern - standard for handling form submissions in web apps
