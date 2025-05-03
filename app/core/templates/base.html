@@ -13,6 +13,12 @@
         {% include 'navbar.html' %}
 
         {# Style reference classes - available in all templates #}
+
+        <!-- Table style sets -->
+        {% set table_classes = "min-w-full table-fixed border-collapse border border-gray-300 mb-6 text-sm" %}
+        {% set th_classes = "px-4 py-2 text-left bg-gray-200 border border-gray-300" %}
+        {% set td_classes = "px-4 py-2 border border-gray-300 text-left" %}
+
         {% set input_classes = "border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm" %}
         {% set label_classes = "border" %}
         {% set submit_classes = "bg-white border border-gray-400 rounded px-4 py-2 text-gray-800 hover:bg-blue-400 cursor-pointer w-full" %}

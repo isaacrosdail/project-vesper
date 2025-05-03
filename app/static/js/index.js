@@ -48,7 +48,19 @@ function markHabitComplete(checkbox, habitId) {
         body: JSON.stringify({ is_done: isDone })
     })
     // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
-    .then(response => response.json())
+    .then(response => {
+        if (response.ok) {
+            // Immediately apply strikethrough effect
+            const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
+            if (textSpan) {
+                if (checkbox.checked) {
+                    textSpan.classList.add("line-through", "text-gray-400");
+                } else {
+                    textSpan.classList.remove("line-through", "text-gray-400");
+                }
+            }
+        }
+    })
     // Once you have that response, do something - here, just log it
     // Later, could update the UI, disable the checkbox, add animation, etc
     .then(data => {
