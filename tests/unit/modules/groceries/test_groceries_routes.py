@@ -7,7 +7,7 @@ def test_groceries_dashboard(client):
     # assert b"Groceries" in response.data ADD THIS CHECK WHEN WE ADD LANGUAGE TOGGLE TO EN DE
 
 def test_add_product_page_loads(client):
-    response = client.get("/groceries/add_product")
+    response = client.get("/groceries/products/add")
     assert response.status_code == 200
     assert "Add new product" in response.get_data(as_text=True)
 
@@ -19,7 +19,7 @@ def test_add_product_submission_creates_product(client):
         "net_weight": "15"
     }
 
-    response = client.post("/groceries/add_product", data=data)
+    response = client.post("/groceries/products/add", data=data)
     assert response.status_code == 302 # Redirect to dashboard
 
     # Confirm product is in DB
@@ -43,7 +43,7 @@ def test_add_transaction_submission_creates_transaction(client):
     # it's technically in its own session regardless, hence the commit
 
     # POST transaction data
-    response = client.post("/groceries/add_transaction", data={
+    response = client.post("/groceries/transactions/add", data={
         "barcode": product.barcode,
         "price": "4.20",
         "quantity": "1",

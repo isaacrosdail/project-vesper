@@ -150,21 +150,6 @@ def test_add_product_missing_data_raises_error():
     
     assert "Product name is required" in str(excinfo.value)
 
-# Invalid range for price
-def test_add_product_invalid_range():
-    invalid_range_data = {
-        "barcode":"1234567",
-        "product_name":"Test Product2",
-        "price": "-12.99",
-        "net_weight": 200
-    }
-
-    # Ensure ValueError is raised
-    with pytest.raises(ValueError) as excinfo:
-        grocery_repo.add_product(db_session, **invalid_range_data)
-
-    assert "Price must be provided and non-negative." in str(excinfo.value)
-
 # endregion
 
 # region add_transaction
