@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
-@main_bp.route("/", methods=["GET", "POST"])
+@main_bp.route("/", methods=["GET"])
 def home():
 
     # Set reference time once
@@ -24,14 +24,16 @@ def home():
 
     # Get all tasks
     tasks = tasks_repo.get_all_tasks(session)
-    # Then filter anchor habits from that
+    # List comprehension to filter anchor habits from tasks list
     anchor_habits = [
         task for task in tasks
         if task.type == "habit" and task.is_anchor
     ]
 
-    return render_template("index.html",
-                           tasks=tasks,
-                           now=now,
-                           start_of_day_utc=start_of_day_utc,
-                           anchor_habits = anchor_habits)
+    return render_template(
+        "index.html",
+        tasks=tasks,
+        now=now,
+        start_of_day_utc=start_of_day_utc,
+        anchor_habits = anchor_habits
+    )
