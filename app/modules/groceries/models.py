@@ -10,7 +10,7 @@ class Product(Base):
 	product_id = Column(Integer, primary_key=True)
 	product_name = Column(String(100), nullable=False)
 	barcode = Column(String(64), unique=True, nullable=False)
-	price = Column(Numeric(10,2), nullable=False)
+	price = Column(Numeric(10,2), nullable=True) # To be removed
 	net_weight = Column(Float, nullable=False)
 
 	# Human-readable column names
@@ -18,7 +18,7 @@ class Product(Base):
 		"product_id": "Product ID",
 		"product_name": "Product Name",
 		"barcode": "Barcode",
-		"price": "Price",
+		"price": "Price", # To be removed
 		"net_weight": "Net Weight (g)",
 	}
 

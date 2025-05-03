@@ -19,10 +19,6 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- If no entries -->
-                {% if not tasks %}
-                    <p class="text-gray-500 italic">No tasks yet.</p>
-                {% endif %}
                 {% if tasks %}
                     {% for task in tasks %}
                     <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
