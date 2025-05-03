@@ -11,9 +11,8 @@ groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url
 # Debug print
 print(" groceries routes.py imported")
 
-@groceries_bp.route("/")
+@groceries_bp.route("/", methods=["GET"])
 def dashboard():
-    print("Rendering GROCERIES dashboard")
     session = db_session()
     # Column names for Transactions model
     transaction_column_names = [
@@ -27,20 +26,20 @@ def dashboard():
     ]
 
     try:
-            # Fetch products and transactions, pass into render_template
+        # Fetch products and transactions, pass into render_template
         products = grocery_repo.get_all_products(session)
         transactions = grocery_repo.get_all_transactions(session)
     finally:
-        #session.close()
         pass
         
-    return render_template("groceries/dashboard.html", products = products,
-                           transactions = transactions, 
-                           product_column_names = product_column_names,
-                           transaction_column_names = transaction_column_names
-                        )
+    return render_template(
+        "groceries/dashboard.html", products = products,
+        transactions = transactions, 
+        product_column_names = product_column_names,
+        transaction_column_names = transaction_column_names
+    )
 
-@groceries_bp.route("/add_product", methods=["GET", "POST"])
+@groceries_bp.route("/products/add", methods=["GET", "POST"])
 def add_product():
     if request.method == "POST":
         # Parse & sanitize form data
@@ -55,14 +54,13 @@ def add_product():
             grocery_repo.ensure_product_exists(session, **product_data)
             session.commit()
         finally:
-            #session.close()
             pass
 
         return redirect(url_for("groceries.dashboard"))
     else:
         return render_template("groceries/add_product.html")
 
-@groceries_bp.route("/add_transaction", methods=["GET", "POST"])
+@groceries_bp.route("/transactions/add", methods=["GET", "POST"])
 def add_transaction():
     session = db_session()
 
@@ -149,7 +147,7 @@ def add_transaction():
         ) 
     
 # DELETE (Product)
-@groceries_bp.route("/<int:product_id>", methods=["DELETE"])
+@groceries_bp.route("/products/<int:product_id>", methods=["DELETE"])
 def delete_product(product_id):
     session = db_session()
     product = session.get(grocery_models.Product, product_id) # Grab product by id from db
@@ -164,7 +162,7 @@ def delete_product(product_id):
     return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
 
 # DELETE (Transaction)
-@groceries_bp.route("/<int:transaction_id>", methods=["DELETE"])
+@groceries_bp.route("/transactions/<int:transaction_id>", methods=["DELETE"])
 def delete_transaction(transaction_id):
     session = db_session()
     transaction = session.get(grocery_models.Transaction, transaction_id) # Grab transaction by id from db

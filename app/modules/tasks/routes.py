@@ -34,7 +34,7 @@ def dashboard():
         task_column_names = task_column_names,
         tasks = tasks)
 
-# Create a new task
+# CREATE
 @tasks_bp.route("/add", methods=["GET", "POST"])
 def add_task():
 

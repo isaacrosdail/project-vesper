@@ -21,7 +21,7 @@ def test_tasks_dashboard_loads(client):
 
 def test_tasks_dashboard_displays_tasks(client):
     # Simulate real user adding task via form (Avoids cross-session visibility issues)
-    response = client.post("/tasks/add_task", data={"title": "Visible Task"})
+    response = client.post("/tasks/add", data={"title": "Visible Task"})
     assert response.status_code == 302 # Confirm redirect after success
 
     # Check dashboard route for task
@@ -35,13 +35,13 @@ def test_tasks_dashboard_displays_tasks(client):
 
 # Test GET
 def test_add_task_form_loads(client):
-    response = client.get("/tasks/add_task")
+    response = client.get("/tasks/add")
     assert response.status_code == 200
     assert "Add new Task" in response.get_data(as_text=True)
 
 # Test POST
 def test_add_task_creates_task(client):
-    response = client.post("/tasks/add_task", data={"title": "From Test"})
+    response = client.post("/tasks/add", data={"title": "From Test"})
     assert response.status_code == 302 # Redir after successful POST
 
     # Check DB to confirm
@@ -55,7 +55,7 @@ def test_complete_task(client):
     # Route returns {"success": True}
 
     # Create task via actual route
-    response = client.post("/tasks/add_task", data={"title": "Complete Me"})
+    response = client.post("/tasks/add", data={"title": "Complete Me"})
     assert response.status_code == 302 # Redirect after success
 
     # Fetch task from DB to get ID

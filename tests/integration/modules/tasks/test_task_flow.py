@@ -2,7 +2,7 @@ from app.core.database import db_session
 
 def test_task_creation_and_completion(client):
     # 1. Add new task
-    response = client.post("/tasks/add_task", data={"title": "Integration Task"})
+    response = client.post("/tasks/add", data={"title": "Integration Task"})
     assert response.status_code == 302 # Expect redirect
 
     # Fetch from DB
@@ -13,6 +13,7 @@ def test_task_creation_and_completion(client):
     assert task.is_done is False
 
     # Mark it complete
+    # FIX THIS - no longer using complete_task, but rather update_task (RESTful)
     response = client.post(f"/tasks/complete_task/{task_id}")
     assert response.status_code == 200
     assert response.json["success"] is True
