@@ -67,38 +67,86 @@ def add_transaction():
     session = db_session()
 
     if request.method == "POST":
-        action = request.form.get("action")
 
-        # Parse & sanitize form data
+        # Grab form data (used for both validation and repopulating form if we need to show it again)
+        form_data = request.form.to_dict()
+
+        # Normalize
         product_data = {
-            "barcode": request.form.get("barcode"),
-            "product_name": request.form.get("product_name"),
-            "price": Decimal(request.form.get("price_at_scan", "0")),
-            "net_weight": float(request.form.get("net_weight", 0)),
-            "quantity": int(request.form.get("quantity") or 1)
+            # Use .get when the field might not be included at all (eg., in our "first pass" for a non-existent product here)
+            "barcode": form_data.get("barcode", "").strip(),
+            "product_name": form_data.get("product_name", "").strip(),
+            "net_weight": form_data.get("net_weight", "").strip()
+        }
+        transaction_data = {
+            "price": form_data.get("price_at_scan", "").strip(),
+            "quantity": form_data.get("quantity", "").strip()
         }
 
-        # Lookup barcode first
-        product = grocery_repo.lookup_barcode(session, product_data["barcode"])
-        if not product:
-            flash("Product not found. Please add it first.")
-            return redirect(url_for("groceries.add_product", barcode=product_data["barcode"]))
+        # Parse
+        try:
+            if product_data["net_weight"]:
+                product_data["net_weight"] = float(product_data["net_weight"])
+            else:
+                product_data["net_weight"] = None
 
-        # Log transaction
-        grocery_repo.add_transaction(session, product, price=product_data["price"], quantity=product_data["quantity"])
+            transaction_data["price"] = Decimal(transaction_data["price"])
+            transaction_data["quantity"] = int(transaction_data["quantity"] or 1)
+        except (ValueError, TypeError):
+            flash("Invalid input.")
+            return render_template(
+                "groceries/add_transaction.html",
+                show_product_fields=True,
+                transaction_data=form_data # Use original form data for re-render
+                )
+        
+        # Validate
+        if not product_data["barcode"]:
+            flash("Barcode is required.")
+            return render_template(
+                "groceries/add_transaction.html",
+                show_product_fields=True,
+                transaction_data=form_data
+            )
+
+        # Check for product existence
+        product = grocery_repo.lookup_barcode(session, product_data["barcode"])
+
+        # Product not found yet
+        # If product is missing: Check if net_weight is filled (ie., second form submit)
+        if not product:
+            if product_data["net_weight"] is None:
+                # Not enough info yet - redisplay form asking for net_weight
+                flash("Product not found. Please enter net weight.")
+                return render_template(
+                    "groceries/add_transaction.html",
+                    show_product_fields=True,
+                    transaction_data=form_data
+                    )
+            else:
+                # Now have enough info to add product
+                grocery_repo.add_product(session, **product_data)
+                product = grocery_repo.lookup_barcode(session, product_data["barcode"])
+        
+        # Product exists -> Add transaction & commit
+        grocery_repo.add_transaction(session, product, transaction_data)
         session.commit()
 
-        # Redirect accordingly
+        # Redirect logic based on user action submitted
+        action = request.form.get("action")
         if action == "submit":
-            #session.close()
             return redirect(url_for("groceries.dashboard"))
         elif action == "next_item":
-            #session.close()
-            return redirect("/add_transaction")
+            return redirect(url_for("groceries.add_transaction"))
     # GET
     else:
         barcode = request.args.get("barcode")
-        return render_template("groceries/add_transaction.html", barcode=barcode)
+        return render_template(
+            "groceries/add_transaction.html",
+            barcode=barcode,
+            show_product_fields=False, # Don't show add_product fields like net_weight by default
+            transaction_data={} # For the "first" time add_transaction to prevent "undefined transaction_data"
+        ) 
     
 # DELETE (Product)
 @groceries_bp.route("/<int:product_id>", methods=["DELETE"])
