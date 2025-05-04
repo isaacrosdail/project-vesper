@@ -307,3 +307,33 @@ Log:
 - Add style sets in base.html for tables, unify styling (also polish date completed display for task table)
 - Add flash() for add_task, add_product, & add_transaction
 
+Log:
+- Begin styling home dashboard cards
+- Fix pain point: Tailwind changes didn't trigger Flask reload even with --debug
+- SOLUTION: Set up 3-process workflow with hot reload
+	1. Run Tailwind in watch mode: npx tailwindcss -i ./static/src/input.css -o ./static/css/output.css --watch  
+	2. Run Flask in debug mode (separate terminal) flask run --debug
+	3. Add BrowserSync
+		1. Installed locally with: npm install browser-sync --save-dev
+		2. Run BrowserSync with: browser-sync start --proxy "localhost:5000" --files "app/**/templates/**/*.html" "static/css/*.css"
+  - Explanation:
+     - Flask handles backend + Jinja templates
+     - Tailwind watch updates output.css on save
+     - BrowserSync reloads browser on HTML or CSS file changes
+     - New Vesper dev workflow would be:
+	1. npx tailwindcss -i ./static/src/input.css -o ./static/css/output.css --watch
+        2. flask run --debug (separate terminal)
+	3. npx browser-sync start --proxy "localhost:5000" --files "app/**/templates/**/*.html" "static/css/*.css"
+	- BUT, we combined everything into a single command using npm scripts:
+		1. Installed concurrently: npm install --save-dev concurrently
+		2. Added to package.json:
+		"scripts": {
+			"tailwind": "npx tailwindcss -i ./app/static/css/style.css -o ./app/static/css/output.css --watch",
+			"flask": "flask run --debug",
+			"sync": "browser-sync start --proxy localhost:5000 --files 'app/**/templates/**/*.html' 'static/css/*.css'",
+			"dev": "concurrently \"npm:tailwind\" \"npm:flask\" \"npm:sync\""
+		}
+		3. Final dev command after activating venv:
+			1. .venv\Scripts\activate
+			2. npm run dev
+			3. Enjoy!
