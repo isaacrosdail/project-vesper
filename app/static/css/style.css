@@ -43,10 +43,22 @@ footer {
 .navbar {
     height: 3.5rem;
 }
-.critical-task-card {
-    background-color: rgb(187, 187, 187);
-    text-align: center;
+/*
+.main-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 16px;
 }
+*/
+/*
+.card {
+    background-color: rgb(187, 187, 187);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    margin-bottom: 24px;
+}
+*/
 
 table {
     background: rgb(190, 185, 185);
