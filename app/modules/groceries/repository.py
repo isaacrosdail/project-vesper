@@ -1,12 +1,10 @@
 ## DB logic functions to access data
+# The "talk to the database - and nothing else" layer
 
 from .models import Product, Transaction
 from sqlalchemy.orm import Session, joinedload
 from datetime import datetime, timezone
 from decimal import Decimal
-
-# Debug print
-print(" grocery_repo.py imported")
 
 # Lookup barcode function to centralize a bit
 def lookup_barcode(session, barcode):
@@ -20,26 +18,13 @@ def get_all_products(session):
 def get_all_transactions(session):
 	return session.query(Transaction).options(joinedload(Transaction.product)).all()
 
-#####################################
-# Uses **kwargs to take in optional data (ie., from forms)
-# Now used for scanner barcode input only
-def process_scanned_barcode(session, barcode, **product_data):
-	product = lookup_barcode(session, barcode)
-
-	if product:
-		add_transaction(session, product, quantity=1, price_at_scan=product.price, net_weight=product.net_weight)
-		return "added_transaction"
-
-	return "new_product"
-####################################
-
 def ensure_product_exists(session, **product_data):
 	barcode = product_data["barcode"]
 	product = lookup_barcode(session, barcode)
 	if not product:
 		add_product(session, **product_data)
 
-# Add not-previously-encountered product
+# Add product to product catalog
 def add_product(session, **product_data):
 
 	# Minimal, strict input validation
@@ -67,7 +52,7 @@ def add_product(session, **product_data):
 
 	session.add(product)
 
-# Add product to 'inventory'
+# Add product to transactions list
 def add_transaction(session, product, **product_data):
 
 	if product is None:

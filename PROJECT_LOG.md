@@ -307,6 +307,7 @@ Log:
 - Add style sets in base.html for tables, unify styling (also polish date completed display for task table)
 - Add flash() for add_task, add_product, & add_transaction
 
+## Sunday [04.05.25]
 Log:
 - Begin styling home dashboard cards
 - Fix pain point: Tailwind changes didn't trigger Flask reload even with --debug
@@ -337,3 +338,54 @@ Log:
 			1. .venv\Scripts\activate
 			2. npm run dev
 			3. Enjoy!
+
+## Monday [05.05.25]
+Log:
+- Table styling overhaul
+- Removed .card & table-wrapper remnants
+	- Converted layout + visuals to Tailwind
+	- Centralized table style sets in base.html
+		- Distinct header style for clarity
+		- Alternating row stripes + hover effect (colors still need refinement)
+		- Red delete button
+		- Standardized spacing across tables
+		- Wrapped tables in card-style divs to match home dashboard layout
+- Model fix
+	- Made Transaction.date_scanned timezone-aware (UTC)
+- Polish table & heading/caption styling, added svg for delete button icon instead of text
+- Learned how to clean up CSS with Tailwind purge
+	1. Got cross-env for a build script with: npm install --save-dev cross-env
+	2. Added in package.json (under scripts):
+		- "build": "cross-env NODE_ENV=production tailwindcss -i .app/static/css/input.css -o .app/static/css/output.css --minify"
+	3. Now we can run: ```npm run build```
+
+## Tuesday [06.05.25]
+Git goal: Practice branching & merging
+Log:
+- Switched to dev/today
+- Remove price tag from Add Product template
+
+## Sunday [11.05.25]
+Goal:
+1. Seed dummy data automatically in dev mode after app startup
+Log:
+- - Cleaned up config.py with proper ENV usage (built-in Flask flags for environments)
+- Add seed_db.py (invoked at app creation) to seed database with dummy info
+- Add reset_db route and function to clear the DB, then run seed_db.py on it (nice for demo/dev purposes)
+	Flow: Button -> reset_db route -> handles logic/seed_db invocation -> return to page we were on
+
+## Tuesday [13.05.25]
+Goal:
+1. Add "Reset" button for dummy db data (drops tables then runs seed_data again)
+Log:
+- Flesh out reset_db()
+- Determined some sort of deadlock is occurring in postgres when we press the Reset DB button.
+
+## Wednesday [14.05.25]
+Log:
+- Created my own dockerfile (Dockerfile.postgres) so we can include a nano installation!
+- Modified package.json to expand scripts option to make 'npm run debug' to allow for debugging with breakpoints
+- Smash bug involving "idle in transaction" connections causing database deadlock
+
+Next Up:
+1. Make reset_db redirect to same page (involves "referrer check")

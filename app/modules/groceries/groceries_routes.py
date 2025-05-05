@@ -73,6 +73,9 @@ def add_transaction():
         # Grab form data (used for both validation and repopulating form if we need to show it again)
         form_data = request.form.to_dict()
 
+        # Bool to conditionally determine flash() message
+        product_created = False
+
         # Normalize
         product_data = {
             # Use .get when the field might not be included at all (eg., in our "first pass" for a non-existent product here)
@@ -85,6 +88,7 @@ def add_transaction():
             "quantity": form_data.get("quantity", "").strip()
         }
 
+        
         # Parse
         try:
             if product_data["net_weight"]:
