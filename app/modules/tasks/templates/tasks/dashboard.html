@@ -3,19 +3,17 @@
 {% block title %}Tasks{% endblock %}
 
 {% block content %}
-    <div class="table-wrapper">
-        <table class="caption-top {{ table_classes }}">
-            <caption>
-                Tasks
-            </caption>
-            <thead>
+    <div class="max-w-4xl mx-auto my-6 bg-gray-200 p-6 rounded-xl shadow-md">
+        <table class="{{ table_classes}}">
+            <caption>Tasks</caption>
+            <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Type</th>
-                    <th>Created</th>
-                    <th>Completed</th>
+                    <th class="{{ th_classes }}">ID</th>
+                    <th class="{{ th_classes }}">Title</th>
+                    <th class="{{ th_classes }}">Status</th>
+                    <th class="{{ th_classes }}">Type</th>
+                    <th class="{{ th_classes }}">Created</th>
+                    <th class="{{ th_classes }}">Completed</th>
                 </tr>
             </thead>
             <tbody>
@@ -23,7 +21,7 @@
                     {% for task in tasks %}
                     <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                     <!-- Using display: none works here as well but causes layout shift -->
-                    <tr class="task-row group" data-item-id="{{ task.id }}">
+                    <tr class="{{ tr_classes }}" data-item-id="{{ task.id }}">
                         <td class="{{ td_classes }}">{{ task.id }}</td>
                         <td class="{{ td_classes }}" ondblclick="editTableField(this, 'tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
                             <span class="task-title">{{ task.title }}</span>
@@ -34,16 +32,16 @@
                             <td class="{{ td_classes }}">&#9744;</td> <!-- Empty checkbox -->
                         {% endif %}
                         <td class="{{ td_classes }}">{{ task.type }}</td>
-                        <td class="{{ td_classes }}">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
-                        <td class="{{ td_classes }}">
+                        <td class="{{ td_classes }} text-right">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
+                        <td class="{{ td_classes }} text-right">
                             {% if task.completed_at %}
                                 {{ task.completed_at.strftime("%H:%M") }}  <!-- EX: 18:09 -->
                             {% else %}
                                 --
                             {% endif %}
                         </td>
-                        <td class="{{ td_classes }}" onclick="deleteTableItem('tasks', '{{ task.id }}')">
-                            <button id="" class="delete-btn group-hover:visible invisible">Delete</button>
+                        <td class="{{ td_classes }} bg-gray-200 border-transparent w-12 text-right px-2" onclick="deleteTableItem('tasks', '{{ task.id }}')">
+                            <button id="" class="delete-btn text-red-500 hover:text-red-700 group-hover:visible invisible">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}

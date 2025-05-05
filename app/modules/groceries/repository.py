@@ -2,7 +2,7 @@
 
 from .models import Product, Transaction
 from sqlalchemy.orm import Session, joinedload
-from datetime import date
+from datetime import datetime, timezone
 from decimal import Decimal
 
 # Debug print
@@ -73,7 +73,7 @@ def add_transaction(session, product, **product_data):
 	if product is None:
 		raise ValueError("Product must be provided for transaction.")
 	
-	today = date.today()
+	today = datetime.now(timezone.utc).date()
 	quantity = int(product_data.get("quantity") or 1)
 	
 	# Check to determine whether to increment qty or add new instance

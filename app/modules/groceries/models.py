@@ -1,6 +1,7 @@
 # Handles DB models for grocery module
 from app.core.db_base import Base
-from sqlalchemy import Column, Integer, String, Float, Date, Numeric, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, Numeric, ForeignKey, DateTime
+from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
 
 # Product Model for database of products known
@@ -30,7 +31,7 @@ class Transaction(Base):
 	product_id = Column(Integer, ForeignKey("product.product_id"), nullable=False)
 	price_at_scan = Column(Numeric(10,2), nullable=False)
 	quantity = Column(Integer, nullable=False)
-	date_scanned = Column(Date)
+	date_scanned = (Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)))
 
 	product = relationship("Product")
 
