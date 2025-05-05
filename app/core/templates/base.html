@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vesper{% endblock %}</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/output.css') }}"> <!-- For Tailwind styling -->
 </head>
 <body class="h-full">
@@ -15,9 +14,10 @@
         {# Style reference classes - available in all templates #}
 
         <!-- Table style sets -->
-        {% set table_classes = "min-w-full table-fixed border-collapse border border-gray-300 mb-6 text-sm" %}
-        {% set th_classes = "px-4 py-2 text-left bg-gray-200 border border-gray-300" %}
-        {% set td_classes = "px-4 py-2 border border-gray-300 text-left" %}
+        {% set table_classes = "caption-top table-auto border-collapse w-full text-sm" %}
+        {% set th_classes = "px-2 py-2 border border-gray-300" %}
+        {% set td_classes = "px-2 py-2 border border-gray-300" %}
+        {% set tr_classes = "task-row group even:bg-gray-100 odd:bg-white hover:bg-gray-400 hover:text-white transition-colors duration-25" %}
 
         {% set input_classes = "border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm" %}
         {% set label_classes = "border" %}

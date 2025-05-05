@@ -9,7 +9,6 @@
         @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition;
     }
 }
-
 body {
     display: flex;
     flex-direction: column;
@@ -29,12 +28,6 @@ a {
     /* Tells flex container's child to grow and take up all remaining space */
     flex: 1;
 }
-/* Double-check these */
-.table-wrapper {
-    /* margin-top: 2rem; */
-    overflow-x: auto;
-    padding: 1rem;
-}
 footer {
     text-align: center;
     padding: 10px;
@@ -43,36 +36,10 @@ footer {
 .navbar {
     height: 3.5rem;
 }
-/*
-.main-container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 16px;
-}
-*/
-/*
-.card {
-    background-color: rgb(187, 187, 187);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    margin-bottom: 24px;
-}
-*/
-
-table {
-    background: rgb(190, 185, 185);
-    padding: 1rem;
-}
 /* Currently used for critical-task-card stuff in JS (Added 02.04.25) && for making delete button appear on hover next to table rows */
 .hidden {
     display: none;
 }
-th, td {
-    padding: .2rem;
-    text-align: left;
-}
-
 /* Custom button stylings for both button & anchor attributes for consistency */
 .button {
     display: inline-block;
