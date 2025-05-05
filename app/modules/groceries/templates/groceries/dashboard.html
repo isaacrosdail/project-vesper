@@ -5,7 +5,8 @@
 {% block title %}Groceries{% endblock %}
 
 {% block content %}
-    <div class="max-w-4xl mx-auto my-6 bg-gray-200 p-6 rounded-xl shadow-md">
+<div class="max-w-3xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10">
+    <div class="min-w-max bg-gray-200 p-6 rounded-xl shadow-md"> <!-- Added my-6 to top div to -->
         <table class="caption-top {{ table_classes }}">
             <caption>Grocery - Products in my Inventory</caption>
             <thead class="bg-gray-800 text-white font-semibold">
@@ -28,8 +29,12 @@
                         <td class="{{ td_classes }}">£{{ transaction.price_at_scan }}</td>
                         <td class="{{ td_classes }}">{{ transaction.quantity }}</td>
                         <td class="{{ td_classes }} text-right">{{ transaction.date_scanned }}</td>
-                        <td class="{{ td_classes }} bg-gray-200 border-transparent w-12 text-right px-2" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
-                            <button class="delete-btn text-red-500 hover:text-red-700 group-hover:visible invisible">Delete</button>
+                        <td class="{{ td_classes }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
+                            <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                    <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
+                                </svg>  
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -43,10 +48,10 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('groceries.add_transaction')}}" class="button">
+    <a href="{{ url_for('groceries.add_transaction')}}" class="{{ btn_classes }}">
         Log New Transaction
     </a>
-    <div class="max-w-4xl mx-auto my-6 bg-gray-200 p-6 rounded-xl shadow-md">
+    <div class="bg-gray-200 p-6 rounded-xl shadow-md">
         <table class="caption-top {{ table_classes }}">
             <caption>Lifetime Products Scanned In</caption>
             <thead class="bg-gray-800 text-white font-semibold">
@@ -65,8 +70,12 @@
                         <td class="{{ td_classes }}">{{ product.product_name }}</td>
                         <td class="{{ td_classes }} text-right">£{{ product.price }}</td>
                         <td class="{{ td_classes }} text-right">{{ product.net_weight }}</td>
-                        <td class="{{ td_classes }} bg-gray-200 border-transparent w-12 text-right px-2" onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
-                            <button class="delete-btn text-red-500 hover:text-red-700 group-hover:visible invisible">Delete</button>
+                        <td class="{{ td_classes }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
+                            <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                    <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
+                                </svg>  
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -80,9 +89,10 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('groceries.add_product')}}" class="button">
+    <a href="{{ url_for('groceries.add_product')}}" class="{{ btn_classes }}">
         Add New Product
     </a>
+</div>
 {% endblock %}
 
 {% block scripts %}
