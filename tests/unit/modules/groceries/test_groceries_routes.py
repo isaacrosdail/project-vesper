@@ -34,7 +34,6 @@ def test_add_transaction_submission_creates_transaction(client):
     product = Product(
         barcode="55555",
         product_name="Transaction Product",
-        price=4.20,
         net_weight=0.8
     )
     db_session.add(product)
@@ -45,7 +44,7 @@ def test_add_transaction_submission_creates_transaction(client):
     # POST transaction data
     response = client.post("/groceries/transactions/add", data={
         "barcode": product.barcode,
-        "price": "4.20",
+        "price_at_scan": "4.20",
         "quantity": "1",
         "action": "submit"
     })

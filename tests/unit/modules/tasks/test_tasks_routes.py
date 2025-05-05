@@ -37,7 +37,7 @@ def test_tasks_dashboard_displays_tasks(client):
 def test_add_task_form_loads(client):
     response = client.get("/tasks/add")
     assert response.status_code == 200
-    assert "Add new Task" in response.get_data(as_text=True)
+    assert "Add new task" in response.get_data(as_text=True)
 
 # Test POST
 def test_add_task_creates_task(client):

@@ -307,6 +307,7 @@ Log:
 - Add style sets in base.html for tables, unify styling (also polish date completed display for task table)
 - Add flash() for add_task, add_product, & add_transaction
 
+## Sunday [04.05.25]
 Log:
 - Begin styling home dashboard cards
 - Fix pain point: Tailwind changes didn't trigger Flask reload even with --debug
@@ -337,3 +338,27 @@ Log:
 			1. .venv\Scripts\activate
 			2. npm run dev
 			3. Enjoy!
+
+## Monday [05.05.25]
+Log:
+- Table styling overhaul
+- Removed .card & table-wrapper remnants
+	- Converted layout + visuals to Tailwind
+	- Centralized table style sets in base.html
+		- Distinct header style for clarity
+		- Alternating row stripes + hover effect (colors still need refinement)
+		- Red delete button
+		- Standardized spacing across tables
+		- Wrapped tables in card-style divs to match home dashboard layout
+- Model fix
+	- Made Transaction.date_scanned timezone-aware (UTC)
+- Polish table & heading/caption styling, added svg for delete button icon instead of text
+- Learned how to clean up CSS with Tailwind purge
+	1. Got cross-env for a build script with: npm install --save-dev cross-env
+	2. Added in package.json (under scripts):
+		- "build": "cross-env NODE_ENV=production tailwindcss -i .app/static/css/input.css -o .app/static/css/output.css --minify"
+	3. Now we can run: ```npm run build```
+
+## Tuesday [06.05.25]
+Session 1: 10:38 - 
+
