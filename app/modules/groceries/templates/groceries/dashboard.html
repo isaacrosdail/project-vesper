@@ -5,32 +5,31 @@
 {% block title %}Groceries{% endblock %}
 
 {% block content %}
-    <div class="table-wrapper">
+    <div class="max-w-4xl mx-auto my-6 bg-gray-200 p-6 rounded-xl shadow-md">
         <table class="caption-top {{ table_classes }}">
-            <caption>
-                Grocery - Products in my Inventory
-            </caption>
-            <thead>
+            <caption>Grocery - Products in my Inventory</caption>
+            <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th>Barcode</th>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Date Scanned</th>
+                    <th class="{{ th_classes }}">Barcode</th>
+                    <th class="{{ th_classes }}">Product Name</th>
+                    <th class="{{ th_classes }}">Price</th>
+                    <th class="{{ th_classes }}">Quantity</th>
+                    <th class="{{ th_classes }}">Date Scanned</th>
                 </tr>
             </thead>
             <tbody>
                 {% if transactions %}
                     {% for transaction in transactions %}
-                    <tr class="group" data-item-id="{{ transaction.transaction_id }}">
+                    <tr class="group {{ tr_classes }}" data-item-id="{{ transaction.transaction_id }}">
                         <td class="{{ td_classes }}">{{ transaction.product.barcode }}</td>
                         <td class="{{ td_classes }}">
                             <span class="product-name">{{ transaction.product.product_name }}</span>
                         </td>
                         <td class="{{ td_classes }}">£{{ transaction.price_at_scan }}</td>
                         <td class="{{ td_classes }}">{{ transaction.quantity }}</td>
-                        <td class="{{ td_classes }}" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
-                            <button class="delete-btn group-hover:visible invisible">Delete</button>
+                        <td class="{{ td_classes }} text-right">{{ transaction.date_scanned }}</td>
+                        <td class="{{ td_classes }} bg-gray-200 border-transparent w-12 text-right px-2" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
+                            <button class="delete-btn text-red-500 hover:text-red-700 group-hover:visible invisible">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -47,29 +46,27 @@
     <a href="{{ url_for('groceries.add_transaction')}}" class="button">
         Log New Transaction
     </a>
-    <div class="table-wrapper">
+    <div class="max-w-4xl mx-auto my-6 bg-gray-200 p-6 rounded-xl shadow-md">
         <table class="caption-top {{ table_classes }}">
-            <caption>
-                Lifetime Products Scanned In
-            </caption>
-            <thead>
+            <caption>Lifetime Products Scanned In</caption>
+            <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th>Barcode</th>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th>Net Weight</th>
+                    <th class="{{ th_classes }}">Barcode</th>
+                    <th class="{{ th_classes }}">Product Name</th>
+                    <th class="{{ th_classes }}">Price</th>
+                    <th class="{{ th_classes }}">Net Weight (g)</th>
                 </tr>
             </thead>
             <tbody>
                 {% if products %}
                     {% for product in products %}
-                    <tr class="group" data-item-id="{{ product.product_id }}">
+                    <tr class="group {{ tr_classes }}" data-item-id="{{ product.product_id }}">
                         <td class="{{ td_classes }}">{{ product.barcode }}</td>
                         <td class="{{ td_classes }}">{{ product.product_name }}</td>
-                        <td class="{{ td_classes }}">£{{ product.price }}</td>
-                        <td class="{{ td_classes }}">{{ product.net_weight }} grams</td>
-                        <td class="{{ td_classes }}" onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
-                            <button class="delete-btn group-hover:visible invisible">Delete</button>
+                        <td class="{{ td_classes }} text-right">£{{ product.price }}</td>
+                        <td class="{{ td_classes }} text-right">{{ product.net_weight }}</td>
+                        <td class="{{ td_classes }} bg-gray-200 border-transparent w-12 text-right px-2" onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
+                            <button class="delete-btn text-red-500 hover:text-red-700 group-hover:visible invisible">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
