@@ -17,5 +17,16 @@
         ".venv/": true,
         ".pytest_cache/": true,
         ".coverage": true
+    },
+    "files.watcherExclude": {
+        "**/node_modules/**": true,
+        "**/.venv/**": true,
+        "**/.pytest_cache/**": true,
+        "**/.coverage/**": true,
+        "**/__pycache__/**": true,
+        "**/.git/**": true,
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/.hg/store/**": true
     }
 }
