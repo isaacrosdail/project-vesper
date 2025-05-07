@@ -360,6 +360,7 @@ Log:
 	3. Now we can run: ```npm run build```
 
 ## Tuesday [06.05.25]
+Git goal: Practice branching & merging
 Log:
 - Switched to dev/today
 - Remove price tag from Add Product template
