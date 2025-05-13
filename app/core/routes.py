@@ -1,7 +1,12 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for
 from app.core.database import db_session
 from app.modules.tasks import repository as tasks_repo
-# Other imports
+
+from app.seed_db import seed_data
+from app.core.database import get_engine
+from flask import current_app
+
+# Date/Time-related imports
 from datetime import datetime, timezone, time
 from zoneinfo import ZoneInfo
 
@@ -37,3 +42,8 @@ def home():
         start_of_day_utc=start_of_day_utc,
         anchor_habits = anchor_habits
     )
+
+@main_bp.route('/reset_db')
+def reset_db():
+    # TO-DO: Lock this down after adding auth // maybe extract it into a utility function later too
+    engine = get_engine(current_app.config) # Current app gives us access to the config within a request context
