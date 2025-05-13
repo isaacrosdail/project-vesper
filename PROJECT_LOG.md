@@ -365,3 +365,17 @@ Log:
 - Switched to dev/today
 - Remove price tag from Add Product template
 
+## Sunday [11.05.25]
+Goal:
+1. Seed dummy data automatically in dev mode after app startup
+Log:
+- - Cleaned up config.py with proper ENV usage (built-in Flask flags for environments)
+- Add seed_db.py (invoked at app creation) to seed database with dummy info
+- Add reset_db route and function to clear the DB, then run seed_db.py on it (nice for demo/dev purposes)
+	Flow: Button -> reset_db route -> handles logic/seed_db invocation -> return to page we were on
+
+## Tuesday [13.05.25]
+Goal:
+1. 
+Log:
+- 
