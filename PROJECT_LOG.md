@@ -388,4 +388,4 @@ Log:
 - Smash bug involving "idle in transaction" connections causing database deadlock
 
 Next Up:
-1. Make reset_db redirect to same page
+1. Make reset_db redirect to same page (involves "referrer check")
