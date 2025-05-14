@@ -15,6 +15,7 @@
     "flask": "flask run --debug",
     "sync": "browser-sync start --proxy localhost:5000 --files 'app/**/templates/**/*.html' 'static/css/*.css'",
     "dev": "concurrently \"npm:tailwind\" \"npm:flask\" \"npm:sync\"",
+    "debug:ui": "concurrently \"npm run tailwind\" \"browser-sync start --proxy localhost:5000 --files 'app/**/*.py, app/templates/**/*.html, app/static/**/*.css'\"",
     "build": "cross-env NODE_ENV=production tailwindcss -i ./app/static/css/style.css -o ./app/static/css/output.css --minify"
   },
   "dependencies": {
