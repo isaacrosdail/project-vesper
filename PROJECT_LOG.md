@@ -376,6 +376,16 @@ Log:
 
 ## Tuesday [13.05.25]
 Goal:
-1. 
+1. Add "Reset" button for dummy db data (drops tables then runs seed_data again)
 Log:
-- 
+- Flesh out reset_db()
+- Determined some sort of deadlock is occurring in postgres when we press the Reset DB button.
+
+## Wednesday [14.05.25]
+Log:
+- Created my own dockerfile (Dockerfile.postgres) so we can include a nano installation!
+- Modified package.json to expand scripts option to make 'npm run debug' to allow for debugging with breakpoints
+- Smash bug involving "idle in transaction" connections causing database deadlock
+
+Next Up:
+1. Make reset_db redirect to same page
