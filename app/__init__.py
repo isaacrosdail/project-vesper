@@ -21,10 +21,10 @@ def create_app(config_name="dev"): # Default to DevConfig if nothing is passed i
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
         init_db(app.config)
-        # If in dev config, run seed_data to fill db with dummy info
+        # If in dev config, run seed_db to fill db with dummy info
         if app.config['ENV'] == 'development':
-            from .seed_db import seed_data
-            seed_data()
+            from .seed_db import seed_db
+            seed_db()
 
     # Remove session after each request or app context teardown
     @app.teardown_appcontext

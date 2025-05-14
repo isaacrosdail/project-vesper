@@ -2,7 +2,9 @@
 # Keeps current dbs we already have set up
 services:
   db:
-    image: postgres
+    build:
+      context: . # why the period here?
+      dockerfile: Dockerfile.postgres
     container_name: vesper-db
     restart: always
     ports:

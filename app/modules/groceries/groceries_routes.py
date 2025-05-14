@@ -13,31 +13,32 @@ print(" groceries routes.py imported")
 
 @groceries_bp.route("/", methods=["GET"])
 def dashboard():
-    session = db_session()
-    # Column names for Transactions model
-    transaction_column_names = [
-        grocery_models.Transaction.COLUMN_LABELS.get(col, col)
-        for col in grocery_models.Transaction.__table__.columns.keys()
-    ]
-    # Column names for Products model
-    product_column_names = [
-        grocery_models.Product.COLUMN_LABELS.get(col, col)
-        for col in grocery_models.Product.__table__.columns.keys()
-    ]
 
+    session = db_session()
     try:
+        # Column names for Transactions model
+        transaction_column_names = [
+            grocery_models.Transaction.COLUMN_LABELS.get(col, col)
+            for col in grocery_models.Transaction.__table__.columns.keys()
+        ]
+        # Column names for Products model
+        product_column_names = [
+            grocery_models.Product.COLUMN_LABELS.get(col, col)
+            for col in grocery_models.Product.__table__.columns.keys()
+        ]
+
         # Fetch products and transactions, pass into render_template
         products = grocery_repo.get_all_products(session)
         transactions = grocery_repo.get_all_transactions(session)
+            
+        return render_template(
+            "groceries/dashboard.html", products = products,
+            transactions = transactions, 
+            product_column_names = product_column_names,
+            transaction_column_names = transaction_column_names
+        )
     finally:
-        pass
-        
-    return render_template(
-        "groceries/dashboard.html", products = products,
-        transactions = transactions, 
-        product_column_names = product_column_names,
-        transaction_column_names = transaction_column_names
-    )
+        session.close()
 
 @groceries_bp.route("/products/add", methods=["GET", "POST"])
 def add_product():
@@ -53,29 +54,24 @@ def add_product():
         try:
             grocery_repo.ensure_product_exists(session, **product_data)
             session.commit()
-
             # Flash message to confirm
             flash("Product added successfully.")
-            
-        finally:
-            pass
 
-        return redirect(url_for("groceries.dashboard"))
+            return redirect(url_for("groceries.dashboard"))
+        finally:
+            session.close()
     else:
         return render_template("groceries/add_product.html")
 
 @groceries_bp.route("/transactions/add", methods=["GET", "POST"])
 def add_transaction():
-    session = db_session()
 
     if request.method == "POST":
 
         # Grab form data (used for both validation and repopulating form if we need to show it again)
         form_data = request.form.to_dict()
-
         # Bool to conditionally determine flash() message
         product_created = False
-
         # Normalize
         product_data = {
             # Use .get when the field might not be included at all (eg., in our "first pass" for a non-existent product here)
@@ -87,8 +83,6 @@ def add_transaction():
             "price": form_data.get("price_at_scan", "").strip(),
             "quantity": form_data.get("quantity", "").strip()
         }
-
-        
         # Parse
         try:
             if product_data["net_weight"]:
@@ -114,39 +108,44 @@ def add_transaction():
                 show_product_fields=True,
                 transaction_data=form_data
             )
-
-        # Check for product existence
-        product = grocery_repo.lookup_barcode(session, product_data["barcode"])
-
-        # Product not found yet
-        # If product is missing: Check if net_weight is filled (ie., second form submit)
-        if not product:
-            if product_data["net_weight"] is None:
-                # Not enough info yet - redisplay form asking for net_weight
-                flash("Product not found. Please enter net weight.")
-                return render_template(
-                    "groceries/add_transaction.html",
-                    show_product_fields=True,
-                    transaction_data=form_data
-                    )
-            else:
-                # Now have enough info to add product
-                grocery_repo.add_product(session, **product_data)
-                product = grocery_repo.lookup_barcode(session, product_data["barcode"])
         
-        # Product exists -> Add transaction & commit
-        grocery_repo.add_transaction(session, product, **transaction_data)
-        session.commit()
+        session = db_session()
+        try:
+            # Check for product existence
+            product = grocery_repo.lookup_barcode(session, product_data["barcode"])
+        
+            # Product not found yet
+            # If product is missing: Check if net_weight is filled (ie., second form submit)
+            if not product:
+                if product_data["net_weight"] is None:
+                    # Not enough info yet - redisplay form asking for net_weight
+                    flash("Product not found. Please enter net weight.")
+                    return render_template(
+                        "groceries/add_transaction.html",
+                        show_product_fields=True,
+                        transaction_data=form_data
+                        )
+                else:
+                    # Now have enough info to add product
+                    grocery_repo.add_product(session, **product_data)
+                    product = grocery_repo.lookup_barcode(session, product_data["barcode"])
+        
+            # Product exists -> Add transaction & commit
+            grocery_repo.add_transaction(session, product, **transaction_data)
+            session.commit()
 
-        # Flash message to confirm
-        flash("Transaction added successfully.")
+            # Flash message to confirm
+            flash("Transaction added successfully.")
 
-        # Redirect logic based on user action submitted
-        action = request.form.get("action")
-        if action == "submit":
-            return redirect(url_for("groceries.dashboard"))
-        elif action == "next_item":
-            return redirect(url_for("groceries.add_transaction"))
+            # Redirect logic based on user action submitted
+            action = request.form.get("action")
+            if action == "submit":
+                return redirect(url_for("groceries.dashboard"))
+            elif action == "next_item":
+                return redirect(url_for("groceries.add_transaction"))
+        finally:
+            session.close()
+
     # GET
     else:
         barcode = request.args.get("barcode")
@@ -161,28 +160,36 @@ def add_transaction():
 @groceries_bp.route("/products/<int:product_id>", methods=["DELETE"])
 def delete_product(product_id):
     session = db_session()
-    product = session.get(grocery_models.Product, product_id) # Grab product by id from db
+    try:
+        product = session.get(grocery_models.Product, product_id) # Grab product by id from db
 
-    # If product doesn't exist
-    if not product:
-        return {"error": "Product not found."}, 404
-    
-    db_session.delete(product)
-    db_session.commit()
-    
-    return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
+        # If product doesn't exist
+        if not product:
+            return {"error": "Product not found."}, 404
+        
+        db_session.delete(product)
+        db_session.commit()
+        
+        return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
+    finally:
+        session.close()
 
 # DELETE (Transaction)
 @groceries_bp.route("/transactions/<int:transaction_id>", methods=["DELETE"])
 def delete_transaction(transaction_id):
     session = db_session()
-    transaction = session.get(grocery_models.Transaction, transaction_id) # Grab transaction by id from db
 
-    # If product doesn't exist
-    if not transaction:
-        return {"error": "Transaction not found."}, 404
+    try:
+        transaction = session.get(grocery_models.Transaction, transaction_id) # Grab transaction by id from db
+
+        # If product doesn't exist
+        if not transaction:
+            return {"error": "Transaction not found."}, 404
+        
+        db_session.delete(transaction)
+        db_session.commit()
+        
+        return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
     
-    db_session.delete(transaction)
-    db_session.commit()
-    
-    return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
+    finally:
+        session.close()
