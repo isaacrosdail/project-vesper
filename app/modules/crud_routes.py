@@ -42,12 +42,17 @@ def add_item(module, subtype):
         # {"title": "Task Title", "type": "Feature", "is_anchor": "True"}
         data = request.form.to_dict() # originally used specific fields like request.form.get("title")
 
-        # Create item dynamically based on the model
-        item = model(**data)
-        db_session.add(item)
-        db_session.commit()
+        session = db_session()
+        try:
+            # Create item dynamically based on the model
+            item = model(**data)
+            db_session.add(item)
+            db_session.commit()
 
-        return redirect(url_for(f"{module}.dashboard")) # Redirect after to corresponding dashboard template
+            return redirect(url_for(f"{module}.dashboard")) # Redirect after to corresponding dashboard template
+        
+        finally:
+            session.close()
 
 
 # DELETE
@@ -55,16 +60,20 @@ def add_item(module, subtype):
 def delete_item(module, subtype, item_id):
     session = db_session()
 
-    # Get correct model
-    model = modelMap.get((module, subtype))
-    print(model)
-    item = session.get(model, item_id) # Grab item by id from db
+    try:
 
-    # If item doesn't exist
-    if not item:
-        return {"error": f"{model.__name__} not found."}, 404
-    
-    db_session.delete(item)
-    db_session.commit()
-    
-    return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
+        # Get correct model
+        model = modelMap.get((module, subtype))
+        print(model)
+        item = session.get(model, item_id) # Grab item by id from db
+
+        # If item doesn't exist
+        if not item:
+            return {"error": f"{model.__name__} not found."}, 404
+        
+        db_session.delete(item)
+        db_session.commit()
+        
+        return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
+    finally:
+        session.close()

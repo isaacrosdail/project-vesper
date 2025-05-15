@@ -1,0 +1,8 @@
+
+# Base image - use official Postgres image
+FROM postgres:latest
+
+# Install nano
+RUN apt-get update && apt-get install -y nano && rm -rf /var/lib/apt/lists/*
+
+# Can add further customizations below later

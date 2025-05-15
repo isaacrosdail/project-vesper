@@ -1,27 +1,35 @@
-<div>
-    <nav class="bg-gray-800 p-4">
-        <div class="max-w-7xl mx-auto">
-            <!-- Mobile / Desktop layout -->
-            <div class="flex items-center">
-                <!-- Brand Logo -->
+<nav class="bg-gray-800 p-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Div for branding, navbar links, & "Reset data" button -->
+        <div class="flex items-center">
+            
+            <!-- Branding -->
+            <div>
                 <span class="text-2xl font-semibold text-gray-300 mr-6">Vesper</span>
+            </div>
 
-                <!-- Navbar Links -->
-                <div class="flex space-x-6">
-                    <a href="{{ url_for('main.home') }}"
-                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'main.home' %}bg-gray-700{% endif %}">
-                            Home
-                    </a>
-                    <a href="{{ url_for('tasks.dashboard') }}" 
-                            class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
-                            Tasks
-                    </a>
-                    <a href="{{ url_for('groceries.dashboard') }}" 
-                            class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
-                            Groceries
-                    </a>
-                </div>
+            <!-- Navbar Links group -->
+            <div class="flex space-x-6">
+                <a href="{{ url_for('main.home') }}"
+                    class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'main.home' %}bg-gray-700{% endif %}">
+                        Home
+                </a>
+                <a href="{{ url_for('tasks.dashboard') }}" 
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
+                        Tasks
+                </a>
+                <a href="{{ url_for('groceries.dashboard') }}" 
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
+                        Groceries
+                </a>
+            </div>
+
+            <!-- Reset db button -->
+            <div>
+                <form action="{{ url_for('main.reset_db') }}" method="POST">
+                    <button type="submit">Reset DB</button>
+                </form>
             </div>
         </div>
-    </nav>
-</div>
+    </div>
+</nav>
