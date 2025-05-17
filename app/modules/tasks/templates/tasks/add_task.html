@@ -13,11 +13,11 @@
                     type="text"
                     id="title" 
                     name="title"
-                    class="{{ input_classes }}"><br> <!-- Now here we can reference input_classes styling which is defined in our base.html -->
+                    class="{{ styles.input_classes() }}"><br> <!-- Remember: using our styling macros with styles.input_classes() -->
             </div>
             <div class="mb-4">
                 <label for="type">Type:</label><br>
-                <select name="type" class="{{ input_classes }}"> <!-- Again, referencing styling from base.html -->
+                <select name="type" class="{{ styles.input_classes() }}"> <!-- Again, referencing styling from base.html -->
                     <option value="todo">ToDo</option>
                     <option value="habit">Habit</option>
                 </select><br>
@@ -27,7 +27,7 @@
                 <label for="anchor" class="font-medium text-gray-700 block mb-1">Anchor Habit?</label>
             </div>
             <div class="mb-4">
-                <button class="{{ submit_classes }}" type="submit">
+                <button class="{{ styles.submit_classes() }}" type="submit">
                     Submit
                 </button>
             </div>

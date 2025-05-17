@@ -11,20 +11,20 @@
             <div class="mb-4">
                 <label for="barcode">Barcode:</label>
                 <input type="text" id="barcode" name="barcode"
-                    class="{{ input_classes }}">
+                    class="{{ styles.input_classes() }}">
             </div>
             <div class="mb-4">
                 <label for="product_name">Product Name:</label>
                 <input type="text" id="product_name" name="product_name"
-                    class="{{ input_classes }}">
+                    class="{{ styles.input_classes() }}">
             </div>
             <div class="mb-4">
                 <label for="net_weight">Net Weight:</label>
                 <input type="text" id="net_weight" name="net_weight"
-                    class="{{ input_classes }}">
+                    class="{{ styles.input_classes() }}">
             </div>
             <div class="mb-4">
-                <button class="{{ submit_classes }}" type="submit">Submit</button>
+                <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
             </div>
         </form>
     </div>

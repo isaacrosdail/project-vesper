@@ -1,0 +1,32 @@
+{# _macros.html - Style macros for consistent styling across templates #}
+
+<!-- HISTORY: Originally used Jinja style class variables, now using macros instead -->
+
+{# === TABLE STYLES === #}
+{% macro table_classes() %}caption-top table-auto border-collapse w-full text-sm{% endmacro %}
+{% macro th_classes() %}px-2 py-2 border border-gray-300{% endmacro %}
+{% macro td_classes() %}px-2 py-2 border border-gray-300{% endmacro %}
+{% macro tr_classes() %}task-row group even:bg-gray-100 odd:bg-white hover:bg-gray-400 hover:text-white transition-colors duration-25{% endmacro %}
+
+{# === FORM STYLES === #}
+{% macro input_classes() %}border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm{% endmacro %}
+{% macro label_classes() %}border{% endmacro %}
+{% macro submit_classes() %}bg-white border border-gray-400 rounded px-4 py-2 text-gray-800 hover:bg-blue-400 cursor-pointer w-full{% endmacro %}
+
+{# === BUTTON STYLES === #}
+{% macro btn_classes() %}border border-gray-300 inline-block px-4 py-2 mx-2 mt-1 text-sm rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 hover:shadow transition{% endmacro %}
+
+<!-- REFERENCE: Previous style variable implementation (commented out for comparison) -->
+{#
+-- Table Styles --
+{% set table_classes = "caption-top table-auto border-collapse w-full text-sm" %}
+{% set th_classes = "px-2 py-2 border border-gray-300" %}
+{% set td_classes = "px-2 py-2 border border-gray-300" %}
+{% set tr_classes = "task-row group even:bg-gray-100 odd:bg-white hover:bg-gray-400 hover:text-white transition-colors duration-25" %}
+
+-- Form & Button Styles --
+{% set input_classes = "border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm" %}
+{% set label_classes = "border" %}
+{% set submit_classes = "bg-white border border-gray-400 rounded px-4 py-2 text-gray-800 hover:bg-blue-400 cursor-pointer w-full" %}
+{% set btn_classes = "border border-gray-300 inline-block px-4 py-2 mx-2 mt-1 text-sm rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 hover:shadow transition" %}
+#}
