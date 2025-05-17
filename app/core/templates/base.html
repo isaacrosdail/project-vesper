@@ -1,5 +1,6 @@
 <!-- Base Class Template -->
 
+{% import '_macros.html' as styles %}
 <!DOCTYPE html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,23 +8,12 @@
     <title>{% block title %}Vesper{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/output.css') }}"> <!-- For Tailwind styling -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/logo_v5_white-bg.png') }}">
+    <!--{% block additional_styles %}{% endblock %}  For future -->
 </head>
 <body class="h-full">
     <div class="wrapper">
-        {% include 'navbar.html' %}
 
-        {# Style reference classes - available in all templates #}
-
-        <!-- Table style sets -->
-        {% set table_classes = "caption-top table-auto border-collapse w-full text-sm" %}
-        {% set th_classes = "px-2 py-2 border border-gray-300" %}
-        {% set td_classes = "px-2 py-2 border border-gray-300" %}
-        {% set tr_classes = "task-row group even:bg-gray-100 odd:bg-white hover:bg-gray-400 hover:text-white transition-colors duration-25" %}
-
-        {% set input_classes = "border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm" %}
-        {% set label_classes = "border" %}
-        {% set submit_classes = "bg-white border border-gray-400 rounded px-4 py-2 text-gray-800 hover:bg-blue-400 cursor-pointer w-full" %}
-        {% set btn_classes = "border border-gray-300 inline-block px-4 py-2 mx-2 mt-1 text-sm rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 hover:shadow transition" %}
+        {% include 'navbar.html' with context %}
 
         <!-- For flash() -->
         {% with messages = get_flashed_messages() %}  <!-- "if flask has any msgs saved, pull them into this variable called messages" -->

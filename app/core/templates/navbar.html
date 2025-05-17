@@ -27,7 +27,7 @@
             <!-- Reset db button -->
             <div>
                 <form action="{{ url_for('main.reset_db') }}" method="POST">
-                    <button type="submit">Reset DB</button>
+                    <button type="submit" class="{{ styles.btn_classes() }}">Reset DB</button>
                 </form>
             </div>
         </div>

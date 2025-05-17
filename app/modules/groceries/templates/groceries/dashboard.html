@@ -8,29 +8,29 @@
 <div class="max-w-3xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10">
     <div class="min-w-max bg-gray-200 p-6 rounded-xl shadow-md"> <!-- Added my-6 to top div to -->
         <h2 class="text-lg font-semibold mb-2">Grocery - Recent Transactions</h2>
-        <table class="caption-top {{ table_classes }}">
+        <table class="caption-top {{ styles.table_classes() }}">
             <caption class="sr-only">Grocery - Recent Transactions</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th class="{{ th_classes }}">Barcode</th>
-                    <th class="{{ th_classes }}">Product Name</th>
-                    <th class="{{ th_classes }}">Price</th>
-                    <th class="{{ th_classes }}">Quantity</th>
-                    <th class="{{ th_classes }}">Date Scanned</th>
+                    <th class="{{ styles.th_classes() }}">Barcode</th>
+                    <th class="{{ styles.th_classes() }}">Product Name</th>
+                    <th class="{{ styles.th_classes() }}">Price</th>
+                    <th class="{{ styles.th_classes() }}">Quantity</th>
+                    <th class="{{ styles.th_classes() }}">Date Scanned</th>
                 </tr>
             </thead>
             <tbody>
                 {% if transactions %}
                     {% for transaction in transactions %}
                     <tr class="group {{ tr_classes }}" data-item-id="{{ transaction.transaction_id }}">
-                        <td class="{{ td_classes }}">{{ transaction.product.barcode }}</td>
-                        <td class="{{ td_classes }}">
+                        <td class="{{ styles.td_classes() }}">{{ transaction.product.barcode }}</td>
+                        <td class="{{ styles.td_classes() }}">
                             <span class="product-name">{{ transaction.product.product_name }}</span>
                         </td>
-                        <td class="{{ td_classes }}">£{{ transaction.price_at_scan }}</td>
-                        <td class="{{ td_classes }}">{{ transaction.quantity }}</td>
-                        <td class="{{ td_classes }} text-right">{{ transaction.date_scanned.strftime("%d.%m.%Y") }}</td>
-                        <td class="{{ td_classes }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
+                        <td class="{{ styles.td_classes() }}">£{{ transaction.price_at_scan }}</td>
+                        <td class="{{ styles.td_classes() }}">{{ transaction.quantity }}</td>
+                        <td class="{{ styles.td_classes() }} text-right">{{ transaction.date_scanned.strftime("%d.%m.%Y") }}</td>
+                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
                             <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
                                     <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
@@ -49,30 +49,30 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('groceries.add_transaction')}}" class="{{ btn_classes }}">
+    <a href="{{ url_for('groceries.add_transaction')}}" class="{{ styles.btn_classes() }}">
         Log New Transaction
     </a>
     <div class="bg-gray-200 p-6 rounded-xl shadow-md">
         <h2 class="text-lg font-semibold mb-2">Product Catalog</h2>
-        <table class="caption-top {{ table_classes }}">
+        <table class="caption-top {{ styles.table_classes() }}">
             <caption class="sr-only">Product Catalog</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th class="{{ th_classes }}">Barcode</th>
-                    <th class="{{ th_classes }}">Product Name</th>
-                    <th class="{{ th_classes }}">Price</th>
-                    <th class="{{ th_classes }}">Net Weight (g)</th>
+                    <th class="{{ styles.th_classes() }}">Barcode</th>
+                    <th class="{{ styles.th_classes() }}">Product Name</th>
+                    <th class="{{ styles.th_classes() }}">Price</th>
+                    <th class="{{ styles.th_classes() }}">Net Weight (g)</th>
                 </tr>
             </thead>
             <tbody>
                 {% if products %}
                     {% for product in products %}
                     <tr class="group {{ tr_classes }}" data-item-id="{{ product.product_id }}">
-                        <td class="{{ td_classes }}">{{ product.barcode }}</td>
-                        <td class="{{ td_classes }}">{{ product.product_name }}</td>
-                        <td class="{{ td_classes }} text-right">£{{ product.price }}</td>
-                        <td class="{{ td_classes }} text-right">{{ product.net_weight }}</td>
-                        <td class="{{ td_classes }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
+                        <td class="{{ styles.td_classes() }}">{{ product.barcode }}</td>
+                        <td class="{{ styles.td_classes() }}">{{ product.product_name }}</td>
+                        <td class="{{ styles.td_classes() }} text-right">£{{ product.price }}</td>
+                        <td class="{{ styles.td_classes() }} text-right">{{ product.net_weight }}</td>
+                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
                             <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
                                     <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
@@ -91,7 +91,7 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('groceries.add_product')}}" class="{{ btn_classes }}">
+    <a href="{{ url_for('groceries.add_product')}}" class="{{ styles.btn_classes() }}">
         Add New Product
     </a>
 </div>
