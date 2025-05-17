@@ -29,7 +29,7 @@
                         </td>
                         <td class="{{ td_classes }}">£{{ transaction.price_at_scan }}</td>
                         <td class="{{ td_classes }}">{{ transaction.quantity }}</td>
-                        <td class="{{ td_classes }} text-right">{{ transaction.date_scanned }}</td>
+                        <td class="{{ td_classes }} text-right">{{ transaction.date_scanned.strftime("%d.%m.%Y") }}</td>
                         <td class="{{ td_classes }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
                             <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
