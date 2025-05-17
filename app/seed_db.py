@@ -72,7 +72,7 @@ def seed_db():
         now_utc = datetime.now(timezone.utc)
 
         # Create 15 random transactions
-        for i in range(15):
+        for i in range(10):
             random_product = random.choice(products)
             days_ago = random.randint(0, 30)
 
@@ -89,7 +89,7 @@ def seed_db():
         session.add_all(transactions)
         session.commit()
 
-        return "DB seeded successfully with 6 Tasks (3 anchor habits, 3 todos), 3 Products, and 15 randomized Transactions for said Products"
+        return "DB seeded successfully with 6 Tasks (3 anchor habits, 3 todos), 3 Products, and 10 randomized Transactions for said Products"
 
     finally:
         session.close()

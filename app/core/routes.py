@@ -4,7 +4,7 @@ from app.modules.tasks import repository as tasks_repo
 
 # For reset_db route
 from sqlalchemy import text
-from flask import jsonify
+from flask import jsonify, flash, request
 from app.seed_db import seed_db
 from app.core.database import get_engine
 from app.core.db_base import Base
@@ -61,9 +61,7 @@ def reset_db():
     db_session.remove() # Closes current "converation" the db, but:
     # - other connections might still be open
     # - PostgreSQL won't let you drop tables if anyone is still "talking" to them
-
     # Since this .remove() didn't fix our issue of hanging/breaking our DB somehow, then the scoped session wasn't the primary cause
-    
     # print("Reset db triggered.")
     # TO-DO: Lock this down after adding auth // maybe extract it into a utility function later too
     engine = get_engine(current_app.config) # Current app gives us access to the config within a request context
@@ -77,8 +75,10 @@ def reset_db():
     # Recreate all tables
     Base.metadata.create_all(bind=engine)
 
-    # print("Running seed script..")
-    # Run seed script
-    # seed_db()
+    # Re-seed the database with seed_db function
+    seed_db()
 
-    return jsonify({'status': 'ok'})
+    # Add confirmation message via flash
+    flash('Database has been reset successfully!', 'success')
+
+    return redirect(request.referrer or url_for('index'))
