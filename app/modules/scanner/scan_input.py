@@ -9,7 +9,7 @@ if platform == "linux":
 elif platform == "win32":
     simulate_scan_loop(callback)
 
-'''
+
 
 def simulate_scan_loop(callback):
     while True:
@@ -19,7 +19,7 @@ def simulate_scan_loop(callback):
 #####################################
 # Uses **kwargs to take in optional data (ie., from forms)
 # Now used for scanner barcode input only
-'''
+
 def process_scanned_barcode(session, barcode, **product_data):
 	product = lookup_barcode(session, barcode)
 
