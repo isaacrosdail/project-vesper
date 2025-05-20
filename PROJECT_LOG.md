@@ -402,3 +402,21 @@ Log:
 	- Instead of using flask run, we use gunicorn [options] module:app (module in this case is our app.py)
 		- So in our case: gunicorn --bind 0.0.0.0:5000 app:app (so then the first 'app' here is referring to app.py)
 
+## Tuesday [20.05.25]
+Before:
+- Configured docker-compose.prod.yml with proper services (db for Postgres & web for Flask app itself)
+- Switched from pycopg2 to psycopg2-binary for Docker compatibility
+Log:
+- Removed no longer necessary pytest-postgresql
+- Cleaned up requirements.txt to remove unused dependencies
+- Added ProdConfig in config.py for production settings
+- Made create_app() use FLASK_ENV to automatically use the right config
+- Set up proper database URIs for different environments
+- Created wsgi.py as the prod entry point & set up gunicorn with wsgi:app in Dockerfile
+- Made code environment-aware
+
+Project stuff to clean up first after hosting:
+1. README.md (features, setup)
+2. Code organization / architecture
+3. Comments on complex logic
+4. Pare comments down in main/pruned branches
