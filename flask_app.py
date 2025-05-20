@@ -31,7 +31,8 @@ def handle_barcode_first(barcode):
         session.commit()
     finally:
         session.close()
-
+        
+'''
 # Start daemon to listen in background for barcode(s)
 scanner_thread = threading.Thread(
     target=lambda: scan_input.simulate_scan_loop(handle_barcode_first),
@@ -39,6 +40,7 @@ scanner_thread = threading.Thread(
 )
 scanner_thread.start()
 # # # # #
+'''
 
 app = create_app()
 

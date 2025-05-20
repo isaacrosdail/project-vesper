@@ -1,0 +1,37 @@
+# Uses existing container name & credentials
+# Keeps current dbs we already have set up
+services:
+  db:
+    build:
+      context: . # why the period here?
+      dockerfile: Dockerfile.postgres
+    container_name: vesper-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
+
+  web:
+    # New service for the Flask app itself
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - FLASK_ENV=production
+    ports:
+      - "5000:5000"
+      
+volumes:
+  pgdata:
+    name: vesper-pgdata

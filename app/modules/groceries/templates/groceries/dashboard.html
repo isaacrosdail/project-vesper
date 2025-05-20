@@ -27,7 +27,7 @@
                         <td class="{{ styles.td_classes() }}">
                             <span class="product-name">{{ transaction.product.product_name }}</span>
                         </td>
-                        <td class="{{ styles.td_classes() }}">£{{ transaction.price_at_scan }}</td>
+                        <td class="{{ styles.td_classes() }}">TEST{{ transaction.price_at_scan }}</td>
                         <td class="{{ styles.td_classes() }}">{{ transaction.quantity }}</td>
                         <td class="{{ styles.td_classes() }} text-right">{{ transaction.date_scanned.strftime("%d.%m.%Y") }}</td>
                         <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
@@ -70,7 +70,7 @@
                     <tr class="group {{ tr_classes }}" data-item-id="{{ product.product_id }}">
                         <td class="{{ styles.td_classes() }}">{{ product.barcode }}</td>
                         <td class="{{ styles.td_classes() }}">{{ product.product_name }}</td>
-                        <td class="{{ styles.td_classes() }} text-right">£{{ product.price }}</td>
+                        <td class="{{ styles.td_classes() }} text-right">£{{ product.price or '-' }}</td>
                         <td class="{{ styles.td_classes() }} text-right">{{ product.net_weight }}</td>
                         <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ product.product_id }}', 'product')">
                             <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">

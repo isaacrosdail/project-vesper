@@ -1,0 +1,26 @@
+name: Vesper CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to Linode
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.LINODE_HOST }}
+        username: ${{ secrets.LINODE_USERNAME }}
+        key: ${{ secrets.LINODE_SSH_KEY }}
+        script: |
+          cd /var/www/project-vesper
+          git pull
+          
+          # Restart Docker containers
+          docker-compose -f docker-compose.prod.yml down
+          docker-compose -f docker-compose.prod.yml up --build -d  # Added --build flag to force rebuild for changes
+          
+          echo "Deployment completed at $(date)"

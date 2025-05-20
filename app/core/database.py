@@ -1,5 +1,5 @@
 # Centralized DB setup file
-
+import os
 from flask import current_app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -24,6 +24,18 @@ def get_engine(config):
     print(" get_engine() CALLED")
     
     global _engine
+
+    # Get & print FLASK_ENV for debugging
+    flask_env = os.environ.get('FLASK_ENV')
+    print(f"Current FLASK_ENV: {flask_env}\n\n\n\n\n")
+
+    # Check whats in the config
+    db_uri = config.get("SQLALCHEMY_DATABASE_URI")
+    print(f"Current DB URI from config: {db_uri}")
+
+    # Print _engine's current state
+    print(f"_engine is None: {_engine is None}")
+
     if _engine is None:
         db_uri = config.get("SQLALCHEMY_DATABASE_URI")
         print(db_uri) # DEBUG PRINT
