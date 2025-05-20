@@ -7,6 +7,7 @@ coverage==7.8.0
 Flask==3.1.0
 Flask-SQLAlchemy==3.1.1
 greenlet==3.1.1
+gunicorn==23.0.0
 idna==3.10
 iniconfig==2.1.0
 itsdangerous==2.2.0
@@ -17,13 +18,11 @@ packaging==24.2
 pluggy==1.5.0
 port-for==0.7.4
 psutil==7.0.0
-psycopg==3.2.6
-psycopg-binary==3.2.6
-psycopg2==2.9.10
+psycopg2-binary==2.9.10
 pytest==8.3.5
 pytest-cov==6.1.1
 pytest-mock==3.14.0
-pytest-postgresql==7.0.1
+python-dotenv==1.1.0
 requests==2.32.3
 SQLAlchemy==2.0.39
 typing_extensions==4.12.2

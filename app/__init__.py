@@ -1,6 +1,10 @@
 from flask import Flask
 from app.core.config import config_map
 from app.core.database import init_db, db_session
+import os
+
+# For environment variables via dotenv
+from dotenv import load_dotenv
 
 # Import DB stuff
 from app.modules.groceries import models as grocery_models
@@ -12,8 +16,20 @@ from app.modules.groceries.groceries_routes import groceries_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.crud_routes import crud_bp
 
-def create_app(config_name="dev"): # Default to DevConfig if nothing is passed in
+def create_app(config_name=None):
+
+    # Load environment variables
+    load_dotenv()
+
     app = Flask(__name__)
+
+    # If no config provided, check Flask_ENV for environment
+    if config_name is None:
+        # Get FLASK_ENV and default to 'dev' if not set
+        env = os.environ.get('FLASK_ENV', 'development')
+        config_name = 'prod' if env == 'production' else 'dev'
+
+    print(f"Using config: {config_name}")
 
     # Load appropriate config based on environment
     app.config.from_object(config_map[config_name])
