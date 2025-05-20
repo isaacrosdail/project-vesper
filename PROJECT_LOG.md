@@ -389,3 +389,16 @@ Log:
 
 Next Up:
 1. Make reset_db redirect to same page (involves "referrer check")
+
+## Sunday [18.05.25]
+Log:
+- Install python-dotenv, create .env
+	Obfuscates real info behind a layer between me as a dev and the stuff the repo sees
+	- To implement this change, we:
+		- Added our Flask container stuff to a new docker-compose.prod.yml
+		- Tweaked that, config.py to use variables, NOT the real values
+		- Env vars are loaded from .env -> Config.py reads those vars -> Flask app get configured properly -> DB connects using the configured URI
+- Installed gunicorn locally to test docker-compose.prod.yml
+	- Instead of using flask run, we use gunicorn [options] module:app (module in this case is our app.py)
+		- So in our case: gunicorn --bind 0.0.0.0:5000 app:app (so then the first 'app' here is referring to app.py)
+
