@@ -614,11 +614,11 @@ sudo apt install docker-compose
 ```
 **2. Set up Nginx (reverse proxy):**
 ```bash
-nano /etc/nginx/sites-available/vesper
+nano /etc/nginx/sites-available/[PROJECT_NAME]
 ```
 - Disabled old resume site:
 ```bash
-rm /etc/nginx/sites-enabled/myflaskapp
+rm /etc/nginx/sites-enabled/[OLD_SITE_CONFIG]
 ```
 **3. Tailwind Styling (on remote):**
 - Installed Node.js + npm:
@@ -626,7 +626,7 @@ rm /etc/nginx/sites-enabled/myflaskapp
 curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 apt-get install -y nodejs
 ```
-- Inside `/var/www/vesper`:
+- Inside project directory:
 ```bash
 npm install      # Install Tailwind + JS deps
 npm run build    # Build CSS
@@ -634,16 +634,16 @@ npm run build    # Build CSS
 **4. Serve static files via Nginx:**
 ```nginx
 location /static/ {
-    alias /var/www/vesper/static/;
+    alias [PROJECT_PATH]/static/;
     expires 30d;
 }
 ```
 **5. Domain Name:**
-- Bought domain  
+- Purchased domain for project  
 - TTL set to 600 (consider raising)
 **6. Link domain in Nginx config:**
 ```nginx
-server_name 139.162.180.181 vesper.isaacrosdail.com;
+server_name [SERVER_IP] [PROJECT_DOMAIN];
 ```
 **7. SSL with Let’s Encrypt:**
 - Install Certbot with Nginx plugin:
@@ -656,7 +656,7 @@ certbot --nginx
 ```
 
 ---
-
+aa
 **WHERE I LEFT OFF:**
 1. **SSL setup broke the site?**
    - After running Certbot, site stopped loading
