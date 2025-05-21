@@ -664,3 +664,10 @@ certbot --nginx
      ```bash
      /etc/nginx/sites-
 
+## [Wed 21.05.25]
+**Goal(s):**
+- Configure HTTPS access on Linode server
+- Standardize project logging format
+**Log:**
+- Changed Linode firewall to accept HTTPS via port 443
+- Implemented refined log format across all existing project logs
