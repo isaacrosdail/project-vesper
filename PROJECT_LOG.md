@@ -420,3 +420,33 @@ Project stuff to clean up first after hosting:
 2. Code organization / architecture
 3. Comments on complex logic
 4. Pare comments down in main/pruned branches
+
+Prepping Linode for hosting:
+1. Installing Docker
+	- curl -fsSL https://get.docker.com -o get-docker.sh
+	- sudo sh get-docker.sh
+	- sudo apt install docker-compose
+2. Setting up Nginx (reverse proxy)
+	- nano /etc/nginx/sites-available/vesper
+	- Disabled old resume site by deleted symbolic link: rm /etc/nginx/sites-enabled/myflaskapp
+3. Sorting out Tailwind styling
+	- Installed Node.js and npm (to be able to run npm run build to build Tailwind CSS styles)
+		- curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+		- apt-get install -y nodejs
+	- Then inside /var/www/vesper:
+		- npm install (install Tailwind & other JS dependencies from package.json)
+		- npm run build (This will build our CSS)
+	- Getting Nginx to serve static files
+		- Added 'location /static/ { alias /var/www/vesper/static/; expires 30d; }' to Nginx config
+4. Bought a domain name!
+	- TTL set to 600, consider increasing
+5. Link to Nginx
+	- To /etc/nginx/sites-available/vesper -> server_name 139.162.180.181 vesper.isaacrosdail.com;
+5. Get SSL with Let's Encrypt
+	- Install Certbot with Nginx plugin: install certbot python3-certbot-nginx
+	- Run Certbot to get cert and configure Nginx: 
+
+WHERE I LEFT OFF:
+1. SSL STUFF BROKE SITE?
+	- messed with Certbot, then site seems to have broken? wont load
+	- see if i broke the file for /etc/nginx/sites-available/vesper
