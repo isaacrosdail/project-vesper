@@ -678,4 +678,5 @@ aa
 	- Now CI runs via Actions when we push main!
 *Note: PuTTY for ssh
 **Next Up:**
+- Ensure local dev stuff is solid again
 - Begin tackling post-hosting checklist
