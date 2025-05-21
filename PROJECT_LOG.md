@@ -666,8 +666,16 @@ aa
 
 ## [Wed 21.05.25]
 **Goal(s):**
-- Configure HTTPS access on Linode server
-- Standardize project logging format
+- Configure HTTPS access on Linode server, sort out timeout issue
+- Standardize project logging format, tidy PROJECT_LOG.md
+- Set up CI, establish git branch workflow
 **Log:**
-- Changed Linode firewall to accept HTTPS via port 443
+- Configure HTTPS - done.
 - Implemented refined log format across all existing project logs
+- Setting up CI/CD (continuous deployment) w/Github Actions:
+	- To project root, add: .github/workflows/docker-ci.yml
+	- Add SSH on server & secrets needed for CI
+	- Now CI runs via Actions when we push main!
+*Note: PuTTY for ssh
+**Next Up:**
+- Begin tackling post-hosting checklist
