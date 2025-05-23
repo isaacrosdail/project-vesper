@@ -16,8 +16,6 @@ jobs:
         username: ${{ secrets.LINODE_USERNAME }}
         key: ${{ secrets.LINODE_SSH_KEY }}
         script: |
-          echo "Connected to host: $(hostname)"
-          echo "IP: $(hostname -I)"
           cd /var/www/vesper
           git pull
           

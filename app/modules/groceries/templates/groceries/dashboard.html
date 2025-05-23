@@ -27,7 +27,7 @@
                         <td class="{{ styles.td_classes() }}">
                             <span class="product-name">{{ transaction.product.product_name }}</span>
                         </td>
-                        <td class="{{ styles.td_classes() }}">£{{ transaction.price_at_scan }}</td>
+                        <td class="{{ styles.td_classes() }}">TEST{{ transaction.price_at_scan }}</td>
                         <td class="{{ styles.td_classes() }}">{{ transaction.quantity }}</td>
                         <td class="{{ styles.td_classes() }} text-right">{{ transaction.date_scanned.strftime("%d.%m.%Y") }}</td>
                         <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent" onclick="deleteTableItem('groceries', '{{ transaction.transaction_id }}', 'transaction')">
