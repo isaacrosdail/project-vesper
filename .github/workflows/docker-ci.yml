@@ -16,7 +16,7 @@ jobs:
         username: ${{ secrets.LINODE_USERNAME }}
         key: ${{ secrets.LINODE_SSH_KEY }}
         script: |
-          cd /var/www/vesper
+          cd /var/www/project-vesper
           git pull
           
           # Restart Docker containers
