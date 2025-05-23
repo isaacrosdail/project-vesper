@@ -656,7 +656,7 @@ certbot --nginx
 ```
 
 ---
-aa
+
 **WHERE I LEFT OFF:**
 1. **SSL setup broke the site?**
    - After running Certbot, site stopped loading
@@ -680,3 +680,10 @@ aa
 **Next Up:**
 - Ensure local dev stuff is solid again
 - Begin tackling post-hosting checklist
+
+## [Fri 24.05.25]
+**Goals:**
+- Fix the "£None" display in the Product table
+- Fix [text] for Today's Intention portion. Use placeholder here too
+- Flesh out placeholder text for forms (Change "Scan or enter text" to just "Enter Barcode" for time being)
+- Fix footer somehow
