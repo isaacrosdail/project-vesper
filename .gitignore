@@ -69,7 +69,7 @@ instance/
 .webassets-cache
 
 # Tailwind output file
-output.css
+# output.css
 
 # Scrapy stuff:
 .scrapy

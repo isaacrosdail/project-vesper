@@ -681,9 +681,18 @@ certbot --nginx
 - Ensure local dev stuff is solid again
 - Begin tackling post-hosting checklist
 
-## [Fri 24.05.25]
+## [Fri 23.05.25]
 **Goals:**
-- Fix the "£None" display in the Product table
-- Fix [text] for Today's Intention portion. Use placeholder here too
-- Flesh out placeholder text for forms (Change "Scan or enter text" to just "Enter Barcode" for time being)
-- Fix footer somehow
+- Clean up obvious issues on live site first ("£None" and "Today's Intention:[text]")
+**Log:**
+- Fixed above issues
+- Fixed CI pipeline issue (added --build to ensure containers rebuild)
+- Removed Tailwind styles output from gitignore (silly me)
+**Next Up:**
+1. Clean up readme/tech stack info, w/ decisions for choices
+2. 2. Clean up readme/tech stack info (with decisions for choices)
+3. Sort out dev/prod database separation (dev-> personal use, prod-> demo info only)
+	Options:
+		- Different database URIs in .env vs production environment variables
+		- Maybe different database names entirely (vesper_dev vs vesper_prod) SMART, do this!
+4. Add "This Week's Improvements" feature
