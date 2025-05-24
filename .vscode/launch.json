@@ -1,7 +1,5 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // Config stuff for debug functionality
     "version": "0.2.0",
     "configurations": [
         {
@@ -10,7 +8,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "app:create_app('dev')",
+                "FLASK_APP": "flask_app.py",
                 "FLASK_DEBUG": "1"
             },
             "args": [
@@ -19,13 +17,12 @@
                 "--no-reload"
             ],
             "jinja": true,
-            "autoStartBrowser": false
         },
         {
             "name": "Python: Run All Tests (pytest)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/venv/bin/pytest", // Path to pytest exe in venv
+            "program": "${workspaceFolder}/.venv/bin/pytest", // Path to pytest exe in venv
             "args": [
                 "${workspaceFolder}/tests" // Dir where tests are located
             ],
