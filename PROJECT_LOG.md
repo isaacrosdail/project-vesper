@@ -696,3 +696,12 @@ certbot --nginx
 		- Different database URIs in .env vs production environment variables
 		- Maybe different database names entirely (vesper_dev vs vesper_prod) SMART, do this!
 4. Add "This Week's Improvements" feature
+
+## [Sat 24.05.25]
+**Log:**
+- While syncing what I did in my resume site, I made some adjustments in Vesper to match:
+	- Use more semantic HTML (header, main) in base.html
+		- Wrap navbar include in <header>, change block content from being in a div to in <main>
+	- Condense outside 2 wrapper divs into one in navbar.html
+		- Inside that, we have LEFT div (Branding & Links) then RIGHT div (Reset DB button) -> 2 birds, 1 stone :P
+	- Add cursor pointer styling for btn_classes() macro

@@ -12,8 +12,9 @@
 </head>
 <body class="h-full">
     <div class="wrapper">
-
-        {% include 'navbar.html' with context %}
+        <header>
+            {% include 'navbar.html' with context %}
+        </header>
 
         <!-- For flash() -->
         {% with messages = get_flashed_messages() %}  <!-- "if flask has any msgs saved, pull them into this variable called messages" -->
@@ -26,9 +27,9 @@
             {% endif %}
         {% endwith %}
 
-        <div class="content">
+        <main class="content">
             {% block content %}{% endblock %}
-        </div>
+        </main>
             
         <footer class="bg-gray-100 text-center text-sm py-4">
             &copy; 2025
