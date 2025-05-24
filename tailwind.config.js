@@ -4,9 +4,6 @@ module.exports = {
       './static/**/*.{css,js}',
       './templates/**/*.html'
     ],
-    theme: {
-      extend: {},
-    },
     plugins: [],
   }
   
