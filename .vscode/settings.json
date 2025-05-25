@@ -10,7 +10,9 @@
         "node_modules/": true,
         ".venv/": true,
         ".pytest_cache/": true,
-        ".coverage": true
+        ".coverage": true,
+        "**/__pycache__/": true,
+        "htmlcov/": true
     },
     "search.exclude": {
         "node_modules/": true,
