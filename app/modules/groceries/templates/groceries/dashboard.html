@@ -22,7 +22,7 @@
             <tbody>
                 {% if transactions %}
                     {% for transaction in transactions %}
-                    <tr class="group {{ tr_classes }}" data-item-id="{{ transaction.transaction_id }}">
+                    <tr class="group {{ styles.tr_classes() }}" data-item-id="{{ transaction.transaction_id }}">
                         <td class="{{ styles.td_classes() }}">{{ transaction.product.barcode }}</td>
                         <td class="{{ styles.td_classes() }}">
                             <span class="product-name">{{ transaction.product.product_name }}</span>
@@ -67,7 +67,7 @@
             <tbody>
                 {% if products %}
                     {% for product in products %}
-                    <tr class="group {{ tr_classes }}" data-item-id="{{ product.product_id }}">
+                    <tr class="group {{ styles.tr_classes() }}" data-item-id="{{ product.product_id }}">
                         <td class="{{ styles.td_classes() }}">{{ product.barcode }}</td>
                         <td class="{{ styles.td_classes() }}">{{ product.product_name }}</td>
                         <td class="{{ styles.td_classes() }} text-right">£{{ product.price or '-' }}</td>
