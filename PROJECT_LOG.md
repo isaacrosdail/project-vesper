@@ -705,3 +705,15 @@ certbot --nginx
 	- Condense outside 2 wrapper divs into one in navbar.html
 		- Inside that, we have LEFT div (Branding & Links) then RIGHT div (Reset DB button) -> 2 birds, 1 stone :P
 	- Add cursor pointer styling for btn_classes() macro
+
+## [Sun 25.05.25]
+**Goals:**
+1. Not much today, mostly worked on resume site
+
+**Log:**
+- Tweak/trim launch.json (FLASK_APP: app:create_app('dev') -> flask_app.py)
+- Update font family to match resume site
+- Update groceries dashboard to reference styling macros properly
+
+**Next Up:**
+- Tidy up code/comments/etc, enforce branching pipeline

@@ -175,3 +175,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Tailwind output file, since we run build before pushing main anyway
+**/output.css
+
+# Playground/ for learning/experimenting
+playground/
