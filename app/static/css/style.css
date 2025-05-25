@@ -9,6 +9,14 @@
         @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition;
     }
 }
+/* Using @layer to extend the _base_ (modifying Tailwind's Preflight config so it lets me change the font) */
+@layer base {
+    html {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 500;
+    }
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -28,6 +36,7 @@ a {
     /* Tells flex container's child to grow and take up all remaining space */
     flex: 1;
 }
+/* Is this needed? */
 footer {
     text-align: center;
     padding: 10px;
