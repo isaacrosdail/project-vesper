@@ -1,10 +1,13 @@
 ## DB logic functions to access data
 # The "talk to the database - and nothing else" layer
 
-from .models import Product, Transaction
-from sqlalchemy.orm import joinedload
 from datetime import datetime, timezone
 from decimal import Decimal
+
+from sqlalchemy.orm import joinedload
+
+from .models import Product, Transaction
+
 
 # Lookup barcode function to centralize a bit
 def lookup_barcode(session, barcode):

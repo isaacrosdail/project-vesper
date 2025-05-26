@@ -1,10 +1,12 @@
 # Basic script to seed our db with dummy data for dev & demo purposes
 
+import random
+from datetime import datetime, timedelta, timezone
+
 from app.core.database import db_session
 from app.modules.groceries.models import Product, Transaction
 from app.modules.tasks.models import Task
-from datetime import datetime, timezone, timedelta
-import random
+
 
 def seed_db():
     session = db_session()

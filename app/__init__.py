@@ -1,20 +1,17 @@
-from flask import Flask
-from app.core.config import config_map
-from app.core.database import init_db, db_session
 import os
 
 # For environment variables via dotenv
 from dotenv import load_dotenv
+from flask import Flask
 
-# Import DB stuff
-from app.modules.groceries import models as grocery_models
-from app.modules.tasks import models as tasks_models
-
+from app.core.config import config_map
+from app.core.database import db_session, init_db
 # Import Blueprints
 from app.core.routes import main_bp
-from app.modules.groceries.groceries_routes import groceries_bp
-from app.modules.tasks.routes import tasks_bp
 from app.modules.crud_routes import crud_bp
+from app.modules.groceries.routes import groceries_bp
+from app.modules.tasks.routes import tasks_bp
+
 
 def create_app(config_name=None):
 
