@@ -34,8 +34,8 @@ def create_app(config_name=None):
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
         init_db(app.config)
-        # If in dev config, run seed_db to fill db with dummy info
-        if app.config['ENV'] == 'development':
+        # Run seed_db for prod to fill with dummy data
+        if app.config['ENV'] == 'production':
             from .seed_db import seed_db
             seed_db()
 
