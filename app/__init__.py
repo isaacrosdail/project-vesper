@@ -12,7 +12,7 @@ from app.modules.tasks import models as tasks_models
 
 # Import Blueprints
 from app.core.routes import main_bp
-from app.modules.groceries.groceries_routes import groceries_bp
+from app.modules.groceries.routes import groceries_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.crud_routes import crud_bp
 
