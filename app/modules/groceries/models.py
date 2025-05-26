@@ -1,6 +1,6 @@
 # Handles DB models for grocery module
 from app.core.db_base import Base
-from sqlalchemy import Column, Integer, String, Float, Date, Numeric, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, Numeric, ForeignKey, DateTime
 from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
 

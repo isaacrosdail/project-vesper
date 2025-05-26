@@ -3,8 +3,7 @@ from app.core.database import db_session
 from app.modules.tasks import repository as tasks_repo
 
 # For reset_db route
-from sqlalchemy import text
-from flask import jsonify, flash, request
+from flask import flash, request
 from app.seed_db import seed_db
 from app.core.database import get_engine
 from app.core.db_base import Base
