@@ -1,8 +1,11 @@
-import pytest
-from unittest.mock import patch
 from datetime import datetime
-from app.modules.tasks.models import Task
+from unittest.mock import patch
+
+import pytest
+
 from app.core.database import db_session
+from app.modules.tasks.models import Task
+
 
 def test_home_route(client):
     response = client.get("/")

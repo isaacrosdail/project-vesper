@@ -1,8 +1,10 @@
-from flask import Blueprint, flash, render_template, redirect, url_for, request
+from decimal import Decimal
+
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+
 from app.core.database import db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
-from decimal import Decimal
 
 groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
 

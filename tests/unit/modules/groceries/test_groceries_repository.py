@@ -1,8 +1,11 @@
-from app.modules.groceries.models import Product, Transaction
-from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
-from app.core.database import db_session
+
 import pytest
+
+from app.core.database import db_session
+from app.modules.groceries import repository as grocery_repo
+from app.modules.groceries.models import Product, Transaction
+
 
 # region lookup_barcode
 # Return a Product if barcode exists, None if barcode doesn't exist

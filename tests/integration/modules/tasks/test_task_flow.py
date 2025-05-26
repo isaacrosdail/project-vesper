@@ -1,5 +1,6 @@
 from app.core.database import db_session
 
+
 def test_task_creation_and_completion(client):
     # 1. Add new task
     response = client.post("/tasks/add", data={"title": "Integration Task"})

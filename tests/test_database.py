@@ -1,22 +1,18 @@
-## DB infrastructure & schema tests
-## Structure, lifecycle, connection tests go here
-
-# region Imports
-# Basic imports
+"""
+DB infrastructure & schema tests
+Structure, lifecycle, connection tests go here
+"""
+# Standard lib imports
 import pytest
+# Third-party lib imports
 from sqlalchemy import inspect, text
-
-from sqlalchemy.orm import sessionmaker
-from app.core.database import get_engine
-
-# Import Models
-from app.modules.tasks.models import Task
-from app.modules.groceries.models import Product
-
-# Imports for exceptions
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker
 
-# endregion
+# Local app imports
+from app.core.database import get_engine
+from app.modules.tasks.models import Task
+
 
 def test_db_connection(app):
     engine = get_engine(app.config)
