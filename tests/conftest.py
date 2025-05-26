@@ -74,11 +74,13 @@ def cleanup_session():
     yield
     db_session.remove()
 
-# monkeypatches get_db_session() to use our test session
+# monkeypatches db_session() to use our test session
 @pytest.fixture(autouse=True)
 def patch_db_session(monkeypatch):
-    from app.core.database import db_session as global_session
-    monkeypatch.setattr("app.core.database.get_db_session", lambda *_: global_session())
+    from app.core.database import db_session as global_session # Imports scoped session factory and renames it to global_session
+    # lambda *_: global_session() creates a function that takes any arguments ("*_" = "ignore whatever args are passed")
+    #       and returns global_session() which calls our scoped session
+    monkeypatch.setattr("app.core.database.db_session", lambda *_: global_session())
 
 # Fake browser to test routes (lets us send requests from a fake browser/client)
 @pytest.fixture
