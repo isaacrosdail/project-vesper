@@ -1,21 +1,19 @@
-# Holds fixtures & test config, automatically loaded by pytest (import not req'd)
+# Holds fixtures & test config, automatically loaded by pytest (import not required)
 
 import pytest
 from app import create_app
+
+# DB imports
 from app.core.database import get_engine, db_session
 from app.core.db_base import Base
 from sqlalchemy import text
+
 import time
 import subprocess
 
-#session = db_session()
-
-print("conftest loaded!")
-
-############### Ensure Docker PostgreSQL container is running before tests start
+# Ensure PostgreSQL container is running before tests start
 @pytest.fixture(scope="session", autouse=True)
 def ensure_docker_postgres():
-    print("Ensuring vesper-db is running...")
 
     # Check if already running
     result = subprocess.run(
