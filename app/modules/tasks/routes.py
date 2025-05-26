@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify, flash
-from app.core.database import db_session, db_session
+from app.core.database import db_session
 
 # Import Task model
 from app.modules.tasks.models import Task
@@ -74,24 +74,6 @@ def add_task():
     else:
         return render_template("tasks/add_task.html")
 
-# REMOVE THIS ROUTE? deprecated by update_task route
-@tasks_bp.route("/complete_task/<int:task_id>", methods=["POST"])
-def complete_task(task_id):
-    session = db_session()
-    try:
-
-        # Get corresponding task from db  
-        task = session.get(Task, task_id)
-
-        # Update task to be completed, incl. completed_at
-        task.is_done = True
-        task.completed_at = datetime.now(timezone.utc)
-        session.commit()
-
-        return jsonify(success=True)
-    finally:
-        session.close()
-
 # UPDATE
 @tasks_bp.route("/<int:task_id>", methods=["PUT", "PATCH"])
 def update_task(task_id):
@@ -141,8 +123,8 @@ def delete_task(task_id):
         if not task:
             return {"error": "Task not found."}, 404
         
-        db_session.delete(task)
-        db_session.commit()
+        session.delete(task)
+        session.commit()
     
         return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
     
