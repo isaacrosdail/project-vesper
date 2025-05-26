@@ -1,4 +1,3 @@
-from sqlalchemy.orm import joinedload
 from app.core.database import db_session
 
 def test_groceries_dashboard(client):

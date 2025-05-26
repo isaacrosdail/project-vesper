@@ -2,7 +2,7 @@
 # The "talk to the database - and nothing else" layer
 
 from .models import Product, Transaction
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import joinedload
 from datetime import datetime, timezone
 from decimal import Decimal
 
