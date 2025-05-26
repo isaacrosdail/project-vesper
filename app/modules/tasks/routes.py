@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify, flash
-from app.core.database import get_db_session, db_session
-from flask import current_app
+from app.core.database import db_session, db_session
 
 # Import Task model
 from app.modules.tasks.models import Task
@@ -11,15 +10,12 @@ from app.modules.tasks import repository as tasks_repo
 # For created_at / completed_at
 from datetime import datetime, timezone
 
-import time
-from zoneinfo import ZoneInfo
-
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
 @tasks_bp.route("/", methods=["GET"])
 def dashboard():
     # Fetch Tasks & pass into template
-    session = get_db_session()
+    session = db_session()
     try:
         # Column names for Task model
         task_column_names = [
@@ -64,7 +60,7 @@ def add_task():
         )
 
         # Add new_task to db
-        session = get_db_session()
+        session = db_session()
         try:
             session.add(new_task)
             session.commit()
@@ -81,7 +77,7 @@ def add_task():
 # REMOVE THIS ROUTE? deprecated by update_task route
 @tasks_bp.route("/complete_task/<int:task_id>", methods=["POST"])
 def complete_task(task_id):
-    session = get_db_session()
+    session = db_session()
     try:
 
         # Get corresponding task from db  
