@@ -11,7 +11,6 @@ from app.core.database import get_engine
 
 # Import Models
 from app.modules.tasks.models import Task
-from app.modules.groceries.models import Product
 
 # Imports for exceptions
 from sqlalchemy.exc import IntegrityError

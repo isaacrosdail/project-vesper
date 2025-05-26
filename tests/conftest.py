@@ -41,9 +41,6 @@ def reset_db(app):
         conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE;"))
         conn.execute(text("CREATE SCHEMA public;"))
 
-    # Import DB stuff
-    from app.modules.groceries import models as grocery_models
-    from app.modules.tasks import models as tasks_models
     Base.metadata.create_all(engine)
 
 # Fixture to clear all table data between tests

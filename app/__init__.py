@@ -6,10 +6,6 @@ import os
 # For environment variables via dotenv
 from dotenv import load_dotenv
 
-# Import DB stuff
-from app.modules.groceries import models as grocery_models
-from app.modules.tasks import models as tasks_models
-
 # Import Blueprints
 from app.core.routes import main_bp
 from app.modules.groceries.routes import groceries_bp
