@@ -1,5 +1,4 @@
 import time
-import threading
 from datetime import datetime, timedelta
 
 # 60-minute "work block" timer

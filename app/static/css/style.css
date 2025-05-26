@@ -3,7 +3,8 @@
 .test {
     color: color-mod(red alpha(90%));
 }
-/* Able to group Tailwind stylings together for repeat usage, within @layer components here */
+/* TODO: Remove this?
+Able to group Tailwind stylings together for repeat usage, within @layer components here */
 @layer components {
     .btn-primary {
         @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition;
