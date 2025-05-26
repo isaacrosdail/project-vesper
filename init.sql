@@ -4,3 +4,4 @@
 
 -- Create the test database
 CREATE DATABASE vesper_test;
+CREATE DATABASE vesper_dev;
