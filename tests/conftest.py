@@ -1,15 +1,16 @@
 # Holds fixtures & test config, automatically loaded by pytest (import not required)
 
-import pytest
-from app import create_app
+import subprocess
+import time
 
-# DB imports
-from app.core.database import get_engine, db_session
-from app.core.db_base import Base
+import pytest
 from sqlalchemy import text
 
-import time
-import subprocess
+from app import create_app
+# DB imports
+from app.core.database import db_session, get_engine
+from app.core.db_base import Base
+
 
 # Ensure PostgreSQL container is running before tests start
 @pytest.fixture(scope="session", autouse=True)
@@ -72,7 +73,10 @@ def cleanup_session():
 # monkeypatches db_session() to use our test session
 @pytest.fixture(autouse=True)
 def patch_db_session(monkeypatch):
-    from app.core.database import db_session as global_session # Imports scoped session factory and renames it to global_session
+    from app.core.database import \
+        db_session as \
+        global_session  # Imports scoped session factory and renames it to global_session
+
     # lambda *_: global_session() creates a function that takes any arguments ("*_" = "ignore whatever args are passed")
     #       and returns global_session() which calls our scoped session
     monkeypatch.setattr("app.core.database.db_session", lambda *_: global_session())

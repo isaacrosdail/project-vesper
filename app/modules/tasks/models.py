@@ -1,9 +1,12 @@
 # Handles DB models for tasks module
 
-from app.core.db_base import Base
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
+
+from app.core.db_base import Base
+
 
 # Task Model for database of tasks, with varying types (task vs habit, etc)
 class Task(Base):

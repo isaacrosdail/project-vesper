@@ -1,7 +1,10 @@
+from datetime import datetime, timedelta, timezone
+
 import pytest
-from app.modules.tasks.models import Task
+
 from app.core.database import db_session
-from datetime import datetime, timezone, timedelta
+from app.modules.tasks.models import Task
+
 
 # Create test task in the DB for use in tests
 @pytest.fixture

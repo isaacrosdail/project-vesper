@@ -1,9 +1,9 @@
 ## Generalized CRUD handling routes for ANY module/model :P
 ## STRONGLY consider moving to a future utils or helpers directory in future
 
-from flask import Blueprint, render_template, redirect, url_for, request
-from app.core.database import db_session
+from flask import Blueprint, redirect, render_template, request, url_for
 
+from app.core.database import db_session
 # Import models
 from app.modules.groceries import models as grocery_models
 from app.modules.tasks import models as tasks_models

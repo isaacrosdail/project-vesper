@@ -1,14 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify, flash
-from app.core.database import db_session
-
-# Import Task model
-from app.modules.tasks.models import Task
-
-# Import Task repository
-from app.modules.tasks import repository as tasks_repo
-
 # For created_at / completed_at
 from datetime import datetime, timezone
+
+from flask import (Blueprint, flash, jsonify, redirect, render_template,
+                   request, url_for)
+
+from app.core.database import db_session
+# Import Task repository
+from app.modules.tasks import repository as tasks_repo
+# Import Task model
+from app.modules.tasks.models import Task
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 

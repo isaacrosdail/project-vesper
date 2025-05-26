@@ -1,8 +1,8 @@
 
 from app.core.database import db_session
-
 # Import model(s)
 from app.modules.tasks.models import Task
+
 
 # Test DELETE functionality for generalized crud routes
 def test_general_delete_task(client):

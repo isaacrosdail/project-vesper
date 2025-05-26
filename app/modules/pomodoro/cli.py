@@ -1,5 +1,6 @@
-from pomodoro import Pomodoro
 import time
+
+from pomodoro import Pomodoro
 
 ''' Here we handle the user inputs (CLI/text) for the timer
 

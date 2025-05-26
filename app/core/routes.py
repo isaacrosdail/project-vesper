@@ -1,17 +1,15 @@
-from flask import Blueprint, render_template, redirect, url_for
-from app.core.database import db_session
-from app.modules.tasks import repository as tasks_repo
+# Date/Time-related imports
+from datetime import datetime, time, timezone
+from zoneinfo import ZoneInfo
 
 # For reset_db route
-from flask import flash, request
-from app.seed_db import seed_db
-from app.core.database import get_engine
-from app.core.db_base import Base
-from flask import current_app
+from flask import (Blueprint, current_app, flash, redirect, render_template,
+                   request, url_for)
 
-# Date/Time-related imports
-from datetime import datetime, timezone, time
-from zoneinfo import ZoneInfo
+from app.core.database import db_session, get_engine
+from app.core.db_base import Base
+from app.modules.tasks import repository as tasks_repo
+from app.seed_db import seed_db
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
