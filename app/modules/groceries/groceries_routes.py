@@ -4,8 +4,6 @@ from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from decimal import Decimal
 
-import time
-
 groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
 
 # Debug print

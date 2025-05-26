@@ -17,7 +17,7 @@ _engine = None # Global connection cache
 # Function to get engine from the config
 # 1. get_engine()     -> creates/returns singleton engine
 # 2. init_db()        -> binds db_session to that engine
-# 3. get_db_session() -> creates sessions using that engine
+# 3. db_session() -> creates sessions using that engine
 def get_engine(config):
 
     # Debug print
@@ -53,7 +53,3 @@ def init_db(config):
     engine = get_engine(config)
     db_session.configure(bind=engine) # Binds Session globally -> "Use this engine for all sessions"
     Base.metadata.create_all(engine)
-
-# Optional, can delete
-def get_db_session():
-    return db_session()

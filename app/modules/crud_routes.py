@@ -1,17 +1,17 @@
 ## Generalized CRUD handling routes for ANY module/model :P
 ## STRONGLY consider moving to a future utils or helpers directory in future
 
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify, flash
+from flask import Blueprint, render_template, redirect, url_for, request
 from app.core.database import db_session
 
 # Import models
 from app.modules.groceries import models as grocery_models
 from app.modules.tasks import models as tasks_models
 
-# right?
+# Blueprint registration
 crud_bp = Blueprint("crud", __name__)
 
-### Generalizing to be able to support all CRUD ops through one generalized engine that supports:
+### Generalizing to be able to support all CRUD ops to handle:
 # 1. Any number of modules (eg, groceries, tasks, etc.)
 # 2. Any number of sub-models within each (eg, grocery product, grocery transaction)
 
@@ -23,7 +23,7 @@ modelMap = {
     ("tasks", "none"): tasks_models.Task,
 }
 
-# ADD
+# ADD - Need to confirm whether I'm using this
 @crud_bp.route("/<module>/<subtype>", methods=["GET", "POST"])
 def add_item(module, subtype):
     if request.method == "GET":
