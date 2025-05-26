@@ -1,22 +1,24 @@
-# Entry point for Flask app ONLY
+# Entry point for Flask app
 
 from app import create_app
-
-## OLDER IMPORTS
-import threading  ## For now, used for running background scanner input daemon
 
 ## Database handling stuff
 from app.modules.groceries import repository as grocery_repo
 from app.modules.scanner import scan_input ## For now, used for running background scanner input
-from app.core.database import get_db_session
+from app.core.database import db_session
 
 # Import DB stuff
 from app.modules.groceries import models as grocery_models
 from app.modules.tasks import models as tasks_models
 
-# Prototyping BARCODE SCANNER logic/handling
+
+'''
+----- Prototyping BARCODE SCANNER logic/handling
+
+import threading  ## Intended for background scanner input daemon
+
 def handle_barcode_first(barcode):
-    session = get_db_session()
+    session = db_session()
     try:
         result = grocery_repo.handle_barcode(session, barcode)
 
@@ -32,7 +34,7 @@ def handle_barcode_first(barcode):
     finally:
         session.close()
         
-'''
+
 # Start daemon to listen in background for barcode(s)
 scanner_thread = threading.Thread(
     target=lambda: scan_input.simulate_scan_loop(handle_barcode_first),
@@ -45,4 +47,4 @@ scanner_thread.start()
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=True) # Remove this now that we have configs? CHECK
+    app.run()
