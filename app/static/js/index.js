@@ -73,3 +73,30 @@ function markHabitComplete(checkbox, habitId) {
         console.error('Error marking anchor habit (task) complete:', error);
     });
 }
+
+// Beginning work for function to update time display on homepage in real-time w/o reload
+function getCurrentTimeString() {
+    let date = new Date(); // First we need to get today's date obj
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    
+    // Pad times
+    let paddedHours = hours.toString().padStart(2, '0');
+    let paddedMinutes = minutes.toString().padStart(2, '0');
+    // Template literal to conjoin
+    let timeString = `${paddedHours}:${paddedMinutes}`;
+    
+    return timeString;
+}
+
+function updateClock() {
+    // Get the element by id
+    let timeDisplay = document.getElementById("time-display");
+    // use getCurrentTimeString to call that and inject that value
+    timeDisplay.textContent = getCurrentTimeString();
+}
+
+window.onload = () => {
+    setInterval(updateClock, 30 * 1000); // 30 seconds
+    updateClock();
+}
