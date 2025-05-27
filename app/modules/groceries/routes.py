@@ -30,6 +30,9 @@ def dashboard():
         # Fetch products and transactions, pass into render_template
         products = grocery_repo.get_all_products(session)
         transactions = grocery_repo.get_all_transactions(session)
+
+        # Sort transactions list by most recent DateTime first
+        transactions.sort(key=lambda trans: trans.date_scanned, reverse=True)
             
         return render_template(
             "groceries/dashboard.html", products = products,
