@@ -176,7 +176,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Tailwind output file, since we run build before pushing main anyway
+# Tailwind output file, now include build in Dockerfile itself
 **/output.css
 
 # Playground/ for learning/experimenting
