@@ -175,3 +175,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Add playground/ to ignore so I can experiment/brush up/practice
+playground/
