@@ -5,8 +5,8 @@
 {% block title %}Groceries{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10">
-    <div class="min-w-max bg-gray-200 p-6 rounded-xl shadow-md"> <!-- Added my-6 to top div to -->
+<div class="{{ styles.dashboard_container_classes() }}">
+    <div class="{{ styles.dashboard_card_classes() }}"> <!-- Added my-6 to top div to -->
         <h2 class="text-lg font-semibold mb-2">Grocery - Recent Transactions</h2>
         <table class="caption-top {{ styles.table_classes() }}">
             <caption class="sr-only">Grocery - Recent Transactions</caption>
@@ -52,7 +52,7 @@
     <a href="{{ url_for('groceries.add_transaction')}}" class="{{ styles.btn_classes() }}">
         Log New Transaction
     </a>
-    <div class="bg-gray-200 p-6 rounded-xl shadow-md">
+    <div class="{{ styles.dashboard_card_classes() }}">
         <h2 class="text-lg font-semibold mb-2">Product Catalog</h2>
         <table class="caption-top {{ styles.table_classes() }}">
             <caption class="sr-only">Product Catalog</caption>
