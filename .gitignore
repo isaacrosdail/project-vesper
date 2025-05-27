@@ -175,3 +175,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Playground folder used locally for learning/expanding understanding without
+# messing up my codebase :P
+playground/
