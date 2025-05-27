@@ -3,8 +3,8 @@
 {% block title %}Tasks{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10">
-    <div class="min-w-max bg-gray-200 p-6 rounded-xl shadow-md">
+<div class="{{ styles.dashboard_container_classes() }}">
+    <div class="{{ styles.dashboard_card_classes() }}">
         <h2 class="text-lg font-semibold mb-2">Tasks / Habits</h2>
         <table class="{{ styles.table_classes() }}">
             <caption class="sr-only">Tasks / Habits</caption>
@@ -61,7 +61,7 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('tasks.add_task')}}" class="{{ styles.btn_classes() }}">
+    <a href="{{ url_for('tasks.add_task')}}" class="mb-2 {{ styles.btn_classes() }}">
         Add New Task
     </a>
 </div>
