@@ -26,6 +26,9 @@ def dashboard():
         # Fetch tasks list
         tasks = tasks_repo.get_all_tasks(session)
 
+        # Sort tasks list by most recent Datetime first
+        tasks.sort(key=lambda task: task.created_at, reverse=True)
+
         return render_template(
             "tasks/dashboard.html",
             task_column_names = task_column_names,
