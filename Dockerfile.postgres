@@ -1,5 +1,6 @@
 
 # Base image - use official Postgres image
+# Remember: this is also Debian Linux + PostgreSQL
 FROM postgres:latest
 
 # Install nano
