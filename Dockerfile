@@ -1,3 +1,4 @@
+# Remember: This isn't just Python - it's Debian Linux with Python pre-installed
 FROM python:3.12-slim
 WORKDIR /app
 
