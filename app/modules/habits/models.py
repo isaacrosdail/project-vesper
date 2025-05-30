@@ -1,0 +1,37 @@
+# Handles DB models for tasks module
+
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+
+from app.core.db_base import Base
+
+# Habit/HabitCompletion
+# Relationship type: one-to-many (one habit, many completions)
+# Direction: bidirectional (thanks to back_populates)
+# Habit Model
+class Habit(Base):
+    __tablename__ = "habits"
+
+    habit_completions = relationship("HabitCompletion", back_populates="habit")
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255), unique=True, nullable=False)
+    status = Column(String(50), default='experimental')     # Becomes 'established' once promoted
+    experimental_start_date = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    established_date = Column(DateTime(timezone=True), nullable=True)
+    promotion_threshold = Column(Float, default=0.7) # 70% completion rate -> How would I code the promotion logic for this??
+
+
+# Habit Completion Model - enables us to track WHEN and HOW OFTEN specific habits were completed!
+# Stores each "completion" as a new entry
+class HabitCompletion(Base):
+    __tablename__ ="habit_completions"
+
+    habit = relationship("Habit", back_populates="habit_completions")
+
+    id = Column(Integer, primary_key=True)
+    habit_id = Column(Integer, ForeignKey('habits.id'))
+    completed_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)) # When was it completed?
