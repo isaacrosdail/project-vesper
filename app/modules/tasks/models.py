@@ -3,7 +3,8 @@
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.core.db_base import Base
 
@@ -16,7 +17,6 @@ class Task(Base):
     title = Column(String(255), unique=True, nullable=False)
     is_done = Column(Boolean, default=False)
     type = Column(String(50), default='todo')
-    is_anchor = Column(Boolean, default=False)
     created_at = (Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)))
     completed_at = (Column(DateTime(timezone=True), nullable=True))
 
@@ -32,7 +32,6 @@ class Task(Base):
         "title": "Task",
         "is_done": "Status",
         "type": "Type",
-        "is_anchor": "Anchor Habit?",
         "created_at": "Created",
         "completed_at": "Completed"
     }
