@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 
+from app.core.config import Config          # To get our config class that was set up using environment variables in config.py
 from app.core.config import config_map
 from app.core.database import db_session, init_db
 # Import Blueprints
@@ -13,23 +14,15 @@ from app.modules.groceries.routes import groceries_bp
 from app.modules.tasks.routes import tasks_bp
 
 
-def create_app(config_name=None):
-
-    # Load environment variables
-    load_dotenv()
+def create_app(config_class=None):
+    if config_class is None:
+        config_class = Config
 
     app = Flask(__name__)
-
-    # If no config provided, check Flask_ENV for environment
-    if config_name is None:
-        # Get FLASK_ENV and default to 'dev' if not set
-        env = os.environ.get('FLASK_ENV', 'development')
-        config_name = 'prod' if env == 'production' else 'dev'
-
-    print(f"Using config: {config_name}")
+    print(f"Using config: {config_class.__name__}")
 
     # Load appropriate config based on environment
-    app.config.from_object(config_map[config_name])
+    app.config.from_object(config_class)
 
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
