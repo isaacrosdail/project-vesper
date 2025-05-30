@@ -9,6 +9,7 @@ from flask import (Blueprint, current_app, flash, redirect, render_template,
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
 from app.modules.tasks import repository as tasks_repo
+from app.modules.habits import repository as habits_repo
 from app.seed_db import seed_db
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
@@ -29,20 +30,18 @@ def home():
         # Get Tasks to pass Anchor Habits to display
         session = db_session()
 
-        # Get all tasks
+        # Get all tasks (just regular todos now)
         tasks = tasks_repo.get_all_tasks(session)
-        # List comprehension to filter anchor habits from tasks list
-        anchor_habits = [
-            task for task in tasks
-            if task.type == "habit" and task.is_anchor
-        ]
+
+        # Get all habits directly from Habit table
+        habits = habits_repo.get_all_habits(session)
 
         return render_template(
             "index.html",
             tasks=tasks,
             now=now,
             start_of_day_utc=start_of_day_utc,
-            anchor_habits = anchor_habits
+            habits=habits
         )
     finally:
         session.close()
