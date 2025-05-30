@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.core.database import db_session
 from app.modules.groceries.models import Product, Transaction
-from app.modules.tasks.models import Task
+from app.modules.tasks.models import Task, Habit, HabitCompletion
 
 
 def seed_db():
@@ -16,34 +16,33 @@ def seed_db():
         session.query(Transaction).delete()
         session.query(Task).delete()
         session.query(Product).delete()
+        session.query(Habit).delete()
+        session.query(HabitCompletion).delete()
 
-        # Create & add tasks
+        # Create regular tasks (no more is_anchor field -> moving to new Habit model entirely)
         tasks = [
-            # Anchor habit #1
-            Task(
-                title="AM Flashcards",
-                type="habit",
-                is_anchor=True,
-            ),
-            # Anchor habit #2
-            Task(
-                title="30 Mins Project Work",
-                type="habit",
-                is_anchor=True,
-            ),
-            # Anchor habit #3
-            Task(
-                title="Walk Puppers",
-                type="habit",
-                is_anchor=True,
-            ),
             # Regular Tasks
             Task(title="Buy groceries"),
             Task(title="Update portfolio website"),
             Task(title="Organize digital files")
         ]
 
-        session.add_all(tasks)
+        # Create habits in new Habit table
+        habits = [
+            Habit(title="AM Flashcards", status="experimental"),
+            Habit(title="30 Mins Project Work", status="experimental"),
+            Habit(title="Walk Puppers", status="established", 
+                    established_date=datetime.now(timezone.utc))
+        ]
+
+        # Add some sample habit completions
+        habit_completions = [
+            HabitCompletion(habit_id=1, completed_at=datetime.now(timezone.utc) - timedelta(days=1)),
+            HabitCompletion(habit_id=1, completed_at=datetime.now(timezone.utc)),
+            HabitCompletion(habit_id=2, completed_at=datetime.now(timezone.utc))
+        ]
+
+        session.add_all(tasks + habits + habit_completions)
 
         # Create & add products
         products = [
@@ -91,7 +90,7 @@ def seed_db():
         session.add_all(transactions)
         session.commit()
 
-        return "DB seeded successfully with 6 Tasks (3 anchor habits, 3 todos), 3 Products, and 10 randomized Transactions for said Products"
+        return "DB seeded successfully"
 
     finally:
         session.close()
