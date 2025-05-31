@@ -1,11 +1,12 @@
 # Handles DB models for tasks module
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import Column, DateTime, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.core.db_base import Base
+
 
 # Habit/HabitCompletion
 # Relationship type: one-to-many (one habit, many completions)
@@ -36,6 +37,16 @@ class Habit(Base):
                 return True # Found completion from today
         
         return False # No completions found for today
+    
+    # Human-readable column names
+    COLUMN_LABELS = {
+        "id": "ID",
+        "title": "Title",
+        "status": "Status",
+        "experimental_start_date": "Date Added",
+        "established_date": "Date Promoted",
+        "promotion_threshold": "Promotion Threshold"
+    }
 
 # Habit Completion Model - enables us to track WHEN and HOW OFTEN specific habits were completed!
 # Stores each "completion" as a new entry

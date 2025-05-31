@@ -3,8 +3,7 @@
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 
 from app.core.db_base import Base
 
@@ -20,8 +19,9 @@ class Task(Base):
     created_at = (Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)))
     completed_at = (Column(DateTime(timezone=True), nullable=True))
 
+    # @property is a common decorator for creating "virtual attributes" that are computed on-the-fly
     # Lets us convert to London time simply by doing task.created_at_local
-    # as if it were a column in the table / property of the object
+    # as if it were a column in the model itself
     @property
     def created_at_local(self):
         return self.created_at.astimezone(ZoneInfo("Europe/London"))

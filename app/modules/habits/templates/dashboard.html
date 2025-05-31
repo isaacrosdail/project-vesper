@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Habits{% endblock %}
+
+{% block content %}
+<div class="{{ styles.dashboard_container_classes() }}">
+    <div class="{{ styles.dashboard_card_classes() }}">
+        <h2 class="text-lg font-semibold mb-2">Habits</h2>
+        <table class="{{ table_classes() }}">
+            <caption class="sr-only">Habits</caption>
+            <thead class="bg-gray-800 text-white font-semibold">
+                <tr>
+                    <th class="{{ styles.th_classes() }}">ID</th>
+                    <th class="{{ styles.th_classes() }}">Title</th>
+                    <th class="{{ styles.th_classes() }}">Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if habits %}
+                    {% for habit in habits %}
+                    <tr class="{{ styles.tr_classes() }}" data-item-id="{{ task.id }}">
+                        <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
+                        <td class="{{ styles.td_classes() }}">{{ habit.title }}</td>
+                        <td class="{{ styles.td_classes() }}">{{ habit.experimental_start_date }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-gray-500 italic py-2">
+                            No habits yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ url_for('habits.add_habit') }}" class="mb-2 {{ styles.btn_classes() }}">
+        Add New Habit
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename = 'js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/habits/dashboard.js') }}"></script>
+{% endblock %}

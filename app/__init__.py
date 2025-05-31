@@ -4,15 +4,15 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 
-from app.core.config import Config          # To get our config class that was set up using environment variables in config.py
-from app.core.config import config_map
+from app.core.config import \
+    Config  # To get our config class that was set up using environment variables in config.py
 from app.core.database import db_session, init_db
 # Import Blueprints
 from app.core.routes import main_bp
 from app.modules.crud_routes import crud_bp
 from app.modules.groceries.routes import groceries_bp
-from app.modules.tasks.routes import tasks_bp
 from app.modules.habits.routes import habits_bp
+from app.modules.tasks.routes import tasks_bp
 
 
 def create_app(config_class=None):

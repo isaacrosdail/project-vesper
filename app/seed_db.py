@@ -1,12 +1,12 @@
-# Basic script to seed our db with dummy data for dev & demo purposes
+# Basic script to seed our db with dummy data for demo purposes
 
 import random
 from datetime import datetime, timedelta, timezone
 
 from app.core.database import db_session
 from app.modules.groceries.models import Product, Transaction
-from app.modules.tasks.models import Task
 from app.modules.habits.models import Habit, HabitCompletion
+from app.modules.tasks.models import Task
 
 
 def seed_db():
@@ -32,7 +32,7 @@ def seed_db():
         habits = [
             Habit(title="AM Flashcards", status="experimental"),
             Habit(title="30 Mins Project Work", status="experimental"),
-            Habit(title="Walk Puppers", status="established", 
+            Habit(title="Walk Dog", status="established", 
                     established_date=datetime.now(timezone.utc))
         ]
 
