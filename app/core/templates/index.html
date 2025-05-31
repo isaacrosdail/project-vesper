@@ -20,19 +20,19 @@
 
         <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p><br>
     </div>
-    <!-- Anchor Habits Card -->
+    <!-- Daily Habits Card -->
     <div class="bg-gray-200 p-6 rounded-xl shadow-lg">
-        <h2 class="text-xl font-semibold mb-2">Anchor Habits</h2>
+        <h2 class="text-xl font-semibold mb-2">Daily Habits</h2>
         <!-- Just print names in UL for now -->
         <ul>
-        {% for anchor_habit in anchor_habits %}
+        {% for habit in habits %}
             <li>
                 <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
                 <input type="checkbox"
-                    {% if anchor_habit.is_done %}checked{% endif %}
-                    onchange="markHabitComplete(this, {{ anchor_habit.id }})">
-                <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if anchor_habit.is_done %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
-                    {{ anchor_habit.title }}
+                    {% if habit.completed_today() %}checked{% endif %}
+                    onchange="markHabitComplete(this, {{ habit.id }})">
+                <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if habit.completed_today() %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
+                    {{ habit.title }}
                 </span>
             </li>
         {% endfor %}
