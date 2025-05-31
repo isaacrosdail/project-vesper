@@ -1,12 +1,11 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-
 # Added: Make Alembic use Vesper's config system directly
-from app.core.config import Config # Uses our auto-selected config from env vars
+from app.core.config import \
+    Config  # Uses our auto-selected config from env vars
 from app.core.db_base import Base  # Import SQLAlchemy Base
 
 # this is the Alembic Config object, which provides
