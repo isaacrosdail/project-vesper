@@ -36,43 +36,56 @@ function markHabitComplete(checkbox, habitId) {
     // If .checked == False -> user just un-checked it
     const isDone = checkbox.checked;
 
-    // Fetch PATCH request to update is_done
-    fetch(`/tasks/${habitId}`, { 
-        // Request config
-        // Making a POST request | Set Content-Type to application/json even if 
-        // we're not sending a body (good habit)
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json' // Good habit to set this, research why later
-        },
-        body: JSON.stringify({ is_done: isDone })
-    })
-    // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
-    .then(response => {
-        if (response.ok) {
-            // Immediately apply strikethrough effect
-            const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
-            if (textSpan) {
-                if (checkbox.checked) {
+    // Now need to break out original PATCH request into two different requests.
+    if (checkbox.checked) {
+        // POST a new HabitCompletion record
+        fetch(`/habits/${habitId}/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
+        .then(response => {
+            if (response.ok) {
+                // Immediately apply strikethrough effect
+                const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
+                if (textSpan) {
                     textSpan.classList.add("line-through", "text-gray-400");
-                } else {
+                }
+            }
+        })
+        // Error Catching (eg, network fails, Flask throws error) // Could later show a popup, retry, etc.
+        // If network fails or Flask throws an error, you'll see it here
+        .catch(error => {
+            console.error('Error marking habit complete:', error);
+        });
+    } else {
+        // DELETE the existing HabitCompletion record
+        fetch(`/habits/${habitId}/completions/today`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
+        .then(response => {
+            if (response.ok) {
+                // Immediately remove strikethrough effect
+                const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
+                if (textSpan) {
                     textSpan.classList.remove("line-through", "text-gray-400");
                 }
             }
+        })
+        .catch(error => {
+            console.error('Error un-marking habit complete:', error);
+        });
         }
-    })
-    // Once you have that response, do something - here, just log it
-    // Later, could update the UI, disable the checkbox, add animation, etc
-    .then(data => {
-        console.log('Anchor habit (task) marked complete:', data);
-        // Optional, update UI here later
-    })
-    // Error Catching (eg, network fails, Flask throws error) // Could later show a popup, retry, etc.
-    // If network fails or Flask throws an error, you'll see it here
-    .catch(error => {
-        console.error('Error marking anchor habit (task) complete:', error);
-    });
 }
+
+
+
 
 // Beginning work for function to update time display on homepage in real-time w/o reload
 function getCurrentTimeString() {
