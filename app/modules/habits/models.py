@@ -1,9 +1,8 @@
 # Handles DB models for tasks module
 
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
+from datetime import datetime, timezone, timedelta
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.core.db_base import Base
@@ -24,6 +23,19 @@ class Habit(Base):
     established_date = Column(DateTime(timezone=True), nullable=True)
     promotion_threshold = Column(Float, default=0.7) # 70% completion rate -> How would I code the promotion logic for this??
 
+    # Method to filter all of a habit's completions to find the one's from today
+    def completed_today(self):
+        # Define "today" - UTC midnight to midnight
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+
+        # Loop through ALL completions for this habit (Study later!)
+        for completion in self.habit_completions: # Uses our bidirectional relationship
+            # Check if completion has happened today
+            if today_start <= completion.completed_at < today_end:
+                return True # Found completion from today
+        
+        return False # No completions found for today
 
 # Habit Completion Model - enables us to track WHEN and HOW OFTEN specific habits were completed!
 # Stores each "completion" as a new entry
