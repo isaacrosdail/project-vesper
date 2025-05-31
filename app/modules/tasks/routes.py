@@ -32,7 +32,8 @@ def dashboard():
         return render_template(
             "tasks/dashboard.html",
             task_column_names = task_column_names,
-            tasks = tasks)
+            tasks = tasks
+        )
     finally:
         session.close()
 
