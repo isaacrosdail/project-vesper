@@ -717,3 +717,14 @@ certbot --nginx
 
 **Next Up:**
 - Tidy up code/comments/etc, enforce branching pipeline
+
+## [Fri 30.05.25] - dev branch
+Log:
+- Install Alembic, initial setup
+- Consolidate env configs to config.py
+	- Removed redundant env detection, simplified create_app with Config class, maintained flexibility for testing/overrides
+ - Create new Habit model
+	- Pruned is_anchor field from Task model
+	- Start cleanup/refactor to transition
+
+
