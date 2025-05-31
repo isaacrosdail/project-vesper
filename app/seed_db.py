@@ -5,7 +5,8 @@ from datetime import datetime, timedelta, timezone
 
 from app.core.database import db_session
 from app.modules.groceries.models import Product, Transaction
-from app.modules.tasks.models import Task, Habit, HabitCompletion
+from app.modules.tasks.models import Task
+from app.modules.habits.models import Habit, HabitCompletion
 
 
 def seed_db():
