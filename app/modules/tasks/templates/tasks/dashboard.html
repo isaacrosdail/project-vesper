@@ -5,9 +5,9 @@
 {% block content %}
 <div class="{{ styles.dashboard_container_classes() }}">
     <div class="{{ styles.dashboard_card_classes() }}">
-        <h2 class="text-lg font-semibold mb-2">Tasks / Habits</h2>
+        <h2 class="text-lg font-semibold mb-2">Tasks</h2>
         <table class="{{ styles.table_classes() }}">
-            <caption class="sr-only">Tasks / Habits</caption>
+            <caption class="sr-only">Tasks</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
                     <th class="{{ styles.th_classes() }}">ID</th>
@@ -61,7 +61,7 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('tasks.add_task')}}" class="mb-2 {{ styles.btn_classes() }}">
+    <a href="{{ url_for('tasks.add_task') }}" class="mb-2 {{ styles.btn_classes() }}">
         Add New Task
     </a>
 </div>
