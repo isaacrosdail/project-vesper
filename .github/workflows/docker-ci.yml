@@ -3,7 +3,7 @@ name: Vesper CI/CD
 on:
   push:
     branches: [ main ]
-    paths ignore:
+    paths-ignore:
       - 'PROJECT_LOG.md'
       - 'README.md'
 
