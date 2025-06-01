@@ -39,6 +39,9 @@ jobs:
             # This way, we can mount the same local-only file from either Pi!
             export SEED_PATH="/home/${{ matrix.username }}/private-seeds/seed_dev_db.py"
 
+            echo "SEED_PATH is set to: $SEED_PATH"
+            ls -la "$SEED_PATH" # check if file exists
+            
             git pull origin dev
             docker-compose down
             docker-compose up -d --build
