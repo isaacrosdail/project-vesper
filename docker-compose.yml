@@ -20,7 +20,7 @@ services:
     volumes:
       - ${SEED_PATH}:/app/app/seed_dev_db.py
 
-    command: sleep infinity
+    #command: sleep infinity
 
   db:
     build:
