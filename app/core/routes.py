@@ -11,6 +11,7 @@ from app.core.db_base import Base
 from app.modules.habits import repository as habits_repo
 from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
+from app.seed_dev_db import seed_dev_db
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
@@ -77,4 +78,15 @@ def reset_db():
     # Add confirmation message via flash
     flash('Database has been reset successfully!', 'success')
 
+    return redirect(request.referrer or url_for('index'))
+
+@main_bp.route('/reset_dev_db', methods=["POST"])
+def reset_dev_db():
+    db_session.remove()
+    engine = get_engine(current_app.config)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    seed_dev_db()
+
+    flash('Dev db reset', 'success')
     return redirect(request.referrer or url_for('index'))

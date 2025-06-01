@@ -64,6 +64,11 @@
     <a href="{{ url_for('tasks.add_task') }}" class="mb-2 {{ styles.btn_classes() }}">
         Add New Task
     </a>
+    {% if flask_env == 'development' %}
+    <form action="{{ url_for('main.reset_dev_db') }}" method="POST">
+        <button type="submit" class="mt-120 {{ styles.btn_classes() }}">Reset dev DB</button>
+    </form>
+    {% endif %}
 </div>
 {% endblock %}
 
