@@ -14,6 +14,11 @@ services:
       - FLASK_ENV=development
     depends_on:
       - db
+    # Bind mounting a file from the host filesystem into the container
+    # This is different from copying! Here, the file lives on the host, but
+    # a direct connection is created such that it appears inside the container
+    volumes:
+      - /home/isaac_1/private-seeds/seed_dev_db.py:/app/seed_dev_db.py
 
   db:
     build:
@@ -30,6 +35,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
+      - ${SEED_PATH}:/app/seed_dev_db.py
 
 volumes:
   pgdata:

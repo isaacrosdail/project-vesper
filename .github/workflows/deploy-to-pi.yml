@@ -35,6 +35,10 @@ jobs:
           script: |
             cd ~/project-vesper
 
+            # Set the dynamic seed path based on current user
+            # This way, we can mount the same local-only file from either Pi!
+            export SEED_PATH="/home/${{ matrix.username }}/private-seeds/seed_dev_db.py"
+
             git pull origin dev
             docker-compose down
             docker-compose up -d --build
