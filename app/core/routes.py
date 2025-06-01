@@ -8,8 +8,8 @@ from flask import (Blueprint, current_app, flash, redirect, render_template,
 
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
-from app.modules.tasks import repository as tasks_repo
 from app.modules.habits import repository as habits_repo
+from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
