@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
-
 from sqlalchemy import func
 
 from app.core.database import db_session
