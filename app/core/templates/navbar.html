@@ -12,6 +12,10 @@
                     class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
                     Tasks
             </a>
+            <a href="{{ url_for('habits.dashboard') }}"
+                    class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'habits.dashboard' %}bg-gray-700{% endif %}">
+                    Habits
+            </a>
             <a href="{{ url_for('groceries.dashboard') }}" 
                     class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
                     Groceries
