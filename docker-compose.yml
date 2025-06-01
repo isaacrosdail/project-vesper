@@ -1,6 +1,20 @@
 # Uses existing container name & credentials
 # Keeps current dbs we already have set up
 services:
+  # Adding web service here as well to serve as our personal use variant
+  web:
+    build: . # assumes we have a Dockerfile for Flask app
+    container_name: vesper-web
+    restart: always
+    ports:
+      - "0.0.0.0:5000:5000" # accessible from network
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - FLASK_ENV=development
+    depends_on:
+      - db
+
   db:
     build:
       context: . # why the period here?
@@ -10,9 +24,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: vesper
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: vesper
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
