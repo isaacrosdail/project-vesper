@@ -20,6 +20,8 @@ services:
     volumes:
       - /home/isaac_1/private-seeds/seed_dev_db.py:/app/seed_dev_db.py
 
+    command: sleep infinity
+
   db:
     build:
       context: . # why the period here?
