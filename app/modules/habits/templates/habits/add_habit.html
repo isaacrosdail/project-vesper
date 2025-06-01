@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Add Habit{% endblock %}
+
+{% block content %}
+    <h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Add new habit:</h2>
+    <div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
+        <form method="POST">
+
+            <div class="mb-4">
+                <label for="title">Habit:</label><br>
+                <input 
+                    type="text"
+                    id="title" 
+                    name="title"
+                    class="{{ styles.input_classes() }}"><br> <!-- Remember: using our styling macros with styles.input_classes() -->
+            </div>
+            <div class="mb-4">
+                <button class="{{ styles.submit_classes() }}" type="submit">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
