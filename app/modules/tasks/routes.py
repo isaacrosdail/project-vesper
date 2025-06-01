@@ -10,6 +10,8 @@ from app.modules.tasks import repository as tasks_repo
 # Import Task model
 from app.modules.tasks.models import Task
 
+import os
+
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
 @tasks_bp.route("/", methods=["GET"])
@@ -32,7 +34,8 @@ def dashboard():
         return render_template(
             "tasks/dashboard.html",
             task_column_names = task_column_names,
-            tasks = tasks
+            tasks = tasks,
+            flask_env=os.getenv('FLASK_ENV')
         )
     finally:
         session.close()
