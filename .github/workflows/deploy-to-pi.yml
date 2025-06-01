@@ -16,11 +16,11 @@ jobs:
           - name: Pi1
             port: 2222
             username: isaac_1
-            key: ${{ secrets.PI5_SSH_KEY }}
+            key: PI5_SSH_KEY
           - name: Pi2
             port: 2223
             username: isaac_2
-            key: ${{ secrets.PI_SSH_KEY }}
+            key: PI_SSH_KEY
 
     steps:
       - uses: actions/checkout@v2
