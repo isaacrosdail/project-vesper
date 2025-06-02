@@ -19,6 +19,11 @@ RUN npm install
 COPY . .
 RUN npm run build
 
+# Create user & switch
+RUN adduser --disabled-password appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
 ENV FLASK_APP=app.py
 EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]da
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
