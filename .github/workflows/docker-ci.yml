@@ -18,6 +18,7 @@ jobs:
         host: ${{ secrets.LINODE_HOST }}
         username: ${{ secrets.LINODE_USERNAME }}
         key: ${{ secrets.LINODE_SSH_KEY }}
+        port: ${{ secrets.LINODE_PORT }}
         script: |
           cd ${{ secrets.PROJECT_PATH }}
           git pull
