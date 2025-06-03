@@ -5,6 +5,8 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 
 from app.core.database import db_session
+from app.utils.sorting import bubble_sort_test
+
 # Import Task repository
 from app.modules.tasks import repository as tasks_repo
 # Import Task model
@@ -29,7 +31,11 @@ def dashboard():
         tasks = tasks_repo.get_all_tasks(session)
 
         # Sort tasks list by most recent Datetime first
-        tasks.sort(key=lambda task: task.created_at, reverse=True)
+        #tasks.sort(key=lambda task: task.created_at, reverse=True)
+
+        # Now using our own bubble sort!
+        # Most recently created tasks at bottom of table
+        bubble_sort_test(tasks, 'created_at_local', reverse=False)
 
         return render_template(
             "tasks/dashboard.html",
@@ -54,14 +60,13 @@ def add_task():
             # Value for checkbox is irrelevant
             # If checked, then value is not None, so bool=True (ie, it exists)
             # Otherwise it is None, in which case bool=False 
-            "is_anchor": bool(request.form.get("is_anchor"))
+            #"is_anchor": bool(request.form.get("is_anchor"))
         }
         # Creating new task Task object
         new_task = Task(
             title=task_data["title"],
             type=task_data["type"],
             is_done=False,
-            is_anchor=task_data["is_anchor"],
             created_at=datetime.now(timezone.utc),
             completed_at=None
         )
