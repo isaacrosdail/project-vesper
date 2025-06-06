@@ -717,3 +717,35 @@ certbot --nginx
 
 **Next Up:**
 - Tidy up code/comments/etc, enforce branching pipeline
+
+## [Fri 06.06.25]
+**Goals:**
+1. Add 2 models:
+	1. DailyIntention model -> DONE
+	2. DailyMetric model -> DONE
+	3. Alembic revision!
+		
+			
+2. Make Daily Intention on homepage now use/update our new model instead of just the element's text!
+
+**Log:**
+1. Made DailyIntention & DailyMetric models
+	- Alembic revision
+		- Ran into issue: Since we switched from vesper to vesper_dev for our dev DB, vesper_dev didn't have an 'alembic_version' table (which is why alembic current showed nothing), but it DID have actual tables from previous migrations.
+			- Fix: Just needed to run 'alembic stamp head', which basically tells Alembic: "Hey Alembic, we're actually at the latest migration"
+				- It creates the alembic_version table in vesper_dev, marks it as being our latest migration, & gets everything in sync!
+				- Then, we could run our revision and run alembic upgrade head
+				
+2. Updated Daily Intention on homepage to use DB for persistence
+	- Added created_at field to DailyIntention model
+	- Created get_today_intention() function in habits_repository.py
+	- Updated homepage route to fetch & pass today's intention to template
+	- Modified index.html: added Jinja conditional to use intention OR default text, refactor critical-task to daily-intention
+Key Changes: DB schema, repository layer, route logic, template rendering
+
+3. Other changes
+	- Fixed lazy loading errors (sneaky!) by moving habit completion logic from templates to backend
+	- Refactored index.html dashboard route to pre-calculate completion status and streaks as dictionaries
+
+**Where I Left Off:**
+- Started test_habits_habit_logic.py unit test file to suss out possible race condition with our AJAX
