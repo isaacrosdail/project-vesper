@@ -12,6 +12,7 @@ from app.modules.habits import repository as habits_repo
 from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
 from app.seed_dev_db import seed_dev_db
+from app.utils.habit_logic import calculate_habit_streak, check_if_completed_today
 
 from app.modules.habits.models import DailyIntention
 
@@ -39,8 +40,21 @@ def home():
         # Get all habits directly from Habit table
         habits = habits_repo.get_all_habits(session)
 
+        # Dict for completed_today status (to move our check out of our template, which caused lazy loading errors)
+        completed_today = {}
+        for habit in habits:
+            completed = check_if_completed_today(habit.id)
+            completed_today[habit.id] = completed
+
         # Get DailyIntention for today, if any
         todayIntention = habits_repo.get_today_intention(session)
+
+        # Get habit streaks
+        # Keys of habit.id and values of streak_count
+        streaks = {}
+        for habit in habits:
+            streak_count = calculate_habit_streak(habit.id)
+            streaks[habit.id] = streak_count
 
         return render_template(
             "index.html",
@@ -48,7 +62,9 @@ def home():
             now=now,
             start_of_day_utc=start_of_day_utc,
             habits=habits,
-            todayIntention=todayIntention
+            todayIntention=todayIntention,
+            streaks=streaks,
+            completed_today=completed_today
         )
     finally:
         session.close()
