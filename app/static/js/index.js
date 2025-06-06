@@ -1,28 +1,43 @@
 
-// Variable for critical-task text input
-let criticalTask;
+// Variable for daily intention text input
+let dailyIntention;
 
-// Constant for critical-task-submit button
-const criticalTaskSubmitBtn = document.getElementById("critical-task-submit");
-// Variables for critical-task-text and critical-task-result
-let criticalTaskText = document.getElementById("critical-task-text");
-let criticalTaskResult = document.getElementById("critical-task-result");
+// Constant for daily-intention-submit button
+const dailyIntentionSubmitBtn = document.getElementById("daily-intention-submit");
+// Variables for daily-intention-text and daily-intention-result
+let dailyIntentionText = document.getElementById("daily-intention-text");
+let dailyIntentionResult = document.getElementById("daily-intention-result");
 
-// Want the value of critical-task-text to become critical-task-result, then hide critical-task-edit again
-criticalTaskSubmitBtn.onclick = () => {
-    // Get critical-task text from input using element id
-    criticalTask = document.getElementById("critical-task-text").value;
-    // Set critical-task-result = critical-task
-    document.getElementById("critical-task-result-text").textContent = criticalTask;
-    // And hide the input text box and submit button
-    document.getElementById("critical-task-result").classList.remove("hidden");
-    document.getElementById("critical-task-edit").classList.add("hidden");
+// Want the value of daily-intention-text to become daily-intention-result, then hide daily-intention-edit again
+dailyIntentionSubmitBtn.onclick = () => {
+    // Get daily-intention text from input using element id
+    dailyIntention = document.getElementById("daily-intention-text").value;
+
+    // POST request to DB via fetch
+    fetch(`/daily-intentions/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intention: dailyIntention })
+    })
+    .then(response => response.json()) // convert response to json so we can use it
+    .then(data => {
+        // Where we handle SUCCESS -> update the DOM, etc.
+        // Set daily-intention-result = daily-intention
+        document.getElementById("daily-intention-result-text").textContent = dailyIntention;
+        // And hide the input text box and submit button
+        document.getElementById("daily-intention-result").classList.remove("hidden");
+        document.getElementById("daily-intention-edit").classList.add("hidden");
+    })
+    .catch(error => {
+        // Handling errors
+        console.error('Failed to save/update: ', error);
+    })
 }
 
 function enableEdit() {
-    document.getElementById("critical-task-result").classList.add("hidden");
-    document.getElementById("critical-task-edit").classList.remove("hidden");
-    document.getElementById("critical-task-text").focus();
+    document.getElementById("daily-intention-result").classList.add("hidden");
+    document.getElementById("daily-intention-edit").classList.remove("hidden");
+    document.getElementById("daily-intention-text").focus();
 }
 
 // Function that activates when checkbox for anchor habits are checked, indicating completion
@@ -36,14 +51,12 @@ function markHabitComplete(checkbox, habitId) {
     // If .checked == False -> user just un-checked it
     const isDone = checkbox.checked;
 
-    // Now need to break out original PATCH request into two different requests.
+    // Now need to break our original PATCH request into two different requests.
     if (checkbox.checked) {
         // POST a new HabitCompletion record
         fetch(`/habits/${habitId}/completions`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
         })
         // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
         .then(response => {
