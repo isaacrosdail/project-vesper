@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 # For reset_db route
 from flask import (Blueprint, current_app, flash, redirect, render_template,
-                   request, url_for)
+                   request, url_for, jsonify)
 
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
@@ -12,6 +12,8 @@ from app.modules.habits import repository as habits_repo
 from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
 from app.seed_dev_db import seed_dev_db
+
+from app.modules.habits.models import DailyIntention
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
@@ -37,13 +39,47 @@ def home():
         # Get all habits directly from Habit table
         habits = habits_repo.get_all_habits(session)
 
+        # Get DailyIntention for today, if any
+        todayIntention = habits_repo.get_today_intention(session)
+
         return render_template(
             "index.html",
             tasks=tasks,
             now=now,
             start_of_day_utc=start_of_day_utc,
-            habits=habits
+            habits=habits,
+            todayIntention=todayIntention
         )
+    finally:
+        session.close()
+
+@main_bp.route('/daily-intentions/', methods=["POST"])
+def update_daily_intention():
+    try:
+        # Get json data from fetch request
+        data = request.get_json()
+        # Check if daily intention exists for today already
+        session = db_session()
+        todayIntention = habits_repo.get_today_intention(session)
+
+        # If it does, just update the intention field using our fetch data
+        if todayIntention:
+            todayIntention.intention = data['intention'] # extract intention key from data
+        # Otherwise, we'll add a new entry for DailyIntention
+        else:
+            new_daily_intention = DailyIntention(
+                intention = data['intention']
+            )
+            session.add(new_daily_intention)
+        session.commit()
+        
+        # Return statement for json success
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        # Undo changes if something failed
+        session.rollback()
+        # Return statement for error
+        return jsonify({'status': 'error', 'message': str(e)}), 500
     finally:
         session.close()
 
