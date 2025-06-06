@@ -8,6 +8,9 @@ def test_insert_and_query_task(app):
     session.add(task)
     session.flush() # instead of commit
 
-    result = session.query(Task).filter_by(title="Test Task").first()
+    result = session.query(Task).filter_by(
+        title="Test Task"
+    ).first()
+    
     assert result.type == "todo"
     session.close()
