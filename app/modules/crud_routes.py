@@ -76,4 +76,4 @@ def delete_item(module, subtype, item_id):
         
         return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
     finally:
-        session.close()
+        session.close()      
