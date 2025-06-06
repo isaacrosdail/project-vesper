@@ -44,8 +44,8 @@
         <h2 class="text-xl font-semibold mb-2">Critical Task</h2>
         <p>
             <span>Today's Intention: </span>
-            <span class="relative group" id="daily-intention" ondblclick="enableEdit()">
-                <span class="text-green-600" id="daily-intention-text">
+            <span class="relative group" id="intention-display" ondblclick="enableEdit()">
+                <span class="text-green-600" id="intention-text">
                 {% if todayIntention %}
                     {{ todayIntention.intention }}
                 {% else %}    
@@ -60,9 +60,9 @@
             </span>
         </p>
         
-        <div id="daily-intention-edit" class="hidden">
-            <input id="daily-intention-text">
-            <button class="button" id="daily-intention-submit">submit</button>
+        <div id="intention-edit" class="hidden">
+            <input id="intention-input">
+            <button class="button" id="intention-submit">submit</button>
         </div>
     </div>
 </div>
