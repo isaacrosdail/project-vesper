@@ -58,3 +58,19 @@ class HabitCompletion(Base):
     id = Column(Integer, primary_key=True)
     habit_id = Column(Integer, ForeignKey('habits.id'))
     completed_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)) # When was it completed?
+
+# Daily Intention Model - to let intentions truly persist as well as to serve future daily reflection stuff
+class DailyIntention(Base):
+    __tablename__ = "daily_intention"
+
+    id = Column(Integer, primary_key=True)
+    intention = Column(String(200))
+    # Consider adding stuff like success_rating and evening_reflection text?
+
+# Daily Metric Model - to store basic metrics like our daily steps counter, for example
+class DailyMetric(Base):
+    __tablename__ = "daily_metric"
+
+    id = Column(Integer, primary_key=True)
+    metric_type = Column(String(50)) # ex: 'steps', 'sleep_hours', etc etc
+    value = Column(Float)
