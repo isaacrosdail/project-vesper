@@ -26,7 +26,7 @@ def bubble_sort(myList):
     for i in range(len(myList)-1):
         no_swaps = True
         for j in range(len(myList)-i-1):
-            # If arr[i] > arr[i+1], swap
+            # If arr[j] > arr[j+1], swap
             if myList[j] > myList[j+1]:
                 no_swaps = False
                 temp = myList[j]
