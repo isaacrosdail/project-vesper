@@ -12,7 +12,7 @@ from app.modules.habits import repository as habits_repo
 from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
 from app.seed_dev_db import seed_dev_db
-from app.utils.habit_logic import calculate_habit_streak, check_if_completed_today
+from app.modules.habits.habit_logic import calculate_habit_streak, check_if_completed_today
 
 from app.modules.habits.models import DailyIntention
 
