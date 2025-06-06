@@ -21,7 +21,7 @@ class SimpleTask:
         self.priority = priority
 
 # Stable
-def bubble_sort(myList):
+def bubble_sort_simple(myList):
     # Outer loop decides whether to continue
     for i in range(len(myList)-1):
         no_swaps = True
@@ -36,7 +36,7 @@ def bubble_sort(myList):
             break
 
 # Stable
-def bubble_sort_test(myList, key, reverse=False):
+def bubble_sort(myList, key, reverse=False):
     # Outer loop decides whether to continue
     for i in range(len(myList)-1):
         no_swaps = True
