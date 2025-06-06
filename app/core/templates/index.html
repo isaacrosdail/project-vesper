@@ -44,8 +44,14 @@
         <h2 class="text-xl font-semibold mb-2">Critical Task</h2>
         <p>
             <span>Today's Intention: </span>
-            <span class="relative group" id="critical-task-result" ondblclick="enableEdit()">
-                <span class="text-green-600" id="critical-task-result-text">What's your focus today?</span>
+            <span class="relative group" id="daily-intention" ondblclick="enableEdit()">
+                <span class="text-green-600" id="daily-intention-text">
+                {% if todayIntention %}
+                    {{ todayIntention.intention }}
+                {% else %}    
+                    What's your focus today?
+                {% endif %}
+                </span>
 
                 <!-- Tooltip -->
                 <span class="absolute opacity-0 group-hover:opacity-100 bg-black text-white text-xs px-1 rounded whitespace-nowrap transition-opacity duration-150">
@@ -54,9 +60,9 @@
             </span>
         </p>
         
-        <div id="critical-task-edit" class="hidden">
-            <input id="critical-task-text">
-            <button class="button" id="critical-task-submit">submit</button>
+        <div id="daily-intention-edit" class="hidden">
+            <input id="daily-intention-text">
+            <button class="button" id="daily-intention-submit">submit</button>
         </div>
     </div>
 </div>
