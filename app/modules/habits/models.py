@@ -65,6 +65,7 @@ class DailyIntention(Base):
 
     id = Column(Integer, primary_key=True)
     intention = Column(String(200))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     # Consider adding stuff like success_rating and evening_reflection text?
 
 # Daily Metric Model - to store basic metrics like our daily steps counter, for example
