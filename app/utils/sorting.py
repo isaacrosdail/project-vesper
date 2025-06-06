@@ -110,13 +110,13 @@ def main():
     task3 = SimpleTask("Another task", 2)
     test_objects = [task1, task2, task3]
     print(test_objects)
-    bubble_sort_test(test_objects, "title")
+    bubble_sort(test_objects, "title")
     print(test_objects)
 
     myList = [7, 4, 2, 1, 0]
     print(myList)
 
-    bubble_sort(myList)
+    bubble_sort_simple(myList)
     print(myList)
 
 
