@@ -21,34 +21,24 @@ main_bp = Blueprint('main', __name__, template_folder="templates")
 @main_bp.route("/", methods=["GET"])
 def home():
 
+    session = db_session()
     try:
-        # Set reference time once
+        # Calculate time references
         now = datetime.now(ZoneInfo("Europe/London"))
-
         # Today's 00:00 in Europe/London time
         start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
-
-        # Convert to UTC for DB comparison
         start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
-        
-        # Get Tasks to pass Anchor Habits to display
-        session = db_session()
 
-        # Get all tasks (just regular todos now)
+        # Fetch tasks, habits, today_intention
         tasks = tasks_repo.get_all_tasks(session)
-
-        # Get all habits directly from Habit table
         habits = habits_repo.get_all_habits(session)
+        todayIntention = habits_repo.get_today_intention(session)
 
         # Dict for completed_today status (to move our check out of our template, which caused lazy loading errors)
         completed_today = {}
         for habit in habits:
             completed = check_if_completed_today(habit.id)
             completed_today[habit.id] = completed
-
-        # Get DailyIntention for today, if any
-        todayIntention = habits_repo.get_today_intention(session)
-
         # Get habit streaks
         # Keys of habit.id and values of streak_count
         streaks = {}
@@ -59,12 +49,12 @@ def home():
         return render_template(
             "index.html",
             tasks=tasks,
-            now=now,
-            start_of_day_utc=start_of_day_utc,
             habits=habits,
             todayIntention=todayIntention,
+            completed_today=completed_today,
             streaks=streaks,
-            completed_today=completed_today
+            now=now,
+            start_of_day_utc=start_of_day_utc
         )
     finally:
         session.close()
