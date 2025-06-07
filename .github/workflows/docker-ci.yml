@@ -26,5 +26,12 @@ jobs:
           # Restart Docker containers
           docker-compose -f docker-compose.prod.yml down
           docker-compose -f docker-compose.prod.yml up --build -d  # Added --build flag to force rebuild for changes
-          
+
+          # Copy static assets to nginx dir
+          echo "Copying static assets.."
+          CONTAINER_ID=$(docker-compose -f docker-compose.prod.yml ps -q web)
+          echo "Container ID: $CONTAINER_ID"
+          docker cp "$CONTAINER_ID:/app/app/static/." "${{ secrets.STATIC_PATH }}"
+          echo "Copying from $CONTAINER_ID:/app/app/static to ${{ secrets.STATIC_PATH }}"
+
           echo "Deployment completed at $(date)"
