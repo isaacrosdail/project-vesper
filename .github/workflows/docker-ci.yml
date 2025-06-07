@@ -29,6 +29,6 @@ jobs:
 
           # Copy static assets to nginx dir
           CONTAINER_ID=$(docker-compose -f docker-compose.prod.yml ps -q web)
-          docker cp "$CONTAINER_ID:/app/app/static" "{{ secrets.STATIC_PATH }}"
+          docker cp "$CONTAINER_ID:/app/app/static/." "${{ secrets.STATIC_PATH }}"
           
           echo "Deployment completed at $(date)"
