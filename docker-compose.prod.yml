@@ -31,9 +31,6 @@ services:
       - FLASK_ENV=production
     ports:
       - "5000:5000"
-    # Bind mounting ./static/ (host) to app/static/ (container) so we can serve styles
-    volumes:
-      - ${STATIC_PATH}:/app/app/static
 
 volumes:
   pgdata:
