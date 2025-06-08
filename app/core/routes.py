@@ -16,6 +16,7 @@ from app.modules.habits.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
 from app.seed_dev_db import seed_dev_db
+from app.utils.db_utils import delete_all_db_data
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
@@ -96,20 +97,11 @@ def reset_db():
     # Current app gives us access to the config within a request context
     engine = get_engine(current_app.config)
 
-    # New way with Alembic instead of create_all()
-    # 1. Delete all DATA but keep all tables
-    # We have to delete child tables (ie, those with relationships to other tables) FIRST
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM habit_completions"))  # references habits
-        conn.execute(text("DELETE FROM transaction"))        # references products
-        conn.execute(text("DELETE FROM habits"))             # parent table
-        conn.execute(text("DELETE FROM product"))            # parent table
-        conn.execute(text("DELETE FROM tasks"))
+    # New way with Alembic instead of create_all() -> Delete all DATA but keep all tables
+    delete_all_db_data(engine, False)
 
-    # Re-seed the database with seed_db function
+    # Re-seed the database with seed_db function & confirm flash()
     seed_db()
-
-    # Add confirmation message via flash
     flash('Database has been reset successfully!', 'success')
 
     return redirect(request.referrer or url_for('index'))
@@ -120,14 +112,10 @@ def reset_dev_db():
     engine = get_engine(current_app.config)
     
     # New way with Alembic instead of create_all()
-    with engine.begin() as conn:
-        conn.execute(text("DELETE FROM habit_completions"))  # references habits
-        conn.execute(text("DELETE FROM transaction"))        # references products
-        conn.execute(text("DELETE FROM habits"))             # parent table
-        conn.execute(text("DELETE FROM product"))            # parent table
-        conn.execute(text("DELETE FROM tasks"))
+    delete_all_db_data(engine, False)   # Using util function in db_utils.py
     
+    # Re-seed & confirm flash()
     seed_dev_db()
-
     flash('Dev db reset', 'success')
+
     return redirect(request.referrer or url_for('index'))
