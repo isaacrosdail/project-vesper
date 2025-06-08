@@ -52,6 +52,6 @@ def get_engine(config):
 db_session = scoped_session(sessionmaker())
 
 def init_db(config):
-    engine = get_engine(config)
-    db_session.configure(bind=engine) # Binds Session globally -> "Use this engine for all sessions"
-    Base.metadata.create_all(engine)
+    engine = get_engine(config)         # Creates DB connection
+    db_session.configure(bind=engine) # Binds Session globally -> Tells SQLAlchemy: "Use this engine for all sessions"
+    # Base.metadata.create_all(engine)  # Removed: We now delete DATA not tables & let Alembic migrations handle the rest
