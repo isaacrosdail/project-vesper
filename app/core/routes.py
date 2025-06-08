@@ -3,18 +3,19 @@ from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
 # For reset_db route
-from flask import (Blueprint, current_app, flash, redirect, render_template,
-                   request, url_for, jsonify)
+from flask import (Blueprint, current_app, flash, jsonify, redirect,
+                   render_template, request, url_for)
+from sqlalchemy import text
 
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
 from app.modules.habits import repository as habits_repo
+from app.modules.habits.habit_logic import (calculate_habit_streak,
+                                            check_if_completed_today)
+from app.modules.habits.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
 from app.seed_dev_db import seed_dev_db
-from app.modules.habits.habit_logic import calculate_habit_streak, check_if_completed_today
-
-from app.modules.habits.models import DailyIntention
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
@@ -92,27 +93,18 @@ def update_daily_intention():
 @main_bp.route('/reset_db', methods=["POST"])
 def reset_db():
 
-    # See database.py for further comments here, but basically we need to add .remove() here.
-    # Otherwise the session may:
-    # - Be holding on to ORM mappings that are now invalid
-    # - Think certain tables/metadata still exist
-    # - Will definitely not be aware of drop_all() happening underneath it
-    db_session.remove() # Closes current "converation" the db, but:
-    # - other connections might still be open
-    # - PostgreSQL won't let you drop tables if anyone is still "talking" to them
-    # Since this .remove() didn't fix our issue of hanging/breaking our DB somehow, then the scoped session wasn't the primary cause
-    # print("Reset db triggered.")
-    # TO-DO: Lock this down after adding auth // maybe extract it into a utility function later too
-    engine = get_engine(current_app.config) # Current app gives us access to the config within a request context
+    # Current app gives us access to the config within a request context
+    engine = get_engine(current_app.config)
 
-    # Drop all tables
-    # Tries to delete all tables, but:
-    # - If any connection is still using those tables, PostgreSQL will wait
-    # - If it waits too long, it looks like your app is frozen/hanging
-    Base.metadata.drop_all(bind=engine)
-
-    # Recreate all tables
-    Base.metadata.create_all(bind=engine)
+    # New way with Alembic instead of create_all()
+    # 1. Delete all DATA but keep all tables
+    # We have to delete child tables (ie, those with relationships to other tables) FIRST
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM habit_completions"))  # references habits
+        conn.execute(text("DELETE FROM transaction"))        # references products
+        conn.execute(text("DELETE FROM habits"))             # parent table
+        conn.execute(text("DELETE FROM product"))            # parent table
+        conn.execute(text("DELETE FROM tasks"))
 
     # Re-seed the database with seed_db function
     seed_db()
@@ -124,10 +116,17 @@ def reset_db():
 
 @main_bp.route('/reset_dev_db', methods=["POST"])
 def reset_dev_db():
-    db_session.remove()
+
     engine = get_engine(current_app.config)
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    
+    # New way with Alembic instead of create_all()
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM habit_completions"))  # references habits
+        conn.execute(text("DELETE FROM transaction"))        # references products
+        conn.execute(text("DELETE FROM habits"))             # parent table
+        conn.execute(text("DELETE FROM product"))            # parent table
+        conn.execute(text("DELETE FROM tasks"))
+    
     seed_dev_db()
 
     flash('Dev db reset', 'success')
