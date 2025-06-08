@@ -3,7 +3,9 @@
 services:
   # Adding web service here as well to serve as our personal use variant
   web:
-    build: . # assumes we have a Dockerfile for Flask app
+    build:
+      context: .
+      dockerfile: Dockerfile.pi # Separate Dockerfile to avoid user add for dev deploy
     container_name: vesper-web
     restart: always
     ports:
