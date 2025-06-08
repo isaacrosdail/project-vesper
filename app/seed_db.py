@@ -14,6 +14,9 @@ def seed_db():
     try:
 
         # Clear existing data
+        # Note: We can get by deleting a child (HabitCompletion) AFTER a parent (Habit) here since SQLAlchemy ORM deletes
+        # function a bit "smarter" than do raw SQL DELETEs
+        # to study: cascade settings for tables
         session.query(Transaction).delete()
         session.query(Task).delete()
         session.query(Product).delete()
@@ -36,15 +39,6 @@ def seed_db():
                     established_date=datetime.now(timezone.utc))
         ]
 
-        # Add some sample habit completions
-        habit_completions = [
-            HabitCompletion(habit_id=1, completed_at=datetime.now(timezone.utc) - timedelta(days=1)),
-            HabitCompletion(habit_id=1, completed_at=datetime.now(timezone.utc)),
-            HabitCompletion(habit_id=2, completed_at=datetime.now(timezone.utc))
-        ]
-
-        session.add_all(tasks + habits + habit_completions)
-
         # Create & add products
         products = [
             Product(
@@ -64,16 +58,22 @@ def seed_db():
             )
         ]
 
-        session.add_all(products)
-        session.flush() # Flush to get IDs for transactions
+        session.add_all(tasks + habits + products)
+        session.flush() # Flush to get product IDs for transactions
 
-        # Create transactions
-        transactions = []
-
-        # For timezone-aware entries
-        now_utc = datetime.now(timezone.utc)
+        # Add some sample habit completions
+        # Note: Moved this below our flush, since HabitCompletions rely on Habits (Foreign key!!)
+        #           Prior to our flush, Habits didn't even _have_ a foreign key, so that was fragile
+        habit_completions = [
+            HabitCompletion(habit_id=habits[0].id, completed_at=datetime.now(timezone.utc) - timedelta(days=1)),
+            HabitCompletion(habit_id=habits[0].id, completed_at=datetime.now(timezone.utc)),
+            HabitCompletion(habit_id=habits[1].id, completed_at=datetime.now(timezone.utc))
+        ]
 
         # Create 15 random transactions
+        transactions = []
+        now_utc = datetime.now(timezone.utc) # for timezone-aware entries
+
         for i in range(10):
             random_product = random.choice(products)
             days_ago = random.randint(0, 30)
@@ -88,7 +88,7 @@ def seed_db():
                 )
             )
 
-        session.add_all(transactions)
+        session.add_all(transactions + habit_completions)
         session.commit()
 
         return "DB seeded successfully"
