@@ -4,6 +4,10 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 
+# For pivoting to using Alembic instead of create_all
+from alembic.config import Config as AlembicConfig
+from alembic import command
+
 from app.core.config import \
     Config  # To get our config class that was set up using environment variables in config.py
 from app.core.database import db_session, init_db
@@ -28,6 +32,11 @@ def create_app(config_class=None):
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
         init_db(app.config)
+
+        # Instead of create_all, now let Alembic handle it by running migrations
+        alembic_cfg = AlembicConfig("alembic.ini")     # "Hey Alembic, here's your config file"
+        command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
+
         # Run seed_db for prod to fill with dummy data
         if app.config['ENV'] == 'production':
             from .seed_db import seed_db
