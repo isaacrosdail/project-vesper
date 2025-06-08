@@ -1,6 +1,7 @@
 
 from sqlalchemy import text
 
+# Delete all data without nuking schema, optionally reset ID sequencing
 def delete_all_db_data(engine, reset_sequences=False):
     # Delete in dependency order -> children first
     tables = [
