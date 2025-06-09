@@ -81,7 +81,7 @@ def seed_db():
             # Create a transaction
             transactions.append(
                 Transaction(
-                    product_id=random_product.product_id,
+                    product_id=random_product.id,
                     price_at_scan=random.uniform(2.5, 10.0), # SQLAlchemy will automatically handle conversion from float to Numeric
                     quantity=random.randint(1, 5),
                     created_at= now_utc - timedelta(days=days_ago)
