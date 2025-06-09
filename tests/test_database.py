@@ -24,7 +24,7 @@ def test_tables_exist(app):
     engine = get_engine(app.config)
     inspector = inspect(engine)
     tables = inspector.get_table_names()
-    assert "tasks" in tables
+    assert "task" in tables
     assert "product" in tables
     assert "transaction" in tables
 
