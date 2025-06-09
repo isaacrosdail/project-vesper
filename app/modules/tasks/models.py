@@ -14,13 +14,6 @@ class Task(Base, CustomBaseTaskMixin):
     title = Column(String(255), unique=True, nullable=False)
     is_done = Column(Boolean, default=False)
     type = Column(String(50), default='todo')
-
-    # @property is a common decorator for creating "virtual attributes" that are computed on-the-fly
-    # Lets us convert to London time simply by doing task.created_at_local
-    # as if it were a column in the model itself
-    @property
-    def created_at_local(self):
-        return self.created_at.astimezone(ZoneInfo("Europe/London"))
     
     # Human-readable column names
     COLUMN_LABELS = {
