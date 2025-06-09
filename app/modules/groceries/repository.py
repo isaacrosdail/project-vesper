@@ -67,7 +67,7 @@ def add_transaction(session, product, **product_data):
 	# Check to determine whether to increment qty or add new instance
 	transaction = session.query(Transaction).filter_by(
 		product_id=product.product_id,
-		date_scanned=today
+		created_at=today
 	).first()
 	
 	if transaction:
@@ -77,6 +77,6 @@ def add_transaction(session, product, **product_data):
 			product_id=product.product_id,
 			price_at_scan=Decimal(product_data["price"]),
 			quantity=quantity,
-			date_scanned=today
+			created_at=today
 		)
 		session.add(transaction)

@@ -1,7 +1,6 @@
-# Uses existing container name & credentials
-# Keeps current dbs we already have set up
+# Docker Compose for local dev & Pi deployment
 services:
-  # Adding web service here as well to serve as our personal use variant
+  # Web application service
   web:
     build:
       context: .
@@ -11,7 +10,7 @@ services:
     ports:
       - "0.0.0.0:5000:5000" # accessible from network
     environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - SECRET_KEY=${SECRET_KEY}
       - FLASK_ENV=development
     depends_on:
