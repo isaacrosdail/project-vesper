@@ -4,6 +4,7 @@ Manages database URIs, debug settings, and environment-specific settings.
 """
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -12,20 +13,17 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevConfig(BaseConfig):
-    ENV = 'development' # Flask-native flag for environment mode: enables debug mode, reloader, detailed error pages
-    DEBUG = True # Redundant with ENV, but good for clarity, will remove as I go
+    DEBUG = True     # Enables debug mode, reloader, detailed error pages
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URI",
         "postgresql://user:password@localhost:5432/dbname"
     )
 
 class ProdConfig(BaseConfig):
-    ENV = 'production'
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
 
 class TestConfig(BaseConfig):
-    ENV = 'testing' # Signals test mode
     TESTING = True  # Enables testing behaviors in Flask (eg, suppress error catching)
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "TEST_DATABASE_URI",
@@ -34,15 +32,6 @@ class TestConfig(BaseConfig):
     # Future testing options to look into:
     # WTF_CSRF_ENABLED = False  # Disable CSRF for form testing
     # DEBUG = False             # Optional: Disable debug in tests
-
-# Auto-select config based on environment here instead of in create_app
-env = os.environ.get('FLASK_ENV', 'development')
-if env == 'production':
-    Config = ProdConfig
-elif env == 'testing':
-    Config = TestConfig
-else:
-    Config = DevConfig
 
 config_map = {
     "dev": DevConfig,
