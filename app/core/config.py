@@ -3,9 +3,7 @@ Configuration classes for different environments.
 Manages database URIs, debug settings, and environment-specific settings.
 """
 import os
-
 from dotenv import load_dotenv
-
 load_dotenv()
 
 
