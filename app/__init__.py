@@ -8,8 +8,6 @@ from flask import Flask
 from alembic.config import Config as AlembicConfig
 from alembic import command
 
-from app.core.config import \
-    Config  # To get our config class that was set up using environment variables in config.py
 from app.core.database import db_session, init_db
 # Import Blueprints
 from app.core.routes import main_bp
@@ -17,17 +15,25 @@ from app.modules.crud_routes import crud_bp
 from app.modules.groceries.routes import groceries_bp
 from app.modules.habits.routes import habits_bp
 from app.modules.tasks.routes import tasks_bp
+from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
 
 
-def create_app(config_class=None):
-    if config_class is None:
-        config_class = Config
+def create_app(config_name=None):
+    if config_name is None:
+        config_name = os.environ.get('APP_ENV', 'dev')
 
     app = Flask(__name__)
-    print(f"Using config: {config_class.__name__}")
+
+    # Debug what's being loaded
+    from .utils.debug import debug_config, print_env_info
+    debug_config(config_name, config_map[config_name])
 
     # Load appropriate config based on environment
-    app.config.from_object(config_class)
+    app.config.from_object(config_map[config_name])
+
+    # Print full env info (dev/testing)
+    if config_name == 'dev' or 'testing':
+        print_env_info(app)
 
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
@@ -38,7 +44,7 @@ def create_app(config_class=None):
         command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
 
         # Run seed_db for prod to fill with dummy data
-        if app.config['ENV'] == 'production':
+        if config_name == 'prod':
             from .seed_db import seed_db
             seed_db()
 
