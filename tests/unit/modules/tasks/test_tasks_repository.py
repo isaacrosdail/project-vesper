@@ -1,6 +1,7 @@
-from app.modules.tasks.models import Task
-from app.modules.tasks import repository as tasks_repo
 from app.core.database import db_session
+from app.modules.tasks import repository as tasks_repo
+from app.modules.tasks.models import Task
+
 
 # Empty DB
 def test_get_all_tasks_empty():

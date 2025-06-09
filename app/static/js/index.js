@@ -1,29 +1,43 @@
 
-// Variable for critical-task text input
-let criticalTask;
+// Constant for daily-intention-submit button
+const dailyIntentionSubmitBtn = document.getElementById("intention-submit");
+// Variables for daily-intention-text and daily-intention-result
+let dailyIntentionText = document.getElementById("daily-intention-text");
+let dailyIntentionResult = document.getElementById("intention-display");
 
-// Constant for critical-task-submit button
-const criticalTaskSubmitBtn = document.getElementById("critical-task-submit");
-// Variables for critical-task-text and critical-task-result
-let criticalTaskText = document.getElementById("critical-task-text");
-let criticalTaskResult = document.getElementById("critical-task-result");
-
-// Want the value of critical-task-text to become critical-task-result, then hide critical-task-edit again
-criticalTaskSubmitBtn.onclick = () => {
-    // Get critical-task text from input using element id
-    criticalTask = document.getElementById("critical-task-text").value;
-    // Set critical-task-result = critical-task
-    document.getElementById("critical-task-result-text").textContent = criticalTask;
-    // And hide the input text box and submit button
-    document.getElementById("critical-task-result").classList.remove("hidden");
-    document.getElementById("critical-task-edit").classList.add("hidden");
-}
-
+// Show edit mode input field
 function enableEdit() {
-    document.getElementById("critical-task-result").classList.add("hidden");
-    document.getElementById("critical-task-edit").classList.remove("hidden");
-    document.getElementById("critical-task-text").focus();
+    document.getElementById("intention-display").classList.add("hidden"); // Hide intention display (span we dblclick)
+    document.getElementById("intention-edit").classList.remove("hidden"); // Show edit input field
+    document.getElementById("intention-input").focus();
 }
+
+// Want the value of daily-intention-text to become daily-intention-result, then hide daily-intention-edit again
+dailyIntentionSubmitBtn.onclick = () => {
+    // Get daily-intention text from input using element id
+    const value = document.getElementById("intention-input").value;
+
+    // POST request to DB via fetch
+    fetch(`/daily-intentions/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intention: value })
+    })
+    .then(response => response.json()) // convert response to json so we can use it
+    .then(data => {
+        // Where we handle SUCCESS -> update the DOM, etc.
+        // 
+        document.getElementById("intention-text").textContent = value;
+        // And hide the input text box and submit button
+        document.getElementById("intention-display").classList.remove("hidden");
+        document.getElementById("intention-edit").classList.add("hidden");
+    })
+    .catch(error => {
+        // Handling errors
+        console.error('Failed to save/update: ', error);
+    })
+}
+
 
 // Function that activates when checkbox for anchor habits are checked, indicating completion
 // Function will then use fetch() to trigger POST to tell Flask to update DB
@@ -36,40 +50,78 @@ function markHabitComplete(checkbox, habitId) {
     // If .checked == False -> user just un-checked it
     const isDone = checkbox.checked;
 
-    // Fetch PATCH request to update is_done
-    fetch(`/tasks/${habitId}`, { 
-        // Request config
-        // Making a POST request | Set Content-Type to application/json even if 
-        // we're not sending a body (good habit)
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json' // Good habit to set this, research why later
-        },
-        body: JSON.stringify({ is_done: isDone })
-    })
-    // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
-    .then(response => {
-        if (response.ok) {
-            // Immediately apply strikethrough effect
-            const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
-            if (textSpan) {
-                if (checkbox.checked) {
+    // Now need to break our original PATCH request into two different requests.
+    if (checkbox.checked) {
+        // POST a new HabitCompletion record
+        fetch(`/habits/${habitId}/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+        })
+        // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
+        .then(response => {
+            if (response.ok) {
+                // Immediately apply strikethrough effect
+                const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
+                if (textSpan) {
                     textSpan.classList.add("line-through", "text-gray-400");
-                } else {
+                }
+            }
+        })
+        // Error Catching (eg, network fails, Flask throws error) // Could later show a popup, retry, etc.
+        // If network fails or Flask throws an error, you'll see it here
+        .catch(error => {
+            console.error('Error marking habit complete:', error);
+        });
+    } else {
+        // DELETE the existing HabitCompletion record
+        fetch(`/habits/${habitId}/completions/today`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
+        .then(response => {
+            if (response.ok) {
+                // Immediately remove strikethrough effect
+                const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
+                if (textSpan) {
                     textSpan.classList.remove("line-through", "text-gray-400");
                 }
             }
+        })
+        .catch(error => {
+            console.error('Error un-marking habit complete:', error);
+        });
         }
-    })
-    // Once you have that response, do something - here, just log it
-    // Later, could update the UI, disable the checkbox, add animation, etc
-    .then(data => {
-        console.log('Anchor habit (task) marked complete:', data);
-        // Optional, update UI here later
-    })
-    // Error Catching (eg, network fails, Flask throws error) // Could later show a popup, retry, etc.
-    // If network fails or Flask throws an error, you'll see it here
-    .catch(error => {
-        console.error('Error marking anchor habit (task) complete:', error);
-    });
+}
+
+
+
+
+// Beginning work for function to update time display on homepage in real-time w/o reload
+function getCurrentTimeString() {
+    let date = new Date(); // First we need to get today's date obj
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    
+    // Pad times
+    let paddedHours = hours.toString().padStart(2, '0');
+    let paddedMinutes = minutes.toString().padStart(2, '0');
+    // Template literal to conjoin
+    let timeString = `${paddedHours}:${paddedMinutes}`;
+    
+    return timeString;
+}
+
+function updateClock() {
+    // Get the element by id
+    let timeDisplay = document.getElementById("time-display");
+    // use getCurrentTimeString to call that and inject that value
+    timeDisplay.textContent = getCurrentTimeString();
+}
+
+window.onload = () => {
+    setInterval(updateClock, 30 * 1000); // 30 seconds
+    updateClock();
 }

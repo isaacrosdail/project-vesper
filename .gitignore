@@ -181,3 +181,7 @@ cython_debug/
 
 # Playground/ for learning/experimenting
 playground/
+seed_dev_db.py
+
+# Docker scripts
+get-docker.sh

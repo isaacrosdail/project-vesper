@@ -1,11 +1,13 @@
 # Centralized DB setup file
 import os
+
 from flask import current_app
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from app.core.db_base import Base
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 import app.modules.groceries.models
 import app.modules.tasks.models
+from app.core.db_base import Base
 
 # Below we're using a connection pool singleton
 # Only creating one engine across entire app
@@ -17,28 +19,16 @@ _engine = None # Global connection cache
 # Function to get engine from the config
 # 1. get_engine()     -> creates/returns singleton engine
 # 2. init_db()        -> binds db_session to that engine
-# 3. get_db_session() -> creates sessions using that engine
+# 3. db_session() -> creates sessions using that engine
 def get_engine(config):
-
-    # Debug print
-    print(" get_engine() CALLED")
     
     global _engine
 
-    # Get & print FLASK_ENV for debugging
-    flask_env = os.environ.get('FLASK_ENV')
-    print(f"Current FLASK_ENV: {flask_env}\n\n\n\n\n")
-
-    # Check whats in the config
-    db_uri = config.get("SQLALCHEMY_DATABASE_URI")
-    print(f"Current DB URI from config: {db_uri}")
-
-    # Print _engine's current state
-    print(f"_engine is None: {_engine is None}")
+    # Debug: print _engine's current state
+    # print(f"_engine is None: {_engine is None}")
 
     if _engine is None:
         db_uri = config.get("SQLALCHEMY_DATABASE_URI")
-        print(db_uri) # DEBUG PRINT
         _engine = create_engine(db_uri)
     return _engine
 
@@ -50,10 +40,6 @@ def get_engine(config):
 db_session = scoped_session(sessionmaker())
 
 def init_db(config):
-    engine = get_engine(config)
-    db_session.configure(bind=engine) # Binds Session globally -> "Use this engine for all sessions"
-    Base.metadata.create_all(engine)
-
-# Optional, can delete
-def get_db_session():
-    return db_session()
+    engine = get_engine(config)         # Creates DB connection
+    db_session.configure(bind=engine) # Binds Session globally -> Tells SQLAlchemy: "Use this engine for all sessions"
+    # Base.metadata.create_all(engine)  # Removed: We now delete DATA not tables & let Alembic migrations handle the rest

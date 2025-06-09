@@ -1,8 +1,11 @@
-import pytest
-from unittest.mock import patch
 from datetime import datetime
-from app.modules.tasks.models import Task
+from unittest.mock import patch
+
+import pytest
+
 from app.core.database import db_session
+from app.modules.tasks.models import Task
+
 
 def test_home_route(client):
     response = client.get("/")
@@ -35,32 +38,3 @@ def test_home_greeting_and_time(client, hour, expected_greeting, expected_time):
 
         assert expected_greeting in html
         assert expected_time in html
-
-@pytest.mark.parametrize("tasks_to_seed, expected_titles", [
-    (
-        [
-            Task(title="Anchor Habit", type="habit", is_anchor=True), # Should work
-            Task(title="Wrong Type", type="todo", is_anchor=True),    # Should not work - not of right type
-            Task(title="Not Anchor", type="habit", is_anchor=False)   # Should not work - incorrect is_anchor bool val
-        ],
-        ["Anchor Habit"]
-    ),
-])
-def test_anchor_habit_filtering(client, tasks_to_seed, expected_titles):
-    # Feed test DB tasks to test on
-    db_session.add_all(tasks_to_seed)
-    db_session.commit()
-
-    response = client.get("/")
-    html = response.data.decode() # How does this work exactly?
-
-    # Check expected anchor habits are rendered
-    for title in expected_titles:
-        assert title in html
-
-    # Ensure excluded ones aren't shown
-    # Translation: “Create a set of task titles from the seeded tasks, 
-    # but only include the ones that are not in the list of expected titles.”
-    excluded_titles = {t.title for t in tasks_to_seed if t.title not in expected_titles}
-    for title in excluded_titles:
-        assert title not in html

@@ -1,10 +1,13 @@
 ## DB logic functions to access data
 # The "talk to the database - and nothing else" layer
 
-from .models import Product, Transaction
-from sqlalchemy.orm import Session, joinedload
 from datetime import datetime, timezone
 from decimal import Decimal
+
+from sqlalchemy.orm import joinedload
+
+from .models import Product, Transaction
+
 
 # Lookup barcode function to centralize a bit
 def lookup_barcode(session, barcode):
@@ -63,17 +66,17 @@ def add_transaction(session, product, **product_data):
 	
 	# Check to determine whether to increment qty or add new instance
 	transaction = session.query(Transaction).filter_by(
-		product_id=product.product_id,
-		date_scanned=today
+		product_id=product.id,
+		created_at=today
 	).first()
 	
 	if transaction:
 		transaction.quantity += quantity
 	else:
 		transaction = Transaction(
-			product_id=product.product_id,
+			product_id=product.id,
 			price_at_scan=Decimal(product_data["price"]),
 			quantity=quantity,
-			date_scanned=today
+			created_at=today
 		)
 		session.add(transaction)

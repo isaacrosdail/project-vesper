@@ -1,25 +1,25 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify, flash
-from app.core.database import get_db_session, db_session
-from flask import current_app
-
-# Import Task model
-from app.modules.tasks.models import Task
-
-# Import Task repository
-from app.modules.tasks import repository as tasks_repo
-
 # For created_at / completed_at
 from datetime import datetime, timezone
 
-import time
-from zoneinfo import ZoneInfo
+from flask import (Blueprint, flash, jsonify, redirect, render_template,
+                   request, url_for)
+
+from app.core.database import db_session
+from app.utils.sorting import bubble_sort
+
+# Import Task repository
+from app.modules.tasks import repository as tasks_repo
+# Import Task model
+from app.modules.tasks.models import Task
+
+import os
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
 @tasks_bp.route("/", methods=["GET"])
 def dashboard():
     # Fetch Tasks & pass into template
-    session = get_db_session()
+    session = db_session()
     try:
         # Column names for Task model
         task_column_names = [
@@ -30,10 +30,19 @@ def dashboard():
         # Fetch tasks list
         tasks = tasks_repo.get_all_tasks(session)
 
+        # Sort tasks list by most recent Datetime first
+        #tasks.sort(key=lambda task: task.created_at, reverse=True)
+
+        # Now using our own bubble sort!
+        # Most recently created tasks at bottom of table
+        bubble_sort(tasks, 'created_at_local', reverse=False)
+
         return render_template(
             "tasks/dashboard.html",
             task_column_names = task_column_names,
-            tasks = tasks)
+            tasks = tasks,
+            flask_env=os.getenv('FLASK_ENV')
+        )
     finally:
         session.close()
 
@@ -51,20 +60,19 @@ def add_task():
             # Value for checkbox is irrelevant
             # If checked, then value is not None, so bool=True (ie, it exists)
             # Otherwise it is None, in which case bool=False 
-            "is_anchor": bool(request.form.get("is_anchor"))
+            #"is_anchor": bool(request.form.get("is_anchor"))
         }
         # Creating new task Task object
         new_task = Task(
             title=task_data["title"],
             type=task_data["type"],
             is_done=False,
-            is_anchor=task_data["is_anchor"],
             created_at=datetime.now(timezone.utc),
             completed_at=None
         )
 
         # Add new_task to db
-        session = get_db_session()
+        session = db_session()
         try:
             session.add(new_task)
             session.commit()
@@ -77,24 +85,6 @@ def add_task():
             session.close()
     else:
         return render_template("tasks/add_task.html")
-
-# REMOVE THIS ROUTE? deprecated by update_task route
-@tasks_bp.route("/complete_task/<int:task_id>", methods=["POST"])
-def complete_task(task_id):
-    session = get_db_session()
-    try:
-
-        # Get corresponding task from db  
-        task = session.get(Task, task_id)
-
-        # Update task to be completed, incl. completed_at
-        task.is_done = True
-        task.completed_at = datetime.now(timezone.utc)
-        session.commit()
-
-        return jsonify(success=True)
-    finally:
-        session.close()
 
 # UPDATE
 @tasks_bp.route("/<int:task_id>", methods=["PUT", "PATCH"])
@@ -145,8 +135,8 @@ def delete_task(task_id):
         if not task:
             return {"error": "Task not found."}, 404
         
-        db_session.delete(task)
-        db_session.commit()
+        session.delete(task)
+        session.commit()
     
         return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
     

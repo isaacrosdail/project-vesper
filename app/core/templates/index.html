@@ -18,34 +18,22 @@
             {% endif %}
         </h1>
 
-        <p>{{ now.strftime("%H:%M:%S") }} | {{ now.strftime("%A, %B %d") }}</p><br>
+        <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p><br>
     </div>
-    <!-- Anchor Habits Card -->
-    <div class="bg-gray-200 p-6 rounded-xl shadow-lg">
-        <h2 class="text-xl font-semibold mb-2">Anchor Habits</h2>
-        <!-- Just print names in UL for now -->
-        <ul>
-        {% for anchor_habit in anchor_habits %}
-            <li>
-                <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
-                <input type="checkbox"
-                    {% if anchor_habit.is_done %}checked{% endif %}
-                    onchange="markHabitComplete(this, {{ anchor_habit.id }})">
-                <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if anchor_habit.is_done %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
-                    {{ anchor_habit.title }}
-                </span>
-            </li>
-        {% endfor %}
-        </ul>
 
-    </div>
     <!-- Critical Task Card -->
     <div class="bg-gray-200 p-6 rounded-xl shadow-lg">
         <h2 class="text-xl font-semibold mb-2">Critical Task</h2>
         <p>
             <span>Today's Intention: </span>
-            <span class="relative group" id="critical-task-result" ondblclick="enableEdit()">
-                <span class="text-green-600" id="critical-task-result-text">What's your focus today?</span>
+            <span class="relative group" id="intention-display" ondblclick="enableEdit()">
+                <span class="text-green-600" id="intention-text">
+                {% if todayIntention %}
+                    {{ todayIntention.intention }}
+                {% else %}    
+                    What's your focus today?
+                {% endif %}
+                </span>
 
                 <!-- Tooltip -->
                 <span class="absolute opacity-0 group-hover:opacity-100 bg-black text-white text-xs px-1 rounded whitespace-nowrap transition-opacity duration-150">
@@ -54,10 +42,39 @@
             </span>
         </p>
         
-        <div id="critical-task-edit" class="hidden">
-            <input id="critical-task-text">
-            <button class="button" id="critical-task-submit">submit</button>
+        <div id="intention-edit" class="hidden">
+            <input id="intention-input">
+            <button class="button" id="intention-submit">submit</button>
         </div>
+    </div>
+
+    <!-- Daily Habits Card -->
+    <div class="bg-gray-200 p-6 rounded-xl shadow-lg">
+        <h2 class="text-xl font-semibold mb-2">Daily Habits</h2>
+        <!-- Just print names in UL for now -->
+        <ul>
+        {% for habit in habits %}
+            <li>
+                <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
+                <input type="checkbox"
+                    {% if completed_today[habit.id] %}checked{% endif %}
+                    onchange="markHabitComplete(this, {{ habit.id }})">
+                <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if completed_today[habit.id] %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
+                    {{ habit.title }}
+                    
+                </span>
+                
+                <span class="text-sm ">
+                    {% if streaks[habit.id] > 0 %}
+                     🔥{{ streaks[habit.id] }}
+                    {% endif %}
+                </span>
+
+
+            </li>
+        {% endfor %}
+        </ul>
+
     </div>
 </div>
 {% endblock %}

@@ -2,6 +2,10 @@
 
 <!-- HISTORY: Originally used Jinja style class variables, now using macros instead -->
 
+{# STYLES TO SORT #}
+{% macro dashboard_container_classes() %}max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10{% endmacro %}
+{% macro dashboard_card_classes() %}min-w-max bg-gray-200 p-6 rounded-xl shadow-md{% endmacro %}
+
 {# === TABLE STYLES === #}
 {% macro table_classes() %}caption-top table-auto border-collapse w-full text-sm{% endmacro %}
 {% macro th_classes() %}px-2 py-2 border border-gray-300{% endmacro %}

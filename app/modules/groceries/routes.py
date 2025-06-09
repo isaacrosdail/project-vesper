@@ -1,10 +1,10 @@
-from flask import Blueprint, flash, render_template, redirect, url_for, request
+from decimal import Decimal
+
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+
 from app.core.database import db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
-from decimal import Decimal
-
-import time
 
 groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
 
@@ -30,6 +30,9 @@ def dashboard():
         # Fetch products and transactions, pass into render_template
         products = grocery_repo.get_all_products(session)
         transactions = grocery_repo.get_all_transactions(session)
+
+        # Sort transactions list by most recent DateTime first
+        transactions.sort(key=lambda trans: trans.created_at, reverse=True)
             
         return render_template(
             "groceries/dashboard.html", products = products,

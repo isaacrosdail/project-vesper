@@ -1,21 +1,23 @@
-# Holds fixtures & test config, automatically loaded by pytest (import not req'd)
+# Holds fixtures & test config, automatically loaded by pytest (import not required)
+
+import subprocess
+import time
 
 import pytest
-from app import create_app
-from app.core.database import get_engine, db_session
-from app.core.db_base import Base
 from sqlalchemy import text
-import time
-import subprocess
 
-#session = db_session()
+import os
 
-print("conftest loaded!")
+from app import create_app
+# DB imports
+from app.core.database import db_session, get_engine
+from app.core.db_base import Base
 
-############### Ensure Docker PostgreSQL container is running before tests start
+from app.core.config import TestConfig
+
+# Ensure PostgreSQL container is running before tests start
 @pytest.fixture(scope="session", autouse=True)
 def ensure_docker_postgres():
-    print("Ensuring vesper-db is running...")
 
     # Check if already running
     result = subprocess.run(
@@ -31,7 +33,10 @@ def ensure_docker_postgres():
 # Create app once and use it for all tests
 @pytest.fixture(scope="session")
 def app():
-    app = create_app("testing")  # Create with 'testing' config
+    # Tell Alembic which DB to use
+    os.environ['APP_ENV'] = 'testing'
+
+    app = create_app('testing')  # Pass in our TestConfig
     yield app
 
 # Fixture to reset the database before each test (optional, for clean slate)
@@ -43,9 +48,6 @@ def reset_db(app):
         conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE;"))
         conn.execute(text("CREATE SCHEMA public;"))
 
-    # Import DB stuff
-    from app.modules.groceries import models as grocery_models
-    from app.modules.tasks import models as tasks_models
     Base.metadata.create_all(engine)
 
 # Fixture to clear all table data between tests
@@ -74,11 +76,16 @@ def cleanup_session():
     yield
     db_session.remove()
 
-# monkeypatches get_db_session() to use our test session
+# monkeypatches db_session() to use our test session
 @pytest.fixture(autouse=True)
 def patch_db_session(monkeypatch):
-    from app.core.database import db_session as global_session
-    monkeypatch.setattr("app.core.database.get_db_session", lambda *_: global_session())
+    from app.core.database import \
+        db_session as \
+        global_session  # Imports scoped session factory and renames it to global_session
+
+    # lambda *_: global_session() creates a function that takes any arguments ("*_" = "ignore whatever args are passed")
+    #       and returns global_session() which calls our scoped session
+    monkeypatch.setattr("app.core.database.db_session", lambda *_: global_session())
 
 # Fake browser to test routes (lets us send requests from a fake browser/client)
 @pytest.fixture

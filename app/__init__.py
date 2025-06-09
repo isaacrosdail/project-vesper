@@ -1,44 +1,50 @@
-from flask import Flask
-from app.core.config import config_map
-from app.core.database import init_db, db_session
 import os
 
 # For environment variables via dotenv
 from dotenv import load_dotenv
+from flask import Flask
 
-# Import DB stuff
-from app.modules.groceries import models as grocery_models
-from app.modules.tasks import models as tasks_models
+# For pivoting to using Alembic instead of create_all
+from alembic.config import Config as AlembicConfig
+from alembic import command
 
+from app.core.database import db_session, init_db
 # Import Blueprints
 from app.core.routes import main_bp
-from app.modules.groceries.groceries_routes import groceries_bp
-from app.modules.tasks.routes import tasks_bp
 from app.modules.crud_routes import crud_bp
+from app.modules.groceries.routes import groceries_bp
+from app.modules.habits.routes import habits_bp
+from app.modules.tasks.routes import tasks_bp
+from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
+
 
 def create_app(config_name=None):
-
-    # Load environment variables
-    load_dotenv()
+    if config_name is None:
+        config_name = os.environ.get('APP_ENV', 'dev')
 
     app = Flask(__name__)
 
-    # If no config provided, check Flask_ENV for environment
-    if config_name is None:
-        # Get FLASK_ENV and default to 'dev' if not set
-        env = os.environ.get('FLASK_ENV', 'development')
-        config_name = 'prod' if env == 'production' else 'dev'
-
-    print(f"Using config: {config_name}")
+    # Debug what's being loaded
+    from .utils.debug import debug_config, print_env_info
+    debug_config(config_name, config_map[config_name])
 
     # Load appropriate config based on environment
     app.config.from_object(config_map[config_name])
 
+    # Print full env info (dev/testing)
+    if config_name == 'dev' or 'testing':
+        print_env_info(app)
+
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
         init_db(app.config)
-        # If in dev config, run seed_db to fill db with dummy info
-        if app.config['ENV'] == 'development':
+
+        # Instead of create_all, now let Alembic handle it by running migrations
+        alembic_cfg = AlembicConfig("alembic.ini")     # "Hey Alembic, here's your config file"
+        command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
+
+        # Run seed_db for prod to fill with dummy data
+        if config_name == 'prod':
             from .seed_db import seed_db
             seed_db()
 
@@ -51,5 +57,6 @@ def create_app(config_name=None):
     app.register_blueprint(crud_bp)
     app.register_blueprint(groceries_bp)
     app.register_blueprint(tasks_bp)
+    app.register_blueprint(habits_bp)
 
     return app
