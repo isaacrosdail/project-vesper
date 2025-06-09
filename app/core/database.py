@@ -21,26 +21,14 @@ _engine = None # Global connection cache
 # 2. init_db()        -> binds db_session to that engine
 # 3. db_session() -> creates sessions using that engine
 def get_engine(config):
-
-    # Debug print
-    print(" get_engine() CALLED")
     
     global _engine
 
-    # Get & print FLASK_ENV for debugging
-    flask_env = os.environ.get('FLASK_ENV')
-    print(f"Current FLASK_ENV: {flask_env}\n\n\n\n\n")
-
-    # Check whats in the config
-    db_uri = config.get("SQLALCHEMY_DATABASE_URI")
-    print(f"Current DB URI from config: {db_uri}")
-
-    # Print _engine's current state
-    print(f"_engine is None: {_engine is None}")
+    # Debug: print _engine's current state
+    # print(f"_engine is None: {_engine is None}")
 
     if _engine is None:
         db_uri = config.get("SQLALCHEMY_DATABASE_URI")
-        print(db_uri) # DEBUG PRINT
         _engine = create_engine(db_uri)
     return _engine
 
