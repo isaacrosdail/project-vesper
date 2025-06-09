@@ -3,9 +3,17 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-# Added: Make Alembic use Vesper's config system directly
-from app.core.config import \
-    Config  # Uses our auto-selected config from env vars
+
+# Added: Make Alembic use proper config class directly
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+# import our debug util
+from app.utils.debug import debug_config
+
+from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
+
 from app.core.db_base import Base  # Import SQLAlchemy Base
 
 # this is the Alembic Config object, which provides
@@ -31,9 +39,16 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-# Added: Tell Alembic to use Vesper's database URL
-# Obv, this needs to happen before Alembic tries to connect to the database as it tells it how to do that
-config.set_main_option('sqlalchemy.url', Config.SQLALCHEMY_DATABASE_URI)
+
+# Get config & set the database URL
+env = os.environ.get('APP_ENV', 'dev')
+config_class = config_map[env]
+
+# Debug print for Alembic migrations
+debug_config(env, config_class)
+print(f"[ALEMBIC] Using database: {config_class.SQLALCHEMY_DATABASE_URI}")
+
+config.set_main_option('sqlalchemy.url', config_class.SQLALCHEMY_DATABASE_URI)
 
 
 def run_migrations_offline() -> None:
