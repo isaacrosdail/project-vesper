@@ -15,7 +15,19 @@ from app.modules.habits.habit_logic import (calculate_habit_streak,
 from app.modules.habits.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
 from app.seed_db import seed_db
-from app.seed_dev_db import seed_dev_db
+
+# Conditional import of our seed_dev_db function
+import os
+if os.environ.get('APP_ENV') == 'dev':
+    try:
+        from app.seed_dev_db import seed_dev_db
+        HAS_DEV_TOOLS = True
+    except ImportError:
+        HAS_DEV_TOOLS = False
+else:
+    HAS_DEV_TOOLS = False
+
+
 from app.utils.db_utils import delete_all_db_data
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
@@ -106,16 +118,18 @@ def reset_db():
 
     return redirect(request.referrer or url_for('index'))
 
-@main_bp.route('/reset_dev_db', methods=["POST"])
-def reset_dev_db():
+# Wrap in conditional so prod doesn't complain that we don't have a seed_dev_db function/route
+if HAS_DEV_TOOLS:
+    @main_bp.route('/reset_dev_db', methods=["POST"])
+    def reset_dev_db():
 
-    engine = get_engine(current_app.config)
-    
-    # New way with Alembic instead of create_all()
-    delete_all_db_data(engine, False)   # Using util function in db_utils.py
-    
-    # Re-seed & confirm flash()
-    seed_dev_db()
-    flash('Dev db reset', 'success')
+        engine = get_engine(current_app.config)
+        
+        # New way with Alembic instead of create_all()
+        delete_all_db_data(engine, False)   # Using util function in db_utils.py
+        
+        # Re-seed & confirm flash()
+        seed_dev_db()
+        flash('Dev db reset', 'success')
 
-    return redirect(request.referrer or url_for('index'))
+        return redirect(request.referrer or url_for('index'))
