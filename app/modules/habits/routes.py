@@ -28,7 +28,7 @@ def dashboard():
         habits = habits_repo.get_all_habits(session)
 
         # Sort habits list by most recent DateTime first
-        habits.sort(key=lambda habit: habit.experimental_start_date, reverse=True)
+        habits.sort(key=lambda habit: habit.created_at, reverse=True)
 
         return render_template(
             "habits/dashboard.html",

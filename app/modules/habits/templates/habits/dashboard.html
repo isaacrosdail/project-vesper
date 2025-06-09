@@ -21,7 +21,7 @@
                     <tr class="{{ styles.tr_classes() }}" data-item-id="{{ habit.id }}">
                         <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.title }}</td>
-                        <td class="{{ styles.td_classes() }}">{{ habit.experimental_start_date }}</td>
+                        <td class="{{ styles.td_classes() }}">{{ habit.created_at }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}

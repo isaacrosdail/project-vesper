@@ -5,18 +5,18 @@ from sqlalchemy import text
 def delete_all_db_data(engine, reset_sequences=False):
     # Delete in dependency order -> children first
     tables = [
-        "habit_completions", # child: references habits
-        "transaction",       # child: references products
-        "habits",            # parent table
+        "habitcompletion",   # child: references habit
+        "transaction",       # child: references product
+        "habit",             # parent table
         "product",           # parent table
-        "tasks"              # independent
+        "task"               # independent
     ]
     sequences = [
-        "habit_completions_id_seq", # references habits
-        "transaction_id_seq",       # references products
-        "habits_id_seq",            # parent table
-        "product_product_id_seq",   # parent table
-        "tasks_id_seq"
+        "habitcompletion_id_seq",  # references habit
+        "transaction_id_seq",      # references product
+        "habit_id_seq",            # parent table
+        "product_product_id_seq",  # parent table
+        "task_id_seq"
     ]
     # New way with Alembic instead of create_all()
     with engine.begin() as conn:

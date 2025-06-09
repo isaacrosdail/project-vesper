@@ -65,9 +65,9 @@ def seed_db():
         # Note: Moved this below our flush, since HabitCompletions rely on Habits (Foreign key!!)
         #           Prior to our flush, Habits didn't even _have_ a foreign key, so that was fragile
         habit_completions = [
-            HabitCompletion(habit_id=habits[0].id, completed_at=datetime.now(timezone.utc) - timedelta(days=1)),
-            HabitCompletion(habit_id=habits[0].id, completed_at=datetime.now(timezone.utc)),
-            HabitCompletion(habit_id=habits[1].id, completed_at=datetime.now(timezone.utc))
+            HabitCompletion(habit_id=habits[0].id, created_at=datetime.now(timezone.utc) - timedelta(days=1)),
+            HabitCompletion(habit_id=habits[0].id, created_at=datetime.now(timezone.utc)),
+            HabitCompletion(habit_id=habits[1].id, created_at=datetime.now(timezone.utc))
         ]
 
         # Create 15 random transactions
@@ -84,7 +84,7 @@ def seed_db():
                     product_id=random_product.product_id,
                     price_at_scan=random.uniform(2.5, 10.0), # SQLAlchemy will automatically handle conversion from float to Numeric
                     quantity=random.randint(1, 5),
-                    date_scanned= now_utc - timedelta(days=days_ago)
+                    created_at= now_utc - timedelta(days=days_ago)
                 )
             )
 

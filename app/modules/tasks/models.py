@@ -5,19 +5,15 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 
-from app.core.db_base import Base
+from app.core.db_base import Base, CustomBaseTaskMixin
 
 
 # Task Model for database of tasks, with varying types (task vs habit, etc)
-class Task(Base):
-    __tablename__ = "tasks"
+class Task(Base, CustomBaseTaskMixin):
 
-    id = Column(Integer, primary_key=True)
     title = Column(String(255), unique=True, nullable=False)
     is_done = Column(Boolean, default=False)
     type = Column(String(50), default='todo')
-    created_at = (Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)))
-    completed_at = (Column(DateTime(timezone=True), nullable=True))
 
     # @property is a common decorator for creating "virtual attributes" that are computed on-the-fly
     # Lets us convert to London time simply by doing task.created_at_local

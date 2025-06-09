@@ -21,16 +21,16 @@ def calculate_habit_streak(habit_id):
                 return 0
 
             # Step 1: Sort the completions with most recent datetime first
-            bubble_sort(habit_completions, 'completed_at', reverse=True)
+            bubble_sort(habit_completions, 'created_at', reverse=True)
 
             # Step 2: First check whether a streak exists at all
             # if today is within 2 days of completion[0] -> then YES
             # if not -> don't bother, we have no streak!
-            if (datetime.now(timezone.utc) - habit_completions[0].completed_at).days < 2:
+            if (datetime.now(timezone.utc) - habit_completions[0].created_at).days < 2:
                 # Have a streak, now loop through completions and sum consecutive days
                 total_streak = 1
                 for i in range(len(habit_completions) - 1): # Remember: -1 here to avoid out of bounds!
-                    if (habit_completions[i].completed_at - habit_completions[i+1].completed_at).days == 1:
+                    if (habit_completions[i].created_at - habit_completions[i+1].created_at).days == 1:
                         total_streak += 1
                     else:
                         break # gap found, streak ends here!
@@ -51,7 +51,7 @@ def check_if_completed_today(habit_id):
         # query habitcompletion table, need matching habit_id and completed_at = today
         habit_completion = session.query(HabitCompletion).filter(
                 HabitCompletion.habit_id == habit_id,
-                func.date(HabitCompletion.completed_at) == today_utc
+                func.date(HabitCompletion.created_at) == today_utc
         ).first()
         # Returns true if it exists, false if it doesn't
         return habit_completion is not None
