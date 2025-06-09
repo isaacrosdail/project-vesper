@@ -6,11 +6,14 @@ import time
 import pytest
 from sqlalchemy import text
 
+import os
+
 from app import create_app
 # DB imports
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
 
+from app.core.config import TestConfig
 
 # Ensure PostgreSQL container is running before tests start
 @pytest.fixture(scope="session", autouse=True)
@@ -30,7 +33,10 @@ def ensure_docker_postgres():
 # Create app once and use it for all tests
 @pytest.fixture(scope="session")
 def app():
-    app = create_app("testing")  # Create with 'testing' config
+    # Tell Alembic which DB to use
+    os.environ['APP_ENV'] = 'testing'
+
+    app = create_app('testing')  # Pass in our TestConfig
     yield app
 
 # Fixture to reset the database before each test (optional, for clean slate)
