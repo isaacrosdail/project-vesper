@@ -96,10 +96,7 @@ function markHabitComplete(checkbox, habitId) {
         }
 }
 
-
-
-
-// Beginning work for function to update time display on homepage in real-time w/o reload
+// Update time display in real-time
 function getCurrentTimeString() {
     let date = new Date(); // First we need to get today's date obj
     let hours = date.getHours();
@@ -121,7 +118,36 @@ function updateClock() {
     timeDisplay.textContent = getCurrentTimeString();
 }
 
-window.onload = () => {
+// Get weather info via API
+async function getWeatherInfo() {
+    const tempDisplay = document.getElementById('weather-temp');
+    const sunsetDisplay = document.getElementById('weather-sunset');
+    const city = "London";
+    const units = "metric";
+
+    tempDisplay.textContent = "Loading weather info...";
+
+    // Async fetch to call our Flask API endpoint/weather/<city>/<units>
+    const response = await fetch(`/api/weather/${city}/${units}`) // GET is the default method, so we just need this here!
+    const weatherInfo = await response.json();
+
+    // use weather info - to start, grab temp & sunset time
+    const temp = weatherInfo.main.temp;
+    const sunset = weatherInfo.sys.sunset;
+
+    // Convert sunset time to date & local
+    const sunsetTime = new Date(sunset * 1000);
+    const sunsetFormatted = sunsetTime.toLocaleTimeString();
+
+    // Display temp with units
+    tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'}`;
+    // Display formatted sunset time
+    sunsetDisplay.textContent = `Sunset: ${sunsetFormatted}`;
+}
+
+window.onload = async () => {
     setInterval(updateClock, 30 * 1000); // 30 seconds
     updateClock();
+
+    await getWeatherInfo();
 }
