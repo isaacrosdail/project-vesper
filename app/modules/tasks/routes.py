@@ -41,7 +41,7 @@ def dashboard():
             "tasks/dashboard.html",
             task_column_names = task_column_names,
             tasks = tasks,
-            flask_env=os.getenv('FLASK_ENV')
+            app_env=os.getenv('APP_ENV')
         )
     finally:
         session.close()
