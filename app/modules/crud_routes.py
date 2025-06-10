@@ -23,6 +23,7 @@ modelMap = {
     ("tasks", "none"): tasks_models.Task,
 }
 
+'''
 # ADD - Need to confirm whether I'm using this
 @crud_bp.route("/<module>/<subtype>", methods=["GET", "POST"])
 def add_item(module, subtype):
@@ -54,7 +55,7 @@ def add_item(module, subtype):
         finally:
             session.close()
 
-
+'''
 # DELETE
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["DELETE"])
 def delete_item(module, subtype, item_id):
