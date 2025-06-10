@@ -724,8 +724,6 @@ certbot --nginx
 	1. DailyIntention model -> DONE
 	2. DailyMetric model -> DONE
 	3. Alembic revision!
-		
-			
 2. Make Daily Intention on homepage now use/update our new model instead of just the element's text!
 
 **Log:**
@@ -743,9 +741,23 @@ certbot --nginx
 	- Modified index.html: added Jinja conditional to use intention OR default text, refactor critical-task to daily-intention
 Key Changes: DB schema, repository layer, route logic, template rendering
 
-3. Other changes
+3. Other changes:
 	- Fixed lazy loading errors (sneaky!) by moving habit completion logic from templates to backend
 	- Refactored index.html dashboard route to pre-calculate completion status and streaks as dictionaries
 
 **Where I Left Off:**
 - Started test_habits_habit_logic.py unit test file to suss out possible race condition with our AJAX
+
+## [Sun 08.06.25]
+**Log:**
+- Refactored DB management from create_all() to Alembic migrations
+
+## [Mon 09.06.25]
+**Log:**
+- Added a custom base class for basics like id & timestamp information
+	- Ran Alembic revision & refactored accordingly to use updated references
+- Clean up environment variable handling a bit, wrap seed_dev_db route in env var conditional check
+
+## [Tues 10.06.25]
+**Log:**
+- 
