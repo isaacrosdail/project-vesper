@@ -250,7 +250,7 @@ window.onload = async () => {
     updateSunPosition(); // Draw sun immediately
 
     setInterval(getWeatherInfo, 1*60*60*1000); // Update weather every hour
-    setInterval(updateSunPosition, 1000); // Update sun from weatherInfo every 10mins 10*60*1000
+    setInterval(updateSunPosition, 10*60*1000); // Update sun from weatherInfo every 10mins 10*60*1000
 }
 
 // Export to allow it to be tested
