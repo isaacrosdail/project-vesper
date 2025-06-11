@@ -129,20 +129,77 @@ async function getWeatherInfo() {
 
     // Async fetch to call our Flask API endpoint/weather/<city>/<units>
     const response = await fetch(`/api/weather/${city}/${units}`) // GET is the default method, so we just need this here!
+    // weatherInfo is our resultant json containing all the info we need
     const weatherInfo = await response.json();
 
     // use weather info - to start, grab temp & sunset time
-    const temp = weatherInfo.main.temp;
+    const temp = Math.round(weatherInfo.main.temp);
     const sunset = weatherInfo.sys.sunset;
+    const desc = weatherInfo.weather[0].description.toLowerCase();
 
+    // Pass sunrise & sunset times to our updateSunPosition function once
+    updateSunPosition(weatherInfo.sys.sunrise, weatherInfo.sys.sunset);
+
+    // Determine fitting emoji
+    let emoji = '🌡️';
+    if (desc.includes('thunder')) emoji = '⛈️';
+    if (desc.includes('drizzle')) emoji = '🌦️';
+    if (desc.includes('rain')) emoji = '🌧️';
+    if (desc.includes('overcast')) emoji = '☁️';
+    if (desc.includes('snow')) emoji = '❄️';
+    if (desc.includes('mist') || desc.includes('fog')) emoji = '🌫️';
+    if (desc.includes('clear')) emoji = '☀️';
+    if (desc.includes('few clouds')) emoji = '🌤️';
+    if (desc.includes('scattered') || desc.includes('broken')) emoji = '⛅';
+    if (desc.includes('overcast')) emoji = '☁️';
+    if (desc.includes('tornado')) emoji = '🌪️';
+    
     // Convert sunset time to date & local
-    const sunsetTime = new Date(sunset * 1000);
-    const sunsetFormatted = sunsetTime.toLocaleTimeString();
+    const sunsetTime = new Date(sunset * 1000); // comes in Unix-style, so convert first
+    const sunsetFormatted = sunsetTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 
     // Display temp with units
-    tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'}`;
+    tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
     // Display formatted sunset time
-    sunsetDisplay.textContent = `Sunset: ${sunsetFormatted}`;
+    sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
+}
+
+// Fun function to make a sun move across the weather widget as the day progresses! :D
+function updateSunPosition(sunrise, sunset) {
+    // To find our normalized x value for the position of our sun
+    const now = Date.now() / 1000; // Current time as Unix timestamp
+    const xVal = (now - sunrise) / (sunset - sunrise);
+    const yVal = Math.sin(xVal * Math.PI);  // Using a sin curve to give us our arc for the sun, fits well between 0 and 1
+
+    drawSun(xVal, yVal);
+}
+
+// Getting started with Canvas
+function drawSun(x, y) {
+
+    // First, translate our values from updateSunPosition to scale to canvas size
+    const canvasX = x * 100; // 0-1 becomes 0-100
+    const canvasY = 100 - (y * 100); // 0-1 becomes 0-100 (flipped - since canvas's (0,0) is at the top left!)
+    const canvas = document.getElementById('sun-canvas');
+    // ctx is a common abbreviation for context - the drawing interface object
+    const ctx = canvas.getContext('2d'); // Canvas can do diff types of drawing 2D graphics or 3D (WebGL?) // 2D here tells it "I want to draw 2D stuff like circles, lines, etc."
+    
+    // Clear the previous sun first!
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'orange';
+    // beginPath() - Canvas draws using "paths" - You start a new path, draw some shapes, then tell it to actually render
+    ctx.beginPath();
+    // ctx.arc(x, y, radius, start angle, end angle);
+    // x, y represent the center point coords - where on the canvas to put the circle
+    // radius 10 says "10 pixels from center to edge"
+    // start angle is where to start drawing (0 = rightmost point)
+    // end angle is where to stop drawing (2pi = full circle)
+    ctx.arc(canvasX, canvasY, 10, 0, 2 * Math.PI);
+    ctx.fill();
 }
 
 window.onload = async () => {
