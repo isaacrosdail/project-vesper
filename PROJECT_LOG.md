@@ -794,3 +794,8 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 - Canvas coordinate system & basic transform
 - Async/await flow with setInterval timing
 - Separating data fetching from data usage (global caching)
+
+**Up Next:**
+1. Stylize sun so it's clearer what it is (add horizon, sun rays, etc?)
+2. Add tooltip for onhover of canvas to further clarify that it moves in realtime/follows the real sun position based on sunrise and sunset of the city
+3. Make it read user's timezone/city so it's not hardcoded to London
