@@ -14,14 +14,12 @@ def seed_db():
     try:
 
         # Clear existing data
-        # Note: We can get by deleting a child (HabitCompletion) AFTER a parent (Habit) here since SQLAlchemy ORM deletes
-        # function a bit "smarter" than do raw SQL DELETEs
         # to study: cascade settings for tables
         session.query(Transaction).delete()
         session.query(Task).delete()
         session.query(Product).delete()
-        session.query(Habit).delete()
         session.query(HabitCompletion).delete()
+        session.query(Habit).delete()
 
         # Create regular tasks (no more is_anchor field -> moving to new Habit model entirely)
         tasks = [
