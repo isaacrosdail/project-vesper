@@ -98,7 +98,6 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }} <!-- To include parent script(s) (from base.html: needed here for flash fadeout) -->
     <script src="{{ url_for('static', filename = 'js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/groceries/dashboard.js') }}"></script>
 {% endblock %}
