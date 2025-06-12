@@ -98,7 +98,7 @@ def delete_habit_completion(habit_id):
         # Find corresponding habitcompletion entry for today
         habit_completion = session.query(HabitCompletion).filter(
             HabitCompletion.habit_id == habit_id,
-            func.date(HabitCompletion.completed_at) == today
+            func.date(HabitCompletion.created_at) == today
         ).first()
 
         if habit_completion:
