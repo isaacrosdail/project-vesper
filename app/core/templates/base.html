@@ -36,8 +36,9 @@
         </footer>
     </div>
 
-    {% block scripts %}
-    <!-- Script to add listener that allows flash() messages to auto-fade & then disappears -->
+    <!-- Site-wide scripts BEFORE the script block -> run everywhere -->
+    <script src="{{ url_for('static', filename = 'js/navbar.js')}}"></script>
+    <!-- Flash message auto-fade -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             console.log("flash script running");
@@ -51,6 +52,7 @@
             }
         });
     </script>
+    {% block scripts %}
     {% endblock %}
 </body>
 </html>
