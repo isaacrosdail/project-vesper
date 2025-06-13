@@ -5,7 +5,7 @@ services:
     build:
       context: . # why the period here?
       dockerfile: Dockerfile.postgres
-    container_name: vesper-db
+    container_name: vesper-db-prod
     restart: always
     ports:
       - "5432:5432"
@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata-prod:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
 
   web:
@@ -28,7 +28,7 @@ services:
     environment:
       - DATABASE_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - SECRET_KEY=${SECRET_KEY}
-      - FLASK_ENV=production
+      - APP_ENV=prod
     ports:
       - "5000:5000"
     # Bind mounting ./static/ (host) to app/static/ (container) so we can serve styles
@@ -36,5 +36,5 @@ services:
       - ./static:/app/static
 
 volumes:
-  pgdata:
-    name: vesper-pgdata
+  pgdata-prod:
+    name: vesper-pgdata-prod
