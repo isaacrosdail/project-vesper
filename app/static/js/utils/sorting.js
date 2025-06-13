@@ -1,7 +1,8 @@
 
 
 // Stable
-function bubbleSortSimple(myList){
+// Note: _ tells ESLint "I know we're not using this function yet - don't worry about it."
+function _bubbleSortSimple(myList){
 
     for (let i = 0; i < myList.length - 1; i++) {
         // Outer loop decides whether to continue
@@ -19,10 +20,11 @@ function bubbleSortSimple(myList){
             break;
         }
     }
-    return thing; // do we need to return here too?
+    return myList; // return sorted list
 }
 
-function bubbleSort(myList, key, reverse=false) {
+// Note: _ tells ESLint "I know we're not using this function yet - don't worry about it."
+function _bubbleSort(myList, key, reverse=false) {
 
     for (let i = 0; i < myList.length -1; i++) {
         // Outer loop decides whether to continue
@@ -50,4 +52,5 @@ function bubbleSort(myList, key, reverse=false) {
             break;
         }
     }
+    return myList; // Return sorted list
 }
