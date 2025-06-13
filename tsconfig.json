@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "outDir": "./app/static/js/dist",
+        "rootDir": "./app/static/js/src",
+        "noUnusedLocals": false,
+        "noUnusedParameters": false
+    }
+}
