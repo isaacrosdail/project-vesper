@@ -43,5 +43,5 @@ jobs:
             ls -la "$SEED_PATH" # check if file exists
             
             git pull origin dev
-            docker-compose down
-            docker-compose up -d --build
+            docker-compose -f docker-compose.pi.yml down
+            docker-compose -f docker-compose.pi.yml up -d --build
