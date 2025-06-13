@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.core.database import db_session
 from app.modules.groceries.models import Product, Transaction
-from app.modules.habits.models import Habit, HabitCompletion
+from app.modules.habits.models import Habit, HabitCompletion, DailyIntention
 from app.modules.tasks.models import Task
 
 
@@ -20,6 +20,10 @@ def seed_db():
         session.query(Product).delete()
         session.query(HabitCompletion).delete()
         session.query(Habit).delete()
+        session.query(DailyIntention).delete()
+
+        # Restore DailyIntention default text
+        dailyIntention = DailyIntention(intention="What's your focus today?")
 
         # Create regular tasks (no more is_anchor field -> moving to new Habit model entirely)
         tasks = [
@@ -56,6 +60,7 @@ def seed_db():
             )
         ]
 
+        session.add(dailyIntention)
         session.add_all(tasks + habits + products)
         session.flush() # Flush to get product IDs for transactions
 
