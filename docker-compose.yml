@@ -1,33 +1,10 @@
-# Docker Compose for local dev & Pi deployment
+# Just Postgres for local dev
 services:
-  # Web application service
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile.pi # Separate Dockerfile to avoid user add for dev deploy
-    container_name: vesper-web
-    restart: always
-    ports:
-      - "0.0.0.0:5000:5000" # accessible from network
-    environment:
-      - DATABASE_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      - SECRET_KEY=${SECRET_KEY}
-      - FLASK_ENV=development
-    depends_on:
-      - db
-    # Bind mounting a file from the host filesystem into the container
-    # This is different from copying! Here, the file lives on the host, but
-    # a direct connection is created such that it appears inside the container
-    volumes:
-      - ${SEED_PATH}:/app/app/seed_dev_db.py
-
-    #command: sleep infinity
-
   db:
     build:
       context: . # why the period here?
       dockerfile: Dockerfile.postgres
-    container_name: vesper-db
+    container_name: vesper-db-dev
     restart: always
     ports:
       - "5432:5432"
@@ -36,9 +13,10 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # Separate dev data
+      - pgdata-dev:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
 
 volumes:
-  pgdata:
-    name: vesper-pgdata
+  pgdata-dev:
+    name: vesper-pgdata-dev # Separate from prod/pi data
