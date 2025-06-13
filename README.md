@@ -40,3 +40,6 @@ audit:
 clean:
   rm -rf node_modules/
   rm -rf __pycache__/
+
+## Attributions
+Weather data provided by [OpenWeatherMap](https://openweathermap.org/), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
