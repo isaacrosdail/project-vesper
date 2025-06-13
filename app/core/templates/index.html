@@ -66,8 +66,10 @@
             <li>
                 <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
                 <input type="checkbox"
+                    class="habit-checkbox"
+                    data-habit-id="{{ habit.id }}"
                     {% if completed_today[habit.id] %}checked{% endif %}
-                    onchange="markHabitComplete(this, {{ habit.id }})">
+                />
                 <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if completed_today[habit.id] %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
                     {{ habit.title }}
                     
