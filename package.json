@@ -1,22 +1,35 @@
 {
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
     "autoprefixer": "^10.4.21",
     "browser-sync": "^3.0.4",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
+    "eslint": "^9.28.0",
+    "globals": "^16.2.0",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.4"
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.0"
   },
   "scripts": {
     "test": "jest",
     "tailwind": "npx tailwindcss -i app/static/css/style.css -o app/static/css/output.css --watch",
     "flask": "flask run --debug",
     "sync": "browser-sync start --proxy localhost:5000 --files 'app/**/templates/**/*.html' 'static/css/*.css'",
-    "dev": "concurrently \"npm:tailwind\" \"npm:flask\" \"npm:sync\"",
+    "tsc": "tsc --watch",
+    "dev": "concurrently \"npm:tailwind\" \"npm:flask\" \"npm:sync\" \"npm:tsc\"",
     "debug:ui": "concurrently \"npm run tailwind\" \"browser-sync start --proxy localhost:5000 --files 'app/**/*.py, app/templates/**/*.html, app/static/**/*.css'\"",
-    "build": "cross-env NODE_ENV=production tailwindcss -i app/static/css/style.css -o app/static/css/output.css --minify"
+    "build": "cross-env NODE_ENV=production tailwindcss -i app/static/css/style.css -o app/static/css/output.css --minify",
+    "prepare": "husky",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.4"
