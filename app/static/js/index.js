@@ -186,7 +186,7 @@ async function getWeatherInfo() {
 
 function updateSunPosition() {
     if (weatherInfo) {
-        const now = Math.floor(Date.now() / 1000);
+        const now = Math.floor(Date.now() / 1000); // convert to seconds to compare to what API gave
         const sunPos = calcSunPosition(weatherInfo.sys.sunrise, weatherInfo.sys.sunset, now);
         drawSun(sunPos.x, sunPos.y);
     }
@@ -196,6 +196,15 @@ function calcSunPosition(sunrise, sunset, now) {
     // To find our normalized x value for the position of our sun
     const xVal = (now - sunrise) / (sunset - sunrise);
     const yVal = Math.sin(xVal * Math.PI);  // Using a sin curve to give us our arc for the sun, fits well between 0 and 1
+
+    /** Notes for adding our moon too:
+     *  Calc becomes: (now - todaySunset) / (tomorrowSunrise - todaySunset)
+     *  Perhaps re-use sun position / draw functions & conditionally determine whether we're
+     *  drawing the sun or moon?
+     *  like: if now < tomorrowSunrise -> calc/draw moon
+     *        else                     -> calc draw sun
+     *  Handle moon phases after
+     */
 
     // Debug logging
     // console.log('Current time:', now);
@@ -247,10 +256,10 @@ function drawSun(x, y) {
     ctx.fill();
 
 
-    // Debug: Draw a dot for each of the sunrise and sunset points
-    // console.log('Raw x, y from math:', x, y);
-    // console.log('Canvas coordinates: ', canvasX, canvasY);
-    // console.log('Canvas size: ', canvas.width, canvas.height);
+    //Debug: Draw a dot for each of the sunrise and sunset points
+    console.log('Raw x, y from math:', x, y);
+    console.log('Canvas coordinates: ', canvasX, canvasY);
+    console.log('Canvas size: ', canvas.width, canvas.height);
 
     // Reset transforms;
     ctx.restore();
