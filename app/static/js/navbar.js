@@ -12,7 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Resize event listener to hide our mobile-nav (handles our mobile-nav.show state)
 let lastWidth = 640;
-// Throttle our resize check
+// Throttle our resize check to 200ms
 let currentTime = Date.now(); // returns ms since 1970
 let lastCheckTime = currentTime - 200; // Pretend it's been 200ms since last check
 
