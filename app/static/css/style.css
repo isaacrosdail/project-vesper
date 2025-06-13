@@ -16,6 +16,10 @@ Able to group Tailwind stylings together for repeat usage, within @layer compone
     }
 }
 
+/* Force everything to respect the screen width */
+* {
+    box-sizing: border-box; /* Padding/borders included in width calculations */
+}
 body {
     display: flex;
     flex-direction: column;
@@ -48,6 +52,20 @@ section > div:not(.divider) {
 a {
     text-decoration: none;
     /* color: inherit; */
+}
+/* Desktop-first styling for navbar */
+#desktop-nav {
+    display: flex;
+}
+#mobile-nav {
+    display: none;
+    flex-direction: column;
+}
+#mobile-nav.show {
+    display: flex;
+}
+#hamburger-btn {
+    display: none;
 }
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
 .wrapper {
@@ -83,4 +101,12 @@ footer {
     border-radius: 4px;
     cursor: pointer;
     max-width: fit-content;
+}
+
+/* Media queries for responsiveness */
+
+/* Small screens only =>  Hide desktop nav & show hamburger button */
+@media (max-width: 640px) {
+    #hamburger-btn { display: block; }
+    #desktop-nav { display: none; }
 }
