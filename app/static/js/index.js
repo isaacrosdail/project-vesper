@@ -44,6 +44,21 @@ if (dailyIntentionSubmitBtn) {
     }
 }
 
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Shift from onchange in index.html to eventListener for our habit-checkbox to complete functionality
+    // Get ALL checkboxes with the class habit-checkbox
+    const habitCheckboxes = document.querySelectorAll('.habit-checkbox');
+    // Add eventListener to each one
+    habitCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function(event) {
+            // event.target = the checkbox (what used to be 'this' in our inline onchange)
+            // event.target.dataset.habitId = gets the data-habit-id value we added
+            markHabitComplete(event.target, event.target.dataset.habitId);
+        });
+    });
+});
+
 // Function that activates when checkbox for anchor habits are checked, indicating completion
 // Function will then use fetch() to trigger POST to tell Flask to update DB
 function markHabitComplete(checkbox, habitId) {
@@ -53,7 +68,6 @@ function markHabitComplete(checkbox, habitId) {
 
     // If .checked == True  -> user just checked it
     // If .checked == False -> user just un-checked it
-    const isDone = checkbox.checked;
 
     // Now need to break our original PATCH request into two different requests.
     if (checkbox.checked) {
