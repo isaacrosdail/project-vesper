@@ -23,14 +23,14 @@ window.addEventListener('resize', function() {
         const mobileNav = document.getElementById('mobile-nav');
         // When resize fires, check if window.innerWidth is above or below 640px
         // Crossing TO desktop
-        if (mobileNav && window.innerWidth > 640 && lastWidth <= 640) {
+        if (mobileNav && window.innerWidth > 640) {
             // Remove the .show class from mobile-nav
             mobileNav.classList.remove('show');
         }
         // Crossing TO mobile
-        if (mobileNav && window.innerWidth < 640 && lastWidth >= 640) {
-            mobileNav.classList.remove('show');
-        }
+        // if (mobileNav && window.innerWidth < 640) {
+        //     mobileNav.classList.remove('show');
+        // }
         lastWidth = window.innerWidth;
 
         lastCheckTime = Date.now();
