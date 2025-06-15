@@ -1,4 +1,6 @@
 {
+  "name": "project-vesper",
+  "version": "0.2.0",
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@typescript-eslint/eslint-plugin": "^8.34.0",

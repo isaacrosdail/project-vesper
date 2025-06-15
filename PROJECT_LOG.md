@@ -734,8 +734,6 @@ Log:
 	1. DailyIntention model -> DONE
 	2. DailyMetric model -> DONE
 	3. Alembic revision!
-		
-			
 2. Make Daily Intention on homepage now use/update our new model instead of just the element's text!
 
 **Log:**
@@ -753,9 +751,61 @@ Log:
 	- Modified index.html: added Jinja conditional to use intention OR default text, refactor critical-task to daily-intention
 Key Changes: DB schema, repository layer, route logic, template rendering
 
-3. Other changes
+3. Other changes:
 	- Fixed lazy loading errors (sneaky!) by moving habit completion logic from templates to backend
 	- Refactored index.html dashboard route to pre-calculate completion status and streaks as dictionaries
 
 **Where I Left Off:**
 - Started test_habits_habit_logic.py unit test file to suss out possible race condition with our AJAX
+
+## [Sun 08.06.25]
+**Log:**
+- Refactored DB management from create_all() to Alembic migrations
+
+## [Mon 09.06.25]
+**Log:**
+- Added a custom base class for basics like id & timestamp information
+	- Ran Alembic revision & refactored accordingly to use updated references
+- Clean up environment variable handling a bit, wrap seed_dev_db route in env var conditional check
+
+## [Tues 10.06.25]
+**Goals:**
+1. Get started with weather API calls
+**Log:**
+1. Weather API calls
+	- Sign up for OpenWeatherMap (personal em, made filter for it)
+	- Add API key to .env (local & server)
+	- Make new api.py to use it via Flask
+**Learned:**
+- Async/await, basic JSON handling
+
+## [Wed 11.06.25]
+**Goals:**
+1. Expand weather API widget functionality a bit
+2. Start implementing an animated sun arc
+	- Begin with Jest for testing pieces of this
+	- Added "testEnvironment: 'jsdom'" to jest.config.js (fake browser environment)
+	- Wrapped DOM code in safety checks: if (element) { element.onclick = ... }
+**Log:**
+1. Expanded weather API widget functionality
+	- Grab sunset time
+	- Make emojis display conditionally depending on weather description
+2. Animated Sun arc
+	- Figured out the math for a moving sun that follows actual sunrise/sunset times
+	- Learned Canvas basics for this: Set up first Canvas element & drawing functions
+	- Refactored these functions to separate pure match function to prep for testing
+3. Diving back into Jest testing
+	- Made a basic 2 + 2 = 4 Jest test
+	- then a test to calc sun position at midday (should be 1)
+4. Using setInterval for both getWeatherInfo & sun drawing functionalities
+	- Weather info updates every hour, sun position updates every 10mins
+**Learned:**
+- JS modules are a mess
+- Canvas coordinate system & basic transform
+- Async/await flow with setInterval timing
+- Separating data fetching from data usage (global caching)
+
+**Up Next:**
+1. Stylize sun so it's clearer what it is (add horizon, sun rays, etc?)
+2. Add tooltip for onhover of canvas to further clarify that it moves in realtime/follows the real sun position based on sunrise and sunset of the city
+3. Make it read user's timezone/city so it's not hardcoded to London
