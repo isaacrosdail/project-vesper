@@ -252,7 +252,9 @@ function drawSun(x, y) {
     // radius 10 says "10 pixels from center to edge"
     // start angle is where to start drawing (0 = rightmost point)
     // end angle is where to stop drawing (2pi = full circle)
-    ctx.arc(canvasX, canvasY, 10, 0, 2 * Math.PI);
+
+    const radius = 10; // radius of sun 'dot'
+    ctx.arc(canvasX, canvasY, radius, 0, 2 * Math.PI);
     ctx.fill();
 
 
@@ -260,6 +262,24 @@ function drawSun(x, y) {
     console.log('Raw x, y from math:', x, y);
     console.log('Canvas coordinates: ', canvasX, canvasY);
     console.log('Canvas size: ', canvas.width, canvas.height);
+
+    // Adding some rays to our sun
+    const rayLength = 15;
+    const numRays = 8;
+    ctx.strokeStyle = 'orange';
+
+    for (let i = 0; i < numRays; i++) {
+        const angle = (i * 2 * Math.PI) / numRays;
+        const startX = canvasX + (radius + 5) * Math.cos(angle);
+        const startY = canvasY + (radius + 5) * Math.sin(angle);
+        const endX = canvasX + (radius + rayLength) * Math.cos(angle);
+        const endY = canvasY + (radius + rayLength) * Math.sin(angle);
+    
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+    }
 
     // Reset transforms;
     ctx.restore();
