@@ -10,29 +10,26 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 })
 
-// Resize event listener to hide our mobile-nav (handles our mobile-nav.show state)
-let lastWidth = 640;
-// Throttle our resize check to 200ms
-let currentTime = Date.now(); // returns ms since 1970
-let lastCheckTime = currentTime - 200; // Pretend it's been 200ms since last check
+/**
+ * Cleans up .show class from mobile-nav when viewport exceeds 640px
+ * Media query handles setting mobile-nav.show display to none though
+ */
+const DESKTOP_BREAKPOINT = 640;
+const THROTTLE_DELAY = 200; // Throttle to every 200ms
+let resizeTimer;
 
 window.addEventListener('resize', function() {
-    currentTime = Date.now();
-    if (currentTime - lastCheckTime >= 200){
-        console.log('Resize triggered!')
-        const mobileNav = document.getElementById('mobile-nav');
-        // When resize fires, check if window.innerWidth is above or below 640px
-        // Crossing TO desktop
-        if (mobileNav && window.innerWidth > 640) {
+    clearTimeout(resizeTimer);
+
+    /**
+     * Throttled resize event handler
+     * Removes mobile-nav.show when crossing to desktop viewport size
+     */
+    resizeTimer = setTimeout(() => {
+        const mobileNav = document.getElementById('mobile-nav'); // Grab element
+        if (mobileNav && window.innerWidth > DESKTOP_BREAKPOINT) { // Check if window size past our breakpoint for desktop
             // Remove the .show class from mobile-nav
             mobileNav.classList.remove('show');
         }
-        // Crossing TO mobile
-        // if (mobileNav && window.innerWidth < 640) {
-        //     mobileNav.classList.remove('show');
-        // }
-        lastWidth = window.innerWidth;
-
-        lastCheckTime = Date.now();
-    }
-})
+    }, THROTTLE_DELAY);
+});
