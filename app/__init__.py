@@ -15,6 +15,7 @@ from app.modules.crud_routes import crud_bp
 from app.modules.groceries.routes import groceries_bp
 from app.modules.habits.routes import habits_bp
 from app.modules.tasks.routes import tasks_bp
+from app.core.api import api_bp
 from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
 
 
@@ -58,5 +59,6 @@ def create_app(config_name=None):
     app.register_blueprint(groceries_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(habits_bp)
+    app.register_blueprint(api_bp)
 
     return app

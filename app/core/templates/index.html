@@ -7,22 +7,31 @@
 {% block content %}
 <div class="max-w-3xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10"> <!-- px-4 = 1rem left + right, sm:px-8 = wider padding on screens >= 640px -->
     <!-- Greeting & Time/Date Card -->
-    <div class="bg-gray-200 p-6 rounded-xl shadow-lg">
-        <h1 class="text-xl font-semibold mb-2">
-            {% if now.hour < 12 %}
-                Good morning!
-            {% elif now.hour < 18 %}
-                Good afternoon!
-            {% else %}
-                Good evening!
-            {% endif %}
-        </h1>
+    <section id="greeting-card" class="bg-gray-200 rounded-xl shadow-lg">
+        <div class="time-section">
+            <h1 class="text-xl font-semibold mb-2">
+                {% if now.hour < 12 %}
+                    Good morning!
+                {% elif now.hour < 18 %}
+                    Good afternoon!
+                {% else %}
+                    Good evening!
+                {% endif %}
+            </h1>
+            <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p><br>
+        </div>
+        <div class="divider"></div>
+        <div class="weather-section">
+            <div id="weather-temp"></div>
+            <div id="weather-sunset"></div>
+            <!-- Learning canvas for our sun :D -->
+            <canvas id="sun-canvas" width="200" height="100"></canvas>
+        </div>
 
-        <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p><br>
-    </div>
+    </section>
 
     <!-- Critical Task Card -->
-    <div class="bg-gray-200 p-6 rounded-xl shadow-lg">
+    <section id="today-intention-card" class="bg-gray-200 p-6 rounded-xl shadow-lg">
         <h2 class="text-xl font-semibold mb-2">Critical Task</h2>
         <p>
             <span>Today's Intention: </span>
@@ -46,10 +55,10 @@
             <input id="intention-input">
             <button class="button" id="intention-submit">submit</button>
         </div>
-    </div>
+    </section>
 
     <!-- Daily Habits Card -->
-    <div class="bg-gray-200 p-6 rounded-xl shadow-lg">
+    <section id="daily-habits-card" class="bg-gray-200 p-6 rounded-xl shadow-lg">
         <h2 class="text-xl font-semibold mb-2">Daily Habits</h2>
         <!-- Just print names in UL for now -->
         <ul>
@@ -57,25 +66,25 @@
             <li>
                 <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
                 <input type="checkbox"
+                    class="habit-checkbox"
+                    data-habit-id="{{ habit.id }}"
                     {% if completed_today[habit.id] %}checked{% endif %}
-                    onchange="markHabitComplete(this, {{ habit.id }})">
+                />
                 <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if completed_today[habit.id] %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
                     {{ habit.title }}
                     
                 </span>
                 
-                <span class="text-sm ">
+                <span class="text-sm">
                     {% if streaks[habit.id] > 0 %}
                      🔥{{ streaks[habit.id] }}
                     {% endif %}
                 </span>
-
-
             </li>
         {% endfor %}
         </ul>
 
-    </div>
+    </section>
 </div>
 {% endblock %}
 

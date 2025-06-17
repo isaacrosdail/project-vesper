@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 
-.test {
-    color: color-mod(red alpha(90%));
-}
+
 /* TODO: Remove this?
 Able to group Tailwind stylings together for repeat usage, within @layer components here */
 @layer components {
@@ -18,14 +16,56 @@ Able to group Tailwind stylings together for repeat usage, within @layer compone
     }
 }
 
+/* Force everything to respect the screen width */
+* {
+    box-sizing: border-box; /* Padding/borders included in width calculations */
+}
 body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
 }
+/* Now making our greeting card be grid layout within our flexbox content */
+#greeting-card {
+    display: grid;
+    /* grid-template-columns
+    1fr: takes up available space
+    auto: just wide enough for content (our divider)
+    1fr: takes up remaining available space
+    */
+    grid-template-columns: 1fr auto 1fr; /* time | divider | weather */
+    grid-template-rows: 1fr;
+    min-height: 80px;
+}
+/* Styling our visible divider div in between greeting & weather */
+.divider {
+    width: 2;
+    background-color: #000;
+    height: 100%;
+    opacity: 50%;
+}
+/* "Apply 1.5rem padding to all direct div children of 'section' elements EXCEPT those with class 'divider' :D 
+** To apply our Tailwind p-6 class styling to most cards (except Critical Task) */
+section > div:not(.divider) {
+    padding: 1.5rem; /* equivalent to p-6 (24px)*/
+}
 a {
     text-decoration: none;
     /* color: inherit; */
+}
+/* Desktop-first styling for navbar */
+#desktop-nav {
+    display: flex;
+}
+#mobile-nav {
+    display: none;
+    flex-direction: column;
+}
+#mobile-nav.show {
+    display: flex;
+}
+#hamburger-btn {
+    display: none;
 }
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
 .wrapper {
@@ -61,4 +101,12 @@ footer {
     border-radius: 4px;
     cursor: pointer;
     max-width: fit-content;
+}
+
+/* Media queries for responsiveness */
+
+/* Small screens only =>  Hide desktop nav & show hamburger button */
+@media (max-width: 640px) {
+    #hamburger-btn { display: block; }
+    #desktop-nav { display: none; }
 }

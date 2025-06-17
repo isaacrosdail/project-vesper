@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-const { updateFieldDisplay } = require('../tasks/dashboard');
+const { updateFieldDisplay } = require('@/tasks/dashboard.js');
 
 test('updates td with new span element containing new value', () => {
     const td = document.createElement('td');

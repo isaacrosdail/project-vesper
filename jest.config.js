@@ -5,6 +5,26 @@
 
 /** @type {import('jest').Config} */
 const config = {
+
+  // Added myself: Change test environment to jsdom
+  testEnvironment: 'jsdom',
+
+  // Adding moduleNameMapper for cleaner imports
+  /*
+  ^ = start of string
+  @/ = literally matches "@/"
+  (.*) = captures everything after "@/" (parentheses create a 'group')
+  $ = "end of the string"
+  So it matches any import that starts with @/ and captures whatever comes after it
+
+  <rootDir> = Jest's special token for our project root directory
+  /app/ = literally the "/app/" path
+  $1 = refers to whatever was captured in the first group (.*) from the left side
+  */
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/app/static/js/$1'
+  },
+
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 

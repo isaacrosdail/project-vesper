@@ -4,22 +4,50 @@
         <!-- LEFT: Branding & Links -->
         <div class="flex space-x-6">
             <span class="text-2xl font-semibold text-gray-300 mr-6">Vesper</span>
-            <a href="{{ url_for('main.home') }}"
-                class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'main.home' %}bg-gray-700{% endif %}">
-                    Home
-            </a>
-            <a href="{{ url_for('tasks.dashboard') }}" 
-                    class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
-                    Tasks
-            </a>
-            <a href="{{ url_for('habits.dashboard') }}"
-                    class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'habits.dashboard' %}bg-gray-700{% endif %}">
-                    Habits
-            </a>
-            <a href="{{ url_for('groceries.dashboard') }}" 
-                    class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
-                    Groceries
-            </a>
+
+            <!-- Beginning hamburger menu -->
+            <button id="hamburger-btn" class="sm:hidden text-gray-300">
+                ☰
+            </button>
+            <!-- Desktop nav links -->
+            <div class="space-x-6" id="desktop-nav">
+                <a href="{{ url_for('main.home') }}"
+                    class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'main.home' %}bg-gray-700{% endif %}">
+                        Home
+                </a>
+                <a href="{{ url_for('tasks.dashboard') }}" 
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
+                        Tasks
+                </a>
+                <a href="{{ url_for('habits.dashboard') }}"
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'habits.dashboard' %}bg-gray-700{% endif %}">
+                        Habits
+                </a>
+                <a href="{{ url_for('groceries.dashboard') }}" 
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
+                        Groceries
+                </a>
+            </div>
+            <!-- Mobile nav links: Hidden by default -->
+            <div class="space-y-6" id="mobile-nav">
+                <a href="{{ url_for('main.home') }}"
+                    class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'main.home' %}bg-gray-700{% endif %}">
+                        Home
+                </a>
+                <a href="{{ url_for('tasks.dashboard') }}" 
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'tasks.dashboard' %}bg-gray-700{% endif %}">
+                        Tasks
+                </a>
+                <a href="{{ url_for('habits.dashboard') }}"
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'habits.dashboard' %}bg-gray-700{% endif %}">
+                        Habits
+                </a>
+                <a href="{{ url_for('groceries.dashboard') }}" 
+                        class="text-gray-300 hover:bg-gray-700 p-2 rounded no-underline {% if request.endpoint == 'groceries.dashboard' %}bg-gray-700{% endif %}">
+                        Groceries
+                </a>
+            </div>
+            
         </div>
 
         <!-- RIGHT: Reset DB button -->

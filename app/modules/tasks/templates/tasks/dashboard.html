@@ -64,7 +64,7 @@
     <a href="{{ url_for('tasks.add_task') }}" class="mb-2 {{ styles.btn_classes() }}">
         Add New Task
     </a>
-    {% if flask_env == 'development' %}
+    {% if app_env == 'dev' %}
     <form action="{{ url_for('main.reset_dev_db') }}" method="POST">
         <button type="submit" class="mt-120 {{ styles.btn_classes() }}">Reset dev DB</button>
     </form>
@@ -73,7 +73,6 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }} <!-- super() makes Flask include the scripts from the parent (eg., base.html() ) which here is needed for the flash() fade function -->
     <script src="{{ url_for('static', filename = 'js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/tasks/dashboard.js') }}"></script>
 {% endblock %}
