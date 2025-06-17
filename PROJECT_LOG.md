@@ -799,3 +799,20 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 1. Stylize sun so it's clearer what it is (add horizon, sun rays, etc?)
 2. Add tooltip for onhover of canvas to further clarify that it moves in realtime/follows the real sun position based on sunrise and sunset of the city
 3. Make it read user's timezone/city so it's not hardcoded to London
+
+## [Thurs 12.06.25]
+**Log:**
+- Remove super() usage in templates, refactor completed_at to created_at to fix bug with HabitCompletion
+
+## [Fri 13.06.25] - Mobile Nav Polish & Dev Tooling
+**Log:**
+- Set up TypeScript, ESLint, and Husky for code quality and pre-commit checks. (see DEV_SETUP.md)
+- Configured the build pipeline & cleaned up some Docker stuff for sanity
+- Began hamburger menu implementation
+	- Started with JS resize detection (incl throttling) but simplified to CSS media queries with JS for state cleanup later.
+ - Also: Fixed some ESLint warnings, cleaned up rest of super() usage, and added notes for future moon implementation.
+
+## [Sun 15.06.25]
+**Log:**
+- Added sunrays using stroke to clarify sun styling
+
