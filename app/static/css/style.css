@@ -106,7 +106,13 @@ footer {
 /* Media queries for responsiveness */
 
 /* Small screens only =>  Hide desktop nav & show hamburger button */
-@media (max-width: 640px) {
+@media (width <= 640px) {
     #hamburger-btn { display: block; }
     #desktop-nav { display: none; }
+}
+
+@media (width > 640px) {
+    #mobile-nav.show {
+        display: none;
+    }
 }
