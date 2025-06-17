@@ -1,31 +1,11 @@
 ## Used to track daily/per-session progress
 
-## [Wed 26.02.25] *(Deprecated – replaced by Flask app)*
+## [Wed 26.02.25] *(Old - obviously replaced by Flask app)*
 
 **Log:**
 - Installed Raspberry Pi OS (RPi 4 Model B), installed Node.js, & got MagicMirror running
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
-
-**Usage Notes:**
-To run:
-```bash
-cd MagicMirror
-npm run start         # Normal launch
-npm run start:dev     # With Dev Tools
-```
-
-To exit:
-```bash
-CTRL+ALT+T
-killall node
-```
-Remote control:
-- Go to `http://<Rasp Pi IP>:8080/remote.html` on same local network
-Shortcuts:
-- ALT+F4 to exit fullscreen
-- ALT to show toolbar
-- CTRL+SHIFT+I to toggle Dev Tools
 
 ## [Sun 02.03.25] Pomodoro Timer Prototype
 **Goal(s):**
@@ -64,7 +44,7 @@ Shortcuts:
   - Uses Python 3.10 (`Users/Name/Python310`)
 - Installed MeloTTS (multi-lang lib?) and `unidic`
 
-## [Tue 18.03.25] Start at 15:00
+## [Tue 18.03.25]
 
 **Goal:**
 - Get barcode scanner functionality running in CLI to scan groceries and add/update DB
@@ -85,7 +65,7 @@ Shortcuts:
 - Successfully displayed static date & time
 
 
-## [Sat 22.03.25] Start 20:20
+## [Sat 22.03.25] 
 
 **Goal:**
 - Add `grocery.html` template to add new product to database
@@ -103,7 +83,8 @@ Shortcuts:
 - Make Vesper detect repeat scans and increment quantity instead of duplicating
 
 
-## [Mon 24.03.25] Start 22:35
+## [Mon 24.03.25]
+
 **Goal:**
 - Add product to grocery DB from barcode  
 - (Stretch) Detect repeat scans & increase quantity
@@ -116,7 +97,7 @@ Shortcuts:
 2. Fix `grocery.html` to generate table headers dynamically
 
 
-## [Tue 25.03.25] Start 18:30
+## [Tue 25.03.25]
 
 **Goals:**
 1. Tweak `add_product` logic to detect repeat scans and increase quantity
@@ -125,7 +106,7 @@ Shortcuts:
 - Forgot to log steps, but both goals were completed
 
 
-## [Wed 26.03.25] Start 22:00?
+## [Wed 26.03.25]
 **Log:**
 - Installed Remote Development extension in VSCode
 - Successfully connected to Raspberry Pi via SSH
@@ -134,7 +115,7 @@ Shortcuts:
 2. Set up Flask-Migrate: init, create/apply schema version, test with `Product` model
 
 
-## [Fri 28.03.25] Start 21:00
+## [Fri 28.03.25]
 **Log:**
 - Finalized `Product` model as permanent barcode-to-product record
 - Introduced `Transaction` model for individual scans
@@ -146,7 +127,7 @@ Shortcuts:
    - Need to finalize `add_product` and `add_transaction` functions
 
 
-## [Sat 29.03.25] Start 11:25
+## [Sat 29.03.25]
 **Goal:**
 - Sort out logic for `add_product` and `add_transaction`
 **Log:**
@@ -157,7 +138,7 @@ Shortcuts:
 - Make `add_product` and `add_transaction` form fields mandatory
 
 
-## [Sun 30.03.25] 11:55–15:00
+## [Sun 30.03.25]
 
 **Goal:**
 - Begin implementing tests using `pytest` / `pytest-mock`
@@ -173,7 +154,7 @@ Shortcuts:
 - Add WebSocket support to redirect to `/add_product` in real-time when scanned barcode doesn't exist
 
 
-## [Tue 01.04.25] Start 14:10
+## [Tue 01.04.25]
 
 **Goal(s):**
 - Add "daily tether(s)" UI element to dashboard page  
@@ -187,7 +168,7 @@ Shortcuts:
 - Began styling the card layout
 
 
-## [Wed 02.04.25] 11:56–14:00, 17:00–18:00 ish
+## [Wed 02.04.25]
 **Goal(s):**
 - Finish JS logic for `tether-card` input  
   - Centered card, hover effects, editable state  
@@ -203,7 +184,7 @@ Shortcuts:
 - Add WebSocket support to redirect to `/add_product` when scanned barcode is not found
 
 
-## [Fri 04.04.25] 17:35–19:12
+## [Fri 04.04.25]
 
 **Goal(s):**
 - Expand unit testing coverage, starting with DB logic in `groceries/repository.py`
@@ -213,9 +194,7 @@ Shortcuts:
   - Happy path  
   - Missing data  
   - Invalid price range
-- Added test cases for `get_all_products`:  
-  - No entries  
-  - With entries
+- Added 'no entries' & 'with entries' test cases for `get_all_products`
 - Added test cases for `get_all_transactions`:  
   - No entries  
   - With entry  
@@ -238,8 +217,6 @@ Shortcuts:
 
 ## [Thu 10.04.25]
 
-**Session 1: 13:27–15:00ish**
-
 **Goals:**
 - Flesh out `tasks.html` and implement 3 recurring habits  
 - *(Stretch)* Add habit streak UI
@@ -247,10 +224,6 @@ Shortcuts:
 - Added `add_task` template
 - Created `modules/tasks/repository.py` for DB logic
 - Used GET/POST in `tasks_routes.py` to process form data and render `tasks.html` with task table
-
----
-
-**Session 2: 19:00–21:55**
 
 **Log:**
 - Rendered “Today’s Habits” list on dashboard  
@@ -272,8 +245,6 @@ Shortcuts:
 
 ## [Fri 11.04.25]
 
-**Session 1: 14:40–22:02**
-
 **Log:**
 - `complete_task()`:
   - Locates task
@@ -290,7 +261,6 @@ Shortcuts:
   - Accurate `datetime` behavior and schema validation
 
 ## [Sat 12.04.25]
-**Session 1: 16:58–23:15**
 
 **Log:**
 - Switched fully to PostgreSQL
@@ -307,7 +277,6 @@ Shortcuts:
 
 
 ## [Sun 13.04.25]
-**Session 1: 14:00–00:41**
 
 **Log:**
 - Set up PostgreSQL in Docker using `docker-compose.yml` and `init.sql`
@@ -344,16 +313,10 @@ Shortcuts:
 
 ## [Tue 15.04.25]
 
-**Pre-Session**
 **Log:**
 - Created `Backups/Vesper` directory for PostgreSQL container DB backups
 - Centralized scripts under `User/Scripts` and added to `PATH`
   - Now `vesper-db-backup` command works from anywhere in PowerShell
-- TODO: Confirm backup `data/` folder actually stores volume contents (still figuring out how to check)
----
-
-**Session 1: 14:32–22:18**
-**Log:**
 - Implemented full CRUD for `tasks` (except DELETE)
   - Merged `complete_task` logic into PATCH section of new `update_task` route
 - Created `tasks/dashboard.js`:
@@ -363,15 +326,7 @@ Shortcuts:
   - Chose `node` env, used `v8` for coverage
   - Disabled coverage reports for now
   - Enabled auto-clear of mocks before each test
-- Installed `jest-environment-jsdom`:
-  ```bash
-  npm install --save-dev jest-environment-jsdom
-  ```
-- Confirmed test runs via:
-  ```bash
-  npm test
-  npx jest --watch
-  ```
+- Installed `jest-environment-jsdom` to mimic DOM & confirmed test runs
 **NOTE:**
 - Plan: Use **Jest** for unit testing, **Cypress** for end-to-end tests
 - Consider generalizing CRUD into a shared `crud_routes.py` later
@@ -381,17 +336,12 @@ Shortcuts:
 **Log:**
 - Added DELETE route for `tasks`
 - Added JS to dynamically show delete button on row hover
-- Began switch from Bootstrap → Tailwind CSS:
-  ```bash
-  npm install -D tailwindcss postcss autoprefixer
-  npx tailwindcss init -p
-  ```
-- Recreated most of the navbar styling in Tailwind
+- Began switch from Bootstrap → Tailwind CSS
+	- Recreated most of the navbar styling in Tailwind
 
 
 ## [Fri 02.05.25]
 
-**Session 1: 17:00–20:55**
 **Log:**
 - Refactored/renamed "Tether" → "Critical Task"
 - Discovered Tailwind styles require manually restarting Flask server to update 😅
@@ -409,7 +359,6 @@ Shortcuts:
 
 ## [Sat 03.05.25]
 
-**Session 1: 12:00–20:55**
 **Log:**
 - Added conditional product creation flow to `add_transaction` route
 - Normalized/parsed form data, enabled re-submission with `net_weight` if product not found
@@ -430,94 +379,32 @@ Shortcuts:
 
 **Log:**
 - Began styling home dashboard cards
-- Fixed pain point: Tailwind changes weren’t triggering Flask reload, even with `--debug`
-
-**SOLUTION: Set up 3-process hot reload workflow**
-1. Run Tailwind in watch mode:
-   ```bash
-   npx tailwindcss -i ./static/src/input.css -o ./static/css/output.css --watch
-   ```
-2. Run Flask in debug mode (separate terminal):
-   ```bash
-   flask run --debug
-   ```
-3. Add BrowserSync:
-   - Installed locally:
-     ```bash
-     npm install browser-sync --save-dev
-     ```
-   - Run with:
-     ```bash
-     browser-sync start --proxy "localhost:5000" --files "app/**/templates/**/*.html" "static/css/*.css"
-     ```
-**Explanation:**
-- Flask handles backend + Jinja templates  
-- Tailwind watch updates `output.css` on save  
-- BrowserSync reloads browser on HTML/CSS change
-
-**Optimized Workflow via npm scripts:**
-- Installed `concurrently`:
-  ```bash
-  npm install --save-dev concurrently
-  ```
-- Updated `package.json`:
-  ```json
-  "scripts": {
-    "tailwind": "npx tailwindcss -i ./app/static/css/style.css -o ./app/static/css/output.css --watch",
-    "flask": "flask run --debug",
-    "sync": "browser-sync start --proxy localhost:5000 --files 'app/**/templates/**/*.html' 'static/css/*.css'",
-    "dev": "concurrently \"npm:tailwind\" \"npm:flask\" \"npm:sync\""
-  }
-  ```
-**Final dev startup:**
-1. Activate venv:
-   ```bash
-   .venv\Scripts\activate
-   ```
-2. Run:
-   ```bash
-   npm run dev
-   ```
-3. ✅ Enjoy full-stack hot reload!
-
+2. Add script to enable npm run dev to run Flask app, BrowserSync, and Tailwind watch
+  - Tailwind watch + BrowserSync to update styling & reload automatically
+  - Installed concurrently for this too?
 
 ## [Mon 05.05.25]
 
 **Log:**
-- **Table Styling Overhaul**
+1. Table styling
   - Removed `.card` & `table-wrapper` remnants
   - Converted layout + visuals to Tailwind
   - Centralized table styles in `base.html`:
     - Distinct header styling for clarity
-    - Alternating row stripes + hover effect  
-      *(Colors still need refining)*
+    - Alternating row stripes + hover effect (need to refine colors)
     - Red delete button
     - Standardized spacing across all tables
     - Wrapped tables in card-style divs to match home dashboard layout
-- **Model Fix:**
-  - Made `Transaction.date_scanned` timezone-aware (UTC)
-- **UI Polish:**
+2. Made `Transaction.date_scanned` timezone-aware (UTC)
+3. UI Polish
   - Polished table + heading/caption styling
   - Replaced delete button text with SVG icon
-- **Tailwind CSS Cleanup via Purge:**
-  1. Installed `cross-env`:
-     ```bash
-     npm install --save-dev cross-env
-     ```
-  2. Added to `package.json`:
-     ```json
-     "build": "cross-env NODE_ENV=production tailwindcss -i .app/static/css/input.css -o .app/static/css/output.css --minify"
-     ```
-  3. Run with:
-     ```bash
-     npm run build
-     ```
+4. Installed `cross-env` & set up npm run build script for Tailwind:
      
 ## [Tue 06.05.25]
 **Git Goal:** Practice branching & merging
 
 **Log:**
-- Switched to branch `dev/today`
 - Removed price tag from `Add Product` template
 
 ## [Sun 11.05.25]
@@ -569,10 +456,7 @@ Shortcuts:
   4. DB connects using proper URI
 
 - Installed `gunicorn` locally to test `docker-compose.prod.yml`
-  - Replaced `flask run` with:
-    ```bash
-    gunicorn --bind 0.0.0.0:5000 app:app
-    ```
+  - Replaced `flask run` with gunicorn command
     - First `app`: the module (`app.py`)  
     - Second `app`: the Flask app instance inside
 
@@ -605,64 +489,7 @@ Shortcuts:
 ---
 
 **Linode Hosting Prep:**
-
-**1. Install Docker:**
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo apt install docker-compose
-```
-**2. Set up Nginx (reverse proxy):**
-```bash
-nano /etc/nginx/sites-available/[PROJECT_NAME]
-```
-- Disabled old resume site:
-```bash
-rm /etc/nginx/sites-enabled/[OLD_SITE_CONFIG]
-```
-**3. Tailwind Styling (on remote):**
-- Installed Node.js + npm:
-```bash
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-apt-get install -y nodejs
-```
-- Inside project directory:
-```bash
-npm install      # Install Tailwind + JS deps
-npm run build    # Build CSS
-```
-**4. Serve static files via Nginx:**
-```nginx
-location /static/ {
-    alias [PROJECT_PATH]/static/;
-    expires 30d;
-}
-```
-**5. Domain Name:**
-- Purchased domain for project  
-- TTL set to 600 (consider raising)
-**6. Link domain in Nginx config:**
-```nginx
-server_name [SERVER_IP] [PROJECT_DOMAIN];
-```
-**7. SSL with Let’s Encrypt:**
-- Install Certbot with Nginx plugin:
-```bash
-apt install certbot python3-certbot-nginx
-```
-- Run Certbot to auto-configure SSL:
-```bash
-certbot --nginx
-```
-
----
-
-**WHERE I LEFT OFF:**
-1. **SSL setup broke the site?**
-   - After running Certbot, site stopped loading
-   - Suspect broken config in:
-     ```bash
-     /etc/nginx/sites-
+- Installed Docker and Node.js, set up Nginx (set up Nginx to serve static directly), got a proper domain name & SSL certs
 
 ## [Wed 21.05.25]
 **Goal(s):**
