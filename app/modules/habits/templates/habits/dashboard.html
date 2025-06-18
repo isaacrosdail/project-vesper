@@ -14,6 +14,7 @@
                         <th class="{{ styles.th_classes() }}">ID</th>
                     {% endif %}
                     <th class="{{ styles.th_classes() }}">Title</th>
+                    <th class="{{ styles.th_classes() }}">Category</th>
                     <th class="{{ styles.th_classes() }}">Created</th>
                 </tr>
             </thead>
@@ -25,6 +26,7 @@
                             <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
                         {% endif %}
                         <td class="{{ styles.td_classes() }}">{{ habit.title }}</td>
+                        <td class="{{ styles.td_classes() }}">{{ habit.category }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
                     </tr>
                     {% endfor %}
