@@ -16,6 +16,7 @@ class Habit(Base):
     habit_completions = relationship("HabitCompletion", back_populates="habit")
 
     title = Column(String(255), unique=True, nullable=False)
+    category = Column(String(255), nullable=False, default='misc') # Misc. category as a catch-all
     status = Column(String(50), default='experimental')     # Becomes 'established' once promoted
     established_date = Column(DateTime(timezone=True), nullable=True)
     promotion_threshold = Column(Float, default=0.7) # 70% completion rate -> How would I code the promotion logic for this??
@@ -38,6 +39,7 @@ class Habit(Base):
     COLUMN_LABELS = {
         "id": "ID",
         "title": "Title",
+        "category": "Category",
         "status": "Status",
         "created_at": "Date Added",
         "established_date": "Date Promoted",
