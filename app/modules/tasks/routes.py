@@ -40,8 +40,7 @@ def dashboard():
         return render_template(
             "tasks/dashboard.html",
             task_column_names = task_column_names,
-            tasks = tasks,
-            app_env=os.getenv('APP_ENV')
+            tasks = tasks
         )
     finally:
         session.close()
