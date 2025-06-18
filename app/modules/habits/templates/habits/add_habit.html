@@ -16,6 +16,17 @@
                     class="{{ styles.input_classes() }}"><br> <!-- Remember: using our styling macros with styles.input_classes() -->
             </div>
             <div class="mb-4">
+                <label for="category">Category:</label>
+                <select name="category" class="{{ styles.input_classes() }}" required>
+                    <option value="">-- Category --</option>
+                    <option value="health">Health</option>
+                    <option value="learning">Learning</option>
+                    <option value="work">Work</option>
+                    <option value="personal">Personal</option>
+                    <option value="misc">Misc.</option>
+                </select>
+            </div>
+            <div class="mb-4">
                 <button class="{{ styles.submit_classes() }}" type="submit">
                     Submit
                 </button>
