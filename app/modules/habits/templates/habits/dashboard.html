@@ -10,7 +10,9 @@
             <caption class="sr-only">Habits</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th class="{{ styles.th_classes() }}">ID</th>
+                    {% if is_dev %}
+                        <th class="{{ styles.th_classes() }}">ID</th>
+                    {% endif %}
                     <th class="{{ styles.th_classes() }}">Title</th>
                     <th class="{{ styles.th_classes() }}">Created</th>
                 </tr>
@@ -19,7 +21,9 @@
                 {% if habits %}
                     {% for habit in habits %}
                     <tr class="{{ styles.tr_classes() }}" data-item-id="{{ habit.id }}">
-                        <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
+                        {% if is_dev %}
+                            <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
+                        {% endif %}
                         <td class="{{ styles.td_classes() }}">{{ habit.title }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
                     </tr>

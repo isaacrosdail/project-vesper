@@ -10,7 +10,9 @@
             <caption class="sr-only">Tasks</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th class="{{ styles.th_classes() }}">ID</th>
+                    {% if is_dev %}
+                        <th class="{{ styles.th_classes() }}">ID</th>
+                    {% endif %}
                     <th class="{{ styles.th_classes() }}">Title</th>
                     <th class="{{ styles.th_classes() }}">Status</th>
                     <th class="{{ styles.th_classes() }}">Type</th>
@@ -24,7 +26,9 @@
                     <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                     <!-- Using display: none works here as well but causes layout shift -->
                     <tr class="{{ styles.tr_classes() }}" data-item-id="{{ task.id }}">
-                        <td class="{{ styles.td_classes() }}">{{ task.id }}</td>
+                        {% if is_dev%}
+                            <td class="{{ styles.td_classes() }}">{{ task.id }}</td>
+                        {% endif %}
                         <td class="{{ styles.td_classes() }}" ondblclick="editTableField(this, 'tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
                             <span class="task-title">{{ task.title }}</span>
                         </td>
