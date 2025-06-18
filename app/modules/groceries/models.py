@@ -12,17 +12,21 @@ from app.core.db_base import Base
 class Product(Base):
 
 	product_name = Column(String(100), nullable=False)
+	category = Column(String(100), nullable=True) # "dairy", "produce", etc
 	barcode = Column(String(64), unique=True, nullable=False)
-	price = Column(Numeric(10,2), nullable=True) # To be removed
 	net_weight = Column(Float, nullable=False)
+	unit_type = Column(String(20), nullable=False) # grams, oz, ml, etc
+	calories_per_100g = Column(Float, nullable=True)
 
 	# Human-readable column names
 	COLUMN_LABELS = {
-		"id": "Product ID",
+		"id": "ID",
 		"product_name": "Product Name",
+		"category": "Category",
 		"barcode": "Barcode",
-		"price": "Price", # To be removed
-		"net_weight": "Net Weight (g)",
+		"net_weight": "Net Weight",
+		"unit_type": "Unit Type",
+		"calories_per_100g": "Kcals per 100g"
 	}
 
 # Transaction Model for 'inventory'
@@ -36,7 +40,7 @@ class Transaction(Base):
 
 	# Human-readable column names
 	COLUMN_LABELS = {
-		"id": "Transaction #",
+		"id": "ID",
 		"price_at_scan": "Price",
 		"quantity": "Quantity",
 	}
