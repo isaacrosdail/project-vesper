@@ -33,13 +33,49 @@
                     value="{{ transaction_data.quantity or '' }}"
                     class="{{ styles.input_classes() }}">
             </div>
-            <!-- net_weight to be conditionally shown depending on whether we need to add_product from here -->
+            <!-- net_weight, category, unit_type, & cals per 100g are all to be conditionally shown depending on whether we need to add_product from here -->
             <!-- Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing -->
+            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+                <label for="category">Category</label>
+                <select name="category" class="{{ styles.input_classes() }}"
+                    {% if not show_product_fields%}disabled{% endif %}>
+                    <option value="">-- Category --</option>
+                    <option value="drink">Drink</option>
+                    <option value="energy_drink">Energy Drink</option>
+                    <option value="produce">Produce</option>
+                    <option value="diary">Diary</option>
+                    <option value="grain">Grain</option>
+                    <option value="oil_fat">Oil/Fat</option>
+                    <option value="nut">Nuts</option>
+                    <option value="meat">Meat</option>
+                    <option value="junk_food">Junk Food</option>
+                </select>
+            </div>
             <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
                 <label for="net_weight">Net Weight:</label>
                 <input type="text" id="net_weight" name="net_weight"
                     {% if not show_product_fields%}disabled{% endif %}
                     class="{{ styles.input_classes() }}">
+            </div>
+            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+                <label for="unit_type">Units:</label>
+                <select name="unit_type" class="{{ styles.input_classes() }}"
+                    {% if not show_product_fields%}disabled{% endif %}>
+                    <option value="">-- Units --</option>
+                    <option value="g">g (grams)</option>
+                    <option value="kg">kg (kilograms)</option>
+                    <option value="oz">oz (ounces)</option>
+                    <option value="lb">lb (pounds)</option>
+                    <option value="ml">ml (milliliters)</option>
+                    <option value="l">l (liters)</option>
+                    <option value="fl_oz">fl oz (fluid ounces)</option>
+                </select>
+            </div>
+            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+                <label for="calories_per_100g">Cals per 100g:</label>
+                <input type="text" id="calories_per_100g" name="calories_per_100g"
+                    class="{{ styles.input_classes() }}"
+                    {% if not show_product_fields%}disabled{% endif %}>
             </div>
             <div class="flex gap-4 mb-4">
                 <button class="{{ styles.submit_classes() }}" type="submit" name="action" value="submit">Submit</button>
