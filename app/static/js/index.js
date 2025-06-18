@@ -8,6 +8,9 @@ let dailyIntentionResult = document.getElementById("intention-display");
 // Global cache for weatherInfo
 let weatherInfo = null;
 
+// Global cache for sunPos (for redrawing after Canvas resizing)
+let cachedSunPos = null;
+
 // Show edit mode input field
 function enableEdit() {
     document.getElementById("intention-display").classList.add("hidden"); // Hide intention display (span we dblclick)
@@ -144,51 +147,61 @@ async function getWeatherInfo() {
     const city = "London";
     const units = "metric";
 
-    tempDisplay.textContent = "Loading weather info...";
+    try {
+        tempDisplay.textContent = "Loading weather info...";
 
-    // Async fetch to call our Flask API endpoint/weather/<city>/<units>
-    const response = await fetch(`/api/weather/${city}/${units}`) // GET is the default method, so we just need this here!
-    // weatherInfo is our resultant json containing all the info we need
-    weatherInfo = await response.json();
+        // Async fetch to call our Flask API endpoint/weather/<city>/<units>
+        const response = await fetch(`/api/weather/${city}/${units}`) // GET is the default method, so we just need this here!
 
-    // use weather info - to start, grab temp & sunset time
-    const temp = Math.round(weatherInfo.main.temp);
-    const sunset = weatherInfo.sys.sunset;
-    const desc = weatherInfo.weather[0].description.toLowerCase();
-    const now = Date.now() / 1000; // Current time as Unix timestamp (for calcSunPosition)
+        if (!response.ok) {
+            throw new Error(`Weather API failed: ${response.status}`);
+        }
+        // weatherInfo is our resultant json containing all the info we need
+        weatherInfo = await response.json();
 
-    // Determine fitting emoji
-    let emoji = '🌡️';
-    if (desc.includes('thunder')) emoji = '⛈️';
-    if (desc.includes('drizzle')) emoji = '🌦️';
-    if (desc.includes('rain')) emoji = '🌧️';
-    if (desc.includes('overcast')) emoji = '☁️';
-    if (desc.includes('snow')) emoji = '❄️';
-    if (desc.includes('mist') || desc.includes('fog')) emoji = '🌫️';
-    if (desc.includes('clear')) emoji = '☀️';
-    if (desc.includes('few clouds')) emoji = '🌤️';
-    if (desc.includes('scattered') || desc.includes('broken')) emoji = '⛅';
-    if (desc.includes('overcast')) emoji = '☁️';
-    if (desc.includes('tornado')) emoji = '🌪️';
-    
-    // Convert sunset time to date & local
-    const sunsetTime = new Date(sunset * 1000); // comes in Unix-style, so convert first
-    const sunsetFormatted = sunsetTime.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+        // use weather info - to start, grab temp & sunset time
+        const temp = Math.round(weatherInfo.main.temp);
+        const sunset = weatherInfo.sys.sunset;
+        const desc = weatherInfo.weather[0].description.toLowerCase();
 
-    // Display temp with units
-    tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
-    // Display formatted sunset time
-    sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
+        // Determine fitting emoji
+        let emoji = '🌡️';
+        if (desc.includes('thunder')) emoji = '⛈️';
+        if (desc.includes('drizzle')) emoji = '🌦️';
+        if (desc.includes('rain')) emoji = '🌧️';
+        if (desc.includes('overcast')) emoji = '☁️';
+        if (desc.includes('snow')) emoji = '❄️';
+        if (desc.includes('mist') || desc.includes('fog')) emoji = '🌫️';
+        if (desc.includes('clear')) emoji = '☀️';
+        if (desc.includes('few clouds')) emoji = '🌤️';
+        if (desc.includes('scattered') || desc.includes('broken')) emoji = '⛅';
+        if (desc.includes('overcast')) emoji = '☁️';
+        if (desc.includes('tornado')) emoji = '🌪️';
+        
+        // Convert sunset time to date & local
+        const sunsetTime = new Date(sunset * 1000); // comes in Unix-style, so convert first
+        const sunsetFormatted = sunsetTime.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Display temp with units
+        tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
+        // Display formatted sunset time
+        sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
+
+    } catch (error) {
+        console.error('Weather fetch failed:', error);
+        tempDisplay.textContent = "Weather unavailable";
+        sunsetDisplay.textContent = "Sunset: --:--";
+    }
 }
 
 function updateSunPosition() {
     if (weatherInfo) {
         const now = Math.floor(Date.now() / 1000); // convert to seconds to compare to what API gave
-        const sunPos = calcSunPosition(weatherInfo.sys.sunrise, weatherInfo.sys.sunset, now);
-        drawSun(sunPos.x, sunPos.y);
+        cachedSunPos = calcSunPosition(weatherInfo.sys.sunrise, weatherInfo.sys.sunset, now);
+        drawSun(cachedSunPos.x, cachedSunPos.y);
     }
 }
 // Handle calculation only of new sun position in arc
