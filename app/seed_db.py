@@ -45,18 +45,27 @@ def seed_db():
         products = [
             Product(
                 product_name="Huel Energy Drink",
+                category="energy drink",
                 barcode="5060419750",
-                net_weight=250.0
+                net_weight=250.0,
+                unit_type="ml",
+                calories_per_100g=9
             ),
             Product(
                 product_name="Organic Bananas",
+                category="produce",
                 barcode="504350",
-                net_weight=1000.0
+                net_weight=1000.0,
+                unit_type="g",
+                calories_per_100g=89
             ),
             Product(
                 product_name="Greek Yogurt",
+                category="diary",
                 barcode="72736376",
-                net_weight=500.0
+                net_weight=500.0,
+                unit_type="g",
+                calories_per_100g=117
             )
         ]
 
