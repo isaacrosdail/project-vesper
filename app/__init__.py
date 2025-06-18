@@ -36,6 +36,13 @@ def create_app(config_name=None):
     if config_name == 'dev' or 'testing':
         print_env_info(app)
 
+    # Context processor runs before every template render
+    # Make is_dev available in all templates globally
+    # So we can do {% if is_dev %} to hide dev-only stuff _without_ needing to keep passing it into each template
+    @app.context_processor
+    def inject_dev_context():
+        return dict(is_dev=app.config.get('APP_ENV') == 'dev')
+
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
         init_db(app.config)
