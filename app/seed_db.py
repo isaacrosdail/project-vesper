@@ -35,9 +35,9 @@ def seed_db():
 
         # Create habits in new Habit table
         habits = [
-            Habit(title="AM Flashcards", status="experimental"),
-            Habit(title="30 Mins Project Work", status="experimental"),
-            Habit(title="Walk Dog", status="established", 
+            Habit(title="AM Flashcards", category="learning", status="experimental"),
+            Habit(title="30 Mins Project Work", category="work", status="experimental"),
+            Habit(title="Walk Dog", category="household", status="established", 
                     established_date=datetime.now(timezone.utc))
         ]
 
