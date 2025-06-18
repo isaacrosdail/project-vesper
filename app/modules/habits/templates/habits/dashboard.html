@@ -26,7 +26,7 @@
                             <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
                         {% endif %}
                         <td class="{{ styles.td_classes() }}">{{ habit.title }}</td>
-                        <td class="{{ styles.td_classes() }}">{{ habit.category }}</td>
+                        <td class="{{ styles.td_classes() }}">{{ habit.category|capitalize }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
                     </tr>
                     {% endfor %}
