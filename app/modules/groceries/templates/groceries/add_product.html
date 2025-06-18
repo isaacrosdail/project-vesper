@@ -11,7 +11,8 @@
             <div class="mb-4">
                 <label for="barcode">Barcode:</label>
                 <input type="text" id="barcode" name="barcode"
-                    class="{{ styles.input_classes() }}">
+                    class="{{ styles.input_classes() }}" required
+                    oninvalid="this.setCustomValidity('Please enter a barcode.')"> <!-- oninvalid lets us set custom message for form validation, look into more later -->
             </div>
             <div class="mb-4">
                 <label for="product_name">Product Name:</label>
@@ -19,8 +20,41 @@
                     class="{{ styles.input_classes() }}">
             </div>
             <div class="mb-4">
+                <label for="category">Category</label>
+                <select name="category" class="{{ styles.input_classes() }}" required>
+                    <option value="">-- Category --</option>
+                    <option value="drink">Drink</option>
+                    <option value="energy_drink">Energy Drink</option>
+                    <option value="produce">Produce</option>
+                    <option value="diary">Diary</option>
+                    <option value="grain">Grain</option>
+                    <option value="oil_fat">Oil/Fat</option>
+                    <option value="nut">Nuts</option>
+                    <option value="meat">Meat</option>
+                    <option value="junk_food">Junk Food</option>
+                </select>
+            </div>
+            <div class="mb-4">
                 <label for="net_weight">Net Weight:</label>
                 <input type="text" id="net_weight" name="net_weight"
+                    class="{{ styles.input_classes() }}">
+            </div>
+            <div class="mb-4">
+                <label for="unit_type">Units:</label>
+                <select name="unit_type" class="{{ styles.input_classes() }}" required>
+                    <option value="">-- Units --</option>
+                    <option value="g">g (grams)</option>
+                    <option value="kg">kg (kilograms)</option>
+                    <option value="oz">oz (ounces)</option>
+                    <option value="lb">lb (pounds)</option>
+                    <option value="ml">ml (milliliters)</option>
+                    <option value="l">l (liters)</option>
+                    <option value="fl_oz">fl oz (fluid ounces)</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="calories_per_100g">Cals per 100g:</label>
+                <input type="text" id="calories_per_100g" name="calories_per_100g"
                     class="{{ styles.input_classes() }}">
             </div>
             <div class="mb-4">
