@@ -50,9 +50,12 @@ def add_product():
         product_data = {
             "barcode": request.form.get("barcode"),
             "product_name": request.form.get("product_name"),
-            "price": Decimal(request.form.get("price", "0")),
-            "net_weight": float(request.form.get("net_weight", 0))
+            "category": request.form.get("category"),
+            "net_weight": float(request.form.get("net_weight", 0)),
+            "unit_type": request.form.get("unit_type"),
+            "calories_per_100g": request.form.get("calories_per_100g")
         }
+
         session = db_session()
         try:
             grocery_repo.ensure_product_exists(session, **product_data)
