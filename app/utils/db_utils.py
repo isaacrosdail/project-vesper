@@ -2,6 +2,7 @@
 from sqlalchemy import text
 
 # Delete all data without nuking schema, optionally reset ID sequencing
+# Does NOT delete from User table
 def delete_all_db_data(engine, reset_sequences=False):
     # Delete in dependency order -> children first
     tables = [
@@ -15,7 +16,7 @@ def delete_all_db_data(engine, reset_sequences=False):
         "habitcompletion_id_seq",  # references habit
         "transaction_id_seq",      # references product
         "habit_id_seq",            # parent table
-        "product_product_id_seq",  # parent table
+        "product_id_seq",  # parent table
         "task_id_seq"
     ]
     # New way with Alembic instead of create_all()
