@@ -1,7 +1,7 @@
 # Currently used to define our User model
 
 from sqlalchemy import Column, String
-from core.database import Base
+from app.core.db_base import Base
 
 class User(Base):
 
