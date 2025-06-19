@@ -43,7 +43,7 @@ def home():
         start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
         start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
 
-        # Fetch tasks, habits, today_intention
+        # Fetch tasks, habits, today_intention, dailymetric
         tasks = tasks_repo.get_all_tasks(session)
         habits = habits_repo.get_all_habits(session)
         todayIntention = habits_repo.get_today_intention(session)
