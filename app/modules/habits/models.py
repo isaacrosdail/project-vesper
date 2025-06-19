@@ -55,20 +55,29 @@ class HabitCompletion(Base, CustomBaseTaskMixin):
     habit_id = Column(Integer, ForeignKey('habit.id'))
     
 
-# Daily Intention Model - to let intentions truly persist as well as to serve future daily reflection stuff
+# Daily Intention Model - to let intentions persist
 class DailyIntention(Base):
 
     intention = Column(String(200))
-    # Consider adding stuff like success_rating and evening_reflection text?
 
-# Daily Metric Model - to store basic metrics like our daily steps counter, for example
+# Daily Metric Model - Quantitative stuff: to store basic metrics like our daily steps counter, for example
 class DailyMetric(Base):
-
-    metric_type = Column(String(50)) # ex: 'steps', 'sleep_hours', etc etc
+    # Flexible, quantitative & objective
+    metric_type = Column(String(50), nullable=False) # 'weight', 'steps', 'movement'
+    unit = Column(String(20), nullable=False)         # 'lbs',    'steps', 'minutes'
     value = Column(Float)
 
-# Daily Reflection Model - Acts as centralized "day log"
+class DailyCheckin(Base):
+    # Fixed fields, quantitative & subjective
+    stress_level = Column(Integer) # 1-10
+    energy_level = Column(Integer) # 1-10
+    mood = Column(Integer)   # maybe?
+    # Can add more scales later
+    
+# Daily Reflection Model - Just the qualitative stuff, acts as centralized "day log"
 class DailyReflection(Base):
 
-    reflection = Column(String(2000))       # what I did, learned, etc.
-
+    reflection = Column(String(2000))       # main reflection text
+    accomplished = Column(String(1000))     # what I accomplished
+    learned_today = Column(String(2000))
+    highlights = Column(String(500))        # Optional, blend of "what went well? what was hard?"
