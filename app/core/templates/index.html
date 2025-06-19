@@ -85,6 +85,33 @@
         </ul>
 
     </section>
+    
+    <!-- Daily Check-In Card -->
+    <section id="daily-check-in-card" class="bg-gray-200 p-6 rounded-xl shadow-lg">
+        <h2 class="text-xl font-semibold mb-2">Daily Check-In</h2>
+        <!-- Content: weight, steps, movement (mins), stress (scale), energy (scale) -->
+
+        <div class="metric-row">
+            <label>Weight:</label>
+            <input type="number" data-metric="weight" placeholder="lbs">
+        </div>
+        <div class="metric-row">
+            <label>Steps:</label>
+            <input type="number" data-metric="steps" placeholder="0">
+        </div>
+        <div class="metric-row">
+            <label>Movement:</label>
+            <input type="number" data-metric="minutes" placeholder="mins">
+        </div>
+        <div class="metric-row">
+            <label>Stress:</label>
+            <input type="range" data-metric="stress_level" min="1" max="10">
+        </div>
+        <div class="metric-row">
+            <label>Energy:</label>
+            <input type="range" data-metric="energy_level" min="1" max="10">
+        </div>
+    </section>
 </div>
 {% endblock %}
 
