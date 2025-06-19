@@ -15,6 +15,8 @@ from app.utils.debug import debug_config
 from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
 
 from app.core.db_base import Base  # Import SQLAlchemy Base
+from app.core.models import User
+from app.modules.tasks.models import Task
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
