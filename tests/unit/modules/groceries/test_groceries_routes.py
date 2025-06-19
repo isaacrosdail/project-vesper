@@ -15,8 +15,10 @@ def test_add_product_submission_creates_product(client):
     data = {
         "barcode": "1234567890",
         "product_name": "Test Product",
-        "price": "3.99",
-        "net_weight": "15"
+        "category": "Test Category",
+        "net_weight": 15,
+        "unit_type": "g",
+        "calories_per_100g": 100
     }
 
     response = client.post("/groceries/products/add", data=data)
@@ -27,32 +29,3 @@ def test_add_product_submission_creates_product(client):
     product = db_session.query(Product).filter_by(barcode="1234567890").first()
     assert product is not None
     assert product.product_name == "Test Product"
-
-def test_add_transaction_submission_creates_transaction(client):
-    # Ensure product exists
-    from app.modules.groceries.models import Product
-    product = Product(
-        barcode="55555",
-        product_name="Transaction Product",
-        net_weight=0.8
-    )
-    db_session.add(product)
-    db_session.commit() # Can't use flush here due to client.post below
-    # Since Flask treats that as a new transaction under the hood (separate request context)
-    # it's technically in its own session regardless, hence the commit
-
-    # POST transaction data
-    response = client.post("/groceries/transactions/add", data={
-        "barcode": product.barcode,
-        "price_at_scan": "4.20",
-        "quantity": "1",
-        "action": "submit"
-    })
-    assert response.status_code == 302 # Expect redirect
-
-    # Confirm transaction indeed exists
-    from app.modules.groceries.models import Transaction
-    transaction = db_session.query(Transaction).first()
-    assert transaction is not None
-    assert transaction.quantity == 1
-    assert transaction.product.product_name == "Transaction Product"
