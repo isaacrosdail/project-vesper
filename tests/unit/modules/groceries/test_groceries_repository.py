@@ -10,20 +10,19 @@ from app.modules.groceries.models import Product, Transaction
 # region lookup_barcode
 # Return a Product if barcode exists, None if barcode doesn't exist
 def test_lookup_barcode_found():
-    print("Test started...")
+
     product_data = {
         "barcode": "1234567",
         "product_name": "Test Product",
-        "price": Decimal("5.99"),
-        "net_weight": 200
+        "category": "Test Category",
+        "net_weight": 200,
+        "unit_type": "g",
+        "calories_per_100g": 100
+
     }
     
     grocery_repo.add_product(db_session, **product_data)
-    
-    # almost never commit in test code now!
-    # Committing breaks rollback isolation
-    #db_session.commit()
-    db_session.flush()
+    db_session.flush() # flush(), don't commit() -> Committing breaks rollback isolation
 
     result = grocery_repo.lookup_barcode(db_session, "1234567")
 
@@ -43,7 +42,16 @@ def test_get_all_products_empty():
     assert products == []
 
 def test_get_all_products_with_entries():
-    grocery_repo.add_product(db_session, barcode="123", product_name="Milk", price="1.50", net_weight="20.0")
+    product_data = {
+        "barcode": "123",
+        "product_name": "Milk",
+        "category": "Test Category",
+        "net_weight": 20,
+        "unit_type": "g",
+        "calories_per_100g": 100
+    }
+        
+    grocery_repo.add_product(db_session, **product_data)
     db_session.flush()
 
     products = grocery_repo.get_all_products(db_session)
@@ -59,11 +67,15 @@ def test_get_all_transactions_empty():
     assert transactions == []
 
 def test_get_all_transactions_existing_product():
+
     product_data = {
         "barcode": "1234567",
         "product_name": "Test Product",
-        "price": "3.50",
-        "net_weight": "0.5"
+        "category": "Test Category",
+        "net_weight": 200,
+        "unit_type": "g",
+        "calories_per_100g": 100
+
     }
 
     grocery_repo.add_product(db_session, **product_data)
@@ -92,8 +104,12 @@ def test_get_all_transactions_ensure_joinedload():
     grocery_repo.add_product(db_session,
         barcode="111",
         product_name="PostSession Item",
+        category="Test Category",
         price="2.00",
-        net_weight="0.3"
+        net_weight="0.3",
+        unit_type="g",
+        calories_per_100g=100
+
     )
     db_session.flush() # instead of commit
 
@@ -123,10 +139,12 @@ def test_get_all_transactions_ensure_joinedload():
 # Happy path test
 def test_add_product():
     product_data = {
-        "barcode": "1234567",
-        "product_name":"Test Product",
-        "price": Decimal("5.99"),
-        "net_weight": 200
+        "barcode": "123",
+        "product_name": "Milk",
+        "category": "Test Category",
+        "net_weight": 20,
+        "unit_type": "g",
+        "calories_per_100g": 100
     }
 
     grocery_repo.add_product(db_session, **product_data)
@@ -136,7 +154,7 @@ def test_add_product():
 
     assert result is not None
     assert result.product_name == product_data["product_name"]
-    assert result.price == product_data["price"]
+    assert result.category == product_data["category"]
     assert result.net_weight == product_data["net_weight"]
 
 # Missing data test
