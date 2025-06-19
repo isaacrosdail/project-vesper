@@ -23,8 +23,8 @@ class TimestampMixin:
     def updated_at_local(self):
         return self.updated_at.astimezone(ZoneInfo("Europe/London")) if self.updated_at else None
 
-# Base Model
-class BaseModel:
+# Base Model (inherits timestamp info)
+class BaseModel(TimestampMixin):
     id = Column(Integer, primary_key=True) # Consider upping to UUIDs later
 
     # Autogenerate table names (singular)
@@ -40,7 +40,7 @@ class BaseModel:
 
 # Define base class for models
 # Now all classes using (Base) receive IDs, a user.id FKey (except User), & Timestamp info
-Base = declarative_base(cls=BaseModel, mixins=(TimestampMixin,))
+Base = declarative_base(cls=BaseModel)
 
 # Mixin -> no Base, no CustomBase parent, just pure mixin
 # Will attach to HabitCompletion & Task for now (moving to TaskCompletion can be a potential task for future self!)
