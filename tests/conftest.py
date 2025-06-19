@@ -2,18 +2,16 @@
 
 import subprocess
 import time
-
 import pytest
 from sqlalchemy import text
-
 import os
-
 from app import create_app
 # DB imports
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
-
 from app.core.config import TestConfig
+from app.utils.db_utils import delete_all_db_data
+
 
 # Ensure PostgreSQL container is running before tests start
 @pytest.fixture(scope="session", autouse=True)
@@ -21,13 +19,13 @@ def ensure_docker_postgres():
 
     # Check if already running
     result = subprocess.run(
-        ["docker", "ps", "-q", "-f", "name=vesper-db"],
+        ["docker", "ps", "-q", "-f", "name=vesper-db-dev"],
         capture_output=True, text=True
     )
 
     if not result.stdout.strip():
-        print("Starting vesper-db container...")
-        subprocess.run(["docker", "start", "vesper-db"])
+        print("Starting vesper-db-dev container...")
+        subprocess.run(["docker", "start", "vesper-db-dev"])
         time.sleep(3) # Let it initialize
 
 # Create app once and use it for all tests
@@ -35,41 +33,45 @@ def ensure_docker_postgres():
 def app():
     # Tell Alembic which DB to use
     os.environ['APP_ENV'] = 'testing'
-
     app = create_app('testing')  # Pass in our TestConfig
     yield app
 
-# Fixture to reset the database before each test (optional, for clean slate)
+# Ensure we have a user with id=1 (since user.id is know a FKey for all other models)
 @pytest.fixture(scope="session", autouse=True)
-def reset_db(app):
+def setup_test_user(app):
     engine = get_engine(app.config)
-    with engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT") # Study this later!!
-        conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE;"))
-        conn.execute(text("CREATE SCHEMA public;"))
 
-    Base.metadata.create_all(engine)
+    with engine.begin() as conn:
+        # Create user (use ON CONFLICT to handle if we already have a user)
+        conn.execute(
+            text("""INSERT INTO "user" (id, username) VALUES (1, 'testuser') ON CONFLICT (id) DO NOTHING""") # Note: need to put user in quotes since it's a reserved keyword in PostgreSQL
+        )
+
+    yield
 
 # Fixture to clear all table data between tests
 # Necessary now that tests and app share the same session via monkeypatching
 @pytest.fixture(autouse=True)
 def clear_tables(app):
-    sess = db_session()
-    try:
-        for table in reversed(Base.metadata.sorted_tables):
-            sess.execute(table.delete())
-        sess.flush()
-        yield
-    finally:
-        sess.rollback()
-        sess.close() # Optional with scoped_session but safe here
-        db_session.remove()
+    # Clear all table data BEFORE each test runs
+    engine = get_engine(app.config)
 
-## TRY THIS OUT
+    # Clear data before the test runs
+    delete_all_db_data(engine, reset_sequences=True)
+
+    db_session.remove() # Remove any hanging sessions
+    
+    yield # Run the test
+
+    # Clean up sessions after test
+    db_session.remove()
+
+# Get engine from app
 @pytest.fixture(scope="session")
 def engine(app):
     return get_engine(app.config)
 
+## REMOVE?
 # Fixture to cleanup session (replaces db_session we had before)
 @pytest.fixture(autouse=True)
 def cleanup_session():
@@ -85,6 +87,7 @@ def patch_db_session(monkeypatch):
 
     # lambda *_: global_session() creates a function that takes any arguments ("*_" = "ignore whatever args are passed")
     #       and returns global_session() which calls our scoped session
+    # This makes all imports of db_session use our test database
     monkeypatch.setattr("app.core.database.db_session", lambda *_: global_session())
 
 # Fake browser to test routes (lets us send requests from a fake browser/client)
