@@ -18,6 +18,9 @@ class Product(Base):
 	unit_type = Column(String(20), nullable=False) # grams, oz, ml, etc
 	calories_per_100g = Column(Float, nullable=True)
 
+	def __str__(self):
+		return f"{self.product_name} ({self.barcode})"
+
 	# Human-readable column names
 	COLUMN_LABELS = {
 		"id": "ID",
@@ -37,6 +40,9 @@ class Transaction(Base):
 	quantity = Column(Integer, nullable=False)
 
 	product = relationship("Product")
+
+	def __str__(self):
+		return f"{self.product_name} ({self.barcode})"
 
 	# Human-readable column names
 	COLUMN_LABELS = {
