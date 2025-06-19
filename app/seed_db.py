@@ -4,6 +4,7 @@ import random
 from datetime import datetime, timedelta, timezone
 
 from app.core.database import db_session
+from app.core.models import User
 from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit, HabitCompletion, DailyIntention
 from app.modules.tasks.models import Task
@@ -21,6 +22,12 @@ def seed_db():
         session.query(HabitCompletion).delete()
         session.query(Habit).delete()
         session.query(DailyIntention).delete()
+
+        # Remake default user
+        session.query(User).delete()
+        default_user = User(id=1, username='default')
+        session.add(default_user)
+        session.flush() # flush so any other adds can reference User
 
         # Restore DailyIntention default text
         dailyIntention = DailyIntention(intention="What's your focus today?")
