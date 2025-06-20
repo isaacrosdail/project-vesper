@@ -1,17 +1,7 @@
+# Keep tests here to stuff like custom methods within models themselves?
 
 from app.modules.groceries.models import Transaction
 from app.core.database import db_session
-
-def test_transaction_creation():
-    transaction = Transaction(
-        barcode="12345",
-        product_name="Test Chips",
-        category="Snacks",
-        net_weight=100,
-        unit_type="g"
-    )
-    assert transaction.barcode == "12345"
-    assert transaction.product_name == "Test Chips"
 
 def test_transaction_string_representation(sample_product):
     transaction = Transaction(
