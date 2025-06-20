@@ -12,7 +12,8 @@
         ".pytest_cache/": true,
         ".coverage": true,
         "**/__pycache__/": true,
-        "htmlcov/": true
+        "htmlcov/": true,
+        ".VSCodeCounter/**": true,
     },
     "search.exclude": {
         "node_modules/": true,
