@@ -12,6 +12,7 @@ from app.core.database import db_session, get_engine
 from app.core.db_base import Base
 from app.utils.db_utils import delete_all_db_data
 from sqlalchemy import text
+from app.modules.groceries.models import Product
 
 
 # Ensure PostgreSQL container is running before tests start
@@ -100,3 +101,18 @@ def client(app):
 def test_postgresql_connection(db_session):
     result = db_session.execute(text("SELECT 1")).scalar()
     assert result == 1
+
+# Product fixture for Transaction tests
+@pytest.fixture
+def sample_product():
+    product = Product(
+        product_name="Test Product",
+        category="Test Product Category",
+        barcode="123456",
+        net_weight=200,
+        unit_type="g",
+        calories_per_100g=150
+    )
+    db_session.add(product)
+    db_session.flush()
+    return product
