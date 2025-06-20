@@ -1,3 +1,4 @@
+# Keep tests here to stuff like custom methods within models themselves?
 
 from app.modules.groceries.models import Transaction
 from app.core.database import db_session
