@@ -4,6 +4,7 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "css.lint.unknownAtRules": "ignore",
 
     // To hide node_modules from file explorer view
     "files.exclude": {
