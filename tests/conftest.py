@@ -1,16 +1,17 @@
 # Holds fixtures & test config, automatically loaded by pytest (import not required)
 
+import os
 import subprocess
 import time
+
 import pytest
-from sqlalchemy import text
-import os
 from app import create_app
+from app.core.config import TestConfig
 # DB imports
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
-from app.core.config import TestConfig
 from app.utils.db_utils import delete_all_db_data
+from sqlalchemy import text
 
 
 # Ensure PostgreSQL container is running before tests start
