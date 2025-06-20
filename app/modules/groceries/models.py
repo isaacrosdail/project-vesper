@@ -42,7 +42,7 @@ class Transaction(Base):
 	product = relationship("Product")
 
 	def __str__(self):
-		return f"{self.product_name} ({self.barcode})"
+		return f"Transaction:{self.id}: {self.quantity}x {self.product.product_name} @ {self.price_at_scan}"
 
 	# Human-readable column names
 	COLUMN_LABELS = {
