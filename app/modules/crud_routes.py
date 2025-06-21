@@ -1,12 +1,13 @@
 ## Generalized CRUD handling routes for ANY module/model :P
 ## STRONGLY consider moving to a future utils or helpers directory in future
 
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for, jsonify
 
 from app.core.database import db_session
 # Import models
 from app.modules.groceries import models as grocery_models
 from app.modules.tasks import models as tasks_models
+from app.modules.habits.models import Habit
 
 # Blueprint registration
 crud_bp = Blueprint("crud", __name__)
@@ -21,6 +22,7 @@ modelMap = {
     ("groceries", "product"): grocery_models.Product,
     ("groceries", "transaction"): grocery_models.Transaction,
     ("tasks", "none"): tasks_models.Task,
+    ("habits", "none"): Habit,
 }
 
 '''
@@ -56,6 +58,27 @@ def add_item(module, subtype):
             session.close()
 
 '''
+
+# UPDATE (PATCH) - Trying out a generic PATCH route for editTableField
+@crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH"])
+def patch_item(module, subtype, item_id):
+    session = db_session()
+
+    try:
+        model = modelMap.get((module, subtype)) # so 'tasks', 'none' returns Task class
+        item = session.get(model, item_id)
+
+        data = request.get_json() # get request body
+
+        for field, value in data.items():
+            setattr(item, field, value)
+
+        session.commit()
+        return jsonify(success=True, message="Updated successfully"), 200
+    
+    finally:
+        session.close()
+
 # DELETE
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["DELETE"])
 def delete_item(module, subtype, item_id):
