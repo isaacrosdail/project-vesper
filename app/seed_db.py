@@ -2,6 +2,8 @@
 
 import random
 from datetime import datetime, timedelta, timezone
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 
 from app.core.database import db_session
 from app.core.models import User
@@ -23,11 +25,14 @@ def seed_db():
         session.query(Habit).delete()
         session.query(DailyIntention).delete()
 
-        # Remake default user
-        session.query(User).delete()
-        default_user = User(id=1, username='default')
-        session.add(default_user)
-        session.flush() # flush so any other adds can reference User
+        # Populate default user
+        # session.query(User).delete()
+        try:
+            default_user = User(id=1, username='default')
+            session.add(default_user)
+            session.flush() # flush so any other adds can reference User
+        except IntegrityError:
+            session.rollback() # clear failed transaction
 
         # Restore DailyIntention default text
         dailyIntention = DailyIntention(intention="What's your focus today?")
