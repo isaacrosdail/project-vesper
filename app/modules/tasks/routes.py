@@ -84,23 +84,3 @@ def add_task():
             session.close()
     else:
         return render_template("tasks/add_task.html")
-
-# DELETE
-@tasks_bp.route("/<int:task_id>", methods=["DELETE"])
-def delete_task(task_id):
-
-    session = db_session()
-    try:
-        task = session.get(Task, task_id) # Grab task by id from db
-
-        # If task doesn't exist
-        if not task:
-            return {"error": "Task not found."}, 404
-        
-        session.delete(task)
-        session.commit()
-    
-        return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
-    
-    finally:
-        session.close()
