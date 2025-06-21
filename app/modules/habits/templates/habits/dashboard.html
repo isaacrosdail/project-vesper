@@ -25,7 +25,8 @@
                         {% if is_dev %}
                             <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
                         {% endif %}
-                        <td class="{{ styles.td_classes() }}">{{ habit.title }}</td>
+                        <td class="editable-cell {{ styles.td_classes() }}" data-item-id="{{ habit.id }}" data-module="habits" data-field="title" title="Double-click to edit field."
+                        >{{ habit.title }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.category|capitalize }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
                     </tr>
@@ -49,4 +50,5 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename = 'js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/habits/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/tables.js') }}"></script>
 {% endblock %}
