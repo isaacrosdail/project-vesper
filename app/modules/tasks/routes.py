@@ -85,43 +85,6 @@ def add_task():
     else:
         return render_template("tasks/add_task.html")
 
-# UPDATE
-@tasks_bp.route("/<int:task_id>", methods=["PUT", "PATCH"])
-def update_task(task_id):
-    ## HANDLE CASE WHERE TASK IS NOT FOUND ##
-    if request.method == "PATCH":
-
-        session = db_session()
-        try:
-            task = session.get(Task, task_id) # Grab task by id from db
-            data = request.get_json() # Get request body
-
-            if 'title' in data: # If we're updating the title
-                task.title = data['title']
-
-                # Save changes & return succes message
-                session.commit()
-                return jsonify(success=True)
-
-            if 'is_done' in data: # If we're marking task as complete/incomplete
-                is_done = data["is_done"]
-
-                # Handle task completion
-                task.is_done = is_done
-                task.completed_at = (
-                    datetime.now(timezone.utc) if is_done else None
-                )
-
-                # Save changes to db & return success message
-                session.commit()
-                return jsonify(success=True)
-        finally:
-            session.close()
-        
-    else:
-        # POST (will add this later :P)
-        pass
-
 # DELETE
 @tasks_bp.route("/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
