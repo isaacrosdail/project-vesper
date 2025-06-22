@@ -68,14 +68,19 @@ def patch_item(module, subtype, item_id):
         model = modelMap.get((module, subtype)) # so 'tasks', 'none' returns Task class
         item = session.get(model, item_id)
 
+        # If item doesn't exist
+        if not item:
+            return {"success": False, "message": f"{model.__name__} not found."}, 404
+        
         data = request.get_json() # get request body
-
         for field, value in data.items():
             setattr(item, field, value)
 
         session.commit()
-        return jsonify(success=True, message="Updated successfully"), 200
-    
+        return {"success": True, "message": f"Successfully updated {model.__name__}"}, 200
+    except Exception as e:
+        session.rollback()
+        return {"success": False, "message": f"Failed to update {model.__name__}"}, 500    
     finally:
         session.close()
 
@@ -85,19 +90,20 @@ def delete_item(module, subtype, item_id):
     session = db_session()
 
     try:
-
         # Get correct model
         model = modelMap.get((module, subtype))
-        print(model)
+        # Debug print: print(model)
         item = session.get(model, item_id) # Grab item by id from db
 
         # If item doesn't exist
         if not item:
-            return {"error": f"{model.__name__} not found."}, 404
+            return {"success": False, "message": f"{model.__name__} not found."}, 404
         
-        db_session.delete(item)
-        db_session.commit()
-        
-        return "", 204     # 204 means No Content (success but nothing to return, used for DELETEs)
+        session.delete(item)
+        session.commit()
+        return {"success": True, "message": f"{model.__name__} deleted"}, 200 # 200 = OK
+    except Exception as e:
+        session.rollback()
+        return {"success": False, "message": f"Failed to delete {model.__name__}"}, 500 # 500 = Internal Server Error
     finally:
-        session.close()      
+        session.close()
