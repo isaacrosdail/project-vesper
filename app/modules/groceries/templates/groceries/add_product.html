@@ -8,18 +8,23 @@
     <h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Add new product:</h2>
     <div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
         <form method="POST">
-            <div class="mb-4">
+
+            <div class="form-group">
                 <label for="barcode">Barcode:</label>
                 <input type="text" id="barcode" name="barcode"
+                    minlength="8" maxlength="14"
+                    pattern="[0-9]{8,14}"
+                    title="Barcode must be 8-14 digits only"
                     class="{{ styles.input_classes() }}" required
+                    placeholder="Scan or enter barcode"
                     oninvalid="this.setCustomValidity('Please enter a barcode.')"> <!-- oninvalid lets us set custom message for form validation, look into more later -->
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="product_name">Product Name:</label>
                 <input type="text" id="product_name" name="product_name"
                     class="{{ styles.input_classes() }}">
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="category">Category</label>
                 <select name="category" class="{{ styles.input_classes() }}" required>
                     <option value="">-- Category --</option>
@@ -35,12 +40,12 @@
                     <option value="condiments_and_sauces">Condiment/Sauce</option>
                 </select>
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="net_weight">Net Weight:</label>
                 <input type="text" id="net_weight" name="net_weight"
                     class="{{ styles.input_classes() }}">
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="unit_type">Units:</label>
                 <select name="unit_type" class="{{ styles.input_classes() }}" required>
                     <option value="">-- Units --</option>
@@ -53,14 +58,13 @@
                     <option value="fl_oz">fl oz (fluid ounces)</option>
                 </select>
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="calories_per_100g">Cals per 100g:</label>
                 <input type="text" id="calories_per_100g" name="calories_per_100g"
                     class="{{ styles.input_classes() }}">
             </div>
-            <div class="mb-4">
-                <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
-            </div>
+
+            <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
         </form>
     </div>
 {% endblock %}
