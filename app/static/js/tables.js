@@ -63,7 +63,7 @@ function editTableField(td, module, field, itemId) {
  * @param {string} newValue - New field value
  * @param {HTMLElement} td - Table cell element to update
  */
-function saveUpdatedField(module, field, itemId, newValue, td, subtype = "none") {
+async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "none") {
 
     // Construct URL dynamically based on given module
     const url = `/${module}/${subtype}/${itemId}`;
@@ -72,26 +72,34 @@ function saveUpdatedField(module, field, itemId, newValue, td, subtype = "none")
     const data = {}
     data[field] = newValue;
 
-    // Send PATCH request via fetch with field data
-    fetch(url, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data) // Send the updated field and value
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            updateFieldDisplay(td, newValue)
+    // Converting fetch to modern async variant
+    try {
+        // 1. Replaces our previous fetch() and first .then
+        const response = await fetch(url, {
+            // Send PATCH request with field data
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) // Send updated field & value
+        });
+
+        // 2. Replaces our .then(data => ..)
+        const responseData = await response.json();
+
+        // 3. Handles our if/else within the .then(data => ...) portion from before
+        if (responseData.success) {
+            // update display field + console.log
+            updateFieldDisplay(td, newValue);
             console.log(`${field} updated to:`, newValue);
         } else {
-            console.error('Error updating field:', data.message);
+            // console.error with data.message
+            console.error('Error updating field:', responseData.message);
         }
-    })
-    .catch(error => {
+    } catch (error) {
+        // replaces our .catch() - handles fetch/network errors
         console.error('Error during fetch request:', error);
-    });
+    }
 }
 
 // Another function to handle "clean up"
