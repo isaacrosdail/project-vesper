@@ -1,0 +1,22 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Metrics{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid {{ styles.dashboard_container_classes() }}">
+    
+    <!-- Playground container to check out Plotly -->
+    <div class="metric-graph {{ styles.dashboard_card_classes() }}">
+        {{ weight_graph|safe }} <!-- |safe is required here to make Jinja not escape HMTL (prevents XSS attacks, but since graph_html is app-generated, safe is good here)-->
+    </div>
+    <div class="metric-graph {{ styles.dashboard_card_classes() }}">
+        {{ steps_graph|safe }}
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
