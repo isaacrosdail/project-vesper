@@ -60,6 +60,35 @@ document.addEventListener('DOMContentLoaded', function() {
             markHabitComplete(event.target, event.target.dataset.habitId);
         });
     });
+
+    // Stuff for saving our Daily Check-In stuff
+    const allCheckinInputs = document.querySelectorAll('input[data-metric]');
+
+    allCheckinInputs.forEach(function(input) {
+        input.addEventListener('change', function(event) {
+            saveData(event.target);
+        });
+    });
+    async function saveData(input) {
+        // Don't bother sending for empty input fields (don't require all to be filled out)
+        if (input.dataset.metric && input.value) {
+            // call metric logic
+            const response = await fetch('/metrics/add-metric', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    metric_type: input.dataset.metric,
+                    value: input.value,
+                    unit: input.dataset.unit
+                })
+            });
+            if (response.ok) {
+                alert('Saved!');
+            }
+        } else if (input.dataset.checkin) {
+            // call checkin logic
+        }
+    }
 });
 
 // Function that activates when checkbox for anchor habits are checked, indicating completion
@@ -72,7 +101,7 @@ function markHabitComplete(checkbox, habitId) {
     // If .checked == True  -> user just checked it
     // If .checked == False -> user just un-checked it
 
-    // Now need to break our original PATCH request into two different requests.
+    // Mark complete -> POST HabitCompletion
     if (checkbox.checked) {
         // POST a new HabitCompletion record
         fetch(`/habits/${habitId}/completions`, {
@@ -94,6 +123,7 @@ function markHabitComplete(checkbox, habitId) {
         .catch(error => {
             console.error('Error marking habit complete:', error);
         });
+    // Un-mark complete -> DELETE HabitCompletion for today
     } else {
         // DELETE the existing HabitCompletion record
         fetch(`/habits/${habitId}/completions/today`, {
