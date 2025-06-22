@@ -26,11 +26,11 @@ def seed_db():
         session.query(Habit).delete()
         session.query(DailyIntention).delete()
 
-        countPostDel = session.query(Product).count()
-        print(f"Count after delete for PRODUCT: {countPostDel}")
+        # Commit deletes before we do anything else
+        session.commit()
 
         # Populate default user
-        # session.query(User).delete()
+        # With commit above, we now do user in a separate transaction
         try:
             default_user = User(id=1, username='default')
             session.add(default_user)
