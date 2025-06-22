@@ -81,7 +81,10 @@ def create_habit_completion(habit_id):
     try:
         session.add(new_habit_completion)
         session.commit()
-        return "", 201  # 201 = Created (success for POST)
+        return {"success": True, "message": "Habit marked complete"}, 201 # 201 = Created (success for POST)
+    except Exception as e:
+        session.rollback() # important for db errors!
+        return {"success": False, "message": "Failed to mark habit complete"}, 500 # 500 = Internal Server Error (unexpected db/server issues)
     finally:
         session.close()
 
@@ -104,9 +107,11 @@ def delete_habit_completion(habit_id):
         if habit_completion:
             session.delete(habit_completion)
             session.commit()
-            return "", 204
+            return {"success": True, "message": "Habit unmarked as complete"}, 200 # 200 = OK (When you return content - ie, the JSON reponse; 200 if no content)
         else:
-            return {"error": "No completion found for today"}, 404
-        
+            return {"success": False, "message": "No completion found for today"}, 404
+    except Exception as e:
+        session.rollback()
+        return {"success": False, "message": "Failed to unmark habit"}, 500 # 500 = Internal Server Error (unexpected db/server issues)
     finally:
         session.close()
