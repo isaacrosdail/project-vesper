@@ -15,8 +15,8 @@ document.addEventListener('dblclick', function(event) {
 /** 
  * Inline table cell editing. Allows double-clicking table cells to edit values in place.
  * @param {HTMLElement} td - The table cell element
- * @param {string} module - API module name for the update endpoint 
- * @param {string} field 
+ * @param {string} module  - API module name for the update endpoint 
+ * @param {string} field   - Field of table being updated
  * @param {string|number} itemId - ID of the item being updated 
  */
 // Allows us to double-click a table cell and change its value
