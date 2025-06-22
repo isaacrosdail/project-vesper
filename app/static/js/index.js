@@ -1,58 +1,58 @@
 
-// Constant for daily-intention-submit button
-const dailyIntentionSubmitBtn = document.getElementById("intention-submit");
-// Variables for daily-intention-text and daily-intention-result
-let dailyIntentionText = document.getElementById("daily-intention-text");
-let dailyIntentionResult = document.getElementById("intention-display");
 
-// Global cache for weatherInfo
-let weatherInfo = null;
+// Global caches
+let weatherInfo = null;  // for weatherInfo
+let cachedSunPos = null; // for sunPos (for redrawing after Canvas resizing)
 
-// Global cache for sunPos (for redrawing after Canvas resizing)
-let cachedSunPos = null;
 
-// Show edit mode input field
-function enableEdit() {
-    document.getElementById("intention-display").classList.add("hidden"); // Hide intention display (span we dblclick)
-    document.getElementById("intention-edit").classList.remove("hidden"); // Show edit input field
-    document.getElementById("intention-input").focus();
+// Handle UI (span -> input field)
+function editIntention(element) {
+    // Grab current text of element
+    const currentText = element.textContent.trim();
+
+    // Replace innerHTML of span with input field & pre-populate with current text
+    element.innerHTML = `<input type="text" value="${currentText}">`;
+    // Grab the input we just made & focus it
+    const input = element.querySelector('input'); // element.querySelector('input') only looks for inputs _inside_ the specific element (ie, inside our span => the input we just made)
+    input.focus();
+
+    // Now set up event listeners for our blur event (to save => call updateIntention)
+    input.addEventListener('blur', function() {
+        updateIntention(element, input.value); // pass our new text
+    });
+
+    input.addEventListener('keydown', function(event) {
+        if (event.key == 'Enter') {
+            input.blur();
+        }
+    });
 }
 
-// Want the value of daily-intention-text to become daily-intention-result, then hide daily-intention-edit again
-// Remember to wrap DOM stuff for safety - "What if dailyIntentionBtn doesn't exist / hasn't loaded?"
-if (dailyIntentionSubmitBtn) {
-    dailyIntentionSubmitBtn.onclick = async () => {
-        // Get daily-intention text from input using element id
-        const value = document.getElementById("intention-input").value;
 
-        try {
-            // Convert to modern async/await variant
-            // 1. Replace fetch and first .then
-            const response = await fetch(`/daily-intentions/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ intention: value })
-            });
+async function updateIntention(element, newValue) {
+    try {
+        // Convert to modern async/await variant
+        // 1. Replace fetch and first .then
+        const response = await fetch(`/daily-intentions/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ intention: newValue })
+        });
 
-            const responseData = await response.json();
+        const responseData = await response.json();
 
-            if (responseData.success) {
-                // Where we handle SUCCESS -> update the DOM, etc.
-                document.getElementById("intention-text").textContent = value;
-                // Then hide the input text box and submit button
-                document.getElementById("intention-display").classList.remove("hidden");
-                document.getElementById("intention-edit").classList.add("hidden");
-            } else {
-                // Handle the Flask route error
-                console.error('Error saving intention:', responseData.message);
-            }
-        
-        } catch (error) {
-            console.error('Failed to save/update:', error);
+        if (responseData.success) {
+            // Where we handle SUCCESS -> update the DOM, etc.
+            element.innerHTML = `${newValue}`; // replace input field with just newValue text upon success
+        } else {
+            // Handle the Flask route error
+            console.error('Error saving intention:', responseData.message);
         }
+    
+    } catch (error) {
+        console.error('Failed to save/update:', error);
     }
 }
-
 
 document.addEventListener('DOMContentLoaded', function() {
     // Shift from onchange in index.html to eventListener for our habit-checkbox to complete functionality
@@ -64,6 +64,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // event.target.dataset.habitId = gets the data-habit-id value we added
             markHabitComplete(event.target, event.target.dataset.habitId);
         });
+    });
+
+    // Add event listener for dblclick for span of id intention-text
+    const intentionSpan = document.getElementById('intention-text');
+    intentionSpan.addEventListener('dblclick', function(event) {
+        // Need to pass: element to turn into input => event.target
+        editIntention(event.target);
     });
 
     // Stuff for saving our Daily Check-In stuff
@@ -315,9 +322,9 @@ function drawSun(x, y) {
 
 
     //Debug: Draw a dot for each of the sunrise and sunset points
-    console.log('Raw x, y from math:', x, y);
-    console.log('Canvas coordinates: ', canvasX, canvasY);
-    console.log('Canvas size: ', canvas.width, canvas.height);
+    // console.log('Raw x, y from math:', x, y);
+    // console.log('Canvas coordinates: ', canvasX, canvasY);
+    // console.log('Canvas size: ', canvas.width, canvas.height);
 
     // Adding some rays to our sun
     const rayLength = 15;
@@ -352,5 +359,7 @@ window.onload = async () => {
     setInterval(updateSunPosition, 10*60*1000); // Update sun from weatherInfo every 10mins 10*60*1000
 }
 
-// Export to allow it to be tested
-module.exports = { calcSunPosition };
+// Make function(s) exportable for testing using Jest
+if (typeof module !== 'undefined') {
+    module.exports = { calcSunPosition };
+}

@@ -16,6 +16,7 @@ def seed_db():
     session = db_session()
     try:
 
+        print("===== SEED DB DEBUG =====")
         # Clear existing data
         # to study: cascade settings for tables
         session.query(Transaction).delete()
@@ -24,6 +25,9 @@ def seed_db():
         session.query(HabitCompletion).delete()
         session.query(Habit).delete()
         session.query(DailyIntention).delete()
+
+        countPostDel = session.query(Product).count()
+        print(f"Count after delete for PRODUCT: {countPostDel}")
 
         # Populate default user
         # session.query(User).delete()
