@@ -8,34 +8,36 @@
     <h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Add new transaction:</h2>
     <div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
         <form method="POST">
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="barcode">Barcode:</label>
+                <!-- Combine length constraints & pattern matching-->
                 <input type="text" id="barcode" name="barcode"
-                    value="{{ transaction_data.barcode or '' }}"
+                    minlength="8" maxlength="14"
+                    pattern="[0-9]{8-14}"
+                    title="Barcode must be 8-14 digits only"
                     placeholder="Scan or enter barcode"
-                    class="{{ styles.input_classes() }}">
+                    class="{{ styles.input_classes() }}" required>
             </div>
-            <div class="mb-4">
+            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="product_name">Product Name</label>
                 <input type="text" id="barcode" name="product_name"
-                    value="{{ transaction_data.product_name or '' }}"
-                    class="{{ styles.input_classes() }}">
+                    class="{{ styles.input_classes() }}"
+                    {% if not show_product_fields%}disabled{% endif %}>
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="price_at_scan">Price:</label>   <!-- HAVE THIS AUTOFILL WITH KNOWN PRICE IF EXISTS -->
                 <input type="text" id="price_at_scan" name="price_at_scan"
-                    value="{{ transaction_data.price_at_scan or '' }}"
-                    class="{{ styles.input_classes() }}">
+                    title="Price you actually paid (may differ from listed price)"
+                    class="{{ styles.input_classes() }}" required>
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="quantity">Quantity:</label>
                 <input type="text" id="quantity" name="quantity"
-                    value="{{ transaction_data.quantity or '' }}"
-                    class="{{ styles.input_classes() }}">
+                    class="{{ styles.input_classes() }}" required>
             </div>
             <!-- net_weight, category, unit_type, & cals per 100g are all to be conditionally shown depending on whether we need to add_product from here -->
             <!-- Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing -->
-            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="category">Category</label>
                 <select name="category" class="{{ styles.input_classes() }}"
                     {% if not show_product_fields%}disabled{% endif %}>
@@ -52,13 +54,13 @@
                     <option value="condiments_and_sauces">Condiment/Sauce</option>
                 </select>
             </div>
-            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="net_weight">Net Weight:</label>
                 <input type="text" id="net_weight" name="net_weight"
                     {% if not show_product_fields%}disabled{% endif %}
                     class="{{ styles.input_classes() }}">
             </div>
-            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="unit_type">Units:</label>
                 <select name="unit_type" class="{{ styles.input_classes() }}"
                     {% if not show_product_fields%}disabled{% endif %}>
@@ -72,7 +74,7 @@
                     <option value="fl_oz">fl oz (fluid ounces)</option>
                 </select>
             </div>
-            <div class="mb-4 {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="calories_per_100g">Cals per 100g:</label>
                 <input type="text" id="calories_per_100g" name="calories_per_100g"
                     class="{{ styles.input_classes() }}"

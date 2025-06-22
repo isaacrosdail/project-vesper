@@ -7,15 +7,11 @@
     <div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
         <form method="POST">
 
-            <div class="mb-4">
-                <label for="title">Habit:</label><br>
-                <input 
-                    type="text"
-                    id="title" 
-                    name="title"
-                    class="{{ styles.input_classes() }}"><br> <!-- Remember: using our styling macros with styles.input_classes() -->
+            <div class="form-group">
+                <label for="title">Habit:</label>
+                <input type="text" id="title" name="title" class="{{ styles.input_classes() }}" required>
             </div>
-            <div class="mb-4">
+            <div class="form-group">
                 <label for="category">Category:</label>
                 <select name="category" class="{{ styles.input_classes() }}" required>
                     <option value="">-- Category --</option>
@@ -28,11 +24,9 @@
                     <option value="misc">Misc.</option>
                 </select>
             </div>
-            <div class="mb-4">
-                <button class="{{ styles.submit_classes() }}" type="submit">
-                    Submit
-                </button>
-            </div>
+
+            <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
+        
         </form>
     </div>
 {% endblock %}
