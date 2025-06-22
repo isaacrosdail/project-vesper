@@ -1,7 +1,8 @@
 <!-- Base Class Template -->
 
 {% import '_macros.html' as styles %}
-<!DOCTYPE html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/logo_v5_white-bg.png') }}">
     <!--{% block additional_styles %}{% endblock %}  For future -->
 </head>
-<body class="h-full">
+<body class="">
     <div class="wrapper">
         <header>
             {% include 'navbar.html' with context %}
