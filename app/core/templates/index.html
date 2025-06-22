@@ -1,4 +1,4 @@
-<!-- Main Dashboard UI -->
+ <!-- Main Dashboard UI -->
 
 {% extends "base.html" %}
 
@@ -64,13 +64,12 @@
         <ul>
         {% for habit in habits %}
             <li>
-                <!-- REMINDER: We need to change the today thing so it just incl date and not specifically min/sec, cause then itll never equal -->
                 <input type="checkbox"
                     class="habit-checkbox"
                     data-habit-id="{{ habit.id }}"
-                    {% if completed_today[habit.id] %}checked{% endif %}
-                />
-                <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if completed_today[habit.id] %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
+                    {% if completed_today[habit.id] %}checked{% endif %}>
+
+                <span class="habit-title text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if completed_today[habit.id] %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
                     {{ habit.title }}
                     
                 </span>
@@ -92,24 +91,28 @@
         <!-- Content: weight, steps, movement (mins), stress (scale), energy (scale) -->
 
         <div class="metric-row">
-            <label>Weight:</label>
-            <input type="number" data-metric="weight" placeholder="lbs">
+            <label for="weight">Weight:</label>
+            <input type="number" name="weight" data-metric="weight" data-unit="lbs" placeholder="lbs">
         </div>
         <div class="metric-row">
-            <label>Steps:</label>
-            <input type="number" data-metric="steps" placeholder="0">
+            <label for="steps">Steps:</label>
+            <input type="number" name="steps" data-metric="steps" data-unit="steps" placeholder="0">
         </div>
         <div class="metric-row">
-            <label>Movement:</label>
-            <input type="number" data-metric="minutes" placeholder="mins">
+            <label for="movement">Movement:</label>
+            <input type="number" name="movement" data-metric="movement" data-unit="minutes" placeholder="mins">
         </div>
         <div class="metric-row">
-            <label>Stress:</label>
-            <input type="range" data-metric="stress_level" min="1" max="10">
+            <label for="stress">Stress:</label>
+            <input type="range" name="stress" data-checkin="stress_level" min="1" max="10">
         </div>
         <div class="metric-row">
-            <label>Energy:</label>
-            <input type="range" data-metric="energy_level" min="1" max="10">
+            <label for="energy">Energy:</label>
+            <input type="range" name="energy" data-checkin="energy_level" min="1" max="10">
+        </div>
+        <div class="metric-row">
+            <label for="mood">Mood:</label>
+            <input type="range" name="mood" data-checkin="mood" min="1" max="10">
         </div>
     </section>
 </div>
