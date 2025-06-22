@@ -35,26 +35,14 @@
         <h2 class="text-xl font-semibold mb-2">Critical Task</h2>
         <p>
             <span>Today's Intention: </span>
-            <span class="relative group" id="intention-display" ondblclick="enableEdit()">
-                <span class="text-green-600" id="intention-text">
-                {% if todayIntention %}
+            <span id="intention-text" class="text-blue-600">
+                {%- if todayIntention -%}
                     {{ todayIntention.intention }}
-                {% else %}    
+                {%- else -%}    
                     What's your focus today?
-                {% endif %}
-                </span>
-
-                <!-- Tooltip -->
-                <span class="absolute opacity-0 group-hover:opacity-100 bg-black text-white text-xs px-1 rounded whitespace-nowrap transition-opacity duration-150">
-                    Double-click to edit
-                </span>
+                {%- endif -%}
             </span>
         </p>
-        
-        <div id="intention-edit" class="hidden">
-            <input id="intention-input">
-            <button class="button" id="intention-submit">submit</button>
-        </div>
     </section>
 
     <!-- Daily Habits Card -->
