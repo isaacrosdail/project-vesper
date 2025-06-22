@@ -139,11 +139,11 @@ section > div:not(.divider) {
 .form-group {
     @apply flex flex-col gap-1 mb-4;
 }
-input:not([type="checkbox"]):user-valid {
+form input:not([type="checkbox"]):user-valid {
     outline: 2px solid;
     outline-color: var(--clr-success);
 }
-input:not([type="checkbox"]):user-invalid {
+form input:not([type="checkbox"]):user-invalid {
     outline: 2px solid;
     outline-color: var(--clr-error);
 }
