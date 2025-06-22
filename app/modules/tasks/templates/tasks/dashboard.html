@@ -29,9 +29,11 @@
                         {% if is_dev%}
                             <td class="{{ styles.td_classes() }}">{{ task.id }}</td>
                         {% endif %}
-                        <td class="{{ styles.td_classes() }}" ondblclick="editTableField(this, 'tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
+                        <!-- <td class="{{ styles.td_classes() }}" ondblclick="editTableField(this, 'tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
                             <span class="task-title">{{ task.title }}</span>
-                        </td>
+                        </td> -->
+                        <td class="editable-cell {{ styles.td_classes() }}" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."
+                            >{{ task.title }}</td>
                         {% if task.is_done == True %}
                             <td class="{{ styles.td_classes() }}">&#9745;</td> <!-- Checked -->
                         {% else %}
@@ -79,4 +81,5 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename = 'js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/tasks/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/tables.js')}}"></script>
 {% endblock %}
