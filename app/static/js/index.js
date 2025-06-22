@@ -21,38 +21,43 @@ function enableEdit() {
 // Want the value of daily-intention-text to become daily-intention-result, then hide daily-intention-edit again
 // Remember to wrap DOM stuff for safety - "What if dailyIntentionBtn doesn't exist / hasn't loaded?"
 if (dailyIntentionSubmitBtn) {
-    dailyIntentionSubmitBtn.onclick = () => {
+    dailyIntentionSubmitBtn.onclick = async () => {
         // Get daily-intention text from input using element id
         const value = document.getElementById("intention-input").value;
 
-        // POST request to DB via fetch
-        fetch(`/daily-intentions/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ intention: value })
-        })
-        .then(response => response.json()) // convert response to json so we can use it
-        .then(data => {
-            // Where we handle SUCCESS -> update the DOM, etc.
-            // 
-            document.getElementById("intention-text").textContent = value;
-            // And hide the input text box and submit button
-            document.getElementById("intention-display").classList.remove("hidden");
-            document.getElementById("intention-edit").classList.add("hidden");
-        })
-        .catch(error => {
-            // Handling errors
-            console.error('Failed to save/update: ', error);
-        })
+        try {
+            // Convert to modern async/await variant
+            // 1. Replace fetch and first .then
+            const response = await fetch(`/daily-intentions/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ intention: value })
+            });
+
+            const responseData = await response.json();
+
+            if (responseData.success) {
+                // Where we handle SUCCESS -> update the DOM, etc.
+                document.getElementById("intention-text").textContent = value;
+                // Then hide the input text box and submit button
+                document.getElementById("intention-display").classList.remove("hidden");
+                document.getElementById("intention-edit").classList.add("hidden");
+            } else {
+                // Handle the Flask route error
+                console.error('Error saving intention:', responseData.message);
+            }
+        
+        } catch (error) {
+            console.error('Failed to save/update:', error);
+        }
     }
 }
 
 
 document.addEventListener('DOMContentLoaded', function() {
     // Shift from onchange in index.html to eventListener for our habit-checkbox to complete functionality
-    // Get ALL checkboxes with the class habit-checkbox
+    // Get ALL checkboxes with the class habit-checkbox & add event listener to each one
     const habitCheckboxes = document.querySelectorAll('.habit-checkbox');
-    // Add eventListener to each one
     habitCheckboxes.forEach(function(checkbox) {
         checkbox.addEventListener('change', function(event) {
             // event.target = the checkbox (what used to be 'this' in our inline onchange)
@@ -86,66 +91,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Saved!');
             }
         } else if (input.dataset.checkin) {
-            // call checkin logic
+            // TODO: call checkin logic
         }
     }
 });
 
-// Function that activates when checkbox for anchor habits are checked, indicating completion
-// Function will then use fetch() to trigger POST to tell Flask to update DB
-function markHabitComplete(checkbox, habitId) {
+/**
+ * Marks a habit as complete/incomplete & updates the UI accordingly.
+ * @async
+ * @param {HTMLInputElement} checkbox - The checkbox that was clicked 
+ * @param {number} habitId - The ID of the habit to update
+ * @returns {Promise<void>} 
+ */
+async function markHabitComplete(checkbox, habitId) {
     // Fetch sends a request to flask server
-    // POSTing to a dynamic URL like /complete_habit/7
-    // Translation: "Hey, mark habit 7 as complete"
-
+    // POSTing to a dynamic URL like /complete_habit/7 => Translation: "Hey, mark habit 7 as complete"
     // If .checked == True  -> user just checked it
     // If .checked == False -> user just un-checked it
 
-    // Mark complete -> POST HabitCompletion
-    if (checkbox.checked) {
-        // POST a new HabitCompletion record
-        fetch(`/habits/${habitId}/completions`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        })
-        // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
-        .then(response => {
-            if (response.ok) {
-                // Immediately apply strikethrough effect
-                const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
+    try {
+        // Mark complete => POST HabitCompletion
+        if (checkbox.checked) {
+            // Replaces our fetch & part of our first .then:
+            const response = await fetch(`/habits/${habitId}/completions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const responseData = await response.json(); // convert json to obj -> Wait for JSON parsing before moving on
+
+            // DO something with our response data
+            // (In the .then version, this would be inside the second .then() callback)
+            if (responseData.success) {
+                // apply effect/styling (update DOM)
+                const textSpan = checkbox.nextElementSibling; // Grabs span right after checkbox element
                 if (textSpan) {
-                    textSpan.classList.add("line-through", "text-gray-400");
+                    textSpan.classList.add('line-through', 'text-gray-400');
                 }
+            } else {
+                // Error handling from Flask route
+                console.error('Error marking habit complete:', responseData.message);
             }
-        })
-        // Error Catching (eg, network fails, Flask throws error) // Could later show a popup, retry, etc.
-        // If network fails or Flask throws an error, you'll see it here
-        .catch(error => {
-            console.error('Error marking habit complete:', error);
-        });
-    // Un-mark complete -> DELETE HabitCompletion for today
-    } else {
-        // DELETE the existing HabitCompletion record
-        fetch(`/habits/${habitId}/completions/today`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
-        // Awaits Flask's response; .json() converts it from raw response to usable JS obj ( {success: true })
-        .then(response => {
-            if (response.ok) {
-                // Immediately remove strikethrough effect
-                const textSpan = checkbox.nextElementSibling; // Grabs the span right after checkbox element
+
+        // Mark un-complete => DELETE HabitCompletion from today
+        } else {
+            // Replaces our fetch & part of our first .then for the OTHER portion of if/else block
+            const response = await fetch(`/habits/${habitId}/completions/today`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const responseData = await response.json(); // Wait for JSON parsing
+
+            // DO something with our response data
+            // Runs AFTER fetch + JSON parsing - not in a nested callback anymore
+            if (responseData.success) {
+                // un-apply effect/styling (update DOM)
+                const textSpan = checkbox.nextElementSibling; // Grabs span right after checkbox element
                 if (textSpan) {
-                    textSpan.classList.remove("line-through", "text-gray-400");
+                    textSpan.classList.remove('line-through', 'text-gray-400');
                 }
+            } else {
+                // Error handling from Flask route
+                console.error('Error un-marking habit complete:', responseData.message);
             }
-        })
-        .catch(error => {
-            console.error('Error un-marking habit complete:', error);
-        });
         }
+    } catch (error) {
+        // Network/fetch errors for either case
+        // With .then, we'd need .catch() at the end of each promise chain
+        console.error('Error during habit completion request:', error);
+    }
 }
 
 // Update time display in real-time
