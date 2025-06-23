@@ -31,7 +31,8 @@ def get_metric_dataframe(metric_type: str, days_ago: int) -> pd.DataFrame:
         ).order_by(DailyMetric.created_at).all()
 
         # Extract dates & metric_type entries into lists for Plotly
-        dates = [entry.created_at for entry in metric_entries] # [datetime1, datetime2, datetime3, ...]
+        # Note: using .date() to strip datetime objects to dates => Plenty for graphs for now
+        dates = [entry.created_at.date() for entry in metric_entries] # [date1, date2, date3, ...]
         values = [entry.value for entry in metric_entries]    # [value1, value2, null, ...]
 
         # Get these into our data frame
