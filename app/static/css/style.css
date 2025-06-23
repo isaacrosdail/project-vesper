@@ -88,6 +88,7 @@ a {
 }
 .metric-graph {
     width: 100%;
+    aspect-ratio: 16/9; /* fixes one graph being slightly taller than other - check out other options */
 }
 
 
