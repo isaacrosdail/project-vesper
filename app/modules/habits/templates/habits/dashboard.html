@@ -21,7 +21,7 @@
             <tbody>
                 {% if habits %}
                     {% for habit in habits %}
-                    <tr class="{{ styles.tr_classes() }}" data-item-id="{{ habit.id }}">
+                    <tr class="{{ styles.tr_classes() }}" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
                         {% if is_dev %}
                             <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
                         {% endif %}
@@ -29,6 +29,9 @@
                         >{{ habit.title }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.category|capitalize }}</td>
                         <td class="{{ styles.td_classes() }}">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
+                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent">
+                            {{ styles.delete_btn() }}
+                        </td>
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -48,7 +51,6 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename = 'js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/habits/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/tables.js') }}"></script>
 {% endblock %}
