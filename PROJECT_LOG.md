@@ -545,6 +545,24 @@
 **Next Up:**
 - Tidy up code/comments/etc, enforce branching pipeline
 
+## [Fri 30.05.25] - dev branch
+**Goal(s):**
+- Install Alembic
+**Log:**
+- Consolidate env configs to config.py
+	- Removed redudant env detection from create_app()
+	- Centralized env logic in config.py with auto-selection
+	- Simplified create_app() with pre-configured Config class
+	- Maintained flexibility for testing/overrides (can pass in configs to create_app() if desired)
+	- Eliminated duplicate load_dotenv() calls
+- Install Alembic and basic setup
+- Create new Habit model, prune type and is_anchor fields from Task model accordingly
+	- Cleanup/Refactor todos:
+		- Add dashboard & CRUD routes
+		- DONE?: Add dashboard.html and add_habit.html     
+		- DONE?:  Remove anything for type="habit" and is_anchor from Add Task form/page
+		- Refactor JS for index.html checkbox stuff to change API endpoints
+
 ## [Fri 06.06.25]
 **Goals:**
 1. Add 2 models:
