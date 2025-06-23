@@ -104,6 +104,6 @@ def delete_item(module, subtype, item_id):
         return {"success": True, "message": f"{model.__name__} deleted"}, 200 # 200 = OK
     except Exception as e:
         session.rollback()
-        return {"success": False, "message": f"Failed to delete {model.__name__}"}, 500 # 500 = Internal Server Error
+        return {"success": False, "message": str(e)}, 500 # 500 = Internal Server Error
     finally:
         session.close()
