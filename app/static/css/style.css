@@ -77,7 +77,7 @@ a {
 }
 
 /* ====== STYLINGS FOR METRICS DASHBOARD/CARDS ====== */
-.dashboard-grid {
+.charts-container {
     display: grid;
     grid-template-columns: 1fr 1fr; /* 2 equal-width columns */
     gap: 1rem;
@@ -166,6 +166,9 @@ footer {
 @media (width <= 640px) {
     #hamburger-btn { display: block; }
     #desktop-nav { display: none; }
+    .charts-container {
+        grid-template-columns: 1fr; /* stack charts for smaller widths */
+    }
 }
 
 @media (width > 640px) {
