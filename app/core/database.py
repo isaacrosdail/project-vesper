@@ -5,8 +5,6 @@ from flask import current_app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-import app.modules.groceries.models
-import app.modules.tasks.models
 from app.core.db_base import Base
 
 # Below we're using a connection pool singleton
