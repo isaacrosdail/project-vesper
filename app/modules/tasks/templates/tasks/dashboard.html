@@ -25,35 +25,24 @@
                     {% for task in tasks %}
                     <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                     <!-- Using display: none works here as well but causes layout shift -->
-                    <tr class="{{ styles.tr_classes() }}" data-item-id="{{ task.id }}">
+                    <tr class="{{ styles.tr_classes() }}" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
                         {% if is_dev%}
                             <td class="{{ styles.td_classes() }}">{{ task.id }}</td>
                         {% endif %}
-                        <!-- <td class="{{ styles.td_classes() }}" ondblclick="editTableField(this, 'tasks', 'title', '{{ task.id }}', '{{ task.title }}')">
-                            <span class="task-title">{{ task.title }}</span>
-                        </td> -->
                         <td class="editable-cell {{ styles.td_classes() }}" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."
                             >{{ task.title }}</td>
-                        {% if task.is_done == True %}
-                            <td class="{{ styles.td_classes() }}">&#9745;</td> <!-- Checked -->
-                        {% else %}
-                            <td class="{{ styles.td_classes() }}">&#9744;</td> <!-- Empty checkbox -->
-                        {% endif %}
+                        <td class="{{ styles.td_classes() }}">
+                            <!-- |safe here to render HTML entities instead of escaping them -->
+                            {{ ('&#9745;' if task.is_done else '&#9744;') | safe }}
+                        </td>
                         <td class="{{ styles.td_classes() }}">{{ task.type }}</td>
                         <td class="{{ styles.td_classes() }} text-right">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
                         <td class="{{ styles.td_classes() }} text-right">
-                            {% if task.completed_at %}
-                                {{ task.completed_at.strftime("%H:%M") }}  <!-- EX: 18:09 -->
-                            {% else %}
-                                --
-                            {% endif %}
+                            <!-- EX: 18:09 -->
+                            {{ task.completed_at.strftime("%H:%M") if task.completed_at else '--' }} 
                         </td>
-                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent" onclick="deleteTableItem('tasks', '{{ task.id }}')">
-                            <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-                                    <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
-                                </svg>  
-                            </button>
+                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent">
+                            {{ styles.delete_btn() }}
                         </td>
                     </tr>
                     {% endfor %}
