@@ -2,6 +2,9 @@ from decimal import Decimal
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
+from app.utils.sorting import bubble_sort
+from app.modules.groceries.utils import get_price_per_100g
+
 from app.core.database import db_session
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
@@ -31,8 +34,13 @@ def dashboard():
         products = grocery_repo.get_all_products(session)
         transactions = grocery_repo.get_all_transactions(session)
 
+        # Compute price_per_100g using our util function
+        # Just tack that bad boy on there as a new attr
+        for transaction in transactions:
+            transaction.price_per_100g = get_price_per_100g(transaction)
+
         # Sort transactions list by most recent DateTime first
-        transactions.sort(key=lambda trans: trans.created_at, reverse=True)
+        bubble_sort(transactions, 'created_at', reverse=True)
             
         return render_template(
             "groceries/dashboard.html", products = products,
