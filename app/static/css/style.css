@@ -82,6 +82,10 @@ a {
     grid-template-columns: 1fr 1fr; /* 2 equal-width columns */
     gap: 1rem;
 }
+.metric-row {
+    display: flex;
+    flex-direction: column;
+}
 .metric-graph {
     width: 100%;
 }
@@ -166,8 +170,8 @@ footer {
 @media (width <= 640px) {
     #hamburger-btn { display: block; }
     #desktop-nav { display: none; }
-    .charts-container {
-        grid-template-columns: 1fr; /* stack charts for smaller widths */
+    .charts-container, #daily-check-in-card {
+        grid-template-columns: 1fr; /* stack charts + metric-row divs for smaller widths */
     }
 }
 
