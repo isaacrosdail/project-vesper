@@ -80,11 +80,11 @@ def update_daily_intention():
         data = request.get_json()
         # Check if daily intention exists for today already
         session = db_session()
-        todayIntention = habits_repo.get_today_intention(session)
+        today_intention = habits_repo.get_today_intention(session)
 
         # If it does, just update the intention field using our fetch data
-        if todayIntention:
-            todayIntention.intention = data['intention'] # extract intention key from data
+        if today_intention:
+            today_intention.intention = data['intention'] # extract intention key from data
         # Otherwise, we'll add a new entry for DailyIntention
         else:
             new_daily_intention = DailyIntention(
@@ -94,12 +94,12 @@ def update_daily_intention():
         session.commit()
         
         # Return statement for json success
-        return jsonify({'status': 'success'})
+        return {"success": True, "message": "Successfully saved intention"}, 200
     except Exception as e:
         # Undo changes if something failed
         session.rollback()
         # Return statement for error
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return {"success": False, "message": str(e)}, 500
     finally:
         session.close()
 
