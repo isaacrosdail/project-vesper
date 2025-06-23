@@ -643,3 +643,69 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 **Log:**
 - Added sunrays using stroke to clarify sun styling
 
+## [Wed 18.06.25]
+**Log:**
+1. Revamped Product model & Tables
+	- Hide ID columns in production (is_dev reference)
+	- Replaced price field with category, unit_type, and calories_per_100g
+	- Updated migrations, seed data, forms, and repository functions
+	- Added dropdown selects for category & unit_type fields
+	- Tweaked groceries Products table to reflect schema changes
+	- Cleaned up zombie 'price' references
+2. Added Category system to Habits
+	- Added 'Category' field to Habit model (default='misc')
+	- Added dropdown input in add_habit form
+	- Updated seed_db & seed_dev_db accordingly
+3. Start on "Daily Check-In" widget (index.html)
+	
+## [Thurs 19.06.25]
+**Log:**
+1. Implemented User model basics
+	- Created User model with username field & user_id
+	- Refactored CustomBase to be split into Timestamp mixin & BaseModel
+	- Updated seed_db to create default user
+2. Updated Product/Transaction models
+	- Added str methods
+	- Fixed routes to handle new Product fields
+3. Bit more on Daily Check-In Feature
+	- Began mocking up card UI
+	- Created DailyCheckin model
+
+## [Fri 20.06.25]
+**Log:**
+1. Play around with grid styling on DailyCheckin card
+2. Cleaning up forms & adding basic frontend validation
+	- Use form-group styling to clean up form layout
+	- Add user-valid/invalid
+	- Add HTML5 validation with required, pattern, min/max
+	- Add tooltips to some form fields
+3. Tests
+	- Remove a couple dumb tests
+	- Add fixture for sample_product
+	- Add test for __str__ for Product/Transaction
+	
+## [Sat 21.06.25]
+**Log:**
+1. Getting Started with Data Visualization (Plan: Start with Plotly, check out D3.js later)
+	- Install plotly & plotly express: pip install plotly , and pip install plotly[express]
+	- Install pandas: pip install pandas
+
+## [Sun 22.06.25]
+**Log:**
+1. Code Quality, UI/UX, & Architecture Improvements
+	- Added generalized PATCH route (remove redundant update_task & delete_task)
+	- Extended double-click inline cell editing to habit titles
+	- Moved styling to form-group CSS classes for consistency
+	- Associated labels with inputs for better accessibility
+	- Transitioned from inline event handlers to addEventListener for cell editing
+	- Moved table cell edit functions to dedicated tables.js file
+	- DailyIntention: Replaced clunky submit button with blur/enter-to-save pattern
+	- Updated all other fetch() requests to more modern async/await pattern
+	- Improved error handling in some routes & implemented better JSON responses for success/error
+	- Fixed critical issue in seed_db where I didn't commit deletes before proceeding (oops!)
+	- Add seed data for DailyMetrics - weight, steps, movement
+	- Make metric inputs & chart containers stack vertically on smaller screens
+2. Added Metrics module
+	- Added blueprint, basic route, navbar links, etc.
+	- Added utility function to make bar graphs & added a couple basic graphs
+
