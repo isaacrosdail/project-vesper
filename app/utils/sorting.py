@@ -1,3 +1,5 @@
+from typing import List, Any
+
 # Will be implementing my own versions of the major sorting algorithms here for learning/practice
 # and invoking them across Vesper
 # Later: Study time & space complexities of each
@@ -36,7 +38,16 @@ def bubble_sort_simple(myList):
             break
 
 # Stable
-def bubble_sort(myList, key, reverse=False):
+def bubble_sort(myList: List[Any], key: str, reverse: bool = False) -> None:
+    """
+    Sort a list of object in place using bubble sort algorithm.
+    Args:
+        myList: List of objects to sort
+        key: Name of the attribute by which to sort (as string)
+        reverse: If True, sort in descending order. If False, ascending. Default: False
+    Returns:
+        None (modifies the list in place)
+    """
     # Outer loop decides whether to continue
     for i in range(len(myList)-1):
         no_swaps = True
