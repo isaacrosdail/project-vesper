@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from app.core.database import db_session
 from app.core.models import User
 from app.modules.groceries.models import Product, Transaction
-from app.modules.habits.models import Habit, HabitCompletion, DailyIntention
+from app.modules.habits.models import Habit, HabitCompletion, DailyIntention, DailyMetric
 from app.modules.tasks.models import Task
 
 
@@ -16,7 +16,6 @@ def seed_db():
     session = db_session()
     try:
 
-        print("===== SEED DB DEBUG =====")
         # Clear existing data
         # to study: cascade settings for tables
         session.query(Transaction).delete()
@@ -25,6 +24,7 @@ def seed_db():
         session.query(HabitCompletion).delete()
         session.query(Habit).delete()
         session.query(DailyIntention).delete()
+        session.query(DailyMetric).delete()
 
         # Commit deletes before we do anything else
         session.commit()
@@ -39,7 +39,33 @@ def seed_db():
             session.rollback() # clear failed transaction
 
         # Restore DailyIntention default text
-        dailyIntention = DailyIntention(intention="What's your focus today?")
+        daily_intention = DailyIntention(intention="What's your focus today?")
+
+        # Seed DailyMetric sample data for Plotly graphs
+        # Weights for last X days
+        LAST_X_DAYS = 7
+
+        weight_metrics = [
+            DailyMetric(created_at=datetime.now(timezone.utc) - timedelta(days=i),
+                        metric_type="weight",
+                        unit="lbs",
+                        value=170 + random.uniform(-2, 2)) # uniform = float
+            for i in range(LAST_X_DAYS)
+        ]
+        steps_metrics = [
+            DailyMetric(created_at=datetime.now(timezone.utc) - timedelta(days=i),
+                        metric_type="steps",
+                        unit="steps",
+                        value=6000 + random.randint(-2000, 3000)) # randint = int (obv)
+            for i in range(LAST_X_DAYS)
+        ]
+        movement_metrics = [
+            DailyMetric(created_at=datetime.now(timezone.utc) - timedelta(days=i),
+                        metric_type="movement",
+                        unit="minutes",
+                        value=90 + random.uniform(-20, 20))
+            for i in range(LAST_X_DAYS)
+        ]
 
         # Create regular tasks (no more is_anchor field -> moving to new Habit model entirely)
         tasks = [
@@ -85,8 +111,8 @@ def seed_db():
             )
         ]
 
-        session.add(dailyIntention)
-        session.add_all(tasks + habits + products)
+        session.add(daily_intention)
+        session.add_all(tasks + habits + products + weight_metrics + steps_metrics + movement_metrics)
         session.flush() # Flush to get product IDs for transactions
 
         # Add some sample habit completions
