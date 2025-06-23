@@ -17,6 +17,7 @@
                     <th class="{{ styles.th_classes() }}">Price</th>
                     <th class="{{ styles.th_classes() }}">Quantity</th>
                     <th class="{{ styles.th_classes() }}">Date Scanned</th>
+                    <td class="{{ styles.th_classes() }}">Price per 100g</td>
                 </tr>
             </thead>
             <tbody>
@@ -30,6 +31,7 @@
                         <td class="{{ styles.td_classes() }}">£{{ transaction.price_at_scan }}</td>
                         <td class="{{ styles.td_classes() }}">{{ transaction.quantity }}</td>
                         <td class="{{ styles.td_classes() }} text-right">{{ transaction.created_at.strftime("%d.%m.%Y") }}</td>
+                        <td class="{{ styles.td_classes() }} text-right">£{{ transaction.price_per_100g | round(2) }}</td>
                         <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent">
                             {{ styles.delete_btn() }}
                         </td>

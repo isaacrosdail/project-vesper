@@ -42,8 +42,7 @@ def calculate_habit_streak(habit_id):
             session.close()
 
 def check_if_completed_today(habit_id):
-    # Get today in UTC
-    # date part at end? Study
+    # Get today in UTC, strip datetime using date() for comparison below
     today_utc = datetime.now(timezone.utc).date()
     
     session = db_session()
