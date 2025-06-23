@@ -2,15 +2,44 @@
 // Functions for our tables, such as editTableField or deleteTableItem?
 
 
-// Event listener to listen for dblclick event on td's with class "editable-cell"
-document.addEventListener('dblclick', function(event) {
-    
-    if (event.target.classList.contains('editable-cell')) {
-        const td = event.target;
-        editTableField(td, td.dataset.module, td.dataset.field, td.dataset.itemId)
-    }
-});
 
+// Currently used by tasks/dashboard & groceries/dashboard
+// DELETE fetch request when clicking delete button
+/**
+ * Deletes item from DB when clicking delete button
+ * @async
+ * @param {string} module 
+ * @param {number} itemId 
+ * @param {string} subtype 
+ * @returns 
+ */
+async function deleteTableItem(module, itemId, subtype = "none") { // Default to none if not passed
+    // Confirm delete
+    if (!confirm(`Are you sure you want to delete this item?`)) return;
+
+    // Construct URL dynamically based on module & itemId
+    const url = `/${module}/${subtype}/${itemId}`
+
+    try {
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const responseData = await response.json();
+
+        if (responseData.success) {
+            // update DOM
+            const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
+            if (itemRow) itemRow.remove();
+        } else {
+            // error from Flask route
+            console.error('Failed to delete item:', responseData.message);
+        }
+    } catch (error) {
+        // If fetch request as a whole failed (network/server errors)
+        console.error('Fetch request failed: ', error);
+    }
+}
 
 /** 
  * Inline table cell editing. Allows double-clicking table cells to edit values in place.
@@ -113,7 +142,46 @@ function updateFieldDisplay(td, newValue) {
     td.textContent = newValue;
 }
 
+/**
+ * Handles delete button clicks using event delegation
+ * @param {Event} e - Click event
+ */
+function handleDeleteClick(e) {
+    // debug
+    console.log('Clicked:', e.target)
+
+    // Click the delete button OR anything inside it (ie, our SVG)
+    if (e.target.matches('.delete-btn') || e.target.closest('.delete-btn')) {
+        // This runs when ANY delete button in the table is clicked
+        // Since e.target is the delete button we clicked, we need to get to the tr for the module, id, & subtype info
+        const row = e.target.closest('tr'); // this walks up the DOM tree to find the first parent element that matches the selector, ie 'tr'
+        deleteTableItem(row.dataset.module, row.dataset.itemId, row.dataset.subtype)
+    }
+}
+
+// Event listener to listen for dblclick event on td's with class "editable-cell"
+/**
+ * Handles double-click editing on table cells
+ * @param {Event} e - Double-click event
+ */
+function handleEditClick(e) {
+    if (e.target.classList.contains('editable-cell')) {
+        const td = e.target;
+        editTableField(td, td.dataset.module, td.dataset.field, td.dataset.itemId)
+    }
+}
+
+// Fires when the HTML is fully parsed & DOM tree is built
+// All HTML elements exist & can be selected
+// Images, stylesheets, fonts might still be loading
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', handleDeleteClick);
+    document.addEventListener('dblclick', handleEditClick);
+});
+
 // Functions to run on page load
+// Fires later/slower => Once EVERYTHING is completely loaded
+//  All HTML elements, all images/CSS/fonts/Externala resources
 window.onload = () => {
     // Useful for event listeners, UI/form initialization, dynamic content loading (like for a weather widget?)
 }
