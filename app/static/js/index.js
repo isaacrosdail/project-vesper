@@ -4,23 +4,33 @@
 let weatherInfo = null;  // for weatherInfo
 let cachedSunPos = null; // for sunPos (for redrawing after Canvas resizing)
 
-
 // Handle UI (span -> input field)
+/**
+ * Converts a span element into an input field for inline editing
+ * @param {HTMLElement} element - The span element containing text to edit
+ * @description
+ * - Replaces span content with size-appropriate input field pre-populated with original text
+ * - Save changes on blur/enter (if not empty) or reverts to original text
+ */
 function editIntention(element) {
     // Grab current text of element
-    const currentText = element.textContent.trim();
+    const originalText = element.textContent.trim();
 
     // Replace innerHTML of span with input field & pre-populate with current text
-    element.innerHTML = `<input type="text" value="${currentText}">`;
-    // Grab the input we just made & focus it
-    const input = element.querySelector('input'); // element.querySelector('input') only looks for inputs _inside_ the specific element (ie, inside our span => the input we just made)
+    element.innerHTML = `<input type="text" value="${originalText}" size="${originalText.length + 2}">`;
+    // Grab the input element inside our span element & focus it
+    const input = element.querySelector('input');
     input.focus();
 
     // Now set up event listeners for our blur event (to save => call updateIntention)
     input.addEventListener('blur', function() {
-        updateIntention(element, input.value); // pass our new text
+        if (input.value.trim() != '') {
+            updateIntention(element, input.value); // pass our new text
+        } else {
+            element.innerHTML = originalText; // Don't save if input is left empty
+        }
     });
-
+    // Trigger blur on enter key
     input.addEventListener('keydown', function(event) {
         if (event.key == 'Enter') {
             input.blur();
@@ -54,54 +64,32 @@ async function updateIntention(element, newValue) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Shift from onchange in index.html to eventListener for our habit-checkbox to complete functionality
-    // Get ALL checkboxes with the class habit-checkbox & add event listener to each one
-    const habitCheckboxes = document.querySelectorAll('.habit-checkbox');
-    habitCheckboxes.forEach(function(checkbox) {
-        checkbox.addEventListener('change', function(event) {
-            // event.target = the checkbox (what used to be 'this' in our inline onchange)
-            // event.target.dataset.habitId = gets the data-habit-id value we added
-            markHabitComplete(event.target, event.target.dataset.habitId);
+/**
+ * Saves input data based on input's data attributes (metric or checkin)
+ * @param {HTMLElement} input - Input element containing data to save
+ * @description
+ * - Only saves if input has a value (allows partial form completion)
+ */
+async function saveData(input) {
+    // Don't bother sending for empty input fields (don't require all to be filled out)
+    if (input.dataset.metric && input.value) {
+        // call metric logic
+        const response = await fetch('/metrics/add-metric', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                metric_type: input.dataset.metric,
+                value: input.value,
+                unit: input.dataset.unit
+            })
         });
-    });
-
-    // Add event listener for dblclick for span of id intention-text
-    const intentionSpan = document.getElementById('intention-text');
-    intentionSpan.addEventListener('dblclick', function(event) {
-        // Need to pass: element to turn into input => event.target
-        editIntention(event.target);
-    });
-
-    // Stuff for saving our Daily Check-In stuff
-    const allCheckinInputs = document.querySelectorAll('input[data-metric]');
-
-    allCheckinInputs.forEach(function(input) {
-        input.addEventListener('change', function(event) {
-            saveData(event.target);
-        });
-    });
-    async function saveData(input) {
-        // Don't bother sending for empty input fields (don't require all to be filled out)
-        if (input.dataset.metric && input.value) {
-            // call metric logic
-            const response = await fetch('/metrics/add-metric', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    metric_type: input.dataset.metric,
-                    value: input.value,
-                    unit: input.dataset.unit
-                })
-            });
-            if (response.ok) {
-                alert('Saved!');
-            }
-        } else if (input.dataset.checkin) {
-            // TODO: call checkin logic
+        if (response.ok) {
+            alert('Saved!');
         }
+    } else if (input.dataset.checkin) {
+        // TODO: call checkin logic
     }
-});
+}
 
 /**
  * Marks a habit as complete/incomplete & updates the UI accordingly.
@@ -184,10 +172,8 @@ function getCurrentTimeString() {
 }
 
 function updateClock() {
-    // Get the element by id
-    let timeDisplay = document.getElementById("time-display");
-    // use getCurrentTimeString to call that and inject that value
-    timeDisplay.textContent = getCurrentTimeString();
+    let timeDisplay = document.getElementById("time-display"); // Get the element by id
+    timeDisplay.textContent = getCurrentTimeString(); // use getCurrentTimeString to call that and inject that value
 }
 
 // Get weather info via API, orchestrates our sun movement
@@ -255,98 +241,125 @@ function updateSunPosition() {
     }
 }
 // Handle calculation only of new sun position in arc
+/**
+ * Calculates normalized sun position along arc for the current time
+ * @param {number} sunrise - Sunrise time in ms (Unix)
+ * @param {number} sunset - Sunset time in ms (Unix)
+ * @param {number} now - Current time in ms (Unix)
+ * @returns {{x: number, y: number}} Normalized coordinates (0-1) for sun position
+ * @description
+ * - X represents progress through the day (0 = sunrise, 1 = sunset)
+ * - Y uses sine curve to create natural arc (0 at horizon, peak at noon)
+ * - Want to extend for moon calculation using night hours later
+ */
 function calcSunPosition(sunrise, sunset, now) {
-    // To find our normalized x value for the position of our sun
+    // Calculate horizontal progress through daylight hours (0-1)
     const xVal = (now - sunrise) / (sunset - sunrise);
-    const yVal = Math.sin(xVal * Math.PI);  // Using a sin curve to give us our arc for the sun, fits well between 0 and 1
+    // Create arc using sine curve
+    const yVal = Math.sin(xVal * Math.PI);
 
     /** Notes for adding our moon too:
      *  Calc becomes: (now - todaySunset) / (tomorrowSunrise - todaySunset)
-     *  Perhaps re-use sun position / draw functions & conditionally determine whether we're
-     *  drawing the sun or moon?
-     *  like: if now < tomorrowSunrise -> calc/draw moon
-     *        else                     -> calc draw sun
-     *  Handle moon phases after
+     *  Conditionally re-use functions:
+     *  if (now < tomorrowSunrise) -> calc/draw moon
+     *  else                       -> calc draw sun
+     *  Add moon phases later
      */
 
     // Debug logging
-    // console.log('Current time:', now);
-    // console.log('Sunrise:', sunrise);
-    // console.log('Sunset:', sunset);
-    // console.log('Progress thru day:', (now-sunrise)/(sunset-sunrise));
+    // console.log(`Current time: ${now} | Sunrise: ${sunrise} | Sunset: ${sunset} | Progress thru day: ${(now-sunrise)/(sunset-sunrise)}`);
 
     return { x: xVal, y: yVal }
 }
 
-// Draw our sun using our current (x, y) position
+// Sun drawing constants
+const SUN_CONFIG = {
+    RADIUS: 10,
+    RAY_COUNT: 8,
+    RAY_LENGTH: 15,
+    RAY_OFFSET: 5, // gap between sun & its rays
+    COLOR: 'orange'
+};
+
+/**
+ * Draws a sun with rays, centered at the specified normalized coordinates
+ * @param {number} x - Normalized x position (0-1)
+ * @param {number} y - Normalized y position (0-1)
+ */
 function drawSun(x, y) {
     const canvas = document.getElementById('sun-canvas');
 
-    // ctx is a common abbreviation for context - the drawing interface object
-    // Canvas can do diff types of drawing 2D graphics or 3D (WebGL?)
-    // 2D here tells it "I want to draw 2D stuff like circles, lines, etc."
+    // Get 2D drawing context (vs 3D WebGL context) // ctx is common abbreviation for 'context' - the drawing interface obj
     const ctx = canvas.getContext('2d'); 
 
-    // First, translate our values from updateSunPosition to scale to canvas size
-    // This also allows us to use whatever canvas dimensions we wish to set in index.html & this adjusts automatically
+    // Convert normalized coordinates (0-1) to actual canvas pixels
+    // Makes the function work with any canvas size
     const canvasX = x * canvas.width; // 0-1 becomes 0-actualWidth
     const canvasY = y * canvas.height; // 0-1 becomes 0-actualHeight
     
-    // Clear prior to transforms, using normal coords
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear canvas & setup coordinate system
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // clear prior to transforms, using normal coords
+    ctx.save(); // Save canvas state => saves: transform matrix (scale/translate/rotate), styles (fillStyle/strokeStyle/etc.), & clipping regions
+                // NOT the actual drawn content
+    ctx.scale(1, -1);                 // Flip y-axis
+    ctx.translate(0, -canvas.height); // Move origin to bottom-left
 
-    // Save canvas state
-    // .save() actually saves:
-    // 1. Transform matrix (scale, translate, rotate)
-    // 2. Styles (fillStyle, strokeStyle, etc.)
-    // 3. Clipping regions
-    // NOT the actual drawn content
-    ctx.save();
-
-    // Apply transforms: Flip the coord system once
-    ctx.scale(1, -1);
-    ctx.translate(0, -canvas.height);
-
-    ctx.fillStyle = 'orange';
-    // beginPath() - Canvas draws using "paths" - You start a new path, draw some shapes, then tell it to actually render
-    ctx.beginPath();
-    // ctx.arc(x, y, radius, start angle, end angle);
-    // x, y represent the center point coords - where on the canvas to put the circle
-    // radius 10 says "10 pixels from center to edge"
-    // start angle is where to start drawing (0 = rightmost point)
-    // end angle is where to stop drawing (2pi = full circle)
-
-    const radius = 10; // radius of sun 'dot'
-    ctx.arc(canvasX, canvasY, radius, 0, 2 * Math.PI);
+    // Draw main sun body
+    ctx.fillStyle = SUN_CONFIG.COLOR;
+    ctx.beginPath(); // Start drawing new "path" - start a new path, draw some shapes, then tell it to actually render
+    // arc(centerX, centerY, radius, startAngle, endAngle) - draws from 0 to 2pi for full circle
+    ctx.arc(canvasX, canvasY, SUN_CONFIG.RADIUS, 0, 2 * Math.PI);
     ctx.fill();
-
 
     //Debug: Draw a dot for each of the sunrise and sunset points
     // console.log('Raw x, y from math:', x, y);
     // console.log('Canvas coordinates: ', canvasX, canvasY);
     // console.log('Canvas size: ', canvas.width, canvas.height);
 
-    // Adding some rays to our sun
-    const rayLength = 15;
-    const numRays = 8;
-    ctx.strokeStyle = 'orange';
-
+    // Draw sun rays
+    ctx.strokeStyle = SUN_CONFIG.COLOR;
     for (let i = 0; i < numRays; i++) {
-        const angle = (i * 2 * Math.PI) / numRays;
-        const startX = canvasX + (radius + 5) * Math.cos(angle);
-        const startY = canvasY + (radius + 5) * Math.sin(angle);
-        const endX = canvasX + (radius + rayLength) * Math.cos(angle);
-        const endY = canvasY + (radius + rayLength) * Math.sin(angle);
+        const angle = (i * 2 * Math.PI) / SUN_CONFIG.RAY_COUNT;
+        const startX = canvasX + (SUN_CONFIG.RADIUS + 5) * Math.cos(angle);
+        const startY = canvasY + (SUN_CONFIG.RADIUS + 5) * Math.sin(angle);
+        const endX = canvasX + (SUN_CONFIG.RADIUS + SUN_CONFIG.RAY_LENGTH) * Math.cos(angle);
+        const endY = canvasY + (SUN_CONFIG.RADIUS + SUN_CONFIG.RAY_LENGTH) * Math.sin(angle);
     
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, endY);
         ctx.stroke();
     }
-
-    // Reset transforms;
-    ctx.restore();
+    ctx.restore(); // Reset transforms to saved state
 }
+
+// Main event listeners
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Switch to event delegation pattern for habit checkboxes
+    // Idea is: Apply listener to PARENT, then determine where event came from
+    // Consolidate 'change' listener for both habit checkboxes & metric inputs
+    // Now our parent becomes .content, so we need to change the querySelector
+    document.querySelector('.content').addEventListener('change', (e) => {
+        if (e.target.matches('.habit-checkbox')) {
+            // event.target = the checkbox (what used to be 'this' in our inline onchange)
+            // event.target.dataset.habitId = gets the data-habit-id value we added
+            markHabitComplete(e.target, e.target.dataset.habitId);
+        }
+        // Handles saving of Daily Check-In inputs (only weight, steps, & movement so far though)
+        else if (e.target.matches('input[data-metric]')) {
+            saveData(e.target);
+        }
+    });
+
+    document.querySelector('.content').addEventListener('dblclick', (e) => {
+        // Dblclick for span of id intention-text
+        if (e.target.matches('#intention-text')) {
+            // Pass element e.target to turn into input
+            editIntention(e.target);
+        }
+    });
+});
 
 window.onload = async () => {
     setInterval(updateClock, 30 * 1000); // 30 seconds
