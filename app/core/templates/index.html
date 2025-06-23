@@ -18,7 +18,7 @@
                     Good evening!
                 {% endif %}
             </h1>
-            <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p><br>
+            <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p>
         </div>
         <div class="divider"></div>
         <div class="weather-section">
@@ -36,11 +36,7 @@
         <p>
             <span>Today's Intention: </span>
             <span id="intention-text" class="text-blue-600">
-                {%- if todayIntention -%}
-                    {{ todayIntention.intention }}
-                {%- else -%}    
-                    What's your focus today?
-                {%- endif -%}
+                {{ todayIntention.intention if todayIntention.intention else "What's your focus today?" }}
             </span>
         </p>
     </section>
@@ -59,7 +55,6 @@
 
                 <span class="habit-title text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if completed_today[habit.id] %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
                     {{ habit.title }}
-                    
                 </span>
                 
                 <span class="text-sm">
