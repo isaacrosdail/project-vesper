@@ -10,18 +10,19 @@ from .models import Product, Transaction
 
 
 # Lookup barcode function to centralize a bit
+# Note: For the two functions here, we're now filtering out "soft-deleted" items
 def lookup_barcode(session, barcode):
-	return session.query(Product).filter_by(barcode=barcode).first()
+	return session.query(Product).filter_by(barcode=barcode).filter(Product.deleted_at.is_(None)).first()
   
 def get_all_products(session):
-	return session.query(Product).all()
+	return session.query(Product).filter(Product.deleted_at.is_(None)).all()
 
 # Eager load 'product' relationship using joinedload so we can safely access transaction.product.* fields in templates
 # after session is closed (avoids DetachedInstanceError)
 def get_all_transactions(session):
 	return session.query(Transaction).options(joinedload(Transaction.product)).all()
 
-def ensure_product_exists(session, **product_data):
+def get_or_create_product(session, **product_data):
 	barcode = product_data["barcode"]
 	product = lookup_barcode(session, barcode)
 	if not product:
