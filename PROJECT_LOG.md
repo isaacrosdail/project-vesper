@@ -727,3 +727,29 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 	- Added blueprint, basic route, navbar links, etc.
 	- Added utility function to make bar graphs & added a couple basic graphs
 
+## [Mon 23.06.25]
+
+**Log:**
+1. Event Delegation Refactoring
+	- Converted from individual event listeners to centralized event delegation
+	- Generally cleaned up listeners
+2. Input editing UX
+	- Made input field size to accommodate text
+	- Fallback to original text if input is empty
+3. Organization / Documentation
+	- Added JSDocs to several functions
+	- Extracted drawSun magic numbers into SUN_CONFIG constant
+	- Standardized backend JSON responses a bit
+	- Cleaned up some variable naming
+4. Data Export via CSV
+	- Key components:
+		1. Python csv handling (csv module or pandas)
+		2. Flask file download mechanics (send_file, proper headers)
+		3. Data formatting & Cleaning before export
+		4. Frontend polish for button/options
+	- Getting started with DictWriter/DictReader
+5. Adding Price per 100g
+	- Added function basics to groceries/utils.py (& type annotated)
+	- Made basic test to check
+	- Added column for this in Transaction table
+6. Metrics tweak: Added aspect-ratio CSS to make graphs match height
