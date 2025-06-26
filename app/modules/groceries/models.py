@@ -17,6 +17,7 @@ class Product(Base):
 	net_weight = Column(Float, nullable=False)
 	unit_type = Column(String(20), nullable=False) # grams, oz, ml, etc
 	calories_per_100g = Column(Float, nullable=True)
+	deleted_at = Column(DateTime, nullable=True, default=None)
 
 	def __str__(self):
 		return f"{self.product_name} ({self.barcode})"
