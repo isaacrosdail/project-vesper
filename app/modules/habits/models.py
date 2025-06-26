@@ -13,7 +13,8 @@ from app.core.db_base import Base, CustomBaseTaskMixin
 # Habit Model
 class Habit(Base):
 
-    habit_completions = relationship("HabitCompletion", back_populates="habit")
+    # cascade here ensures that when we delete Habits, any associated HabitCompletions are also deleted, preventing hanging/orphaned entries
+    habit_completions = relationship("HabitCompletion", back_populates="habit", cascade="all, delete-orphan")
 
     title = Column(String(255), unique=True, nullable=False)
     category = Column(String(255), nullable=False, default='misc') # Misc. category as a catch-all
