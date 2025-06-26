@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
-from app.core.database import db_session
+from app.core.database import db_session, database_connection
 from app.core.models import User
 from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit, HabitCompletion, DailyIntention, DailyMetric
@@ -13,10 +13,9 @@ from app.modules.tasks.models import Task
 
 
 def seed_db():
-    session = db_session()
-    try:
 
-        # Clear existing data
+    # Ensuring we start with a clean slate
+    with database_connection() as session:
         # to study: cascade settings for tables
         session.query(Transaction).delete()
         session.query(Task).delete()
@@ -26,18 +25,17 @@ def seed_db():
         session.query(DailyIntention).delete()
         session.query(DailyMetric).delete()
 
-        # Commit deletes before we do anything else
-        session.commit()
-
-        # Populate default user
-        # With commit above, we now do user in a separate transaction
+    with database_connection() as session:
         try:
+            # Populate default user (separate transaction)
             default_user = User(id=1, username='default')
             session.add(default_user)
             session.flush() # flush so any other adds can reference User
         except IntegrityError:
-            session.rollback() # clear failed transaction
+            # session.rollback() # clear failed transaction
+            print("User already exists, skipping..")
 
+    with database_connection() as session:
         # Restore DailyIntention default text
         daily_intention = DailyIntention(intention="What's your focus today?")
 
@@ -146,6 +144,3 @@ def seed_db():
         session.commit()
 
         return "DB seeded successfully"
-
-    finally:
-        session.close()
