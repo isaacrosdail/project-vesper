@@ -12,6 +12,7 @@
                 <label for="barcode">Barcode:</label>
                 <!-- Combine length constraints & pattern matching-->
                 <input type="text" id="barcode" name="barcode"
+                    value="{{ transaction_data.barcode if transaction_data else ''}}"
                     minlength="8" maxlength="14"
                     pattern="[0-9]{8-14}"
                     title="Barcode must be 8-14 digits only"
@@ -27,12 +28,14 @@
             <div class="form-group">
                 <label for="price_at_scan">Price:</label>   <!-- HAVE THIS AUTOFILL WITH KNOWN PRICE IF EXISTS -->
                 <input type="text" id="price_at_scan" name="price_at_scan"
+                    value="{{ transaction_data.price_at_scan if transaction_data else '' }}"
                     title="Price you actually paid (may differ from listed price)"
                     class="{{ styles.input_classes() }}" required>
             </div>
             <div class="form-group">
                 <label for="quantity">Quantity:</label>
                 <input type="text" id="quantity" name="quantity"
+                    value="{{ transaction_data.quantity if transaction_data else '' }}"
                     class="{{ styles.input_classes() }}" required>
             </div>
             <!-- net_weight, category, unit_type, & cals per 100g are all to be conditionally shown depending on whether we need to add_product from here -->
