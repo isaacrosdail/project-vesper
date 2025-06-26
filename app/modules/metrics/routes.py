@@ -11,7 +11,7 @@ from app.modules.metrics.utils import get_metric_dataframe, create_metric_chart_
 metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_prefix='/metrics')
 
 # Dashboard
-@metrics_bp.route('/', methods=["GET"])
+@metrics_bp.route('/dashboard', methods=["GET"])
 def dashboard():
 
     # # Takes in metric_type str & days_ago int => returns DataFrame
@@ -29,8 +29,8 @@ def dashboard():
                            steps_graph=steps_graph)
 
 
-@metrics_bp.route("/add-metric", methods=["POST"])
-def add_metric():
+@metrics_bp.route("/", methods=["POST"])
+def metrics():
     data = request.get_json()
 
     session = db_session()

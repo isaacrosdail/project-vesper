@@ -13,7 +13,7 @@ from app.modules.habits.models import Habit, HabitCompletion
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
-@habits_bp.route("/", methods=["GET"])
+@habits_bp.route("/dashboard", methods=["GET"])
 def dashboard():
     # Fetch Habits & pass into template
     session = db_session()
@@ -39,8 +39,8 @@ def dashboard():
         session.close()
 
 # CREATE
-@habits_bp.route("/add", methods=["GET", "POST"])
-def add_habit():
+@habits_bp.route("/", methods=["GET", "POST"])
+def habits():
 
     # Process form data and add new habit to db
     if request.method == "POST":
@@ -65,12 +65,13 @@ def add_habit():
             # Follows Post/Redirect/Get (PRG) pattern
         finally:
             session.close()
+    # GET => Return add_habit form page
     else:
         return render_template("habits/add_habit.html")
     
 # Creates a new HabitCompletion record to mark a Habit complete and enable more robust habit analytics in future
 @habits_bp.route("/<int:habit_id>/completions", methods=["POST"])
-def create_habit_completion(habit_id):
+def completions(habit_id):
     
     # So we have the habit_id and need to make a new HabitCompletion entry using that as its foreignkey
     # Just have primary key and date default otherwise, so don't need to specify/add those
@@ -91,8 +92,13 @@ def create_habit_completion(habit_id):
 
 # Deletes a given HabitCompletion record (acts as our "habit marked complete")
 # For now, we'll only allow habits to have a single completion record in a given day
-@habits_bp.route("/<int:habit_id>/completions/today", methods=["DELETE"])
-def delete_habit_completion(habit_id):
+@habits_bp.route("/<int:habit_id>/completions", methods=["DELETE"])
+def completion(habit_id):
+
+    # Instead of /today in route, pass desired day in as arg/param
+    # TODO: Tweak rest of this route function to use this rather than simply "today"
+    # Also: Ensure our JS fetch stuff reflects these changes
+    date = request.args.get('date', 'today') # default to today
     from datetime import date
     today = date.today()
 
