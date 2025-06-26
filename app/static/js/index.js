@@ -4,6 +4,53 @@
 let weatherInfo = null;  // for weatherInfo
 let cachedSunPos = null; // for sunPos (for redrawing after Canvas resizing)
 
+
+/**
+ * Function for inputting time entries via our activity log card inputs
+ * @param {HTMLElement} element - The "Save Entry" button in our activity log card
+ */
+async function saveTimeEntry(element) {
+    // Grabbing our elements from there
+    const card = element.closest('#activity-log-card');
+    const categoryElement = card.querySelector('#category');
+    const durationElement = card.querySelector('#duration');
+    const descriptionElement = card.querySelector('#description');
+
+    // Getting values for POST
+    const category = categoryElement.value;
+    const duration = durationElement.value;
+    const description = descriptionElement.value;
+
+    try {
+        // Now our async fetch
+        const response = await fetch('/activity_log/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                category: category,
+                duration: duration,
+                description: description
+            })
+        });
+        const responseData = await response.json();
+
+        if (responseData.success) {
+            // Clear our inputs
+            categoryElement.value = '';
+            durationElement.value = '';
+            descriptionElement.value = '';
+        } else {
+            console.error('Error saving entry: ', responseData.message);
+        }
+    }
+    catch (error) {
+        console.error('Failed to save/update: ', error);
+    }
+}
+
+
 // Handle UI (span -> input field)
 /**
  * Converts a span element into an input field for inline editing
@@ -357,6 +404,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.matches('#intention-text')) {
             // Pass element e.target to turn into input
             editIntention(e.target);
+        }
+    });
+
+    document.querySelector('.content').addEventListener('click', (e) => {
+        // Click save-entry-btn to save time log entry
+        if (e.target.matches('#save-entry-btn')) {
+            saveTimeEntry(e.target); // pass in our button element and navigate from there
         }
     });
 });
