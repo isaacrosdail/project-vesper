@@ -61,12 +61,13 @@ def add_item(module, subtype):
 
 '''
 
-# UPDATE (PATCH) - Trying out a generic PATCH route for editTableField
-@crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH"])
-def patch_item(module, subtype, item_id):
+@crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH", "DELETE"])
+def item(module, subtype, item_id):
 
     try:
         with database_connection() as session:
+
+            # Item lookup
             model = modelMap.get((module, subtype)) # so 'tasks', 'none' returns Task class
             item = session.get(model, item_id)
 
@@ -74,37 +75,65 @@ def patch_item(module, subtype, item_id):
             if not item:
                 return jsonify({"success": False, "message": f"{model.__name__} not found."}), 404
             
-            data = request.get_json() # get request body
-            for field, value in data.items():
-                setattr(item, field, value)
-
-            return jsonify({"success": True, "message": f"Successfully updated {model.__name__}"}), 200
-        
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Failed to update {model.__name__}"}), 500    
-
-
-# DELETE
-@crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["DELETE"])
-def delete_item(module, subtype, item_id):
-    session = db_session()
-
-    try:
-        with database_connection() as session:
-            model = modelMap.get((module, subtype))  # Get correct model
-            item = session.get(model, item_id)       # Grab item by id from db
-
-            # If item doesn't exist
-            if not item:
-                return jsonify({"success": False, "message": f"{model.__name__} not found."}), 404
+            if request.method == 'PATCH':
+                data = request.get_json() # get request body
+                for field, value in data.items():
+                    setattr(item, field, value)
+                return jsonify({"success": True, "message": f"Successfully updated {model.__name__}"}), 200
             
-            # Soft deletes for Products, hard delete for all else
-            if model.__name__ == 'Product':
-                item.deleted_at = datetime.now(timezone.utc)
-            else:
-                session.delete(item)
-
-            return jsonify({"success": True, "message": f"{model.__name__} deleted"}), 200 # 200 = OK
+            elif request.method == 'DELETE':
+                if model.__name__ == 'Product':
+                    item.deleted_at = datetime.now(timezone.utc)   # soft deletes for Products
+                else:
+                    session.delete(item)     # hard deletes for all else
+                return jsonify({"success": True, "message": f"{model.__name__} deleted"}), 200 # 200 = OK
         
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500 # 500 = Internal Server Error
+
+# # UPDATE (PATCH) - Trying out a generic PATCH route for editTableField
+# @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH"])
+# def patch_item(module, subtype, item_id):
+
+#     try:
+#         with database_connection() as session:
+#             model = modelMap.get((module, subtype)) # so 'tasks', 'none' returns Task class
+#             item = session.get(model, item_id)
+
+#             # If item doesn't exist
+#             if not item:
+#                 return jsonify({"success": False, "message": f"{model.__name__} not found."}), 404
+            
+#             data = request.get_json() # get request body
+#             for field, value in data.items():
+#                 setattr(item, field, value)
+
+#             return jsonify({"success": True, "message": f"Successfully updated {model.__name__}"}), 200
+        
+#     except Exception as e:
+#         return jsonify({"success": False, "message": f"Failed to update {model.__name__}"}), 500    
+
+
+# # DELETE
+# @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["DELETE"])
+# def delete_item(module, subtype, item_id):
+
+#     try:
+#         with database_connection() as session:
+#             model = modelMap.get((module, subtype))  # Get correct model
+#             item = session.get(model, item_id)       # Grab item by id from db
+
+#             # If item doesn't exist
+#             if not item:
+#                 return jsonify({"success": False, "message": f"{model.__name__} not found."}), 404
+            
+#             # Soft deletes for Products, hard delete for all else
+#             if model.__name__ == 'Product':
+#                 item.deleted_at = datetime.now(timezone.utc)
+#             else:
+#                 session.delete(item)
+
+#             return jsonify({"success": True, "message": f"{model.__name__} deleted"}), 200 # 200 = OK
+        
+#     except Exception as e:
+#         return jsonify({"success": False, "message": str(e)}), 500 # 500 = Internal Server Error
