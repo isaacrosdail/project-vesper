@@ -11,10 +11,8 @@ from app.modules.groceries import repository as grocery_repo
 
 groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
 
-# Debug print
-print(" groceries routes.py imported")
 
-@groceries_bp.route("/", methods=["GET"])
+@groceries_bp.route("/dashboard", methods=["GET"])
 def dashboard():
 
     session = db_session()
@@ -51,8 +49,8 @@ def dashboard():
     finally:
         session.close()
 
-@groceries_bp.route("/products/add", methods=["GET", "POST"])
-def add_product():
+@groceries_bp.route("/products", methods=["GET", "POST"])
+def products():
     if request.method == "POST":
         # Parse & sanitize form data
         product_data = {
@@ -74,14 +72,15 @@ def add_product():
             return redirect(url_for("groceries.dashboard"))
         finally:
             session.close()
+    # GET => Show add_product form page
     else:
         return render_template("groceries/add_product.html")
 
-@groceries_bp.route("/transactions/add", methods=["GET", "POST"])
-def add_transaction():
+# TODO: Clean this one up
+@groceries_bp.route("/transactions", methods=["GET", "POST"])
+def transactions():
 
     if request.method == "POST":
-
         # Grab form data (used for both validation and repopulating form if we need to show it again)
         form_data = request.form.to_dict()
         # Bool to conditionally determine flash() message
@@ -171,8 +170,9 @@ def add_transaction():
         ) 
     
 # DELETE (Product)
+# TODO: Improve JSON returns for success/error
 @groceries_bp.route("/products/<int:product_id>", methods=["DELETE"])
-def delete_product(product_id):
+def product(product_id):
     session = db_session()
     try:
         product = session.get(grocery_models.Product, product_id) # Grab product by id from db
@@ -189,8 +189,9 @@ def delete_product(product_id):
         session.close()
 
 # DELETE (Transaction)
+# TODO: Improve JSON returns for success/error
 @groceries_bp.route("/transactions/<int:transaction_id>", methods=["DELETE"])
-def delete_transaction(transaction_id):
+def transaction(transaction_id):
     session = db_session()
 
     try:

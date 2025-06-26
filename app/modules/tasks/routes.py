@@ -16,7 +16,7 @@ import os
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
-@tasks_bp.route("/", methods=["GET"])
+@tasks_bp.route("/dashboard", methods=["GET"])
 def dashboard():
     # Fetch Tasks & pass into template
     session = db_session()
@@ -46,8 +46,8 @@ def dashboard():
         session.close()
 
 # CREATE
-@tasks_bp.route("/add", methods=["GET", "POST"])
-def add_task():
+@tasks_bp.route("/", methods=["GET", "POST"])
+def tasks():
 
     # Process form data and add new task to db
     if request.method == "POST":
@@ -82,5 +82,6 @@ def add_task():
             # Post/Redirect/Get (PRG) pattern - standard for handling form submissions in web apps
         finally:
             session.close()
+    # GET => Return add_task form page
     else:
         return render_template("tasks/add_task.html")
