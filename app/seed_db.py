@@ -88,7 +88,7 @@ def seed_db():
             Product(
                 product_name="Huel Energy Drink",
                 category="energy drink",
-                barcode="5060419750",
+                barcode="94204197",
                 net_weight=250.0,
                 unit_type="ml",
                 calories_per_100g=9
@@ -96,7 +96,7 @@ def seed_db():
             Product(
                 product_name="Organic Bananas",
                 category="produce",
-                barcode="504350",
+                barcode="50435087",
                 net_weight=1000.0,
                 unit_type="g",
                 calories_per_100g=89
