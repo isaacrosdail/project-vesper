@@ -3,11 +3,13 @@
 
 from flask import Blueprint, redirect, render_template, request, url_for, jsonify
 
-from app.core.database import db_session
+from app.core.database import db_session, database_connection
 # Import models
 from app.modules.groceries import models as grocery_models
 from app.modules.tasks import models as tasks_models
 from app.modules.habits.models import Habit
+
+from datetime import datetime, timezone
 
 # Blueprint registration
 crud_bp = Blueprint("crud", __name__)
@@ -62,27 +64,25 @@ def add_item(module, subtype):
 # UPDATE (PATCH) - Trying out a generic PATCH route for editTableField
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH"])
 def patch_item(module, subtype, item_id):
-    session = db_session()
 
     try:
-        model = modelMap.get((module, subtype)) # so 'tasks', 'none' returns Task class
-        item = session.get(model, item_id)
+        with database_connection() as session:
+            model = modelMap.get((module, subtype)) # so 'tasks', 'none' returns Task class
+            item = session.get(model, item_id)
 
-        # If item doesn't exist
-        if not item:
-            return {"success": False, "message": f"{model.__name__} not found."}, 404
+            # If item doesn't exist
+            if not item:
+                return jsonify({"success": False, "message": f"{model.__name__} not found."}), 404
+            
+            data = request.get_json() # get request body
+            for field, value in data.items():
+                setattr(item, field, value)
+
+            return jsonify({"success": True, "message": f"Successfully updated {model.__name__}"}), 200
         
-        data = request.get_json() # get request body
-        for field, value in data.items():
-            setattr(item, field, value)
-
-        session.commit()
-        return {"success": True, "message": f"Successfully updated {model.__name__}"}, 200
     except Exception as e:
-        session.rollback()
-        return {"success": False, "message": f"Failed to update {model.__name__}"}, 500    
-    finally:
-        session.close()
+        return jsonify({"success": False, "message": f"Failed to update {model.__name__}"}), 500    
+
 
 # DELETE
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["DELETE"])
@@ -90,20 +90,21 @@ def delete_item(module, subtype, item_id):
     session = db_session()
 
     try:
-        # Get correct model
-        model = modelMap.get((module, subtype))
-        # Debug print: print(model)
-        item = session.get(model, item_id) # Grab item by id from db
+        with database_connection() as session:
+            model = modelMap.get((module, subtype))  # Get correct model
+            item = session.get(model, item_id)       # Grab item by id from db
 
-        # If item doesn't exist
-        if not item:
-            return {"success": False, "message": f"{model.__name__} not found."}, 404
+            # If item doesn't exist
+            if not item:
+                return jsonify({"success": False, "message": f"{model.__name__} not found."}), 404
+            
+            # Soft deletes for Products, hard delete for all else
+            if model.__name__ == 'Product':
+                item.deleted_at = datetime.now(timezone.utc)
+            else:
+                session.delete(item)
+
+            return jsonify({"success": True, "message": f"{model.__name__} deleted"}), 200 # 200 = OK
         
-        session.delete(item)
-        session.commit()
-        return {"success": True, "message": f"{model.__name__} deleted"}, 200 # 200 = OK
     except Exception as e:
-        session.rollback()
-        return {"success": False, "message": str(e)}, 500 # 500 = Internal Server Error
-    finally:
-        session.close()
+        return jsonify({"success": False, "message": str(e)}), 500 # 500 = Internal Server Error
