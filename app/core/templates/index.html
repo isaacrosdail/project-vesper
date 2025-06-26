@@ -69,6 +69,7 @@
     </section>
     
     <!-- Daily Check-In Card -->
+    <!-- TODO: Scrap our 'data-' things in this card. Used more for storing custom data on elements not for grabbing them -->
     <section id="daily-check-in-card" class="bg-gray-200 p-6 rounded-xl shadow-lg">
         <h2 class="text-xl font-semibold mb-2">Daily Check-In</h2>
         <!-- Content: weight, steps, movement (mins), stress (scale), energy (scale) -->
@@ -97,6 +98,26 @@
             <label for="mood">Mood:</label>
             <input type="range" name="mood" data-checkin="mood" min="1" max="10">
         </div>
+    </section>
+
+    <!-- Activity Log Entry Card -->
+    <!-- Roll our own JS validation here instead of using form and intercepting with .preventDefault() -->
+    <section id="activity-log-card" class="bg-gray-200 p-6 rounded-xl shadow-lg">
+        <h2 class="text-xl font-semibold mb-2">Daily Time Log Entry</h2>
+
+        <div class="time-entry-row">
+            <label for="category">Category:</label>
+            <input type="text" id="category">
+        </div>
+        <div class="time-entry-row">
+            <label for="duration">Duration:</label>
+            <input type="number" id="duration" min="0">
+        </div>
+        <div class="time-entry-row">
+            <label for="description">Description (Optional):</label>
+            <input type="text" id="description">
+        </div>
+        <button id="save-entry-btn">Save Entry</button>
     </section>
 </div>
 {% endblock %}
