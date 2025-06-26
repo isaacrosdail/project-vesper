@@ -2,6 +2,8 @@
 import os
 
 from flask import current_app
+from contextlib import contextmanager
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -41,3 +43,16 @@ def init_db(config):
     engine = get_engine(config)         # Creates DB connection
     db_session.configure(bind=engine) # Binds Session globally -> Tells SQLAlchemy: "Use this engine for all sessions"
     # Base.metadata.create_all(engine)  # Removed: We now delete DATA not tables & let Alembic migrations handle the rest
+
+
+# Making our own context manager
+@contextmanager
+def database_connection():
+    session = db_session()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+    finally:
+        session.close()
