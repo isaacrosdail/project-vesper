@@ -94,20 +94,26 @@ def completions(habit_id):
 # For now, we'll only allow habits to have a single completion record in a given day
 @habits_bp.route("/<int:habit_id>/completions", methods=["DELETE"])
 def completion(habit_id):
-
-    # Instead of /today in route, pass desired day in as arg/param
-    # TODO: Tweak rest of this route function to use this rather than simply "today"
-    # Also: Ensure our JS fetch stuff reflects these changes
-    date = request.args.get('date', 'today') # default to today
     from datetime import date
-    today = date.today()
+    # Instead of /today in route, pass desired day in as arg/param
+    # Want to be able to receive date string from HTTP like "2025-06-26"
+    date_received = request.args.get('date', 'today') # default to today
+
+    if date_received == 'today':
+        # handle default case
+        date_only = date.today()
+    else:
+        # Handle actual date string case
+        # Turn date string into datetime obj first
+        date_obj = datetime.strptime(date_received, "%Y-%m-%d") # Format "2025-06-26 00:00:00"
+        date_only = date_obj.date() # Then get date ONLY (no time)
 
     session = db_session()
     try:
         # Find corresponding habitcompletion entry for today
         habit_completion = session.query(HabitCompletion).filter(
             HabitCompletion.habit_id == habit_id,
-            func.date(HabitCompletion.created_at) == today
+            func.date(HabitCompletion.created_at) == date_only
         ).first()
 
         if habit_completion:
