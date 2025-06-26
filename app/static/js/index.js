@@ -23,7 +23,7 @@ async function saveTimeEntry(element) {
 
     try {
         // Now our async fetch
-        const response = await fetch('/activity_log/', {
+        const response = await fetch('/time_tracking/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -182,7 +182,7 @@ async function markHabitComplete(checkbox, habitId) {
             const today = new Date(); // Date() with no args defaults to current date and time
             const dateFormatted = today.toISOString().split('T')[0]; // Gives format like "2025-06-26"
 
-            const response = await fetch(`/habits/${habitId}/completions/?date=${dateFormatted}`, {
+            const response = await fetch(`/habits/${habitId}/completions?date=${dateFormatted}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
             });
