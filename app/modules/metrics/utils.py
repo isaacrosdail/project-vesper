@@ -16,7 +16,8 @@ def get_metric_dataframe(metric_type: str, days_ago: int) -> pd.DataFrame:
     Returns:
         DataFrame with 'Date' & capitalized metric_type columns
     """
-
+    
+    # TODO: Standardize session handling - consider passing session from caller here?
     session = db_session()
     try:
         today_utc = datetime.now(timezone.utc)

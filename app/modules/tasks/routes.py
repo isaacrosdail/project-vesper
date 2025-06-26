@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 
-from app.core.database import db_session
+from app.core.database import db_session, database_connection
 from app.utils.sorting import bubble_sort
 
 # Import Task repository
@@ -18,32 +18,27 @@ tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix=
 
 @tasks_bp.route("/dashboard", methods=["GET"])
 def dashboard():
-    # Fetch Tasks & pass into template
-    session = db_session()
+
     try:
-        # Column names for Task model
-        task_column_names = [
-            Task.COLUMN_LABELS.get(col, col)
-            for col in Task.__table__.columns.keys()
-        ]
+        with database_connection() as session:
+            # Column names for Task model
+            task_column_names = [
+                Task.COLUMN_LABELS.get(col, col)
+                for col in Task.__table__.columns.keys()
+            ]
 
-        # Fetch tasks list
-        tasks = tasks_repo.get_all_tasks(session)
+            # Fetch tasks, sort
+            tasks = tasks_repo.get_all_tasks(session)
+            bubble_sort(tasks, 'created_at_local', reverse=False)
 
-        # Sort tasks list by most recent Datetime first
-        #tasks.sort(key=lambda task: task.created_at, reverse=True)
-
-        # Now using our own bubble sort!
-        # Most recently created tasks at bottom of table
-        bubble_sort(tasks, 'created_at_local', reverse=False)
-
-        return render_template(
-            "tasks/dashboard.html",
-            task_column_names = task_column_names,
-            tasks = tasks
-        )
-    finally:
-        session.close()
+            return render_template(
+                "tasks/dashboard.html",
+                task_column_names = task_column_names,
+                tasks = tasks
+            )
+        
+    except Exception as e:
+        return jsonify({"success": True, "message": str(e)}), 500
 
 # CREATE
 @tasks_bp.route("/", methods=["GET", "POST"])
@@ -71,17 +66,13 @@ def tasks():
         )
 
         # Add new_task to db
-        session = db_session()
-        try:
+        with database_connection() as session:
             session.add(new_task)
-            session.commit()
-            # Display flash() for add confirmation
             flash(f"Task added successfully.")
             return redirect(url_for("tasks.dashboard")) # Redirect after POST - NOT render_template
             # Using redirect here after the form POST follows the best practice of
             # Post/Redirect/Get (PRG) pattern - standard for handling form submissions in web apps
-        finally:
-            session.close()
+            
     # GET => Return add_task form page
     else:
         return render_template("tasks/add_task.html")
