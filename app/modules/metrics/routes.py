@@ -1,10 +1,8 @@
 
-from flask import Blueprint, render_template, request
-from app.core.database import db_session
+from flask import Blueprint, render_template, request, jsonify
+from app.core.database import db_session, database_connection
 from app.modules.habits.models import DailyMetric, DailyCheckin
 
-import plotly.express as px
-import pandas as pd
 from app.modules.metrics.utils import get_metric_dataframe, create_metric_chart_html
 
 # New Blueprint
@@ -33,17 +31,17 @@ def dashboard():
 def metrics():
     data = request.get_json()
 
-    session = db_session()
-
-    new_metric = DailyMetric(
-        metric_type=data["metric_type"],
-        value=data["value"],
-        unit=data["unit"]
-    )
-
     try:
-        session.add(new_metric)
-        session.commit()
-        return "", 201
-    finally:
-        session.close()
+        with database_connection() as session:
+            new_metric = DailyMetric(
+                metric_type=data["metric_type"],
+                value=data["value"],
+                unit=data["unit"]
+            )
+            session.add(new_metric)
+
+            return jsonify({"success": True, "message": "Successfully added metric"}), 201
+
+    # TODO: Security - don't expose internal errors to users, need to adjust
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
