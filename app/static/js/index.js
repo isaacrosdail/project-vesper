@@ -121,7 +121,7 @@ async function saveData(input) {
     // Don't bother sending for empty input fields (don't require all to be filled out)
     if (input.dataset.metric && input.value) {
         // call metric logic
-        const response = await fetch('/metrics/add-metric', {
+        const response = await fetch('/metrics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -176,8 +176,13 @@ async function markHabitComplete(checkbox, habitId) {
 
         // Mark un-complete => DELETE HabitCompletion from today
         } else {
-            // Replaces our fetch & part of our first .then for the OTHER portion of if/else block
-            const response = await fetch(`/habits/${habitId}/completions/today`, {
+            // Note: Built this to accept any date via query parameter (the "?=.." thing) for future flexibility
+            // but currently we only ever delete today's completion from our main dashboard
+            // So the route CAN handle any date, but our JS will stick to today
+            const today = new Date(); // Date() with no args defaults to current date and time
+            const dateFormatted = today.toISOString().split('T')[0]; // Gives format like "2025-06-26"
+
+            const response = await fetch(`/habits/${habitId}/completions/?date=${dateFormatted}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -365,7 +370,7 @@ function drawSun(x, y) {
 
     // Draw sun rays
     ctx.strokeStyle = SUN_CONFIG.COLOR;
-    for (let i = 0; i < numRays; i++) {
+    for (let i = 0; i < SUN_CONFIG.RAY_COUNT; i++) {
         const angle = (i * 2 * Math.PI) / SUN_CONFIG.RAY_COUNT;
         const startX = canvasX + (SUN_CONFIG.RADIUS + 5) * Math.cos(angle);
         const startY = canvasY + (SUN_CONFIG.RADIUS + 5) * Math.sin(angle);
