@@ -36,7 +36,7 @@
         <p>
             <span>Today's Intention: </span>
             <span id="intention-text" class="text-blue-600">
-                {{ todayIntention.intention if todayIntention.intention else "What's your focus today?" }}
+                {{ today_intention.intention if today_intention.intention else "What's your focus today?" }}
             </span>
         </p>
     </section>
@@ -51,15 +51,15 @@
                 <input type="checkbox"
                     class="habit-checkbox"
                     data-habit-id="{{ habit.id }}"
-                    {% if completed_today[habit.id] %}checked{% endif %}>
+                    {% if habit_info[habit.id].completed_today %}checked{% endif %}>
 
-                <span class="habit-title text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if completed_today[habit.id] %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
+                <span class="habit-title text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if habit_info[habit.id].completed_today %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
                     {{ habit.title }}
                 </span>
                 
                 <span class="text-sm">
-                    {% if streaks[habit.id] > 0 %}
-                     🔥{{ streaks[habit.id] }}
+                    {% if habit_info[habit.id].streak_count > 0 %}
+                     🔥{{ habit_info[habit.id].streak_count }}
                     {% endif %}
                 </span>
             </li>
@@ -101,23 +101,24 @@
     </section>
 
     <!-- Activity Log Entry Card -->
-    <!-- Roll our own JS validation here instead of using form and intercepting with .preventDefault() -->
+    <!-- Roll our own JS validation for this instead of using form and intercepting with .preventDefault() -->
+    <!-- TODO: Develop 2-3 style macros for different types of inputs & buttons - these don't quite fit here -->
     <section id="activity-log-card" class="bg-gray-200 p-6 rounded-xl shadow-lg">
         <h2 class="text-xl font-semibold mb-2">Daily Time Log Entry</h2>
 
         <div class="time-entry-row">
             <label for="category">Category:</label>
-            <input type="text" id="category">
+            <input type="text" id="category" class="{{ styles.input_classes() }}">
         </div>
         <div class="time-entry-row">
             <label for="duration">Duration:</label>
-            <input type="number" id="duration" min="0">
+            <input type="number" id="duration" min="0" class="{{ styles.input_classes() }}">
         </div>
         <div class="time-entry-row">
             <label for="description">Description (Optional):</label>
-            <input type="text" id="description">
+            <input type="text" id="description" class="{{ styles.input_classes() }}">
         </div>
-        <button id="save-entry-btn">Save Entry</button>
+        <button id="save-entry-btn" class="{{ styles.submit_classes() }}">Save Entry</button>
     </section>
 </div>
 {% endblock %}
