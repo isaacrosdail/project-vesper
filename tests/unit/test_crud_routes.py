@@ -16,8 +16,12 @@ def test_general_delete_task(client):
     # DELETE request to route
     response = client.delete(f"/tasks/none/{task_id}")
 
-    # Check response code
-    assert response.status_code == 204 # 204 No Content (success for delete)
+    json_data = response.get_json()
+
+    # Assert on the message field
+    assert json_data["message"] == "Task deleted"
+    assert json_data["success"] == True
+    assert response.status_code == 200 # Should now return 200 since we're returning JSON
 
     # Confirm task no longer exists
     deleted_task = db_session.get(Task, task_id)

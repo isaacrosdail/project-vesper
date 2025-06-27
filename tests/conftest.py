@@ -6,16 +6,14 @@ import time
 
 import pytest
 from app import create_app
-from app.core.config import TestConfig
-# DB imports
 from app.core.database import db_session, get_engine
-from app.core.db_base import Base
+from app.modules.groceries.models import Product
 from app.utils.database.db_utils import delete_all_db_data
 from sqlalchemy import text
-from app.modules.groceries.models import Product
 
 
 # Ensure PostgreSQL container is running before tests start
+# TODO: Needed/used?
 @pytest.fixture(scope="session", autouse=True)
 def ensure_docker_postgres():
 
@@ -30,7 +28,7 @@ def ensure_docker_postgres():
         subprocess.run(["docker", "start", "vesper-db-dev"])
         time.sleep(3) # Let it initialize
 
-# Create app once and use it for all tests
+# Create app once & use it for all tests
 @pytest.fixture(scope="session")
 def app():
     # Tell Alembic which DB to use
@@ -38,7 +36,7 @@ def app():
     app = create_app('testing')  # Pass in our TestConfig
     yield app
 
-# Ensure we have a user with id=1 (since user.id is know a FKey for all other models)
+# Ensure we have a user with id=1 (user.id is a Foreign Key for all other models)
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_user(app):
     engine = get_engine(app.config)
@@ -46,7 +44,8 @@ def setup_test_user(app):
     with engine.begin() as conn:
         # Create user (use ON CONFLICT to handle if we already have a user)
         conn.execute(
-            text("""INSERT INTO "user" (id, username) VALUES (1, 'testuser') ON CONFLICT (id) DO NOTHING""") # Note: need to put user in quotes since it's a reserved keyword in PostgreSQL
+            # Note: need to put user in quotes since it's a reserved keyword in PostgreSQL
+            text("""INSERT INTO "user" (id, username) VALUES (1, 'testuser') ON CONFLICT (id) DO NOTHING""")
         )
 
     yield
@@ -55,14 +54,12 @@ def setup_test_user(app):
 # Necessary now that tests and app share the same session via monkeypatching
 @pytest.fixture(autouse=True)
 def clear_tables(app):
-    # Clear all table data BEFORE each test runs
     engine = get_engine(app.config)
 
-    # Clear data before the test runs
+    # Clear data before each test runs & reset sequence IDs
     delete_all_db_data(engine, reset_sequences=True)
-
-    db_session.remove() # Remove any hanging sessions
-    
+    # Remove any hanging sessions
+    db_session.remove()
     yield # Run the test
 
     # Clean up sessions after test
@@ -73,12 +70,12 @@ def clear_tables(app):
 def engine(app):
     return get_engine(app.config)
 
-## REMOVE?
-# Fixture to cleanup session (replaces db_session we had before)
-@pytest.fixture(autouse=True)
-def cleanup_session():
-    yield
-    db_session.remove()
+# ## REMOVE?
+# # Fixture to cleanup session (replaces db_session we had before)
+# @pytest.fixture(autouse=True)
+# def cleanup_session():
+#     yield
+#     db_session.remove()
 
 # monkeypatches db_session() to use our test session
 @pytest.fixture(autouse=True)
