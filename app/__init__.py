@@ -54,7 +54,7 @@ def create_app(config_name=None):
 
         # Run seed_db for prod to fill with dummy data
         if config_name == 'prod':
-            from .seed_db import seed_db
+            from .utils.database.seed.seed_db import seed_db
             seed_db()
 
     # Remove session after each request or app context teardown
