@@ -10,7 +10,7 @@ from app.core.config import TestConfig
 # DB imports
 from app.core.database import db_session, get_engine
 from app.core.db_base import Base
-from app.utils.db_utils import delete_all_db_data
+from app.utils.database.db_utils import delete_all_db_data
 from sqlalchemy import text
 from app.modules.groceries.models import Product
 

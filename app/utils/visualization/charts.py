@@ -1,47 +1,48 @@
-from app.core.database import db_session
-from app.modules.habits.models import DailyMetric, DailyCheckin
-from datetime import datetime, timezone, timedelta
-from sqlalchemy import func
+from datetime import datetime, timedelta, timezone
+
 import pandas as pd
 import plotly.express as px
+from app.modules.habits.models import DailyMetric
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 
 # Function to return results from query for metric_type & timeframe for graphing our data with Plotly
 # Gets metric data ready for visualization
-def get_metric_dataframe(metric_type: str, days_ago: int) -> pd.DataFrame:
+def get_metric_dataframe(metric_type: str, days_ago: int, session: Session) -> pd.DataFrame:
     """
     Get metric data for the last X days, formatted for plotting.
     Args:
         metric_type: eg, 'weight', 'sleep'
         days_ago: Number of days back from today to include/start
+        session: Database session for executing queries
     Returns:
         DataFrame with 'Date' & capitalized metric_type columns
     """
     
-    # TODO: Standardize session handling - consider passing session from caller here?
-    session = db_session()
-    try:
-        today_utc = datetime.now(timezone.utc)
-        # Since .func strips timezone, need .date() to make start_date a date, not a datetime - to match
-        start_date = (today_utc - timedelta(days=days_ago)).date()
+    today_utc = datetime.now(timezone.utc)
+    # Since .func strips timezone, need .date() to make start_date a date, not a datetime
+    start_date = (today_utc - timedelta(days=days_ago)).date()
 
-        # Query for weight: Need all DailyMetric records, ordered by date, for metric_type where date is between today & days_ago
-        metric_entries = session.query(DailyMetric).filter(
-            DailyMetric.metric_type == metric_type,
-            func.date(DailyMetric.created_at) >= start_date, # compares date to date
-            DailyMetric.created_at <= today_utc              # compares datetime to datetime (fine to mix?)
-        ).order_by(DailyMetric.created_at).all()
+    # Query for weight: 
+    # Need all DailyMetrics for metric_type where date is between today & days_ago ordered by date
+    metric_entries = session.query(DailyMetric).filter(
+        DailyMetric.metric_type == metric_type,
+        func.date(DailyMetric.created_at) >= start_date, # compares date to date
+        DailyMetric.created_at <= today_utc              # compares datetime to datetime (fine to mix?)
+    ).order_by(DailyMetric.created_at).all()
 
-        # Extract dates & metric_type entries into lists for Plotly
-        # Note: using .date() to strip datetime objects to dates => Plenty for graphs for now
-        dates = [entry.created_at.date() for entry in metric_entries] # [date1, date2, date3, ...]
-        values = [entry.value for entry in metric_entries]    # [value1, value2, null, ...]
+    # Extract dates & metric_type entries into lists for Plotly
+    # Note: using .date() to strip datetime objects to dates => Plenty for graphs for now
+    dates = [entry.created_at.date() for entry in metric_entries] # [date1, date2, date3, ...]
+    values = [entry.value for entry in metric_entries]            # [value1, value2, null, ...]
 
-        # Get these into our data frame
-        df = pd.DataFrame({'Date': dates, metric_type.title(): values})
+    # Get these into our data frame
+    df = pd.DataFrame({'Date': dates, metric_type.title(): values})
 
-        return df # caller gets pandas DataFrame
-    finally:
-        session.close()
+    # Return DataFrame to caller
+    return df
+
 
 def create_metric_chart_html(df: pd.DataFrame, 
                              metric_type: str, 
@@ -65,7 +66,7 @@ def create_metric_chart_html(df: pd.DataFrame,
 
     fig = px.line(df, x=df.columns[0], y=df.columns[1], title=title)
     fig.update_xaxes(
-        tickformat=date_format, # Default: DD.MM
+        tickformat=date_format,        # Default: DD.MM
         dtick=2 * 24 * 60 * 60 * 1000, # 2 days in ms (show every other day)
         )
 

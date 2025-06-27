@@ -41,7 +41,7 @@ def seed_db():
 
         # Seed DailyMetric sample data for Plotly graphs
         # Weights for last X days
-        LAST_X_DAYS = 7
+        LAST_X_DAYS = 14
 
         weight_metrics = [
             DailyMetric(created_at=datetime.now(timezone.utc) - timedelta(days=i),
