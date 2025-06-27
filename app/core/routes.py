@@ -40,6 +40,7 @@ def home():
             # Calculate time references
             now = datetime.now(ZoneInfo("Europe/London"))
             # Today's 00:00 in Europe/London time
+            # TODO: Consider extracting into datetime/date helper functions/utils?
             start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
             start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
 
@@ -47,8 +48,6 @@ def home():
             tasks = tasks_repo.get_all_tasks(session)
             habits = habits_repo.get_all_habits(session)
             today_intention = habits_repo.get_today_intention(session)
-
-            print("CHECKPOINT BRAVO", file=sys.stderr)
             
             habit_info = {}
             for habit in habits:
@@ -57,7 +56,6 @@ def home():
                     'streak_count': calculate_habit_streak(habit.id, session)
                 }
 
-            print("CHECKPOINT DELTA", file=sys.stderr)
             return render_template(
                 "index.html",
                 tasks=tasks,
@@ -73,7 +71,7 @@ def home():
 @main_bp.route('/daily-intentions/', methods=["POST"])
 def update_daily_intention():
     try:
-        # Get json data from fetch request
+        # Get JSON data from request body & parse into Python dict
         data = request.get_json()
 
         with database_connection() as session:

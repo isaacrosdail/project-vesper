@@ -9,20 +9,252 @@
         font-weight: 500;
     }
 }
-/* TODO: Remove this?
-Able to group Tailwind stylings together for repeat usage, within @layer components here */
+
+/* Test: Forcing Tailwind to keep our theme styling to toggle light/dark WHILE keeping our macros setup */
+/* Components stuff used to bind colors/styles stuff to use in our macros for various components */
 @layer components {
-    .btn-primary {
-        @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition;
+    /* Background for full viewport/page */
+    .bg-color {
+        background: var(--bg-clr);
     }
+    /* Card background - Primary container for content blocks */
+    .surface-primary {
+        background: var(--surface-primary);
+    }
+    /* BG-GRAY-200 */
+    .surface-muted {
+        background: var(--surface-muted);
+    }
+    /* Table header row styling - remove all bg-gray-800 mentions from thead classes!!! */
+    .table-header-row {
+        background-color: var(--accent-primary);
+        color: var(--text-inverse);
+        font-weight: 600; /* equivalent to font-semibold in Tailwind */
+    }
+    /* Primary accent - like for navbar, table headers, etc */
+    .accent-primary {
+        background-color: var(--accent-primary);
+    }
+    /* ======= FORMS & BUTTONS ========= */
+    /* Background for input fields */
+    .bg-surface-input {
+        background-color: var(--surface-input);
+    }
+    .btn-primary {
+        background-color: var(--accent-secondary);
+        color: var(--accent-text);
+    }
+    .btn-secondary {
+        background-color: var(--surface-muted);
+        color: var(--text-primary);
+    }
+
+    /* ================================= */
+    /* ALTERNATING TABLE ROW STUFF */
+    .alternating-table-rows:nth-child(even) {
+        background: var(--surface-subtle);
+    }
+    .alternating-table-rows:nth-child(odd) {
+        background: var(--surface-secondary);
+    }
+    .alternating-table-rows:hover {
+        background: var(--surface-hover);
+        color: var(--text-inverse);
+    }
+    /* BORDER-GRAY-300 STUFF */
+    /* border-default in macros refers to: ??? */
+    .border-default {
+        border-color: var(--border-default);
+    }
+    /* BORDER-GRAY-400 STUFF */
+    .border-strong {
+        border-color: var(--border-strong);
+    }
+    /* Visual stylings for cards */
+
 }
 
 /* ==== CSS CUSTOM PROPERTIES (VARIABLES) ==== */
 :root {
     --clr-success: #16a34a;
     --clr-error: #dc2626;
+
+    /* LIGHT THEME DEFINITIONS */
+    color-scheme: light;
+    --light-bg-clr: white;
+    --light-text-clr: blue;
+    --light-divider-clr: black;
+    
+    /* SEMANTIC COLOR ROLES - LIGHT THEME */
+    /* "theme tokens"? */
+    --light-accent-primary: oklch(27.8% 0.033 256.848);       /* bg-gray-800 what was previously our navbar & table headers, etc */
+    --light-accent-secondary: oklch(44.6% 0.03 256.802);    /* bg-gray-600 - used for submit buttons */
+    --light-surface-primary: #e5e7eb;      /* bg-gray-200 main bg */
+    --light-surface-secondary: white;      /* DONE bg-white cards, inputs */
+    --light-surface-subtle: #f3f4f6;       /* DONE bg-gray-100 alternating rows */
+    --light-surface-muted: #e5e7eb;        /* DONE bg-gray-200 buttons */
+
+    --light-surface-input: white;    /* background for input fields */
+
+    --light-text-primary: #1f2937;                    /* main text */
+    --light-text-secondary: #9ca3af;       /* text-gray-400 placeholders */
+    --light-border-default: #d1d5db;       /* border-gray-300 most borders */
+    --light-border-strong: #9ca3af;        /* border-gray-300 input borders */
+    /* --light-accent-secondary: #60a5fa;       bg-blue-400 buttons on hover */
+    --light-surface-hover: #9ca3af;        /* bg-gray-400 hover backgrounds */
+
+    
+    --light-accent-text: oklch(87.2% 0.01 258.338); /* text-gray-300 */
+
+
+    /* DARK THEME DEFINITIONS */
+    --dark-bg-clr: orange;
+    --dark-text-clr: darkred;
+    --dark-divider-clr: white;
+
+    /* SEMANTIC COLOR ROLES - DARK THEME */
+    --dark-accent-primary: white;   /* need to adjust or just make match bg-gray-800 */
+    --dark-accent-secondary: oklch(44.6% 0.03 256.802);    /* bg-gray-600 - used for submit buttons */
+    --dark-surface-primary: var(--dark-bg-clr);
+    --dark-surface-secondary: #374151;           /* dark card bg */
+    --dark-surface-subtle: #4b5563;             /* dark alternating */
+    --dark-surface-muted: #6b7280;              /* dark buttons */
+
+    --dark-surface-input: gray; /* background for input fields */
+
+    --dark-text-primary: #f9fafb;               /* light text on dark */
+    --dark-text-secondary: #d1d5db;             /* lighter secondary */
+    --dark-border-default: #6b7280;             /* darker borders */
+    --dark-border-strong: #9ca3af;              /* same */
+    --dark-surface-hover: #6b7280;              /* dark hover */
+
+    --dark-accent-text: white;
+
+
+
+    /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
+    --bg-clr: var(--light-bg-clr);
+    --text-clr: var(--light-text-clr);
+    --divider-clr: var(--light-divider-clr);
+
+    --accent-primary: var(--light-accent-primary);
+    --surface-primary: var(--light-surface-primary);
+    --surface-secondary: var(--light-surface-secondary);
+    --surface-subtle: var(--light-surface-subtle);
+    --surface-muted: var(--light-surface-muted);
+
+    --surface-input: var(--light-surface-input);
+
+    --text-primary: var(--light-text-primary);
+    --text-secondary: var(--light-text-secondary);
+    --light-text-inverse: white; /* SAME AS DARK */
+    --border-default: var(--light-border-default);
+    --border-strong: var(--light-border-strong);
+    /* --accent-secondary: var(--light-accent-secondary); */
+    --surface-hover: var(--light-surface-hover);
+
+    --accent-text: var(--light-accent-text);  /* text-gray-300 */
+    --accent-secondary: var(--light-accent-secondary);    /* bg-gray-600*/
+
+    
+    @media (prefers-color-scheme: dark) {
+        /* ACTIVE THEME MAPPINGS - DARK */
+        /* --theme: moon; */
+        color-scheme: dark;
+        --bg-clr: var(--dark-bg-clr);
+        --text-clr: var(--dark-text-clr);
+        --divider-clr: var(--dark-divider-clr);
+
+        --accent-primary: var(--dark-accent-primary);
+        --surface-primary: var(--dark-surface-primary);
+        --surface-secondary: var(--dark-surface-secondary);
+        --surface-subtle: var(--dark-surface-subtle);
+        --surface-muted: var(--dark-surface-muted);
+
+        --surface-input: var(--dark-surface-input);
+
+        --text-primary: var(--dark-text-primary);
+        --text-secondary: var(--dark-text-secondary);
+        --dark-text-inverse: var(--text-inverse);   /* SAME AS LIGHT */
+        --border-default: var(--dark-border-default);
+        --border-strong: var(--dark-border-strong);
+        /* --accent-secondary: var(--dark-accent-secondary); */
+        --surface-hover: var(--dark-surface-hover);
+
+        --accent-text: var(--dark-accent-text);
+        --accent-secondary: var(--dark-accent-secondary);    /* bg-gray-600*/
+    }
 }
 
+/* User Override: Lets the user manually override the system preference with toggle buttons */
+:root:has([value="sun"]:checked),
+:root[data-theme="light"] {
+    /* --theme: sun; */
+    color-scheme: light;
+    --bg-color: var(--light-bg-clr);
+    --text-color: var(--light-text-clr);
+    --divider-clr: var(--light-divider-clr);
+
+    --accent-primary: var(--light-accent-primary);
+    --surface-primary: var(--light-surface-primary);
+    --surface-secondary: var(--light-surface-secondary);
+    --surface-subtle: var(--light-surface-subtle);
+    --surface-muted: var(--light-surface-muted);
+
+    --surface-input: var(--light-surface-input);
+
+    --text-primary: var(--light-text-primary);
+    --text-secondary: var(--light-text-secondary);
+    --text-inverse: var(--light-text-inverse);
+    --border-default: var(--light-border-default);
+    --border-strong: var(--light-border-strong);
+    /* --accent-secondary: var(--light-accent-secondary); */
+    --surface-hover: var(--light-surface-hover);
+
+    --accent-text: var(--light-accent-text);  /* text-gray-300 */
+    --accent-secondary: var(--light-accent-secondary);    /* bg-gray-600*/
+
+
+}
+:root:has([value="moon"]:checked),
+:root[data-theme="dark"] {
+    /* --theme: moon; */
+    color-scheme: dark;
+    --bg-color: var(--dark-bg-clr);
+    --text-color: var(--dark-text-clr);
+    --divider-clr: var(--dark-divider-clr);
+    --accent-primary: var(--dark-accent-primary);
+    --surface-primary: var(--dark-surface-primary);
+    --surface-secondary: var(--dark-surface-secondary);
+    --surface-subtle: var(--dark-surface-subtle);
+    --surface-muted: var(--dark-surface-muted);
+
+    --surface-input: var(--dark-surface-input);
+
+    --text-primary: var(--dark-text-primary);
+    --text-secondary: var(--dark-text-secondary);
+    --text-inverse: var(--text-inverse);   /* TEXT INVERSE STAYS WHITE */
+    --border-default: var(--dark-border-default);
+    --border-strong: var(--dark-border-strong);
+    /* --accent-secondary: var(--dark-accent-secondary); */
+    --surface-hover: var(--dark-surface-hover);
+
+    --accent-text: var(--dark-accent-text);
+    --accent-secondary: var(--dark-accent-secondary);    /* bg-gray-600*/
+
+}
+#theme {
+    cursor: pointer;
+}
+/* Hide text for theme toggle */
+.visually-hidden {
+    clip-path: inset(50%); /* Clips (hides) 50% from all sides of element - creates 1x1 pixel visible area in center */
+    height: 1px;
+    width: 1px; /* makes element tiny, small enough to be invisible but not zero (zero dimensions can be ignored by screen readers */
+    overflow: hidden; /* hides any content that would spill outside 1x1 px box*/
+    position: absolute; /* takes element out of normal document flow - prevents layout spillover */
+    white-space: nowrap; /* prevents text from wrapping to multiple lines */
+}
 /* ==== GLOBAL STYLES ==== */
 /* Force everything to respect the screen width */
 * {
@@ -35,7 +267,6 @@ body {
 }
 a {
     text-decoration: none;
-    /* color: inherit; */
 }
 
 /* ==== LAYOUT COMPONENTS ==== */
@@ -127,7 +358,7 @@ a {
 /* Styling our visible divider div in between greeting & weather */
 .divider {
     width: 2px;
-    background-color: #000;
+    background-color: var(--divider-clr);
     height: 100%;
     opacity: 50%;
 }

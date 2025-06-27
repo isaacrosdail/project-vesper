@@ -1,14 +1,13 @@
 
-from flask import Blueprint, render_template, request, jsonify
-from app.core.database import db_session, database_connection
-from app.modules.habits.models import DailyMetric, DailyCheckin
+from app.core.database import database_connection
+from app.modules.habits.models import DailyMetric
+from app.utils.visualization.charts import (create_metric_chart_html,
+                                            get_metric_dataframe)
+from flask import Blueprint, jsonify, render_template, request
 
-from app.utils.visualization.charts import get_metric_dataframe, create_metric_chart_html
-
-# New Blueprint
 metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_prefix='/metrics')
 
-# Dashboard
+
 @metrics_bp.route('/dashboard', methods=["GET"])
 def dashboard():
 
