@@ -1,13 +1,15 @@
-from app.core.database import db_session
+
+from app.core.database import db_session, database_connection
 
 
 def test_groceries_dashboard(client):
-    response = client.get("/groceries/")
+    response = client.get("/groceries/dashboard")
     assert response.status_code == 200
     # assert b"Groceries" in response.data ADD THIS CHECK WHEN WE ADD LANGUAGE TOGGLE TO EN DE
 
 def test_add_product_page_loads(client):
-    response = client.get("/groceries/products/add")
+    response = client.get("/groceries/products")
+
     assert response.status_code == 200
     assert "Add new product" in response.get_data(as_text=True)
 
@@ -21,11 +23,12 @@ def test_add_product_submission_creates_product(client):
         "calories_per_100g": 100
     }
 
-    response = client.post("/groceries/products/add", data=data)
+    response = client.post("/groceries/products", data=data)
     assert response.status_code == 302 # Redirect to dashboard
 
     # Confirm product is in DB
     from app.modules.groceries.models import Product
-    product = db_session.query(Product).filter_by(barcode="1234567890").first()
-    assert product is not None
-    assert product.product_name == "Test Product"
+    with database_connection() as session:
+        product = db_session.query(Product).filter_by(barcode="1234567890").first()
+        assert product is not None
+        assert product.product_name == "Test Product"
