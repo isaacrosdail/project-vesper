@@ -1,4 +1,4 @@
-<nav class="bg-gray-800 p-4">
+<nav class="accent-primary p-4">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
 
         <!-- LEFT: Branding & Links -->
@@ -58,9 +58,21 @@
             
         </div>
 
-        <!-- RIGHT: Reset DB button -->
+        <!-- RIGHT: Reset DB button, then System/Light/Dark toggle -->
         <form action="{{ url_for('main.reset_db') }}" method="POST">
             <button type="submit" class="{{ styles.btn_classes() }}">Reset DB</button>
+        </form>
+        <form class="color-picker">
+            <fieldset>
+                <!-- Legend here is good for accessibility (screen readers) -->
+                <legend class="visually-hidden">Pick a theme</legend>
+                
+                <select name="theme" id="theme">
+                    <option value="laptop">System</option>
+                    <option value="sun">Light</option>
+                    <option value="moon">Dark</option>
+                </select>
+            </fieldset>
         </form>
 
     </div>
