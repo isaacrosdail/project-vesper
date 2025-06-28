@@ -26,7 +26,7 @@
             </div>
             <div class="form-group">
                 <label for="category">Category</label>
-                <select name="category" class="{{ styles.input_classes() }}" required>
+                <select name="category" id="category" class="{{ styles.input_classes() }}" required>
                     <option value="">-- Category --</option>
                     <option value="drink">Drink</option>
                     <option value="energy_drink">Energy Drink</option>
@@ -47,7 +47,7 @@
             </div>
             <div class="form-group">
                 <label for="unit_type">Units:</label>
-                <select name="unit_type" class="{{ styles.input_classes() }}" required>
+                <select name="unit_type" id="unit_type" class="{{ styles.input_classes() }}" required>
                     <option value="">-- Units --</option>
                     <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
@@ -67,4 +67,8 @@
             <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
         </form>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename = 'js/forms.js') }}"></script>
 {% endblock %}

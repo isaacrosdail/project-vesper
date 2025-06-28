@@ -17,6 +17,8 @@ from app.modules.habits.routes import habits_bp
 from app.modules.tasks.routes import tasks_bp
 from app.core.api import api_bp
 from app.modules.metrics.routes import metrics_bp
+from app.modules.time_tracking.routes import time_tracking_bp
+
 from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
 
 
@@ -69,5 +71,6 @@ def create_app(config_name=None):
     app.register_blueprint(habits_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(metrics_bp)
+    app.register_blueprint(time_tracking_bp)
 
     return app

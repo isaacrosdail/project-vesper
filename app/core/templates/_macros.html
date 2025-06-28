@@ -8,7 +8,7 @@
 
 {% macro nav_link(text, endpoint, current_endpoint) %}
 <a href="{{ url_for(endpoint) }}"
-class="accent-text hover:bg-gray-700 p-2 rounded no-underline {% if current_endpoint == endpoint %}bg-gray-700{% endif %}">
+class="accent-text nav-link p-2 rounded no-underline {% if current_endpoint == endpoint %}active{% endif %}">
     {{ text }}
 </a>
 {% endmacro %}
@@ -23,7 +23,7 @@ class="accent-text hover:bg-gray-700 p-2 rounded no-underline {% if current_endp
 {% macro tr_classes() %}task-row group alternating-table-rows transition-colors duration-25{% endmacro %}
 
 {# === FORM STYLES === #}
-{% macro input_classes() %}border border-strong rounded px-3 py-2 w-full bg-surface-input text-gray-800 placeholder-gray-400 shadow-sm{% endmacro %}
+{% macro input_classes() %}border border-strong rounded px-3 py-2 w-full bg-surface-input text-input placeholder-gray-400 shadow-sm{% endmacro %}
 
 {% macro select_form_classes() %}accent-text select-styling{% endmacro %}
 
@@ -31,7 +31,7 @@ class="accent-text hover:bg-gray-700 p-2 rounded no-underline {% if current_endp
 
 {% macro submit_classes() %}btn-primary border border-strong rounded px-4 py-2 hover:bg-blue-400 cursor-pointer w-full{% endmacro %}
 
-{% macro muted_submit_classes() %}btn-secondary border border-strong rounded px-4 py-2 text-gray-800 hover:bg-blue-400 cursor-pointer w-full{% endmacro %}
+{% macro muted_submit_classes() %}btn-secondary border border-strong rounded px-4 py-2 text-input hover:bg-blue-400 cursor-pointer w-full{% endmacro %}
 
 
 {% macro my_select() %}
@@ -49,7 +49,7 @@ class="accent-text hover:bg-gray-700 p-2 rounded no-underline {% if current_endp
 
 {# === BUTTON STYLES === #}
 
-{% macro btn_classes() %}border border-default inline-block px-4 py-2 mx-2 mt-1 text-sm rounded-md surface-muted text-gray-800 hover:bg-gray-300 hover:shadow transition cursor-pointer{% endmacro %}
+{% macro btn_classes() %}border border-default inline-block px-4 py-2 mx-2 mt-1 text-sm rounded-md surface-muted text-input hover:bg-gray-300 hover:shadow transition cursor-pointer{% endmacro %}
 
 {% macro delete_btn() %}
 <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
@@ -58,6 +58,25 @@ class="accent-text hover:bg-gray-700 p-2 rounded no-underline {% if current_endp
     </svg>  
 </button>
 {% endmacro %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- REFERENCE: Previous style variable implementation (commented out for comparison) -->
 {#
