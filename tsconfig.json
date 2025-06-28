@@ -4,5 +4,6 @@
         "rootDir": "./app/static/js/src",
         "noUnusedLocals": false,
         "noUnusedParameters": false
-    }
+    },
+    "exclude": ["**/*"]
 }

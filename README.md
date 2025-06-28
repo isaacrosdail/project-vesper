@@ -41,5 +41,17 @@ clean:
   rm -rf node_modules/
   rm -rf __pycache__/
 
+## Note to self:
+Module structure:
+
+module_name/
+├── __init__.py
+├── models.py
+├── repository.py  
+├── routes.py
+├── services.py    # Business logic (like habit_logic.py)
+├── utils.py       # Module-specific utilities only
+└── templates/
+
 ## Attributions
 Weather data provided by [OpenWeatherMap](https://openweathermap.org/), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)

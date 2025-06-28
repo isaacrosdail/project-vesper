@@ -42,7 +42,7 @@
             <!-- Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing -->
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="category">Category</label>
-                <select name="category" class="{{ styles.input_classes() }}"
+                <select name="category" id="category" class="{{ styles.input_classes() }}"
                     {% if not show_product_fields%}disabled{% endif %}>
                     <option value="">-- Category --</option>
                     <option value="drink">Drink</option>
@@ -65,7 +65,7 @@
             </div>
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="unit_type">Units:</label>
-                <select name="unit_type" class="{{ styles.input_classes() }}"
+                <select name="unit_type" id="unit_type" class="{{ styles.input_classes() }}"
                     {% if not show_product_fields%}disabled{% endif %}>
                     <option value="">-- Units --</option>
                     <option value="g">g (grams)</option>
@@ -89,4 +89,8 @@
             </div>
         </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename = 'js/forms.js') }}"></script>
 {% endblock %}

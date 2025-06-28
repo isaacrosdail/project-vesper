@@ -5,7 +5,7 @@ function getCookie() {
     // Parse document.cookie, which is a plain string
     const cookie = document.cookie;
 
-    console.log(`Cookie read as: ${cookie}`);
+    // console.log(`Cookie read as: ${cookie}`);
     if (cookie.includes('theme=light')) {
         // set our form to light
         document.getElementById('theme').value = 'sun';
@@ -15,14 +15,14 @@ function getCookie() {
         document.getElementById('theme').value = 'laptop';
     }
 
-    console.log(`Cookie parsed as: ${cookie}`);
+    // console.log(`Cookie parsed as: ${cookie}`);
 }
 
 // Also need to make this more robust
 function setCookie() {
     const themeSetting = document.getElementById('theme').value;
 
-    console.log(`Theme detected from form as: ${themeSetting}`);
+    // console.log(`Theme detected from form as: ${themeSetting}`);
     if (themeSetting === 'sun') {
         // set cookie to 'theme=light'
         // so key-value pair, then path=/ makes it accessible to all routes/pages
@@ -36,7 +36,7 @@ function setCookie() {
         document.cookie = "theme=system; path=/; max-age=31536000"
     }
 
-    console.log(`Cookie set/saved as: ${document.cookie}`);
+    // console.log(`Cookie set/saved as: ${document.cookie}`);
 }
 
 function applyThemeFromCookie() {
