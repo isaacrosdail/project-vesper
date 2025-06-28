@@ -31,18 +31,20 @@
         <form action="{{ url_for('main.reset_db') }}" method="POST">
             <button type="submit" class="{{ styles.btn_classes() }}">Reset DB</button>
         </form>
+
+        {{ styles.my_select() }}
+
         <form class="color-picker">
             <fieldset>
                 <!-- Legend here is good for accessibility (screen readers) -->
                 <legend class="visually-hidden">Pick a theme</legend>
                 
-                <select name="theme" id="theme">
+                <select name="theme" id="theme" class="{{ styles.select_form_classes() }}">
                     <option value="laptop">System</option>
                     <option value="sun">Light</option>
                     <option value="moon">Dark</option>
                 </select>
             </fieldset>
         </form>
-
     </div>
 </nav>
