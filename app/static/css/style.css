@@ -35,6 +35,21 @@
     .accent-primary {
         background-color: var(--accent-primary);
     }
+    .accent-text {
+        color: var(--accent-text);
+    }
+
+    /* REMOVE / ADJUST MEEEEEEEE =============== */
+    /* Styling for select input dropdowns */
+    .select-styling {
+        background-color: purple;
+    }
+    .select-styling option:hover {
+        background-color: red;
+    }
+    /* REMOVE / ADJUST MEEEEEEEE =============== */
+
+    
     /* ======= FORMS & BUTTONS ========= */
     /* Background for input fields */
     .bg-surface-input {
