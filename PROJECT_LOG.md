@@ -753,3 +753,9 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 	- Made basic test to check
 	- Added column for this in Transaction table
 6. Metrics tweak: Added aspect-ratio CSS to make graphs match height
+
+
+# TODOS:
+1. Add Docker checkhealth
+2. Add health/status API endpoints (have Docker checkhealth ping these too)
+3. Add external monitoring (also ping our health/status endpoint(s))
