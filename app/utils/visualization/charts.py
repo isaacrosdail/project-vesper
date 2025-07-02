@@ -3,8 +3,10 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 import plotly.express as px
 from app.modules.habits.models import DailyMetric
+from app.modules.time_tracking.models import TimeEntry
+from typing import Type
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, DeclarativeMeta
 
 
 # Function to return results from query for metric_type & timeframe for graphing our data with Plotly
@@ -43,6 +45,31 @@ def get_metric_dataframe(metric_type: str, days_ago: int, session: Session) -> p
     # Return DataFrame to caller
     return df
 
+# Trying to abstract the above function to work for DailyMetric, TimeEntry, etc
+# First try to adapt for TimeEntry
+def get_dataframe(model_name: Type[DeclarativeMeta], category: str, days_ago: int, session: Session) -> pd.DataFrame:
+    
+    today_utc = datetime.now(timezone.utc)
+    start_date = (today_utc - timedelta(days=days_ago)).date()
+
+    # Query for given category
+    # Need all model_names for metric_type where date is between today & days_ago ordered by date
+    entries = session.query(model_name).filter(
+        model_name.category == category,
+        func.date(model_name.created_at) >= start_date, # compares date to date
+        model_name.created_at <= today_utc              # compares datetime to datetime (fine to mix?)
+    ).order_by(model_name.created_at).all()
+
+    # Extract dates & metric_type entries into lists for Plotly
+    # Note: using .date() to strip datetime objects to dates => Plenty for graphs for now
+    dates = [entry.created_at.date() for entry in entries] # [date1, date2, date3, ...]
+    values = [entry.value for entry in entries]            # [value1, value2, null, ...]
+
+    # Get these into our data frame
+    df = pd.DataFrame({'Date': dates, category.title(): values})
+
+    # Return DataFrame to caller
+    return df
 
 def create_metric_chart_html(df: pd.DataFrame, 
                              metric_type: str, 
