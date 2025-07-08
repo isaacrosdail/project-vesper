@@ -6,7 +6,7 @@ from app.modules.time_tracking.models import TimeEntry
 from app.core.database import database_connection
 
 from app.utils.visualization.charts import (create_metric_chart_html,
-                                            get_metric_dataframe)
+                                            get_metric_dataframe, get_time_entry_dataframe)
 
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
 
@@ -15,11 +15,11 @@ def dashboard():
     
     DEFAULT_DAYS = 14
     with database_connection() as session:
-        df = get_metric_dataframe(TimeEntry, "time entries", 7, session)
-        time_entries_graph = create_metric_chart_html(df, "time entries")
+        df = get_time_entry_dataframe(TimeEntry, "Programming", DEFAULT_DAYS, session)
+        time_entries_graph = create_metric_chart_html(df, "time_entries")
 
-    return render_template("time_tracking/dashboard.html",
-                           time_entries_graph=time_entries_graph)
+        return render_template("time_tracking/dashboard.html",
+                                time_entries_graph=time_entries_graph)
 
 @time_tracking_bp.route('/', methods=["GET", "POST"])
 def time_entries():
