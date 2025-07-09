@@ -26,9 +26,14 @@ def dashboard():
         df_2 = get_metric_dataframe("steps", DEFAULT_DAYS, session)
         steps_graph = create_metric_chart_html(df_2, "steps")
 
+        # Get list of all metrics for table, sort by date for now
+        metrics = metrics_repo.get_all_metrics(session)
+        bubble_sort(metrics, 'created_at', reverse=True)
+
         return render_template("metrics/dashboard.html", 
                             weight_graph=weight_graph,
-                            steps_graph=steps_graph)
+                            steps_graph=steps_graph,
+                            metrics=metrics)
 
 
 @metrics_bp.route("/", methods=["POST"])
