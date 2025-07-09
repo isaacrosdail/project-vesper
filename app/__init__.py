@@ -11,7 +11,7 @@ from alembic import command
 from app.core.database import db_session, init_db
 # Import Blueprints
 from app.core.routes import main_bp
-from app.modules.crud_routes import crud_bp
+from app.core.crud_routes import crud_bp
 from app.modules.groceries.routes import groceries_bp
 from app.modules.habits.routes import habits_bp
 from app.modules.tasks.routes import tasks_bp
