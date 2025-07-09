@@ -1,9 +1,11 @@
 
 from app.core.database import database_connection
-from app.modules.habits.models import DailyMetric
+from app.modules.metrics.models import DailyMetric
+from app.modules.metrics import repository as metrics_repo
 from app.utils.visualization.charts import (create_metric_chart_html,
                                             get_metric_dataframe)
 from flask import Blueprint, jsonify, render_template, request
+from app.utils.sorting import bubble_sort
 
 metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_prefix='/metrics')
 

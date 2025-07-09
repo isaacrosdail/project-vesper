@@ -9,8 +9,9 @@ from app.core.database import database_connection, get_engine
 from app.modules.habits import repository as habits_repo
 from app.modules.habits.habit_logic import (calculate_habit_streak,
                                             check_if_completed_today)
-from app.modules.habits.models import DailyIntention
+from app.modules.metrics.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
+from app.modules.metrics import repository as metrics_repo
 from app.utils.database.seed.seed_db import seed_db
 from flask import (Blueprint, current_app, flash, jsonify, redirect,
                    render_template, request, url_for)
@@ -47,7 +48,7 @@ def home():
             # Fetch tasks, habits, today_intention
             tasks = tasks_repo.get_all_tasks(session)
             habits = habits_repo.get_all_habits(session)
-            today_intention = habits_repo.get_today_intention(session)
+            today_intention = metrics_repo.get_today_intention(session)
             
             habit_info = {}
             for habit in habits:

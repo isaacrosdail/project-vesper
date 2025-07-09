@@ -8,7 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from app.core.database import db_session, database_connection
 from app.core.models import User
 from app.modules.groceries.models import Product, Transaction
-from app.modules.habits.models import Habit, HabitCompletion, DailyIntention, DailyMetric
+from app.modules.habits.models import Habit, HabitCompletion
+from app.modules.metrics.models import DailyIntention, DailyMetric
 from app.modules.tasks.models import Task
 
 

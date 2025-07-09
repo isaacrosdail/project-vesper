@@ -2,11 +2,11 @@ from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 import plotly.express as px
-from app.modules.habits.models import DailyMetric
+from app.modules.metrics.models import DailyMetric
 from app.modules.time_tracking.models import TimeEntry
 from typing import Type, Any
 from sqlalchemy import func
-from sqlalchemy.orm import Session, DeclarativeMeta
+from sqlalchemy.orm import Session
 from app.core.db_base import Base
 
 
