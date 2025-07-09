@@ -25,6 +25,7 @@
                 {{ styles.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
                 {{ styles.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
                 {{ styles.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
+                {{ styles.nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
             </div>
         </div>
 
@@ -33,6 +34,7 @@
             <button type="submit" class="{{ styles.btn_classes() }}">Reset DB</button>
         </form>
 
+        <!-- TODO: Finish this to implement custom dropdown(s) elsewhere => chiefly for theme then lang toggles -->
         {{ styles.my_select() }}
 
         <form class="color-picker">
@@ -40,6 +42,7 @@
                 <!-- Legend here is good for accessibility (screen readers) -->
                 <legend class="visually-hidden">Pick a theme</legend>
                 
+                <!-- Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) -->
                 <select name="theme" id="theme" class="{{ styles.select_form_classes() }}">
                     <option value="laptop">System</option>
                     <option value="sun">Light</option>

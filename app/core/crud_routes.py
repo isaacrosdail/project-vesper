@@ -7,6 +7,7 @@ from app.core.database import database_connection
 from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit
 from app.modules.tasks.models import Task
+from app.modules.metrics.models import DailyMetric
 from flask import Blueprint, jsonify, request
 
 # Blueprint registration
@@ -23,6 +24,7 @@ modelMap = {
     ("groceries", "transaction"): Transaction,
     ("tasks", "none"): Task,
     ("habits", "none"): Habit,
+    ("metrics", "metric"): DailyMetric,
 }
 
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH", "DELETE"])
