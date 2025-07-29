@@ -10,8 +10,10 @@
     }
 }
 
-/* Test: Forcing Tailwind to keep our theme styling to toggle light/dark WHILE keeping our macros setup */
-/* Components stuff used to bind colors/styles stuff to use in our macros for various components */
+/* ======= COMPONENT UTILITIES =======
+ * Custom CSS classes to map theme variables to Tailwind-style utilities 
+ * Bridges theme system with template macros, to avoid hardcoded colors in HTML/templates
+ */
 @layer components {
 
     /* ======= BACKGROUND UTILITIES ======= */
