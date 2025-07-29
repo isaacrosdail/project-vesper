@@ -64,7 +64,7 @@
     .text-selection {
         color: var(--text-selection);
     }
-    .text-desctructive {
+    .text-destructive {
         color: var(--text-destructive);
     }
 
@@ -89,8 +89,9 @@
     }
 
     /* ======= PLACEHOLDER UTILITY ======= */
-    .placeholder-color::placeholder {
-        color: var(--placeholder);
+    /* .placeholder-text::placeholder -> pseudo-element targeting placeholder text inside input fields */
+    .placeholder-text {
+        color: var(--placeholder-text);
     }
     
     /* ======= BUTTONS ======= */
@@ -146,8 +147,9 @@
         color: var(--text-input);
         border-color: var(--border-strong);
     }
+    /* TODO: Currently same as placeholder-text variable. Condense into one or ditch this one since we have bg colors already anyway */
     .form-input::placeholder {
-        color: var(--placeholder);
+        color: var(--placeholder-text);
     }
 
     /* ======= FIX SELECT STYLING ======= */
@@ -198,7 +200,7 @@
     --light-divider-color: black;
 
     /* === INTERACTIVE STATES === */
-    --light-placeholder: #9ca3af;          /* placeholder-gray-400 */
+    --light-placeholder-text: red;     /* placeholder-gray-400 */
     --light-nav-hover: #374151;            /* bg-gray-700 */
     --light-button-hover: #60a5fa;         /* bg-blue-400 */
     /* =============== END LIGHT THEME DEFINITIONS =============== */
@@ -235,7 +237,7 @@
     --dark-divider-color: white;
 
     /* === INTERACTIVE STATES === */
-    --dark-placeholder: #9ca3af;          /* placeholder-gray-400 */
+    --dark-placeholder-text: #9ca3af;          /* placeholder-gray-400 */
     --dark-nav-hover: #374151;            /* bg-gray-700 */
     --dark-button-hover: #60a5fa;         /* bg-blue-400 */
     /* =============== END DARK THEME DEFINITIONS =============== */
@@ -273,7 +275,7 @@
     --divider-color: var(--light-divider-color);
 
     /* === INTERACTIVE STATES === */
-    --placeholder: var(--light-placeholder);
+    --placeholder-text: var(--light-placeholder-text);
     --nav-hover: var(--light-nav-hover);
     --button-hover: var(--light-button-hover);
     /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
@@ -315,7 +317,7 @@
         --divider-color: var(--dark-divider-color);
 
         /* === INTERACTIVE STATES === */
-        --placeholder: var(--dark-placeholder);
+        --placeholder-text: var(--dark-placeholder-text);
         --nav-hover: var(--dark-nav-hover);
         --button-hover: var(--dark-button-hover);
         /* END ACTIVE THEME MAPPINGS - DARK */
@@ -360,7 +362,7 @@
     --divider-color: var(--light-divider-color);
 
     /* === INTERACTIVE STATES === */
-    --placeholder: var(--light-placeholder);
+    --placeholder-text: var(--light-placeholder-text);
     --nav-hover: var(--light-nav-hover);
     --button-hover: var(--light-button-hover);
     /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
@@ -403,7 +405,7 @@
     --divider-color: var(--dark-divider-color);
 
     /* === INTERACTIVE STATES === */
-    --placeholder: var(--dark-placeholder);
+    --placeholder-text: var(--dark-placeholder-text);
     --nav-hover: var(--dark-nav-hover);
     --button-hover: var(--dark-button-hover);
     /* END ACTIVE THEME MAPPINGS - DARK */
