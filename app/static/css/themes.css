@@ -1,0 +1,250 @@
+/* ==== CSS CUSTOM PROPERTIES (VARIABLES) ==== */
+:root {
+    --color-success: #16a34a;
+    --color-error: #dc2626;    
+    
+    /* "theme tokens"? */
+
+    /* =============== LIGHT THEME DEFINITIONS =============== */
+    color-scheme: light;
+    /* === BACKGROUND COLORS === */
+    --light-bg-color: white;
+    --light-surface-primary: #e5e7eb;      /* bg-gray-200 main bg */
+    --light-surface-secondary: white;      /* bg-white cards, inputs */
+    --light-surface-subtle: #f3f4f6;       /* bg-gray-100 alternating rows */
+    --light-surface-muted: #e5e7eb;        /* bg-gray-200 buttons */
+    --light-surface-input: white;          /* background for input fields */
+    --light-surface-hover: #9ca3af;        /* bg-gray-400 hover backgrounds */
+    --light-bg-selection: grey;
+    --light-bg-destructive: red;
+
+    /* === ACCENT COLORS === */
+    --light-accent-primary: oklch(27.8% 0.033 256.848);    /* bg-gray-800 navbar & table headers */
+    --light-accent-secondary: oklch(44.6% 0.03 256.802);   /* bg-gray-600 submit buttons */
+    --light-accent-text: oklch(87.2% 0.01 258.338);        /* text-gray-300 */
+
+    /* === TEXT COLORS === */
+    --light-text-primary: #1f2937;         /* main text */
+    --light-text-secondary: #9ca3af;       /* text-gray-400 placeholders */
+    --light-text-input: #1f2937;           /* text-gray-800 */
+    --light-text-inverse: white;           /* white text on dark backgrounds */
+    --light-text-color: blue;              /* not sure I want/need*/
+    --light-text-selection: blue;
+    --light-text-destructive: purple;
+
+    /* === BORDER COLORS === */
+    --light-border-default: #d1d5db;       /* border-gray-300 most borders */
+    --light-border-strong: #9ca3af;        /* border-gray-400 input borders */
+    --light-divider-color: black;
+
+    /* === INTERACTIVE STATES === */
+    --light-placeholder-text: red;     /* placeholder-gray-400 */
+    --light-nav-hover: #374151;            /* bg-gray-700 */
+    --light-button-hover: #60a5fa;         /* bg-blue-400 */
+    /* =============== END LIGHT THEME DEFINITIONS =============== */
+
+    /* =============== DARK THEME DEFINITIONS =============== */
+    /* === BACKGROUND COLORS === */
+    --dark-bg-color: orange;
+    --dark-surface-primary: lime;
+    --dark-surface-secondary: #374151;           /* dark card bg */
+    --dark-surface-subtle: #4b5563;             /* dark alternating */
+    --dark-surface-muted: #6b7280;              /* dark buttons */
+    --dark-surface-input: gray; /* background for input fields */
+    --dark-surface-hover: #6b7280;              /* dark hover */
+    --dark-bg-selection: grey;  /* color for selected text background */
+    --dark-bg-destructive: red;
+
+    /* === ACCENT COLORS === */
+    --dark-accent-primary: white;   /* need to adjust or just make match bg-gray-800 */
+    --dark-accent-secondary: oklch(44.6% 0.03 256.802);    /* bg-gray-600 - used for submit buttons */
+    --dark-accent-text: white;
+
+    /* === TEXT COLORS === */
+    --dark-text-primary: #f9fafb;               /* light text on dark */
+    --dark-text-secondary: #d1d5db;             /* lighter secondary */
+    --dark-text-input: #1f2937; /* text-gray-800*/
+    --dark-text-inverse: white;
+    --dark-text-color: darkred;
+    --dark-text-selection: blue;
+    --dark-text-destructive: purple;
+
+    /* === BORDER COLORS === */
+    --dark-border-default: #6b7280;             /* darker borders */
+    --dark-border-strong: #9ca3af;              /* same */
+    --dark-divider-color: white;
+
+    /* === INTERACTIVE STATES === */
+    --dark-placeholder-text: #9ca3af;          /* placeholder-gray-400 */
+    --dark-nav-hover: #374151;            /* bg-gray-700 */
+    --dark-button-hover: #60a5fa;         /* bg-blue-400 */
+    /* =============== END DARK THEME DEFINITIONS =============== */
+
+
+    /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
+    /* === BACKGROUND COLORS === */
+    --bg-color: var(--light-bg-color);
+    --surface-primary: var(--light-surface-primary);
+    --surface-secondary: var(--light-surface-secondary);
+    --surface-subtle: var(--light-surface-subtle);
+    --surface-muted: var(--light-surface-muted);
+    --surface-input: var(--light-surface-input);
+    --surface-hover: var(--light-surface-hover);
+    --bg-selection: var(--light-bg-selection);
+    --bg-destructive: var(--light-bg-destructive);
+
+    /* === ACCENT COLORS === */
+    --accent-primary: var(--light-accent-primary);
+    --accent-secondary: var(--light-accent-secondary);
+    --accent-text: var(--light-accent-text);
+
+    /* === TEXT COLORS === */
+    --text-primary: var(--light-text-primary);
+    --text-secondary: var(--light-text-secondary);
+    --text-input: var(--light-text-input);
+    --text-inverse: var(--light-text-inverse);
+    --text-color: var(--light-text-color);
+    --text-selection: var(--light-text-selection);
+    --text-destructive: var(--light-text-destructive);
+
+    /* === BORDER COLORS === */
+    --border-default: var(--light-border-default);
+    --border-strong: var(--light-border-strong);
+    --divider-color: var(--light-divider-color);
+
+    /* === INTERACTIVE STATES === */
+    --placeholder-text: var(--light-placeholder-text);
+    --nav-hover: var(--light-nav-hover);
+    --button-hover: var(--light-button-hover);
+    /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
+
+    
+    @media (prefers-color-scheme: dark) {
+        /* --theme: moon; */
+        color-scheme: dark;
+
+        /* ACTIVE THEME MAPPINGS - DARK */
+        /* === BACKGROUND COLORS === */
+        --bg-color: var(--dark-bg-color);
+        --surface-primary: var(--dark-surface-primary);
+        --surface-secondary: var(--dark-surface-secondary);
+        --surface-subtle: var(--dark-surface-subtle);
+        --surface-muted: var(--dark-surface-muted);
+        --surface-input: var(--dark-surface-input);
+        --surface-hover: var(--dark-surface-hover);
+        --bg-selection: var(--dark-bg-selection);
+        --bg-destructive: var(--dark-bg-destructive);
+
+        /* === ACCENT COLORS === */
+        --accent-primary: var(--dark-accent-primary);
+        --accent-secondary: var(--dark-accent-secondary);
+        --accent-text: var(--dark-accent-text);
+
+        /* === TEXT COLORS === */
+        --text-primary: var(--dark-text-primary);
+        --text-secondary: var(--dark-text-secondary);
+        --text-input: var(--dark-text-input);
+        --text-inverse: var(--dark-text-inverse);
+        --text-color: var(--dark-text-color);
+        --text-selection: var(--dark-text-selection);
+        --text-destructive: var(--dark-text-destructive);
+
+        /* === BORDER COLORS === */
+        --border-default: var(--dark-border-default);
+        --border-strong: var(--dark-border-strong);
+        --divider-color: var(--dark-divider-color);
+
+        /* === INTERACTIVE STATES === */
+        --placeholder-text: var(--dark-placeholder-text);
+        --nav-hover: var(--dark-nav-hover);
+        --button-hover: var(--dark-button-hover);
+        /* END ACTIVE THEME MAPPINGS - DARK */
+    }
+}
+
+/* User Override: Lets the user manually override the system preference with toggle buttons */
+:root:has([value="sun"]:checked),
+:root[data-theme="light"] {
+    /* --theme: sun; */
+    color-scheme: light;
+
+    /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
+    /* === BACKGROUND COLORS === */
+    --bg-color: var(--light-bg-color);
+    --surface-primary: var(--light-surface-primary);
+    --surface-secondary: var(--light-surface-secondary);
+    --surface-subtle: var(--light-surface-subtle);
+    --surface-muted: var(--light-surface-muted);
+    --surface-input: var(--light-surface-input);
+    --surface-hover: var(--light-surface-hover);
+    --bg-selection: var(--light-bg-selection);
+    --bg-destructive: var(--light-bg-destructive);
+
+    /* === ACCENT COLORS === */
+    --accent-primary: var(--light-accent-primary);
+    --accent-secondary: var(--light-accent-secondary);
+    --accent-text: var(--light-accent-text);
+
+    /* === TEXT COLORS === */
+    --text-primary: var(--light-text-primary);
+    --text-secondary: var(--light-text-secondary);
+    --text-input: var(--light-text-input);
+    --text-inverse: var(--light-text-inverse);
+    --text-color: var(--light-text-color);
+    --text-selection: var(--light-text-selection);
+    --text-destructive: var(--light-text-destructive);
+
+    /* === BORDER COLORS === */
+    --border-default: var(--light-border-default);
+    --border-strong: var(--light-border-strong);
+    --divider-color: var(--light-divider-color);
+
+    /* === INTERACTIVE STATES === */
+    --placeholder-text: var(--light-placeholder-text);
+    --nav-hover: var(--light-nav-hover);
+    --button-hover: var(--light-button-hover);
+    /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
+}
+
+:root:has([value="moon"]:checked),
+:root[data-theme="dark"] {
+    /* --theme: moon; */
+    color-scheme: dark;
+
+    /* ACTIVE THEME MAPPINGS - DARK */
+    /* === BACKGROUND COLORS === */
+    --bg-color: var(--dark-bg-color);
+    --surface-primary: var(--dark-surface-primary);
+    --surface-secondary: var(--dark-surface-secondary);
+    --surface-subtle: var(--dark-surface-subtle);
+    --surface-muted: var(--dark-surface-muted);
+    --surface-input: var(--dark-surface-input);
+    --surface-hover: var(--dark-surface-hover);
+    --bg-selection: var(--dark-bg-selection);
+    --bg-destructive: var(--dark-bg-destructive);
+
+    /* === ACCENT COLORS === */
+    --accent-primary: var(--dark-accent-primary);
+    --accent-secondary: var(--dark-accent-secondary);
+    --accent-text: var(--dark-accent-text);
+
+    /* === TEXT COLORS === */
+    --text-primary: var(--dark-text-primary);
+    --text-secondary: var(--dark-text-secondary);
+    --text-input: var(--dark-text-input);
+    --text-inverse: var(--dark-text-inverse);
+    --text-color: var(--dark-text-color);
+    --text-selection: var(--dark-text-selection);
+    --text-destructive: var(--dark-text-destructive);
+
+    /* === BORDER COLORS === */
+    --border-default: var(--dark-border-default);
+    --border-strong: var(--dark-border-strong);
+    --divider-color: var(--dark-divider-color);
+
+    /* === INTERACTIVE STATES === */
+    --placeholder-text: var(--dark-placeholder-text);
+    --nav-hover: var(--dark-nav-hover);
+    --button-hover: var(--dark-button-hover);
+    /* END ACTIVE THEME MAPPINGS - DARK */
+}
