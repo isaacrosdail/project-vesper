@@ -90,7 +90,7 @@ async function updateIntention(element, newValue) {
     try {
         // Convert to modern async/await variant
         // 1. Replace fetch and first .then
-        const response = await fetch(`/daily-intentions/`, {
+        const response = await fetch('/daily-intentions/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ intention: newValue })
@@ -130,7 +130,9 @@ async function saveData(input) {
                 unit: input.dataset.unit
             })
         });
-        if (response.ok) {
+        const responseData = await response.json();
+
+        if (responseData.success) {
             alert('Saved!');
         }
     } else if (input.dataset.checkin) {
