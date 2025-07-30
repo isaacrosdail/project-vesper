@@ -1,7 +1,6 @@
 # Date/Time-related imports
 # Conditional import of our seed_dev_db function
 import os
-import sys
 from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
@@ -15,6 +14,7 @@ from app.modules.metrics import repository as metrics_repo
 from app.utils.database.seed.seed_db import seed_db
 from flask import (Blueprint, current_app, flash, jsonify, redirect,
                    render_template, request, url_for)
+
 
 if os.environ.get('APP_ENV') == 'dev':
     try:
@@ -35,8 +35,6 @@ def home():
 
     try:
         with database_connection() as session:
-
-            print("CHECKPOINT ALPHA", file=sys.stderr)
 
             # Calculate time references
             now = datetime.now(ZoneInfo("Europe/London"))
