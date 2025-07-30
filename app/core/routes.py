@@ -66,29 +66,35 @@ def home():
             )
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
+    
 @main_bp.route('/daily-intentions/', methods=["POST"])
 def update_daily_intention():
     try:
         # Get JSON data from request body & parse into Python dict
         data = request.get_json()
 
+        if not data:
+            return jsonify({"success": False, "message": "Error: data is None"}), 400
+        intention = data.get('intention')
+        if not intention:
+            return jsonify({"success": False, "message": "No intention provided."}), 400
+
         with database_connection() as session:
             # Check if daily intention exists for today already
-            today_intention = habits_repo.get_today_intention(session)
-
+            today_intention = metrics_repo.get_today_intention(session)
+            
             # If it does, just update the intention field using our fetch data
             if today_intention:
                 today_intention.intention = data['intention'] # extract intention key from data
+                return jsonify({"success": True, "message": "Successfully created user intention"}), 201
             # Otherwise, we'll add a new entry for DailyIntention
             else:
                 new_daily_intention = DailyIntention(
                     intention = data['intention']
                 )
                 session.add(new_daily_intention)
-
-            return jsonify({"success": True, "message": "Successfully saved intention"}), 200
-        
+                return jsonify({"success": True, "message": "Successfully saved intention"}), 200
+            
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
