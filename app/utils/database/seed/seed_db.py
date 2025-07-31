@@ -2,11 +2,10 @@
 
 import random
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
-from app.core.database import db_session, database_connection
-from app.core.models import User
+from app.core.database import database_connection
+from app.core.auth.models import User
 from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit, HabitCompletion
 from app.modules.metrics.models import DailyIntention, DailyMetric
