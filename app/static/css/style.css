@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import 'themes.css';
+@import './themes.css';
 
 /* ==== TAILWIND LAYERS ==== */
 /* Using @layer to extend the _base_ (modifying Tailwind's Preflight config so it lets me change the font) */
