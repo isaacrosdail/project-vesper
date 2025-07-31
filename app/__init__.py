@@ -4,22 +4,22 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 
+from alembic import command
 # For pivoting to using Alembic instead of create_all
 from alembic.config import Config as AlembicConfig
-from alembic import command
-
+from app.core.api import api_bp
+from app.core.auth.routes import auth_bp
+from app.core.config import config_map
+from app.core.crud_routes import crud_bp
 from app.core.database import db_session, init_db
+
 # Import Blueprints
 from app.core.routes import main_bp
-from app.core.crud_routes import crud_bp
 from app.modules.groceries.routes import groceries_bp
 from app.modules.habits.routes import habits_bp
-from app.modules.tasks.routes import tasks_bp
-from app.core.api import api_bp
 from app.modules.metrics.routes import metrics_bp
+from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
-
-from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
 
 
 def create_app(config_name=None):
@@ -72,5 +72,6 @@ def create_app(config_name=None):
     app.register_blueprint(api_bp)
     app.register_blueprint(metrics_bp)
     app.register_blueprint(time_tracking_bp)
+    app.register_blueprint(auth_bp)
 
     return app

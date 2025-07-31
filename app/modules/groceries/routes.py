@@ -82,6 +82,7 @@ def transactions():
         # Grab form data (used for both validation and repopulating form if we need to show it again)
         form_data = request.form.to_dict()
         # Bool to conditionally determine flash() message
+        # TODO: Clean this file up & determine what's needed where
         product_created = False
 
         ######## TODO: EXTRACT THIS VALIDATION/ETC STUFF INTO HELPER FUNCTIONS
