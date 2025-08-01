@@ -17,12 +17,14 @@ def user_dashboard():
     
     return render_template('user_dashboard.html')
 
+
 @auth_bp.route('/logout', methods=["GET", "POST"])
 @login_required
 def logout():
     logout_user()
     flash("Logout successful.")
     return redirect(url_for("main.home"))
+
 
 @auth_bp.route('/login', methods=["GET", "POST"])
 def login():
@@ -43,11 +45,12 @@ def login():
                 flash(msg("password_incorrect", lang))
             else:
                 remember = 'remember_user' in request.form
-                login_user(user, remember=remember)
+                login_user(user, remember=remember)  # Stores session data in persistent cookie, with expiration date, and cookie survives browser restarts
                 return redirect(url_for('main.home'))
 
     else:
         return render_template('auth/login.html')
+    
 
 @auth_bp.route('/register', methods=["GET", "POST"])
 def register():
