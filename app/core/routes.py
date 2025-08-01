@@ -34,6 +34,8 @@ main_bp = Blueprint('main', __name__, template_folder="templates")
 @main_bp.route("/", methods=["GET"])
 def home():
 
+    if not current_user.is_authenticated:
+        return render_template('landing.html')
     try:
         with database_connection() as session:
 
@@ -43,6 +45,13 @@ def home():
             # TODO: Consider extracting into datetime/date helper functions/utils?
             start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
             start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
+
+            if now.hour < 12:
+                greeting = "Good morning"
+            elif now.hour < 18:
+                greeting = "Good afternoon"
+            else:
+                greeting = "Good evening"
 
             # Fetch tasks, habits, today_intention
             tasks = tasks_repo.get_all_tasks(session)
@@ -63,10 +72,12 @@ def home():
                 today_intention=today_intention,
                 habit_info=habit_info,
                 now=now,
-                start_of_day_utc=start_of_day_utc
+                start_of_day_utc=start_of_day_utc,
+                greeting=greeting
             )
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
     
 @main_bp.route('/daily-intentions/', methods=["POST"])
 def update_daily_intention():
