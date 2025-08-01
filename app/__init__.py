@@ -13,6 +13,10 @@ from app.core.config import config_map
 from app.core.crud_routes import crud_bp
 from app.core.database import db_session, init_db
 
+from app.utils.debug import request_debugging
+
+from flask_login import LoginManager
+
 # Import Blueprints
 from app.core.routes import main_bp
 from app.modules.groceries.routes import groceries_bp
@@ -23,21 +27,33 @@ from app.modules.time_tracking.routes import time_tracking_bp
 
 
 def create_app(config_name=None):
-    if config_name is None:
-        config_name = os.environ.get('APP_ENV', 'dev')
-
     app = Flask(__name__)
 
+    config_name = config_name or os.environ.get('APP_ENV', 'dev')
+    
+    # Load appropriate config based on environment
+    app.config.from_object(config_map[config_name])
+    
     # Debug what's being loaded
     from .utils.debug import debug_config, print_env_info
     debug_config(config_name, config_map[config_name])
 
-    # Load appropriate config based on environment
-    app.config.from_object(config_map[config_name])
-
     # Print full env info (dev/testing)
     if config_name == 'dev' or 'testing':
         print_env_info(app)
+        request_debugging(app)
+    
+    # Initialize Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = "auth.login" # <- where @login_required redirects
+
+    # Flask-Login needs this callback
+    # Note: this runs outside the normal request flow? Called whenever Flask-Login needs to reload the user object, even between requests.
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.core.auth.models import User
+        return db_session.get(User, int(user_id))
 
     # Context processor runs before every template render
     # Make is_dev available in all templates globally
@@ -64,6 +80,12 @@ def create_app(config_name=None):
     def remove_session(exception=None):
         db_session.remove()
 
+    _register_blueprints(app)
+
+    return app
+
+
+def _register_blueprints(app):
     app.register_blueprint(main_bp)
     app.register_blueprint(crud_bp)
     app.register_blueprint(groceries_bp)
@@ -73,5 +95,3 @@ def create_app(config_name=None):
     app.register_blueprint(metrics_bp)
     app.register_blueprint(time_tracking_bp)
     app.register_blueprint(auth_bp)
-
-    return app
