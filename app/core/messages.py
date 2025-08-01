@@ -9,16 +9,20 @@ MESSAGES = {
     "en": {
         "username_invalid": "Username must be 3-30 alphanumeric characters.",
         "username_taken": "Username already taken.",
+        "username_nonexistent": "Invalid username: No matching user exists.",
+        "password_incorrect": "Incorrect password.",
         "password_short": "Password must be at least 8 characters.",
         "name_invalid": "Name invalid.",
-        "register_success": "[name] successfully registered!",
+        "register_success": "Successfully registered!",
     },
     "de": {
         "username_invalid": "Invalid.",
         "username_taken": "Benutzername bereits vergeben.",
+        "username_nonexistent": "Invalid username: No matching user exists.",
+        "password_incorrect": "Incorrect password.",
         "password_short": "Passwort muss mindestens 8 Zeichen lang sein.",
         "name_invalid": "Name nicht gültig.",
-        "register_success": "[name] erfolgreich registriert!",
+        "register_success": "Erfolgreich registriert!",
     },
 }
 
