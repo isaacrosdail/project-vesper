@@ -15,6 +15,7 @@ from app.utils.database.seed.seed_db import seed_db
 from flask import (Blueprint, current_app, flash, jsonify, redirect,
                    render_template, request, url_for)
 
+from flask_login import current_user
 
 if os.environ.get('APP_ENV') == 'dev':
     try:

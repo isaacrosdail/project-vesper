@@ -8,7 +8,8 @@ from app.core.constants import MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH, MAX_NAM
 def validate_username(username: str, session, lang="en") -> list[str]:
     errors = []
     
-    # TODO: Add pattern matching (alphanumeric), for now just check length
+    # Length & uniqueness check
+    # TODO: Add pattern matching (alphanumeric)
     if not 3 <= len(username) <= 30: # pythonic range test, drill these
         errors.append(msg("username_invalid", lang))
     # Ensure username isn't taken already
