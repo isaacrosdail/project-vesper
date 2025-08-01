@@ -6,11 +6,13 @@
 {% macro dashboard_container_classes() %}max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10{% endmacro %}
 {% macro dashboard_card_classes() %}min-w-max surface-primary p-6 rounded-xl shadow-md{% endmacro %}
 
-{% macro nav_link(text, endpoint, current_endpoint) %}
-<a href="{{ url_for(endpoint) }}"
-class="accent-text nav-link p-2 rounded no-underline {% if current_endpoint == endpoint %}active{% endif %}">
-    {{ text }}
-</a>
+{% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
+    {% if not required_role or (current_user.is_authenticated and current_user.role == required_role) %}
+        <a href="{{ url_for(endpoint) }}"
+        class="accent-text nav-link p-2 rounded no-underline {% if current_endpoint == endpoint %}active{% endif %}">
+            {{ text }}
+        </a>
+    {% endif %}
 {% endmacro %}
 
 {# === TABLE STYLES === #}
