@@ -5,7 +5,7 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 from sqlalchemy import func
 
-from app.utils.sorting import bubble_sort
+from app.common.sorting import bubble_sort
 
 from app.core.database import db_session, database_connection
 # Import Habit repository

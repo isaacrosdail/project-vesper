@@ -5,7 +5,7 @@ from app.modules.time_tracking.models import TimeEntry
 
 from app.core.database import database_connection
 
-from app.utils.visualization.charts import (create_metric_chart_html,
+from app.common.visualization.charts import (create_metric_chart_html,
                                             get_metric_dataframe, get_time_entry_dataframe)
 
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
