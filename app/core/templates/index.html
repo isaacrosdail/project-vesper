@@ -10,12 +10,10 @@
     <section id="greeting-card" class="bg-gray-200 rounded-xl shadow-lg">
         <div class="time-section">
             <h1 class="text-xl font-semibold mb-2">
-                {% if now.hour < 12 %}
-                    Good morning!
-                {% elif now.hour < 18 %}
-                    Good afternoon!
+                {% if current_user.is_authenticated %}
+                    {{ greeting }}, {{ current_user.name }}!
                 {% else %}
-                    Good evening!
+                    {{ greeting }}
                 {% endif %}
             </h1>
             <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p>
