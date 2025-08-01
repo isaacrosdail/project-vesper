@@ -4,7 +4,7 @@ from app.core.database import database_connection
 from app.modules.groceries import models as grocery_models
 from app.modules.groceries import repository as grocery_repo
 from app.modules.groceries.utils import get_price_per_100g
-from app.utils.sorting import bubble_sort
+from app.common.sorting import bubble_sort
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 

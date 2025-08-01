@@ -11,7 +11,7 @@ from app.modules.habits.habit_logic import (calculate_habit_streak,
 from app.modules.metrics.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
 from app.modules.metrics import repository as metrics_repo
-from app.utils.database.seed.seed_db import seed_db
+from app.common.database.seed.seed_db import seed_db
 from flask import (Blueprint, current_app, flash, jsonify, redirect,
                    render_template, request, url_for)
 
@@ -19,7 +19,7 @@ from flask_login import current_user
 
 if os.environ.get('APP_ENV') == 'dev':
     try:
-        from app.utils.database.seed.seed_dev_db import seed_dev_db
+        from app.common.database.seed.seed_dev_db import seed_dev_db
         HAS_DEV_TOOLS = True
     except ImportError:
         HAS_DEV_TOOLS = False
@@ -27,7 +27,7 @@ else:
     HAS_DEV_TOOLS = False
 
 
-from app.utils.database.db_utils import delete_all_db_data
+from app.common.database.operations import delete_all_db_data
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 

@@ -8,7 +8,7 @@ import pytest
 from app import create_app
 from app.core.database import db_session, get_engine
 from app.modules.groceries.models import Product
-from app.utils.database.db_utils import delete_all_db_data
+from app.common.database.operations import delete_all_db_data
 from sqlalchemy import text
 
 

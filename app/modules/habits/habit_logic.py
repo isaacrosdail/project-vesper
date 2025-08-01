@@ -1,7 +1,7 @@
 # Business logic functions for habits module
 
 from datetime import datetime, timezone
-from app.utils.sorting import bubble_sort
+from app.common.sorting import bubble_sort
 from app.modules.habits.models import HabitCompletion
 from app.core.database import database_connection
 from sqlalchemy import func
