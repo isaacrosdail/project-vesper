@@ -31,9 +31,9 @@ def validate_name(name: str, lang="en") -> list[str]:
     errors = []
 
     # Validate existent & not whitespace only
-    if name:
-        errors.append(msg("name_invalid")) 
-    if (len(name) <= MAX_NAME_LENGTH):
-        errors.append(msg("name_invalid"))
+    if not name:
+        errors.append(msg("name_invalid", lang)) 
+    if (len(name) > MAX_NAME_LENGTH):
+        errors.append(msg("name_invalid", lang))
 
     return errors
