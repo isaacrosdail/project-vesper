@@ -1,5 +1,5 @@
 from app.core.database import database_connection, db_session
-from app.utils.visualization.charts import get_time_entry_dataframe
+from app.common.visualization.charts import get_time_entry_dataframe
 from app.modules.time_tracking.models import TimeEntry
 from datetime import datetime, timezone, timedelta
 import pandas as pd

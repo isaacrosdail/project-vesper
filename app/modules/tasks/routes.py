@@ -5,7 +5,7 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 
 from app.core.database import db_session, database_connection
-from app.utils.sorting import bubble_sort
+from app.common.sorting import bubble_sort
 
 # Import Task repository
 from app.modules.tasks import repository as tasks_repo

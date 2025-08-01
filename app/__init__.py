@@ -13,7 +13,7 @@ from app.core.config import config_map
 from app.core.crud_routes import crud_bp
 from app.core.database import db_session, init_db
 
-from app.utils.debug import request_debugging
+from app.common.debug import request_debugging
 
 from flask_login import LoginManager
 
@@ -35,7 +35,7 @@ def create_app(config_name=None):
     app.config.from_object(config_map[config_name])
     
     # Debug what's being loaded
-    from .utils.debug import debug_config, print_env_info
+    from .common.debug import debug_config, print_env_info
     debug_config(config_name, config_map[config_name])
 
     # Print full env info (dev/testing)
@@ -72,7 +72,7 @@ def create_app(config_name=None):
 
         # Run seed_db for prod to fill with dummy data
         if config_name == 'prod':
-            from .utils.database.seed.seed_db import seed_db
+            from .common.database.seed.seed_db import seed_db
             seed_db()
 
     # Remove session after each request or app context teardown
