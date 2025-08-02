@@ -1,5 +1,5 @@
 
-const { calcSunPosition } = require('@/index.js');
+const { calcSunPosition } = require('@/core/index.js');
 
 
 test('basic math works', () => {
