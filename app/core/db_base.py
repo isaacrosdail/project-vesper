@@ -32,11 +32,11 @@ class BaseModel(TimestampMixin):
     def __tablename__(cls):
         return cls.__name__.lower()
     
-    # Only add user_id FKey if this isn't the User model
+    # Automatically add 
     @declared_attr
     def user_id(cls):
         if cls.__name__ != 'User':
-            return Column(Integer, ForeignKey('user.id'), nullable=False, default=1)
+            return Column(Integer, ForeignKey('user.id'), nullable=False)
 
 # Define base class for models
 # Now all classes using (Base) receive IDs, a user.id FKey (except User), & Timestamp info
