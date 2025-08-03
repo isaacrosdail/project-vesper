@@ -40,30 +40,56 @@ def app():
     app = create_app('testing')  # Pass in our TestConfig
     yield app
 
-# Ensure we have a user with id=1 (user.id is a Foreign Key for all other models)
-@pytest.fixture(scope="session", autouse=True)
-def setup_test_user(app):
-    engine = get_engine(app.config)
+# # Ensure we have a user with id=1 (user.id is a Foreign Key for all other models)
+# @pytest.fixture(scope="session", autouse=True)
+# def setup_test_user(app):
+#     engine = get_engine(app.config)
 
-    with engine.begin() as conn:
-        # Create user (use ON CONFLICT to handle if we already have a user)
-        conn.execute(
-            # Note: need to put user in quotes since it's a reserved keyword in PostgreSQL
-            text("""INSERT INTO "user" (id, username) VALUES (1, 'testuser') ON CONFLICT (id) DO NOTHING""")
-        )
+#     with engine.begin() as conn:
+#         # Create user (use ON CONFLICT to handle if we already have a user)
+#         conn.execute(
+#             # Note: need to put user in quotes since it's a reserved keyword in PostgreSQL
+#             text("""INSERT INTO "user" (id, username) VALUES (1, 'testuser') ON CONFLICT (id) DO NOTHING""")
+#         )
+#     yield
 
-    yield
+# Fixture to give us a logged in user to test with
+@pytest.fixture
+def logged_in_user(app, clear_tables): # add clear_tables as dependency to ensure it runs before this?
+    """Creates a logged-in user for testing authenticated routes."""
+    # Creates fake HTTP request context for testing
+    # Makes Flask think it's handling a real web request
+    # Enables things like request, session, current_user
+    with app.test_request_context():
+        print(f"DEBUG logged_in_user: Session ID = {id(db_session)}")
+        print(f"DEBUG logged_in_user: Session info = {db_session.info}")
+        import time
+        unique_username = f"Base_User_{int(time.time())}"
+        # Create test user
+        user = User(username=unique_username, name="Jeff", role='user')
+        user.set_password('password123')
+        db_session.add(user)
+        db_session.commit()
+
+        login_user(user)
+        
+    return user
 
 # Fixture to clear all table data between tests
 # Necessary now that tests and app share the same session via monkeypatching
 @pytest.fixture(autouse=True)
 def clear_tables(app):
-    engine = get_engine(app.config)
-
-    # Clear data before each test runs & reset sequence IDs
-    delete_all_db_data(engine, reset_sequences=True)
+    print(f"DEBUG clear_tables: Session ID = {id(db_session)}")
+    print(f"DEBUG clear_tables: Session info = {db_session.info}")
+    # # Clear data before each test runs & reset sequence IDs
+    # delete_all_db_data(engine, reset_sequences=True)
+    delete_all_db_data(db_session, reset_sequences=True, include_users=True)
+    remaining = db_session.query(User).all()
+    print(f"Remaining users after clear: {remaining}", file=sys.stderr)
+    print("2", file=sys.stderr)
     # Remove any hanging sessions
     db_session.remove()
+    print("3", file=sys.stderr)
     yield # Run the test
 
     # Clean up sessions after test
