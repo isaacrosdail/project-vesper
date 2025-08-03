@@ -13,7 +13,12 @@ from app.modules.tasks.models import Task
 
 from flask_login import current_user
 
-def seed_basic_data():
+# Minimal dataset for demo users
+def seed_basic_data(user_id, session):
+    pass
+
+# Comprehensive dataset for development
+def seed_rich_data(user_id, session):
     pass
 
 def seed_db():
