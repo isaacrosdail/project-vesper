@@ -1,24 +1,33 @@
 from app.core.auth.repository import get_user_by_username
 from app.core.messages import msg
-from app.core.constants import MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH, MAX_NAME_LENGTH
+from app.core.constants import MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH, MAX_NAME_LENGTH, DEFAULT_LANG
 
 # Password: Needs to: exist, have min length, and ideally be complex (TODO: Enforce complexity later)
 # Name: Needs to: exist, stay under max length
 
-def validate_username(username: str, session, lang="en") -> list[str]:
+def validate_username(username: str, session, lang=DEFAULT_LANG) -> list[str]:
+    """
+    Validates username requirements: Uniqueness and length (under MAX_NAME_LENGTH)
+
+    Args:
+        username: Username to validate
+        session: Database session.
+        lang: language for error messages (defaults to DEFAULT_LANG)
+
+    Returns:
+        List of error message strings (empty if valid)
+    """
     errors = []
-    
-    # Length & uniqueness check
+
     # TODO: Add pattern matching (alphanumeric)
     if not 3 <= len(username) <= 30: # pythonic range test, drill these
         errors.append(msg("username_invalid", lang))
-    # Ensure username isn't taken already
     if get_user_by_username(username, session):
         errors.append(msg("username_taken", lang))
 
     return errors
 
-def validate_password(password: str, lang="en") -> list[str]:
+def validate_password(password: str, lang=DEFAULT_LANG) -> list[str]:
     errors = []
 
     # Check length
