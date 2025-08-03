@@ -35,7 +35,7 @@ main_bp = Blueprint('main', __name__, template_folder="templates")
 def home():
 
     if not current_user.is_authenticated:
-        return render_template('landing.html')
+        return render_template('landing_page.html')
     try:
         with database_connection() as session:
 
