@@ -13,6 +13,8 @@ from app.modules.habits import repository as habits_repo
 # Import Habit, HabitCompletion model
 from app.modules.habits.models import Habit, HabitCompletion
 
+from flask_login import login_required, current_user
+
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
 
