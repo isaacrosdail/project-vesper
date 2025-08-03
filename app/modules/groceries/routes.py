@@ -15,6 +15,7 @@ groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url
 
 
 @groceries_bp.route("/dashboard", methods=["GET"])
+@login_required
 def dashboard():
 
     try:
@@ -31,11 +32,12 @@ def dashboard():
             ]
 
             # Fetch products and transactions
-            products = grocery_repo.get_all_products(session)
-            transactions = grocery_repo.get_all_transactions(session)
+            products = grocery_repo.get_user_products(session, current_user.id)
+            transactions = grocery_repo.get_user_transactions(session, current_user.id)
 
             # Compute price_per_100g using our util function
             # Just tack that bad boy on there as a new attr
+            # TODO: Can I fold this into an instance method for Transaction model?
             for transaction in transactions:
                 transaction.price_per_100g = get_price_per_100g(transaction)
 

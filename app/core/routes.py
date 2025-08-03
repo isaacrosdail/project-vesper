@@ -54,15 +54,15 @@ def home():
                 greeting = "Good evening"
 
             # Fetch tasks, habits, today_intention
-            tasks = tasks_repo.get_all_tasks(session)
-            habits = habits_repo.get_all_habits(session)
-            today_intention = metrics_repo.get_today_intention(session)
+            tasks = tasks_repo.get_user_tasks(session, current_user.id)
+            habits = habits_repo.get_user_habits(session, current_user.id)
+            today_intention = metrics_repo.get_user_today_intention(session, current_user.id)
             
             habit_info = {}
             for habit in habits:
                 habit_info[habit.id] = {
-                    'completed_today': check_if_completed_today(habit.id, session),
-                    'streak_count': calculate_habit_streak(habit.id, session)
+                    'completed_today': check_if_completed_today(habit.id, current_user.id, session),
+                    'streak_count': calculate_habit_streak(habit.id, current_user.id, session)
                 }
 
             return render_template(
@@ -80,6 +80,7 @@ def home():
 
     
 @main_bp.route('/daily-intentions/', methods=["POST"])
+@login_required
 def update_daily_intention():
     try:
         # Get JSON data from request body & parse into Python dict
@@ -93,7 +94,7 @@ def update_daily_intention():
 
         with database_connection() as session:
             # Check if daily intention exists for today already
-            today_intention = metrics_repo.get_today_intention(session)
+            today_intention = metrics_repo.get_user_today_intention(session, current_user.id)
             
             # If it does, just update the intention field using our fetch data
             if today_intention:
@@ -102,7 +103,8 @@ def update_daily_intention():
             # Otherwise, we'll add a new entry for DailyIntention
             else:
                 new_daily_intention = DailyIntention(
-                    intention = data['intention']
+                    intention = data['intention'],
+                    user_id = current_user.id
                 )
                 session.add(new_daily_intention)
                 return jsonify({"success": True, "message": "Successfully saved intention"}), 200

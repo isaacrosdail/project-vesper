@@ -17,6 +17,7 @@ from flask_login import current_user, login_required
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
 @tasks_bp.route("/dashboard", methods=["GET"])
+@login_required
 def dashboard():
 
     try:
@@ -28,7 +29,7 @@ def dashboard():
             ]
 
             # Fetch tasks, sort
-            tasks = tasks_repo.get_all_tasks(session)
+            tasks = tasks_repo.get_user_tasks(session, current_user.id)
             bubble_sort(tasks, 'created_at_local', reverse=False)
 
             return render_template(
@@ -42,6 +43,7 @@ def dashboard():
 
 # CREATE
 @tasks_bp.route("/", methods=["GET", "POST"])
+@login_required
 def tasks():
 
     if request.method == "POST":
@@ -57,7 +59,8 @@ def tasks():
             type=task_data["type"],
             is_done=False,
             created_at=datetime.now(timezone.utc),
-            completed_at=None
+            completed_at=None,
+            user_id=current_user.id
         )
 
         # Add new_task to db
