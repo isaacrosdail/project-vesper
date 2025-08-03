@@ -40,7 +40,7 @@ def test_get_user_products_empty(logged_in_user):
     products = grocery_repo.get_user_products(db_session, logged_in_user.id)
     assert products == []
 
-def test_get_all_products_with_entries():
+def test_get_user_products_with_entries(logged_in_user):
     product_data = {
         "barcode": "123",
         "product_name": "Milk",
@@ -65,7 +65,7 @@ def test_get_user_transactions_empty(logged_in_user):
     transactions = grocery_repo.get_user_transactions(db_session, logged_in_user.id)
     assert transactions == []
 
-def test_get_all_transactions_existing_product():
+def test_get_user_transactions_existing_product(logged_in_user):
 
     product_data = {
         "barcode": "1234567",
@@ -136,7 +136,7 @@ def test_get_user_transactions_ensure_joinedload(logged_in_user):
 
 # region add_product
 # Happy path test
-def test_add_product():
+def test_add_product(logged_in_user):
     product_data = {
         "barcode": "123",
         "product_name": "Milk",
