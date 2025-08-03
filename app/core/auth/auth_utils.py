@@ -36,7 +36,7 @@ def validate_password(password: str, lang=DEFAULT_LANG) -> list[str]:
 
     return errors
 
-def validate_name(name: str, lang="en") -> list[str]:
+def validate_name(name: str, lang=DEFAULT_LANG) -> list[str]:
     errors = []
 
     # Validate existent & not whitespace only
