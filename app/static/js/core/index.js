@@ -246,7 +246,7 @@ async function getWeatherInfo() {
         if (!response.ok) {
             throw new Error(`Weather API failed: ${response.status}`);
         }
-        // weatherInfo is our resultant json containing all the info we need
+        // Parse JSON response 
         weatherInfo = await response.json();
 
         // use weather info - to start, grab temp & sunset time
