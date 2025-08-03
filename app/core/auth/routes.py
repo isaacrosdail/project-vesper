@@ -4,11 +4,10 @@ from app.core.auth.auth_utils import validate_username, validate_password, valid
 from app.core.auth.models import User
 from flask_login import login_user, login_required, logout_user
 from app.core.messages import msg
-
+from app.core.constants import DEFAULT_LANG
 from app.core.auth.repository import get_user_by_username
 import sys
 
-lang = "en"
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
@@ -40,9 +39,9 @@ def login():
             user = get_user_by_username(username, session)
             
             if not user:
-                flash(msg("username_nonexistent", lang))
+                flash(msg("username_nonexistent", DEFAULT_LANG))
             elif not user.check_password(password):
-                flash(msg("password_incorrect", lang))
+                flash(msg("password_incorrect", DEFAULT_LANG))
             else:
                 remember = 'remember_user' in request.form
                 login_user(user, remember=remember)  # Stores session data in persistent cookie, with expiration date, and cookie survives browser restarts
@@ -57,7 +56,6 @@ def register():
     try:
         # TODO: Pull lang from a user's setting instead of hardcoding here
         # Unsure whether to make it a user setting or a cookie via lang toggle
-        lang = "en"
         if request.method == "POST":
             # User types in creds, hits Submit.
             # 1. Grab form data
@@ -70,9 +68,9 @@ def register():
 
                 # Validate
                 errors = (
-                    validate_username(username, session, lang)
-                    + validate_password(password, lang)
-                    + validate_name(name, lang)
+                    validate_username(username, session, DEFAULT_LANG)
+                    + validate_password(password, DEFAULT_LANG)
+                    + validate_name(name, DEFAULT_LANG)
                 )
                 if errors:
                     for e in errors:
@@ -87,9 +85,9 @@ def register():
                     session.add(user)
                     session.flush()   # hits DB so user.id is populated
                     #login_user(user) # now user.id exists for the session
-                    lang = "en"
+                    
                     try:
-                        flash(msg("register_success", lang))
+                        flash(msg("register_success", DEFAULT_LANG))
                     except Exception as flash_error:
                         print(f"FLASH ERROR: {flash_error}", file=sys.stderr)
                     return redirect(url_for("main.home"))
