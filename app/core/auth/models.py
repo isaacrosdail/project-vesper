@@ -4,7 +4,6 @@ from sqlalchemy import Column, String
 from flask_login import UserMixin
 
 class User(Base, UserMixin):
-
     username = Column(String(50), nullable=False, unique=True)
     name = Column(String(50), nullable=False)
     password_hash = Column(String(256), nullable=False) # Large enough? bcrypt = 60chars, Werkzeug's default uses pbkdf2:sha256 = around 95 chars
