@@ -5,3 +5,25 @@ DEFAULT_LANG = "en"
 MIN_PASSWORD_LENGTH = 8
 MAX_PASSWORD_LENGTH = 14
 MAX_NAME_LENGTH = 50
+
+DATA_TABLES = [
+    # Arranged in dependency order -> children first
+    "habitcompletion",   # child: references habit
+    "transaction",       # child: references product
+    "habit",             # parent table
+    "product",           # parent table
+    "task",               # independent
+]
+
+ALL_TABLES = DATA_TABLES + ["user"] # For complete database deletions
+
+# Corresponding sequences for ID reset
+DATA_SEQUENCES = [
+    "habitcompletion_id_seq",  # references habit
+    "transaction_id_seq",      # references product
+    "habit_id_seq",            # parent table
+    "product_id_seq",  # parent table
+    "task_id_seq"
+]
+
+ALL_SEQUENCES = DATA_SEQUENCES + ["user_id_seq"]
