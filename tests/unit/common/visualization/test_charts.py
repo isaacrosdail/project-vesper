@@ -3,33 +3,44 @@ from app.common.visualization.charts import get_time_entry_dataframe
 from app.modules.time_tracking.models import TimeEntry
 from datetime import datetime, timezone, timedelta
 import pandas as pd
+import sys
 
-def test_get_time_entry_dataframe():
+print("FILE IS BEING IMPORTED")
 
-    with database_connection() as session:
-        entry1 = TimeEntry(
-            category="Programming",
-            duration=30,
-            started_at=datetime.now(timezone.utc) - timedelta(minutes=30)
-        )
-        entry2 = TimeEntry(
-            category="Programming",
-            duration=30,
-            started_at=datetime.now(timezone.utc) - timedelta(minutes=30)
-        )
-        session.add(TimeEntry(category="Programming", duration=30, created_at=datetime.now(timezone.utc) - timedelta(days=2)))
-        session.add(TimeEntry(category="Studying", duration=45))
-
-        print(f"Session 1 ID: {id(session)}")
-
-        print("HELLO THERE")
+def test_get_time_entry_dataframe(logged_in_user):
+    
+        # ARRANGE
+        time_entries = [
+            TimeEntry(
+                category="Programming",
+                duration=30,
+                started_at=(datetime.now(timezone.utc) - timedelta(minutes=120)),
+                user_id=logged_in_user.id
+            ),
+            # more entries
+            TimeEntry(
+                category="Programming",
+                duration=30,
+                started_at=datetime.now(timezone.utc) - timedelta(minutes=30),
+                user_id=logged_in_user.id
+            ),
+            TimeEntry(
+                category="Programming",
+                duration=30, 
+                started_at=datetime.now(timezone.utc) - timedelta(days=2),
+                user_id=logged_in_user.id
+            ),
+        ]
+        db_session.add_all(time_entries)
+        db_session.flush()
+        print(f"Session 1 ID: {id(db_session)}")
 
         # ACT
-        session.flush()
-        #print(f"Session 2 ID: {id(session)}")
-        df = get_time_entry_dataframe(TimeEntry, "Programming", 7, session)
+        #print(f"Session 2 ID: {id(db_session)}")
+        df = get_time_entry_dataframe(TimeEntry, "Programming", 7, db_session)
         print(f"got df:{df}")
 
+        print("hey")
         # DEBUG - see what's actually in there
         print(f"\n=== DEBUG ===")
         print(f"DataFrame shape: {df.shape}")
@@ -38,30 +49,26 @@ def test_get_time_entry_dataframe():
         print(f"=============\n")
 
         # ASSERT
-        assert len(df) == 2 # only 2 programming entries within given days
+        assert len(df) == 3 # only 2 programming entries within given days
         assert df.columns.tolist() == ["Date", "Programming"]
-        assert df["Programming"].sum() == 70 # duration 30 + 40
+        assert df["Programming"].sum() == 90 # duration 30*3
         print("HELLO THERE 2")
 
-def test_also_get_time_entry_dataframe():
-    
+def test_also_get_time_entry_dataframe(logged_in_user):
     print("TEST START")
 
-    session = db_session()
-
-    # Add one entry
+    # ARRANGE
     entry = TimeEntry(
-        category="Programming",
-        duration=30,
-        created_at=datetime.now(timezone.utc)
+        category="Programming", 
+        duration=30, 
+        started_at=datetime.now(timezone.utc) - timedelta(days=1),
+        user_id=logged_in_user.id
     )
-
-    session.add(entry)
-    session.commit()
+    db_session.add(entry)
+    db_session.commit()
     print("Added entry")
 
-    df = get_time_entry_dataframe(TimeEntry, "Programming", 7, session)
+    df = get_time_entry_dataframe(TimeEntry, "Programming", 7, db_session)
     print(f"Got df: {df}")
-
     print(f"Length: {len(df)}")
     assert len(df) == 1
