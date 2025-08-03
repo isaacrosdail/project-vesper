@@ -60,7 +60,7 @@
         Add New Task
     </a>
     {% if is_dev %}
-    <form action="{{ url_for('main.reset_dev_db') }}" method="POST">
+    <form action="{{ url_for('main.reset_and_dev') }}" method="POST">
         <button type="submit" class="mt-120 {{ styles.btn_classes() }}">Reset dev DB</button>
     </form>
     {% endif %}
