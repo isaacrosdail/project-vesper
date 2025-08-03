@@ -32,6 +32,8 @@ def debug_config(config_name: str, config_class):
 def request_debugging(app: Flask = None):
     @app.before_request
     def debug_everything():
+        if request.endpoint == 'static':
+            return # skip logging for CSS/JS files
         print_stderr(f"\n== REQUEST DEBUG ==")
         print_stderr(f"URL: {request.url}")
         print_stderr(f"Method: {request.method}")
