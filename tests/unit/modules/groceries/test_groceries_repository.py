@@ -17,8 +17,7 @@ def test_lookup_barcode_found(logged_in_user):
         "category": "Test Category",
         "net_weight": 200,
         "unit_type": "g",
-        "calories_per_100g": 100
-
+        "calories_per_100g": 100,
     }
     
     grocery_repo.add_product(db_session, logged_in_user.id, **product_data)
@@ -89,7 +88,7 @@ def test_get_all_transactions_existing_product():
         price="3.50",
         quantity=2
     )
-    db_session.flush() # Again, flush instead of commit
+    db_session.flush()
 
     transactions = grocery_repo.get_user_transactions(db_session, logged_in_user.id)
 
@@ -109,9 +108,8 @@ def test_get_user_transactions_ensure_joinedload(logged_in_user):
         net_weight="0.3",
         unit_type="g",
         calories_per_100g=100
-
     )
-    db_session.flush() # instead of commit
+    db_session.flush()
 
     product = grocery_repo.lookup_barcode(db_session, "111", logged_in_user.id)
     grocery_repo.add_transaction(
@@ -124,6 +122,7 @@ def test_get_user_transactions_ensure_joinedload(logged_in_user):
     db_session.flush()
     transactions = grocery_repo.get_user_transactions(db_session, logged_in_user.id)
 
+    # TODO: Study/drill this
     # expunge_all instead of .close() here to simulate teardown without breaking rollback
     db_session.expunge_all() # simulate session teardown
 
