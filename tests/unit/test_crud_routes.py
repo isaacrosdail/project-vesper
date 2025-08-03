@@ -24,5 +24,6 @@ def test_general_delete_task(client):
     assert response.status_code == 200 # Should now return 200 since we're returning JSON
 
     # Confirm task no longer exists
-    deleted_task = db_session.get(Task, task_id)
+    deleted_task = db_session.get(Task, task_id) # bad practice to use direct query here?
+    # I mean, task IDs ARE unique regardless of user
     assert deleted_task is None
