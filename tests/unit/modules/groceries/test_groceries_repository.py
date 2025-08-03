@@ -9,7 +9,7 @@ from app.modules.groceries.models import Product, Transaction
 
 # region lookup_barcode
 # Return a Product if barcode exists, None if barcode doesn't exist
-def test_lookup_barcode_found():
+def test_lookup_barcode_found(logged_in_user):
 
     product_data = {
         "barcode": "1234567",
@@ -21,24 +21,24 @@ def test_lookup_barcode_found():
 
     }
     
-    grocery_repo.add_product(db_session, **product_data)
+    grocery_repo.add_product(db_session, logged_in_user.id, **product_data)
     db_session.flush() # flush(), don't commit() -> Committing breaks rollback isolation
 
-    result = grocery_repo.lookup_barcode(db_session, "1234567")
+    result = grocery_repo.lookup_barcode(db_session, "1234567", logged_in_user.id)
 
     assert result is not None
     assert isinstance(result, Product)
     assert result.product_name == "Test Product"
 
-def test_lookup_barcode_not_found():
-    result = grocery_repo.lookup_barcode(db_session, "9999999")
+def test_lookup_barcode_not_found(logged_in_user):
+    result = grocery_repo.lookup_barcode(db_session, "9999999", logged_in_user.id)
     assert result is None
 # endregion
 
 # region get_all_products
 
-def test_get_all_products_empty():
-    products = grocery_repo.get_all_products(db_session)
+def test_get_user_products_empty(logged_in_user):
+    products = grocery_repo.get_user_products(db_session, logged_in_user.id)
     assert products == []
 
 def test_get_all_products_with_entries():
@@ -62,8 +62,8 @@ def test_get_all_products_with_entries():
 
 # region get_all_transactions
 
-def test_get_all_transactions_empty():
-    transactions = grocery_repo.get_all_transactions(db_session)
+def test_get_user_transactions_empty(logged_in_user):
+    transactions = grocery_repo.get_user_transactions(db_session, logged_in_user.id)
     assert transactions == []
 
 def test_get_all_transactions_existing_product():
