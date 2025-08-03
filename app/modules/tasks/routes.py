@@ -12,11 +12,12 @@ from app.modules.tasks import repository as tasks_repo
 # Import Task model
 from app.modules.tasks.models import Task
 
-import os
+from flask_login import current_user, login_required
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
 @tasks_bp.route("/dashboard", methods=["GET"])
+@login_required
 def dashboard():
 
     try:
@@ -28,7 +29,7 @@ def dashboard():
             ]
 
             # Fetch tasks, sort
-            tasks = tasks_repo.get_all_tasks(session)
+            tasks = tasks_repo.get_user_tasks(session, current_user.id)
             bubble_sort(tasks, 'created_at_local', reverse=False)
 
             return render_template(
@@ -42,19 +43,15 @@ def dashboard():
 
 # CREATE
 @tasks_bp.route("/", methods=["GET", "POST"])
+@login_required
 def tasks():
 
-    # Process form data and add new task to db
     if request.method == "POST":
 
         # Parse & sanitize form data
         task_data = {
             "title": request.form.get("title"),
             "type": request.form.get("type"),
-            # Value for checkbox is irrelevant
-            # If checked, then value is not None, so bool=True (ie, it exists)
-            # Otherwise it is None, in which case bool=False 
-            #"is_anchor": bool(request.form.get("is_anchor"))
         }
         # Creating new task Task object
         new_task = Task(
@@ -62,7 +59,8 @@ def tasks():
             type=task_data["type"],
             is_done=False,
             created_at=datetime.now(timezone.utc),
-            completed_at=None
+            completed_at=None,
+            user_id=current_user.id
         )
 
         # Add new_task to db

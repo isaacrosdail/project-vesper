@@ -51,10 +51,10 @@ def test_get_all_products_with_entries():
         "calories_per_100g": 100
     }
         
-    grocery_repo.add_product(db_session, **product_data)
+    grocery_repo.add_product(db_session, logged_in_user.id, **product_data)
     db_session.flush()
 
-    products = grocery_repo.get_all_products(db_session)
+    products = grocery_repo.get_user_products(db_session, logged_in_user.id)
     assert len(products) == 1
     assert products[0].product_name == "Milk"
 
@@ -78,30 +78,30 @@ def test_get_all_transactions_existing_product():
 
     }
 
-    grocery_repo.add_product(db_session, **product_data)
-    
-    # Use flush instead of commit
+    grocery_repo.add_product(db_session, logged_in_user.id, **product_data)
     db_session.flush()
-
-    product = grocery_repo.lookup_barcode(db_session, "1234567")
+    product = grocery_repo.lookup_barcode(db_session, "1234567", logged_in_user.id)
 
     grocery_repo.add_transaction(
         db_session,
         product,
+        user_id=logged_in_user.id,
         price="3.50",
         quantity=2
     )
     db_session.flush() # Again, flush instead of commit
 
-    transactions = grocery_repo.get_all_transactions(db_session)
+    transactions = grocery_repo.get_user_transactions(db_session, logged_in_user.id)
 
     assert len(transactions) == 1
     assert transactions[0].quantity == 2
     assert transactions[0].product.product_name == "Test Product"
 
 # Test to ensure it works after session close?
-def test_get_all_transactions_ensure_joinedload():
-    grocery_repo.add_product(db_session,
+def test_get_user_transactions_ensure_joinedload(logged_in_user):
+    grocery_repo.add_product(
+        db_session,
+        user_id=logged_in_user.id,
         barcode="111",
         product_name="PostSession Item",
         category="Test Category",
@@ -113,16 +113,16 @@ def test_get_all_transactions_ensure_joinedload():
     )
     db_session.flush() # instead of commit
 
-    product = grocery_repo.lookup_barcode(db_session, "111")
+    product = grocery_repo.lookup_barcode(db_session, "111", logged_in_user.id)
     grocery_repo.add_transaction(
         db_session,
         product,
+        user_id=logged_in_user.id,
         price="2.00",
         quantity=1
     )
-    db_session.flush() # again, instead of commit
-
-    transactions = grocery_repo.get_all_transactions(db_session)
+    db_session.flush()
+    transactions = grocery_repo.get_user_transactions(db_session, logged_in_user.id)
 
     # expunge_all instead of .close() here to simulate teardown without breaking rollback
     db_session.expunge_all() # simulate session teardown
@@ -147,10 +147,12 @@ def test_add_product():
         "calories_per_100g": 100
     }
 
-    grocery_repo.add_product(db_session, **product_data)
+    grocery_repo.add_product(db_session, logged_in_user.id, **product_data)
 
     # Query DB to verify
-    result = db_session.query(Product).filter_by(barcode=product_data["barcode"]).first()
+    result = db_session.query(Product).filter(
+        Product.barcode==product_data["barcode"]
+    ).first()
 
     assert result is not None
     assert result.product_name == product_data["product_name"]
