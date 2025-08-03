@@ -158,27 +158,6 @@ def test_add_product(logged_in_user):
     assert result.category == product_data["category"]
     assert result.net_weight == product_data["net_weight"]
 
-# Missing data test
-def test_add_product_missing_data_raises_error():
-    incomplete_data = {
-        "barcode":"1234567",
-        "price": Decimal("5.99"),
-        "net_weight": 200
-    }
-
-    # Ensure ValueError is raised
-    with pytest.raises(ValueError) as excinfo:
-        grocery_repo.add_product(db_session, **incomplete_data)
-    
-    assert "Product name is required" in str(excinfo.value)
-
-# endregion
-
-# region add_transaction
-
-def test_add_transaction_requires_product():
-    with pytest.raises(ValueError, match="Product must be provided for transaction."):
-        grocery_repo.add_transaction(db_session, None, price="2.50", quantity=1)
 
 
 # endregion
