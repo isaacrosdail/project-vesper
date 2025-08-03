@@ -107,8 +107,9 @@ def transactions():
                 product = grocery_repo.lookup_barcode(session, product_data["barcode"], current_user.id)
             
                 # Product not found yet: Check if net_weight is filled (ie., second form submit)
-                # Early return to form page if empty
-                if not product and product_data["net_weight"] is None:
+                # Early return to form page if empty#
+                # Note: Disabled form fields (net_weight) get submitted as empty strings, not None
+                if not product and product_data["net_weight"] == "":
                     # Not enough info yet - redisplay form asking for net_weight
                     flash("Product not found. Please enter net weight.")
                     return render_template(
