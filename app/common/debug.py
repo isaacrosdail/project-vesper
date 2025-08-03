@@ -1,5 +1,8 @@
-import os, sys
+import os
+import sys
+
 from flask import Flask, request
+
 
 # TODO: Using stderr since Flask buffers print output, but there is undoubtedly a better way to do this.
 def print_stderr(msg: str) -> None:
@@ -34,7 +37,7 @@ def request_debugging(app: Flask = None):
     def debug_everything():
         if request.endpoint == 'static':
             return # skip logging for CSS/JS files
-        print_stderr(f"\n== REQUEST DEBUG ==")
+        print_stderr("\n== REQUEST DEBUG ==")
         print_stderr(f"URL: {request.url}")
         print_stderr(f"Method: {request.method}")
         print_stderr(f"Endpoint: {request.endpoint}")

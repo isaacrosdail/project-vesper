@@ -37,6 +37,7 @@ def dashboard():
 
 
 @metrics_bp.route("/", methods=["POST"])
+@login_required
 def metrics():
     data = request.get_json()
 

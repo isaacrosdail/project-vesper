@@ -1,7 +1,6 @@
 # DB logic functions to access data
 
 from .models import Habit, HabitCompletion
-from datetime import datetime, timezone
 from sqlalchemy import func
 
 

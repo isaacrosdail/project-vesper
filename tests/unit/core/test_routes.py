@@ -3,8 +3,6 @@ from unittest.mock import patch
 
 import pytest
 
-from app.core.database import db_session
-from app.modules.tasks.models import Task
 
 
 def test_home_route(authenticated_client):

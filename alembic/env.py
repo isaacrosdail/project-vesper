@@ -13,7 +13,6 @@ load_dotenv()
 #from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
 from app.core.config import config_map
 from app.core.db_base import Base  # Import SQLAlchemy Base
-from app.modules.tasks.models import Task
 # import our debug util
 from app.common.debug import debug_config
 
