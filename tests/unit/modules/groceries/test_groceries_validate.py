@@ -5,7 +5,7 @@ import pytest
 from app.core.database import db_session
 from app.modules.groceries import repository as grocery_repo
 from app.modules.groceries.models import Product, Transaction
-from app.modules.groceries.validate import validate_product_data
+from app.modules.groceries.validate import validate_product_data, validate_transaction_data
 
 # Missing data test
 def test_add_product_missing_data_raises_error():
