@@ -7,17 +7,17 @@ from app.core.database import db_session
 from app.modules.tasks.models import Task
 
 
-def test_home_route(client):
-    response = client.get("/")
+def test_home_route(authenticated_client):
+    response = authenticated_client.get("/")
     assert response.status_code == 200
 
 @pytest.mark.parametrize("hour, expected_greeting, expected_time", [
     # tuple with 3 values (corresponds to 3 parameter names above)
-    (6, "Good morning!", "06:00:00"),
-    (15, "Good afternoon!", "15:00:00"),
-    (21, "Good evening!", "21:00:00"),
+    (6, "Good morning", "06:00:00"),
+    (15, "Good afternoon", "15:00:00"),
+    (21, "Good evening", "21:00:00"),
 ])
-def test_home_greeting_and_time(client, hour, expected_greeting, expected_time):
+def test_authenticated_home_greeting_and_time(authenticated_client, hour, expected_greeting, expected_time):
     # Translation: "For the duration of this block, any reference to datetime 
     # in app.core.routes will use this mock."
     with patch("app.core.routes.datetime") as mock_dt:
@@ -31,9 +31,10 @@ def test_home_greeting_and_time(client, hour, expected_greeting, expected_time):
         # Patching replaces the whole datetime class inside our route — not just .now().
         # So real code like datetime(...) would break without help, since mocks can't build real objects. (datetime is no longer the real datetime, just a mock object)
         # side_effect tells it: "Fake .now(), but act like real datetime() for everything else."
+        # TODO: STUDY/DRILL
         mock_dt.side_effect = lambda *a, **kw: datetime(*a, **kw)
 
-        res = client.get("/")
+        res = authenticated_client.get("/")
         html = res.data.decode()
 
         assert expected_greeting in html
