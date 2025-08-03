@@ -2,12 +2,13 @@
 from app.core.database import db_session, database_connection
 
 
-def test_groceries_dashboard(client):
-    response = client.get("/groceries/dashboard")
+def test_groceries_dashboard(authenticated_client):
+    response = authenticated_client.get("/groceries/dashboard")
     assert response.status_code == 200
     # assert b"Groceries" in response.data ADD THIS CHECK WHEN WE ADD LANGUAGE TOGGLE TO EN DE
 
-def test_add_product_page_loads(client):
+def test_add_product_page_loads(client, auth, logged_in_user):
+    auth.login(logged_in_user.username, 'password123')
     response = client.get("/groceries/products")
 
     assert response.status_code == 200
