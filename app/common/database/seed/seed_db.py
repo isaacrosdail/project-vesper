@@ -11,26 +11,19 @@ from app.modules.habits.models import Habit, HabitCompletion
 from app.modules.metrics.models import DailyIntention, DailyMetric
 from app.modules.tasks.models import Task
 
+from flask_login import current_user
+
+def seed_basic_data():
+    pass
 
 def seed_db():
-
-    # Ensuring we start with a clean slate
-    with database_connection() as session:
-        # to study: cascade settings for tables
-        session.query(Transaction).delete()
-        session.query(Task).delete()
-        session.query(Product).delete()
-        session.query(HabitCompletion).delete()
-        session.query(Habit).delete()
-        session.query(DailyIntention).delete()
-        session.query(DailyMetric).delete()
 
     with database_connection() as session:
         try:
             # Populate default user (separate transaction)
             default_user = User(id=1, username='default')
             session.add(default_user)
-            session.flush() # flush so any other adds can reference User
+            session.flush() # flush to assign ID to user before referencing it below
         except IntegrityError:
             # session.rollback() # clear failed transaction
             print("User already exists, skipping..")
@@ -144,3 +137,6 @@ def seed_db():
         session.commit()
 
         return "DB seeded successfully"
+    
+
+    
