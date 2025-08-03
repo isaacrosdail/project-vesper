@@ -16,6 +16,27 @@ from sqlalchemy import text
 from app.core.auth.models import User
 from flask_login import login_user
 
+class AuthActions():
+    def __init__(self, client):
+        self.client = client
+    
+    def login(self, username, password):
+        # This sets a session cookie (telling Flask-Login we're logged in)
+        return self.client.post('/login', data={ 
+            'username': username, 
+            'password': password
+        })
+
+# Drafting authenticated_client fixture
+@pytest.fixture
+def authenticated_client(client, auth, logged_in_user):
+    # 1. Pass in client
+    # 2. Do the login POST part => this gives us our "logged in" session cookie in the same HTTP context
+    # ..which is what Flask-Login is looking for to ensure we're authenticated
+    auth.login(logged_in_user.username, 'password123')
+    
+    return client # <= client now has session cookie attached
+
 # Ensure PostgreSQL container is running before tests start
 # TODO: Needed/used?
 @pytest.fixture(scope="session", autouse=True)
@@ -80,10 +101,12 @@ def logged_in_user(app, clear_tables): # add clear_tables as dependency to ensur
 @pytest.fixture(autouse=True)
 def clear_tables(app):
     print(f"DEBUG clear_tables: Session ID = {id(db_session)}")
-    print(f"DEBUG clear_tables: Session info = {db_session.info}")
+
     # # Clear data before each test runs & reset sequence IDs
     # delete_all_db_data(engine, reset_sequences=True)
     delete_all_db_data(db_session, reset_sequences=True, include_users=True)
+    db_session.commit()
+    
     remaining = db_session.query(User).all()
     print(f"Remaining users after clear: {remaining}", file=sys.stderr)
     print("2", file=sys.stderr)
@@ -124,6 +147,11 @@ def patch_db_session(monkeypatch):
 def client(app):
     return app.test_client()
 
+# Wrapper around test_client that adds convenient authentication methods
+@pytest.fixture
+def auth(client):
+    return AuthActions(client)
+
 # Basic sanity test
 def test_postgresql_connection(db_session):
     result = db_session.execute(text("SELECT 1")).scalar()
@@ -131,14 +159,15 @@ def test_postgresql_connection(db_session):
 
 # Product fixture for Transaction tests
 @pytest.fixture
-def sample_product():
+def sample_product(logged_in_user):
     product = Product(
         product_name="Test Product",
         category="Test Product Category",
         barcode="123456",
         net_weight=200,
         unit_type="g",
-        calories_per_100g=150
+        calories_per_100g=150,
+        user_id=logged_in_user.id
     )
     db_session.add(product)
     db_session.flush()
