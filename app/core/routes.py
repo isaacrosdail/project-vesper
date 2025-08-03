@@ -116,29 +116,109 @@ def update_daily_intention():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@main_bp.route('/reset_db', methods=["POST"])
-def reset_db():
 
-    # Current app gives us access to the config within a request context
-    engine = get_engine(current_app.config)
+# Note to self: POST here prevents triggering from URL visits
+@main_bp.route('/reset-users', methods=["POST"])
+def reset_users_only():
+    # Deletes all data + users, then create fresh demo + admin users
+    with database_connection() as session:
+        # Reset database
+        delete_all_db_data(session, include_users=True)
 
-    # New way with Alembic instead of create_all() -> Delete all DATA but keep all tables
-    delete_all_db_data(engine, False)
+        # Create demo + owner users
+        demo_user = User(username='guest', role='user')
+        demo_user.set_password('demo123')
 
-    seed_db()
-    flash('Database has been reset successfully!', 'success')
+        owner_user = User(username='owner', role='owner')
+        owner_user.set_password('owner123')
 
-    return redirect(request.referrer or url_for('index'))
+        session.add_all([demo_user, owner_user])   # Pass list to add_all
 
-# Wrap in conditional so prod doesn't complain that we don't have a seed_dev_db function/route
-if HAS_DEV_TOOLS:
-    @main_bp.route('/reset_dev_db', methods=["POST"])
-    def reset_dev_db():
-        engine = get_engine(current_app.config)
+    flash(msg("db_reset_users", DEFAULT_LANG))
+    return redirect(url_for('auth.login'))
+
+# Wipe data but leave users intact
+@main_bp.route('/admin/reset-db', methods=["POST"])
+@login_required
+def reset_database():
+    if current_user.role != 'owner':
+        return abort(403)
+    
+    # Reset database
+    with database_connection() as session:
+        delete_all_db_data(session)
+
+    flash(msg("db_reset", DEFAULT_LANG))
+    return redirect(url_for('landing_page'))
+
+@main_bp.route('/admin/reset-demo', methods=["POST"])
+@login_required
+def reset_and_demo():
+    if current_user.role != 'owner':
+        return abort(403)
+
+    # Create demo user + seed basic data
+    with database_connection() as session:
+        delete_all_db_data(session) # wipe everything
+
+        # Create demo user + seed basic data
+        demo_user = User(username='guest', role='user')
+        demo_user.set_password('demo123')
+        session.add(demo_user)
+        session.flush() # Get the ID
         
-        delete_all_db_data(engine, False)
-        
-        seed_dev_db()
-        flash('Dev db reset', 'success')
+        seed_basic_data(demo_user.id, session)
 
-        return redirect(request.referrer or url_for('index'))
+    flash(msg("db_reset_demo", DEFAULT_LANG))
+    return redirect(url_for('landing_page'))
+
+@main_bp.route('/admin/reset-dev', methods=["POST"])
+@login_required
+def reset_and_dev():
+    if current_user.role != 'owner':
+        return abort(403)
+
+    # Create owner user + seed
+    with database_connection() as session:
+        print("ALPHA", file=sys.stderr)
+        delete_all_db_data(session, include_users=True)
+
+        # Create owner user + seed rich data
+        owner_user = User(username='owner', role='owner')
+        owner_user.set_password('owner123')
+        session.add(owner_user)
+        session.flush()
+
+        seed_rich_data(owner_user.id, session)
+
+    flash(msg("db_reset_dev", DEFAULT_LANG))
+    return redirect(url_for('main.home'))
+
+
+#### OLD: DELETE AFTER SORTING NEW FLOW
+# @main_bp.route('/reset_db', methods=["POST"])
+# def reset_db():
+
+#     # Current app gives us access to the config within a request context
+#     engine = get_engine(current_app.config)
+
+#     # New way with Alembic instead of create_all() -> Delete all DATA but keep all tables
+#     delete_all_db_data(engine, False)
+
+#     seed_db()
+#     flash('Database has been reset successfully!', 'success')
+#     flash(msg("username_nonexistent", lang))
+#     return redirect(request.referrer or url_for('index'))
+
+# # Wrap in conditional so prod doesn't complain that we don't have a seed_dev_db function/route
+# if HAS_DEV_TOOLS:
+#     @main_bp.route('/reset_dev_db', methods=["POST"])
+#     def reset_dev_db():
+#         engine = get_engine(current_app.config)
+        
+#         delete_all_db_data(engine, False)
+        
+#         seed_dev_db()
+#         flash('Dev db reset', 'success')
+
+#         return redirect(request.referrer or url_for('index'))
