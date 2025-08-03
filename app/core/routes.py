@@ -1,22 +1,26 @@
 # Date/Time-related imports
 # Conditional import of our seed_dev_db function
-import os, sys
+import os
+import sys
 from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
-from app.core.database import database_connection, get_engine
+from app.common.database.seed.seed_db import seed_basic_data, seed_rich_data
+from app.core.auth.models import User
+from app.core.constants import DEFAULT_LANG
+from app.core.database import database_connection
+from app.core.messages import msg
 from app.modules.habits import repository as habits_repo
 from app.modules.habits.habit_logic import (calculate_habit_streak,
                                             check_if_completed_today)
+from app.modules.metrics import repository as metrics_repo
 from app.modules.metrics.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
-from app.modules.metrics import repository as metrics_repo
-from app.common.database.seed.seed_db import seed_db
-from flask import (Blueprint, current_app, flash, jsonify, redirect,
-                   render_template, request, url_for)
+from flask import (Blueprint, abort, flash, jsonify, redirect, render_template,
+                   request, url_for)
+from flask_login import current_user, login_required
 
-from flask_login import current_user
-
+# TODO: Remove now with proper user auth
 if os.environ.get('APP_ENV') == 'dev':
     try:
         from app.common.database.seed.seed_dev_db import seed_dev_db
