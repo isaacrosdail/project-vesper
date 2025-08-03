@@ -3,6 +3,13 @@ from app.core.constants import DEFAULT_LANG
 from app.core.messages import msg
 from decimal import Decimal
 
+TRANSACTION_SCHEMA = {
+	'required': ['barcode', 'quantity', 'price'],
+	'optional': []
+}
+
+#PRODUCT_SCHEMA
+
 def parse_and_validate_form_data(form_data):
     ######## TODO: EXTRACT THIS VALIDATION/ETC STUFF INTO HELPER FUNCTIONS
     # Normalize

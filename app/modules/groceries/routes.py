@@ -118,7 +118,7 @@ def transactions():
                         transaction_data=form_data
                         )
                 # Have enough info => add product
-                if not product:
+                elif not product:
                     grocery_repo.add_product(session, current_user.id, **product_data)
                     session.flush() # Forces INSERT without committing (context manager wouldn't have done this yet)
                     product = grocery_repo.lookup_barcode(session, product_data["barcode"], current_user.id)
