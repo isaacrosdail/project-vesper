@@ -1,13 +1,11 @@
-from app.core.database import database_connection, db_session
-from app.common.visualization.charts import get_time_entry_dataframe
+from app.core.database import db_session
+from app.common.visualization.charts import get_filtered_dataframe
 from app.modules.time_tracking.models import TimeEntry
 from datetime import datetime, timezone, timedelta
-import pandas as pd
-import sys
 
 print("FILE IS BEING IMPORTED")
 
-def test_get_time_entry_dataframe(logged_in_user):
+def test_get_filtered_dataframe(logged_in_user):
     
         # ARRANGE
         time_entries = [

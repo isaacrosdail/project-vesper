@@ -1,10 +1,8 @@
-from decimal import Decimal
 
-import pytest
 
 from app.core.database import db_session
 from app.modules.groceries import repository as grocery_repo
-from app.modules.groceries.models import Product, Transaction
+from app.modules.groceries.models import Product
 
 
 # region lookup_barcode

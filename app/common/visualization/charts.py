@@ -42,8 +42,6 @@ def get_metric_dataframe(metric_type: str, days_ago: int, session: Session) -> p
 
     # Get these into our data frame
     df = pd.DataFrame({'Date': dates, metric_type.title(): values})
-
-    # Return DataFrame to caller
     return df
 
 # get_metric_dataframe adapted for TimeEntries
@@ -67,8 +65,6 @@ def get_time_entry_dataframe(model_name: Type[Any], category: str, days_ago: int
 
     # Get these into our data frame
     df = pd.DataFrame({'Date': dates, category.title(): values})
-
-    # Return DataFrame to caller
     return df
 
 def create_metric_chart_html(df: pd.DataFrame, 
@@ -79,7 +75,7 @@ def create_metric_chart_html(df: pd.DataFrame,
     """
     Convert metric DataFrame to HTML chart.
     Args:
-        df: DataFrame from get_metric_dataframe()
+        df: Pandas DataFrame being passed in.
         metric_type: Name of the metric (for titles/labels)
         chart_type: Type of chart ('line', 'bar', etc.)
         date_format: Format string for x-axis dates

@@ -1,9 +1,7 @@
 # Handles DB models for tasks module
 
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, String
 
 from app.core.db_base import Base, CustomBaseTaskMixin
 

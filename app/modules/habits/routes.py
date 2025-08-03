@@ -1,13 +1,12 @@
 # For created_at / completed_at
-from datetime import datetime, timezone
+from datetime import datetime
 
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
-from sqlalchemy import func
 
 from app.common.sorting import bubble_sort
 
-from app.core.database import db_session, database_connection
+from app.core.database import database_connection
 # Import Habit repository
 from app.modules.habits import repository as habits_repo
 # Import Habit, HabitCompletion model
@@ -59,7 +58,7 @@ def habits():
         with database_connection() as session:
         # Add new_habit to db
             session.add(new_habit)
-            flash(f"Habit added successfully.") # flash confirmation
+            flash("Habit added successfully.") # flash confirmation
 
             return redirect(url_for("habits.dashboard")) # Redirect after POST - NOT render_template
             # Follows Post/Redirect/Get (PRG) pattern
@@ -93,7 +92,7 @@ def completions(habit_id):
             )
             session.add(new_habit_completion)
             return jsonify({"success": True, "message": "Habit marked complete"}), 201 # 201 = Created (success for POST)
-    except Exception as e:
+    except Exception:
         return jsonify({"success": False, "message": "Failed to mark habit complete"}), 500
     
 
@@ -134,5 +133,5 @@ def completion(habit_id):
             else:
                 return jsonify({"success": False, "message": "No completion found for today"}), 404
             
-    except Exception as e:
+    except Exception:
         return jsonify({"success": False, "message": "Failed to unmark habit"}), 500 # 500 = Internal Server Error

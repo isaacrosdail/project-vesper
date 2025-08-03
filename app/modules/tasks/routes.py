@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 
-from app.core.database import db_session, database_connection
+from app.core.database import database_connection
 from app.common.sorting import bubble_sort
 
 # Import Task repository
@@ -66,7 +66,7 @@ def tasks():
         # Add new_task to db
         with database_connection() as session:
             session.add(new_task)
-            flash(f"Task added successfully.")
+            flash("Task added successfully.")
             return redirect(url_for("tasks.dashboard")) # Redirect after POST - NOT render_template
             # Using redirect here after the form POST follows the best practice of
             # Post/Redirect/Get (PRG) pattern - standard for handling form submissions in web apps

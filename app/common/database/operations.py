@@ -2,8 +2,10 @@
 # Exact intention of this file TBD
 
 from sqlalchemy import text
-from app.core.constants import DATA_TABLES, ALL_TABLES, DATA_SEQUENCES, ALL_SEQUENCES
-from app.core.database import database_connection
+
+from app.core.constants import (ALL_SEQUENCES, ALL_TABLES, DATA_SEQUENCES,
+                                DATA_TABLES)
+
 
 # Delete all data without nuking schema, optionally reset ID sequencing
 # Does NOT delete from User table
