@@ -14,6 +14,7 @@ class Task(Base, CustomBaseTaskMixin):
     title = Column(String(255), unique=True, nullable=False)
     is_done = Column(Boolean, default=False)
     type = Column(String(50), default='todo')
+    # TODO: Add category, due_date?
     
     # Human-readable column names
     COLUMN_LABELS = {
