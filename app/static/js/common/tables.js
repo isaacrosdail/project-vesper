@@ -1,8 +1,6 @@
 
 // Functions for our tables, such as editTableField or deleteTableItem?
 
-
-
 // Currently used by tasks/dashboard & groceries/dashboard
 // DELETE fetch request when clicking delete button
 /**
