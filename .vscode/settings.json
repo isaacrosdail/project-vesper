@@ -20,7 +20,8 @@
         "node_modules/": true,
         ".venv/": true,
         ".pytest_cache/": true,
-        ".coverage": true
+        ".coverage": true,
+        "PROJECT_LOG.md": true
     },
     "files.watcherExclude": {
         "**/node_modules/**": true,
