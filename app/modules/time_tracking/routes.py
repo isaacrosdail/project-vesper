@@ -27,7 +27,7 @@ def time_entries():
         
             # Get JSON data from request => put in dict entry_data
             entry_data =  request.get_json()
-            print(entry_data, file=sys.stderr)
+            # DEBUG: print(entry_data, file=sys.stderr)
 
             with database_connection() as session:
 
@@ -37,8 +37,6 @@ def time_entries():
                     duration = float(entry_data.get('duration')),
                     description = entry_data.get('description'),
                 )
-
-                # Save to db
                 session.add(new_time_entry)
 
                 return jsonify({"success": True, "message": "Time entry added."}), 201
