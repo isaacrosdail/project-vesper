@@ -24,6 +24,7 @@ from app.modules.habits.routes import habits_bp
 from app.modules.metrics.routes import metrics_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
+from app._internal.health_routes import internal_bp
 
 
 def create_app(config_name=None):
@@ -95,3 +96,4 @@ def _register_blueprints(app):
     app.register_blueprint(metrics_bp)
     app.register_blueprint(time_tracking_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(internal_bp)
