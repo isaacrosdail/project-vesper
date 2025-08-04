@@ -1,22 +1,20 @@
+# Added: Make Alembic use proper config class directly
+import os
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
-# Added: Make Alembic use proper config class directly
-import os
-from dotenv import load_dotenv
 load_dotenv()
 
-# import our debug util
-from app.utils.debug import debug_config
-
-from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
-
+#from app.core.auth.models import User
+#from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
+from app.core.config import config_map
 from app.core.db_base import Base  # Import SQLAlchemy Base
-from app.core.models import User
-from app.modules.tasks.models import Task
+# import our debug util
+from app.common.debug import debug_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

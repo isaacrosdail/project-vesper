@@ -1,4 +1,4 @@
-from app.core.database import db_session, database_connection
+from app.core.database import database_connection
 
 def test_add_transaction_submission_creates_transaction(client):
     # Create product

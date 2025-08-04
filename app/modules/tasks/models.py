@@ -1,9 +1,7 @@
 # Handles DB models for tasks module
 
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, String
 
 from app.core.db_base import Base, CustomBaseTaskMixin
 
@@ -14,6 +12,7 @@ class Task(Base, CustomBaseTaskMixin):
     title = Column(String(255), unique=True, nullable=False)
     is_done = Column(Boolean, default=False)
     type = Column(String(50), default='todo')
+    # TODO: Add category, due_date?
     
     # Human-readable column names
     COLUMN_LABELS = {

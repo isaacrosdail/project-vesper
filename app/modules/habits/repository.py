@@ -1,20 +1,17 @@
 # DB logic functions to access data
 
-from .models import Habit, HabitCompletion, DailyIntention
+from .models import Habit, HabitCompletion
 from sqlalchemy import func
-from datetime import datetime, timezone
-# Get all habits
-def get_all_habits(session):
-    return session.query(Habit).all()
 
-# Get today's daily intention
-def get_today_intention(session):
 
-    # Get today in UTC
-    today_utc = datetime.now(timezone.utc).date()
+# Get all habits for given user id
+def get_user_habits(session, user_id):
+    return session.query(Habit).filter(Habit.user_id==user_id).all()
 
-    todayIntention = session.query(DailyIntention).filter(
-        func.date(DailyIntention.created_at) == today_utc
+# Get today's habit completions for a given user id
+def get_user_today_habit_completions(session, user_id, habit_id, date):
+    return session.query(HabitCompletion).join(Habit).filter(
+        HabitCompletion.habit_id == habit_id,
+        Habit.user_id == user_id,
+        func.date(HabitCompletion.created_at) == date
     ).first()
-    
-    return todayIntention

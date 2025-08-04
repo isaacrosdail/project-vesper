@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Login:</h2>
+<div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
+<form action="{{ url_for('auth.login') }}" method="POST">
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" placeholder="johnsaccount" required
+            class="{{ styles.input_classes() }}">
+    </div>
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="1234" required
+            class="{{ styles.input_classes() }}">
+    </div>
+    <div class="mb-4">
+        <label for="remember_user">Remember me</label>
+        <input type="checkbox" id="remember_user" name="remember_user">
+    </div>
+
+    <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
+</form>
+<a href="{{ url_for('auth.register') }}">Don't have an account? Sign up</a>
+</div>
+{% endblock %}

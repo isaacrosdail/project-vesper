@@ -1,13 +1,10 @@
 # Centralized DB setup file
-import os
 
-from flask import current_app
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from app.core.db_base import Base
 
 # Below we're using a connection pool singleton
 # Only creating one engine across entire app

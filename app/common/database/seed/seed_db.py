@@ -2,35 +2,33 @@
 
 import random
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import text
+
 from sqlalchemy.exc import IntegrityError
 
-from app.core.database import db_session, database_connection
-from app.core.models import User
+from app.core.auth.models import User
+from app.core.database import database_connection
 from app.modules.groceries.models import Product, Transaction
-from app.modules.habits.models import Habit, HabitCompletion, DailyIntention, DailyMetric
+from app.modules.habits.models import Habit, HabitCompletion
+from app.modules.metrics.models import DailyIntention, DailyMetric
 from app.modules.tasks.models import Task
 
 
-def seed_db():
+# Minimal dataset for demo users
+def seed_basic_data(user_id, session):
+    pass
 
-    # Ensuring we start with a clean slate
-    with database_connection() as session:
-        # to study: cascade settings for tables
-        session.query(Transaction).delete()
-        session.query(Task).delete()
-        session.query(Product).delete()
-        session.query(HabitCompletion).delete()
-        session.query(Habit).delete()
-        session.query(DailyIntention).delete()
-        session.query(DailyMetric).delete()
+# Comprehensive dataset for development
+def seed_rich_data(user_id, session):
+    pass
+
+def seed_db():
 
     with database_connection() as session:
         try:
             # Populate default user (separate transaction)
             default_user = User(id=1, username='default')
             session.add(default_user)
-            session.flush() # flush so any other adds can reference User
+            session.flush() # flush to assign ID to user before referencing it below
         except IntegrityError:
             # session.rollback() # clear failed transaction
             print("User already exists, skipping..")
@@ -144,3 +142,6 @@ def seed_db():
         session.commit()
 
         return "DB seeded successfully"
+    
+
+    

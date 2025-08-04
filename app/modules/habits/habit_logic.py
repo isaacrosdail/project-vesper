@@ -1,17 +1,19 @@
 # Business logic functions for habits module
 
 from datetime import datetime, timezone
-from app.utils.sorting import bubble_sort
-from app.modules.habits.models import HabitCompletion
+from app.common.sorting import bubble_sort
+from app.modules.habits.models import Habit, HabitCompletion
 from app.core.database import database_connection
 from sqlalchemy import func
 
 # Originally prototyped in playground3.py - see that for notes
-def calculate_habit_streak(habit_id, session=None):
+def calculate_habit_streak(habit_id, user_id, session):
 
     # Fetch all HabitCompletions for given habit
-    habit_completions = session.query(HabitCompletion).filter_by(
-        habit_id=habit_id
+    # TODO: Study/drill these (also: joins generally)
+    habit_completions = session.query(HabitCompletion).join(Habit).filter(
+        HabitCompletion.habit_id == habit_id,
+        Habit.user_id == user_id, # Ensure habit belongs to this user
     ).all()
 
     # Streak is naturally 0 if there simply are no completions :P
@@ -36,18 +38,19 @@ def calculate_habit_streak(habit_id, session=None):
     else:
         return 0
 
-def check_if_completed_today(habit_id, session=None):
+def check_if_completed_today(habit_id, user_id, session):
     # Get today in UTC, strip datetime using date() for comparison below
     today_utc = datetime.now(timezone.utc).date()
     
     def _do_check(s):
         # query habitcompletion table, need matching habit_id and completed_at = today
-        habit_completion = s.query(HabitCompletion).filter(
+        habit_completion = s.query(HabitCompletion).join(Habit).filter(
                 HabitCompletion.habit_id == habit_id,
+                Habit.user_id == user_id,
                 func.date(HabitCompletion.created_at) == today_utc
         ).first()
-        # Returns true if it exists, false if it doesn't
-        return habit_completion is not None
+
+        return habit_completion is not None  # return true if exists, false if not
     
     if session:
         return _do_check(session)

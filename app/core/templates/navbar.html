@@ -12,34 +12,60 @@
             <!-- Desktop nav links -->
             <div class="space-x-6" id="desktop-nav">
                 {{ styles.nav_link('Home', 'main.home', request.endpoint) }}
-                {{ styles.nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
-                {{ styles.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
-                {{ styles.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
-                {{ styles.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
-                {{ styles.nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
+
+                {% if current_user.is_authenticated %}
+                    {{ styles.nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
+
+                    {{ styles.nav_link('Logout', 'auth.logout', request.endpoint )}}
+                {% endif %}
+                
+                {% if current_user.is_anonymous %}
+                    {{ styles.nav_link('Login/Register', 'auth.login', request.endpoint) }}
+                {% endif %}
+
             </div>
             <!-- Mobile nav links: Hidden by default -->
             <div class="space-y-6" id="mobile-nav">
                 {{ styles.nav_link('Home', 'main.home', request.endpoint) }}
-                {{ styles.nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
-                {{ styles.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
-                {{ styles.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
-                {{ styles.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
+
+                {% if current_user.is_authenticated %}
+                    {{ styles.nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
+                    {{ styles.nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
+
+                    {{ styles.nav_link('Logout', 'auth.logout', request.endpoint )}}
+                {% endif %}
+                
+                {% if current_user.is_anonymous %}
+                    {{ styles.nav_link('Login/Register', 'auth.login', request.endpoint) }}
+                {% endif %}
             </div>
         </div>
 
+        <!-- Temporary Home for some admin-only privileges -->
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
         <!-- RIGHT: Reset DB button, then System/Light/Dark toggle -->
         <form action="{{ url_for('main.reset_db') }}" method="POST">
             <button type="submit" class="{{ styles.btn_classes() }}">Reset DB</button>
         </form>
 
+        <!-- TODO: Finish this to implement custom dropdown(s) elsewhere => chiefly for theme then lang toggles -->
         {{ styles.my_select() }}
+
+        {% endif %}
 
         <form class="color-picker">
             <fieldset>
                 <!-- Legend here is good for accessibility (screen readers) -->
                 <legend class="visually-hidden">Pick a theme</legend>
                 
+                <!-- Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) -->
                 <select name="theme" id="theme" class="{{ styles.select_form_classes() }}">
                     <option value="laptop">System</option>
                     <option value="sun">Light</option>

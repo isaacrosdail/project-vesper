@@ -1,8 +1,6 @@
 
 // Functions for our tables, such as editTableField or deleteTableItem?
 
-
-
 // Currently used by tasks/dashboard & groceries/dashboard
 // DELETE fetch request when clicking delete button
 /**
@@ -49,7 +47,7 @@ async function deleteTableItem(module, itemId, subtype = "none") { // Default to
  * @param {string|number} itemId - ID of the item being updated 
  */
 // Allows us to double-click a table cell and change its value
-function editTableField(td, module, field, itemId) {
+function editTableField(td, module, field, itemId, subtype) {
 
     // Debug alert
     // alert(`Module: ${module}, Field: ${field}, ID: ${itemId}, Value: ${td.textContent}`);
@@ -70,7 +68,7 @@ function editTableField(td, module, field, itemId) {
     // Imagine what might occur if the user hits enter AND clicks away in rapid succession? This helps avoid potential issues
     input.addEventListener('blur', function() {
         const td = this.parentElement; // 'this' = input element, so here we get the parent <td>
-        saveUpdatedField(module, field, itemId, input.value, td); // Pass td along with other data
+        saveUpdatedField(module, field, itemId, input.value, td, subtype); // Pass td along with other data
     });
 
     input.addEventListener('keydown', function(event) {
@@ -167,7 +165,7 @@ function handleDeleteClick(e) {
 function handleEditClick(e) {
     if (e.target.classList.contains('editable-cell')) {
         const td = e.target;
-        editTableField(td, td.dataset.module, td.dataset.field, td.dataset.itemId)
+        editTableField(td, td.dataset.module, td.dataset.field, td.dataset.itemId, td.dataset.subtype)
     }
 }
 

@@ -3,7 +3,6 @@ from sqlalchemy import (Column, DateTime, Float, String)
 
 from app.core.db_base import Base
 
-from datetime import timedelta
 
 # Model for individual time entries for our activity log
 class TimeEntry(Base):
