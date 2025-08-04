@@ -20,12 +20,12 @@ def dashboard():
     with database_connection() as session:
         # # Takes in metric_type str & days_ago int => returns DataFrame
         # # Get DataFrame for metric_type weight starting from 7 days ago (ie, show last 7 days)
-        df = get_filtered_dataframe(session, DailyMetric, "metric_type", "weight", "value", DEFAULT_CHART_DAYS)
+        df = get_filtered_dataframe(session, DailyMetric, current_user.id, "metric_type", "weight", "value", DEFAULT_CHART_DAYS)
         # # Pass in df, metric_type => returns graph_html figure
         weight_graph = create_metric_chart_html(df, "weight")
 
         # Same for steps
-        df_2 = get_filtered_dataframe(session, DailyMetric, "metric_type", "steps", "value", DEFAULT_CHART_DAYS)
+        df_2 = get_filtered_dataframe(session, DailyMetric, current_user.id, "metric_type", "steps", "value", DEFAULT_CHART_DAYS)
         steps_graph = create_metric_chart_html(df_2, "steps")
 
         # Get list of all metrics for table, sort by date for now
