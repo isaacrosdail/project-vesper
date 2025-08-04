@@ -1,70 +1,58 @@
 from datetime import datetime, timedelta, timezone
+from typing import Any, Type
 
 import pandas as pd
 import plotly.express as px
-from app.modules.metrics.models import DailyMetric
-from app.modules.time_tracking.models import TimeEntry
-from typing import Type, Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from app.core.db_base import Base
 
 
-# Function to return results from query for metric_type & timeframe for graphing our data with Plotly
-# Gets metric data ready for visualization
-def get_metric_dataframe(metric_type: str, days_ago: int, session: Session) -> pd.DataFrame:
+
+def get_filtered_dataframe(session: Session, model_name: Type[Any], filter_field:str, filter_value, value_field_name:str, days_ago: int) -> pd.DataFrame:
     """
-    Get metric data for the last X days, formatted for plotting.
+    Queries a database table and returns a pandas DataFrame with filtered data ready for plotting.
+    
     Args:
-        metric_type: eg, 'weight', 'sleep'
-        days_ago: Number of days back from today to include/start
-        session: Database session for executing queries
+        session: SQLAlchemy Session object.
+        model_name: Name of database table to query.
+        filter_field: Name of column we're filtering on. (ie, "category", "metric_type")
+        filter_value: Name of what we're searching for. (ie, "Programming", "weight")
+        value_field_name: Name of column we're extracting data from to be plotted. (ie, "duration", "value")
+        days_ago: Integer representing how far back in time our query should reach.
     Returns:
-        DataFrame with 'Date' & capitalized metric_type columns
+        pd.DataFrame: Pandas DataFrame.
+    Examples:
+        ### Get weight from DailyMetric
+        df = get_filtered_dataframe(session, DailyMetric, "metric_type", "weight", "value", 30)
+
+        ### Get programming time from TimeEntry  
+        df = get_filtered_dataframe(session, TimeEntry, "category", "Programming", "duration", 7)
     """
-    
-    today_utc = datetime.now(timezone.utc)
-    # Since .func strips timezone, need .date() to make start_date a date, not a datetime
-    start_date = (today_utc - timedelta(days=days_ago)).date()
-
-    # Query for weight: 
-    # Need all DailyMetrics for metric_type where date is between today & days_ago ordered by date
-    metric_entries = session.query(DailyMetric).filter(
-        DailyMetric.metric_type == metric_type,
-        func.date(DailyMetric.created_at) >= start_date, # compares date to date
-        DailyMetric.created_at <= today_utc              # compares datetime to datetime (fine to mix?)
-    ).order_by(DailyMetric.created_at).all()
-
-    # Extract dates & metric_type entries into lists for Plotly
-    # Note: using .date() to strip datetime objects to dates => Plenty for graphs for now
-    dates = [entry.created_at.date() for entry in metric_entries] # [date1, date2, date3, ...]
-    values = [entry.value for entry in metric_entries]            # [value1, value2, null, ...]
-
-    # Get these into our data frame
-    df = pd.DataFrame({'Date': dates, metric_type.title(): values})
-    return df
-
-# get_metric_dataframe adapted for TimeEntries
-def get_time_entry_dataframe(model_name: Type[Any], category: str, days_ago: int, session: Session) -> pd.DataFrame:
-    
     today_utc = datetime.now(timezone.utc)
     start_date = (today_utc - timedelta(days=days_ago)).date()
 
-    # Query for given category
-    # Need all model_names for metric_type where date is between today & days_ago ordered by date
+    # SQLAlchemy uses column objects like TimeEntry.category & translates == into "'WHERE category = 'Programming'"
+    # Just passing str "category" then doing model_name.filter_field directly wouldn't work here
+    # Need to reconstruct column object from the string
+    filter_field_obj = getattr(model_name, filter_field)
+
+    # Query for filtered data
+    # Extract matching entries & their values (e.g., duration, weight measurements)
+
+    # Need all model_names for filter_field_obj where date is between today & days_ago, ordered by date
     entries = session.query(model_name).filter(
-        model_name.category == category,
+        filter_field_obj == filter_value,
         func.date(model_name.created_at) >= start_date, # compares date to date
         model_name.created_at <= today_utc              # compares datetime to datetime (fine to mix?)
     ).order_by(model_name.created_at).all()
 
-    # Extract dates & category entries into lists for Plotly
+    # Extract dates & values for plotting into discrete lists
     # Note: using .date() to strip datetime objects to dates => Plenty for graphs for now
-    dates = [entry.created_at.date() for entry in entries] # [date1, date2, date3, ...]
-    values = [entry.duration for entry in entries]            # [value1, value2, null, ...]
+    dates = [entry.created_at.date() for entry in entries]            # [date1, date2, date3, ...]
+    values = [getattr(entry, value_field_name) for entry in entries]  # [value1, value2, null, ...]
 
     # Get these into our data frame
-    df = pd.DataFrame({'Date': dates, category.title(): values})
+    df = pd.DataFrame({'Date': dates, filter_value.title(): values})
     return df
 
 def create_metric_chart_html(df: pd.DataFrame, 
