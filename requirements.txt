@@ -27,6 +27,7 @@ pluggy==1.5.0
 port-for==0.7.4
 psutil==7.0.0
 psycopg2-binary==2.9.10
+pyflakes==3.4.0
 pytest==8.3.5
 pytest-cov==6.1.1
 pytest-mock==3.14.0
@@ -34,6 +35,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 pytz==2025.2
 requests==2.32.3
+ruff==0.12.7
 six==1.17.0
 SQLAlchemy==2.0.39
 typing_extensions==4.12.2
