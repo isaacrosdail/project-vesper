@@ -1,7 +1,6 @@
 # Getting started with HTTP health checks
 
 from flask import Blueprint, jsonify
-from app import db
 
 from app.common.datetime.helpers import now_local
 from app.core.constants import DEFAULT_HEALTH_TIMEZONE
