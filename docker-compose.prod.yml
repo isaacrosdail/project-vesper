@@ -21,7 +21,7 @@ services:
       test: ["CMD-SHELL", "pg_isready"] # returns 'accepting connections' if up
       interval: 30s     # How often to run the health check (default: 30s)
       timeout: 5s       # Max time to wait for the command to finish (default: 30s)
-      start-period: 10s # Grace period after container starts before failures count (default: 0s)
+      # start-period: 10s # Grace period after container starts before failures count (default: 0s)
       retries: 3        # Allowed consecutive failures before marking unhealthy (default: 3)
 
   web:
@@ -42,7 +42,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
       timeout: 5s
-      start-period: 10s
+      # start-period: 10s
       retries: 3
 
 
