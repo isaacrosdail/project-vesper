@@ -35,7 +35,12 @@ def test_get_filtered_dataframe(logged_in_user):
 
         # ACT
         #print(f"Session 2 ID: {id(db_session)}")
-        df = get_time_entry_dataframe(TimeEntry, "Programming", 7, db_session)
+        # Get all TimeEntries where category = Programming
+        # So category is the filter_field
+        # Programming the filter_value
+        # and duration the value_field_name
+        
+        df = get_filtered_dataframe(db_session, TimeEntry, "category", "Programming", "duration", 7)
         print(f"got df:{df}")
 
         print("hey")
@@ -52,7 +57,7 @@ def test_get_filtered_dataframe(logged_in_user):
         assert df["Programming"].sum() == 90 # duration 30*3
         print("HELLO THERE 2")
 
-def test_also_get_time_entry_dataframe(logged_in_user):
+def test_also_get_filtered_dataframe(logged_in_user):
     print("TEST START")
 
     # ARRANGE
@@ -66,7 +71,7 @@ def test_also_get_time_entry_dataframe(logged_in_user):
     db_session.commit()
     print("Added entry")
 
-    df = get_time_entry_dataframe(TimeEntry, "Programming", 7, db_session)
+    df = get_filtered_dataframe(db_session, TimeEntry, "category", "Programming", "duration", 7)
     print(f"Got df: {df}")
     print(f"Length: {len(df)}")
     assert len(df) == 1
