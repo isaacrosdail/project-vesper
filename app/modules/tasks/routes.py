@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 
-from app.core.database import db_session, database_connection
+from app.core.database import database_connection
 from app.common.sorting import bubble_sort
 
 # Import Task repository

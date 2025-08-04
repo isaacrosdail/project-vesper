@@ -1,13 +1,12 @@
 # For created_at / completed_at
-from datetime import datetime, timezone
+from datetime import datetime
 
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
-from sqlalchemy import func
 
 from app.common.sorting import bubble_sort
 
-from app.core.database import db_session, database_connection
+from app.core.database import database_connection
 # Import Habit repository
 from app.modules.habits import repository as habits_repo
 # Import Habit, HabitCompletion model

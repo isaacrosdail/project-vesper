@@ -1,19 +1,17 @@
 
-from flask import Blueprint, request, jsonify, render_template
-import sys
-from app.modules.time_tracking.models import TimeEntry
-
-from app.core.database import database_connection
+from flask import Blueprint, jsonify, render_template, request
 
 from app.common.visualization.charts import (create_metric_chart_html,
-                                            get_metric_dataframe, get_time_entry_dataframe)
+                                             get_filtered_dataframe)
+from app.core.constants import DEFAULT_CHART_DAYS
+from app.core.database import database_connection
+from app.modules.time_tracking.models import TimeEntry
 
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
 
 @time_tracking_bp.route('/dashboard', methods=["GET"])
 def dashboard():
     
-    DEFAULT_DAYS = 14
     with database_connection() as session:
         df = get_time_entry_dataframe(TimeEntry, "Programming", DEFAULT_DAYS, session)
         time_entries_graph = create_metric_chart_html(df, "time_entries")

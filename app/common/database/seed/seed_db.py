@@ -2,16 +2,16 @@
 
 import random
 from datetime import datetime, timedelta, timezone
+
 from sqlalchemy.exc import IntegrityError
 
-from app.core.database import database_connection
 from app.core.auth.models import User
+from app.core.database import database_connection
 from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit, HabitCompletion
 from app.modules.metrics.models import DailyIntention, DailyMetric
 from app.modules.tasks.models import Task
 
-from flask_login import current_user
 
 # Minimal dataset for demo users
 def seed_basic_data(user_id, session):

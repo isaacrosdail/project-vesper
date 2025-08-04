@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import Any, List
 
 # Will be implementing my own versions of the major sorting algorithms here for learning/practice
 # and invoking them across Vesper
