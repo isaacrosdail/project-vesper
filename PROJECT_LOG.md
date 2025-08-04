@@ -754,7 +754,11 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 	- Added column for this in Transaction table
 6. Metrics tweak: Added aspect-ratio CSS to make graphs match height
 
-
+## [Wed 09.07.25]
+* Working in mini_sprint branch *
+**Log:**
+1. Made "METRICS WE'RE TRACKING" note in Obsidian to keep the following straight
+	- Put all metrics I'm thinking of tracking into a card on main page, seeing where the dust settles just to get things moving
 # TODOS:
 1. Add Docker checkhealth
 2. Add health/status API endpoints (have Docker checkhealth ping these too)
