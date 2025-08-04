@@ -75,7 +75,7 @@ def create_metric_chart_html(df: pd.DataFrame,
     """
     Convert metric DataFrame to HTML chart.
     Args:
-        df: DataFrame from get_metric_dataframe()
+        df: Pandas DataFrame being passed in.
         metric_type: Name of the metric (for titles/labels)
         chart_type: Type of chart ('line', 'bar', etc.)
         date_format: Format string for x-axis dates
