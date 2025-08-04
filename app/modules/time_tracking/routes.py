@@ -13,7 +13,7 @@ time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templat
 def dashboard():
     
     with database_connection() as session:
-        df = get_time_entry_dataframe(TimeEntry, "Programming", DEFAULT_DAYS, session)
+        df = get_filtered_dataframe(session, TimeEntry, "category", "Programming", "duration", DEFAULT_CHART_DAYS)
         time_entries_graph = create_metric_chart_html(df, "time_entries")
 
         return render_template("time_tracking/dashboard.html",
