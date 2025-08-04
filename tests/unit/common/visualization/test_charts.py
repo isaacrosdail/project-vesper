@@ -45,11 +45,11 @@ def test_get_filtered_dataframe(logged_in_user):
 
         print("hey")
         # DEBUG - see what's actually in there
-        print(f"\n=== DEBUG ===")
+        print("\n=== DEBUG ===")
         print(f"DataFrame shape: {df.shape}")
         print(f"DataFrame contents:\n{df}")
         print(f"Sum: {df['Programming'].sum() if 'Programming' in df.columns else 'No Programming column!'}")
-        print(f"=============\n")
+        print("=============\n")
 
         # ASSERT
         assert len(df) == 3 # only 2 programming entries within given days
