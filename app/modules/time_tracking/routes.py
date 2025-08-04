@@ -6,36 +6,39 @@ from app.common.visualization.charts import (create_metric_chart_html,
 from app.core.constants import DEFAULT_CHART_DAYS
 from app.core.database import database_connection
 from app.modules.time_tracking.models import TimeEntry
+from flask_login import current_user, login_required
 
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
 
 @time_tracking_bp.route('/dashboard', methods=["GET"])
+@login_required
 def dashboard():
     
     with database_connection() as session:
-        df = get_filtered_dataframe(session, TimeEntry, "category", "Programming", "duration", DEFAULT_CHART_DAYS)
+        df = get_filtered_dataframe(session, TimeEntry, current_user.id, "category", "Programming", "duration", DEFAULT_CHART_DAYS)
         time_entries_graph = create_metric_chart_html(df, "time_entries")
 
         return render_template("time_tracking/dashboard.html",
                                 time_entries_graph=time_entries_graph)
 
 @time_tracking_bp.route('/', methods=["GET", "POST"])
+@login_required
 def time_entries():
     
     try:
         if request.method == 'POST':
         
-            # Get JSON data from request => put in dict entry_data
-            entry_data =  request.get_json()
-            # DEBUG: print(entry_data, file=sys.stderr)
+            # Get JSON data from request => put in dict form_data
+            form_data =  request.get_json()
+            # DEBUG: print(form_data, file=sys.stderr)
 
             with database_connection() as session:
 
                 # New TimeEntry with that data
                 new_time_entry = TimeEntry(
-                    category = entry_data.get('category'),
-                    duration = float(entry_data.get('duration')),
-                    description = entry_data.get('description'),
+                    category = form_data.get('category'),
+                    duration = float(form_data.get('duration')),
+                    description = form_data.get('description'),
                 )
                 session.add(new_time_entry)
 
