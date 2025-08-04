@@ -6,6 +6,8 @@ MIN_PASSWORD_LENGTH = 8
 MAX_PASSWORD_LENGTH = 14
 MAX_NAME_LENGTH = 50
 DEFAULT_CHART_DAYS = 14 # How many days back to look when plotting with Plotly
+DEFAULT_HEALTH_TIMEZONE = 'America/Chicago' # Default TZ to be used for _internal health check via HTTP
+                                            # Note: Above uses IANA timezone names
 
 DATA_TABLES = [
     # Arranged in dependency order -> children first
