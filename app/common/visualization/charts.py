@@ -8,13 +8,14 @@ from sqlalchemy.orm import Session
 
 
 
-def get_filtered_dataframe(session: Session, model_name: Type[Any], filter_field:str, filter_value, value_field_name:str, days_ago: int) -> pd.DataFrame:
+def get_filtered_dataframe(session: Session, model_name: Type[Any], user_id: int, filter_field:str, filter_value, value_field_name:str, days_ago: int) -> pd.DataFrame:
     """
     Queries a database table and returns a pandas DataFrame with filtered data ready for plotting.
     
     Args:
         session: SQLAlchemy Session object.
         model_name: Name of database table to query.
+        user_id: User id by which to filter query.
         filter_field: Name of column we're filtering on. (ie, "category", "metric_type")
         filter_value: Name of what we're searching for. (ie, "Programming", "weight")
         value_field_name: Name of column we're extracting data from to be plotted. (ie, "duration", "value")
@@ -23,10 +24,10 @@ def get_filtered_dataframe(session: Session, model_name: Type[Any], filter_field
         pd.DataFrame: Pandas DataFrame.
     Examples:
         ### Get weight from DailyMetric
-        df = get_filtered_dataframe(session, DailyMetric, "metric_type", "weight", "value", 30)
+        df = get_filtered_dataframe(session, DailyMetric, current_user.id, "metric_type", "weight", "value", 30)
 
         ### Get programming time from TimeEntry  
-        df = get_filtered_dataframe(session, TimeEntry, "category", "Programming", "duration", 7)
+        df = get_filtered_dataframe(session, TimeEntry, current_user.id, "category", "Programming", "duration", 7)
     """
     today_utc = datetime.now(timezone.utc)
     start_date = (today_utc - timedelta(days=days_ago)).date()
@@ -43,7 +44,8 @@ def get_filtered_dataframe(session: Session, model_name: Type[Any], filter_field
     entries = session.query(model_name).filter(
         filter_field_obj == filter_value,
         func.date(model_name.created_at) >= start_date, # compares date to date
-        model_name.created_at <= today_utc              # compares datetime to datetime (fine to mix?)
+        model_name.created_at <= today_utc,             # compares datetime to datetime (fine to mix?)
+        model_name.user_id==user_id
     ).order_by(model_name.created_at).all()
 
     # Extract dates & values for plotting into discrete lists
@@ -57,7 +59,7 @@ def get_filtered_dataframe(session: Session, model_name: Type[Any], filter_field
 
 def create_metric_chart_html(df: pd.DataFrame, 
                              metric_type: str, 
-                             title: str = None, 
+                             title: str = None,
                              date_format: str = "%d.%m") -> str:
 
     """
