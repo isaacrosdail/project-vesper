@@ -9,13 +9,13 @@
     /* =============== LIGHT THEME DEFINITIONS =============== */
     color-scheme: light;
     /* === BACKGROUND COLORS === */
-    --light-bg-color: white;
-    --light-surface-primary: #e5e7eb;      /* bg-gray-200 main bg */
-    --light-surface-secondary: white;      /* bg-white cards, inputs */
-    --light-surface-subtle: #f3f4f6;       /* bg-gray-100 alternating rows */
-    --light-surface-muted: #e5e7eb;        /* bg-gray-200 buttons */
-    --light-surface-input: white;          /* background for input fields */
-    --light-surface-hover: #9ca3af;        /* bg-gray-400 hover backgrounds */
+    --light-bg-base: hsl(54 54 54);        /* Main page background */
+    --light-bg-card: hsl(220, 13%, 91%);   /* Cards, modals, main content areas (Tailwind: bg-gray-200)*/
+    --light-bg-input: hsl(100, 100%, 100%); /* Form inputs */
+    /* --light-surface-primary: #e5e7eb;      bg-gray-200 main bg */
+    --light-bg-subtle: #f3f4f6;       /* bg-gray-100 alternating rows */
+    --light-bg-muted: #e5e7eb;        /* bg-gray-200 buttons */
+    --light-bg-hover: #9ca3af;        /* bg-gray-400 hover backgrounds */
     --light-bg-selection: grey;
     --light-bg-destructive: red;
 
@@ -47,13 +47,13 @@
     
     /* =============== DARK THEME DEFINITIONS =============== */
     /* === BACKGROUND COLORS === */
-    --dark-bg-color: orange;
-    --dark-surface-primary: lime;
-    --dark-surface-secondary: #374151;           /* dark card bg */
-    --dark-surface-subtle: #4b5563;             /* dark alternating */
-    --dark-surface-muted: #6b7280;              /* dark buttons */
-    --dark-surface-input: gray; /* background for input fields */
-    --dark-surface-hover: #6b7280;              /* dark hover */
+    --dark-bg-base: hsl(0 0 0);            /* Main container/page bg color */
+    --dark-bg-card: gray;             /* Background for cards */
+    --dark-bg-input: hsl(100, 100%, 100%); /* Input fields */
+    /* --dark-surface-primary: lime; */
+    --dark-bg-subtle: #4b5563;             /* dark alternating */
+    --dark-bg-muted: #6b7280;              /* dark buttons */
+    --dark-bg-hover: #6b7280;              /* dark hover */
     --dark-bg-selection: grey;  /* color for selected text background */
     --dark-bg-destructive: red;
 
@@ -85,13 +85,13 @@
 
     /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
     /* === BACKGROUND COLORS === */
-    --bg-color: var(--light-bg-color);
+    --bg-base: var(--light-bg-base);
+    --bg-card: var(--light-bg-card);
+    --bg-input: var(--light-bg-input);
     --surface-primary: var(--light-surface-primary);
-    --surface-secondary: var(--light-surface-secondary);
-    --surface-subtle: var(--light-surface-subtle);
-    --surface-muted: var(--light-surface-muted);
-    --surface-input: var(--light-surface-input);
-    --surface-hover: var(--light-surface-hover);
+    --bg-subtle: var(--light-bg-subtle);
+    --bg-muted: var(--light-bg-muted);
+    --bg-hover: var(--light-bg-hover);
     --bg-selection: var(--light-bg-selection);
     --bg-destructive: var(--light-bg-destructive);
 
@@ -127,13 +127,13 @@
 
         /* ACTIVE THEME MAPPINGS - DARK */
         /* === BACKGROUND COLORS === */
-        --bg-color: var(--dark-bg-color);
+        --bg-base: var(--dark-bg-base);
+        --bg-card: var(--dark-bg-card);
+        --bg-input: var(--dark-bg-input);
         --surface-primary: var(--dark-surface-primary);
-        --surface-secondary: var(--dark-surface-secondary);
-        --surface-subtle: var(--dark-surface-subtle);
-        --surface-muted: var(--dark-surface-muted);
-        --surface-input: var(--dark-surface-input);
-        --surface-hover: var(--dark-surface-hover);
+        --bg-subtle: var(--dark-bg-subtle);
+        --bg-muted: var(--dark-bg-muted);
+        --bg-hover: var(--dark-bg-hover);
         --bg-selection: var(--dark-bg-selection);
         --bg-destructive: var(--dark-bg-destructive);
 
@@ -172,13 +172,13 @@
 
     /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
     /* === BACKGROUND COLORS === */
-    --bg-color: var(--light-bg-color);
+    --bg-base: var(--light-bg-base);
+    --bg-card: var(--light-bg-card);
+    --bg-input: var(--light-bg-input);
     --surface-primary: var(--light-surface-primary);
-    --surface-secondary: var(--light-surface-secondary);
-    --surface-subtle: var(--light-surface-subtle);
-    --surface-muted: var(--light-surface-muted);
-    --surface-input: var(--light-surface-input);
-    --surface-hover: var(--light-surface-hover);
+    --bg-subtle: var(--light-bg-subtle);
+    --bg-muted: var(--light-bg-muted);
+    --bg-hover: var(--light-bg-hover);
     --bg-selection: var(--light-bg-selection);
     --bg-destructive: var(--light-bg-destructive);
 
@@ -215,13 +215,13 @@
 
     /* ACTIVE THEME MAPPINGS - DARK */
     /* === BACKGROUND COLORS === */
-    --bg-color: var(--dark-bg-color);
+    --bg-base: var(--dark-bg-base);
+    --bg-card: var(--dark-bg-card);
+    --bg-input: var(--dark-bg-input);
     --surface-primary: var(--dark-surface-primary);
-    --surface-secondary: var(--dark-surface-secondary);
-    --surface-subtle: var(--dark-surface-subtle);
-    --surface-muted: var(--dark-surface-muted);
-    --surface-input: var(--dark-surface-input);
-    --surface-hover: var(--dark-surface-hover);
+    --bg-subtle: var(--dark-bg-subtle);
+    --bg-muted: var(--dark-bg-muted);
+    --bg-hover: var(--dark-bg-hover);
     --bg-selection: var(--dark-bg-selection);
     --bg-destructive: var(--dark-bg-destructive);
 
