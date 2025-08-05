@@ -20,98 +20,71 @@
 
     /* ======= BACKGROUND UTILITIES ======= */
     /* Background for full viewport/page */
-    .bg-color {
-        background: var(--bg-color);
-    }
+    .bg-base { background-color: var(--bg-base); }
     /* Card background - Primary container for content blocks */
-    .surface-primary {
-        background: var(--surface-primary);
-    }
-    .surface-secondary {
-        background: var(--surface-secondary);
-    }
-    .surface-subtle {
-        background: var(--surface-subtle);
-    }
-    .surface-muted {  /* BG-GRAY-200 */
-        background: var(--surface-muted);
-    }
-    .surface-input {
-        background: var(--surface-input);
-    }
-    .surface-hover {
-        background: var(--surface-hover);
-    }
-    .bg-selection {
-        background: var(--bg-selection);
-    }
-    .bg-destructive {
-        background: var(--bg-destructive);
-    }
+    .bg-card { background-color: var(--bg-card); }
+    /* Form input background */
+    .bg-input { background-color: var(--bg-input); }
+    .surface-primary { background-color: var(--surface-primary); }
+    .surface-secondary { background-color: var(--surface-secondary); }
+    .bg-subtle { background-color: var(--bg-subtle); }
+    .bg-muted {  /* BG-GRAY-200 */ background-color: var(--bg-muted); }
+    .bg-hover { background-color: var(--bg-hover); }
+    .bg-selection { background-color: var(--bg-selection); }
+    .bg-destructive { background-color: var(--bg-destructive); }
 
     /* ======= TEXT COLOR UTILITIES ======= */
-    .text-primary {
-        color: var(--text-primary);
-    }
-    .text-secondary {
-        color: var(--text-secondary);
-    }
-    .text-input {
-        color: var(--text-input);
-    }
-    .text-inverse {
-        color: var(--text-inverse);
-    }
-    .accent-text {
-        color: var(--accent-text);
-    }
-    .text-selection {
-        color: var(--text-selection);
-    }
-    .text-destructive {
-        color: var(--text-destructive);
-    }
+    .text-primary { color: var(--text-primary); }
+    .text-secondary { color: var(--text-secondary); }
+    .text-input { color: var(--text-input); }
+    .text-inverse { color: var(--text-inverse); }
+    .accent-text { color: var(--accent-text); }
+    .text-selection { color: var(--text-selection); }
+    .text-destructive { color: var(--text-destructive); }
 
     /* ======= BORDER UTILITIES ======= */
     /* BORDER-GRAY-300 STUFF */
     /* border-default in macros refers to: ??? */
-    .border-default {
-        border-color: var(--border-default);
-    }
+    .border-default { border-color: var(--border-default); }
     /* BORDER-GRAY-400 STUFF */
-    .border-strong {
-        border-color: var(--border-strong);
-    }
+    .border-strong { border-color: var(--border-strong); }
 
     /* ======= ACCENT UTILITIES ======= */
     /* Primary accent - like for navbar, table headers, etc */
-    .accent-primary {
-        background-color: var(--accent-primary);
-    }
-    .accent-secondary {
-        background-color: var(--accent-secondary);
-    }
+    .accent-primary { background-color: var(--accent-primary); }
+    .accent-secondary { background-color: var(--accent-secondary); }
 
     /* ======= PLACEHOLDER UTILITY ======= */
     /* .placeholder-text::placeholder -> pseudo-element targeting placeholder text inside input fields */
-    .placeholder-text {
-        color: var(--placeholder-text);
-    }
+    .placeholder-text { color: var(--placeholder-text); }
     
     /* ======= BUTTONS ======= */
     .btn-primary {
+        display: inline-block; /* keeps button compact-ly sized? */
         background-color: var(--accent-secondary);
         color: var(--accent-text);
+        border: 1px solid var(--border-strong);
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        /* width: 100%; */
+        cursor: pointer;
     }
     .btn-primary:hover {
         background-color: var(--button-hover);
     }
     .btn-secondary {
-        background-color: var(--surface-muted);
+        display: inline-block; /* keeps button compact-ly sized? */
+        background-color: var(--bg-muted);
         color: var(--text-primary);
+        border: 1px solid var(--border-strong);
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem; /* px-4 py-2*/
+        /* width: 100%; */
+        cursor: pointer;
     }
     .btn-secondary:hover {
-        background-color: var(--surface-hover);
+        background-color: var(--bg-hover); /* hover:bg-gray-300 */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* hover:shadow */
     }
     .btn-destructive {
         background-color: var(--bg-destructive);
@@ -120,34 +93,51 @@
 
     /* ======= TABLE COMPONENTS ======= */
 
+    .table-standard {
+        caption-side: top;
+        table-layout: auto; /* TODO: study */
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.875rem;
+    }
     /* Table header row styling - remove all bg-gray-800 mentions from thead classes!!! */
-    .table-header-row {
+    .table-header {
         background-color: var(--accent-primary);
         color: var(--text-inverse);
         font-weight: 600; /* equivalent to font-semibold in Tailwind */
+        padding: 0.5rem;
+        border: 1px solid var(--border-default);
     }
-    .alternating-table-rows:nth-child(even) {
-        background: var(--surface-subtle);
+    .table-cell {
+        padding: 0.5rem;
+        border: 1px solid var(--border-default);
     }
-    .alternating-table-rows:nth-child(odd) {
-        background: var(--surface-secondary);
+    .table-row {
+        transition: 25ms;
     }
-    .alternating-table-rows:hover {
-        background: var(--surface-hover);
+    .table-row:nth-child(even) {
+        background-color: var(--bg-subtle);
+    }
+    /* TODO: Unnecessary? */
+    .table-row:nth-child(odd) {
+        background-color: var(--surface-secondary);
+    }
+    .table-row:hover {
+        background-color: var(--bg-hover);
         color: var(--text-inverse);
     }
 
     /* ======= NAVIGATION ======= */
     .nav-link:hover {
-        background: var(--nav-hover);
+        background-color: var(--nav-hover);
     }
     .nav-link.active {
-        background: var(--nav-hover); /* might add 'nav-active' for separate styling */
+        background-color: var(--nav-hover); /* might add 'nav-active' for separate styling */
     }
 
     /* ======= FORMS ======= */
     .form-input {
-        background-color: var(--surface-input);
+        background-color: var(--bg-input);
         color: var(--text-input);
         border-color: var(--border-strong);
     }
@@ -156,11 +146,62 @@
         color: var(--placeholder-text);
     }
 
+    /* ======= INPUT COMPONENTS ======= */
+    /* For dashboard quick-entry */
+    .input-inline {
+        border: 1px solid #9ca3af; /* Tailwind's border+border-gray-400 */
+        border-radius: 0.375rem;     /* Tailwind's default border radius */
+        padding: 0.25rem 0.75rem;    /* px-3 */
+        background-color: var(--bg-input); /* ?? */
+        color: #1f2937; /* Tailwind's gray 800 */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
+    }
+    /* For regular forms, more padding and stronger borders */
+    .input-standard {
+        border: 2px solid var(--border-strong);
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        width: 100%; /* w-full */
+        background-color: var(--bg-input);
+        color: var(--text-primary);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+
+    }
     /* ======= FIX SELECT STYLING ======= */
-    .select-styling {
-        background-color: var(--surface-input);
+    .select-dropdown {
+        background-color: var(--bg-input);
         color: var(--text-input);
         /* TODO: remove purple/red once we style properly! */
+    }
+    /* ======= LAYOUT COMPONENTS ======= */
+    .dashboard-container {
+        background-color: var(--bg-base);
+        max-width: 48rem; /* = 3xl in Tailwind */
+        margin: 2.5rem auto 0;
+        overflow-x: auto;
+        padding: 1rem 1rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem; /* controls spacing between items in layout containers like grids &  flexboxes */
+    }
+
+    .dashboard-card {
+        min-width: max-content;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background-color: var(--bg-card);
+    }
+
+    /* Warnings? Messages? Success? idk */
+    .flash-message {
+        background-color: #dcfce7; /* bg-green-100 */
+        color: #166534;      /* text-green-800 */
+        padding: 0.5rem 1rem;  /* py-2 px-4 */
+        border-radius: 0.25rem; /* rounded */
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+        margin-bottom: 1rem;          /* mb-4 */
     }
 }
 
@@ -186,11 +227,6 @@
 * {
     box-sizing: border-box; /* Padding/borders included in width calculations */
 }
-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
 a {
     text-decoration: none;
 }
@@ -198,14 +234,17 @@ a {
 /* ==== LAYOUT COMPONENTS ==== */
 
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
+/* Main page wrapper: organizes header/content/footer */
 .wrapper {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
+/* Main content area: fills remaining viewport space below navbar */
 .content {
     /* Tells flex container's child to grow and take up all remaining space */
     flex: 1;
+    background-color: var(--bg-base);
 }
 
 
@@ -239,10 +278,6 @@ a {
     grid-template-columns: 1fr 1fr; /* 2 equal-width columns */
     gap: 1rem;
 }
-.metric-row {
-    display: flex;
-    flex-direction: column;
-}
 .metric-graph {
     width: 100%;
     aspect-ratio: 16/9; /* fixes one graph being slightly taller than other - check out other options */
@@ -260,7 +295,15 @@ a {
     */
     grid-template-columns: 1fr auto 1fr; /* time | divider | weather */
     grid-template-rows: 1fr;
-    min-height: 80px;
+    min-height: 120px;
+    align-items: stretch; /* makes all children same height */
+}
+/* Styling our visible divider div in between greeting & weather */
+.divider {
+    width: 2px;
+    background-color: var(--divider-color);
+    height: 100%;
+    opacity: 50%;
 }
 /* Makes DailyCheckin card consist of grid layout with two columns */
 #daily-check-in-card {
@@ -272,25 +315,10 @@ a {
 #daily-check-in-card h2 {
     grid-column: 1 / -1;
 }
-/* Apply our input stylings to all inputs inside checkin container
-   Matches input_classes() macro in _macro.html (reduced py-2 to py-1 here though) */
-#daily-check-in-card input {
-    @apply border border-gray-400 rounded px-3 py-1 bg-white text-gray-800 placeholder-gray-400 shadow-sm;
-}
 
-
-
-
-/* Styling our visible divider div in between greeting & weather */
-.divider {
-    width: 2px;
-    background-color: var(--divider-color);
-    height: 100%;
-    opacity: 50%;
-}
-/* "Apply 1.5rem padding to all direct div children of 'section' elements EXCEPT those with class 'divider' :D 
+/* "Apply 1.5rem padding to all direct div children of 'section' elements EXCEPT those with class 'divider' and sections of id "greeting-card" :D 
 ** To apply our Tailwind p-6 class styling to most cards (except Critical Task) */
-section > div:not(.divider) {
+section:not(#greeting-card) > div:not(.divider) {
     padding: 1.5rem; /* equivalent to p-6 (24px)*/
 }
 
@@ -299,7 +327,10 @@ section > div:not(.divider) {
 /* ==== FORMS & INPUTS ==== */
 /* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
 .form-group {
-    @apply flex flex-col gap-1 mb-4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
 }
 form input:not([type="checkbox"]):user-valid {
     outline: 2px solid;
@@ -311,13 +342,18 @@ form input:not([type="checkbox"]):user-invalid {
 }
 
 /* ==== UTILITY CLASSES ==== */
-/* Currently used for critical-task-card stuff in JS (Added 02.04.25) && for making delete button appear on hover next to table rows */
+/* 
+Currently used for critical-task-card stuff in JS (Added 02.04.25) && for making delete button appear on hover next to table rows
+TODO: iirc, using display none does not prevent input? 
+Need to double check & adjust usage of hidden/disabled accordingly in our form pages
+*/
 .hidden {
     display: none;
 }
 
 /* ==== FOOTER ==== */
 footer {
+    /* bg-gray-100 text-center text-sm py-4 */
     text-align: center;
     padding: 10px;
     font-size: 0.9em;
@@ -336,5 +372,18 @@ footer {
 @media (width > 640px) {
     #mobile-nav.show {
         display: none;
+    }
+}
+
+@media (width >= 1024px) {
+    .dashboard-container {
+        max-width: 72rem; /* lg:max-w-6xl */
+        padding: 1rem 2rem 0; /* sm:px-8 */
+    }
+}
+
+@media (width >= 1280px) {
+    .dashboard-container {
+        max-width: 80rem; /* xl:max-w-7xl */
     }
 }
