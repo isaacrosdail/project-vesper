@@ -21,7 +21,7 @@
             <tbody>
                 {% if habits %}
                     {% for habit in habits %}
-                    <tr class="group table-row" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
+                    <tr class="table-row" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
                         {% if is_dev %}
                             <td class="table-cell">{{ habit.id }}</td>
                         {% endif %}
