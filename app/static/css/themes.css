@@ -1,123 +1,110 @@
-/* ==== CSS CUSTOM PROPERTIES (VARIABLES) ==== */
-/* TODO: STUDY/DRILL THIS IN FULL */
+/* ==== CSS CUSTOM PROPERTIES (DESIGN TOKEN SYSTEM) ==== */
+/* TODO: Ensure I can explain this system perfectly */
+/*
+* Architecture:
+* 1. Theme-specific tokens (--light-*, --dark-*) = actual color values
+* 2. Semantic tokens (--bg-base, --accent-text) = sort of a translation layer to decouple
+* 3. Theme switching = CSS that remaps semantic tokens to active theme.
+*
+* This lets components stay theme-agnostic while supporting unlimited themes (especially once Firefox supports container queries!)
+* HMTL never changes, CSS handles all the complexity.
+*/
 :root {
+    /* Global constants */
     --color-success: #16a34a;
     --color-error: #dc2626;    
-    
-    /* "theme tokens"? */
 
     /* =============== LIGHT THEME DEFINITIONS =============== */
+    /* Temp notes:
+    * surface-primary was bg-gray-200
+    * text-placeholder = 9ca3af was placeholder-gray-400
+    * oklch(44.6% 0.03 256.802) => bg-gray-600
+    * --light-text-input: #1f2937;           Input text? Unsure whether we want/need this, but might be good for accessibility/contrast? (Tailwind's text-gray-800)
+    * --light-bg-destructive: hsl(0, 84%, 60%);            Danger/Error backgrounds
+    * hsl(0, 74%, 42%); => text-red-700
+    */
     color-scheme: light;
-    /* === BACKGROUND COLORS === */
-    --light-bg-base: hsl(54 54 54);        /* Main page background */
-    --light-bg-card: hsl(220, 13%, 91%);   /* Cards, modals, main content areas (Tailwind: bg-gray-200)*/
-    --light-bg-input: hsl(100, 100%, 100%); /* Form inputs */
-    /* --light-surface-primary: #e5e7eb;      bg-gray-200 main bg */
-    --light-bg-subtle: #f3f4f6;       /* bg-gray-100 alternating rows */
-    --light-bg-muted: #e5e7eb;        /* bg-gray-200 buttons */
-    --light-bg-hover: #9ca3af;        /* bg-gray-400 hover backgrounds */
-    --light-bg-selection: grey;
-    --light-bg-destructive: red;
 
-    /* === ACCENT COLORS === */
-    --light-accent-primary: oklch(27.8% 0.033 256.848);    /* bg-gray-800 navbar & table headers */
-    --light-accent-secondary: oklch(44.6% 0.03 256.802);   /* bg-gray-600 submit buttons */
-    --light-accent-text: oklch(87.2% 0.01 258.338);        /* text-gray-300 */
+    /* Note: For inverted text, simply directly use the opposite theme's (below in theme mappings, not incl. in definitions obv) */
+    /* Example: (on light mode): */
+    /* === BACKGROUND HIERARCHY === */
+    --light-bg-base: hsl(54 54 54);           /* Main page/canvas background (lighter) */
+    --light-bg-elevated: hsl(220, 13%, 91%);  /* Cards, modals, main content areas (light) (Tailwind: bg-gray-200)*/
+    --light-bg-muted: #f3f4f6;                /* Secondary button backgrounds, alternating rows, muted backgrounds (Tailwind's bg-gray-100 or 200?) */
+    --light-bg-input: hsl(100, 100%, 100%);   /* Input fields (lightest, visually needs to 'pop') */
+    --light-bg-selection: grey;               /* Text selection background */
 
-    /* === TEXT COLORS === */
-    --light-text-primary: #1f2937;         /* main text */
-    --light-text-secondary: #9ca3af;       /* text-gray-400 placeholders */
-    --light-text-input: #1f2937;           /* text-gray-800 */
-    --light-text-inverse: white;           /* white text on dark backgrounds */
-    --light-text-color: blue;              /* not sure I want/need*/
+    /* === TEXT === */
+    --light-text-primary: #1f2937;      /* Main body text (dark) (folded text-input into here too - kinda both had the same job) */
+    --light-text-muted: #9ca3af;        /* Muted text AND placeholders (Tailwind's text-gray-400) */
+    --light-accent-text: oklch(87.2% 0.01 258.338);/* Branded text ("Vesper"), nav items (must work on dark backgrounds) (Tailwind's text-gray-300) */
+    --light-text-destructive: hsl(0, 84%, 60%); /* For delete buttons, for example (Tailwind's text-red-500) */
+    
+    /* === UI ELEMENTS / ACCENT COLOR(S) === */
+    --light-accent-primary: oklch(27.8% 0.033 256.848); /* bg-gray-800 navbar & table headers (AND primary buttons?) */
     --light-text-selection: blue;
-    --light-text-destructive: purple;
 
-    /* === BORDER COLORS === */
+    /* === HOVER/INTERACTIVE STATES === */
+    --light-bg-hover: #9ca3af; /* For normal hovers, Secondary buttons hover / Hover state backgrounds (Tailwind's bg-gray-400) */
+    --light-ui-hover: #374151;   /* For UI elements (nav, table rows?) bg-gray-700 */
+
+    /* === BORDERS === */
     --light-border-default: #d1d5db;       /* border-gray-300 most borders */
-    --light-border-strong: #9ca3af;        /* border-gray-400 input borders */
-    --light-divider-color: black;
-
-    /* === INTERACTIVE STATES === */
-    --light-placeholder-text: red;     /* placeholder-gray-400 */
-    --light-nav-hover: #374151;            /* bg-gray-700 */
-    --light-button-hover: #60a5fa;         /* bg-blue-400 */
     /* =============== END LIGHT THEME DEFINITIONS =============== */
 
     
     /* =============== DARK THEME DEFINITIONS =============== */
-    /* === BACKGROUND COLORS === */
-    --dark-bg-base: hsl(0 0 0);            /* Main container/page bg color */
-    --dark-bg-card: gray;             /* Background for cards */
-    --dark-bg-input: hsl(100, 100%, 100%); /* Input fields */
-    /* --dark-surface-primary: lime; */
-    --dark-bg-subtle: #4b5563;             /* dark alternating */
-    --dark-bg-muted: #6b7280;              /* dark buttons */
-    --dark-bg-hover: #6b7280;              /* dark hover */
-    --dark-bg-selection: grey;  /* color for selected text background */
-    --dark-bg-destructive: red;
+    /* === BACKGROUND HIERARCHY === */
+    --dark-bg-base: hsl(0 0 0);     /* Main page/canvas background (darker) */
+    --dark-bg-elevated: gray;       /* Cards, modals, main content areas */
+    --dark-bg-muted: #6b7280;       /* Secondary button backgrounds, alternating rows, muted backgrounds */
+    --dark-bg-input: hsl(100, 100%, 100%); /* Input fields (visually needs to 'pop') */
+    --dark-bg-selection: grey;      /* Text selection background */
 
-    /* === ACCENT COLORS === */
-    --dark-accent-primary: white;   /* need to adjust or just make match bg-gray-800 */
-    --dark-accent-secondary: oklch(44.6% 0.03 256.802);    /* bg-gray-600 - used for submit buttons */
+    /* === TEXT === */
+    --dark-text-primary: #f9fafb;    /* light text on dark */
+    --dark-text-muted: #d1d5db;      /* "un-muted"? lol, secondary */
     --dark-accent-text: white;
-
-    /* === TEXT COLORS === */
-    --dark-text-primary: #f9fafb;               /* light text on dark */
-    --dark-text-secondary: #d1d5db;             /* lighter secondary */
-    --dark-text-input: #1f2937; /* text-gray-800*/
-    --dark-text-inverse: white;
-    --dark-text-color: darkred;
-    --dark-text-selection: blue;
     --dark-text-destructive: purple;
 
-    /* === BORDER COLORS === */
-    --dark-border-default: #6b7280;             /* darker borders */
-    --dark-border-strong: #9ca3af;              /* same */
-    --dark-divider-color: white;
+    /* === UI ELEMENTS / ACCENT COLOR(S) === */
+    --dark-accent-primary: white;   /* navbar & table headers (AND primary buttons?) */
+    --dark-text-selection: yellow;
 
-    /* === INTERACTIVE STATES === */
-    --dark-placeholder-text: #9ca3af;          /* placeholder-gray-400 */
-    --dark-nav-hover: #374151;            /* bg-gray-700 */
-    --dark-button-hover: #60a5fa;         /* bg-blue-400 */
+    /* === HOVER/INTERACTIVE STATES === */
+    --dark-bg-hover: #6b7280;      /* dark hover */
+    --dark-ui-hover: #374151;            /* bg-gray-700 */
+
+    /* === BORDERS === */
+    --dark-border-default: #6b7280;             /* darker borders */
     /* =============== END DARK THEME DEFINITIONS =============== */
 
 
     /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
-    /* === BACKGROUND COLORS === */
+    /* === BACKGROUND HIERARCHY === */
     --bg-base: var(--light-bg-base);
-    --bg-card: var(--light-bg-card);
-    --bg-input: var(--light-bg-input);
-    --surface-primary: var(--light-surface-primary);
-    --bg-subtle: var(--light-bg-subtle);
+    --bg-elevated: var(--light-bg-elevated);
     --bg-muted: var(--light-bg-muted);
-    --bg-hover: var(--light-bg-hover);
+    --bg-input: var(--light-bg-input);
     --bg-selection: var(--light-bg-selection);
-    --bg-destructive: var(--light-bg-destructive);
-
-    /* === ACCENT COLORS === */
-    --accent-primary: var(--light-accent-primary);
-    --accent-secondary: var(--light-accent-secondary);
-    --accent-text: var(--light-accent-text);
-
-    /* === TEXT COLORS === */
+    
+    /* === TEXT === */
     --text-primary: var(--light-text-primary);
-    --text-secondary: var(--light-text-secondary);
-    --text-input: var(--light-text-input);
-    --text-inverse: var(--light-text-inverse);
-    --text-color: var(--light-text-color);
-    --text-selection: var(--light-text-selection);
+    --text-muted: var(--light-text-muted);
+    --accent-text: var(--light-accent-text);
     --text-destructive: var(--light-text-destructive);
+    --text-inverse: var(--dark-text-primary); /* Note: Using dark's normal text as inverse */
 
-    /* === BORDER COLORS === */
+    /* === UI ELEMENTS / ACCENT COLOR(S) === */
+    --accent-primary: var(--light-accent-primary);
+    --text-selection: var(--light-text-selection);
+
+    /* === HOVER/INTERACTIVE STATES === */
+    --bg-hover: var(--light-bg-hover);
+    --ui-hover: var(--light-ui-hover);
+
+    /* === BORDERS === */
     --border-default: var(--light-border-default);
-    --border-strong: var(--light-border-strong);
-    --divider-color: var(--light-divider-color);
-
-    /* === INTERACTIVE STATES === */
-    --placeholder-text: var(--light-placeholder-text);
-    --nav-hover: var(--light-nav-hover);
-    --button-hover: var(--light-button-hover);
     /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
 
     
@@ -125,42 +112,32 @@
         /* --theme: moon; */
         color-scheme: dark;
 
-        /* ACTIVE THEME MAPPINGS - DARK */
-        /* === BACKGROUND COLORS === */
+        /* ACTIVE THEME MAPPINGS - dark THEME (default) */
+        /* === BACKGROUND HIERARCHY === */
         --bg-base: var(--dark-bg-base);
-        --bg-card: var(--dark-bg-card);
-        --bg-input: var(--dark-bg-input);
-        --surface-primary: var(--dark-surface-primary);
-        --bg-subtle: var(--dark-bg-subtle);
+        --bg-elevated: var(--dark-bg-elevated);
         --bg-muted: var(--dark-bg-muted);
-        --bg-hover: var(--dark-bg-hover);
+        --bg-input: var(--dark-bg-input);
         --bg-selection: var(--dark-bg-selection);
-        --bg-destructive: var(--dark-bg-destructive);
-
-        /* === ACCENT COLORS === */
-        --accent-primary: var(--dark-accent-primary);
-        --accent-secondary: var(--dark-accent-secondary);
-        --accent-text: var(--dark-accent-text);
-
-        /* === TEXT COLORS === */
+        
+        /* === TEXT === */
         --text-primary: var(--dark-text-primary);
-        --text-secondary: var(--dark-text-secondary);
-        --text-input: var(--dark-text-input);
-        --text-inverse: var(--dark-text-inverse);
-        --text-color: var(--dark-text-color);
-        --text-selection: var(--dark-text-selection);
+        --text-muted: var(--dark-text-muted);
+        --accent-text: var(--dark-accent-text);
         --text-destructive: var(--dark-text-destructive);
+        --text-inverse: var(--light-text-primary); /* Note: Using light's normal text as inverse */
 
-        /* === BORDER COLORS === */
+        /* === UI ELEMENTS / ACCENT COLOR(S) === */
+        --accent-primary: var(--dark-accent-primary);
+        --text-selection: var(--dark-text-selection);
+
+        /* === HOVER/INTERACTIVE STATES === */
+        --bg-hover: var(--dark-bg-hover);
+        --ui-hover: var(--dark-ui-hover);
+
+        /* === BORDERS === */
         --border-default: var(--dark-border-default);
-        --border-strong: var(--dark-border-strong);
-        --divider-color: var(--dark-divider-color);
-
-        /* === INTERACTIVE STATES === */
-        --placeholder-text: var(--dark-placeholder-text);
-        --nav-hover: var(--dark-nav-hover);
-        --button-hover: var(--dark-button-hover);
-        /* END ACTIVE THEME MAPPINGS - DARK */
+        /* END ACTIVE THEME MAPPINGS - dark THEME (default) */
     }
 }
 
@@ -170,41 +147,31 @@
     /* --theme: sun; */
     color-scheme: light;
 
-    /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
-    /* === BACKGROUND COLORS === */
+    /* ACTIVE THEME MAPPINGS - LIGHT THEME */
+    /* === BACKGROUND HIERARCHY === */
     --bg-base: var(--light-bg-base);
-    --bg-card: var(--light-bg-card);
-    --bg-input: var(--light-bg-input);
-    --surface-primary: var(--light-surface-primary);
-    --bg-subtle: var(--light-bg-subtle);
+    --bg-elevated: var(--light-bg-elevated);
     --bg-muted: var(--light-bg-muted);
-    --bg-hover: var(--light-bg-hover);
+    --bg-input: var(--light-bg-input);
     --bg-selection: var(--light-bg-selection);
-    --bg-destructive: var(--light-bg-destructive);
-
-    /* === ACCENT COLORS === */
-    --accent-primary: var(--light-accent-primary);
-    --accent-secondary: var(--light-accent-secondary);
-    --accent-text: var(--light-accent-text);
-
-    /* === TEXT COLORS === */
+    
+    /* === TEXT === */
     --text-primary: var(--light-text-primary);
-    --text-secondary: var(--light-text-secondary);
-    --text-input: var(--light-text-input);
-    --text-inverse: var(--light-text-inverse);
-    --text-color: var(--light-text-color);
-    --text-selection: var(--light-text-selection);
+    --text-muted: var(--light-text-muted);
+    --accent-text: var(--light-accent-text);
     --text-destructive: var(--light-text-destructive);
+    --text-inverse: var(--dark-text-primary); /* Note: Using dark's normal text as inverse */
 
-    /* === BORDER COLORS === */
+    /* === UI ELEMENTS / ACCENT COLOR(S) === */
+    --accent-primary: var(--light-accent-primary);
+    --text-selection: var(--light-text-selection);
+
+    /* === HOVER/INTERACTIVE STATES === */
+    --bg-hover: var(--light-bg-hover);
+    --ui-hover: var(--light-ui-hover);
+
+    /* === BORDERS === */
     --border-default: var(--light-border-default);
-    --border-strong: var(--light-border-strong);
-    --divider-color: var(--light-divider-color);
-
-    /* === INTERACTIVE STATES === */
-    --placeholder-text: var(--light-placeholder-text);
-    --nav-hover: var(--light-nav-hover);
-    --button-hover: var(--light-button-hover);
     /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
 }
 
@@ -213,40 +180,30 @@
     /* --theme: moon; */
     color-scheme: dark;
 
-    /* ACTIVE THEME MAPPINGS - DARK */
-    /* === BACKGROUND COLORS === */
+    /* ACTIVE THEME MAPPINGS - dark THEME (default) */
+    /* === BACKGROUND HIERARCHY === */
     --bg-base: var(--dark-bg-base);
-    --bg-card: var(--dark-bg-card);
-    --bg-input: var(--dark-bg-input);
-    --surface-primary: var(--dark-surface-primary);
-    --bg-subtle: var(--dark-bg-subtle);
+    --bg-elevated: var(--dark-bg-elevated);
     --bg-muted: var(--dark-bg-muted);
-    --bg-hover: var(--dark-bg-hover);
+    --bg-input: var(--dark-bg-input);
     --bg-selection: var(--dark-bg-selection);
-    --bg-destructive: var(--dark-bg-destructive);
-
-    /* === ACCENT COLORS === */
-    --accent-primary: var(--dark-accent-primary);
-    --accent-secondary: var(--dark-accent-secondary);
-    --accent-text: var(--dark-accent-text);
-
-    /* === TEXT COLORS === */
+    
+    /* === TEXT === */
     --text-primary: var(--dark-text-primary);
-    --text-secondary: var(--dark-text-secondary);
-    --text-input: var(--dark-text-input);
-    --text-inverse: var(--dark-text-inverse);
-    --text-color: var(--dark-text-color);
-    --text-selection: var(--dark-text-selection);
+    --text-muted: var(--dark-text-muted);
+    --accent-text: var(--dark-accent-text);
     --text-destructive: var(--dark-text-destructive);
+    --text-inverse: var(--light-text-primary); /* Note: Using light's normal text as inverse */
 
-    /* === BORDER COLORS === */
+    /* === UI ELEMENTS / ACCENT COLOR(S) === */
+    --accent-primary: var(--dark-accent-primary);
+    --text-selection: var(--dark-text-selection);
+
+    /* === HOVER/INTERACTIVE STATES === */
+    --bg-hover: var(--dark-bg-hover);
+    --ui-hover: var(--dark-ui-hover);
+
+    /* === BORDERS === */
     --border-default: var(--dark-border-default);
-    --border-strong: var(--dark-border-strong);
-    --divider-color: var(--dark-divider-color);
-
-    /* === INTERACTIVE STATES === */
-    --placeholder-text: var(--dark-placeholder-text);
-    --nav-hover: var(--dark-nav-hover);
-    --button-hover: var(--dark-button-hover);
-    /* END ACTIVE THEME MAPPINGS - DARK */
+    /* END ACTIVE THEME MAPPINGS - dark THEME (default) */
 }

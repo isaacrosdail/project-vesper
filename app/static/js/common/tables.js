@@ -118,7 +118,7 @@ async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "
         if (responseData.success) {
             // update display field + console.log
             updateFieldDisplay(td, newValue);
-            console.log(`${field} updated to:`, newValue);
+            //console.log(`${field} updated to:`, newValue);
         } else {
             // console.error with data.message
             console.error('Error updating field:', responseData.message);
@@ -146,7 +146,7 @@ function updateFieldDisplay(td, newValue) {
  */
 function handleDeleteClick(e) {
     // debug
-    console.log('Clicked:', e.target)
+    // console.log('Clicked:', e.target)
 
     // Click the delete button OR anything inside it (ie, our SVG)
     if (e.target.matches('.delete-btn') || e.target.closest('.delete-btn')) {

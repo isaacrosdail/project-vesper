@@ -13,70 +13,62 @@
 }
 
 /* ======= COMPONENT UTILITIES =======
- * Custom CSS classes to map theme variables to Tailwind-style utilities 
- * Bridges theme system with template macros, to avoid hardcoded colors in HTML/templates
+ * "Making 'Tailwind at home'" (I didn't even steal this idea!!)
+ * Design token-based component classes that adapt to theme changes automatically.
+ *
+ * Using semantic CSS variables (--accent-text, --bg-elevated) instead of hardcoded colors, making components theme-agnostic. Changing themes automatically
+ * changes the values of these classes without needing to alter any HTML/templates.
+ * This replaces template macros & hardcoded colors with a more maintainable, scalable design system that separates content (HTML) from styling (CSS).
  */
 @layer components {
 
-    /* ======= BACKGROUND UTILITIES ======= */
-    /* Background for full viewport/page */
+    /* ======= BACKGROUND HIERARCHY UTILITIES ======= */
+    /* Main page/canvas background */
     .bg-base { background-color: var(--bg-base); }
-    /* Card background - Primary container for content blocks */
-    .bg-card { background-color: var(--bg-card); }
-    /* Form input background */
-    .bg-input { background-color: var(--bg-input); }
-    .surface-primary { background-color: var(--surface-primary); }
-    .surface-secondary { background-color: var(--surface-secondary); }
-    .bg-subtle { background-color: var(--bg-subtle); }
+    /* Cards, modals, main content areas */
+    .bg-card { background-color: var(--bg-elevated); }
     .bg-muted {  /* BG-GRAY-200 */ background-color: var(--bg-muted); }
-    .bg-hover { background-color: var(--bg-hover); }
-    .bg-selection { background-color: var(--bg-selection); }
-    .bg-destructive { background-color: var(--bg-destructive); }
+    /* Input fields background */
+    .bg-input { background-color: var(--bg-input); }
 
     /* ======= TEXT COLOR UTILITIES ======= */
     .text-primary { color: var(--text-primary); }
-    .text-secondary { color: var(--text-secondary); }
-    .text-input { color: var(--text-input); }
-    .text-inverse { color: var(--text-inverse); }
+    .text-muted { color: var(--text-muted); }
     .accent-text { color: var(--accent-text); }
-    .text-selection { color: var(--text-selection); }
     .text-destructive { color: var(--text-destructive); }
+    .text-inverse { color: var(--text-inverse); }
+
+    /* === UI ELEMENTS / ACCENT COLOR(S) === */
+    /* Primary accent - like for navbar, table headers, etc */
+    .accent-primary { background-color: var(--accent-primary); }
+
+    /* === HOVER/INTERACTIVE STATES UTILITIES === */
+    .bg-hover { background-color: var(--bg-hover); }
+    .ui-hover { background-color: var(--ui-hover); }
 
     /* ======= BORDER UTILITIES ======= */
     /* BORDER-GRAY-300 STUFF */
-    /* border-default in macros refers to: ??? */
     .border-default { border-color: var(--border-default); }
-    /* BORDER-GRAY-400 STUFF */
-    .border-strong { border-color: var(--border-strong); }
 
-    /* ======= ACCENT UTILITIES ======= */
-    /* Primary accent - like for navbar, table headers, etc */
-    .accent-primary { background-color: var(--accent-primary); }
-    .accent-secondary { background-color: var(--accent-secondary); }
-
-    /* ======= PLACEHOLDER UTILITY ======= */
-    /* .placeholder-text::placeholder -> pseudo-element targeting placeholder text inside input fields */
-    .placeholder-text { color: var(--placeholder-text); }
-    
     /* ======= BUTTONS ======= */
     .btn-primary {
         display: inline-block; /* keeps button compact-ly sized? */
-        background-color: var(--accent-secondary);
+        background-color: var(--accent-primary);
         color: var(--accent-text);
-        border: 1px solid var(--border-strong);
+        border: 1px solid var(--border-default);
         border-radius: 0.375rem;
         padding: 0.5rem 1rem;
         /* width: 100%; */
         cursor: pointer;
     }
     .btn-primary:hover {
-        background-color: var(--button-hover);
+        opacity: 80%;
     }
     .btn-secondary {
         display: inline-block; /* keeps button compact-ly sized? */
         background-color: var(--bg-muted);
         color: var(--text-primary);
-        border: 1px solid var(--border-strong);
+        border: 1px solid var(--border-default);
         border-radius: 0.375rem;
         padding: 0.5rem 1rem; /* px-4 py-2*/
         /* width: 100%; */
@@ -87,12 +79,14 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* hover:shadow */
     }
     .btn-destructive {
-        background-color: var(--bg-destructive);
         color: var(--text-destructive);
+    }
+    .btn-destructive:hover {
+        opacity: 80%;
+        cursor: pointer;
     }
 
     /* ======= TABLE COMPONENTS ======= */
-
     .table-standard {
         caption-side: top;
         table-layout: auto; /* TODO: study */
@@ -100,10 +94,10 @@
         width: 100%;
         font-size: 0.875rem;
     }
-    /* Table header row styling - remove all bg-gray-800 mentions from thead classes!!! */
+    /* TODO: Table header row styling - remove all bg-gray-800 mentions from thead classes!!! */
     .table-header {
         background-color: var(--accent-primary);
-        color: var(--text-inverse);
+        color: var(--text-inverse);    /* TODO */
         font-weight: 600; /* equivalent to font-semibold in Tailwind */
         padding: 0.5rem;
         border: 1px solid var(--border-default);
@@ -115,63 +109,66 @@
     .table-row {
         transition: 25ms;
     }
+    .table-row .delete-btn {
+        visibility: hidden; /* All (table) delete buttons start hidden */
+    }
+    .table-row:hover .delete-btn {
+        visibility: visible; /* ..and become visible on hover of row */
+    }
     .table-row:nth-child(even) {
-        background-color: var(--bg-subtle);
+        background-color: var(--bg-muted);
     }
     /* TODO: Unnecessary? */
     .table-row:nth-child(odd) {
-        background-color: var(--surface-secondary);
+        background-color: var(--bg-base); /* TODO? */
     }
     .table-row:hover {
         background-color: var(--bg-hover);
-        color: var(--text-inverse);
+        color: var(--text-inverse); /* TODO */
     }
 
     /* ======= NAVIGATION ======= */
+    .nav-link {
+        text-decoration: none;
+    }
     .nav-link:hover {
-        background-color: var(--nav-hover);
+        background-color: var(--ui-hover);
     }
     .nav-link.active {
-        background-color: var(--nav-hover); /* might add 'nav-active' for separate styling */
+        background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
     }
 
     /* ======= FORMS ======= */
     .form-input {
         background-color: var(--bg-input);
-        color: var(--text-input);
-        border-color: var(--border-strong);
-    }
-    /* TODO: Currently same as placeholder-text variable. Condense into one or ditch this one since we have bg colors already anyway */
-    .form-input::placeholder {
-        color: var(--placeholder-text);
+        color: var(--text-primary);
+        border-color: var(--border-default);
     }
 
     /* ======= INPUT COMPONENTS ======= */
     /* For dashboard quick-entry */
     .input-inline {
-        border: 1px solid #9ca3af; /* Tailwind's border+border-gray-400 */
+        border: 1px solid var(--border-default); /* Tailwind's border+border-gray-400 */
         border-radius: 0.375rem;     /* Tailwind's default border radius */
         padding: 0.25rem 0.75rem;    /* px-3 */
         background-color: var(--bg-input); /* ?? */
-        color: #1f2937; /* Tailwind's gray 800 */
+        color: var(--text-primary); /* #1f2937; Tailwind's gray 800 */
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* shadow-sm */
     }
     /* For regular forms, more padding and stronger borders */
     .input-standard {
-        border: 2px solid var(--border-strong);
+        border: 2px solid var(--border-default);
         border-radius: 0.375rem;
         padding: 0.5rem 0.75rem;
         width: 100%; /* w-full */
         background-color: var(--bg-input);
         color: var(--text-primary);
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-
-
     }
     /* ======= FIX SELECT STYLING ======= */
     .select-dropdown {
         background-color: var(--bg-input);
-        color: var(--text-input);
+        color: var(--text-primary);
         /* TODO: remove purple/red once we style properly! */
     }
     /* ======= LAYOUT COMPONENTS ======= */
@@ -191,11 +188,17 @@
         padding: 1.5rem;
         border-radius: 0.75rem;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        background-color: var(--bg-card);
+        background-color: var(--bg-elevated);
     }
 
     /* Warnings? Messages? Success? idk */
     .flash-message {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%; /* match navbar width */
+        height: var(--navbar-height);
+        z-index: 99; /* appear above other content */
         background-color: #dcfce7; /* bg-green-100 */
         color: #166534;      /* text-green-800 */
         padding: 0.5rem 1rem;  /* py-2 px-4 */
@@ -205,11 +208,69 @@
     }
 }
 
+/* */
+:root {
+    --min-navbar-height: 4rem;
+}
+/* TODO: Clean up: Styling for playing around with dialog element to make modal */
+/* TODO: STUDY TRANSFORM */
+dialog {
+    padding: 2rem;
+    position: fixed;
+    /* Move 50% relative to container */
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* transforms don't affect layout, they're visual effects that happen "on top" of the normal page flow */
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px); /* create a  blur effect behind modal -> filter: blur(10px); would make the ENTIRE element/page blur? */
+    /* Note: apparently high blur (blur(20px)+) on large areas may impact performance */
+}
 /* Affects selected text (replaces standard "blue highlight + white text" default) */
 ::selection {
     background-color: var(--bg-selection);
-    color: var(--selection-text);
+    color: var(--text-selection);
 }
+::placeholder {
+    color: var(--text-muted);
+}
+nav {
+    min-height: var(--min-navbar-height);
+    background-color: var(--accent-primary);
+    padding: 1rem;
+    position: relative; /* creates positioning context for flash-message */
+    /* overflow: hidden; keep content inside navbar bounds */
+}
+/* 2nd descendant of nav */
+.navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 80rem; /* max-w-7xl equivalent */
+    margin: 0 auto; /* mx-auto equivalent */
+}
+/* Direct descendant of nav */
+.nav-container {
+    display: flex;
+    gap: 1.5rem;
+}
+/* Target direct div children of nav-container */
+/* .nav-container > div {
+    display: flex;
+    gap: 1.5rem; 
+} */
+.branding {
+    color: var(--accent-text);
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 600; /* font-semibold */
+    margin-right: 1.5rem; /* mr-6 */
+}
+/* TODO: Consider changing this */
 #theme {
     cursor: pointer;
 }
@@ -226,9 +287,6 @@
 /* Force everything to respect the screen width */
 * {
     box-sizing: border-box; /* Padding/borders included in width calculations */
-}
-a {
-    text-decoration: none;
 }
 
 /* ==== LAYOUT COMPONENTS ==== */
@@ -249,27 +307,27 @@ a {
 
 
 /* ==== NAVIGATION ==== */
-.navbar {
-    height: 3.5rem;
-}
 /* Desktop-first styling for navbar */
 #desktop-nav {
     display: flex;
+    column-gap: 1.5rem; /* space-x-6 */
 }
 #mobile-nav {
     display: none;
     flex-direction: column;
+    row-gap: 1.5rem;        /* space-y-6 */
 }
 #mobile-nav.show {
     display: flex;
 }
 #hamburger-btn {
+    color: var(--accent-text);
     display: none;
 }
 
 .habit-item.completed .habit-title {
     text-decoration: line-through;
-    color: #9ca3af; /* grey-400 */
+    color: var(--text-muted);
 }
 
 /* ====== STYLINGS FOR METRICS DASHBOARD/CARDS ====== */
@@ -286,6 +344,7 @@ a {
 
 /* ====== CARD STYLINGS ====== */
 /* Now making our greeting card be grid layout within our flexbox content */
+/* TODO: Need to fix divider so it spans entire height of greeting card again */
 #greeting-card {
     display: grid;
     /* grid-template-columns
@@ -301,7 +360,7 @@ a {
 /* Styling our visible divider div in between greeting & weather */
 .divider {
     width: 2px;
-    background-color: var(--divider-color);
+    background-color: var(--border-default);
     height: 100%;
     opacity: 50%;
 }
@@ -363,6 +422,7 @@ footer {
 /* Small screens only =>  Hide desktop nav & show hamburger button */
 @media (width <= 640px) {
     #hamburger-btn { display: block; }
+    nav { height: auto; } /* Let mobile nav grow */
     #desktop-nav { display: none; }
     .charts-container, #daily-check-in-card {
         grid-template-columns: 1fr; /* stack charts + metric-row divs for smaller widths */

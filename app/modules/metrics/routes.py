@@ -48,7 +48,8 @@ def metrics():
             new_metric = DailyMetric(
                 metric_type=data["metric_type"],
                 value=data["value"],
-                unit=data["unit"]
+                unit=data["unit"],
+                user_id=current_user.id
             )
             session.add(new_metric)
 
