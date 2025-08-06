@@ -180,7 +180,7 @@ cython_debug/
 **/output.css
 
 # Playground/ for learning/experimenting
-playground/
+_playground/
 seed_dev_db.py
 
 # Docker scripts
