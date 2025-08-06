@@ -3,21 +3,21 @@
 {% block title %}Tasks{% endblock %}
 
 {% block content %}
-<div class="{{ styles.dashboard_container_classes() }}">
-    <div class="{{ styles.dashboard_card_classes() }}">
+<div class="dashboard-container">
+    <div class="dashboard-card">
         <h2 class="text-lg font-semibold mb-2">Tasks</h2>
-        <table class="{{ styles.table_classes() }}">
+        <table class="table-standard">
             <caption class="sr-only">Tasks</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
                     {% if is_dev %}
-                        <th class="{{ styles.th_classes() }}">ID</th>
+                        <th class="table-header">ID</th>
                     {% endif %}
-                    <th class="{{ styles.th_classes() }}">Title</th>
-                    <th class="{{ styles.th_classes() }}">Status</th>
-                    <th class="{{ styles.th_classes() }}">Type</th>
-                    <th class="{{ styles.th_classes() }}">Created</th>
-                    <th class="{{ styles.th_classes() }}">Completed</th>
+                    <th class="table-header">Title</th>
+                    <th class="table-header">Status</th>
+                    <th class="table-header">Type</th>
+                    <th class="table-header">Created</th>
+                    <th class="table-header">Completed</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,23 +25,23 @@
                     {% for task in tasks %}
                     <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                     <!-- Using display: none works here as well but causes layout shift -->
-                    <tr class="{{ styles.tr_classes() }}" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
+                    <tr class="table-row" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
                         {% if is_dev%}
-                            <td class="{{ styles.td_classes() }}">{{ task.id }}</td>
+                            <td class="table-cell">{{ task.id }}</td>
                         {% endif %}
-                        <td class="editable-cell {{ styles.td_classes() }}" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."
+                        <td class="editable-cell table-cell" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."
                             >{{ task.title }}</td>
-                        <td class="{{ styles.td_classes() }}">
+                        <td class="table-cell">
                             <!-- |safe here to render HTML entities instead of escaping them -->
                             {{ ('&#9745;' if task.is_done else '&#9744;') | safe }}
                         </td>
-                        <td class="{{ styles.td_classes() }}">{{ task.type }}</td>
-                        <td class="{{ styles.td_classes() }} text-right">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
-                        <td class="{{ styles.td_classes() }} text-right">
+                        <td class="table-cell">{{ task.type }}</td>
+                        <td class="table-cell text-right">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
+                        <td class="table-cell text-right">
                             <!-- EX: 18:09 -->
                             {{ task.completed_at.strftime("%H:%M") if task.completed_at else '--' }} 
                         </td>
-                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent">
+                        <td class="table-cell bg-gray-200 border-transparent">
                             {{ styles.delete_btn() }}
                         </td>
                     </tr>
@@ -56,12 +56,12 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('tasks.tasks') }}" class="mb-2 {{ styles.btn_classes() }}">
+    <a href="{{ url_for('tasks.tasks') }}" class="mb-2 btn-secondary">
         Add New Task
     </a>
     {% if is_dev %}
     <form action="{{ url_for('main.reset_and_dev') }}" method="POST">
-        <button type="submit" class="mt-120 {{ styles.btn_classes() }}">Reset dev DB</button>
+        <button type="submit" class="mt-120 btn-secondary">Reset dev DB</button>
     </form>
     {% endif %}
 </div>

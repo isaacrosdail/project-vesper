@@ -5,34 +5,34 @@
 {% block title %}Groceries{% endblock %}
 
 {% block content %}
-<div class="{{ styles.dashboard_container_classes() }}">
-    <div class="{{ styles.dashboard_card_classes() }}"> <!-- Added my-6 to top div to -->
+<div class="dashboard-container">
+    <div class="dashboard-card"> <!-- Added my-6 to top div to -->
         <h2 class="text-lg font-semibold mb-2">Grocery - Recent Transactions</h2>
-        <table class="caption-top {{ styles.table_classes() }}">
+        <table class="caption-top table-standard">
             <caption class="sr-only">Grocery - Recent Transactions</caption>
             <thead>
                 <tr>
-                    <th class="{{ styles.th_classes() }}">Barcode</th>
-                    <th class="{{ styles.th_classes() }}">Product Name</th>
-                    <th class="{{ styles.th_classes() }}">Price</th>
-                    <th class="{{ styles.th_classes() }}">Quantity</th>
-                    <th class="{{ styles.th_classes() }}">Date Scanned</th>
-                    <td class="{{ styles.th_classes() }}">Price per 100g</td>
+                    <th class="table-header">Barcode</th>
+                    <th class="table-header">Product Name</th>
+                    <th class="table-header">Price</th>
+                    <th class="table-header">Quantity</th>
+                    <th class="table-header">Date Scanned</th>
+                    <td class="table-header">Price per 100g</td>
                 </tr>
             </thead>
             <tbody>
                 {% if transactions %}
                     {% for transaction in transactions %}
-                    <tr class="group {{ styles.tr_classes() }}" data-item-id="{{ transaction.id }}" data-module="groceries" data-subtype="transaction">
-                        <td class="{{ styles.td_classes() }}">{{ transaction.product.barcode }}</td>
-                        <td class="{{ styles.td_classes() }}">
+                    <tr class="group table-row" data-item-id="{{ transaction.id }}" data-module="groceries" data-subtype="transaction">
+                        <td class="table-cell">{{ transaction.product.barcode }}</td>
+                        <td class="table-cell">
                             <span class="product-name">{{ transaction.product.product_name }}</span>
                         </td>
-                        <td class="{{ styles.td_classes() }}">£{{ transaction.price_at_scan }}</td>
-                        <td class="{{ styles.td_classes() }}">{{ transaction.quantity }}</td>
-                        <td class="{{ styles.td_classes() }} text-right">{{ transaction.created_at.strftime("%d.%m.%Y") }}</td>
-                        <td class="{{ styles.td_classes() }} text-right">£{{ transaction.price_per_100g | round(2) }}</td>
-                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent">
+                        <td class="table-cell">£{{ transaction.price_at_scan }}</td>
+                        <td class="table-cell">{{ transaction.quantity }}</td>
+                        <td class="table-cell text-right">{{ transaction.created_at.strftime("%d.%m.%Y") }}</td>
+                        <td class="table-cell text-right">£{{ transaction.price_per_100g | round(2) }}</td>
+                        <td class="table-cell bg-gray-200 border-transparent">
                             {{ styles.delete_btn() }}
                         </td>
                     </tr>
@@ -47,32 +47,32 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('groceries.transactions')}}" class="{{ styles.btn_classes() }}">
+    <a href="{{ url_for('groceries.transactions')}}" class="btn-secondary">
         Log New Transaction
     </a>
-    <div class="{{ styles.dashboard_card_classes() }}">
+    <div class="dashboard-card">
         <h2 class="text-lg font-semibold mb-2">Product Catalog</h2>
-        <table class="caption-top {{ styles.table_classes() }}">
+        <table class="caption-top table-standard">
             <caption class="sr-only">Product Catalog</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
-                    <th class="{{ styles.th_classes() }}">Barcode</th>
-                    <th class="{{ styles.th_classes() }}">Product Name</th>
-                    <th class="{{ styles.th_classes() }}">Category</th>
-                    <th class="{{ styles.th_classes() }}">Net Weight (units)</th>
-                    <th class="{{ styles.th_classes() }}">Kcals per 100g</th>
+                    <th class="table-header">Barcode</th>
+                    <th class="table-header">Product Name</th>
+                    <th class="table-header">Category</th>
+                    <th class="table-header">Net Weight (units)</th>
+                    <th class="table-header">Kcals per 100g</th>
                 </tr>
             </thead>
             <tbody>
                 {% if products %}
                     {% for product in products %}
-                    <tr class="group {{ styles.tr_classes() }}" data-item-id="{{ product.id }}" data-module="groceries" data-subtype="product">
-                        <td class="{{ styles.td_classes() }}">{{ product.barcode }}</td>
-                        <td class="{{ styles.td_classes() }}">{{ product.product_name }}</td>
-                        <td class="{{ styles.td_classes() }} text-right">{{ product.category }}</td>
-                        <td class="{{ styles.td_classes() }} text-right">{{ product.net_weight }} ({{ product.unit_type }})</td>
-                        <td class="{{ styles.td_classes() }} text-right">{{ product.calories_per_100g|int if product.calories_per_100g else '-' }}</td> <!-- Int filter |int here to chop of decimals -->
-                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent">
+                    <tr class="group table-row" data-item-id="{{ product.id }}" data-module="groceries" data-subtype="product">
+                        <td class="table-cell">{{ product.barcode }}</td>
+                        <td class="table-cell">{{ product.product_name }}</td>
+                        <td class="table-cell text-right">{{ product.category }}</td>
+                        <td class="table-cell text-right">{{ product.net_weight }} ({{ product.unit_type }})</td>
+                        <td class="table-cell text-right">{{ product.calories_per_100g|int if product.calories_per_100g else '-' }}</td> <!-- Int filter |int here to chop of decimals -->
+                        <td class="table-cell bg-gray-200 border-transparent">
                             {{ styles.delete_btn() }}
                         </td>
                     </tr>
@@ -87,7 +87,7 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('groceries.products')}}" class="{{ styles.btn_classes() }}">
+    <a href="{{ url_for('groceries.products')}}" class="btn-secondary">
         Add New Product
     </a>
 </div>

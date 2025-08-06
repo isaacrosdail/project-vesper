@@ -26,6 +26,7 @@ from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
 from app._internal.health_routes import internal_bp
 
+from app.core.constants import DEFAULT_LANG
 
 def create_app(config_name=None):
     app = Flask(__name__)
@@ -60,8 +61,11 @@ def create_app(config_name=None):
     # Make is_dev available in all templates globally
     # So we can do {% if is_dev %} to hide dev-only stuff _without_ needing to keep passing it into each template
     @app.context_processor
-    def inject_dev_context():
-        return dict(is_dev=os.environ.get('APP_ENV') == 'dev')
+    def inject_globals():
+        return dict(
+            is_dev=os.environ.get('APP_ENV') == 'dev',
+            default_lang=DEFAULT_LANG
+        )
 
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
