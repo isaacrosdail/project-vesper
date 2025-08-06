@@ -4,7 +4,6 @@
 let weatherInfo = null;  // for weatherInfo
 let cachedSunPos = null; // for sunPos (for redrawing after Canvas resizing)
 
-
 /**
  * Function for inputting time entries via our activity log card inputs
  * @param {HTMLElement} element - The "Save Entry" button in our activity log card
@@ -394,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Idea is: Apply listener to PARENT, then determine where event came from
     // Consolidate 'change' listener for both habit checkboxes & metric inputs
     // Now our parent becomes .content, so we need to change the querySelector
-    document.querySelector('.content').addEventListener('change', (e) => {
+    document.addEventListener('change', (e) => {
         if (e.target.matches('.habit-checkbox')) {
             // event.target = the checkbox (what used to be 'this' in our inline onchange)
             // event.target.dataset.habitId = gets the data-habit-id value we added
@@ -406,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.querySelector('.content').addEventListener('dblclick', (e) => {
+    document.addEventListener('dblclick', (e) => {
         // Dblclick for span of id intention-text
         if (e.target.matches('#intention-text')) {
             // Pass element e.target to turn into input
@@ -414,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.querySelector('.content').addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
         // Click save-entry-btn to save time log entry
         if (e.target.matches('#save-entry-btn')) {
             saveTimeEntry(e.target); // pass in our button element and navigate from there

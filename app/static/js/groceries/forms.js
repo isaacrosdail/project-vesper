@@ -8,7 +8,7 @@ function filterUnitOptions() {
     const allOptions = document.querySelectorAll('#unit_type option'); // Grab all options in select menu => returns a NodeList
 
     // debugging
-    console.log(`Category selected: ${categorySelection}`);
+    //console.log(`Category selected: ${categorySelection}`);
     // List to make this more readable
     const fluidUnits = ['drink', 'energy_drink', 'condiments_and_sauces'];
     const solidUnits = ['produce', 'diary', 'grain', 'nut', 'meat'];
