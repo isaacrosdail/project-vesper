@@ -15,18 +15,18 @@
                     minlength="8" maxlength="14"
                     pattern="[0-9]{8,14}"
                     title="Barcode must be 8-14 digits only"
-                    class="{{ styles.input_classes() }}" required
+                    class="input-standard" required
                     placeholder="Scan or enter barcode"
                     oninvalid="this.setCustomValidity('Please enter a barcode.')"> <!-- oninvalid lets us set custom message for form validation, look into more later -->
             </div>
             <div class="form-group">
                 <label for="product_name">Product Name:</label>
                 <input type="text" id="product_name" name="product_name"
-                    class="{{ styles.input_classes() }}">
+                    class="input-standard">
             </div>
             <div class="form-group">
                 <label for="category">Category</label>
-                <select name="category" id="category" class="{{ styles.input_classes() }}" required>
+                <select name="category" id="category" class="input-standard" required>
                     <option value="">-- Category --</option>
                     <option value="drink">Drink</option>
                     <option value="energy_drink">Energy Drink</option>
@@ -43,11 +43,11 @@
             <div class="form-group">
                 <label for="net_weight">Net Weight:</label>
                 <input type="text" id="net_weight" name="net_weight"
-                    class="{{ styles.input_classes() }}">
+                    class="input-standard">
             </div>
             <div class="form-group">
                 <label for="unit_type">Units:</label>
-                <select name="unit_type" id="unit_type" class="{{ styles.input_classes() }}" required>
+                <select name="unit_type" id="unit_type" class="input-standard" required>
                     <option value="">-- Units --</option>
                     <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
@@ -61,10 +61,10 @@
             <div class="form-group">
                 <label for="calories_per_100g">Cals per 100g:</label>
                 <input type="text" id="calories_per_100g" name="calories_per_100g"
-                    class="{{ styles.input_classes() }}">
+                    class="input-standard">
             </div>
 
-            <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
+            <button class="btn-primary" type="submit">Submit</button>
         </form>
     </div>
 {% endblock %}

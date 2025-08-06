@@ -3,9 +3,9 @@
 {% block title %}Time Tracking{% endblock %}
 
 {% block content %}
-<div class="charts-container {{ styles.dashboard_container_classes() }}">
+<div class="charts-container dashboard-container">
 
-    <div class="{{ styles.dashboard_card_classes() }}">
+    <div class="dashboard-card">
         {{ time_entries_graph|safe }}
     </div>
 </div>

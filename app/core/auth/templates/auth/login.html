@@ -10,19 +10,19 @@
     <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" placeholder="johnsaccount" required
-            class="{{ styles.input_classes() }}">
+            class="input-standard">
     </div>
     <div class="form-group">
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" placeholder="1234" required
-            class="{{ styles.input_classes() }}">
+            class="input-standard">
     </div>
     <div class="mb-4">
         <label for="remember_user">Remember me</label>
         <input type="checkbox" id="remember_user" name="remember_user">
     </div>
 
-    <button class="{{ styles.submit_classes() }}" type="submit">Submit</button>
+    <button class="btn-primary" type="submit">Submit</button>
 </form>
 <a href="{{ url_for('auth.register') }}">Don't have an account? Sign up</a>
 </div>

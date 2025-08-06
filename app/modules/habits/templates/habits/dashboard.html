@@ -3,33 +3,33 @@
 {% block title %}Habits{% endblock %}
 
 {% block content %}
-<div class="{{ styles.dashboard_container_classes() }}">
-    <div class="{{ styles.dashboard_card_classes() }}">
+<div class="dashboard-container">
+    <div class="dashboard-card">
         <h2 class="text-lg font-semibold mb-2">Habits</h2>
-        <table class="{{ styles.table_classes() }}">
+        <table class="table-standard">
             <caption class="sr-only">Habits</caption>
             <thead class="bg-gray-800 text-white font-semibold">
                 <tr>
                     {% if is_dev %}
-                        <th class="{{ styles.th_classes() }}">ID</th>
+                        <th class="table-header">ID</th>
                     {% endif %}
-                    <th class="{{ styles.th_classes() }}">Title</th>
-                    <th class="{{ styles.th_classes() }}">Category</th>
-                    <th class="{{ styles.th_classes() }}">Created</th>
+                    <th class="table-header">Title</th>
+                    <th class="table-header">Category</th>
+                    <th class="table-header">Created</th>
                 </tr>
             </thead>
             <tbody>
                 {% if habits %}
                     {% for habit in habits %}
-                    <tr class="{{ styles.tr_classes() }}" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
+                    <tr class="table-row" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
                         {% if is_dev %}
-                            <td class="{{ styles.td_classes() }}">{{ habit.id }}</td>
+                            <td class="table-cell">{{ habit.id }}</td>
                         {% endif %}
-                        <td class="editable-cell {{ styles.td_classes() }}" data-item-id="{{ habit.id }}" data-module="habits" data-field="title" title="Double-click to edit field."
+                        <td class="editable-cell table-cell" data-item-id="{{ habit.id }}" data-module="habits" data-field="title" title="Double-click to edit field."
                         >{{ habit.title }}</td>
-                        <td class="{{ styles.td_classes() }}">{{ habit.category|capitalize }}</td>
-                        <td class="{{ styles.td_classes() }}">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
-                        <td class="{{ styles.td_classes() }} bg-gray-200 border-transparent">
+                        <td class="table-cell">{{ habit.category|capitalize }}</td>
+                        <td class="table-cell">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
+                        <td class="table-cell bg-gray-200 border-transparent">
                             {{ styles.delete_btn() }}
                         </td>
                     </tr>
@@ -44,7 +44,7 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('habits.habits') }}" class="mb-2 {{ styles.btn_classes() }}">
+    <a href="{{ url_for('habits.habits') }}" class="mb-2 btn-secondary">
         Add New Habit
     </a>
 </div>

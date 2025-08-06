@@ -1,10 +1,14 @@
 {# _macros.html - Style macros for consistent styling across templates #}
+{# <!--
+REMEMBER:
+If we're defining reusable batch styles → style.css (.input-standard, .form-group)
+If we're defining reusable COMPONENTS (with structure/behavior/logic) → here ({{ form_input() }}, {{ card() }})
+  - Components = HTML structure + behavior + logic
+  - Styles = just CSS classes
+--> #}
+ 
 
-<!-- HISTORY: Originally used Jinja style class variables, now using macros instead -->
-
-{# STYLES TO SORT #}
-{% macro dashboard_container_classes() %}max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto overflow-x-auto px-4 sm:px-8 space-y-6 mt-10{% endmacro %}
-{% macro dashboard_card_classes() %}min-w-max surface-primary p-6 rounded-xl shadow-md{% endmacro %}
+{# === NAV COMPONENTS === #}
 
 {% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
     {% if not required_role or (current_user.is_authenticated and current_user.role == required_role) %}
@@ -15,26 +19,8 @@
     {% endif %}
 {% endmacro %}
 
-{# === TABLE STYLES === #}
-{% macro table_classes() %}caption-top table-auto border-collapse w-full text-sm{% endmacro %}
 
-
-{% macro th_classes() %}table-header-row px-2 py-2 border border-default{% endmacro %}
-{% macro td_classes() %}px-2 py-2 border border-default{% endmacro %}
-
-{% macro tr_classes() %}task-row group alternating-table-rows transition-colors duration-25{% endmacro %}
-
-{# === FORM STYLES === #}
-{% macro input_classes() %}border border-strong rounded px-3 py-2 w-full bg-surface-input text-input placeholder-gray-400 shadow-sm{% endmacro %}
-
-{% macro select_form_classes() %}accent-text select-styling{% endmacro %}
-
-{% macro label_classes() %}border{% endmacro %}
-
-{% macro submit_classes() %}btn-primary border border-strong rounded px-4 py-2 hover:bg-blue-400 cursor-pointer w-full{% endmacro %}
-
-{% macro muted_submit_classes() %}btn-secondary border border-strong rounded px-4 py-2 text-input hover:bg-blue-400 cursor-pointer w-full{% endmacro %}
-
+{# === FORM COMPONENTS === #}
 
 {% macro my_select() %}
 <script></script>
@@ -49,9 +35,7 @@
 {% endmacro %}
 
 
-{# === BUTTON STYLES === #}
-
-{% macro btn_classes() %}border border-default inline-block px-4 py-2 mx-2 mt-1 text-sm rounded-md surface-muted text-input hover:bg-gray-300 hover:shadow transition cursor-pointer{% endmacro %}
+{# === BUTTON COMPONENTS === #}
 
 {% macro delete_btn() %}
 <button aria-label="Delete" class="delete-btn text-red-500 hover:text-red-700 hover:cursor-pointer group-hover:visible invisible">
@@ -61,36 +45,3 @@
 </button>
 {% endmacro %}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- REFERENCE: Previous style variable implementation (commented out for comparison) -->
-{#
--- Table Styles --
-{% set table_classes = "caption-top table-auto border-collapse w-full text-sm" %}
-{% set th_classes = "px-2 py-2 border border-gray-300" %}
-{% set td_classes = "px-2 py-2 border border-gray-300" %}
-{% set tr_classes = "task-row group even:bg-gray-100 odd:bg-white hover:bg-gray-400 hover:text-white transition-colors duration-25" %}
-
--- Form & Button Styles --
-{% set input_classes = "border border-gray-400 rounded px-3 py-2 w-full bg-white text-gray-800 placeholder-gray-400 shadow-sm" %}
-{% set label_classes = "border" %}
-{% set submit_classes = "bg-white border border-gray-400 rounded px-4 py-2 text-gray-800 hover:bg-blue-400 cursor-pointer w-full" %}
-{% set btn_classes = "border border-gray-300 inline-block px-4 py-2 mx-2 mt-1 text-sm rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 hover:shadow transition" %}
-#}
