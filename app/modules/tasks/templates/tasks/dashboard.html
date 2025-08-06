@@ -25,7 +25,7 @@
                     {% for task in tasks %}
                     <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                     <!-- Using display: none works here as well but causes layout shift -->
-                    <tr class="table-row" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
+                    <tr class="group table-row" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
                         {% if is_dev%}
                             <td class="table-cell">{{ task.id }}</td>
                         {% endif %}

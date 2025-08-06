@@ -18,7 +18,7 @@ from app.modules.metrics.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
 from flask import (Blueprint, abort, flash, jsonify, redirect, render_template,
                    request, url_for)
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required, logout_user
 
 # TODO: Remove now with proper user auth
 if os.environ.get('APP_ENV') == 'dev':
@@ -177,11 +177,14 @@ def reset_and_demo():
 def reset_and_dev():
     if current_user.role != 'owner':
         return abort(403)
-
+    
+    logout_user()
     # Create owner user + seed
+    # TODO: DEBUG our delete function thoroughly => currently not working
     with database_connection() as session:
         print("ALPHA", file=sys.stderr)
         delete_all_db_data(session, include_users=True)
+        session.commit()
 
         # Create owner user + seed rich data
         owner_user = User(username='owner', role='owner')

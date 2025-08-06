@@ -40,8 +40,10 @@ def login():
             
             if not user:
                 flash(msg("username_nonexistent", DEFAULT_LANG))
+                return redirect(url_for('auth.login'))
             elif not user.check_password(password):
                 flash(msg("password_incorrect", DEFAULT_LANG))
+                return redirect(url_for('auth.login'))
             else:
                 remember = 'remember_user' in request.form
                 login_user(user, remember=remember)  # Stores session data in persistent cookie, with expiration date, and cookie survives browser restarts
