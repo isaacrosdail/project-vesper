@@ -32,7 +32,7 @@
         <!-- For flash() -->
         {% with messages = get_flashed_messages() %}  <!-- "if flask has any msgs saved, pull them into this variable called messages" -->
             {% if messages %}
-            <div id="flash-message" class="bg-green-100 text-green-800 px-4 py-2 rounded shadow mb-4">
+            <div id="flash-message" class="flash-message">
                 {% for message in messages %}
                 <p>{{ message }}</p>
                 {% endfor %}
@@ -44,7 +44,7 @@
             {% block content %}{% endblock %}
         </main>
             
-        <footer class="bg-gray-100 text-center text-sm py-4">
+        <footer>
             &copy; 2025
         </footer>
     </div>

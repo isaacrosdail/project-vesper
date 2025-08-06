@@ -49,11 +49,12 @@
         </div>
 
         <!-- Temporary Home for some admin-only privileges -->
-        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+        {% if current_user.is_authenticated and (current_user.role == 'admin' or current_user.role == 'owner') %}
         <!-- RIGHT: Reset DB button, then System/Light/Dark toggle -->
-        <form action="{{ url_for('main.reset_db') }}" method="POST">
-            <button type="submit" class="{{ styles.btn_classes() }}">Reset DB</button>
+        <form action="{{ url_for('main.reset_and_dev') }}" method="POST">
+            <button type="submit" class="btn-secondary">reset_and_dev</button>
         </form>
+        
 
         <!-- TODO: Finish this to implement custom dropdown(s) elsewhere => chiefly for theme then lang toggles -->
         {{ styles.my_select() }}
@@ -66,7 +67,7 @@
                 <legend class="visually-hidden">Pick a theme</legend>
                 
                 <!-- Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) -->
-                <select name="theme" id="theme" class="{{ styles.select_form_classes() }}">
+                <select name="theme" id="theme" class="select-dropdown">
                     <option value="laptop">System</option>
                     <option value="sun">Light</option>
                     <option value="moon">Dark</option>
