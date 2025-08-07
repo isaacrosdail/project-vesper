@@ -5,10 +5,10 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-card">
-        <h2 class="text-lg font-semibold mb-2">Habits</h2>
+        <h2>Habits</h2>
         <table class="table-standard">
             <caption class="sr-only">Habits</caption>
-            <thead class="bg-gray-800 text-white font-semibold">
+            <thead>
                 <tr>
                     {% if is_dev %}
                         <th class="table-header">ID</th>
@@ -29,14 +29,14 @@
                         >{{ habit.title }}</td>
                         <td class="table-cell">{{ habit.category|capitalize }}</td>
                         <td class="table-cell">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
-                        <td class="table-cell bg-gray-200 border-transparent">
+                        <td class="table-cell delete-cell">
                             {{ styles.delete_btn() }}
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="3" class="text-center text-gray-500 italic py-2">
+                        <td colspan="3" class="table-empty">
                             No habits yet.
                         </td>
                     </tr>
