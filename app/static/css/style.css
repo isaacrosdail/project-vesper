@@ -16,7 +16,7 @@
  * "Making 'Tailwind at home'" (I didn't even steal this idea!!)
  * Design token-based component classes that adapt to theme changes automatically.
  *
- * Using semantic CSS variables (--accent-text, --bg) instead of hardcoded colors, making components theme-agnostic. Changing themes automatically
+ * Using semantic CSS variables (--text, --bg) instead of hardcoded colors, making components theme-agnostic. Changing themes automatically
  * changes the values of these classes without needing to alter any HTML/templates.
  * This replaces template macros & hardcoded colors with a more maintainable, scalable design system that separates content (HTML) from styling (CSS).
  */
