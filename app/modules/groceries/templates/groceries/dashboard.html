@@ -7,7 +7,7 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-card"> <!-- Added my-6 to top div to -->
-        <h2 class="text-lg font-semibold mb-2">Grocery - Recent Transactions</h2>
+        <h2>Grocery - Recent Transactions</h2>
 
         <table class="table-standard">
             <caption class="sr-only">Grocery - Recent Transactions</caption>
@@ -33,14 +33,14 @@
                         <td class="table-cell">{{ transaction.quantity }}</td>
                         <td class="table-cell text-right">{{ transaction.created_at.strftime("%d.%m.%Y") }}</td>
                         <td class="table-cell text-right">£{{ transaction.price_per_100g | round(2) }}</td>
-                        <td class="table-cell bg-gray-200 border-transparent">
+                        <td class="table-cell delete-cell">
                             {{ styles.delete_btn() }}
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="3" class="text-center text-gray-500 italic py-2">
+                        <td colspan="3" class="table-empty">
                             No transactions yet.
                         </td>
                     </tr>
@@ -52,10 +52,10 @@
         Log New Transaction
     </a>
     <div class="dashboard-card">
-        <h2 class="text-lg font-semibold mb-2">Product Catalog</h2>
+        <h2>Product Catalog</h2>
         <table class="table-standard">
             <caption class="sr-only">Product Catalog</caption>
-            <thead class="bg-gray-800 text-white font-semibold">
+            <thead>
                 <tr>
                     <th class="table-header">Barcode</th>
                     <th class="table-header">Product Name</th>
@@ -73,14 +73,14 @@
                         <td class="table-cell text-right">{{ product.category }}</td>
                         <td class="table-cell text-right">{{ product.net_weight }} ({{ product.unit_type }})</td>
                         <td class="table-cell text-right">{{ product.calories_per_100g|int if product.calories_per_100g else '-' }}</td> <!-- Int filter |int here to chop of decimals -->
-                        <td class="table-cell bg-gray-200 border-transparent">
+                        <td class="table-cell delete-cell">
                             {{ styles.delete_btn() }}
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="3" class="text-center text-gray-500 italic py-2">
+                        <td colspan="3" class="table-empty">
                             No products yet.
                         </td>
                     </tr>

@@ -31,7 +31,7 @@
     --light-border-default: #d1d5db;          /* Borders (border-gray-300) */
 
 
-    --light-accent-text: oklch(87.2% 0.01 258.338);/* Branded text ("Vesper"), nav items (must work on dark backgrounds) (Tailwind's text-gray-300) */
+    /* --light-accent-text: oklch(87.2% 0.01 258.338);Branded text ("Vesper"), nav items (must work on dark backgrounds) (Tailwind's text-gray-300) */
     --light-text-destructive: hsl(0, 84%, 60%); /* For delete buttons, for example (Tailwind's text-red-500) */
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --light-accent-primary: oklch(60% 0.12 250); /* navbar & table headers (AND primary buttons?) */
@@ -54,7 +54,7 @@
 
 
 
-    --dark-accent-text: white;
+    /* --dark-accent-text: white; */
     --dark-text-destructive: hsl(0, 84%, 60%);
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --dark-accent-primary: oklch(40% 0.12 250);   /* navbar & table headers (AND primary buttons?) */
@@ -80,7 +80,7 @@
     --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
 
-    --accent-text: var(--light-accent-text);
+    /* --accent-text: var(--light-accent-text); */
     --text-destructive: var(--light-text-destructive);
     --text-inverse: var(--dark-text); /* Note: Using dark's normal text as inverse */
 
@@ -113,7 +113,7 @@
         
         /* === TEXT === */
 
-        --accent-text: var(--dark-accent-text);
+        /* --accent-text: var(--dark-accent-text); */
         --text-destructive: var(--dark-text-destructive);
         --text-inverse: var(--light-text); /* Note: Using light's normal text as inverse */
 
