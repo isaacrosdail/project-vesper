@@ -3,7 +3,7 @@
 /*
 * Architecture:
 * 1. Theme-specific tokens (--light-*, --dark-*) = actual color values
-* 2. Semantic tokens (--bg-base, --accent-text) = sort of a translation layer to decouple
+* 2. Semantic tokens (--bg-dark, --accent-text) = sort of a translation layer to decouple
 * 3. Theme switching = CSS that remaps semantic tokens to active theme.
 *
 * This lets components stay theme-agnostic while supporting unlimited themes (especially once Firefox supports container queries!)
@@ -11,100 +11,85 @@
 */
 :root {
     /* Global constants */
-    --color-success: #16a34a;
+    --color-success: #166534;
     --color-error: #dc2626;    
 
     /* =============== LIGHT THEME DEFINITIONS =============== */
-    /* Temp notes:
-    * surface-primary was bg-gray-200
-    * text-placeholder = 9ca3af was placeholder-gray-400
-    * oklch(44.6% 0.03 256.802) => bg-gray-600
-    * --light-text-input: #1f2937;           Input text? Unsure whether we want/need this, but might be good for accessibility/contrast? (Tailwind's text-gray-800)
-    * --light-bg-destructive: hsl(0, 84%, 60%);            Danger/Error backgrounds
-    * hsl(0, 74%, 42%); => text-red-700
-    */
     color-scheme: light;
 
     /* Note: For inverted text, simply directly use the opposite theme's (below in theme mappings, not incl. in definitions obv) */
     /* Example: (on light mode): */
-    /* === BACKGROUND HIERARCHY === */
-    --light-bg-base: hsl(54 54 54);           /* Main page/canvas background (lighter) */
-    --light-bg-elevated: hsl(220, 13%, 91%);  /* Cards, modals, main content areas (light) (Tailwind: bg-gray-200)*/
-    --light-bg-muted: #f3f4f6;                /* Secondary button backgrounds, alternating rows, muted backgrounds (Tailwind's bg-gray-100 or 200?) */
-    --light-bg-input: hsl(100, 100%, 100%);   /* Input fields (lightest, visually needs to 'pop') */
-    --light-bg-selection: grey;               /* Text selection background */
+    /* === NEUTRALS === */
+    --light-bg-dark: hsl(0 0 90);     /* Pure white base => Main page/canvas background */
+    --light-bg: hsl(0 0 95);          /* Subtle off-white => Cards, modals, main content areas */
+    --light-bg-light: hsl(0 0 100);   /* input fields. Secondary button backgrounds, alternating rows  */
 
-    /* === TEXT === */
-    --light-text-primary: #1f2937;      /* Main body text (dark) (folded text-input into here too - kinda both had the same job) */
-    --light-text-muted: #9ca3af;        /* Muted text AND placeholders (Tailwind's text-gray-400) */
+    --light-text: hsl(0 0 5);           /* for headers/etc, High contrast */
+    --light-text-muted: hsl(0 0 30);    /* main text, slightly muted from that */
+
+
+    --light-border-default: #d1d5db;          /* Borders (border-gray-300) */
+
+
     --light-accent-text: oklch(87.2% 0.01 258.338);/* Branded text ("Vesper"), nav items (must work on dark backgrounds) (Tailwind's text-gray-300) */
     --light-text-destructive: hsl(0, 84%, 60%); /* For delete buttons, for example (Tailwind's text-red-500) */
-    
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
-    --light-accent-primary: oklch(27.8% 0.033 256.848); /* bg-gray-800 navbar & table headers (AND primary buttons?) */
+    --light-accent-primary: oklch(60% 0.12 250); /* navbar & table headers (AND primary buttons?) */
+    --light-ui-hover: oklch(85% 0.05 250);
+
+    /* TODO: Selection text stuff */
+    --light-bg-selection: grey;   /* Text selection background */
     --light-text-selection: blue;
-
-    /* === HOVER/INTERACTIVE STATES === */
-    --light-bg-hover: #9ca3af; /* For normal hovers, Secondary buttons hover / Hover state backgrounds (Tailwind's bg-gray-400) */
-    --light-ui-hover: #374151;   /* For UI elements (nav, table rows?) bg-gray-700 */
-
-    /* === BORDERS === */
-    --light-border-default: #d1d5db;       /* border-gray-300 most borders */
     /* =============== END LIGHT THEME DEFINITIONS =============== */
 
     
     /* =============== DARK THEME DEFINITIONS =============== */
     /* === BACKGROUND HIERARCHY === */
-    --dark-bg-base: hsl(0 0 0);     /* Main page/canvas background (darker) */
-    --dark-bg-elevated: gray;       /* Cards, modals, main content areas */
-    --dark-bg-muted: #6b7280;       /* Secondary button backgrounds, alternating rows, muted backgrounds */
-    --dark-bg-input: hsl(100, 100%, 100%); /* Input fields (visually needs to 'pop') */
-    --dark-bg-selection: grey;      /* Text selection background */
+    --dark-bg-dark: hsl(0 0 0);     /* Main page/canvas background (darker) */
+    --dark-bg: hsl(0 0 5);          /* Lifted surface: Cards, modals, main content areas */
+    --dark-bg-light: hsl(0 0 10);       /* Input fields too? Buttons, dropdowns, menus, toggles, etc. Secondary button backgrounds, alternating rows, muted backgrounds */
 
-    /* === TEXT === */
-    --dark-text-primary: #f9fafb;    /* light text on dark */
-    --dark-text-muted: #d1d5db;      /* "un-muted"? lol, secondary */
+    --dark-text: hsl(0 0 95); /* Sharper, higher contrast color for headings/important elements */
+    --dark-text-muted: hsl(0 0 70); /* Slightly muted shade for most text */
+
+
+
     --dark-accent-text: white;
-    --dark-text-destructive: purple;
-
+    --dark-text-destructive: hsl(0, 84%, 60%);
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
-    --dark-accent-primary: white;   /* navbar & table headers (AND primary buttons?) */
-    --dark-text-selection: yellow;
-
-    /* === HOVER/INTERACTIVE STATES === */
-    --dark-bg-hover: #6b7280;      /* dark hover */
-    --dark-ui-hover: #374151;            /* bg-gray-700 */
+    --dark-accent-primary: oklch(40% 0.12 250);   /* navbar & table headers (AND primary buttons?) */
 
     /* === BORDERS === */
     --dark-border-default: #6b7280;             /* darker borders */
-    /* =============== END DARK THEME DEFINITIONS =============== */
+    /* Selection stuff */
+    --dark-bg-selection: grey;      /* Text selection background */
+    --dark-text-selection: yellow;
 
+    /* =============== END DARK THEME DEFINITIONS =============== */
 
     /* ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
     /* === BACKGROUND HIERARCHY === */
-    --bg-base: var(--light-bg-base);
-    --bg-elevated: var(--light-bg-elevated);
-    --bg-muted: var(--light-bg-muted);
-    --bg-input: var(--light-bg-input);
-    --bg-selection: var(--light-bg-selection);
-    
-    /* === TEXT === */
-    --text-primary: var(--light-text-primary);
+    --bg-dark: var(--light-bg-dark);
+    --bg: var(--light-bg);
+    --bg-light: var(--light-bg-light);
+
     --text-muted: var(--light-text-muted);
+    --text: var(--light-text);
+
+    --border: hsl(0 0% 30%);
+    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+
     --accent-text: var(--light-accent-text);
     --text-destructive: var(--light-text-destructive);
-    --text-inverse: var(--dark-text-primary); /* Note: Using dark's normal text as inverse */
+    --text-inverse: var(--dark-text); /* Note: Using dark's normal text as inverse */
 
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --accent-primary: var(--light-accent-primary);
+
+    /* selection stuff */
+    --bg-selection: var(--light-bg-selection);
     --text-selection: var(--light-text-selection);
-
-    /* === HOVER/INTERACTIVE STATES === */
-    --bg-hover: var(--light-bg-hover);
-    --ui-hover: var(--light-ui-hover);
-
-    /* === BORDERS === */
-    --border-default: var(--light-border-default);
     /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
 
     
@@ -114,29 +99,34 @@
 
         /* ACTIVE THEME MAPPINGS - dark THEME (default) */
         /* === BACKGROUND HIERARCHY === */
-        --bg-base: var(--dark-bg-base);
-        --bg-elevated: var(--dark-bg-elevated);
-        --bg-muted: var(--dark-bg-muted);
-        --bg-input: var(--dark-bg-input);
-        --bg-selection: var(--dark-bg-selection);
+        --bg-dark: var(--dark-bg-dark);
+        --bg: var(--dark-bg);
+        --bg-light: var(--dark-bg-light);
+
+        --text-muted: var(--dark-text-muted);     
+        --text: var(--dark-text);
+
+
+        --border: hsl(0 0% 30%);
+        --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
         
         /* === TEXT === */
-        --text-primary: var(--dark-text-primary);
-        --text-muted: var(--dark-text-muted);
+
         --accent-text: var(--dark-accent-text);
         --text-destructive: var(--dark-text-destructive);
-        --text-inverse: var(--light-text-primary); /* Note: Using light's normal text as inverse */
+        --text-inverse: var(--light-text); /* Note: Using light's normal text as inverse */
 
         /* === UI ELEMENTS / ACCENT COLOR(S) === */
         --accent-primary: var(--dark-accent-primary);
-        --text-selection: var(--dark-text-selection);
+        --ui-hover: var(--light-ui-hover);
 
-        /* === HOVER/INTERACTIVE STATES === */
-        --bg-hover: var(--dark-bg-hover);
-        --ui-hover: var(--dark-ui-hover);
 
         /* === BORDERS === */
         --border-default: var(--dark-border-default);
+        /* selection stuff */
+        --bg-selection: var(--dark-bg-selection);
+        --text-selection: var(--dark-text-selection);
         /* END ACTIVE THEME MAPPINGS - dark THEME (default) */
     }
 }
@@ -149,29 +139,28 @@
 
     /* ACTIVE THEME MAPPINGS - LIGHT THEME */
     /* === BACKGROUND HIERARCHY === */
-    --bg-base: var(--light-bg-base);
-    --bg-elevated: var(--light-bg-elevated);
-    --bg-muted: var(--light-bg-muted);
-    --bg-input: var(--light-bg-input);
-    --bg-selection: var(--light-bg-selection);
-    
-    /* === TEXT === */
-    --text-primary: var(--light-text-primary);
+    --bg-dark: var(--light-bg-dark);
+    --bg: var(--light-bg);
+    --bg-light: var(--light-bg-light);
+
     --text-muted: var(--light-text-muted);
-    --accent-text: var(--light-accent-text);
+    --text: var(--light-text);
+
+    --border: hsl(0 0% 30%);
+    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+    
     --text-destructive: var(--light-text-destructive);
-    --text-inverse: var(--dark-text-primary); /* Note: Using dark's normal text as inverse */
+    --text-inverse: var(--dark-text); /* Note: Using dark's normal text as inverse */
 
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --accent-primary: var(--light-accent-primary);
+
+
+
+    /* selection stuff */
+    --bg-selection: var(--light-bg-selection);
     --text-selection: var(--light-text-selection);
-
-    /* === HOVER/INTERACTIVE STATES === */
-    --bg-hover: var(--light-bg-hover);
-    --ui-hover: var(--light-ui-hover);
-
-    /* === BORDERS === */
-    --border-default: var(--light-border-default);
     /* END ACTIVE THEME MAPPINGS - LIGHT THEME (default) */
 }
 
@@ -182,28 +171,29 @@
 
     /* ACTIVE THEME MAPPINGS - dark THEME (default) */
     /* === BACKGROUND HIERARCHY === */
-    --bg-base: var(--dark-bg-base);
-    --bg-elevated: var(--dark-bg-elevated);
-    --bg-muted: var(--dark-bg-muted);
-    --bg-input: var(--dark-bg-input);
-    --bg-selection: var(--dark-bg-selection);
-    
-    /* === TEXT === */
-    --text-primary: var(--dark-text-primary);
+    --bg-dark: var(--dark-bg-dark);
+    --bg: var(--dark-bg);
+    --bg-light: var(--dark-bg-light);
+
+    --text: var(--dark-text);
     --text-muted: var(--dark-text-muted);
-    --accent-text: var(--dark-accent-text);
+
+
+    --border: hsl(0 0% 30%);
+    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+
     --text-destructive: var(--dark-text-destructive);
-    --text-inverse: var(--light-text-primary); /* Note: Using light's normal text as inverse */
+
+    --text-inverse: var(--light-text); /* Note: Using light's normal text as inverse */
 
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --accent-primary: var(--dark-accent-primary);
-    --text-selection: var(--dark-text-selection);
 
-    /* === HOVER/INTERACTIVE STATES === */
-    --bg-hover: var(--dark-bg-hover);
-    --ui-hover: var(--dark-ui-hover);
 
-    /* === BORDERS === */
     --border-default: var(--dark-border-default);
+    /* selection stuff */
+    --bg-selection: var(--dark-bg-selection);
+    --text-selection: var(--dark-text-selection);
     /* END ACTIVE THEME MAPPINGS - dark THEME (default) */
 }
