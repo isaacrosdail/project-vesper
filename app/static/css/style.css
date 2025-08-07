@@ -121,23 +121,7 @@
         background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
     }
 
-    /* ======= FIX SELECT STYLING ======= */
-    .select-dropdown {
-        background-color: var(--bg-light);
-        color: var(--text-muted);
-    }
     /* ======= LAYOUT COMPONENTS ======= */
-    .dashboard-container {
-        background-color: var(--bg-dark);
-        max-width: 48rem; /* = 3xl in Tailwind */
-        margin: 2.5rem auto 0;
-        overflow-x: auto;
-        padding: 1rem 1rem 0;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem; /* controls spacing between items in layout containers like grids &  flexboxes */
-    }
-
     .dashboard-card {
         min-width: max-content;
         padding: 1.5rem;
