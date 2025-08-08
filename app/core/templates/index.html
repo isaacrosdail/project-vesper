@@ -6,15 +6,6 @@
 
 {% block content %}
 <div class="dashboard-container"> <!-- px-4 = 1rem left + right, sm:px-8 = wider padding on screens >= 640px -->
-
-    <!-- Testing colors -->
-    <!-- <div style="background-color: hsl(196, 43%, 44%); height: 4rem;">1</div>
-    <div style="background-color: color-mix(in srgb, hsl(197, 92%, 15%) 80%, white 10%); height: 4rem;">2</div>
-    <div style="background-color: hsl(212, 64%, 46%); height: 4rem;">3</div>
-    <div style="background-color: lch(70 70 280); height: 4rem;">4</div>
-    <div style="background-color: hsl(212, 50%, 25%); height: 4rem;">5</div>
-    <div style="background-color: hsl(212, 20%, 25%); height: 4rem;">6</div> -->
-
     <!-- Greeting & Time/Date Card -->
     <section id="greeting-card" class="dashboard-card">
         <div class="time-section">
@@ -82,64 +73,64 @@
 
         <div class="form-group">
             <label for="weight">Weight:</label>
-            <input class="input-inline" type="number" name="weight" data-metric="weight" data-unit="lbs" placeholder="lbs">
+            <input class="input-inline" type="number" id="weight" name="weight" data-metric="weight" data-unit="lbs" placeholder="lbs">
         </div>
         <div class="form-group">
             <label for="steps">Steps:</label>
-            <input class="input-inline" type="number" name="steps" data-metric="steps" data-unit="steps" placeholder="0">
+            <input class="input-inline" type="number" id="steps" name="steps" data-metric="steps" data-unit="steps" placeholder="0">
         </div>
         <div class="form-group">
             <label for="movement">Movement:</label>
-            <input class="input-inline" type="number" name="movement" data-metric="movement" data-unit="minutes" placeholder="mins">
+            <input class="input-inline" type="number" id="movement" name="movement" data-metric="movement" data-unit="minutes" placeholder="mins">
         </div>
         <div class="form-group">
             <label for="stress">Stress:</label>
-            <input class="input-inline" type="range" name="stress" data-checkin="stress_level" min="1" max="10">
+            <input class="input-inline" type="range" id="stress" name="stress" data-checkin="stress_level" min="1" max="10">
         </div>
         <div class="form-group">
             <label for="energy">Energy:</label>
-            <input class="input-inline" type="range" name="energy" data-checkin="energy_level" min="1" max="10">
+            <input class="input-inline" type="range" id="energy" name="energy" data-checkin="energy_level" min="1" max="10">
         </div>
         <div class="form-group">
             <label for="mood">Mood:</label>
-            <input class="input-inline" type="range" name="mood" data-checkin="mood" min="1" max="10">
+            <input class="input-inline" type="range" id="mood" name="mood" data-checkin="mood" min="1" max="10">
         </div>
 
         <div class="form-group">
-            <label for="">Sleep Time</label>
-            <input class="input-inline" type="time" name="sleep_time">
+            <label for="sleep_time">Sleep Time</label>
+            <input class="input-inline" type="time" id="sleep_time" name="sleep_time">
         </div>
         <div class="form-group">
-            <label for="">Wake Time</label>
-            <input class="input-inline" type="time" name="wake_time">
+            <label for="wake_time">Wake Time</label>
+            <input class="input-inline" type="time" id="wake_time" name="wake_time">
         </div>
         <div class="form-group">
-            <label for="">Calories</label>
-            <input class="input-inline" type="text">
+            <label for="calories">Calories</label>
+            <input class="input-inline" type="text" id="calories" name="calories">
         </div>
         <div class="form-group">
-            <label for="">Screen Time</label>
-            <input class="input-inline" type="text">
+            <label for="screen_time">Screen Time</label>
+            <input class="input-inline" type="text" id="screen_time" name="screen_time">
         </div>
         <!-- Eventually use a camera to gauge this? -->
         <div class="form-group">
-            <label for="">Room Tidiness?</label>
-            <input class="input-inline" type="range" min="1" max="10">
+            <label for="room_tidiness">Room Tidiness?</label>
+            <input class="input-inline" type="range" id="room_tidiness" name="room_tidiness" min="1" max="10">
         </div>
         <div class="form-group">
             <!-- Have a "meds list" table? Then select from here in a dropdown -->
             <!-- Also: Use created_at for time taken? OR allow for option using datetime form -->
-            <label for="">Med Taken:</label>
-            <input class="input-inline" type="text">
+            <label for="med_taken">Med Taken:</label>
+            <input class="input-inline" type="text" id="med_taken" name="med_taken">
         </div>
         <div class="form-group">
-            <label for="">EOD Balance: </label>
-            <input class="input-inline" type="number">
+            <label for="eod_balance">EOD Balance: </label>
+            <input class="input-inline" type="number" id="eod_balance" name="eod_balance">
         </div>
         <div class="form-group">
             <!-- Make a button like "-/+ glass"? More optimal size/UX -->
-            <label for="">Water Intake</label>
-            <input class="input-inline" type="text">
+            <label for="water_intake">Water Intake</label>
+            <input class="input-inline" type="text" id="water_intake" name="water_intake">
         </div>
     </section>
 
@@ -147,20 +138,20 @@
     <!-- Roll our own JS validation for this instead of using form and intercepting with .preventDefault() -->
     <!-- TODO: Develop 2-3 style macros for different types of inputs & buttons - these don't quite fit here -->
     <!-- Consider converting this to a modal rather than being sorta an inline input? -->
-    <section id="activity-log-card" class="dashboard-card p-6">
+    <section id="activity-log-card" class="dashboard-card">
         <h2 class="text-xl font-semibold mb-2">Daily Time Log Entry</h2>
 
         <div class="form-group">
             <label for="category">Category:</label>
-            <input type="text" id="category" class="input-standard">
+            <input type="text" id="category" name="category" class="input-standard">
         </div>
         <div class="form-group">
             <label for="duration">Duration:</label>
-            <input type="number" id="duration" min="0" class="input-standard">
+            <input type="number" id="duration" name="duration" min="0" class="input-standard">
         </div>
         <div class="form-group">
             <label for="description">Description (Optional):</label>
-            <input type="text" id="description" class="input-standard">
+            <input type="text" id="description" name="description" class="input-standard">
         </div>
         <button id="save-entry-btn" class="btn-primary">Save Entry</button>
     </section>
