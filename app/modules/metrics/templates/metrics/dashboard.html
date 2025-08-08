@@ -15,46 +15,45 @@
     </div>
 </div>
 
-<div class="dashboard-container">
-    <div class="dashboard-card">
-        <h2>Metric Entries</h2>
-        <table class="table-standard">
-            <caption class="sr-only">Metric Entries</caption>
-            <thead>
-                <tr>
-                    {% if is_dev %}
-                        <th class="table-header">ID</th>
-                    {% endif %}
-                    <th class="table-header">Metric Type</th>
-                    <th class="table-header">Value (units)</th>
-                    <th class="table-header">Created</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if metrics %}
-                    {% for metric in metrics %}
-                    <tr class="table-row" data-item-id="{{ metric.id }}" data-module="metrics" data-subtype="metric">
-                        {% if is_dev %}
-                            <td class="table-cell">{{ metric.id }}</td>
-                        {% endif %}
-                        <td class="editable-cell table-cell" data-item-id="{{ metric.id }}" data-module="metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ metric.metric_type }}</td>
-                        <td class="editable-cell table-cell" data-item-id="{{ metric.id }}" data-module="metrics" data-field="value" title="Double-click to edit value.">{{ metric.value | round }}  ({{ metric.unit }})</td>
-                        <td class="table-cell">{{ metric.created_at.strftime("%d.%m.%Y") }}</td>
-                        <td class="table-cell delete-cell">
-                            {{ styles.delete_btn() }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="3" class="table-empty">
-                            No metric entries yet.
-                        </td>
-                    </tr>
+
+<div class="dashboard-card">
+    <h2>Metric Entries</h2>
+    <table class="table-standard">
+        <caption class="sr-only">Metric Entries</caption>
+        <thead>
+            <tr>
+                {% if is_dev %}
+                    <th class="table-header">ID</th>
                 {% endif %}
-            </tbody>
-        </table>
-    </div>
+                <th class="table-header">Metric Type</th>
+                <th class="table-header">Value (units)</th>
+                <th class="table-header">Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if metrics %}
+                {% for metric in metrics %}
+                <tr class="table-row" data-item-id="{{ metric.id }}" data-module="metrics" data-subtype="metric">
+                    {% if is_dev %}
+                        <td class="table-cell">{{ metric.id }}</td>
+                    {% endif %}
+                    <td class="editable-cell table-cell" data-item-id="{{ metric.id }}" data-module="metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ metric.metric_type }}</td>
+                    <td class="editable-cell table-cell" data-item-id="{{ metric.id }}" data-module="metrics" data-field="value" title="Double-click to edit value.">{{ metric.value | round }}  ({{ metric.unit }})</td>
+                    <td class="table-cell">{{ metric.created_at.strftime("%d.%m.%Y") }}</td>
+                    <td class="table-cell delete-cell">
+                        {{ styles.delete_btn() }}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" class="table-empty">
+                        No metric entries yet.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
 </div>
 
 
