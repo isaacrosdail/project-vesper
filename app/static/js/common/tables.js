@@ -208,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const menu = document.querySelector('.context-menu');
             // Below is functionally similar to: document.body.removeChild(menu);
             menu?.remove();
-            console.log('Menu removed!');
         }
     });
 });
