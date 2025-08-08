@@ -34,7 +34,8 @@
         cursor: pointer;
     }
     .btn-primary:hover {
-        opacity: 80%;
+        /* Color-mixing with --text ensures light mode buttons get lighter AND dark mode buttons get darker */
+        background-color: color-mix(in srgb, var(--accent-lighter) 80%, var(--text));
     }
     .btn-secondary {
         display: inline-block; /* keeps button compact-ly sized? */
@@ -47,13 +48,13 @@
         cursor: pointer;
     }
     .btn-secondary:hover {
-        opacity: 80%;
+        background-color: color-mix(in srgb, var(--bg-light) 80%, var(--text));
     }
     .btn-destructive {
         color: var(--text-destructive);
     }
     .btn-destructive:hover {
-        opacity: 80%;
+        color: color-mix(in srgb, var(--text-destructive) 80%, white);
         cursor: pointer;
     }
 
