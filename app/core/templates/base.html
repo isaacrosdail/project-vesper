@@ -9,8 +9,8 @@
     <title>{% block title %}Vesper{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/output.css') }}"> <!-- For Tailwind styling -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/logo_v5_white-bg.png') }}">
-    <!--{% block additional_styles %}{% endblock %}  For future -->
-    <script>
+    <!-- nonce: -->
+    <script nonce="{{ nonce }}">
         // Set data-theme value so CSS can grab & apply proper theme from cookie BEFORE loading rest
         // Prevents the flash of incorrect theme of doom
         (function () {
@@ -53,7 +53,7 @@
     <script src="{{ url_for('static', filename = 'js/common/navbar.js')}}"></script>
     <script src="{{ url_for('static', filename = 'js/common/theme-manager.js') }}"></script>
     <!-- Flash message auto-fade -->
-    <script>
+    <script nonce="{{ nonce }}">
         window.addEventListener('DOMContentLoaded', () => {
             const flash = document.getElementById('flash-message');
             if (flash) {
