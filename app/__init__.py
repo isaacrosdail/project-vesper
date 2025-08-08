@@ -1,8 +1,8 @@
 import os
-
+import secrets
 # For environment variables via dotenv
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, g
 
 from alembic import command
 # For pivoting to using Alembic instead of create_all
@@ -57,6 +57,11 @@ def create_app(config_name=None):
         from app.core.auth.models import User
         return db_session.get(User, int(user_id))
 
+    # Generate nonce once per-request (allows our inline theme JS to execute)
+    @app.before_request
+    def generate_nonce():
+        g.nonce = secrets.token_urlsafe(16)
+
     # Context processor runs before every template render
     # Make is_dev available in all templates globally
     # So we can do {% if is_dev %} to hide dev-only stuff _without_ needing to keep passing it into each template
@@ -64,8 +69,23 @@ def create_app(config_name=None):
     def inject_globals():
         return dict(
             is_dev=os.environ.get('APP_ENV') == 'dev',
-            default_lang=DEFAULT_LANG
+            default_lang=DEFAULT_LANG,
+            nonce=getattr(g, 'nonce', '') # inject our nonce here as well
         )
+    
+    # Add to CSP headers
+    @app.after_request
+    def apply_csp(response):
+        response.headers['Content-Security-Policy'] = (
+            f"default-src 'self'; "
+            # unsafe-inline defeats much of the point of CSP, but Plotly won't play nice
+            f"script-src 'self' 'unsafe-inline' https://cdn.plot.ly; " # Should be => f"script-src 'self' 'nonce-{g.nonce}'; "
+            f"style-src 'self' 'unsafe-inline'; " # unsafe-inline since Plotly injects inline styles :/
+            f"img-src 'self' data:;"
+            f"object-src 'none'; "
+            f"base-uri 'self';"
+        )
+        return response
 
     # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
     with app.app_context():
