@@ -219,6 +219,12 @@ select:not(.input-inline) {
     padding: 0.25rem 0.75rem; /* Slightly tighter */
     font-size: 0.875rem;
 }
+.context-menu {
+    background-color: red;
+    border: 1px solid black;
+    position: fixed;  /* important since it takes it out of the DOM flow? */
+    z-index: 1000;
+}
 
 /* For regular forms, more padding and stronger borders */
 /* .input-standard {
