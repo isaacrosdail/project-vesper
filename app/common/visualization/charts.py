@@ -30,7 +30,7 @@ def get_filtered_dataframe(session: Session, model_name: Type[Any], user_id: int
         df = get_filtered_dataframe(session, TimeEntry, current_user.id, "category", "Programming", "duration", 7)
     """
     today_utc = datetime.now(timezone.utc)
-    start_date = (today_utc - timedelta(days=days_ago)).date()
+    start_date = (today_utc - timedelta(days=days_ago)).replace(hour=0, minute=0, second=0, microsecond=0)
 
     # SQLAlchemy uses column objects like TimeEntry.category & translates == into "'WHERE category = 'Programming'"
     # Just passing str "category" then doing model_name.filter_field directly wouldn't work here
@@ -43,20 +43,23 @@ def get_filtered_dataframe(session: Session, model_name: Type[Any], user_id: int
     # Need all model_names for filter_field_obj where date is between today & days_ago, ordered by date
     entries = session.query(model_name).filter(
         filter_field_obj == filter_value,
-        func.date(model_name.created_at) >= start_date, # compares date to date
-        model_name.created_at <= today_utc,             # compares datetime to datetime (fine to mix?)
+        model_name.created_at >= start_date,    # now both datetime to datetime
+        model_name.created_at <= today_utc,     # compares datetime to datetime
         model_name.user_id==user_id
     ).order_by(model_name.created_at).all()
 
     # Extract dates & values for plotting into discrete lists
     # Note: using .date() to strip datetime objects to dates => Plenty for graphs for now
-    dates = [entry.created_at.date() for entry in entries]            # [date1, date2, date3, ...]
+    dates = [entry.created_at for entry in entries]            # [date1, date2, date3, ...]
     values = [getattr(entry, value_field_name) for entry in entries]  # [value1, value2, null, ...]
 
     # Get these into our data frame
     df = pd.DataFrame({'Date': dates, filter_value.title(): values})
+    df['Date'] = pd.to_datetime(df['Date']) # makes this datetime64[ns] as it should be
     return df
 
+## Note to self: Plotly uses D3.js time format specifiers under the hood, NOT Python's strftime
+### Meaning time formats that are valid in Python are not necessarily valid in Plotly
 def create_metric_chart_html(df: pd.DataFrame, 
                              metric_type: str, 
                              title: str = None,
@@ -77,9 +80,11 @@ def create_metric_chart_html(df: pd.DataFrame,
     if title is None:
         title = f"{metric_type.title()} over time"
 
+    print(df.dtypes, file=sys.stderr)
     fig = px.line(df, x=df.columns[0], y=df.columns[1], title=title)
+
     fig.update_xaxes(
-        tickformat=date_format,        # Default: DD.MM
+        # tickformat=date_format,        # TODO: This causes error for bad format, need to test & iron out
         dtick=2 * 24 * 60 * 60 * 1000, # 2 days in ms (show every other day)
         )
 
@@ -99,4 +104,4 @@ def create_metric_chart_html(df: pd.DataFrame,
     #     hovertemplate='<b>%{y}</b><br>%{x}<extra></extra>'
     # )
 
-    return fig.to_html(include_plotlyjs='cdn')
+    return fig.to_html(include_plotlyjs='cdn') 
