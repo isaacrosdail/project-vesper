@@ -131,6 +131,32 @@
 
         /* TODO: Scrap, this is temporary to see styling as I wrap up */
         border: solid 1px var(--border);
+
+        position: relative;
+        margin-top: 1rem;
+    }
+    /* Mimicking <fieldset>'s 'title intersects border' effect for our table container headers */
+    .card-title {
+        position: absolute; /* breaks the title out of normal flow */
+        top: -0.9rem;
+        left: 1rem;
+        background: linear-gradient(
+            to bottom,
+            var(--bg-dark) 50%, /* Top half */
+            var(--bg) -50%      /* Bottom half */
+        );
+        padding: 0 0.02rem;
+        margin: 0;
+    }
+    /* Getting our "Add __" buttons to appear above top right of tables */
+    .table-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .table-card-btn {
+        margin-left: auto;
     }
 
     /* Warnings? Messages? Success? idk */
