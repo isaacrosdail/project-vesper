@@ -189,16 +189,7 @@
 :root {
     --min-navbar-height: 4rem;
 }
-.dashboard-container {
-    background-color: var(--bg-dark);
-    max-width: 48rem; /* = 3xl in Tailwind */
-    margin: 2.5rem auto 0;
-    overflow-x: auto;
-    padding: 1rem 1rem 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* controls spacing between items in layout containers like grids &  flexboxes */
-}
+
 /* TODO: use :where to consolidate these into one. input base styles (standard & inline) */
 input:not(.input-inline), 
 select:not(.input-inline) {
@@ -241,6 +232,7 @@ h2 {
 /* TODO: Clean up: Styling for playing around with dialog element to make modal */
 /* TODO: STUDY TRANSFORM */
 dialog {
+    background-color: var(--bg);
     padding: 2rem;
     position: fixed;
     /* Move 50% relative to container */
@@ -315,10 +307,8 @@ nav {
     box-sizing: border-box; /* Padding/borders included in width calculations */
 }
 
-/* ==== LAYOUT COMPONENTS ==== */
-
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
-/* Main page wrapper: organizes header/content/footer */
+/* Full height flex container => header/content/footer */
 .wrapper {
     min-height: 100vh;
     display: flex;
@@ -329,6 +319,17 @@ nav {
     /* Tells flex container's child to grow and take up all remaining space */
     flex: 1;
     background-color: var(--bg-dark);
+    /* Other standard page stylings */
+}
+.dashboard-container {
+    background-color: var(--bg-dark);
+    max-width: 48rem; /* = 3xl in Tailwind */
+    margin: 2.5rem auto 0;
+    overflow-x: auto;
+    padding: 1rem 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* controls spacing between items in layout containers like grids &  flexboxes */
 }
 
 
