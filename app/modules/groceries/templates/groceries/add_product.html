@@ -63,10 +63,11 @@
                 <input type="text" id="calories_per_100g" name="calories_per_100g"
                     class="input-standard">
             </div>
-
-            <button class="btn-primary" type="submit">Submit</button>
-        </form>
-    </div>
+            <a href="{{ url_for('groceries.dashboard') }}" class="btn-secondary">Cancel / Return</a>
+            <button class="btn-primary" type="submit" name="action" value="save">Submit</button>
+        </fieldset>
+    </form>
+</div>
 {% endblock %}
 
 {% block scripts %}
