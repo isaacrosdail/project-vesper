@@ -1,7 +1,7 @@
 
 window.addEventListener('DOMContentLoaded', () => {
     const mobileNav = document.getElementById('mobile-nav');
-    const modal = document.getElementById('my-modal');
+    const modal = document.getElementById('settings-modal');
 
     document.addEventListener('click', (e) => {
         const t = e.target
@@ -25,7 +25,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Baby's First Modal
         // Open modal
-        if (t.matches('#my-btn')) {
+        if (t.matches('#settings-btn')) {
             // Trying out <dialog> element stuff
             // What's this do? => dialog.returnValue = "...";
             modal?.showModal(); // ESC key & blur automatically handled :P
