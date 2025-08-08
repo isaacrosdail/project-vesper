@@ -169,19 +169,55 @@ function handleEditClick(e) {
     }
 }
 
+function handleContextMenu(e) {
+    if (e.target.closest('.table-row')) {
+        e.preventDefault(); // Prevents appearance of default browser context menu?
+
+        // Accessing OR making our custom context menu
+        let menu = document.querySelector('.context-menu');
+        if (!menu) {
+            menu = document.createElement('ul');
+            const menuItems = ['Edit', 'Delete', 'Close'];
+        
+            for (const item of menuItems) {
+                const menuItem = document.createElement('li');
+                menuItem.textContent = item; // set string from array as textContent property for element
+                menu.appendChild(menuItem);
+            }
+            menu.classList.add('context-menu'); // add class (for CSS)
+        }
+
+        // Position menu at cursor
+        menu.style.left = e.clientX + 'px';
+        menu.style.top = e.clientY + 'px';
+        menu.style.display = 'block';
+        document.body.appendChild(menu); // Now we made our HTML element in JS memory, but need to add it to the page!
+    }
+}
 // Fires when the HTML is fully parsed & DOM tree is built
 // All HTML elements exist & can be selected
 // Images, stylesheets, fonts might still be loading
 document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', handleDeleteClick);
     document.addEventListener('dblclick', handleEditClick);
+    document.addEventListener('contextmenu', handleContextMenu); // TODO?: Pull our context menu handling into some kind of global.js
+
+    // Listener for click away (to remove context menu)
+    document.addEventListener('click', (e) => {
+        if (!e.target.matches('.context-menu')) {
+            const menu = document.querySelector('.context-menu');
+            // Below is functionally similar to: document.body.removeChild(menu);
+            menu?.remove();
+            console.log('Menu removed!');
+        }
+    });
 });
 
 // Functions to run on page load
 // Fires later/slower => Once EVERYTHING is completely loaded
 //  All HTML elements, all images/CSS/fonts/Externala resources
 window.onload = () => {
-    // Useful for event listeners, UI/form initialization, dynamic content loading (like for a weather widget?)
+    // Useful for event listeners, UI/form initialization
 }
 
 // Make function(s) exportable for testing using Jest
