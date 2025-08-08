@@ -44,10 +44,8 @@ def dashboard():
 @login_required
 #TODO: Rename?
 def habits():
-
-    # Process form data and add new habit to db
+    # Process form data from modal
     if request.method == "POST":
-
         # Create new habit object
         new_habit = Habit(
             title = request.form.get("title"),

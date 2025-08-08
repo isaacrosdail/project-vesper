@@ -169,9 +169,9 @@ function handleEditClick(e) {
     }
 }
 
-function handleContextMenu(e) {
+function handleCustomContextMenu(e) {
     if (e.target.closest('.table-row')) {
-        e.preventDefault(); // Prevents appearance of default browser context menu?
+        //e.preventDefault(); // Prevents appearance of default browser context menu?
 
         // Accessing OR making our custom context menu
         let menu = document.querySelector('.context-menu');
@@ -200,7 +200,17 @@ function handleContextMenu(e) {
 document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', handleDeleteClick);
     document.addEventListener('dblclick', handleEditClick);
-    document.addEventListener('contextmenu', handleContextMenu); // TODO?: Pull our context menu handling into some kind of global.js
+    document.addEventListener('contextmenu', (e) => {
+        console.log('FIRED: contextmenu event');
+        console.log('Shift key:', e.shiftKey);
+        console.log('Target element:', e.target);
+        console.log('Default prevented?', e.defaultPrevented);
+        if (e.ctrlKey) {
+            console.log('shift pressed!');
+            e.preventDefault();
+            handleCustomContextMenu(e); // TODO?: Pull our context menu handling into some kind of global.js
+        }
+    });
 
     // Listener for click away (to remove context menu)
     document.addEventListener('click', (e) => {

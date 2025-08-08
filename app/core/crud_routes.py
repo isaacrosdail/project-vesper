@@ -27,12 +27,17 @@ modelMap = {
     ("metrics", "metric"): DailyMetric,
 }
 
+# Toying around with helper function
+def get_model(module, subtype="none"):
+    return modelMap.get((module, subtype))
+
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH", "DELETE"])
 def item(module, subtype, item_id):
 
     try:
         with database_connection() as session:
 
+            # TODO: Consider rename to model_class for precision/clarity?
             model = modelMap.get((module, subtype)) # so 'tasks', 'none' returns Task class
             item = session.get(model, item_id)
 
