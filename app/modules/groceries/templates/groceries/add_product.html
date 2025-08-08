@@ -5,10 +5,11 @@
 {% block title %}Add New Product{% endblock %}
 
 {% block content %}
-    <h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Add new product:</h2>
-    <div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
-        <form method="POST">
-
+<!-- <h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Add new product:</h2> -->
+<div class="dashboard-card">
+    <form method="POST">
+        <fieldset>
+            <legend>Add new product:</legend>
             <div class="form-group">
                 <label for="barcode">Barcode:</label>
                 <input type="text" id="barcode" name="barcode"
