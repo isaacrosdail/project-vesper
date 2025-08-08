@@ -25,7 +25,7 @@
     /* ======= BUTTONS ======= */
     .btn-primary {
         display: inline-block; /* keeps button compact-ly sized? */
-        background-color: var(--accent-primary);
+        background-color: var(--accent-lighter);
         color: var(--text);
         border: 1px solid var(--border);
         border-radius: 0.375rem;
@@ -79,7 +79,7 @@
     }
     /* TODO: Table header row styling - remove all bg-gray-800 mentions from thead classes!!! */
     .table-header {
-        background-color: var(--accent-primary);
+        background-color: var(--accent-lighter);
         color: var(--text);    /* TODO */
         font-weight: 600; /* equivalent to font-semibold in Tailwind */
         padding: 0.5rem;
@@ -261,7 +261,7 @@ dialog::backdrop {
 }
 nav {
     min-height: var(--min-navbar-height);
-    background-color: var(--accent-primary);
+    background-color: var(--accent-darker);
     padding: 1rem;
     position: relative; /* creates positioning context for flash-message */
     /* overflow: hidden; keep content inside navbar bounds */

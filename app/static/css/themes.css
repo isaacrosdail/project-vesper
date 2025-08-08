@@ -28,13 +28,14 @@
     --light-text-muted: hsl(0 0 30);    /* main text, slightly muted from that */
 
 
-    --light-border-default: #d1d5db;          /* Borders (border-gray-300) */
+    --light-border: hsl(0 0% 30%); /* Borders */
 
 
     /* --light-accent-text: oklch(87.2% 0.01 258.338);Branded text ("Vesper"), nav items (must work on dark backgrounds) (Tailwind's text-gray-300) */
     --light-text-destructive: hsl(0, 84%, 60%); /* For delete buttons, for example (Tailwind's text-red-500) */
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
-    --light-accent-primary: oklch(60% 0.12 250); /* navbar & table headers (AND primary buttons?) */
+    --light-accent-darker: oklch(60% 0.12 250); /* navbar & table headers (AND primary buttons?) */
+    --light-accent-lighter: oklch(70% 0.12 250); /* Lighter variant of accent color to be used for CTAs, subtler visual notes throughout app */
     --light-ui-hover: oklch(85% 0.05 250);
 
     /* TODO: Selection text stuff */
@@ -57,10 +58,11 @@
     /* --dark-accent-text: white; */
     --dark-text-destructive: hsl(0, 84%, 60%);
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
-    --dark-accent-primary: oklch(40% 0.12 250);   /* navbar & table headers (AND primary buttons?) */
+    --dark-accent-darker: oklch(40% 0.12 250);   /* navbar & table headers (AND primary buttons?) */
+    --dark-accent-lighter: oklch(70% 0.12 250);
 
     /* === BORDERS === */
-    --dark-border-default: #6b7280;             /* darker borders */
+    --dark-border: hsl(0 0% 30%);             /* darker borders */
     /* Selection stuff */
     --dark-bg-selection: grey;      /* Text selection background */
     --dark-text-selection: yellow;
@@ -76,7 +78,7 @@
     --text-muted: var(--light-text-muted);
     --text: var(--light-text);
 
-    --border: hsl(0 0% 30%);
+    --border: var(--light-border);
     --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
 
@@ -85,7 +87,8 @@
     --text-inverse: var(--dark-text); /* Note: Using dark's normal text as inverse */
 
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
-    --accent-primary: var(--light-accent-primary);
+    --accent-darker: var(--light-accent-darker);
+    --accent-lighter: var(--light-accent-lighter);
 
     /* selection stuff */
     --bg-selection: var(--light-bg-selection);
@@ -107,23 +110,19 @@
         --text: var(--dark-text);
 
 
-        --border: hsl(0 0% 30%);
+        --border: var(--dark-border);
         --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
-        
-        /* === TEXT === */
 
         /* --accent-text: var(--dark-accent-text); */
         --text-destructive: var(--dark-text-destructive);
         --text-inverse: var(--light-text); /* Note: Using light's normal text as inverse */
 
         /* === UI ELEMENTS / ACCENT COLOR(S) === */
-        --accent-primary: var(--dark-accent-primary);
+        --accent-darker: var(--dark-accent-darker);
+        --accent-lighter: var(--dark-accent-lighter);
         --ui-hover: var(--light-ui-hover);
 
-
-        /* === BORDERS === */
-        --border-default: var(--dark-border-default);
         /* selection stuff */
         --bg-selection: var(--dark-bg-selection);
         --text-selection: var(--dark-text-selection);
@@ -145,17 +144,18 @@
 
     --text-muted: var(--light-text-muted);
     --text: var(--light-text);
-
-    --border: hsl(0 0% 30%);
-    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
-
-    
     --text-destructive: var(--light-text-destructive);
     --text-inverse: var(--dark-text); /* Note: Using dark's normal text as inverse */
 
-    /* === UI ELEMENTS / ACCENT COLOR(S) === */
-    --accent-primary: var(--light-accent-primary);
 
+    --border: var(--light-border);
+    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+
+
+    /* === UI ELEMENTS / ACCENT COLOR(S) === */
+    --accent-darker: var(--light-accent-darker);
+    --accent-lighter: var(--light-accent-lighter);
 
 
     /* selection stuff */
@@ -177,21 +177,18 @@
 
     --text: var(--dark-text);
     --text-muted: var(--dark-text-muted);
+    --text-inverse: var(--light-text); /* TODO: Do we even need this? Note: Using light's normal text as inverse */
+    --text-destructive: var(--dark-text-destructive);
 
 
-    --border: hsl(0 0% 30%);
+    --border: var(--dark-border);
     --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
 
-    --text-destructive: var(--dark-text-destructive);
-
-    --text-inverse: var(--light-text); /* Note: Using light's normal text as inverse */
-
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
-    --accent-primary: var(--dark-accent-primary);
+    --accent-darker: var(--dark-accent-darker);
+    --accent-lighter: var(--dark-accent-lighter);
 
-
-    --border-default: var(--dark-border-default);
     /* selection stuff */
     --bg-selection: var(--dark-bg-selection);
     --text-selection: var(--dark-text-selection);
