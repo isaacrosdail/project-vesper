@@ -56,14 +56,18 @@ def habits():
         with database_connection() as session:
         # Add new_habit to db
             session.add(new_habit)
+            session.flush()
             flash("Habit added successfully.") # flash confirmation
-
-            return redirect(url_for("habits.dashboard")) # Redirect after POST - NOT render_template
-            # Follows Post/Redirect/Get (PRG) pattern
-
-    # GET => Return add_habit form page
-    else:
-        return render_template("habits/add_habit.html")
+            # TODO: STUDY: Is there a better way to do this with **args/**kwargs?
+            return jsonify({
+                "success": True, 
+                "message": "Task added successfully.",
+                "habit": {
+                    "id": new_habit.id,
+                    "title": new_habit.title,
+                    "category": new_habit.category
+                }
+            })
     
 # Creates a new HabitCompletion record to mark a Habit complete & enable more robust habit analytics in future
 @habits_bp.route("/<int:habit_id>/completions", methods=["POST"])

@@ -3,68 +3,73 @@
 {% block title %}Tasks{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="dashboard-card">
-        <h2>Tasks</h2>
-        <table class="table-standard">
-            <caption class="sr-only">Tasks</caption>
-            <thead>
-                <tr>
-                    {% if is_dev %}
-                        <th class="table-header">ID</th>
-                    {% endif %}
-                    <th class="table-header">Title</th>
-                    <th class="table-header">Status</th>
-                    <th class="table-header">Type</th>
-                    <th class="table-header">Created</th>
-                    <th class="table-header">Completed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if tasks %}
-                    {% for task in tasks %}
-                    <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
-                    <!-- Using display: none works here as well but causes layout shift -->
-                    <tr class="table-row" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
-                        {% if is_dev%}
-                            <td class="table-cell">{{ task.id }}</td>
-                        {% endif %}
-                        <td class="editable-cell table-cell" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."
-                            >{{ task.title }}</td>
-                        <td class="table-cell">
-                            <!-- |safe here to render HTML entities instead of escaping them -->
-                            {{ ('&#9745;' if task.is_done else '&#9744;') | safe }}
-                        </td>
-                        <td class="table-cell">{{ task.type }}</td>
-                        <td class="table-cell text-right">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
-                        <td class="table-cell text-right">
-                            <!-- EX: 18:09 -->
-                            {{ task.completed_at.strftime("%H:%M") if task.completed_at else '--' }} 
-                        </td>
-                        <td class="table-cell delete-cell">
-                            {{ styles.delete_btn() }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="3" class="table-empty">
-                            No tasks yet.
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-    <a href="{{ url_for('tasks.tasks') }}" class="btn-secondary mb-2">
-        Add New Task
-    </a>
-    {% if is_dev %}
-    <form action="{{ url_for('main.reset_and_dev') }}" method="POST">
-        <button type="submit" class="btn-secondary mt-120">Reset dev DB</button>
+<dialog id="add-task-modal">
+    <form id="add-task-form" method="POST">
+        <fieldset>
+            <legend>Add new task:</legend>
+            <div class="form-group">
+                <label for="title">Task:</label>
+                <input type="text" id="title" name="title" class="input-standard" required>
+            </div>
+        </fieldset>
+        <button class="btn-primary" type="submit">Submit</button>
+        <button class="btn-secondary" id="modal-close-btn">Close</button>
     </form>
-    {% endif %}
+</dialog>
+<div class="dashboard-card">
+    <h2>Tasks</h2>
+    <table class="table-standard">
+        <caption class="sr-only">Tasks</caption>
+        <thead>
+            <tr>
+                {% if is_dev %}
+                    <th class="table-header">ID</th>
+                {% endif %}
+                <th class="table-header">Title</th>
+                <th class="table-header">Status</th>
+                <th class="table-header">Type</th>
+                <th class="table-header">Created</th>
+                <th class="table-header">Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if tasks %}
+                {% for task in tasks %}
+                <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
+                <!-- Using display: none works here as well but causes layout shift -->
+                <tr class="table-row" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
+                    {% if is_dev%}
+                        <td class="table-cell">{{ task.id }}</td>
+                    {% endif %}
+                    <td class="editable-cell table-cell" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."
+                        >{{ task.title }}</td>
+                    <td class="table-cell">
+                        <!-- |safe here to render HTML entities instead of escaping them -->
+                        {{ ('&#9745;' if task.is_done else '&#9744;') | safe }}
+                    </td>
+                    <td class="table-cell">{{ task.type }}</td>
+                    <td class="table-cell text-right">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
+                    <td class="table-cell text-right">
+                        <!-- EX: 18:09 -->
+                        {{ task.completed_at.strftime("%H:%M") if task.completed_at else '--' }} 
+                    </td>
+                    <td class="table-cell delete-cell">
+                        {{ styles.delete_btn() }}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" class="table-empty">
+                        No tasks yet.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
 </div>
+<button id="add-task-btn" class="btn-primary">Add Task (Modal)</button>
+
 {% endblock %}
 
 {% block scripts %}

@@ -11,7 +11,7 @@ function filterUnitOptions() {
     //console.log(`Category selected: ${categorySelection}`);
     // List to make this more readable
     const fluidUnits = ['drink', 'energy_drink', 'condiments_and_sauces'];
-    const solidUnits = ['produce', 'diary', 'grain', 'nut', 'meat'];
+    const solidUnits = ['produce', 'dairy', 'grain', 'nut', 'meat'];
 
     // if fluids => show only ml, l, fl oz
     if (fluidUnits.includes(categorySelection)) {

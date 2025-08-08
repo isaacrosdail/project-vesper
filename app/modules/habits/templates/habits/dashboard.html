@@ -3,52 +3,74 @@
 {% block title %}Habits{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="dashboard-card">
-        <div class="table-card-header">
-            <h2 class="card-title">Habits</h2>
-            <a href="{{ url_for('habits.habits') }}" class="btn-secondary table-card-btn">
-                Add New Habit
-            </a>
-        </div>
-        <table class="table-standard">
-            <caption class="sr-only">Habits</caption>
-            <thead>
-                <tr>
-                    {% if is_dev %}
-                        <th class="table-header">ID</th>
-                    {% endif %}
-                    <th class="table-header">Title</th>
-                    <th class="table-header">Category</th>
-                    <th class="table-header">Created</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if habits %}
-                    {% for habit in habits %}
-                    <tr class="table-row" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
-                        {% if is_dev %}
-                            <td class="table-cell">{{ habit.id }}</td>
-                        {% endif %}
-                        <td class="editable-cell table-cell" data-item-id="{{ habit.id }}" data-module="habits" data-field="title" title="Double-click to edit field."
-                        >{{ habit.title }}</td>
-                        <td class="table-cell">{{ habit.category|capitalize }}</td>
-                        <td class="table-cell">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
-                        <td class="table-cell delete-cell">
-                            {{ styles.delete_btn() }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="3" class="table-empty">
-                            No habits yet.
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+<dialog id="add-habit-modal">
+    <form id="add-habit-form" method="POST">
+        <fieldset>
+            <legend>Add new habit:</legend>
+            <div class="form-group">
+                <label for="title">Habit:</label>
+                <input type="text" id="title" name="title" class="input-standard" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select name="category" class="input-standard" required>
+                    <option value="">-- Category --</option>
+                    <option value="health">Health</option>
+                    <option value="learning">Learning</option>
+                    <option value="work">Work</option>
+                    <option value="personal">Personal</option>
+                    <!-- Household: walking dog, cleaning kitchen, paying taxes..? Need better term/name -->
+                    <option value="household">Household</option>
+                    <option value="misc">Misc.</option>
+                </select>
+            </div>
+            <button class="btn-secondary" id="modal-close-btn">Close</button>
+            <button class="btn-primary" type="submit">Submit</button>
+        </fieldset>
+    </form>
+</dialog>
+<div class="dashboard-card">
+    <div class="table-card-header">
+        <h2 class="card-title">Habits</h2>
+        <button id="add-habit-btn" class="btn-primary table-card-btn">Add Habit (Modal)</button>
     </div>
+    <table class="table-standard">
+        <caption class="sr-only">Habits</caption>
+        <thead>
+            <tr>
+                {% if is_dev %}
+                    <th class="table-header">ID</th>
+                {% endif %}
+                <th class="table-header">Title</th>
+                <th class="table-header">Category</th>
+                <th class="table-header">Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if habits %}
+                {% for habit in habits %}
+                <tr class="table-row" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
+                    {% if is_dev %}
+                        <td class="table-cell">{{ habit.id }}</td>
+                    {% endif %}
+                    <td class="editable-cell table-cell" data-item-id="{{ habit.id }}" data-module="habits" data-field="title" title="Double-click to edit field."
+                    >{{ habit.title }}</td>
+                    <td class="table-cell">{{ habit.category|capitalize }}</td>
+                    <td class="table-cell">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
+                    <td class="table-cell delete-cell">
+                        {{ styles.delete_btn() }}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" class="table-empty">
+                        No habits yet.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
 

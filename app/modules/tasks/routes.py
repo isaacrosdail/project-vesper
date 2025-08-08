@@ -65,11 +65,13 @@ def tasks():
         # Add new_task to db
         with database_connection() as session:
             session.add(new_task)
+            session.flush()
             flash("Task added successfully.")
-            return redirect(url_for("tasks.dashboard")) # Redirect after POST - NOT render_template
-            # Using redirect here after the form POST follows the best practice of
-            # Post/Redirect/Get (PRG) pattern - standard for handling form submissions in web apps
-            
-    # GET => Return add_task form page
-    else:
-        return render_template("tasks/add_task.html")
+            return jsonify({
+                "success": True, 
+                "message": "Task added successfully.",
+                "task": {
+                    "id": new_task.id,
+                    "title": new_task.title
+                }
+            })

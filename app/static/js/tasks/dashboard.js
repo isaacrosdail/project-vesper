@@ -1,1 +1,59 @@
-// not sure what to do here now :p
+// Currently handles add task modal
+
+document.addEventListener('DOMContentLoaded', (e) => {
+    const modal = document.getElementById('add-task-modal');
+    // Event listener for modal click
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('#add-task-btn')) {
+            modal?.showModal();
+        }
+        // TODO: Fix bug => Close causes "input field __ not focusable", doesn't seem to break functionality
+        // just causes validation outline upon reopen
+        else if (e.target.matches('#modal-close-btn')) {
+            const form = modal.querySelector('form');
+            form.reset();
+            modal?.close();
+        }
+    });
+    // Listen for submit event on modal
+    modal?.addEventListener('submit', (e) => {
+        // e.target here is the form itself
+        // The form fires the submit event which bubbles up to the modal where our listener catches it
+        e.preventDefault(); // prevent default form submission behavior (Note: method on EVENT, not target)
+
+        // Get our form data
+        const formData = new FormData(e.target);
+        saveModalFormSubmission(formData, e.currentTarget);
+
+    });
+});
+
+// Handle submission for modal
+// Don't like passing modal, would rather isolate & handle .close
+// in our event listener above, but that incurs rewrites I wouldn't
+// like either
+async function saveModalFormSubmission(formData, modal) {
+    const url = '/tasks';
+
+    // POST fetch
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData // no headers needed for FormData object
+        });
+
+        // Reads our response body, parses it as JSON
+        const responseData = await response.json();
+
+        if (responseData.success) {
+            const task = responseData.task;
+            // Debug: console.log(`Task id: ${task.title}`)
+            modal.querySelector('form').reset(); // Clear form on submit
+            modal?.close();
+        } else {
+            console.error('Error submitting Task form:', responseData.message);
+        }
+    } catch (error) {
+        console.error('Error during fetch request:', error);
+    }
+}
