@@ -5,7 +5,12 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-card">
-        <h2>Habits</h2>
+        <div class="table-card-header">
+            <h2 class="card-title">Habits</h2>
+            <a href="{{ url_for('habits.habits') }}" class="btn-secondary table-card-btn">
+                Add New Habit
+            </a>
+        </div>
         <table class="table-standard">
             <caption class="sr-only">Habits</caption>
             <thead>
@@ -44,9 +49,6 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('habits.habits') }}" class="mb-2 btn-secondary">
-        Add New Habit
-    </a>
 </div>
 {% endblock %}
 
