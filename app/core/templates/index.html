@@ -5,142 +5,141 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="dashboard-container"> <!-- px-4 = 1rem left + right, sm:px-8 = wider padding on screens >= 640px -->
-    <!-- Greeting & Time/Date Card -->
-    <section id="greeting-card" class="dashboard-card">
-        <div class="time-section">
-            <h1 class="text-xl font-semibold mb-2">
-                {% if current_user.is_authenticated %}
-                    {{ greeting }}, {{ current_user.name }}!
-                {% else %}
-                    {{ greeting }}
-                {% endif %}
-            </h1>
-            <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p>
-        </div>
-        <div class="divider"></div>
-        <div class="weather-section">
-            <div id="weather-temp"></div>
-            <div id="weather-sunset"></div>
-            <!-- Learning canvas for our sun :D -->
-            <canvas id="sun-canvas" width="200" height="100"></canvas>
-        </div>
+<!-- Greeting & Time/Date Card -->
+<section id="greeting-card" class="dashboard-card">
+    <div class="time-section">
+        <h1 class="text-xl font-semibold mb-2">
+            {% if current_user.is_authenticated %}
+                {{ greeting }}, {{ current_user.name }}!
+            {% else %}
+                {{ greeting }}
+            {% endif %}
+        </h1>
+        <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p>
+    </div>
+    <div class="divider"></div>
+    <div class="weather-section">
+        <div id="weather-temp"></div>
+        <div id="weather-sunset"></div>
+        <!-- Learning canvas for our sun :D -->
+        <canvas id="sun-canvas" width="200" height="100"></canvas>
+    </div>
 
-    </section>
+</section>
 
-    <!-- Critical Task Card bg-gray-200 p-6 rounded-xl shadow-lg -->
-    <section id="today-intention-card" class="dashboard-card">
-        <h2>Critical Task</h2>
-        <p>
-            <span>Today's Intention: </span>
-            <span id="intention-text" class="placeholder-text">
-                {{ today_intention.intention if today_intention.intention else "What's your focus today?" }}
+<!-- Critical Task Card bg-gray-200 p-6 rounded-xl shadow-lg -->
+<section id="today-intention-card" class="dashboard-card">
+    <h2>Critical Task</h2>
+    <p>
+        <span>Today's Intention: </span>
+        <span id="intention-text" class="placeholder-text">
+            {{ today_intention.intention if today_intention.intention else "What's your focus today?" }}
+        </span>
+    </p>
+</section>
+
+<!-- Daily Habits Card -->
+<section id="daily-habits-card" class="dashboard-card">
+    <h2>Daily Habits</h2>
+    <!-- Just print names in UL for now -->
+    <ul>
+    {% for habit in habits %}
+        <li>
+            <input type="checkbox"
+                class="habit-checkbox"
+                data-habit-id="{{ habit.id }}"
+                {% if habit_info[habit.id].completed_today %}checked{% endif %}>
+
+            <span class="habit-title text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if habit_info[habit.id].completed_today %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
+                {{ habit.title }}
             </span>
-        </p>
-    </section>
+            
+            <span class="text-sm">
+                {% if habit_info[habit.id].streak_count > 0 %}
+                    🔥{{ habit_info[habit.id].streak_count }}
+                {% endif %}
+            </span>
+        </li>
+    {% endfor %}
+    </ul>
+</section>
 
-    <!-- Daily Habits Card -->
-    <section id="daily-habits-card" class="dashboard-card">
-        <h2>Daily Habits</h2>
-        <!-- Just print names in UL for now -->
-        <ul>
-        {% for habit in habits %}
-            <li>
-                <input type="checkbox"
-                    class="habit-checkbox"
-                    data-habit-id="{{ habit.id }}"
-                    {% if habit_info[habit.id].completed_today %}checked{% endif %}>
+<!-- Daily Check-In Card -->
+<!-- TODO: Scrap our 'data-' things in this card. Used more for storing custom data on elements not for grabbing them -->
+<section id="daily-check-in-card" class="dashboard-card">
+    <h2>Daily Check-In</h2>
+    <!-- Content: weight, steps, movement (mins), stress (scale), energy (scale) -->
 
-                <span class="habit-title text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded {% if habit_info[habit.id].completed_today %}line-through text-gray-400{% endif %}"> <!-- UNSURE ABOUT THIS STYLING -->
-                    {{ habit.title }}
-                </span>
-                
-                <span class="text-sm">
-                    {% if habit_info[habit.id].streak_count > 0 %}
-                     🔥{{ habit_info[habit.id].streak_count }}
-                    {% endif %}
-                </span>
-            </li>
-        {% endfor %}
-        </ul>
-    </section>
-    
-    <!-- Daily Check-In Card -->
-    <!-- TODO: Scrap our 'data-' things in this card. Used more for storing custom data on elements not for grabbing them -->
-    <section id="daily-check-in-card" class="dashboard-card">
-        <h2>Daily Check-In</h2>
-        <!-- Content: weight, steps, movement (mins), stress (scale), energy (scale) -->
+    <div class="form-group">
+        <label for="weight">Weight:</label>
+        <input class="input-inline" type="number" id="weight" min="0" max="500" step="0.1" name="weight" data-metric="weight" data-unit="lbs" placeholder="lbs">
+    </div>
+    <div class="form-group">
+        <label for="steps">Steps:</label>
+        <input class="input-inline" type="number" id="steps" min="0" max="100000" step="1" name="steps" data-metric="steps" data-unit="steps" placeholder="0">
+    </div>
+    <div class="form-group">
+        <label for="movement">Movement:</label>
+        <input class="input-inline" type="number" id="movement" min="0" max="480" name="movement" data-metric="movement" data-unit="minutes" placeholder="mins">
+    </div>
+    <div class="form-group">
+        <label for="stress">Stress:</label>
+        <input class="input-inline" type="range" id="stress" name="stress" data-checkin="stress_level" min="1" max="10">
+    </div>
+    <div class="form-group">
+        <label for="energy">Energy:</label>
+        <input class="input-inline" type="range" id="energy" name="energy" data-checkin="energy_level" min="1" max="10">
+    </div>
+    <div class="form-group">
+        <label for="mood">Mood:</label>
+        <input class="input-inline" type="range" id="mood" name="mood" data-checkin="mood" min="1" max="10">
+    </div>
 
-        <div class="form-group">
-            <label for="weight">Weight:</label>
-            <input class="input-inline" type="number" id="weight" name="weight" data-metric="weight" data-unit="lbs" placeholder="lbs">
-        </div>
-        <div class="form-group">
-            <label for="steps">Steps:</label>
-            <input class="input-inline" type="number" id="steps" name="steps" data-metric="steps" data-unit="steps" placeholder="0">
-        </div>
-        <div class="form-group">
-            <label for="movement">Movement:</label>
-            <input class="input-inline" type="number" id="movement" name="movement" data-metric="movement" data-unit="minutes" placeholder="mins">
-        </div>
-        <div class="form-group">
-            <label for="stress">Stress:</label>
-            <input class="input-inline" type="range" id="stress" name="stress" data-checkin="stress_level" min="1" max="10">
-        </div>
-        <div class="form-group">
-            <label for="energy">Energy:</label>
-            <input class="input-inline" type="range" id="energy" name="energy" data-checkin="energy_level" min="1" max="10">
-        </div>
-        <div class="form-group">
-            <label for="mood">Mood:</label>
-            <input class="input-inline" type="range" id="mood" name="mood" data-checkin="mood" min="1" max="10">
-        </div>
+    <div class="form-group">
+        <label for="sleep_time">Sleep Time</label>
+        <input class="input-inline" type="time" id="sleep_time" name="sleep_time">
+    </div>
+    <div class="form-group">
+        <label for="wake_time">Wake Time</label>
+        <input class="input-inline" type="time" id="wake_time" name="wake_time">
+    </div>
+    <div class="form-group">
+        <label for="calories">Calories</label>
+        <input class="input-inline" type="number" id="calories" min="0" max="10000" step="1" name="calories">
+    </div>
+    <div class="form-group">
+        <label for="screen_time">Screen Time</label>
+        <input class="input-inline" type="number" id="screen_time" min="0" max="1440" name="screen_time">
+    </div>
+    <div class="form-group">
+        <label for="room_tidiness">Room Tidiness?</label>
+        <input class="input-inline" type="range" id="room_tidiness" name="room_tidiness" min="1" max="10">
+    </div>
+    <div class="form-group">
+        <!-- Have a "meds list" table? Then select from here in a dropdown -->
+        <!-- Also: Use created_at for time taken? OR allow for option using datetime form -->
+        <label for="med_taken">Med Taken:</label>
+        <input class="input-inline" type="text" id="med_taken" name="med_taken">
+    </div>
+    <div class="form-group">
+        <label for="eod_balance">EOD Balance: </label>
+        <input class="input-inline" type="number" id="eod_balance" min="0" name="eod_balance">
+    </div>
+    <div class="form-group">
+        <!-- Make a button like "-/+ glass"? More optimal size/UX
+         TODO: Add/implements units display + db field here -->
+        <label for="water_intake">Water Intake</label>
+        <input class="input-inline" type="number" id="water_intake" min="0" max="300" name="water_intake">
+    </div>
+</section>
 
-        <div class="form-group">
-            <label for="sleep_time">Sleep Time</label>
-            <input class="input-inline" type="time" id="sleep_time" name="sleep_time">
-        </div>
-        <div class="form-group">
-            <label for="wake_time">Wake Time</label>
-            <input class="input-inline" type="time" id="wake_time" name="wake_time">
-        </div>
-        <div class="form-group">
-            <label for="calories">Calories</label>
-            <input class="input-inline" type="text" id="calories" name="calories">
-        </div>
-        <div class="form-group">
-            <label for="screen_time">Screen Time</label>
-            <input class="input-inline" type="text" id="screen_time" name="screen_time">
-        </div>
-        <!-- Eventually use a camera to gauge this? -->
-        <div class="form-group">
-            <label for="room_tidiness">Room Tidiness?</label>
-            <input class="input-inline" type="range" id="room_tidiness" name="room_tidiness" min="1" max="10">
-        </div>
-        <div class="form-group">
-            <!-- Have a "meds list" table? Then select from here in a dropdown -->
-            <!-- Also: Use created_at for time taken? OR allow for option using datetime form -->
-            <label for="med_taken">Med Taken:</label>
-            <input class="input-inline" type="text" id="med_taken" name="med_taken">
-        </div>
-        <div class="form-group">
-            <label for="eod_balance">EOD Balance: </label>
-            <input class="input-inline" type="number" id="eod_balance" name="eod_balance">
-        </div>
-        <div class="form-group">
-            <!-- Make a button like "-/+ glass"? More optimal size/UX -->
-            <label for="water_intake">Water Intake</label>
-            <input class="input-inline" type="text" id="water_intake" name="water_intake">
-        </div>
-    </section>
-
-    <!-- Activity Log Entry Card -->
-    <!-- Roll our own JS validation for this instead of using form and intercepting with .preventDefault() -->
-    <!-- TODO: Develop 2-3 style macros for different types of inputs & buttons - these don't quite fit here -->
-    <!-- Consider converting this to a modal rather than being sorta an inline input? -->
-    <section id="activity-log-card" class="dashboard-card">
-        <h2 class="text-xl font-semibold mb-2">Daily Time Log Entry</h2>
-
+<!-- Activity Log Entry Card -->
+<!-- Roll our own JS validation for this instead of using form and intercepting with .preventDefault() -->
+<!-- TODO: Develop 2-3 style macros for different types of inputs & buttons - these don't quite fit here -->
+<!-- Consider converting this to a modal rather than being sorta an inline input? -->
+<section id="activity-log-card" class="dashboard-card">
+    <fieldset>
+        <legend class="text-xl font-semibold mb-2">Daily Time Log Entry</legend>
         <div class="form-group">
             <label for="category">Category:</label>
             <input type="text" id="category" name="category" class="input-standard">

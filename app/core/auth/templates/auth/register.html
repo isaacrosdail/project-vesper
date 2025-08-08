@@ -4,28 +4,34 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Register:</h2>
-<div class="bg-white shadow-lg rounded-xl p-6 max-w-lg mx-auto mt-8 border border-gray-200">
-
-<form action="{{ url_for('auth.register') }}" method="POST">
-    <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" placeholder="johnsaccount" required
-            class="input-standard">
-    </div>
-    <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="text" id="password" name="password" placeholder="1234" maxlength="14" required
-            class="input-standard">
-    </div>
-    <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" placeholder="John" required
-            class="input-standard">
-    </div>
-
-    <button class="btn-primary" type="submit">Submit</button>
-</form>
+<!-- <h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Register:</h2> -->
+<div class="dashboard-card">
+    <form action="{{ url_for('auth.register') }}" method="POST">
+        <fieldset>
+            <legend>Register:</legend>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" 
+                        required minlength="8" maxlength="50"
+                        placeholder="Enter desired username"
+                        class="input-standard">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password" 
+                        required minlength="8" maxlength="50"
+                        placeholder="Enter desired password"
+                        class="input-standard">
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" placeholder="John" required
+                    class="input-standard">
+            </div>
+            <button class="btn-secondary" type="submit" name="action" value="cancel">Cancel / Return </button>
+            <button class="btn-primary" type="submit" name="action" value="save">Submit</button>
+        </fieldset>
+    </form>
 <a href="{{ url_for('auth.login') }}">Already have an account? Log in</a>
 </div>
 {% endblock %}
