@@ -54,7 +54,7 @@ def dashboard():
 @login_required
 def products():
     try:
-        if request.method == "POST":
+        if request.method == "POST":           
             # Parse & sanitize form data
             product_data = {
                 "barcode": request.form.get("barcode"),

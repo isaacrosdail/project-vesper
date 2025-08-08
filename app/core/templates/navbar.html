@@ -61,6 +61,7 @@
             </form>
         </dialog>
 
+        <!-- TODO: Fold this into our new cog wheel modal! -->
         {% if current_user.is_authenticated and (current_user.role == 'admin' or current_user.role == 'owner') %}
         <!-- RIGHT: Reset DB button, then System/Light/Dark toggle -->
         <form action="{{ url_for('main.reset_and_dev') }}" method="POST">

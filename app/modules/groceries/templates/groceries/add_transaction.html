@@ -26,7 +26,7 @@
                     {% if not show_product_fields%}disabled{% endif %}>
             </div>
             <div class="form-group">
-                <label for="price_at_scan">Price:</label>   <!-- HAVE THIS AUTOFILL WITH KNOWN PRICE IF EXISTS -->
+                <label for="price_at_scan">Price:</label>
                 <!-- TODO: Add currency dropdown once we implement conversion math -->
                 <input type="number" step="0.01" min="0" id="price_at_scan" name="price_at_scan"
                     value="{{ transaction_data.price_at_scan if transaction_data else '' }}"

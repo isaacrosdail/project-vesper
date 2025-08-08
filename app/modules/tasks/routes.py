@@ -47,7 +47,6 @@ def dashboard():
 def tasks():
 
     if request.method == "POST":
-
         # Parse & sanitize form data
         task_data = {
             "title": request.form.get("title"),
