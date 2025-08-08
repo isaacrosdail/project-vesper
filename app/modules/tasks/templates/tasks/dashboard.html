@@ -56,12 +56,12 @@
             </tbody>
         </table>
     </div>
-    <a href="{{ url_for('tasks.tasks') }}" class="mb-2 btn-secondary">
+    <a href="{{ url_for('tasks.tasks') }}" class="btn-secondary mb-2">
         Add New Task
     </a>
     {% if is_dev %}
     <form action="{{ url_for('main.reset_and_dev') }}" method="POST">
-        <button type="submit" class="mt-120 btn-secondary">Reset dev DB</button>
+        <button type="submit" class="btn-secondary mt-120">Reset dev DB</button>
     </form>
     {% endif %}
 </div>
