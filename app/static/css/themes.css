@@ -54,12 +54,11 @@
     --dark-text-muted: hsl(0 0 70); /* Slightly muted shade for most text */
 
 
-
-    /* --dark-accent-text: white; */
     --dark-text-destructive: hsl(0, 84%, 60%);
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --dark-accent-darker: oklch(40% 0.12 250);   /* navbar & table headers (AND primary buttons?) */
     --dark-accent-lighter: oklch(70% 0.12 250);
+    --dark-ui-hover: oklch(85% 0.05 250);
 
     /* === BORDERS === */
     --dark-border: hsl(0 0% 30%);             /* darker borders */
@@ -84,11 +83,12 @@
 
     /* --accent-text: var(--light-accent-text); */
     --text-destructive: var(--light-text-destructive);
-    --text-inverse: var(--dark-text); /* Note: Using dark's normal text as inverse */
+    --text-inverse: var(--dark-text); /* Note: Using dark's sharper text as inverse */
 
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --accent-darker: var(--light-accent-darker);
     --accent-lighter: var(--light-accent-lighter);
+    --ui-hover: var(--light-ui-hover);
 
     /* selection stuff */
     --bg-selection: var(--light-bg-selection);
@@ -116,12 +116,12 @@
 
         /* --accent-text: var(--dark-accent-text); */
         --text-destructive: var(--dark-text-destructive);
-        --text-inverse: var(--light-text); /* Note: Using light's normal text as inverse */
+        --text-inverse: var(--light-text); /* Note: Using light's sharper text as inverse */
 
         /* === UI ELEMENTS / ACCENT COLOR(S) === */
         --accent-darker: var(--dark-accent-darker);
         --accent-lighter: var(--dark-accent-lighter);
-        --ui-hover: var(--light-ui-hover);
+        --ui-hover: var(--dark-ui-hover);
 
         /* selection stuff */
         --bg-selection: var(--dark-bg-selection);
@@ -145,7 +145,7 @@
     --text-muted: var(--light-text-muted);
     --text: var(--light-text);
     --text-destructive: var(--light-text-destructive);
-    --text-inverse: var(--dark-text); /* Note: Using dark's normal text as inverse */
+    --text-inverse: var(--dark-text); /* Note: Using dark's sharper text as inverse */
 
 
     --border: var(--light-border);
@@ -156,6 +156,7 @@
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --accent-darker: var(--light-accent-darker);
     --accent-lighter: var(--light-accent-lighter);
+    --ui-hover: var(--light-ui-hover);
 
 
     /* selection stuff */
@@ -177,7 +178,7 @@
 
     --text: var(--dark-text);
     --text-muted: var(--dark-text-muted);
-    --text-inverse: var(--light-text); /* TODO: Do we even need this? Note: Using light's normal text as inverse */
+    --text-inverse: var(--light-text); /* TODO: Do we even need this? Note: Using light's sharper text as inverse */
     --text-destructive: var(--dark-text-destructive);
 
 
@@ -188,6 +189,7 @@
     /* === UI ELEMENTS / ACCENT COLOR(S) === */
     --accent-darker: var(--dark-accent-darker);
     --accent-lighter: var(--dark-accent-lighter);
+    --ui-hover: var(--dark-ui-hover);
 
     /* selection stuff */
     --bg-selection: var(--dark-bg-selection);
