@@ -249,9 +249,9 @@ async function getWeatherInfo() {
         weatherInfo = await response.json();
 
         // use weather info - to start, grab temp & sunset time
-        const temp = Math.round(weatherInfo.main.temp);
-        const sunset = weatherInfo.sys.sunset;
-        const desc = weatherInfo.weather[0].description.toLowerCase();
+        const temp = Math.round(weatherInfo.data.temp);
+        const sunset = weatherInfo.data.sunset;
+        const desc = weatherInfo.weather.description.toLowerCase();
 
         // Determine fitting emoji
         let emoji = '🌡️';
