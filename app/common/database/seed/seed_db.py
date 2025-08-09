@@ -99,7 +99,7 @@ def seed_db():
             ),
             Product(
                 product_name="Greek Yogurt",
-                category="diary",
+                category="dairy",
                 barcode="72736376",
                 net_weight=500.0,
                 unit_type="g",
