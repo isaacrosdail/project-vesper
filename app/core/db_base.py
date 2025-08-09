@@ -14,6 +14,7 @@ class TimestampMixin:
     # @property is a common decorator for creating "virtual attributes" that are computed on-the-fly
     # Lets us convert to London time simply by doing task.created_at_local
     # as if it were a column in the model itself
+    # TODO: Fix hardcoded zoneinfo here!!
     @property
     def created_at_local(self):
         return self.created_at.astimezone(ZoneInfo("Europe/London"))
