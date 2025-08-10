@@ -1,35 +1,38 @@
 import os
 import sys
 
-from flask import Flask, request
+from flask import Flask, request, current_app, has_app_context
 
 
 # TODO: Using stderr since Flask buffers print output, but there is undoubtedly a better way to do this.
-def print_stderr(msg: str) -> None:
-    print(msg, file=sys.stderr)
+def log_info(msg: str) -> None:
+    if has_app_context():
+        current_app.logger.info(msg)
+    else:
+        print(msg, file=sys.stderr, flush=True) # flush avoids buffering?
 
 def print_env_info(app: Flask = None):
     """ Print current env & config info for debugging """
-    print_stderr("\n" + "="*20)
-    print_stderr("ENVIRONMENT DEBUG INFO")
-    print_stderr("="*20)
+    log_info("\n" + "="*20)
+    log_info("ENVIRONMENT DEBUG INFO")
+    log_info("="*20)
 
     # Environment Variables
-    print_stderr(f"APP_ENV: {os.environ.get('APP_ENV', "Not set (defaulting to 'dev')")}")
-    print_stderr(f"FLASK_ENV: {os.environ.get('FLASK_ENV', 'Not set')}")
+    log_info(f"APP_ENV: {os.environ.get('APP_ENV', "Not set (defaulting to 'dev')")}")
+    log_info(f"FLASK_ENV: {os.environ.get('FLASK_ENV', 'Not set')}")
 
     # Flask app config
     if app:
-        print_stderr(f"\nActive Config: {app.config.get('ENV', 'Not set')}")
-        print_stderr(f"DEBUG mode: {app.config.get('DEBUG', False)}")
-        print_stderr(f"TESTING mode: {app.config.get('TESTING', False)}")
-        print_stderr(f"Database URI: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')}")
+        log_info(f"\nActive Config: {app.config.get('ENV', 'Not set')}")
+        log_info(f"DEBUG mode: {app.config.get('DEBUG', False)}")
+        log_info(f"TESTING mode: {app.config.get('TESTING', False)}")
+        log_info(f"Database URI: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')}")
 
-    print_stderr("="*20 + "\n")
+    log_info("="*20 + "\n")
 
 def debug_config(config_name: str, config_class):
     """ Print which config is being loaded """
-    print_stderr(f"\n[CONFIG] Loading {config_name} config: {config_class.__name__}")
+    log_info(f"\n[CONFIG] Loading {config_name} config: {config_class.__name__}")
 
 
 def request_debugging(app: Flask = None):
@@ -37,10 +40,10 @@ def request_debugging(app: Flask = None):
     def debug_everything():
         if request.endpoint == 'static':
             return # skip logging for CSS/JS files
-        print_stderr("\n== REQUEST DEBUG ==")
-        print_stderr(f"URL: {request.url}")
-        print_stderr(f"Method: {request.method}")
-        print_stderr(f"Endpoint: {request.endpoint}")
-        print_stderr(f"Form data: {dict(request.form)}")
-        print_stderr(f"Args: {dict(request.args)}")
-        print_stderr("====================\n")
+        log_info("\n== REQUEST DEBUG ==")
+        log_info(f"URL: {request.url}")
+        log_info(f"Method: {request.method}")
+        log_info(f"Endpoint: {request.endpoint}")
+        log_info(f"Form data: {dict(request.form)}")
+        log_info(f"Args: {dict(request.args)}")
+        log_info("====================\n")
