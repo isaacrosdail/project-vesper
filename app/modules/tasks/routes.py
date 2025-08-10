@@ -74,4 +74,4 @@ def tasks():
                     "id": new_task.id,
                     "title": new_task.title
                 }
-            })
+            }), 200

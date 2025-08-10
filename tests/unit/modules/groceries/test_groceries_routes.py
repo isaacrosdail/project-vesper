@@ -14,22 +14,23 @@ def test_add_product_page_loads(client, auth, logged_in_user):
     assert response.status_code == 200
     assert "Add new product" in response.get_data(as_text=True)
 
-def test_add_product_submission_creates_product(client):
+def test_add_product_submission_creates_product(authenticated_client, logged_in_user):
     data = {
         "barcode": "1234567890",
         "product_name": "Test Product",
         "category": "Test Category",
         "net_weight": 15,
         "unit_type": "g",
-        "calories_per_100g": 100
+        "calories_per_100g": 100,
+        "user_id": logged_in_user.id
     }
 
-    response = client.post("/groceries/products", data=data)
+    response = authenticated_client.post("/groceries/products", data=data)
     assert response.status_code == 302 # Redirect to dashboard
 
     # Confirm product is in DB
     from app.modules.groceries.models import Product
     with database_connection() as session:
-        product = db_session.query(Product).filter_by(barcode="1234567890").first()
+        product = session.query(Product).filter_by(barcode="1234567890").first()
         assert product is not None
         assert product.product_name == "Test Product"

@@ -13,22 +13,18 @@ def sample_task(db_session, logged_in_user):
     db_session.flush() # Flush to DB without committing
     return task
 
-# region dashboard tests
 def test_tasks_dashboard_loads(authenticated_client):
-    response = authenticated_client.get("/tasks/")
+    response = authenticated_client.get("/tasks/dashboard")
     assert response.status_code == 200
-    # TODO: Add language toggle assertion when implemented
-    # assert b"Tasks" in response.data
 
 # Test that tasks are visible on dashboard after creation
 def test_tasks_dashboard_displays_tasks(authenticated_client):
-    # Create task via form submission (Avoids session isolation issues)
+    # TODO: NOTES: Create task via form submission (Avoids session isolation issues)
     response = authenticated_client.post("/tasks/", data={"title": "Visible Task"})
-    assert response.status_code == 302 # Redirect after successful creation
-
+    assert response.status_code == 200 # Successful CREATE
+    
     # Verify task appears on dashboard
     response = authenticated_client.get("/tasks/dashboard")
     html = response.get_data(as_text=True)
     assert response.status_code == 200
     assert "Visible Task" in html
-# endregion
