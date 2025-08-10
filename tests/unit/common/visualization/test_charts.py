@@ -3,10 +3,7 @@ from app.common.visualization.charts import get_filtered_dataframe
 from app.modules.time_tracking.models import TimeEntry
 from datetime import datetime, timezone, timedelta
 
-print("FILE IS BEING IMPORTED")
-
 def test_get_filtered_dataframe(logged_in_user):
-    
         # ARRANGE
         time_entries = [
             TimeEntry(
@@ -31,35 +28,16 @@ def test_get_filtered_dataframe(logged_in_user):
         ]
         db_session.add_all(time_entries)
         db_session.flush()
-        print(f"Session 1 ID: {id(db_session)}")
 
-        # ACT
-        #print(f"Session 2 ID: {id(db_session)}")
-        # Get all TimeEntries where category = Programming
-        # So category is the filter_field
-        # Programming the filter_value
-        # and duration the value_field_name
-        
-        df = get_filtered_dataframe(db_session, TimeEntry, "category", "Programming", "duration", 7)
-        print(f"got df:{df}")
-
-        print("hey")
-        # DEBUG - see what's actually in there
-        print("\n=== DEBUG ===")
-        print(f"DataFrame shape: {df.shape}")
-        print(f"DataFrame contents:\n{df}")
-        print(f"Sum: {df['Programming'].sum() if 'Programming' in df.columns else 'No Programming column!'}")
-        print("=============\n")
+        # ACT        
+        df = get_filtered_dataframe(db_session, TimeEntry, logged_in_user.id, "category", "Programming", "duration", 7)
 
         # ASSERT
         assert len(df) == 3 # only 2 programming entries within given days
         assert df.columns.tolist() == ["Date", "Programming"]
         assert df["Programming"].sum() == 90 # duration 30*3
-        print("HELLO THERE 2")
 
 def test_also_get_filtered_dataframe(logged_in_user):
-    print("TEST START")
-
     # ARRANGE
     entry = TimeEntry(
         category="Programming", 
@@ -69,9 +47,9 @@ def test_also_get_filtered_dataframe(logged_in_user):
     )
     db_session.add(entry)
     db_session.commit()
-    print("Added entry")
+    
+    # ACT
+    df = get_filtered_dataframe(db_session, TimeEntry, logged_in_user.id, "category", "Programming", "duration", 7)
 
-    df = get_filtered_dataframe(db_session, TimeEntry, "category", "Programming", "duration", 7)
-    print(f"Got df: {df}")
-    print(f"Length: {len(df)}")
+    # ASSERT
     assert len(df) == 1
