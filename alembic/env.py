@@ -11,7 +11,7 @@ load_dotenv()
 
 #from app.core.auth.models import User
 #from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
-from app.core.config import config_map
+from app.config import config_map
 from app.core.db_base import Base  # Import SQLAlchemy Base
 # import our debug util
 from app.common.debug import debug_config
@@ -44,7 +44,7 @@ target_metadata = Base.metadata
 env = os.environ.get('APP_ENV', 'dev')
 config_class = config_map[env]
 
-# Debug print for Alembic migrations
+# Debug prints to display active config & database URI
 debug_config(env, config_class)
 print(f"[ALEMBIC] Using database: {config_class.SQLALCHEMY_DATABASE_URI}")
 

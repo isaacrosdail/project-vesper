@@ -1,4 +1,5 @@
 # Centralized DB setup file
+# TODO: Rectify & expand notes on this to study
 
 from contextlib import contextmanager
 
@@ -21,9 +22,6 @@ def get_engine(config):
     
     global _engine
 
-    # Debug: print _engine's current state
-    # print(f"_engine is None: {_engine is None}")
-
     if _engine is None:
         db_uri = config.get("SQLALCHEMY_DATABASE_URI")
         _engine = create_engine(db_uri)
@@ -37,9 +35,14 @@ def get_engine(config):
 db_session = scoped_session(sessionmaker())
 
 def init_db(config):
-    engine = get_engine(config)         # Creates DB connection
-    db_session.configure(bind=engine) # Binds Session globally -> Tells SQLAlchemy: "Use this engine for all sessions"
-    # Base.metadata.create_all(engine)  # Removed: We now delete DATA not tables & let Alembic migrations handle the rest
+    """
+    Initialize the database session binding.
+
+    Creates an SQLAlchemy engine from the given config, binds it to the global session (db_session), and configures it for app use.
+    Skipping table creation, as Alembic handles schema changes.
+    """
+    engine = get_engine(config)         # Creates DB connection TODO: NOTES: Expand/improve this
+    db_session.configure(bind=engine)   # Binds session globally => Tells SQLAlchemy: "Use this engine for all sessions"
 
 
 # Making our own context manager
@@ -51,5 +54,6 @@ def database_connection():
         session.commit()
     except Exception:
         session.rollback()
+        raise # re-raises errors?
     finally:
         session.close()

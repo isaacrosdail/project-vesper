@@ -58,11 +58,16 @@ def validate_product_data(product_data):
 		#raise ValueError("Net weight must be positive.")
 	return errors
 
+# TODO: Do this
 def validate_transaction_data(transaction_data, creating_product=False):
 	# # If creating_product = True: also validate embedded product fields
 	errors = []
-	# if not transaction_data.get("barcode"):
+
+	# Transaction fields
 	if transaction_data:
-		return errors
-	else:
-		return errors.append("error")
+		pass
+	
+	if creating_product:
+		errors += validate_product_data(transaction_data)
+
+	return errors

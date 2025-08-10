@@ -9,7 +9,7 @@ from alembic import command
 from alembic.config import Config as AlembicConfig
 from app.core.api import api_bp
 from app.core.auth.routes import auth_bp
-from app.core.config import config_map
+from app.config import config_map
 from app.core.crud_routes import crud_bp
 from app.core.database import db_session, init_db
 
@@ -28,20 +28,31 @@ from app._internal.health_routes import internal_bp
 
 from app.core.constants import DEFAULT_LANG
 
+# Central app factory => Loads configs, inits extensions, runs DB migrations, registers blueprints, & sets global helpers, too
+# Using our APP_ENV over Flask's built-ins
 def create_app(config_name=None):
     app = Flask(__name__)
 
+    # Determine which config to load, if not passed => read the APP_ENV var, default to dev
     config_name = config_name or os.environ.get('APP_ENV', 'dev')
+
+    if config_name not in config_map:
+        raise RuntimeError(f"Unknown APP_ENV '{config_name}'")
     
-    # Load appropriate config based on environment
+    # Takes config class (DevConfig, ProdConfig, etc) from config_map & copy all class attrs into app.config
     app.config.from_object(config_map[config_name])
-    
+
+    # Makes sure app.config has an "APP_ENV" key
+    # If config class already has APP_ENV defined, does nothing?
+    # If it doesn't, it sets it to the value from the class    
+    app.config.setdefault("APP_ENV", config_map[config_name].APP_ENV)
+
     # Debug what's being loaded
     from .common.debug import debug_config, print_env_info
     debug_config(config_name, config_map[config_name])
 
-    # Print full env info (dev/testing)
-    if config_name == 'dev' or 'testing':
+    # Print full env info (dev or testing)
+    if config_name in ('dev', 'testing'):
         print_env_info(app)
         request_debugging(app)
     
@@ -57,6 +68,7 @@ def create_app(config_name=None):
         from app.core.auth.models import User
         return db_session.get(User, int(user_id))
 
+    # TODO: We need to sort out Plotly's nonsense (injects inline styles/JS) or scrap nonces & strict CSP
     # Generate nonce once per-request (allows our inline theme JS to execute)
     @app.before_request
     def generate_nonce():
@@ -68,12 +80,12 @@ def create_app(config_name=None):
     @app.context_processor
     def inject_globals():
         return dict(
-            is_dev=os.environ.get('APP_ENV') == 'dev',
+            is_dev=(app.config['APP_ENV'] == 'dev'), # Prefer config over raw os.environ now that we pick config class from env
             default_lang=DEFAULT_LANG,
             nonce=getattr(g, 'nonce', '') # inject our nonce here as well
         )
     
-    # Add to CSP headers
+    # Apply CSP headers
     @app.after_request
     def apply_csp(response):
         response.headers['Content-Security-Policy'] = (
@@ -87,18 +99,15 @@ def create_app(config_name=None):
         )
         return response
 
-    # Initialize DB (and optionally seed it with seed_db - Will pivot from this though when adding auth)
+    # Initialize DB
+    # TODO: Move auto-migration here into CI instead, disable on prod
     with app.app_context():
         init_db(app.config)
-
-        # Instead of create_all, now let Alembic handle it by running migrations
-        alembic_cfg = AlembicConfig("alembic.ini")     # "Hey Alembic, here's your config file"
-        command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
-
-        # Run seed_db for prod to fill with dummy data
-        if config_name == 'prod':
-            from .common.database.seed.seed_db import seed_db
-            seed_db()
+        if app.config["AUTO_MIGRATE"]:
+            # Run Alembic migration(s) on startup (in leiu of old 'create_all' method)
+            alembic_cfg = AlembicConfig("alembic.ini")     # "Hey Alembic, here's your config file"
+            alembic_cfg.set_main_option("sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"]) # Make Alembic use the same db URL our Flask app is using instead of whatever APP_ENV/alembic.ini/'alembic/env.py' might try to guess.
+            command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
 
     # Remove session after each request or app context teardown
     @app.teardown_appcontext

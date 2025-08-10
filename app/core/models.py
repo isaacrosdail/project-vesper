@@ -8,5 +8,7 @@ class ApiCallRecord(Base):
     api_called = Column(String(255), nullable=False)
     date = Column(Date, nullable=False) # Just date
     call_count = Column(Integer, default=0)
-    # Composite uniqueness => "1 API call PER API PER day"
+    # TODO: Add notes for this: Composite unique constraint => "1 API call PER API PER day"
+    # Postgres ON CONFLICT
+    # So "The combination of api_called AND date together must be unique"
     __table_args__ = (UniqueConstraint('api_called', 'date'),)

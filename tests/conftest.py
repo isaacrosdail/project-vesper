@@ -57,7 +57,7 @@ def ensure_docker_postgres():
 @pytest.fixture(scope="session")
 def app():
     # Tell Alembic which DB to use
-    os.environ['APP_ENV'] = 'testing'
+    # os.environ['APP_ENV'] = 'testing' <= Removing with updates to APP_ENV handling, we'll see what breaks :P
     app = create_app('testing')  # Pass in our TestConfig
     yield app
 
