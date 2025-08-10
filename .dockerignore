@@ -1,0 +1,23 @@
+# VCS / editor
+.git
+.gitignore
+
+# Python build caches
+_pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual envs
+.venv/
+venv/
+
+# Node/assets
+node_modules/
+dist/
+build/
+
+# Local envs
+.env
+prod.env
