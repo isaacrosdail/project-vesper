@@ -240,7 +240,7 @@ async function getWeatherInfo() {
         tempDisplay.textContent = "Loading weather info...";
 
         // Async fetch to call our Flask API endpoint/weather/<city>/<units>
-        const response = await fetch(`/api/weather/${city}/${units}`) // GET is the default method, so we just need this here!
+        const response = await fetch(`/api/weather/${city}/${units}`) // TODO: Note: GET is default method for fetch
 
         if (!response.ok) {
             throw new Error(`Weather API failed: ${response.status}`);
@@ -249,9 +249,9 @@ async function getWeatherInfo() {
         weatherInfo = await response.json();
 
         // use weather info - to start, grab temp & sunset time
-        const temp = Math.round(weatherInfo.data.temp);
-        const sunset = weatherInfo.data.sunset;
-        const desc = weatherInfo.weather.description.toLowerCase();
+        const temp = Math.round(weatherInfo.main.temp);
+        const sunset = weatherInfo.sys.sunset;
+        const desc = weatherInfo.weather[0].description.toLowerCase();
 
         // Determine fitting emoji
         let emoji = '🌡️';
