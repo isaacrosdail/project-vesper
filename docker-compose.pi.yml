@@ -1,34 +1,15 @@
 # Docker Compose for Pi deployment
 services:
-  # Web application service
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile.pi # Separate Dockerfile to avoid user add for dev deploy
-    container_name: vesper-web-pi
-    restart: always
-    ports:
-      - "0.0.0.0:5000:5000" # accessible from network
-    environment:
-      - DATABASE_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      - SECRET_KEY=${SECRET_KEY}
-      - APP_ENV=dev
-    depends_on:
-      - db
-    # Bind mounting a file from the host filesystem into the container
-    # This is different from copying! Here, the file lives on the host, but
-    # a direct connection is created such that it appears inside the container
-    volumes:
-      - ${SEED_PATH}:/app/app/seed_dev_db.py
-
   db:
     build:
       context: . # why the period here?
       dockerfile: Dockerfile.postgres
     container_name: vesper-db-pi
-    restart: always
-    ports:
-      - "5432:5432"
+    # Keep DB internal => don't publish 5432 to host
+    expose:
+      - "5432"
+    env_file:
+      - pi.env
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -37,6 +18,52 @@ services:
       # Change volume endings for clarity
       - pgdata-pi:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h 127.0.0.1"]
+      interval: 45s  # Pi is slower, give time to spin up
+      timeout: 8s
+      retries: 4
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Service for Flask app
+  web:
+    build:
+      context: . # Use repo root as build context
+      dockerfile: Dockerfile.pi # Separate Dockerfile to avoid user add for dev deploy
+    container_name: vesper-web-pi
+    depends_on:
+      - db
+    env_file:
+      - pi.env
+    environment:
+      APP_ENV: dev
+      DATABASE_URI: ${DATABASE_URI}
+      SECRET_KEY: ${SECRET_KEY}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+    ports:
+      # 5000:5000 binds to 0.0.0.0 by default
+      - "5000:5000" # accessible from network
+    
+    # Bind mounting a file from the host filesystem into the container
+    # Not COPY: Here, file lives on host, but direct conn is created to appear in container
+    volumes:
+      - ${SEED_PATH}:/app/app/seed_dev_db.py
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-m", "2", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   pgdata-pi:
