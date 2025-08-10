@@ -6,7 +6,7 @@
     "python.testing.pytestEnabled": true,
     "css.lint.unknownAtRules": "ignore",
 
-    // To hide node_modules from file explorer view
+    // Hide files from explorer pane view
     "files.exclude": {
         "node_modules/": true,
         ".venv/": true,
@@ -15,6 +15,7 @@
         "**/__pycache__/": true,
         "htmlcov/": true,
         ".VSCodeCounter/**": true,
+        ".ruff_cache": true,
     },
     "search.exclude": {
         "node_modules/": true,
