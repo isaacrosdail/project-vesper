@@ -8,10 +8,12 @@ __pycache__/
 # *$py.class
 
 # ==========================
-# Project playground / temp
+# Tools & Scratch
 # ==========================
 _playground/
 seed_dev_db.py
+.VSCodeCounter/
+.ruff_cache/
 
 # ==========================
 # Environment files / venv
@@ -30,9 +32,6 @@ seed_dev_db.py
 htmlcov/
 .coverage
 .coverage.*
-
-# Extensions
-.VSCodeCounter/
 
 # ==========================
 # Node / front-end artifacts

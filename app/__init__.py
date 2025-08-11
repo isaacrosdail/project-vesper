@@ -15,7 +15,7 @@ from app.core.database import db_session, init_db
 
 from app.common.debug import request_debugging
 
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 
 # Import Blueprints
 from app.core.routes import main_bp

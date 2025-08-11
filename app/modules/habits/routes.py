@@ -58,7 +58,6 @@ def habits():
             session.add(new_habit)
             session.flush()
             flash("Habit added successfully.") # flash confirmation
-            # TODO: STUDY: Is there a better way to do this with **args/**kwargs?
             return jsonify({
                 "success": True, 
                 "message": "Task added successfully.",

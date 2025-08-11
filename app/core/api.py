@@ -13,7 +13,6 @@ from flask import current_app
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
-# TODO: Review, practice patterns similar
 def get_or_upsert_api_count(api_name, date, daily_limit, upsert=False):
 
     if upsert:
@@ -29,7 +28,7 @@ def get_or_upsert_api_count(api_name, date, daily_limit, upsert=False):
                 WHERE apicallrecord.call_count < :limit
                 RETURNING call_count
         """), {"api_name": api_name, "date": date, "limit": daily_limit})
-            return result.scalar_one_or_none() # TODO: NOTES: Add this & scalar_one()
+            return result.scalar_one_or_none()
             
     else:
         with database_connection() as session:

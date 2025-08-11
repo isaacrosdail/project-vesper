@@ -38,7 +38,7 @@
         <caption class="sr-only">Habits</caption>
         <thead>
             <tr>
-                {% if is_dev %}
+                {% if has_dev_tools %}
                     <th class="table-header">ID</th>
                 {% endif %}
                 <th class="table-header">Title</th>
@@ -50,7 +50,7 @@
             {% if habits %}
                 {% for habit in habits %}
                 <tr class="table-row" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
-                    {% if is_dev %}
+                    {% if has_dev_tools %}
                         <td class="table-cell">{{ habit.id }}</td>
                     {% endif %}
                     <td class="editable-cell table-cell" data-item-id="{{ habit.id }}" data-module="habits" data-field="title" title="Double-click to edit field."

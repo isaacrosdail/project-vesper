@@ -28,7 +28,6 @@ def parse_and_validate_form_data(form_data):
     }
     try:
         transaction_data["price"] = Decimal(transaction_data["price"])
-    # TODO: Study/drill this
     except (ValueError, TypeError):
         return None, None, "Invalid input."
 	

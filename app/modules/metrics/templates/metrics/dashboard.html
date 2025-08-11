@@ -22,7 +22,7 @@
         <caption class="sr-only">Metric Entries</caption>
         <thead>
             <tr>
-                {% if is_dev %}
+                {% if has_dev_tools %}
                     <th class="table-header">ID</th>
                 {% endif %}
                 <th class="table-header">Metric Type</th>
@@ -34,7 +34,7 @@
             {% if metrics %}
                 {% for metric in metrics %}
                 <tr class="table-row" data-item-id="{{ metric.id }}" data-module="metrics" data-subtype="metric">
-                    {% if is_dev %}
+                    {% if has_dev_tools %}
                         <td class="table-cell">{{ metric.id }}</td>
                     {% endif %}
                     <td class="editable-cell table-cell" data-item-id="{{ metric.id }}" data-module="metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ metric.metric_type }}</td>

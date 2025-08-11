@@ -10,7 +10,6 @@ from sqlalchemy import func
 def calculate_habit_streak(habit_id, user_id, session):
 
     # Fetch all HabitCompletions for given habit
-    # TODO: Study/drill these (also: joins generally)
     habit_completions = session.query(HabitCompletion).join(Habit).filter(
         HabitCompletion.habit_id == habit_id,
         Habit.user_id == user_id, # Ensure habit belongs to this user

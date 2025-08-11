@@ -24,13 +24,10 @@ def dashboard():
 @time_tracking_bp.route('/', methods=["GET", "POST"])
 @login_required
 def time_entries():
-    
     try:
         if request.method == 'POST':
-        
             # Get JSON data from request => put in dict form_data
             form_data =  request.get_json()
-            # DEBUG: print(form_data, file=sys.stderr)
 
             with database_connection() as session:
 
@@ -45,7 +42,7 @@ def time_entries():
                 return jsonify({"success": True, "message": "Time entry added."}), 201
 
     
-        # GET => ? Should we have a bespoke "add_entry" form as well?
+        # No GET => Modal-driven
         else:
             return jsonify({"message": "GET arriving soon"}), 200
     
