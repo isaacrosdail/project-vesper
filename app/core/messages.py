@@ -2,8 +2,6 @@
 
 from app.core.constants import MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH
 
-## TODO: Find a way to mimic template literal behavior here for dynamic messages. Specifically: Make our password message reference the MIN-/MAX_PASSWORD_LENGTH constants in constants.py
-
 # Top level keys are lang codes, second-level keys are message IDs (ie, "username_invalid")
 MESSAGES = {
     "en": {
@@ -12,6 +10,7 @@ MESSAGES = {
         "username_nonexistent": "Invalid username: No matching user exists.",
         "db_reset": "Database has been reset successfully!",
         "db_reset_dev": "(Dev) Database has been reset successfully!",
+        "demo_ready": "Welcome to the demo!",
         "password_incorrect": "Incorrect password.",
         "password_short": "Password must be at least 8 characters.",
         "name_invalid": "Name invalid.",
@@ -24,6 +23,7 @@ MESSAGES = {
         "username_nonexistent": "Invalid username: No matching user exists.",
         "db_reset": "Database has been reset successfully!",
         "db_reset_dev": "(Dev) Database has been reset successfully!",
+        "demo_ready": "Welcome to the demo!",
         "password_incorrect": "Incorrect password.",
         "password_short": "Passwort muss mindestens 8 Zeichen lang sein.",
         "name_invalid": "Name nicht gültig.",

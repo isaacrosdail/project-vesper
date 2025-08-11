@@ -16,7 +16,7 @@ def safe_db_uri(uri: str) -> str:
     try:
         return make_url(uri).render_as_string(hide_password=True) # Displays DB password as **
     except Exception:
-        return uri  # TODO: non-SQLAlchemy URI?
+        return uri  # TODO: NOTES: non-SQLAlchemy URI?
 
 def print_env_info(app: Flask = None):
     """ Print current env & config info for debugging """
