@@ -135,25 +135,30 @@
 
 <!-- Activity Log Entry Card -->
 <!-- Roll our own JS validation for this instead of using form and intercepting with .preventDefault() -->
-<!-- TODO: Develop 2-3 style macros for different types of inputs & buttons - these don't quite fit here -->
-<!-- Consider converting this to a modal rather than being sorta an inline input? -->
+<!-- TODO: Consider converting this to a modal rather than being sorta an inline input? -->
 <section id="activity-log-card" class="dashboard-card">
-    <fieldset>
-        <legend class="text-xl font-semibold mb-2">Daily Time Log Entry</legend>
-        <div class="form-group">
-            <label for="category">Category:</label>
-            <input type="text" id="category" name="category" class="input-standard">
-        </div>
-        <div class="form-group">
-            <label for="duration">Duration:</label>
-            <input type="number" id="duration" name="duration" min="0" class="input-standard">
-        </div>
-        <div class="form-group">
-            <label for="description">Description (Optional):</label>
-            <input type="text" id="description" name="description" class="input-standard">
-        </div>
-        <button id="save-entry-btn" class="btn-primary">Save Entry</button>
-    </fieldset>
+    <button class="btn-primary" id="time-entry-modal-btn">Time Entry Modal</button>
+    <dialog id="time-entry-modal">
+        <form>
+            <fieldset>
+                <legend class="text-xl font-semibold mb-2">Daily Time Log Entry</legend>
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <input type="text" id="category" name="category" class="input-standard">
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration:</label>
+                    <input type="number" id="duration" name="duration" min="0" class="input-standard">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description (Optional):</label>
+                    <input type="text" id="description" name="description" class="input-standard">
+                </div>
+                <button type="button" class="btn-primary" id="save-entry-btn">Save Entry</button>
+                <button type="button" class="btn-secondary" id="time-entry-modal-close-btn">Close</button>
+            </fieldset>
+        </form>
+    </dialog>
 </section>
 
 {% endblock %}
