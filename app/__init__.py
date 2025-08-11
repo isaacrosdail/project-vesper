@@ -28,6 +28,14 @@ from app._internal.health_routes import internal_bp
 
 from app.core.constants import DEFAULT_LANG
 
+
+def has_dev_tools() -> bool:
+    # Before login: current_user.is_authenticated is False, re-evals upon login?
+    return bool(
+        getattr(current_user, "is_authenticated", False)
+        and getattr(current_user, "is_owner", False)
+    )
+
 # Central app factory => Loads configs, inits extensions, runs DB migrations, registers blueprints, & sets global helpers, too
 # Using our APP_ENV over Flask's built-ins
 def create_app(config_name=None):
@@ -69,20 +77,20 @@ def create_app(config_name=None):
         return db_session.get(User, int(user_id))
 
     # TODO: We need to sort out Plotly's nonsense (injects inline styles/JS) or scrap nonces & strict CSP
-    # Generate nonce once per-request (allows our inline theme JS to execute)
+    # Before each request: Evaluate has_dev_tools, generate nonce (allows our inline theme JS to execute)
     @app.before_request
     def generate_nonce():
         g.nonce = secrets.token_urlsafe(16)
+        g.has_dev_tools = has_dev_tools()
 
     # Context processor runs before every template render
-    # Make is_dev available in all templates globally
-    # So we can do {% if is_dev %} to hide dev-only stuff _without_ needing to keep passing it into each template
+    # Injects helpful globals (can reference globally as regular vars)
     @app.context_processor
     def inject_globals():
         return dict(
-            is_dev=(app.config['APP_ENV'] == 'dev'), # Prefer config over raw os.environ now that we pick config class from env
+            has_dev_tools=has_dev_tools, # Prefer config over raw os.environ now that we pick config class from env
             default_lang=DEFAULT_LANG,
-            nonce=getattr(g, 'nonce', '') # inject our nonce here as well
+            nonce=getattr(g, 'nonce', ''), # inject our nonce here as well
         )
     
     # Apply CSP headers
