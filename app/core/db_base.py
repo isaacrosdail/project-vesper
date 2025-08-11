@@ -4,6 +4,7 @@ from sqlalchemy.orm import declarative_base, declared_attr
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+from flask import current_app
 
 # Core mixins
 class TimestampMixin:
@@ -14,15 +15,15 @@ class TimestampMixin:
     # @property is a common decorator for creating "virtual attributes" that are computed on-the-fly
     # Lets us convert to London time simply by doing task.created_at_local
     # as if it were a column in the model itself
-    # TODO: Fix hardcoded zoneinfo here!!
     @property
     def created_at_local(self):
-        return self.created_at.astimezone(ZoneInfo("Europe/London"))
+        tzname = current_app.config.get("DEFAULT_TZ", "Europe/London")
+        return self.created_at.astimezone(ZoneInfo(tzname))
     
-    # Also add one for updated_at! (if it exists)
     @property
     def updated_at_local(self):
-        return self.updated_at.astimezone(ZoneInfo("Europe/London")) if self.updated_at else None
+        tzname = current_app.config.get("DEFAULT_TZ", "Europe/London")
+        return self.updated_at.astimezone(ZoneInfo(tzname)) if self.updated_at else None
 
 # Base Model (inherits timestamp info)
 class BaseModel(TimestampMixin):

@@ -12,26 +12,29 @@ DEFAULT_CHART_DAYS = 14 # How many days back to look when plotting with Plotly
 DEFAULT_HEALTH_TIMEZONE = 'America/Chicago' # Default TZ to be used for _internal health check via HTTP
                                             # Note: Above uses IANA timezone names
 
-DATA_TABLES = [
-    # Arranged in dependency order -> children first
-    "habitcompletion",   # child: references habit
-    "transaction",       # child: references product
-    "timeentry",
-    "habit",             # parent table
-    "product",           # parent table
-    "task",              # independent
+# DATA_TABLES = [
+#     # Arranged in dependency order -> children first
+#     "habitcompletion",   # child: references habit
+#     "transaction",       # child: references product
+#     "timeentry",
+#     "habit",             # parent table
+#     "product",           # parent table
+#     "task",              # independent
+# ]
+
+TABLES_WITHOUT_USERS = [
+    # Arranged in dependency order -> children first, parents last
+    "habitcompletion",   # child: references habit + user
+    "transaction",       # child: references product + user  
+    "timeentry",         # child: references user
+    "dailycheckin",      # child: references user
+    "dailyintention",    # child: references user
+    "dailymetric",       # child: references user
+    "dailyreflection",   # child: references user
+    "task",              # child: references user
+    "habit",             # child: references user (but parent to habitcompletion)
+    "product",           # child: references user (but parent to transaction)
 ]
 
-ALL_TABLES = DATA_TABLES + ["user"] # For complete database deletions
-
-# Corresponding sequences for ID reset
-DATA_SEQUENCES = [
-    "habitcompletion_id_seq",  # references habit
-    "transaction_id_seq",      # references product
-    "timeentry_id_seq",        #
-    "habit_id_seq",            # parent table
-    "product_id_seq",  # parent table
-    "task_id_seq"
-]
-
-ALL_SEQUENCES = DATA_SEQUENCES + ["user_id_seq"]
+# To keep editing/deletion of users separate
+TABLES_WITH_USERS = TABLES_WITHOUT_USERS + ["user"] # For complete database deletions

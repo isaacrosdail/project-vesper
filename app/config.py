@@ -10,6 +10,7 @@ if os.getenv("APP_ENV", "dev") != "prod":
     load_dotenv(override=False) # real env (Docker) wins if already set, so we pull our env vars from our container instead of 
 
 class BaseConfig:
+    DEFAULT_TZ = "Europe/London" # default TZ to be used for some stuff
     APP_ENV = "base"
     AUTO_MIGRATE = True # Default to run migrations on startup
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-me")

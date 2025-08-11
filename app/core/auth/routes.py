@@ -27,7 +27,7 @@ def logout():
 
 @auth_bp.route('/login', methods=["GET", "POST"])
 def login():
-    # TODO: CSRF, rate limiting, & lockout mechanisms
+    # TODO: STUDY: CSRF, rate limiting, & lockout mechanisms
 
     if request.method == "POST":
         # Get form data: need username and password entry
@@ -56,7 +56,7 @@ def login():
 @auth_bp.route('/register', methods=["GET", "POST"])
 def register():
     try:
-        # TODO: Pull lang from a user's setting instead of hardcoding here
+        # TODO: LATER: Pull lang from a user's setting instead of hardcoding here
         # Unsure whether to make it a user setting or a cookie via lang toggle
         if request.method == "POST":
             # User types in creds, hits Submit.
