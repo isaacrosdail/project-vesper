@@ -15,7 +15,12 @@ from app.modules.tasks.models import Task
 
 # Minimal dataset for demo users
 def seed_basic_data(user_id, session):
-    pass
+    new_habit = Habit(
+        title="guest_habit",
+        user_id=user_id
+    )
+    session.add(new_habit)
+    
 
 # Comprehensive dataset for development
 def seed_rich_data(user_id, session):
