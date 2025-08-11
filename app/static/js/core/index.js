@@ -388,6 +388,7 @@ function drawSun(x, y) {
 
 // Main event listeners
 document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('time-entry-modal');
 
     // Switch to event delegation pattern for habit checkboxes
     // Idea is: Apply listener to PARENT, then determine where event came from
@@ -417,6 +418,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Click save-entry-btn to save time log entry
         if (e.target.matches('#save-entry-btn')) {
             saveTimeEntry(e.target); // pass in our button element and navigate from there
+        }
+        else if (e.target.matches('#time-entry-modal-btn')) {
+            modal?.showModal();
+        }
+        else if (e.target.matches('#time-entry-modal-close-btn')) {
+            const form = modal?.querySelector('form');
+            form?.reset();
+            modal?.close()
         }
     });
 });
