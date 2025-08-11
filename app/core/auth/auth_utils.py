@@ -19,7 +19,7 @@ def validate_username(username: str, session, lang=DEFAULT_LANG) -> list[str]:
     """
     errors = []
 
-    # TODO: Add pattern matching (alphanumeric)
+    # TODO: MINOR: Add pattern matching (alphanumeric)
     if not 3 <= len(username) <= 30: # pythonic range test, drill these
         errors.append(msg("username_invalid", lang))
     if get_user_by_username(username, session):

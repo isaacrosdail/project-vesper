@@ -3,6 +3,7 @@
 {% block title %}Tasks{% endblock %}
 
 {% block content %}
+
 <dialog id="add-task-modal">
     <form id="add-task-form" method="POST">
         <fieldset>
@@ -16,13 +17,14 @@
         <button class="btn-secondary" id="modal-close-btn">Close</button>
     </form>
 </dialog>
+
 <div class="dashboard-card">
     <h2>Tasks</h2>
     <table class="table-standard">
         <caption class="sr-only">Tasks</caption>
         <thead>
             <tr>
-                {% if is_dev %}
+                {% if has_dev_tools %}
                     <th class="table-header">ID</th>
                 {% endif %}
                 <th class="table-header">Title</th>
@@ -38,7 +40,7 @@
                 <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                 <!-- Using display: none works here as well but causes layout shift -->
                 <tr class="table-row" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
-                    {% if is_dev%}
+                    {% if has_dev_tools%}
                         <td class="table-cell">{{ task.id }}</td>
                     {% endif %}
                     <td class="editable-cell table-cell" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."

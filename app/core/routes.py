@@ -46,7 +46,7 @@ def home():
             # Calculate time references
             now = datetime.now(ZoneInfo("Europe/London"))
             # Today's 00:00 in Europe/London time
-            # TODO: Consider extracting into datetime/date helper functions/utils?
+            # TODO: MINOR: Consider extracting into datetime/date helper functions/utils?
             start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
             start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
 

@@ -1,5 +1,5 @@
 # Centralized DB setup file
-# TODO: Rectify & expand notes on this to study
+# TODO: NOTES: Rectify & expand notes on this to study
 
 from contextlib import contextmanager
 
@@ -41,7 +41,7 @@ def init_db(config):
     Creates an SQLAlchemy engine from the given config, binds it to the global session (db_session), and configures it for app use.
     Skipping table creation, as Alembic handles schema changes.
     """
-    engine = get_engine(config)         # Creates DB connection TODO: NOTES: Expand/improve this
+    engine = get_engine(config)         # Creates DB connection
     db_session.configure(bind=engine)   # Binds session globally => Tells SQLAlchemy: "Use this engine for all sessions"
 
 
