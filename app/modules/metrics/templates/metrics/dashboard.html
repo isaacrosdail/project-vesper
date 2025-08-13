@@ -7,17 +7,17 @@
 <div class="charts-container">
     
     <!-- Playground container to check out Plotly -->
-    <div class="metric-graph dashboard-card">
+    <div class="metric-graph card-dashboard">
         {{ weight_graph|safe }} <!-- |safe is required here to make Jinja not escape HMTL (prevents XSS attacks, but since graph_html is app-generated, safe is good here)-->
     </div>
-    <div class="metric-graph dashboard-card">
+    <div class="metric-graph card-dashboard">
         {{ steps_graph|safe }}
     </div>
 </div>
 
 
-<div class="dashboard-card">
-    <h2>Metric Entries</h2>
+<div class="card-dashboard">
+    <h2 class="card-title">Metric Entries</h2>
     <table class="table-standard">
         <caption class="sr-only">Metric Entries</caption>
         <thead>
@@ -47,7 +47,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="3" class="table-empty">
+                    <td colspan="999" class="table-empty">
                         No metric entries yet.
                     </td>
                 </tr>

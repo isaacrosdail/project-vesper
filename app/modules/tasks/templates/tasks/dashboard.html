@@ -13,13 +13,14 @@
                 <input type="text" id="title" name="title" class="input-standard" required>
             </div>
         </fieldset>
-        <button class="btn-primary" type="submit">Submit</button>
-        <button class="btn-secondary" id="modal-close-btn">Close</button>
+        <button class="btn btn-primary" type="submit">Submit</button>
+        <button class="btn btn-secondary" id="modal-close-btn">Close</button>
     </form>
 </dialog>
 
-<div class="dashboard-card">
-    <h2>Tasks</h2>
+<div class="card-dashboard">
+    <h2 class="card-title">Tasks</h2>
+    <button id="add-task-btn" class="btn btn-primary">Add Task</button>
     <table class="table-standard">
         <caption class="sr-only">Tasks</caption>
         <thead>
@@ -62,7 +63,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="3" class="table-empty">
+                    <td colspan="999" class="table-empty">
                         No tasks yet.
                     </td>
                 </tr>
@@ -70,7 +71,6 @@
         </tbody>
     </table>
 </div>
-<button id="add-task-btn" class="btn-primary">Add Task (Modal)</button>
 
 {% endblock %}
 

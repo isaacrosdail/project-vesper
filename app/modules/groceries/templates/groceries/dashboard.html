@@ -5,8 +5,8 @@
 {% block title %}Groceries{% endblock %}
 
 {% block content %}
-<div class="dashboard-card"> <!-- Added my-6 to top div to -->
-    <h2>Grocery - Recent Transactions</h2>
+<div class="card-dashboard">
+    <h2 class="card-title">Grocery - Recent Transactions</h2>
 
     <table class="table-standard">
         <caption class="sr-only">Grocery - Recent Transactions</caption>
@@ -39,7 +39,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="3" class="table-empty">
+                    <td colspan="999" class="table-empty">
                         No transactions yet.
                     </td>
                 </tr>
@@ -47,11 +47,11 @@
         </tbody>
     </table>
 </div>
-<a href="{{ url_for('groceries.transactions')}}" class="btn-secondary">
+<a href="{{ url_for('groceries.transactions')}}" class="btn btn-secondary">
     Log New Transaction
 </a>
-<div class="dashboard-card">
-    <h2>Product Catalog</h2>
+<div class="card-dashboard">
+    <h2 class="card-title">Product Catalog</h2>
     <table class="table-standard">
         <caption class="sr-only">Product Catalog</caption>
         <thead>
@@ -79,7 +79,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="3" class="table-empty">
+                    <td colspan="999" class="table-empty">
                         No products yet.
                     </td>
                 </tr>
@@ -87,7 +87,7 @@
         </tbody>
     </table>
 </div>
-<a href="{{ url_for('groceries.products')}}" class="btn-secondary">
+<a href="{{ url_for('groceries.products')}}" class="btn btn-secondary">
     Add New Product
 </a>
 {% endblock %}

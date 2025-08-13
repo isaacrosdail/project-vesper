@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
         if (e.target.matches('#add-task-btn')) {
             modal?.showModal();
         }
-        // TODO: Fix bug => Close causes "input field __ not focusable", doesn't seem to break functionality
+        // TODO: Fix bug => Close causes "input field __ not focusable", doesn't seem to break functionality otherwise
         // just causes validation outline upon reopen
         else if (e.target.matches('#modal-close-btn')) {
             const form = modal.querySelector('form');
