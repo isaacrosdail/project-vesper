@@ -11,6 +11,7 @@
 */
 :root {
     /* Global constants */
+    /* TODO: Add --focus-ring var? */
     --color-success: #166534;
     --color-error: #dc2626;    
 

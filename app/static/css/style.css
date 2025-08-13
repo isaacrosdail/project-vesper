@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 @import './themes.css';
 
-/* TODO: STUDY/DRILL THIS IN FULL */
-
 /* ==== TAILWIND LAYERS ==== */
 /* Using @layer to extend the _base_ (modifying Tailwind's Preflight config so it lets me change the font) */
 @layer base {
@@ -20,49 +18,79 @@
  * changes the values of these classes without needing to alter any HTML/templates.
  * This replaces template macros & hardcoded colors with a more maintainable, scalable design system that separates content (HTML) from styling (CSS).
  */
+
+/* Styling note to self: Components should mostly worry about internal padding & appearance, NOT margin -> that's the parent's responsibility */
 @layer components {
 
     /* ======= BUTTONS ======= */
+    /* Base button styling: shape + ergonomics goes here */
+    .btn {
+        display: inline-flex; /* icons+text align*/
+        align-items: center; /* for icon+label vertical centering? */
+        justify-content: center; /* center text when full width */
+        min-height: 2.5rem; /* ensure big enough for touch */
+        line-height: 1; /* explicit to be consistent across browsers */
+        cursor: pointer;
+        user-select: none;
+        appearance: none;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.375rem;
+        gap: 0.4rem;
+    }
+    /* Subtle "pressed" effect for active buttons */
+    .btn:active {
+        transform: translateY(1px);
+        filter: brightness(0.95);
+    }
+    /* Focus ring: visual feedback for keyboard users */
+    .btn:focus-visible {
+        outline: red;
+        outline-offset: 2px;
+    }
+    /* Catch native + ARIA-disabled buttons */
+    .btn[disabled],
+    .btn[aria-disabled="true"] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
     .btn-primary {
-        display: inline-block; /* keeps button compact-ly sized? */
         background-color: var(--accent-lighter);
         color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 0.375rem;
-        padding: 0.5rem 1rem;
-        /* width: 100%; */
-        cursor: pointer;
-    }
-    .btn-primary:hover {
-        /* Color-mixing with --text ensures light mode buttons get lighter AND dark mode buttons get darker */
-        background-color: color-mix(in srgb, var(--accent-lighter) 80%, var(--text));
+        border-color: var(--border);
     }
     .btn-secondary {
-        display: inline-block; /* keeps button compact-ly sized? */
         background-color: var(--bg-light);
         color: var(--text-muted);
-        border: 1px solid var(--border);
-        border-radius: 0.375rem;
-        padding: 0.5rem 1rem; /* px-4 py-2*/
-        /* width: 100%; */
-        cursor: pointer;
-    }
-    .btn-secondary:hover {
-        background-color: color-mix(in srgb, var(--bg-light) 80%, var(--text));
+        border-color: var(--border);
     }
     .btn-destructive {
         color: var(--text-destructive);
+        border-color: var(--text-destructive);
     }
-    .btn-destructive:hover {
-        color: color-mix(in srgb, var(--text-destructive) 80%, white);
-        cursor: pointer;
+    /* Scope hover styles (skip on touchscreen) */
+    /* Color-mixing with --text ensures light mode buttons get lighter AND dark mode buttons get darker */
+    @media (hover: hover) {
+        .btn-primary:hover {
+            background-color: color-mix(in srgb, var(--accent-lighter) 80%, var(--text));
+        }
+        .btn-secondary:hover {
+            background-color: color-mix(in srgb, var(--bg-light) 80%, var(--text));
+        }
+        .btn-destructive:hover {
+            color: var(--bg-lighter);
+            background-color: var(--text-destructive);
+        }
     }
 
     /* ======= TABLE COMPONENTS ======= */
     /* Needed higher specificity here to override so delete-cell properly blends in to card */
     .table-cell.delete-cell {
-        background-color: var(--bg);
         border: none;
+        padding: 0;
+        width: 0; /* prevent us from consuming extra table width */
+        background-color: var(--bg);
     }
     .table-empty {
         text-align: center;
@@ -77,17 +105,15 @@
         width: 100%;
         font-size: 0.875rem;
     }
-    /* TODO: Table header row styling - remove all bg-gray-800 mentions from thead classes!!! */
+    .table-header,
+    .table-cell {
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+    }
     .table-header {
         background-color: var(--accent-lighter);
         color: var(--text);    /* TODO */
         font-weight: 600; /* equivalent to font-semibold in Tailwind */
-        padding: 0.5rem;
-        border: 1px solid var(--border);
-    }
-    .table-cell {
-        padding: 0.5rem;
-        border: 1px solid var(--border);
     }
     .table-row {
         transition: 25ms;
@@ -110,56 +136,31 @@
         color: var(--text); /* TODO */
     }
 
-    /* ======= NAVIGATION ======= */
-    .nav-link {
-        text-decoration: none;
-        color: var(--text);
-    }
-    .nav-link:hover {
-        background-color: var(--ui-hover);
-        color: var(--text-inverse); /* TODO: Works well on dark mode, but light mode not at all */
-    }
-    .nav-link.active {
-        background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
-        color: var(--text-inverse); /* TODO: Again, well on dark, not light */
-    }
-
     /* ======= LAYOUT COMPONENTS ======= */
-    .dashboard-card {
-        min-width: max-content;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        background-color: var(--bg);
 
-        /* TODO: Scrap, this is temporary to see styling as I wrap up */
-        border: solid 1px var(--border);
-
-        position: relative;
-        margin-top: 1rem;
-    }
-    /* Mimicking <fieldset>'s 'title intersects border' effect for our table container headers */
+    /* Mimick <fieldset>'s 'title intersects border' effect for container headers */
     .card-title {
-        position: absolute; /* breaks the title out of normal flow */
+        position: absolute; /* TODO: NOTES: breaks the title out of normal flow */
         top: -0.9rem;
         left: 1rem;
         background: linear-gradient(
             to bottom,
-            var(--bg-dark) 50%, /* Top half */
-            var(--bg) -50%      /* Bottom half */
+            var(--bg-dark) 48%, /* Top half */
+            var(--bg) 52%      /* Bottom half */
         );
         padding: 0 0.02rem;
-        margin: 0;
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        pointer-events: none;
+        /* margin: 0; */
     }
     /* Getting our "Add __" buttons to appear above top right of tables */
-    .table-card-header {
+    .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
-    }
-    .table-card-btn {
-        margin-left: auto;
     }
 
     /* Warnings? Messages? Success? idk */
@@ -187,77 +188,196 @@
 
 }
 
-/* */
+/* General formula for using properties as bools?
+ * if (condition)  => multiply by 1 or 0
+ * if (!condition) => multiply by (1 - condition)
+*/
 :root {
     --min-navbar-height: 4rem;
+    --has-hover: 0;
 }
-
-/* TODO: use :where to consolidate these into one. input base styles (standard & inline) */
-input:not(.input-inline), 
-select:not(.input-inline) {
-    background-color: var(--bg-light);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    border-radius: 0.25rem;
-    box-shadow: var(--shadow-card);
-    padding: 0.5rem 0.75rem;
+/* TODO: FINISH: Use media query to effectively set a bool? Play around with this */
+@media (hover: hover) {
+    :root {
+        --has-hover: 1;
+    }
 }
-/* For dashboard quick-entry */
-.input-inline {
-    background-color: var(--bg-light);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    box-shadow: var(--shadow-card);
-    padding: 0.25rem 0.75rem; /* Slightly tighter */
-    font-size: 0.875rem;
-}
-.context-menu {
-    background-color: red;
-    border: 1px solid black;
-    position: fixed;  /* important since it takes it out of the DOM flow? */
-    z-index: 1000;
-}
-
-/* For regular forms, more padding and stronger borders */
-/* .input-standard {
-    padding: 0.5rem 0.75rem;
-    width: 100%;
-    border-width: 2px;
-} */
-h2 {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-/* TODO: Clean up: Styling for playing around with dialog element to make modal */
-/* TODO: STUDY TRANSFORM */
-dialog {
-    background-color: var(--bg);
-    padding: 2rem;
-    position: fixed;
-    /* Move 50% relative to container */
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* transforms don't affect layout, they're visual effects that happen "on top" of the normal page flow */
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px); /* create a  blur effect behind modal -> filter: blur(10px); would make the ENTIRE element/page blur? */
-    /* Note: apparently high blur (blur(20px)+) on large areas may impact performance */
+/* ==== GLOBAL STYLES ==== */
+/* Force everything to respect the screen width */
+* {
+    box-sizing: border-box; /* Padding/borders included in width calculations */
 }
 /* Affects selected text (replaces standard "blue highlight + white text" default) */
 ::selection {
     background-color: var(--bg-selection);
     color: var(--text-selection);
 }
-::placeholder {
+::placeholder, .placeholder-text {
     opacity: 80%;
+}
+
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text);
+}
+.nav-link:hover {
+    background-color: var(--ui-hover);
+    color: var(--text-inverse); /* TODO: Works well on dark mode, but light mode not at all */
+}
+.nav-link.active {
+    background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
+    color: var(--text-inverse); /* TODO: Again, well on dark, not light */
+}
+/* Container for landing page content */
+.landing-content {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    align-items: center; /*horizontal center children */
+    gap: 1rem;
+    padding: 2rem 1rem;
+}
+/* Cap the paragraph for legibility */
+.landing-content p {
+    font-size: 1rem;
+    line-height: 1.5; 
+    max-width: 60ch;
+    color: var(--text-muted);
+}
+
+.landing-content h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    /* text-align: left; */
+}
+.landing-content a {
+    text-align: center;
+}
+/* === LANDING PAGE CONTENT STYLING ABOVE === */
+
+.demo-grid-container { 
+    display: grid;
+    /* TODO: NOTES: Add
+     * minmax(200px, 1fr) => each item >= 200px wide, but can stretch to fill
+     * auto-fit => automatically packs as many columns as will fit in the row
+    */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+/* Below two group buttons on landing page together & dictate their width */
+.btn-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem; /* TODO: NOTES: space between ANY direct children */
+    margin: 0 auto; /* center the whole thing */
+}
+.btn-container > a,
+.btn-container form > button { width: 100%; }
+
+/* Base input stylings */
+:where(input, select, textarea) {
+    background-color: var(--bg-light);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+}
+:where(input, select, textarea):focus-visible {
+    outline: 1px solid var(--accent-lighter);
+    outline-offset: 1px;
+}
+
+
+/* ===== FORMS, INPUTS ===== */
+/* For dashboard quick-entry & JS inline cell edit inputs */
+.input-inline {
+    padding-block: 0.25rem; /* Slightly tighter */
+    border: none;
+    border-bottom: 1px solid var(--border);
+    /* box-shadow: none; */
+    font-size: 0.875rem;
+}
+/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+form input:not([type="checkbox"]):user-valid {
+    outline: 2px solid;
+    outline-color: var(--color-success);
+}
+form input:not([type="checkbox"]):user-invalid {
+    outline: 2px solid;
+    outline-color: var(--color-error);
+}
+
+/* ===== CUSTOM COMPONENT STYLINGS ===== */
+.context-menu {
+    background-color: red;
+    border: 1px solid black;
+    position: fixed;  /* important since it takes it out of the DOM flow? */
+    z-index: 1000;
+}
+/* TODO: FINISH: Tune styling */
+dialog {
+    background-color: var(--bg);
+    padding: 2rem;
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+.tooltip-popup { 
+    position: relative; /* also makes it act as anchor for ::after ? */
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
+    color: var(--bg); /* then use current bg as text for color parity */
+    overflow-wrap: break-word;
+    padding: 4px 4px;
+    margin-top: 8px;
+    max-width: 28ch;
+}
+.tooltip-popup:not(#no-after)::after {
+    content: "";
+    position: absolute;
+    left: var(--carrot-pos, 50%); /* --carrot-pos calculated via JS */
+    transform: translate(-50%, -40%);
+    border: 0.4rem solid transparent; /* forms our triangle "arrow" */
+    border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
+    opacity: 1;
+    top: -0.4rem;
+}
+
+/* ==== NAVIGATION ==== */
+/* Desktop-first styling for navbar */
+#desktop-nav {
+    display: flex;
+    column-gap: 1.5rem; /* space-x-6 */
+}
+#mobile-nav {
+    display: none;
+    flex-direction: column;
+    row-gap: 1.5rem;        /* space-y-6 */
+}
+#mobile-nav.show {
+    display: flex;
+}
+#hamburger-btn {
+    color: var(--text);
+    display: none;
 }
 nav {
     min-height: var(--min-navbar-height);
@@ -279,21 +399,14 @@ nav {
     display: flex;
     gap: 1.5rem;
 }
-/* Target direct div children of nav-container */
-/* .nav-container > div {
-    display: flex;
-    gap: 1.5rem; 
-} */
+
 .branding {
     color: var(--text);
     font-size: 1.5rem; /* text-2xl */
     font-weight: 600; /* font-semibold */
     margin-right: 1.5rem; /* mr-6 */
 }
-/* TODO: Consider changing this */
-#theme {
-    cursor: pointer;
-}
+
 /* Hide text for theme toggle */
 .visually-hidden {
     clip-path: inset(50%); /* Clips (hides) 50% from all sides of element - creates 1x1 pixel visible area in center */
@@ -303,14 +416,10 @@ nav {
     position: absolute; /* takes element out of normal document flow - prevents layout spillover */
     white-space: nowrap; /* prevents text from wrapping to multiple lines */
 }
-/* ==== GLOBAL STYLES ==== */
-/* Force everything to respect the screen width */
-* {
-    box-sizing: border-box; /* Padding/borders included in width calculations */
-}
+
 
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
-/* Full height flex container => header/content/footer */
+/* Flex container for header/content/footer */
 .wrapper {
     min-height: 100vh;
     display: flex;
@@ -318,40 +427,45 @@ nav {
 }
 /* Main content area: fills remaining viewport space below navbar */
 .content {
-    /* Tells flex container's child to grow and take up all remaining space */
-    flex: 1;
+    flex: 1; /* makes flex container's child grow & take up all remaining space */
     background-color: var(--bg-dark);
-    /* Other standard page stylings */
 }
+/* Layout for card: layout only, max-width, margin, padding around grid/stack, gap */
 .dashboard-container {
-    background-color: var(--bg-dark);
-    max-width: 48rem; /* = 3xl in Tailwind */
+    max-width: 48rem;
     margin: 2.5rem auto 0;
-    overflow-x: auto;
     padding: 1rem 1rem 0;
     display: flex;
     flex-direction: column;
     gap: 1.5rem; /* controls spacing between items in layout containers like grids &  flexboxes */
 }
-
-
-/* ==== NAVIGATION ==== */
-/* Desktop-first styling for navbar */
-#desktop-nav {
+/* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
+.card-dashboard {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background-color: var(--bg);
+    border: solid 1px var(--border);
+    position: relative; /* for card-title positioning */
+    /* Remember: Vertical spacing is gap's job, no button/header-specific margins */
     display: flex;
-    column-gap: 1.5rem; /* space-x-6 */
-}
-#mobile-nav {
-    display: none;
     flex-direction: column;
-    row-gap: 1.5rem;        /* space-y-6 */
+    gap: 0.5rem;
 }
-#mobile-nav.show {
+
+/* Dashboard checkbox completion effect */
+.habit-list {
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+}
+.habit-row {
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
-#hamburger-btn {
+.habit-title {
     color: var(--text);
-    display: none;
 }
 
 .habit-item.completed .habit-title {
@@ -399,49 +513,17 @@ nav {
     grid-template-columns: 1fr 1fr;
     gap: 0.25rem;
 }
-/* Makes h2 element span all columns */
-#daily-check-in-card h2 {
-    grid-column: 1 / -1;
+#daily-check-in-card > div {
+    padding: 1.5rem;
 }
 
-/* "Apply 1.5rem padding to all direct div children of 'section' elements EXCEPT those with class 'divider' and sections of id "greeting-card" :D 
-** To apply our Tailwind p-6 class styling to most cards (except Critical Task) */
-section:not(#greeting-card) > div:not(.divider) {
-    padding: 1.5rem; /* equivalent to p-6 (24px)*/
-}
-
-
-
-/* ==== FORMS & INPUTS ==== */
-/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 1rem;
-}
-form input:not([type="checkbox"]):user-valid {
-    outline: 2px solid;
-    outline-color: var(--color-success);
-}
-form input:not([type="checkbox"]):user-invalid {
-    outline: 2px solid;
-    outline-color: var(--color-error);
-}
-
-/* ==== UTILITY CLASSES ==== */
-/* 
-Currently used for critical-task-card stuff in JS (Added 02.04.25) && for making delete button appear on hover next to table rows
-TODO: iirc, using display none does not prevent input? 
-Need to double check & adjust usage of hidden/disabled accordingly in our form pages
-*/
+/* Applied to SVG icon for table rows (overlap with Tailwind, but am planning to ditch Tailwind anyway */
 .hidden {
     display: none;
 }
 
 /* ==== FOOTER ==== */
 footer {
-    /* bg-gray-100 text-center text-sm py-4 */
     text-align: center;
     padding: 10px;
     font-size: 0.9em;
