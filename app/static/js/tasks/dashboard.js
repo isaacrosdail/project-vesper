@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', (e) => {
             modal?.close();
         }
     });
+    // Use native 'cancel' event for dialog to make Esc key close modal (a11y)
+    modal.addEventListener('cancel', (e) => {
+        modal.querySelector('form')?.reset();
+    });
     // Listen for submit event on modal
     modal?.addEventListener('submit', (e) => {
         // e.target here is the form itself
