@@ -24,15 +24,16 @@
                     <option value="misc">Misc.</option>
                 </select>
             </div>
-            <button class="btn-secondary" id="modal-close-btn">Close</button>
-            <button class="btn-primary" type="submit">Submit</button>
+            <button class="btn btn-secondary" id="modal-close-btn">Close</button>
+            <button class="btn btn-primary" type="submit">Submit</button>
         </fieldset>
     </form>
 </dialog>
-<div class="dashboard-card">
-    <div class="table-card-header">
+
+<div class="card-dashboard">
+    <div class="card-header">
         <h2 class="card-title">Habits</h2>
-        <button id="add-habit-btn" class="btn-primary table-card-btn">Add Habit (Modal)</button>
+        <button id="add-habit-btn" class="btn btn-primary table-card-btn">Add Habit</button>
     </div>
     <table class="table-standard">
         <caption class="sr-only">Habits</caption>
@@ -64,7 +65,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="3" class="table-empty">
+                    <td colspan="999" class="table-empty">
                         No habits yet.
                     </td>
                 </tr>

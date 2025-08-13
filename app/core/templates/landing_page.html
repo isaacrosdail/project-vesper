@@ -5,14 +5,21 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
+<div class="landing-content">
     <h1>Welcome to Vesper</h1>
     <p>Vesper is a personal "life OS" - starting as a routine tracker and evolving into a home OS + automation platform driven by data.</p>
 
-    <div class="">
-        <a href="{{ url_for('auth.login') }}" class="btn-secondary">Classic Login</a>
+    <div class="btn-container">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary tooltip" data-tip="Go to the login page">Log in / Sign up</a>
         <form action="{{ url_for('main.init_demo') }}" method="POST">
-            <button type="submit" class="btn-primary">Quick Start 🚀</button>
+            <button type="submit" class="btn btn-primary tooltip" data-tip="Sign as a guest & open dashboard.">Try the demo 🚀</button>
         </form>
     </div>
 
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename = 'js/common/tooltip.js') }}"></script>
 {% endblock %}

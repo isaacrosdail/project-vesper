@@ -5,8 +5,8 @@
 {% block title %}Log New Transaction{% endblock %}
 
 {% block content %}
-<!-- <h2 class="text-lg font-semibold px-2 mb-4 border-b pb-2">Add new transaction:</h2> -->
-<div class="dashboard-card">
+
+<div class="card-dashboard">
     <form method="POST">
         <fieldset>
             <legend>Add new transaction</legend>
@@ -88,9 +88,9 @@
             </div>
             <!-- Note to self: Might want to clean this styling up: Flex & flex-1 are used to make buttons evenly share space inline -->
             <div class="flex gap-4 mb-4">
-                <a href="{{ url_for('groceries.dashboard') }}" class="btn-secondary">Cancel / Return</a>
-                <button class="btn-primary flex-1" type="submit" name="action" value="submit">Submit</button>
-                <button class="btn-secondary flex-1" type="submit" name="action" value="next_item">Add Next Item</button>
+                <a href="{{ url_for('groceries.dashboard') }}" class="btn btn-secondary">Cancel / Return</a>
+                <button class="btn btn-primary flex-1" type="submit" name="action" value="submit">Submit</button>
+                <button class="btn btn-secondary flex-1" type="submit" name="action" value="next_item">Add Next Item</button>
             </div>
         </fieldset>
     </form>
