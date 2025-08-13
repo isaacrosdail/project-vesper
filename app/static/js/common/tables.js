@@ -54,6 +54,7 @@ function editTableField(td, module, field, itemId, subtype) {
 
     // Create an input element to replace cell content
     const input = document.createElement('input');
+    input.className = 'input-inline';
     input.type = 'text';
     input.value = td.textContent;
 
