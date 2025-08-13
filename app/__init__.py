@@ -25,6 +25,7 @@ from app.modules.metrics.routes import metrics_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
 from app._internal.health_routes import internal_bp
+from app._internal.tooling_routes import tooling_bp
 
 from app.core.constants import DEFAULT_LANG
 
@@ -138,3 +139,4 @@ def _register_blueprints(app):
     app.register_blueprint(time_tracking_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(internal_bp)
+    app.register_blueprint(tooling_bp)

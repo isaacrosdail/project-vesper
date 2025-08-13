@@ -476,3 +476,14 @@ footer {
         max-width: 80rem; /* xl:max-w-7xl */
     }
 }
+
+
+
+/* TESTING: */
+/* #my-div {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: solid calc(2px * var(--has-hover)) var(--border);
+} */
