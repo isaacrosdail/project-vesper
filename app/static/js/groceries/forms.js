@@ -4,7 +4,7 @@
 // filter unit_type options
 function filterUnitOptions() {
     // if value is drink or energy_drink
-    const categorySelection = document.getElementById('category').value;
+    const categorySelection = document.querySelector('#category').value;
     const allOptions = document.querySelectorAll('#unit_type option'); // Grab all options in select menu => returns a NodeList
 
     // debugging

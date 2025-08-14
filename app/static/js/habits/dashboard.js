@@ -1,12 +1,15 @@
 // Currently handles add habit modal
 
 document.addEventListener('DOMContentLoaded', (e) => {
-    const modal = document.getElementById('add-habit-modal');
+    const modal = document.querySelector('#add-habit-modal');
     // Event listener for modal click
     document.addEventListener('click', (e) => {
         if (e.target.matches('#add-habit-btn')) {
             modal?.showModal();
         }
+
+
+
         // TODO: Fix bug => Close causes "input field __ not focusable", doesn't seem to break functionality
         // just causes validation outline upon reopen
         else if (e.target.matches('#modal-close-btn')) {
@@ -29,6 +32,13 @@ document.addEventListener('DOMContentLoaded', (e) => {
         const formData = new FormData(e.target);
         saveModalFormSubmission(formData, e.currentTarget);
 
+    });
+
+    // testing
+    modal?.addEventListener('close', (e) => {
+        //if (modal.returnValue === 'save') saveStuff();
+        form.reset();
+        console.log(`Close triggered with value of: ${modal.returnValue}`);
     });
 });
 

@@ -58,7 +58,7 @@
     <!-- Flash message auto-fade -->
     <script nonce="{{ nonce }}">
         window.addEventListener('DOMContentLoaded', () => {
-            const flash = document.getElementById('flash-message');
+            const flash = document.querySelector('#flash-message');
             if (flash) {
                 setTimeout(() => {
                     flash.style.opacity = '0'; // fade?
