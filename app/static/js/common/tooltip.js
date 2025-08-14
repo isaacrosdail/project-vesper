@@ -1,4 +1,9 @@
 // Custom tooltip behavior because CSS can't handle it
+/**
+ * To use for a given element:
+ * Add class 'tooltip' for styling
+ * Add 'data-tip' attr with desired tooltip text
+ */
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -32,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         element.addEventListener('mouseleave', (e) => {
             // Wipe tooltip on leave
-            const tooltip = document.getElementById('tooltip');
+            const tooltip = document.querySelector('#tooltip');
             tooltip?.remove();
         });
     });

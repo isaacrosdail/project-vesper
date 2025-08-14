@@ -19,12 +19,12 @@
                     pattern="[0-9]{8-14}"
                     title="Barcode must be 8-14 digits only"
                     placeholder="Scan or enter barcode"
-                    class="input-standard" required>
+                     required>
             </div>
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="product_name">Product Name</label>
                 <input type="text" id="product_name" name="product_name"
-                    class="input-standard"
+                    
                     {% if not show_product_fields%}disabled{% endif %}>
             </div>
             <div class="form-group">
@@ -33,19 +33,19 @@
                 <input type="number" step="0.01" min="0" id="price_at_scan" name="price_at_scan"
                     value="{{ transaction_data.price_at_scan if transaction_data else '' }}"
                     title="Price you actually paid (may differ from listed price)"
-                    class="input-standard" required>
+                     required>
             </div>
             <div class="form-group">
                 <label for="quantity">Quantity:</label>
                 <input type="text" id="quantity" name="quantity"
                     value="{{ transaction_data.quantity if transaction_data else '' }}"
-                    class="input-standard" required>
+                     required>
             </div>
             <!-- net_weight, category, unit_type, & cals per 100g are all to be conditionally shown depending on whether we need to add_product from here -->
             <!-- Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing -->
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="category">Category</label>
-                <select name="category" id="category" class="input-standard"
+                <select name="category" id="category" 
                     {% if not show_product_fields%}disabled{% endif %}>
                     <option value="">-- Category --</option>
                     <option value="drink">Drink</option>
@@ -63,12 +63,11 @@
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="net_weight">Net Weight:</label>
                 <input type="text" id="net_weight" name="net_weight"
-                    {% if not show_product_fields%}disabled{% endif %}
-                    class="input-standard">
+                    {% if not show_product_fields%}disabled{% endif %}>
             </div>
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="unit_type">Units:</label>
-                <select name="unit_type" id="unit_type" class="input-standard"
+                <select name="unit_type" id="unit_type" 
                     {% if not show_product_fields%}disabled{% endif %}>
                     <option value="">-- Units --</option>
                     <option value="g">g (grams)</option>
@@ -83,14 +82,12 @@
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="calories_per_100g">Cals per 100g:</label>
                 <input type="text" id="calories_per_100g" name="calories_per_100g"
-                    class="input-standard"
                     {% if not show_product_fields%}disabled{% endif %}>
             </div>
-            <!-- Note to self: Might want to clean this styling up: Flex & flex-1 are used to make buttons evenly share space inline -->
-            <div class="flex gap-4 mb-4">
+            <div class="form-actions">
+                <button type="submit" name="action" value="submit" class="btn btn-primary">Submit</button>
+                <!-- TODO: Make a toggle instead: <button class="btn btn-secondary flex-1" type="submit" name="action" value="next_item">Add Next Item</button> -->
                 <a href="{{ url_for('groceries.dashboard') }}" class="btn btn-secondary">Cancel / Return</a>
-                <button class="btn btn-primary flex-1" type="submit" name="action" value="submit">Submit</button>
-                <button class="btn btn-secondary flex-1" type="submit" name="action" value="next_item">Add Next Item</button>
             </div>
         </fieldset>
     </form>

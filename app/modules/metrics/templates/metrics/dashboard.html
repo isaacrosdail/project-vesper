@@ -18,28 +18,30 @@
 
 <div class="card-dashboard">
     <h2 class="card-title">Metric Entries</h2>
+
+    {% set headers = ["Metric Type", "Value (units)", "Created"] %}
     <table class="table-standard">
         <caption class="sr-only">Metric Entries</caption>
-        <thead>
+        <thead class="table-header">
             <tr>
                 {% if has_dev_tools %}
-                    <th class="table-header">ID</th>
+                    <th>ID</th>
                 {% endif %}
-                <th class="table-header">Metric Type</th>
-                <th class="table-header">Value (units)</th>
-                <th class="table-header">Created</th>
+                {% for h in headers %}
+                    <th>{{ h }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% if metrics %}
-                {% for metric in metrics %}
-                <tr class="table-row" data-item-id="{{ metric.id }}" data-module="metrics" data-subtype="metric">
+                {% for m in metrics %}
+                <tr class="table-row" data-item-id="{{ m.id }}" data-module="metrics" data-subtype="metric">
                     {% if has_dev_tools %}
-                        <td class="table-cell">{{ metric.id }}</td>
+                        <td class="table-cell">{{ m.id }}</td>
                     {% endif %}
-                    <td class="editable-cell table-cell" data-item-id="{{ metric.id }}" data-module="metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ metric.metric_type }}</td>
-                    <td class="editable-cell table-cell" data-item-id="{{ metric.id }}" data-module="metrics" data-field="value" title="Double-click to edit value.">{{ metric.value | round }}  ({{ metric.unit }})</td>
-                    <td class="table-cell">{{ metric.created_at.strftime("%d.%m.%Y") }}</td>
+                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ m.metric_type }}</td>
+                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="metrics" data-field="value" title="Double-click to edit value.">{{ m.value | round }}  ({{ m.unit }})</td>
+                    <td class="table-cell">{{ m.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="table-cell delete-cell">
                         {{ styles.delete_btn() }}
                     </td>

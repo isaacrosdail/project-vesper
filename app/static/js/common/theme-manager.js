@@ -8,11 +8,11 @@ function getCookie() {
     // console.log(`Cookie read as: ${cookie}`);
     if (cookie.includes('theme=light')) {
         // set our form to light
-        document.getElementById('theme').value = 'sun';
+        document.querySelector('#theme').value = 'sun';
     } else if (cookie.includes('theme=dark')) {
-        document.getElementById('theme').value = 'moon';
+        document.querySelector('#theme').value = 'moon';
     } else {
-        document.getElementById('theme').value = 'laptop';
+        document.querySelector('#theme').value = 'laptop';
     }
 
     // console.log(`Cookie parsed as: ${cookie}`);
@@ -20,7 +20,7 @@ function getCookie() {
 
 // Also need to make this more robust
 function setCookie() {
-    const themeSetting = document.getElementById('theme').value;
+    const themeSetting = document.querySelector('#theme').value;
 
     // console.log(`Theme detected from form as: ${themeSetting}`);
     if (themeSetting === 'sun') {
@@ -42,12 +42,12 @@ function setCookie() {
 function applyThemeFromCookie() {
     // After sync, force CSS to re-evaluate
     // TODO: Study use cases of dispatchEvent
-    document.getElementById('theme').dispatchEvent(new Event('change'));
+    document.querySelector('#theme').dispatchEvent(new Event('change'));
 }
 
 // Might need to make this more defensive (if element doesn't exist?)
 document.addEventListener('DOMContentLoaded', () => {
     getCookie();            // Sync UI to the cookie
     applyThemeFromCookie(); // Apply the theme based on the value
-    document.getElementById('theme').addEventListener('change', setCookie); // runs every time user picks new theme option
+    document.querySelector('#theme').addEventListener('change', setCookie); // runs every time user picks new theme option
 });

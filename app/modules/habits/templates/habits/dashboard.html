@@ -7,13 +7,14 @@
     <form id="add-habit-form" method="POST">
         <fieldset>
             <legend>Add new habit:</legend>
+            <button type="button" class="modal-close btn btn-destructive" id="modal-close-btn" aria-label="Close">&times;</button>
             <div class="form-group">
                 <label for="title">Habit:</label>
-                <input type="text" id="title" name="title" class="input-standard" required>
+                <input type="text" id="title" name="title"  required>
             </div>
             <div class="form-group">
                 <label for="category">Category:</label>
-                <select name="category" class="input-standard" required>
+                <select name="category"  required>
                     <option value="">-- Category --</option>
                     <option value="health">Health</option>
                     <option value="learning">Learning</option>
@@ -24,7 +25,6 @@
                     <option value="misc">Misc.</option>
                 </select>
             </div>
-            <button class="btn btn-secondary" id="modal-close-btn">Close</button>
             <button class="btn btn-primary" type="submit">Submit</button>
         </fieldset>
     </form>
@@ -33,31 +33,31 @@
 <div class="card-dashboard">
     <div class="card-header">
         <h2 class="card-title">Habits</h2>
-        <button id="add-habit-btn" class="btn btn-primary table-card-btn">Add Habit</button>
+        <button id="add-habit-btn" class="btn btn-primary">Add Habit</button>
     </div>
+    {% set headers = ["Title", "Category", "Created"] %}
     <table class="table-standard">
         <caption class="sr-only">Habits</caption>
-        <thead>
+        <thead class="table-header">
             <tr>
                 {% if has_dev_tools %}
-                    <th class="table-header">ID</th>
+                    <th>ID</th>
                 {% endif %}
-                <th class="table-header">Title</th>
-                <th class="table-header">Category</th>
-                <th class="table-header">Created</th>
+                {% for h in headers %}
+                    <th>{{ h }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% if habits %}
-                {% for habit in habits %}
-                <tr class="table-row" data-item-id="{{ habit.id }}" data-module="habits" data-subtype="none">
+                {% for h in habits %}
+                <tr class="table-row" data-item-id="{{ h.id }}" data-module="habits" data-subtype="none">
                     {% if has_dev_tools %}
-                        <td class="table-cell">{{ habit.id }}</td>
+                        <td>{{ h.id }}</td>
                     {% endif %}
-                    <td class="editable-cell table-cell" data-item-id="{{ habit.id }}" data-module="habits" data-field="title" title="Double-click to edit field."
-                    >{{ habit.title }}</td>
-                    <td class="table-cell">{{ habit.category|capitalize }}</td>
-                    <td class="table-cell">{{ habit.created_at.strftime("%d.%m.%Y") }}</td>
+                    <td class="editable-cell tooltip" data-item-id="{{ h.id }}" data-module="habits" data-field="title" data-tip="Double-click to edit field.">{{ h.title }}</td>
+                    <td>{{ h.category|capitalize }}</td>
+                    <td>{{ h.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="table-cell delete-cell">
                         {{ styles.delete_btn() }}
                     </td>
@@ -78,4 +78,5 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename = 'js/habits/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/common/tables.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/common/tooltip.js') }}"></script>
 {% endblock %}

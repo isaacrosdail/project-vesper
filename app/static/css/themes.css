@@ -21,15 +21,15 @@
     /* Note: For inverted text, simply directly use the opposite theme's (below in theme mappings, not incl. in definitions obv) */
     /* Example: (on light mode): */
     /* === NEUTRALS === */
-    --light-bg-dark: hsl(0 0 90);     /* Pure white base => Main page/canvas background */
-    --light-bg: hsl(0 0 95);          /* Subtle off-white => Cards, modals, main content areas */
-    --light-bg-light: hsl(0 0 100);   /* input fields. Secondary button backgrounds, alternating rows  */
+    --light-bg-dark: hsl(0 0% 90%);     /* Pure white base => Main page/canvas background */
+    --light-bg: hsl(0 0% 95%);          /* Subtle off-white => Cards, modals, main content areas */
+    --light-bg-light: hsl(0 0% 100%);   /* input fields. Secondary button backgrounds, alternating rows  */
 
     --light-text: hsl(0 0 5);           /* for headers/etc, High contrast */
-    --light-text-muted: hsl(0 0 30);    /* main text, slightly muted from that */
+    --light-text-muted: hsl(0 0% 30%);    /* main text, slightly muted from that */
 
 
-    --light-border: hsl(0 0% 30%); /* Borders */
+    --light-border-color: hsl(0 0% 30%); /* Borders */
 
 
     /* --light-accent-text: oklch(87.2% 0.01 258.338);Branded text ("Vesper"), nav items (must work on dark backgrounds) (Tailwind's text-gray-300) */
@@ -47,12 +47,12 @@
     
     /* =============== DARK THEME DEFINITIONS =============== */
     /* === BACKGROUND HIERARCHY === */
-    --dark-bg-dark: hsl(0 0 0);     /* Main page/canvas background (darker) */
-    --dark-bg: hsl(0 0 5);          /* Lifted surface: Cards, modals, main content areas */
-    --dark-bg-light: hsl(0 0 10);       /* Input fields too? Buttons, dropdowns, menus, toggles, etc. Secondary button backgrounds, alternating rows, muted backgrounds */
+    --dark-bg-dark: hsl(0 0% 0%);     /* Main page/canvas background (darker) */
+    --dark-bg: hsl(0 0% 5%);          /* Lifted surface: Cards, modals, main content areas */
+    --dark-bg-light: hsl(0 0% 10%);       /* Input fields too? Buttons, dropdowns, menus, toggles, etc. Secondary button backgrounds, alternating rows, muted backgrounds */
 
-    --dark-text: hsl(0 0 95); /* Sharper, higher contrast color for headings/important elements */
-    --dark-text-muted: hsl(0 0 70); /* Slightly muted shade for most text */
+    --dark-text: hsl(0 0% 95%); /* Sharper, higher contrast color for headings/important elements */
+    --dark-text-muted: hsl(0 0% 70%); /* Slightly muted shade for most text */
 
 
     --dark-text-destructive: hsl(0, 84%, 60%);
@@ -62,7 +62,7 @@
     --dark-ui-hover: oklch(85% 0.05 250);
 
     /* === BORDERS === */
-    --dark-border: hsl(0 0% 30%);             /* darker borders */
+    --dark-border-color: hsl(0 0% 30%);             /* darker borders */
     /* Selection stuff */
     --dark-bg-selection: grey;      /* Text selection background */
     --dark-text-selection: yellow;
@@ -78,7 +78,7 @@
     --text-muted: var(--light-text-muted);
     --text: var(--light-text);
 
-    --border: var(--light-border);
+    --border-color: var(--light-border-color);
     --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
 
@@ -111,7 +111,7 @@
         --text: var(--dark-text);
 
 
-        --border: var(--dark-border);
+        --border-color: var(--dark-border-color);
         --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
 
@@ -149,7 +149,7 @@
     --text-inverse: var(--dark-text); /* Note: Using dark's sharper text as inverse */
 
 
-    --border: var(--light-border);
+    --border-color: var(--light-border-color);
     --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
 
@@ -183,7 +183,7 @@
     --text-destructive: var(--dark-text-destructive);
 
 
-    --border: var(--dark-border);
+    --border-color: var(--dark-border-color);
     --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
 
