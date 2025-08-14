@@ -16,17 +16,16 @@
                     minlength="8" maxlength="14"
                     pattern="[0-9]{8,14}"
                     title="Barcode must be 8-14 digits only"
-                    class="input-standard" required
+                     required
                     placeholder="Scan or enter barcode">
             </div>
             <div class="form-group">
                 <label for="product_name">Product Name:</label>
-                <input type="text" id="product_name" name="product_name"
-                    class="input-standard">
+                <input type="text" id="product_name" name="product_name">
             </div>
             <div class="form-group">
                 <label for="category">Category</label>
-                <select name="category" id="category" class="input-standard" required>
+                <select name="category" id="category"  required>
                     <option value="">-- Category --</option>
                     <option value="drink">Drink</option>
                     <option value="energy_drink">Energy Drink</option>
@@ -42,12 +41,11 @@
             </div>
             <div class="form-group">
                 <label for="net_weight">Net Weight:</label>
-                <input type="text" id="net_weight" name="net_weight"
-                    class="input-standard">
+                <input type="text" id="net_weight" name="net_weight">
             </div>
             <div class="form-group">
                 <label for="unit_type">Units:</label>
-                <select name="unit_type" id="unit_type" class="input-standard" required>
+                <select name="unit_type" id="unit_type"  required>
                     <option value="">-- Units --</option>
                     <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
@@ -60,11 +58,12 @@
             </div>
             <div class="form-group">
                 <label for="calories_per_100g">Cals per 100g:</label>
-                <input type="text" id="calories_per_100g" name="calories_per_100g"
-                    class="input-standard">
+                <input type="text" id="calories_per_100g" name="calories_per_100g">
             </div>
-            <a href="{{ url_for('groceries.dashboard') }}" class="btn btn-secondary">Cancel / Return</a>
-            <button class="btn btn-primary" type="submit" name="action" value="save">Submit</button>
+            <div class="form-actions">
+                <button type="submit" name="action" value="save" class="btn btn-primary">Submit</button>
+                <a href="{{ url_for('groceries.dashboard') }}" class="btn btn-secondary">Cancel / Return</a>
+            </div>
         </fieldset>
     </form>
 </div>

@@ -1,16 +1,15 @@
 <nav>
-    <div class="navbar-inner">
-
+    <div class="navbar-content">
         <!-- LEFT: Branding & Links -->
-        <div class="nav-container">
+        <div class="nav-left">
             <span class="branding">Vesper</span>
 
             <!-- Beginning hamburger menu -->
-            <button id="hamburger-btn">
+            <button id="hamburger-btn" aria-controls="navlinks" aria-expanded="false">
                 ☰
             </button>
-            <!-- Desktop nav links -->
-            <div id="desktop-nav">
+            <!-- Navlinks: folded/column on mobile, shown row on desktop -->
+            <div class="navlinks">
                 {{ styles.nav_link('Home', 'main.home', request.endpoint) }}
 
                 {% if current_user.is_authenticated %}
@@ -27,28 +26,13 @@
                     {{ styles.nav_link('Log in', 'auth.login', request.endpoint) }}
                 {% endif %}
 
-            </div>
-            <!-- Mobile nav links: Hidden by default -->
-            <div id="mobile-nav">
-                {{ styles.nav_link('Home', 'main.home', request.endpoint) }}
-
-                {% if current_user.is_authenticated %}
-                    {{ styles.nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
-                    {{ styles.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
-                    {{ styles.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
-                    {{ styles.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
-                    {{ styles.nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
-
-                    {{ styles.nav_link('Log out', 'auth.logout', request.endpoint )}}
-                {% endif %}
-                
-                {% if current_user.is_anonymous %}
-                    {{ styles.nav_link('Log in', 'auth.login', request.endpoint) }}
-                {% endif %}
             </div>
         </div>
 
-        <!-- Temporary Home for some admin-only privileges -->
+        <!-- Settings modal, theme select, etc.-->
+        <div class="nav-right">
+
+        </div>
         
         <!-- Baby's first modal -->
         <button id="settings-btn" aria-label="Settings">⚙️</button>

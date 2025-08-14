@@ -1,4 +1,3 @@
-<!-- View grocery items -->
 
 {% extends "base.html" %}
 
@@ -6,32 +5,33 @@
 
 {% block content %}
 <div class="card-dashboard">
-    <h2 class="card-title">Grocery - Recent Transactions</h2>
+    <div class="card-header">
+        <h2 class="card-title">Grocery - Recent Transactions</h2>
+        <a href="{{ url_for('groceries.transactions')}}" class="btn btn-primary">
+            Log New Transaction
+        </a>
+    </div>
 
+    {% set headers = ["Barcode", "Product Name", "Price", "Quantity", "Date Scanned", "Price per 100g"] %}
     <table class="table-standard">
         <caption class="sr-only">Grocery - Recent Transactions</caption>
-        <thead>
+        <thead class="table-header">
             <tr>
-                <th class="table-header">Barcode</th>
-                <th class="table-header">Product Name</th>
-                <th class="table-header">Price</th>
-                <th class="table-header">Quantity</th>
-                <th class="table-header">Date Scanned</th>
-                <td class="table-header">Price per 100g</td>
+                {% for h in headers %}
+                    <th>{{ h }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% if transactions %}
-                {% for transaction in transactions %}
-                <tr class="group table-row" data-item-id="{{ transaction.id }}" data-module="groceries" data-subtype="transaction">
-                    <td class="table-cell">{{ transaction.product.barcode }}</td>
-                    <td class="table-cell">
-                        <span class="product-name">{{ transaction.product.product_name }}</span>
-                    </td>
-                    <td class="table-cell">£{{ transaction.price_at_scan }}</td>
-                    <td class="table-cell">{{ transaction.quantity }}</td>
-                    <td class="table-cell text-right">{{ transaction.created_at.strftime("%d.%m.%Y") }}</td>
-                    <td class="table-cell text-right">£{{ transaction.price_per_100g | round(2) }}</td>
+                {% for t in transactions %}
+                <tr class="group table-row" data-item-id="{{ t.id }}" data-module="groceries" data-subtype="transaction">
+                    <td>{{ t.product.barcode }}</td>
+                    <td>{{ t.product.product_name }}</td>
+                    <td>${{ t.price_at_scan }}</td>
+                    <td>{{ t.quantity }}</td>
+                    <td class="text-right">{{ t.created_at.strftime("%d.%m.%Y") }}</td>
+                    <td class="text-right">${{ t.price_per_100g | round(2) }}</td>
                     <td class="table-cell delete-cell">
                         {{ styles.delete_btn() }}
                     </td>
@@ -47,31 +47,34 @@
         </tbody>
     </table>
 </div>
-<a href="{{ url_for('groceries.transactions')}}" class="btn btn-secondary">
-    Log New Transaction
-</a>
+
 <div class="card-dashboard">
-    <h2 class="card-title">Product Catalog</h2>
+    <div class="card-header">
+        <h2 class="card-title">Product Catalog</h2>
+        <a href="{{ url_for('groceries.products')}}" class="btn btn-primary">
+            Add New Product
+        </a>
+    </div>
+
+    {% set headers = ["Barcode", "Product Name", "Category", "Net Weight (units)", "Cals per 100g"] %}
     <table class="table-standard">
         <caption class="sr-only">Product Catalog</caption>
-        <thead>
+        <thead class="table-header">
             <tr>
-                <th class="table-header">Barcode</th>
-                <th class="table-header">Product Name</th>
-                <th class="table-header">Category</th>
-                <th class="table-header">Net Weight (units)</th>
-                <th class="table-header">Kcals per 100g</th>
+                {% for h in headers %}
+                    <th>{{ h }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% if products %}
-                {% for product in products %}
-                <tr class="group table-row" data-item-id="{{ product.id }}" data-module="groceries" data-subtype="product">
-                    <td class="table-cell">{{ product.barcode }}</td>
-                    <td class="table-cell">{{ product.product_name }}</td>
-                    <td class="table-cell text-right">{{ product.category }}</td>
-                    <td class="table-cell text-right">{{ product.net_weight }} ({{ product.unit_type }})</td>
-                    <td class="table-cell text-right">{{ product.calories_per_100g|int if product.calories_per_100g else '-' }}</td> <!-- Int filter |int here to chop of decimals -->
+                {% for p in products %}
+                <tr class="group table-row" data-item-id="{{ p.id }}" data-module="groceries" data-subtype="product">
+                    <td>{{ p.barcode }}</td>
+                    <td>{{ p.product_name }}</td>
+                    <td class="text-right">{{ p.category }}</td>
+                    <td class="text-right">{{ p.net_weight }} ({{ p.unit_type }})</td>
+                    <td class="text-right">{{ p.calories_per_100g|int if p.calories_per_100g else '-' }}</td> <!-- Int filter |int here to chop of decimals -->
                     <td class="table-cell delete-cell">
                         {{ styles.delete_btn() }}
                     </td>
@@ -87,9 +90,6 @@
         </tbody>
     </table>
 </div>
-<a href="{{ url_for('groceries.products')}}" class="btn btn-secondary">
-    Add New Product
-</a>
 {% endblock %}
 
 {% block scripts %}

@@ -1,7 +1,7 @@
 // Currently handles add task modal
 
 document.addEventListener('DOMContentLoaded', (e) => {
-    const modal = document.getElementById('add-task-modal');
+    const modal = document.querySelector('#add-task-modal');
     // Event listener for modal click
     document.addEventListener('click', (e) => {
         if (e.target.matches('#add-task-btn')) {

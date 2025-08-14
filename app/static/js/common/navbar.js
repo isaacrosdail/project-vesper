@@ -1,59 +1,32 @@
 
 window.addEventListener('DOMContentLoaded', () => {
-    const mobileNav = document.getElementById('mobile-nav');
-    const modal = document.getElementById('settings-modal');
+    const navlinks = document.querySelector('.navlinks');
+    const modal = document.querySelector('#settings-modal');
+    const mq = window.matchMedia('(max-width: 640px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
+    const hamburgerBtn = document.querySelector('#hamburger-btn');
 
     document.addEventListener('click', (e) => {
-        const t = e.target
-
-        // TODO: Extract these notes!!
-        /** Optional chaining operator ('?')
-         * Old JS:
-         * if (modal && modal.showModal) {
-         *     modal.showModal();
-         * }
-         * 
-         * Modern:
-         *  modal?.showModal();  <= if modal is null or undefined, it just silently returns undefined instead of exploding :D
-         * And yes, we can chain multiple like: user?.profile?.picture?.url (nested obj/property checks)
-         */
-
         // Toggle mobile nav
-        if (t.matches('#hamburger-btn')) {
-            mobileNav?.classList.toggle('show'); // ? is the optional chaining operator
+        if (e.target.matches('#hamburger-btn')) {
+            navlinks?.classList.toggle('is-open'); // ? is the optional chaining operator
+            const isOpen = navlinks?.classList.contains('is-open'); // set proper bool for is-open state
+            hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value 
+            if (isOpen) navlinks.querySelector('a')?.focus(); // focus on first anchor el in nav
         }
 
-        // Baby's First Modal
-        // Open modal
-        if (t.matches('#settings-btn')) {
-            // Trying out <dialog> element stuff
-            // What's this do? => dialog.returnValue = "...";
-            modal?.showModal(); // ESC key & blur automatically handled :P
+        // Open settings modal
+        if (e.target.matches('#settings-btn')) {
+            // Optional chaining avoids null errors if modal is missing
+            modal?.showModal(); // ESC key & blur automatically handled
         }
     });
-})
 
-/**
- * Cleans up .show class from mobile-nav when viewport exceeds 640px
- * Media query handles setting mobile-nav.show display to none though
- * TODO: Do we even use/need this anymore? Tidy up
- */
-const DESKTOP_BREAKPOINT = 640;
-const THROTTLE_DELAY = 200; // Throttle to every 200ms
-let resizeTimer;
-
-window.addEventListener('resize', function() {
-    clearTimeout(resizeTimer);
-
-    /**
-     * Throttled resize event handler
-     * Removes mobile-nav.show when crossing to desktop viewport size
-     */
-    resizeTimer = setTimeout(() => {
-        const mobileNav = document.getElementById('mobile-nav'); // Grab element
-        if (mobileNav && window.innerWidth > DESKTOP_BREAKPOINT) { // Check if window size past our breakpoint for desktop
-            // Remove the .show class from mobile-nav
-            mobileNav.classList.remove('show');
+    // Reset nav state when switching to desktop (close, reset aria-expanded)
+    mq.addEventListener('change', (e) => {
+        // True when window <= 640px
+        if (!e.matches) {
+            navlinks.classList.remove('is-open');
+            hamburgerBtn.setAttribute('aria-expanded', 'false');
         }
-    }, THROTTLE_DELAY);
+    });
 });

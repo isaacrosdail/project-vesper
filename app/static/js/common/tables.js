@@ -185,7 +185,7 @@ function handleCustomContextMenu(e) {
                 menuItem.textContent = item; // set string from array as textContent property for element
                 menu.appendChild(menuItem);
             }
-            menu.classList.add('context-menu'); // add class (for CSS)
+            menu.classList.add('context-menu');
         }
 
         // Position menu at cursor
@@ -202,10 +202,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', handleDeleteClick);
     document.addEventListener('dblclick', handleEditClick);
     document.addEventListener('contextmenu', (e) => {
-        console.log('FIRED: contextmenu event');
-        console.log('Shift key:', e.shiftKey);
-        console.log('Target element:', e.target);
-        console.log('Default prevented?', e.defaultPrevented);
+        // console.log('FIRED: contextmenu event');
+        // console.log('Shift key:', e.shiftKey);
+        // console.log('Target element:', e.target);
+        // console.log('Default prevented?', e.defaultPrevented);
         if (e.ctrlKey) {
             console.log('shift pressed!');
             e.preventDefault();

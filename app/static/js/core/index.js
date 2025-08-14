@@ -225,14 +225,14 @@ function getCurrentTimeString() {
 }
 
 function updateClock() {
-    let timeDisplay = document.getElementById("time-display"); // Get the element by id
+    let timeDisplay = document.querySelector('#time-display'); // Get the element by id
     timeDisplay.textContent = getCurrentTimeString(); // use getCurrentTimeString to call that and inject that value
 }
 
 // Get weather info via API, orchestrates our sun movement
 async function getWeatherInfo() {
-    const tempDisplay = document.getElementById('weather-temp');
-    const sunsetDisplay = document.getElementById('weather-sunset');
+    const tempDisplay = document.querySelector('#weather-temp');
+    const sunsetDisplay = document.querySelector('#weather-sunset');
     const city = "London";
     const units = "metric";
 
@@ -340,7 +340,7 @@ const SUN_CONFIG = {
  * @param {number} y - Normalized y position (0-1)
  */
 function drawSun(x, y) {
-    const canvas = document.getElementById('sun-canvas');
+    const canvas = document.querySelector('#sun-canvas');
 
     // Get 2D drawing context (vs 3D WebGL context) // ctx is common abbreviation for 'context' - the drawing interface obj
     const ctx = canvas.getContext('2d'); 
@@ -388,7 +388,7 @@ function drawSun(x, y) {
 
 // Main event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('time-entry-modal');
+    const modal = document.querySelector('#time-entry-modal');
 
     // Switch to event delegation pattern for habit checkboxes
     // Idea is: Apply listener to PARENT, then determine where event came from

@@ -8,53 +8,53 @@
     <form id="add-task-form" method="POST">
         <fieldset>
             <legend>Add new task:</legend>
+            <button type="button" class="modal-close btn btn-destructive" id="modal-close-btn" aria-label="Close">&times;</button>
             <div class="form-group">
                 <label for="title">Task:</label>
-                <input type="text" id="title" name="title" class="input-standard" required>
+                <input type="text" id="title" name="title"  required>
             </div>
         </fieldset>
         <button class="btn btn-primary" type="submit">Submit</button>
-        <button class="btn btn-secondary" id="modal-close-btn">Close</button>
     </form>
 </dialog>
 
 <div class="card-dashboard">
-    <h2 class="card-title">Tasks</h2>
-    <button id="add-task-btn" class="btn btn-primary">Add Task</button>
+    <div class="card-header">
+        <h2 class="card-title">Tasks</h2>
+        <button id="add-task-btn" class="btn btn-primary">Add Task</button>
+    </div>
+    {% set headers = ["Title", "Status", "Type", "Created", "Completed"] %}
     <table class="table-standard">
         <caption class="sr-only">Tasks</caption>
-        <thead>
+        <thead class="table-header">
             <tr>
                 {% if has_dev_tools %}
-                    <th class="table-header">ID</th>
+                    <th>ID</th>
                 {% endif %}
-                <th class="table-header">Title</th>
-                <th class="table-header">Status</th>
-                <th class="table-header">Type</th>
-                <th class="table-header">Created</th>
-                <th class="table-header">Completed</th>
+                {% for h in headers %}
+                    <th>{{ h }}</th>
+                {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% if tasks %}
-                {% for task in tasks %}
+                {% for t in tasks %}
                 <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
                 <!-- Using display: none works here as well but causes layout shift -->
-                <tr class="table-row" data-item-id="{{ task.id }}" data-module="tasks" data-subtype="none">
+                <tr class="table-row" data-item-id="{{ t.id }}" data-module="tasks" data-subtype="none">
                     {% if has_dev_tools%}
-                        <td class="table-cell">{{ task.id }}</td>
+                        <td>{{ t.id }}</td>
                     {% endif %}
-                    <td class="editable-cell table-cell" data-item-id="{{ task.id }}" data-module="tasks" data-field="title" title="Double-click to edit field."
-                        >{{ task.title }}</td>
-                    <td class="table-cell">
+                    <td class="editable-cell tooltip" data-item-id="{{ t.id }}" data-module="tasks" data-field="title" data-tip="Double-click to edit field.">{{ t.title }}</td>
+                    <td>
                         <!-- |safe here to render HTML entities instead of escaping them -->
-                        {{ ('&#9745;' if task.is_done else '&#9744;') | safe }}
+                        {{ ('&#9745;' if t.is_done else '&#9744;') | safe }}
                     </td>
-                    <td class="table-cell">{{ task.type }}</td>
-                    <td class="table-cell text-right">{{ task.created_at_local.strftime("%d.%m.%Y") }}</td>
-                    <td class="table-cell text-right">
+                    <td>{{ t.type }}</td>
+                    <td class="text-right">{{ t.created_at_local.strftime("%d.%m.%Y") }}</td>
+                    <td class="text-right">
                         <!-- EX: 18:09 -->
-                        {{ task.completed_at.strftime("%H:%M") if task.completed_at else '--' }} 
+                        {{ t.completed_at.strftime("%H:%M") if t.completed_at else '--' }} 
                     </td>
                     <td class="table-cell delete-cell">
                         {{ styles.delete_btn() }}
@@ -77,4 +77,5 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename = 'js/tasks/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename = 'js/common/tables.js')}}"></script>
+    <script src="{{ url_for('static', filename = 'js/common/tooltip.js') }}"></script>
 {% endblock %}

@@ -10,6 +10,14 @@
     }
 }
 
+/* Breakpoints:
+ * width <= 640px   Mobile nav toggle, chart stacking
+ * width > 640px    Hide mobile navlinks?
+ * width >= 1024px  Adjust dashboard-container max-width/padding
+ * width >= 1280px  Adjust dashboard-container max-width
+*/
+
+
 /* ======= COMPONENT UTILITIES =======
  * "Making 'Tailwind at home'" (I didn't even steal this idea!!)
  * Design token-based component classes that adapt to theme changes automatically.
@@ -34,8 +42,8 @@
         user-select: none;
         appearance: none;
         padding: 0.5rem 1rem;
-        border: 1px solid var(--border);
-        border-radius: 0.375rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
         gap: 0.4rem;
     }
     /* Subtle "pressed" effect for active buttons */
@@ -58,12 +66,12 @@
     .btn-primary {
         background-color: var(--accent-lighter);
         color: var(--text);
-        border-color: var(--border);
+        border-color: var(--border-color);
     }
     .btn-secondary {
         background-color: var(--bg-light);
         color: var(--text-muted);
-        border-color: var(--border);
+        border-color: var(--border-color);
     }
     .btn-destructive {
         color: var(--text-destructive);
@@ -79,13 +87,14 @@
             background-color: color-mix(in srgb, var(--bg-light) 80%, var(--text));
         }
         .btn-destructive:hover {
-            color: var(--bg-lighter);
+            color: var(--bg-light);
             background-color: var(--text-destructive);
         }
     }
 
     /* ======= TABLE COMPONENTS ======= */
     /* Needed higher specificity here to override so delete-cell properly blends in to card */
+    /* TODO: BUG: Fix this & sort out why table-cell class is required for delete-btn's to style properly */
     .table-cell.delete-cell {
         border: none;
         padding: 0;
@@ -105,18 +114,18 @@
         width: 100%;
         font-size: 0.875rem;
     }
-    .table-header,
-    .table-cell {
+    .table-standard th,
+    .table-standard td {
         padding: 0.5rem;
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-color);
     }
-    .table-header {
+    .table-header th {
         background-color: var(--accent-lighter);
         color: var(--text);    /* TODO */
         font-weight: 600; /* equivalent to font-semibold in Tailwind */
     }
     .table-row {
-        transition: 25ms;
+        transition: background-color 25ms ease-out;
     }
     .table-row .delete-btn {
         visibility: hidden; /* All (table) delete buttons start hidden */
@@ -126,10 +135,6 @@
     }
     .table-row:nth-child(even) {
         background-color: var(--bg-light);
-    }
-    /* TODO: Unnecessary? */
-    .table-row:nth-child(odd) {
-        background-color: var(--bg-dark); /* TODO? */
     }
     .table-row:hover {
         background-color: var(--ui-hover);
@@ -174,13 +179,13 @@
         background-color: color-mix(in srgb, var(--color-success) 10%, white); /* Derive bg-color from our color-success var instead of hardcoding */
         color: var(--color-success);
         padding: 0.5rem 1rem;  /* py-2 px-4 */
-        border-radius: 0.25rem; /* rounded */
+        border-radius: var(--border-radius);
         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
         margin-bottom: 1rem;          /* mb-4 */
     }
     /* TODO: Not 100% happy with these 2, not sure why though. */
     .border-card {
-        border: solid 1px var(--border);
+        border: solid 1px var(--border-color);
     }
     .shadow-card {
         box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
@@ -194,6 +199,8 @@
 */
 :root {
     --min-navbar-height: 4rem;
+    --border-radius: 0.5rem;
+    --border-radius-top: 0.5rem 0.5rem 0 0;
     --has-hover: 0;
 }
 /* TODO: FINISH: Use media query to effectively set a bool? Play around with this */
@@ -213,22 +220,9 @@
     color: var(--text-selection);
 }
 ::placeholder, .placeholder-text {
-    opacity: 80%;
+    opacity: 0.8;
 }
 
-
-.nav-link {
-    text-decoration: none;
-    color: var(--text);
-}
-.nav-link:hover {
-    background-color: var(--ui-hover);
-    color: var(--text-inverse); /* TODO: Works well on dark mode, but light mode not at all */
-}
-.nav-link.active {
-    background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
-    color: var(--text-inverse); /* TODO: Again, well on dark, not light */
-}
 /* Container for landing page content */
 .landing-content {
     display: flex;
@@ -257,32 +251,13 @@
 }
 /* === LANDING PAGE CONTENT STYLING ABOVE === */
 
-.demo-grid-container { 
-    display: grid;
-    /* TODO: NOTES: Add
-     * minmax(200px, 1fr) => each item >= 200px wide, but can stretch to fill
-     * auto-fit => automatically packs as many columns as will fit in the row
-    */
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-/* Below two group buttons on landing page together & dictate their width */
-.btn-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem; /* TODO: NOTES: space between ANY direct children */
-    margin: 0 auto; /* center the whole thing */
-}
-.btn-container > a,
-.btn-container form > button { width: 100%; }
 
 /* Base input stylings */
 :where(input, select, textarea) {
     background-color: var(--bg-light);
     color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 0.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     padding: 0.5rem 0.75rem;
 }
 :where(input, select, textarea):focus-visible {
@@ -296,9 +271,19 @@
 .input-inline {
     padding-block: 0.25rem; /* Slightly tighter */
     border: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-color);
     /* box-shadow: none; */
     font-size: 0.875rem;
+}
+/* For consistent spacing/styling for "CTA + secondary buttons that might be anchor elements" pattern */
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+.form-actions > * {
+    min-width: 8rem;
 }
 /* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
 .form-group {
@@ -318,12 +303,35 @@ form input:not([type="checkbox"]):user-invalid {
 
 /* ===== CUSTOM COMPONENT STYLINGS ===== */
 .context-menu {
-    background-color: red;
-    border: 1px solid black;
+    background-color: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     position: fixed;  /* important since it takes it out of the DOM flow? */
+    max-width: 50%;
     z-index: 1000;
 }
-/* TODO: FINISH: Tune styling */
+.context-menu > li {
+    padding: 0.5rem 1rem;
+}
+/* Style hover so its corners don't jut out from ul element itself */
+.context-menu > li:first-child:hover {
+    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
+}
+.context-menu > li:last-child:hover {
+    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
+}
+.context-menu > li:only-child:hover {
+    border-radius: var(--border-radius);
+}
+.context-menu > li:hover {
+    background-color: var(--ui-hover);
+    cursor: pointer;
+}
+/* TODO: 
+ * FINISH: Tune styling 
+ * Also consider renaming to modal? Need to determine roles/intentions there
+ */
 dialog {
     background-color: var(--bg);
     padding: 2rem;
@@ -332,17 +340,32 @@ dialog {
     left: 50%;
     transform: translate(-50%, -50%);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
 }
+/* Ditch 'close' button in leiu of an X */
+.modal-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 1.5rem;
+    padding: 0.25rem 0.5rem; /* override btn: smaller box */
+    line-height: 1;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+}
+.modal-close:hover {
+    color: var(--text-destructive);
+}
 .tooltip-popup { 
     position: relative; /* also makes it act as anchor for ::after ? */
-    border: 1px solid var(--border);
-    border-radius: .5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
     color: var(--bg); /* then use current bg as text for color parity */
     overflow-wrap: break-word;
@@ -362,32 +385,24 @@ dialog::backdrop {
 }
 
 /* ==== NAVIGATION ==== */
-/* Desktop-first styling for navbar */
-#desktop-nav {
-    display: flex;
-    column-gap: 1.5rem; /* space-x-6 */
-}
-#mobile-nav {
-    display: none;
-    flex-direction: column;
-    row-gap: 1.5rem;        /* space-y-6 */
-}
-#mobile-nav.show {
-    display: flex;
-}
 #hamburger-btn {
     color: var(--text);
-    display: none;
+    min-width: 40px;
+    min-height: 40px;
+}
+/* Base navlinks styling (desktop-first) */
+.navlinks {
+    display: flex;
+    gap: 1.5rem;
 }
 nav {
     min-height: var(--min-navbar-height);
     background-color: var(--accent-darker);
     padding: 1rem;
     position: relative; /* creates positioning context for flash-message */
-    /* overflow: hidden; keep content inside navbar bounds */
 }
 /* 2nd descendant of nav */
-.navbar-inner {
+.navbar-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -395,11 +410,24 @@ nav {
     margin: 0 auto; /* mx-auto equivalent */
 }
 /* Direct descendant of nav */
-.nav-container {
+.nav-left, .nav-right {
     display: flex;
+    align-items: center;
     gap: 1.5rem;
 }
-
+.nav-link {
+    text-decoration: none;
+    color: var(--text);
+}
+.nav-link:hover {
+    background-color: var(--ui-hover);
+    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
+}
+.nav-link.active {
+    background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
+    color: var(--text);
+    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
+}
 .branding {
     color: var(--text);
     font-size: 1.5rem; /* text-2xl */
@@ -442,10 +470,10 @@ nav {
 /* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
 .card-dashboard {
     padding: 1.5rem;
-    border-radius: 0.75rem;
+    border-radius: var(--border-radius);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     background-color: var(--bg);
-    border: solid 1px var(--border);
+    border: solid 1px var(--border-color);
     position: relative; /* for card-title positioning */
     /* Remember: Vertical spacing is gap's job, no button/header-specific margins */
     display: flex;
@@ -500,13 +528,7 @@ nav {
     min-height: 120px;
     align-items: stretch; /* makes all children same height */
 }
-/* Styling our visible divider div in between greeting & weather */
-.divider {
-    width: 2px;
-    background-color: var(--border);
-    height: 100%;
-    opacity: 50%;
-}
+
 /* Makes DailyCheckin card consist of grid layout with two columns */
 #daily-check-in-card {
     display: grid;
@@ -532,40 +554,48 @@ footer {
 /* ==== MEDIA QUERIES ==== */
 /* Small screens only =>  Hide desktop nav & show hamburger button */
 @media (width <= 640px) {
-    #hamburger-btn { display: block; }
-    nav { height: auto; } /* Let mobile nav grow */
-    #desktop-nav { display: none; }
+    /* Mobile: hidden until toggled */
+    .navlinks {
+        display: none;
+        flex-direction: column;
+        row-gap: 1.5rem;
+    }
+    .navlinks.is-open { display: flex; }
     .charts-container, #daily-check-in-card {
         grid-template-columns: 1fr; /* stack charts + metric-row divs for smaller widths */
     }
 }
-
 @media (width > 640px) {
-    #mobile-nav.show {
-        display: none;
-    }
+    #hamburger-btn { display: none; }
 }
-
 @media (width >= 1024px) {
     .dashboard-container {
         max-width: 72rem; /* lg:max-w-6xl */
         padding: 1rem 2rem 0; /* sm:px-8 */
     }
 }
-
 @media (width >= 1280px) {
     .dashboard-container {
         max-width: 80rem; /* xl:max-w-7xl */
     }
 }
 
+/* TODO: Tune this later as we add some basic animations/transitions */
+@media (prefers-reduced-motion: reduce) {
+    .navlinks {transition: none;}
+}
 
-
-/* TESTING: */
-/* #my-div {
-    position: fixed;
-    top: 30%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: solid calc(2px * var(--has-hover)) var(--border);
-} */
+/* Override stylng to position dummy context menu on theme-demo page */
+.context-menu-positioning {
+    position: relative;
+}
+/* Grid container for various theme-demo page components */
+.demo-grid-container { 
+    display: grid;
+    /* TODO: NOTES: Add
+     * minmax(200px, 1fr) => each item >= 200px wide, but can stretch to fill
+     * auto-fit => automatically packs as many columns as will fit in the row
+    */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
