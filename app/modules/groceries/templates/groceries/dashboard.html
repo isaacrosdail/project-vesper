@@ -27,13 +27,13 @@
                 {% for t in transactions %}
                 <tr class="group table-row" data-item-id="{{ t.id }}" data-module="groceries" data-subtype="transaction">
                     <td>{{ t.product.barcode }}</td>
-                    <td>{{ t.product.product_name }}</td>
+                    <td>{{ t.product.name }}</td>
                     <td>${{ t.price_at_scan }}</td>
                     <td>{{ t.quantity }}</td>
                     <td class="text-right">{{ t.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="text-right">${{ t.price_per_100g | round(2) }}</td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}
@@ -71,12 +71,12 @@
                 {% for p in products %}
                 <tr class="group table-row" data-item-id="{{ p.id }}" data-module="groceries" data-subtype="product">
                     <td>{{ p.barcode }}</td>
-                    <td>{{ p.product_name }}</td>
+                    <td>{{ p.name }}</td>
                     <td class="text-right">{{ p.category }}</td>
                     <td class="text-right">{{ p.net_weight }} ({{ p.unit_type }})</td>
-                    <td class="text-right">{{ p.calories_per_100g|int if p.calories_per_100g else '-' }}</td> <!-- Int filter |int here to chop of decimals -->
+                    <td class="text-right">{{ p.calories_per_100g|int if p.calories_per_100g else '-' }}</td> {# Int filter |int here to chop of decimals #}
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}
@@ -92,7 +92,4 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-    <script src="{{ url_for('static', filename = 'js/groceries/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename = 'js/common/tables.js') }}"></script>
-{% endblock %}
+{% block scripts %}{% endblock %}

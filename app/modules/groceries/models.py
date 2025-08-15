@@ -1,36 +1,60 @@
 # Handles DB models for grocery module
-from datetime import datetime, timezone
+import enum
 
-from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, Numeric,
-                        String)
+from sqlalchemy import Column, DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 
-from app.core.db_base import Base
+from app._infra.db_base import Base
 
 
-# Product Model for database of products known
+class Unit(enum.Enum):
+	g = "g"
+	kg = "kg"
+	oz = "oz"
+	lb = "lb"
+	ml = "ml"
+	l = "l"
+	fl_oz = "fl_oz"
+	ea = "ea" 	# each
+
+# Acts as catalog of 'known' products
+# TODO: Sort out logic for "re-adding a product that is marked as having been soft-deleted"
+#		ie, "un-soft-delete it"
 class Product(Base):
 
-	product_name = Column(String(100), nullable=False)
-	category = Column(String(100), nullable=True) # "dairy", "produce", etc
+	name = Column(String(100), nullable=False)
+	category = Column(String(100), nullable=True) # eg, dairy, produce
 	barcode = Column(String(64), unique=True, nullable=False)
-	net_weight = Column(Float, nullable=False)
-	unit_type = Column(String(20), nullable=False) # grams, oz, ml, etc
-	calories_per_100g = Column(Float, nullable=True)
-	deleted_at = Column(DateTime, nullable=True, default=None)
+
+	net_weight = Column(Numeric(10, 3), nullable=False) # "asdecimal" false?
+	unit_type = Column(SAEnum(Unit, name="unit_enum"), nullable=False, default=Unit.g)
+
+	calories_per_100g = Column(Numeric(8, 2), nullable=True)
+	deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+	### TODO: Study __table_args__ options & add here
 
 	def __str__(self):
-		return f"{self.product_name} ({self.barcode})"
+		return f"{self.name} ({self.barcode})"
+	
+	def __repr__(self):
+		return (
+			f"<Product id={self.id} name='{self.name}' "
+			f"<barcode='{self.barcode}'>"
+		)
 
 	# Human-readable column names
 	COLUMN_LABELS = {
 		"id": "ID",
-		"product_name": "Product Name",
+		"name": "Product Name",
 		"category": "Category",
 		"barcode": "Barcode",
 		"net_weight": "Net Weight",
-		"unit_type": "Unit Type",
-		"calories_per_100g": "Kcals per 100g"
+		"unit_type": "Unit",
+		"calories_per_100g": "Kcals per 100g",
+		"created_at": "Created",
 	}
 
 # Transaction Model for 'inventory'
@@ -43,11 +67,16 @@ class Transaction(Base):
 	product = relationship("Product")
 
 	def __str__(self):
-		return f"Transaction:{self.id}: {self.quantity}x {self.product.product_name} @ {self.price_at_scan}"
+		return f"Transaction:{self.id}: {self.quantity}x {self.product.name} @ {self.price_at_scan}"
+	
+	def __repr__(self):
+		return f"<Transaction id={self.id} product_id={self.product_id}>"
 
 	# Human-readable column names
 	COLUMN_LABELS = {
 		"id": "ID",
+		"product_id": "Product ID",
 		"price_at_scan": "Price",
 		"quantity": "Quantity",
+		"created_at": "Created",
 	}

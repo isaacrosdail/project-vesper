@@ -1,39 +1,33 @@
 {
   "name": "project-vesper",
   "version": "0.2.0",
+  "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@typescript-eslint/eslint-plugin": "^8.34.0",
     "@typescript-eslint/parser": "^8.34.0",
-    "autoprefixer": "^10.4.21",
     "browser-sync": "^3.0.4",
-    "concurrently": "^9.1.2",
-    "cross-env": "^7.0.3",
+    "browsersync": "^0.0.1-security",
+    "concurrently": "^9.2.0",
+    "cross-env": "^10.0.0",
+    "esbuild": "^0.25.9",
     "eslint": "^9.28.0",
     "globals": "^16.2.0",
     "husky": "^9.1.7",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.34.0"
+    "typescript-eslint": "^8.34.0",
+    "wait-on": "^8.0.4"
   },
   "scripts": {
-    "test": "jest",
-    "tailwind": "npx tailwindcss -i app/static/css/style.css -o app/static/css/output.css --watch",
-    "flask": "flask run --debug",
-    "sync": "browser-sync start --proxy localhost:5000 --files 'app/**/templates/**/*.html' 'static/css/*.css'",
-    "tsc": "tsc --watch",
-    "dev": "concurrently \"npm:tailwind\" \"npm:flask\" \"npm:sync\" \"npm:tsc\"",
-    "debug:ui": "concurrently \"npm run tailwind\" \"browser-sync start --proxy localhost:5000 --files 'app/**/*.py, app/templates/**/*.html, app/static/**/*.css'\"",
-    "build": "cross-env NODE_ENV=production tailwindcss -i app/static/css/style.css -o app/static/css/output.css --minify",
+    "build": "node build.mjs",
+    "dev": "concurrently -k -p \"[{name}]\" -n esbuild,flask,sync \"npm run build:watch\" \"npm run flask:dev\" \"npm run sync\"",
+    "build:watch": "node build.mjs --watch",
+    "flask:dev": "flask run --debug",
+    "sync": "wait-on tcp:127.0.0.1:5000 --timeout 5000 && browser-sync start --proxy http://127.0.0.1:5000 --port 5001 --files \"app/_templates/**/*.html, app/static/**/*\" --open local",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app/static_src/js",
+    "lint:fix": "npm run ts:check && eslint app/static_src/js app/**/*.ts app/**/*.js --fix",
     "prepare": "husky",
-    "lint": "eslint . --ext .ts,.js",
-    "lint:fix": "eslint . --ext .ts,.js --fix",
-    "type-check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@tailwindcss/cli": "^4.1.4"
+    "test": "jest"
   }
 }

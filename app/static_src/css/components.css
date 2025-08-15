@@ -1,0 +1,265 @@
+/* ==== COMPONENTS ==== */
+/* Reusable blocks: buttons, cards, tables */
+
+/* Utilities:
+ * Token-based classes. No hardcoded colors or template macros, more scalable this way.
+ * Components handle only internal spacing & appearance.
+ * 
+ * Margins = parent's job.
+ * Design token-based component classes that adapt to theme changes automatically.
+ *
+ * Can either have left this in: @layer components {.. OR simply specify layer(components) in import */
+
+
+/* ======= BUTTONS ======= */
+/* Base button styling: shape + ergonomics goes here */
+.btn {
+    display: inline-flex; /* icons+text align*/
+    align-items: center; /* for icon+label vertical centering? */
+    justify-content: center; /* center text when full width */
+    min-height: 2.5rem; /* ensure big enough for touch */
+    cursor: pointer;
+    user-select: none;
+    appearance: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    gap: var(--gap-sm);
+}
+/* Subtle "pressed" effect for active buttons */
+.btn:active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
+}
+/* TODO: Focus ring: visual feedback for keyboard users */
+.btn:focus-visible {
+    outline: red;
+    outline-offset: 2px;
+}
+/* Catch native + ARIA-disabled buttons */
+.btn[disabled],
+.btn[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.btn-primary {
+    background-color: var(--accent-subtle);
+    color: var(--text);
+    border-color: var(--border-color);
+}
+.btn-secondary {
+    background-color: var(--bg-light);
+    color: var(--text-muted);
+    border-color: var(--border-color);
+}
+.btn-destructive {
+    color: var(--text-destructive);
+    border-color: var(--text-destructive);
+}
+/* Scope hover styles (skip on touchscreen) */
+/* Color-mixing with --text ensures light mode buttons get lighter AND dark mode buttons get darker */
+@media (hover: hover) {
+    .btn-primary:hover {
+        background-color: color-mix(in srgb, var(--accent-subtle) 80%, var(--text));
+    }
+    .btn-secondary:hover {
+        background-color: color-mix(in srgb, var(--bg-light) 80%, var(--text));
+    }
+    .btn-destructive:hover {
+        color: var(--bg-light);
+        background-color: var(--text-destructive);
+    }
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    /* gap: var(--gap-sm); */
+    margin-bottom: 1rem;
+}
+
+/* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
+.card-dashboard {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background-color: var(--bg);
+    border: solid 1px var(--border-color);
+    position: relative; /* for card-title positioning */
+    /* Remember: Vertical spacing is gap's job, no button/header-specific margins */
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+}
+
+/* For consistent spacing/styling for "CTA + secondary buttons that might be anchor elements" pattern */
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: var(--gap-sm);
+}
+.form-actions > * {
+    min-width: 8rem;
+}
+/* 2nd descendant of nav */
+.navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 80rem;
+    margin: 0 auto;
+}
+/* Direct descendant of nav */
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-lg);
+}
+.nav-link {
+    text-decoration: none;
+    border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
+    color: var(--text);
+    padding: 0.5rem;
+}
+.nav-link:hover {
+    background-color: var(--ui-hover);
+    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
+}
+.nav-link.active {
+    background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
+    color: var(--text);
+    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
+}
+.branding {
+    color: var(--text);
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 600; /* font-semibold */
+    margin-right: 1.5rem; /* mr-6 */
+}
+/* ======= TABLE COMPONENTS ======= */
+/* Needed higher specificity here to override so delete-cell properly blends in to card */
+/* TODO: BUG: Fix this & sort out why table-cell class is required for delete-btn's to style properly */
+.table-cell.delete-cell {
+    border: none;
+    padding: 0;
+    width: 0; /* prevent us from consuming extra table width */
+    background-color: var(--bg);
+}
+.table-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 0.5rem 0;
+}
+.table-standard {
+    caption-side: top;
+    table-layout: auto; /* TODO: study */
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.875rem;
+}
+.table-standard th,
+.table-standard td {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+.table-header th {
+    background-color: var(--accent-subtle);
+    color: var(--text);    /* TODO */
+    font-weight: 600; /* equivalent to font-semibold in Tailwind */
+}
+.table-row {
+    transition: background-color 25ms ease-out;
+}
+.table-row .delete-btn {
+    visibility: hidden; /* All (table) delete buttons start hidden */
+}
+.table-row:hover .delete-btn {
+    visibility: visible; /* ..and become visible on hover of row */
+}
+.table-row:nth-child(even) {
+    background-color: var(--bg-light);
+}
+.table-row:hover {
+    background-color: var(--ui-hover);
+    color: var(--text); /* TODO */
+}
+
+/* ===== CUSTOM COMPONENT STYLINGS ===== */
+.context-menu {
+    background-color: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    position: fixed;  /* important since it takes it out of the DOM flow? */
+    max-width: 50%;
+    z-index: 1000;
+}
+.context-menu > li {
+    padding: 0.5rem 1rem;
+}
+/* Style hover so its corners don't jut out from ul element itself */
+.context-menu > li:first-child:hover {
+    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
+}
+.context-menu > li:last-child:hover {
+    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
+}
+.context-menu > li:only-child:hover {
+    border-radius: var(--border-radius);
+}
+.context-menu > li:hover {
+    background-color: var(--ui-hover);
+    cursor: pointer;
+}
+/* ======= LAYOUT COMPONENTS ======= */
+
+/* Mimick <fieldset>'s 'title intersects border' effect for container headers */
+.card-title {
+    position: absolute; /* TODO: NOTES: breaks the title out of normal flow */
+    top: -0.9rem;
+    left: 1rem;
+    background: linear-gradient(
+        to bottom,
+        var(--bg-dark) 48%, /* Top half */
+        var(--bg) 52%      /* Bottom half */
+    );
+    padding: 0 0.02rem;
+    font-size: 1.25rem;
+    line-height: var(--line-height-higher);
+    font-weight: 600;
+    pointer-events: none;
+}
+/* Getting our "Add __" buttons to appear above top right of tables */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Warnings? Messages? Success? idk */
+.flash-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%; /* match navbar width */
+    height: var(--min-navbar-height);
+    z-index: 99; /* appear above other content */
+    background-color: color-mix(in srgb, var(--color-success) 10%, white); /* Derive bg-color from our color-success var instead of hardcoding */
+    color: var(--color-success);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
+}
+
+.shadow-card {
+    box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
+}
+
+/* ==== FOOTER ==== */
+footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9em;
+}

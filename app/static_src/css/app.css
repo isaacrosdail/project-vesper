@@ -1,0 +1,300 @@
+/* Single entry file, declares layer order + imports
+ * Defines cascade precedence: lowest = highest priority
+ */
+@layer base, components, utilities, app;
+
+/* Design tokens live OUTSIDE layers so everything can read vars */
+@import './tokens.css';
+@import url('./base.css') layer(base);
+@import url('./components.css') layer(components);
+@import url('./utilities.css') layer(utilities);
+
+/* Breakpoints:
+ * width <= 640px   Mobile nav toggle, chart stacking
+ * width > 640px    Hide mobile navlinks?
+*/
+
+:root {
+    --min-navbar-height: 4rem;
+    --has-hover: 0;
+}
+
+/* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
+/* Flex container for header/content/footer */
+.wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: calc(1.5 * var(--gap-lg));
+    background-color: var(--bg-dark);
+}
+/* Main content area: fills remaining viewport space below navbar */
+.content {
+    flex: 1; /* makes flex container's child grow & take up all remaining space */
+    width: 100%;
+    max-width: clamp(48rem, 90vw, 90rem);
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
+}
+/* For pages using our content_mod Jinja block to provide narrower styling for content */
+.content--narrow {
+    max-width: clamp(35rem, 90vw, 50rem);
+}
+
+/* Container for landing page content */
+.landing-content {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    align-items: center; /*horizontal center children */
+    gap: var(--gap-lg);
+    padding: 2rem 1rem;
+}
+/* Cap the paragraph for legibility */
+.landing-content p {
+    max-width: 60ch;
+    color: var(--text-muted);
+}
+
+.landing-content h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    /* text-align: left; */
+}
+.landing-content a {
+    text-align: center;
+}
+/* === LANDING PAGE CONTENT STYLING ABOVE === */
+
+
+/* ====== STYLINGS FOR METRICS DASHBOARD/CARDS ====== */
+.charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 equal-width columns */
+    gap: var(--gap-md);
+}
+.metric-graph {
+    width: 100%;
+    aspect-ratio: 16/9; /* fixes one graph being slightly taller than other - check out other options */
+}
+
+/* ====== CARD STYLINGS ====== */
+/* Now making our greeting card be grid layout within our flexbox content */
+/* TODO: Need to fix divider so it spans entire height of greeting card again */
+#greeting-card {
+    display: grid;
+    /* grid-template-columns
+    1fr: takes up available space
+    auto: just wide enough for content (our divider)
+    1fr: takes up remaining available space
+    */
+    grid-template-columns: 1fr auto 1fr; /* time | divider | weather */
+    grid-template-rows: 1fr;
+    min-height: 120px;
+    align-items: stretch; /* makes all children same height */
+}
+/* Makes DailyCheckin card consist of grid layout with two columns */
+#daily-check-in-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-lg);
+}
+
+
+
+
+
+/* 404 + 500 error pages */
+.error-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    text-align: center;
+    align-items: center;
+}
+.error-page > h1 {
+    font-size: 2rem;
+}
+/* Let's take a stab at animations */
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+}
+.icon-wiggle {
+    width: clamp(12rem, 30vw, 20rem);
+    height: auto;
+    display: block;
+    animation: wiggle 0.4s ease-in-out 1;
+}
+
+/* ===== FORMS, INPUTS ===== */
+/* For dashboard quick-entry & JS inline cell edit inputs */
+.input-inline {
+    padding-block: 0.25rem; /* Slightly tighter */
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    /* box-shadow: none; */
+    font-size: 0.875rem;
+}
+
+/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
+
+form input:not([type="checkbox"]):user-valid {
+    outline: 2px solid;
+    outline-color: var(--color-success);
+}
+form input:not([type="checkbox"]):user-invalid {
+    outline: 2px solid;
+    outline-color: var(--color-error);
+}
+
+/* TODO: 
+ * FINISH: Tune styling 
+ * Also consider renaming to modal? Need to determine roles/intentions there
+ */
+dialog {
+    background-color: var(--bg);
+    padding: 2rem;
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+/* Modal X button styling */
+.modal-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 1.5rem;
+    padding: 0.25rem 0.5rem; /* override btn: smaller box */
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+}
+.modal-close:hover {
+    color: var(--text-destructive);
+}
+.tooltip-popup { 
+    position: relative; /* also makes it act as anchor for ::after ? */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
+    color: var(--bg); /* then use current bg as text for color parity */
+    overflow-wrap: break-word;
+    padding: 4px 4px;
+    margin-top: 8px;
+    max-width: 28ch;
+}
+.tooltip-popup:not(#no-after)::after {
+    content: "";
+    position: absolute;
+    left: var(--carrot-pos, 50%); /* --carrot-pos calculated via JS */
+    transform: translate(-50%, -40%);
+    border: 0.4rem solid transparent; /* forms our triangle "arrow" */
+    border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
+    opacity: 1;
+    top: -0.4rem;
+}
+
+/* ==== NAVIGATION ==== */
+#hamburger-btn {
+    color: var(--text);
+    min-width: 40px;
+    min-height: 40px;
+}
+/* Base navlinks styling (desktop-first) */
+.navlinks {
+    display: flex;
+    gap: var(--gap-lg);
+}
+nav {
+    min-height: var(--min-navbar-height);
+    background-color: var(--accent-strong);
+    padding: 1rem;
+    position: relative; /* creates positioning context for flash-message */
+}
+
+/* Dashboard checkbox completion effect */
+.habit-list {
+    list-style: none;
+    display: grid;
+    gap: var(--gap-sm);
+}
+.habit-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+.habit-title {
+    color: var(--text);
+}
+
+.habit-item.completed .habit-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+
+
+/* ==== MEDIA QUERIES ==== */
+/* Small screens only =>  Hide desktop nav & show hamburger button */
+@media (width <= 640px) {
+    .navlinks {
+        display: none;
+        flex-direction: column;
+        row-gap: var(--gap-lg);
+    }
+    .navlinks.is-open { display: flex; }
+    .charts-container, #daily-check-in-card {
+        grid-template-columns: 1fr; /* stack charts + metric-row divs for smaller widths */
+    }
+}
+@media (width > 640px) {
+    #hamburger-btn { display: none; }
+}
+
+/* TODO: Tune this later as we add some basic animations/transitions */
+@media (prefers-reduced-motion: reduce) {
+    .navlinks { transition: none; }
+    .icon-wiggle { animation: none; transition: none; }
+}
+
+
+/* Stylings for style-reference.html */
+/* Override stylng to position dummy context menu on style-reference page */
+.context-menu-positioning {
+    position: relative;
+}
+/* Grid defaults for token swatches */
+.demo-grid-container { 
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 100px));
+    gap: var(--gap-md);
+    align-items: center;
+}
+/* Default stylings for component swatches */
+/* Only size (aspect-ratio, max-width) and centering content */
+.demo-grid-container > div {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100px;
+    border: 1px solid var(--text);
+    border-radius: var(--border-radius);
+}
+/* Target components to let them breathe */
+.demo-grid-container:has(:not(div)) {
+    grid-template-columns:  repeat(auto-fit, minmax(80px, 1fr));
+}

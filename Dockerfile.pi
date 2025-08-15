@@ -1,5 +1,4 @@
 # Remember: This isn't just Python - it's Debian Linux with Python pre-installed
-# TODO: Consider merging to Dockerfile unless we refine this specifically for Pi somehow
 FROM python:3.12-slim
 WORKDIR /app
 

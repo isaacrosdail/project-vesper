@@ -1,14 +1,14 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Metrics{% endblock %}
+{% block title %}Daily Metrics{% endblock %}
 
 {% block content %}
 <div class="charts-container">
     
-    <!-- Playground container to check out Plotly -->
+    {# Playground container to check out Plotly #}
     <div class="metric-graph card-dashboard">
-        {{ weight_graph|safe }} <!-- |safe is required here to make Jinja not escape HMTL (prevents XSS attacks, but since graph_html is app-generated, safe is good here)-->
+        {{ weight_graph|safe }} {# |safe is required here to make Jinja not escape HMTL (prevents XSS attacks, but since graph_html is app-generated, safe is good here) #}
     </div>
     <div class="metric-graph card-dashboard">
         {{ steps_graph|safe }}
@@ -17,7 +17,7 @@
 
 
 <div class="card-dashboard">
-    <h2 class="card-title">Metric Entries</h2>
+    <h2 class="card-title">Daily Metric Entries</h2>
 
     {% set headers = ["Metric Type", "Value (units)", "Created"] %}
     <table class="table-standard">
@@ -33,17 +33,17 @@
             </tr>
         </thead>
         <tbody>
-            {% if metrics %}
-                {% for m in metrics %}
-                <tr class="table-row" data-item-id="{{ m.id }}" data-module="metrics" data-subtype="metric">
+            {% if daily_metrics %}
+                {% for m in daily_metrics %}
+                <tr class="table-row" data-item-id="{{ m.id }}" data-module="daily_metrics" data-subtype="metric">
                     {% if has_dev_tools %}
                         <td class="table-cell">{{ m.id }}</td>
                     {% endif %}
-                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ m.metric_type }}</td>
-                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="metrics" data-field="value" title="Double-click to edit value.">{{ m.value | round }}  ({{ m.unit }})</td>
+                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="daily_metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ m.metric_type }}</td>
+                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="daily_metrics" data-field="value" title="Double-click to edit value.">{{ m.value | round }}  ({{ m.unit }})</td>
                     <td class="table-cell">{{ m.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}
@@ -57,10 +57,6 @@
         </tbody>
     </table>
 </div>
-
-
 {% endblock %}
 
-{% block scripts %}
-    <script src="{{ url_for('static', filename = 'js/common/tables.js') }}"></script>
-{% endblock %}
+{% block scripts %}{% endblock %}

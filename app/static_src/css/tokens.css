@@ -1,0 +1,199 @@
+/* ==== DESIGN TOKENS ==== */
+/* Variables for color, spacing, typography */
+
+/* TODO: Add --focus-ring custom property */
+
+/*
+* Architecture:
+* 1. Theme tokens (--light-*, --dark-*) = raw color values
+* 2. Semantic tokens (--bg-dark, --accent-text) = translation layer to decouple
+* 3. Theme switching = remaps semantic tokens to active theme.
+*
+* Components stay theme-agnostic: HTML unchanged, CSS handles complexity
+* Would like to support more themes, esp. once Firefox supports container style queries
+* 
+* Note: For inverted text, map to the opposite theme's values in mappings.
+*/
+:root {
+    --font-family-primary: 'Manrope', sans-serif;
+    --font-weight-default: 400;
+    --line-height-default: 1.5;
+    --line-height-higher: 1.75rem;
+    --container-lg: 72rem;
+    --container-xl: 80rem;
+
+    --border-radius: 0.5rem;
+    --border-radius-top: 0.5rem 0.5rem 0 0;
+    --gap-sm: 0.5rem;
+    --gap-md: 1rem;
+    --gap-lg: 1.5rem;
+
+    --color-success: #166534;
+    --color-error: #dc2626;
+
+    /* =============== LIGHT THEME DEFINITIONS ============== */
+    color-scheme: light;
+
+    /* Background Hierarchy */
+    --light-bg-dark: hsl(0 0% 90%);              /* Darkest: Main page/canvas background */
+    --light-bg: hsl(0 0% 95%);                   /* Moderate: Cards, modals, main content areas */
+    --light-bg-light: hsl(0 0% 100%);            /* Input fields, secondary button backgrounds, table rows  */
+
+    /* Text Hierarchy */
+    --light-text: hsl(0 0% 5%);                  /* Headers, high contrast text */
+    --light-text-muted: hsl(0 0% 30%);           /* Body text, labels */
+    --light-text-destructive: hsl(0, 84%, 60%);  /* Error states, delete buttons */
+
+    /* Borders */
+    --light-border-color: hsl(0 0% 30%);         /* General borders */
+
+    /* Accent Colors */
+    --light-accent-strong: oklch(60% 0.12 250);  /* Navigation, table headers (AND primary buttons?) */
+    --light-accent-subtle: oklch(70% 0.12 250);  /* CTAs, highlights, subtler visual notes throughout app */
+    --light-ui-hover: oklch(85% 0.05 250);       /* ?? */
+
+    /* Selection */
+    --light-bg-selection: grey;                  /* Selection background */
+    --light-text-selection: blue;                /* Selection text color */
+
+
+    /* =============== DARK THEME DEFINITIONS =============== */
+
+    /* Background Hierarchy */
+    --dark-bg-dark: hsl(0 0% 0%);
+    --dark-bg: hsl(0 0% 5%);
+    --dark-bg-light: hsl(0 0% 10%);
+
+    /* Text Hierarchy */
+    --dark-text: hsl(0 0% 95%);
+    --dark-text-muted: hsl(0 0% 70%);
+    --dark-text-destructive: hsl(0, 84%, 60%);
+
+    /* Borders */
+    --dark-border-color: hsl(0 0% 30%);
+
+    /* Accent Colors */
+    --dark-accent-strong: oklch(40% 0.12 250);
+    --dark-accent-subtle: oklch(70% 0.12 250);
+    --dark-ui-hover: oklch(85% 0.05 250);
+
+    /* Selection */
+    --dark-bg-selection: grey;
+    --dark-text-selection: yellow;
+
+
+    /* === ACTIVE THEME MAPPINGS === */
+
+    /* Light Theme */
+
+    /* Background Hierarchy */
+    --bg-dark: var(--light-bg-dark);
+    --bg: var(--light-bg);
+    --bg-light: var(--light-bg-light);
+
+    /* Text */
+    --text: var(--light-text);
+    --text-muted: var(--light-text-muted);
+    --text-destructive: var(--light-text-destructive);
+    --text-inverse: var(--dark-text);
+
+    /* Borders */
+    --border-color: var(--light-border-color);
+
+    /* Gradient */
+    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+    /* Accents */
+    --accent-strong: var(--light-accent-strong);
+    --accent-subtle: var(--light-accent-subtle);
+    --ui-hover: var(--light-ui-hover);
+
+    /* Selection */
+    --bg-selection: var(--light-bg-selection);
+    --text-selection: var(--light-text-selection);
+    
+    /* Dark Theme */
+    @media (prefers-color-scheme: dark) {
+        /* --theme: moon; */
+        color-scheme: dark;
+
+        /* Background Hierarchy */
+        --bg-dark: var(--dark-bg-dark);
+        --bg: var(--dark-bg);
+        --bg-light: var(--dark-bg-light);
+
+        /* Text */
+        --text: var(--dark-text);
+        --text-muted: var(--dark-text-muted);
+        --text-destructive: var(--dark-text-destructive);
+        --text-inverse: var(--light-text);
+
+        /* Borders */
+        --border-color: var(--dark-border-color);
+
+        /* Gradient */
+        --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+        /* Accents */
+        --accent-strong: var(--dark-accent-strong);
+        --accent-subtle: var(--dark-accent-subtle);
+        --ui-hover: var(--dark-ui-hover);
+
+        /* Selection */
+        --bg-selection: var(--dark-bg-selection);
+        --text-selection: var(--dark-text-selection);
+    }
+}
+
+/* User Override: Lets the user manually override the system preference with theme select buttons */
+:root:has([value="sun"]:checked),
+:root[data-theme="light"] {
+    /* --theme: sun; */
+    color-scheme: light;
+
+    --bg-dark: var(--light-bg-dark);
+    --bg: var(--light-bg);
+    --bg-light: var(--light-bg-light);
+
+    --text: var(--light-text);
+    --text-muted: var(--light-text-muted);
+    --text-destructive: var(--light-text-destructive);
+    --text-inverse: var(--dark-text);
+
+    --border-color: var(--light-border-color);
+
+    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+    --accent-strong: var(--light-accent-strong);
+    --accent-subtle: var(--light-accent-subtle);
+    --ui-hover: var(--light-ui-hover);
+
+    --bg-selection: var(--light-bg-selection);
+    --text-selection: var(--light-text-selection);
+}
+
+:root:has([value="moon"]:checked),
+:root[data-theme="dark"] {
+    /* --theme: moon; */
+    color-scheme: dark;
+
+        --bg-dark: var(--dark-bg-dark);
+        --bg: var(--dark-bg);
+        --bg-light: var(--dark-bg-light);
+
+        --text: var(--dark-text);
+        --text-muted: var(--dark-text-muted);
+        --text-destructive: var(--dark-text-destructive);
+        --text-inverse: var(--light-text);
+
+        --border-color: var(--dark-border-color);
+
+        --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+
+        --accent-strong: var(--dark-accent-strong);
+        --accent-subtle: var(--dark-accent-subtle);
+        --ui-hover: var(--dark-ui-hover);
+
+        --bg-selection: var(--dark-bg-selection);
+        --text-selection: var(--dark-text-selection);
+}

@@ -1,0 +1,36 @@
+/* Utilities: Tiny helpers, atomic styles */
+
+/* Applied to SVG icon for table rows */
+@layer utilities {
+    .hidden {
+        display: none;
+    }
+}
+
+
+/* Hide text for theme toggle */
+.visually-hidden {
+    clip-path: inset(50%); /* Clips (hides) 50% from all sides of element - creates 1x1 pixel visible area in center */
+    height: 1px;
+    width: 1px; /* makes element tiny, small enough to be invisible but not zero (zero dimensions can be ignored by screen readers */
+    overflow: hidden; /* hides any content that would spill outside 1x1 px box*/
+    position: absolute; /* takes element out of normal document flow - prevents layout spillover */
+    white-space: nowrap; /* prevents text from wrapping to multiple lines */
+}
+
+/* 1:1 Tailwind version */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    /* margin: -1px; */
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap; /* prevent line breaks */
+    border: 0;
+}
+
+.text-right {
+    text-align: right;
+}

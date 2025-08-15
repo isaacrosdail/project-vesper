@@ -1,0 +1,48 @@
+{# Base Class Template #}
+
+{% import '_macros/misc.html' as ui %}
+<!DOCTYPE html>
+<html lang="{{ default_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vesper{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/app.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/favicon.png') }}">
+    {# nonce: #}
+    <script nonce="{{ nonce }}">
+        // Set data-theme value so CSS can grab & apply proper theme from cookie BEFORE loading rest
+        // Prevents the "Flash of Incorrect Theme of Doom"
+        (function () {
+            const cookie = document.cookie;
+            if (cookie.includes('theme=light')) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else if (cookie.includes('theme=dark')) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            {% include '_partials/_navbar.html' with context %}
+        </header>
+
+        {% include '_partials/_flash.html' %}
+
+        <main class="content {% block content_mod %}{% endblock %}">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="bg-muted">
+            &copy; 2025
+        </footer>
+    </div>
+
+    {# Site-wide scripts BEFORE the script block -> run everywhere #}
+    <script type="module" src="{{ url_for('static', filename = 'js/bundle.js') }}"></script>
+    {% block scripts %}{% endblock %}
+    
+</body>
+</html>

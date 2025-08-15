@@ -1,51 +1,16 @@
-# Date/Time-related imports
-# Conditional import of our seed_dev_db function
-import os
-import sys
-from datetime import datetime, time, timezone
-from zoneinfo import ZoneInfo
 
-from app.common.database.seed.seed_db import seed_basic_data, seed_rich_data
-from app.core.auth.models import User
-from app.core.constants import DEFAULT_LANG
-from app.core.database import database_connection
-from app.core.messages import msg
-from app.modules.habits import repository as habits_repo
-from app.modules.habits.habit_logic import (calculate_habit_streak,
-                                            check_if_completed_today)
-from app.modules.metrics import repository as metrics_repo
-from app.modules.metrics.models import DailyIntention
-from app.modules.habits.models import Habit
-from app.modules.tasks import repository as tasks_repo
-from flask import (Blueprint, abort, flash, jsonify, redirect, render_template,
-                   request, url_for)
-from flask_login import current_user, login_required, logout_user, login_user
+from flask import Blueprint, jsonify, render_template, request
+from flask_login import current_user, login_required
 
-from sqlalchemy import select
-from app.common.database.operations import delete_all_db_data
-
+from app._infra.database import database_connection
+from app.modules.habits.repository import HabitsRepository
+from app.modules.habits.service import (calculate_habit_streak,
+                                        check_if_completed_today)
+from app.modules.metrics.repository import DailyMetricsRepository
+from app.shared.datetime.helpers import datetime_local, today_range
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
-# Helpers to DRY things up
-def create_demo_user(session, username="guest", name="Guest", password="demo123"):
-    user = User(username=username, name=name, role="user")
-    user.set_password(password)
-    session.add(user)
-    return user
-
-def create_owner_user(session, username="owner", name="owner", password="owner123"):
-    user = User(username=username, name=name, role="owner")
-    user.set_password(password)
-    session.add(user)
-    return user
-
-def seed_data_for(session, user):
-    session.flush() # make sure we have user.id
-    if user.role == "owner":
-        seed_rich_data(user.id, session)
-    else:
-        seed_basic_data(user.id, session)
 
 @main_bp.route("/", methods=["GET"])
 def home():
@@ -54,13 +19,9 @@ def home():
         return render_template('landing_page.html')
     try:
         with database_connection() as session:
-
-            # Calculate time references
-            now = datetime.now(ZoneInfo("Europe/London"))
-            # Today's 00:00 in Europe/London time
-            # TODO: MINOR: Consider extracting into datetime/date helper functions/utils?
-            start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
-            start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
+            now = datetime_local(current_user.timezone)
+            now_date = now.strftime("%H:%M:%S")
+            now_time = now.strftime("%A, %B %d")
 
             if now.hour < 12:
                 greeting = "Good morning"
@@ -70,27 +31,32 @@ def home():
                 greeting = "Good evening"
 
             # Fetch tasks, habits, today_intention
-            tasks = tasks_repo.get_user_tasks(session, current_user.id)
-            habits = habits_repo.get_user_habits(session, current_user.id)
-            today_intention = metrics_repo.get_user_today_intention(session, current_user.id)
+            start_utc, end_utc = today_range(current_user.timezone)
+            habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
+            metrics_repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+            habits = habits_repo.get_all_habits()
+            today_intention = metrics_repo.get_intention_for_day(start_utc, end_utc)
             
             habit_info = {}
             for habit in habits:
                 habit_info[habit.id] = {
-                    'completed_today': check_if_completed_today(habit.id, current_user.id, session),
-                    'streak_count': calculate_habit_streak(habit.id, current_user.id, session)
+                    'completed_today': check_if_completed_today(session, current_user.id, habit.id, current_user.timezone),
+                    'streak_count': calculate_habit_streak(session, current_user.id, habit.id, current_user.timezone)
                 }
 
-            return render_template(
-                "index.html",
-                tasks=tasks,
-                habits=habits,
-                today_intention=today_intention,
-                habit_info=habit_info,
-                now=now,
-                start_of_day_utc=start_of_day_utc,
-                greeting=greeting
-            )
+            ### Each key becomes its own top-level var in template (No 'ctx.' prefix required)
+            ctx = {
+                #"tasks": tasks,
+                "habits": habits,
+                "today_intention": today_intention,
+                "habit_info": habit_info,
+                "now": now,
+                "now_date": now_date,
+                "now_time": now_time,
+                "greeting": greeting
+            }
+            return render_template("index.html", **ctx)
+        
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -104,113 +70,22 @@ def update_daily_intention():
 
         if not data:
             return jsonify({"success": False, "message": "Error: data is None"}), 400
+        
         intention = data.get('intention')
         if not intention:
             return jsonify({"success": False, "message": "No intention provided."}), 400
 
         with database_connection() as session:
-            # Check if daily intention exists for today already
-            today_intention = metrics_repo.get_user_today_intention(session, current_user.id)
-            
-            # If it does, just update the intention field using our fetch data
+            start_utc, end_utc = today_range(current_user.timezone)
+            metrics_repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+            today_intention = metrics_repo.get_intention_for_day(start_utc, end_utc)
+
             if today_intention:
-                today_intention.intention = data['intention'] # extract intention key from data
+                today_intention.intention = data['intention']
                 return jsonify({"success": True, "message": "Successfully created user intention"}), 201
-            # Otherwise, we'll add a new entry for DailyIntention
             else:
-                new_daily_intention = DailyIntention(
-                    intention = data['intention'],
-                    user_id = current_user.id
-                )
-                session.add(new_daily_intention)
+                new_daily_intention = metrics_repo.create_daily_intention(data['intention'])
                 return jsonify({"success": True, "message": "Successfully saved intention"}), 200
             
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-# Create & Seed only
-@main_bp.route('/init-demo', methods=["POST"])
-def init_demo():
-    # Boot logged in users first just in case
-    try:
-        logout_user()
-    except Exception:
-        pass
-
-    with database_connection() as session:
-        # Get or create demo user
-        demo_user = session.execute(
-            select(User).where(User.username == "guest")
-        ).scalar_one_or_none()
-
-        if demo_user is None:
-            demo_user = create_demo_user(session)
-            session.flush()
-            # Seed if we created user
-            seed_data_for(session, demo_user)
-        else:
-            has_data = session.execute(
-                select(Habit.id).join(User).where(User.username == "guest").limit(1)
-            ).scalar_one_or_none() is not None
-
-            if not has_data:
-                seed_data_for(session, demo_user)
-
-        login_user(demo_user) # "quick start": log them in automatically 
-
-    flash(msg("demo_ready", DEFAULT_LANG))
-    return redirect(url_for('main.home'))
-
-
-@main_bp.route('/admin/reset-users', methods=["POST"])
-@login_required
-def reset_users():
-    if current_user.role != 'owner':
-        return abort(403)
-    
-    logout_user()
-
-    # Deletes all data + users, then create fresh demo + admin users
-    with database_connection() as session:
-        with session.begin(): # Single transaction => should be atomic
-            delete_all_db_data(session, include_users=True, reset_sequences=True)
-            demo_user = create_demo_user(session)
-            seed_data_for(session, demo_user)
-            owner_user = create_owner_user(session)
-            seed_data_for(session, owner_user)
-
-    flash(msg("db_reset_users", DEFAULT_LANG))
-    return redirect(url_for('auth.login'))
-
-# Wipe app data only; reset IDs for more predictable seeding
-@main_bp.route('/admin/reset-db', methods=["POST"])
-@login_required
-def reset_database():
-    if current_user.role != 'owner':
-        return abort(403)
-
-    # Reset database
-    with database_connection() as session:
-        with session.begin(): # again, atomic
-            delete_all_db_data(session, include_users=False, reset_sequences=True)
-
-    flash(msg("db_reset", DEFAULT_LANG))
-    return redirect(url_for('landing_page'))
-
-
-@main_bp.route('/admin/reset-dev', methods=["POST"])
-@login_required
-def reset_dev():
-    if current_user.role != 'owner':
-        return abort(403)
-    
-    logout_user()
-
-    with database_connection() as session:
-        with session.begin():
-            delete_all_db_data(session, include_users=True, reset_sequences=True)
-            owner_user = create_owner_user(session)
-            seed_data_for(session, owner_user)
-
-    flash(msg("db_reset_dev", DEFAULT_LANG))
-    return redirect(url_for('main.home'))

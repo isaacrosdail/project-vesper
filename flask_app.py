@@ -1,4 +1,4 @@
-# Entry point for Flask app
+"""Entry point for Flask app."""
 
 from app import create_app
 

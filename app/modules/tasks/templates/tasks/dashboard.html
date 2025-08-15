@@ -10,8 +10,8 @@
             <legend>Add new task:</legend>
             <button type="button" class="modal-close btn btn-destructive" id="modal-close-btn" aria-label="Close">&times;</button>
             <div class="form-group">
-                <label for="title">Task:</label>
-                <input type="text" id="title" name="title"  required>
+                <label for="name">Task:</label>
+                <input type="text" id="name" name="name"  required>
             </div>
         </fieldset>
         <button class="btn btn-primary" type="submit">Submit</button>
@@ -23,7 +23,6 @@
         <h2 class="card-title">Tasks</h2>
         <button id="add-task-btn" class="btn btn-primary">Add Task</button>
     </div>
-    {% set headers = ["Title", "Status", "Type", "Created", "Completed"] %}
     <table class="table-standard">
         <caption class="sr-only">Tasks</caption>
         <thead class="table-header">
@@ -31,33 +30,36 @@
                 {% if has_dev_tools %}
                     <th>ID</th>
                 {% endif %}
-                {% for h in headers %}
-                    <th>{{ h }}</th>
+                {% for h in task_headers %}
+                    <th>{{ h.label }}</th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% if tasks %}
                 {% for t in tasks %}
-                <!-- group class here uses Tailwind to style it such that when the parent (tr) is hovered, the child (delete button) appears but is otherwise insivible -->
-                <!-- Using display: none works here as well but causes layout shift -->
                 <tr class="table-row" data-item-id="{{ t.id }}" data-module="tasks" data-subtype="none">
                     {% if has_dev_tools%}
                         <td>{{ t.id }}</td>
                     {% endif %}
-                    <td class="editable-cell tooltip" data-item-id="{{ t.id }}" data-module="tasks" data-field="title" data-tip="Double-click to edit field.">{{ t.title }}</td>
+                    <td class="editable-cell tooltip" data-item-id="{{ t.id }}" data-module="tasks" data-field="name" data-tip="Double-click to edit field.">{{ t.name }}</td>
                     <td>
-                        <!-- |safe here to render HTML entities instead of escaping them -->
+                        {# TODO: NOTES: |safe here to render HTML entities instead of escaping them #}
                         {{ ('&#9745;' if t.is_done else '&#9744;') | safe }}
                     </td>
-                    <td>{{ t.type }}</td>
+                    <td>
+                        {% for tag in t.tags %}
+                            {{ tag.name }}
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
                     <td class="text-right">{{ t.created_at_local.strftime("%d.%m.%Y") }}</td>
                     <td class="text-right">
-                        <!-- EX: 18:09 -->
+                        {# EX: 18:09 #}
                         {{ t.completed_at.strftime("%H:%M") if t.completed_at else '--' }} 
                     </td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}
@@ -74,8 +76,4 @@
 
 {% endblock %}
 
-{% block scripts %}
-    <script src="{{ url_for('static', filename = 'js/tasks/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename = 'js/common/tables.js')}}"></script>
-    <script src="{{ url_for('static', filename = 'js/common/tooltip.js') }}"></script>
-{% endblock %}
+{% block scripts %}{% endblock %}

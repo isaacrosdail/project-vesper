@@ -1,4 +1,5 @@
-# Added to be able to do this in our Dockerfile for deployment via Gunicorn:
-# CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+"""
+WSGI entry point for the Flask application. Exposes the `app` object for WSGI server to run in production.
+"""
 
 from flask_app import app
