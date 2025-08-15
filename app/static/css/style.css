@@ -585,11 +585,11 @@ footer {
     .navlinks {transition: none;}
 }
 
-/* Override stylng to position dummy context menu on theme-demo page */
+/* Override stylng to position dummy context menu on style-reference page */
 .context-menu-positioning {
     position: relative;
 }
-/* Grid container for various theme-demo page components */
+/* Grid container for various style-reference page components */
 .demo-grid-container { 
     display: grid;
     /* TODO: NOTES: Add

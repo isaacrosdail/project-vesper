@@ -1,4 +1,4 @@
-from app.core.database import db_session
+from app._infra.database import db_session
 from app.modules.tasks.repository import get_user_tasks
 from app.modules.tasks.models import Task
 

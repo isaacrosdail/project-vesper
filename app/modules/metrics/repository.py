@@ -1,7 +1,10 @@
 
-from .models import DailyMetric, DailyIntention
-from sqlalchemy import func
 from datetime import datetime, timezone
+
+from sqlalchemy import func
+
+from .models import DailyIntention, DailyMetric
+
 
 # Get all DailyMetrics of given user id
 def get_user_metrics(session, user_id):

@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from app.modules.groceries.utils import calculate_price_per_100g
+from app.modules.groceries.pricing import calculate_price_per_100g
 
 
 def test_calc_price_per_100g():

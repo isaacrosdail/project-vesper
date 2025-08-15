@@ -8,14 +8,15 @@ import sys
 
 import pytest
 from app import create_app
-from app.core.database import db_session, get_engine
+from app._infra.database import db_session, get_engine
 from app.modules.groceries.models import Product
-from app.common.database.operations import delete_all_db_data
+from app.shared.database.operations import delete_all_db_data
 from sqlalchemy import text
 
-from app.core.auth.models import User
+from app.modules.auth.models import User
 from flask_login import login_user
 
+# TODO: Consider moving?
 class AuthActions():
     def __init__(self, client):
         self.client = client
@@ -133,14 +134,14 @@ def engine(app):
 # monkeypatches db_session() to use our test session
 @pytest.fixture(autouse=True)
 def patch_db_session(monkeypatch):
-    from app.core.database import \
+    from app._infra.database import \
         db_session as \
         global_session  # Imports scoped session factory and renames it to global_session
 
     # lambda *_: global_session() creates a function that takes any arguments ("*_" = "ignore whatever args are passed")
     #       and returns global_session() which calls our scoped session
     # This makes all imports of db_session use our test database
-    monkeypatch.setattr("app.core.database.db_session", lambda *_: global_session())
+    monkeypatch.setattr("app._infra.database.db_session", lambda *_: global_session())
 
 # Fake browser to test routes (lets us send requests from a fake browser/client)
 @pytest.fixture

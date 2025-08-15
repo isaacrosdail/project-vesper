@@ -16,13 +16,18 @@
         "htmlcov/": true,
         ".VSCodeCounter/**": true,
         ".ruff_cache": true,
+        "**/.vscode": true,
+        "**/.husky": true,
+        "alembic/README": true,
+        "alembic/script.py.mako": true,
     },
     "search.exclude": {
         "node_modules/": true,
+        "**/package-lock.json": true,
         ".venv/": true,
         ".pytest_cache/": true,
         ".coverage": true,
-        "PROJECT_LOG.md": true
+        "PROJECT_LOG.md": true,
     },
     "files.watcherExclude": {
         "**/node_modules/**": true,

@@ -1,13 +1,12 @@
 
-from app.core.database import database_connection
-from app.modules.metrics.models import DailyMetric
+from app._infra.database import database_connection
 from app.modules.metrics import repository as metrics_repo
-from app.common.visualization.charts import (create_metric_chart_html,
-                                            get_filtered_dataframe)
+from app.modules.metrics.models import DailyMetric
+from app.shared.constants import DEFAULT_CHART_DAYS
+from app.shared.sorting import bubble_sort
+from app.shared.visualization.charts import (create_metric_chart_html,
+                                             get_filtered_dataframe)
 from flask import Blueprint, jsonify, render_template, request
-from app.common.sorting import bubble_sort
-
-from app.core.constants import DEFAULT_CHART_DAYS
 from flask_login import current_user, login_required
 
 metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_prefix='/metrics')

@@ -1,33 +1,25 @@
 import os
 import secrets
-# For environment variables via dotenv
-from dotenv import load_dotenv
-from flask import Flask, g
 
 from alembic import command
-# For pivoting to using Alembic instead of create_all
 from alembic.config import Config as AlembicConfig
-from app.core.api import api_bp
-from app.core.auth.routes import auth_bp
-from app.config import config_map
-from app.core.crud_routes import crud_bp
-from app.core.database import db_session, init_db
-
-from app.common.debug import request_debugging
-
+from flask import Flask, g
 from flask_login import LoginManager, current_user
 
-# Import Blueprints
+from app._infra.database import db_session, init_db
+from app.config import config_map
+from app.core.crud_routes import crud_bp
 from app.core.routes import main_bp
+from app.devtools.routes import devtools_bp
+from app.modules.api.routes import api_bp
+from app.modules.auth.routes import auth_bp
 from app.modules.groceries.routes import groceries_bp
 from app.modules.habits.routes import habits_bp
 from app.modules.metrics.routes import metrics_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
-from app._internal.health_routes import internal_bp
-from app._internal.tooling_routes import tooling_bp
-
-from app.core.constants import DEFAULT_LANG
+from app.shared.constants import DEFAULT_LANG
+from app.shared.debug import request_debugging
 
 
 def has_dev_tools() -> bool:
@@ -40,7 +32,7 @@ def has_dev_tools() -> bool:
 # Central app factory => Loads configs, inits extensions, runs DB migrations, registers blueprints, & sets global helpers, too
 # Using our APP_ENV over Flask's built-ins
 def create_app(config_name=None):
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='_templates')
 
     # Determine which config to load, if not passed => read the APP_ENV var, default to dev
     config_name = config_name or os.environ.get('APP_ENV', 'dev')
@@ -57,7 +49,7 @@ def create_app(config_name=None):
     app.config.setdefault("APP_ENV", config_map[config_name].APP_ENV)
 
     # Debug what's being loaded
-    from .common.debug import debug_config, print_env_info
+    from .shared.debug import debug_config, print_env_info
     debug_config(config_name, config_map[config_name])
 
     # Print full env info (dev or testing)
@@ -74,7 +66,7 @@ def create_app(config_name=None):
     # Note: this runs outside the normal request flow? Called whenever Flask-Login needs to reload the user object, even between requests.
     @login_manager.user_loader
     def load_user(user_id):
-        from app.core.auth.models import User
+        from app.modules.auth.models import User
         return db_session.get(User, int(user_id))
 
     # TODO: We need to sort out Plotly's nonsense (injects inline styles/JS) or scrap nonces & strict CSP
@@ -138,5 +130,4 @@ def _register_blueprints(app):
     app.register_blueprint(metrics_bp)
     app.register_blueprint(time_tracking_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(internal_bp)
-    app.register_blueprint(tooling_bp)
+    app.register_blueprint(devtools_bp)

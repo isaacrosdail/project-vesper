@@ -1,5 +1,5 @@
 """
-DB infrastructure & schema tests
+DB _infrastructure & schema tests
 Structure, lifecycle, connection tests go here
 """
 # Standard lib imports
@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 # Local app imports
-from app.core.database import get_engine
+from app._infra.database import get_engine
 from app.modules.tasks.models import Task
 
 

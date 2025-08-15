@@ -1,14 +1,12 @@
 ## Generalized CRUD handling routes for ANY module/model_class
-## STRONGLY consider moving to a future utils or helpers directory in future
 
-from datetime import datetime, timezone
-
-from app.core.database import database_connection
+from app._infra.database import database_connection
 from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit
-from app.modules.tasks.models import Task
 from app.modules.metrics.models import DailyMetric
-from flask import Blueprint, jsonify, request, current_app, abort
+from app.modules.tasks.models import Task
+from app.shared.database.operations import safe_delete
+from flask import Blueprint, abort, current_app, jsonify, request
 
 # Blueprint registration
 crud_bp = Blueprint("crud", __name__)
@@ -52,14 +50,8 @@ def item(module, subtype, item_id):
                 return jsonify({"success": True, "message": f"Successfully updated {model_class.__name__}"}), 200
             
             elif request.method == 'DELETE':
-                # Products => soft delete
-                if model_class.__name__ == 'Product':
-                    item.deleted_at = datetime.now(timezone.utc)
-                # All else => hard delete
-                else:
-                    session.delete(item)
-                    
-                return jsonify({"success": True, "message": f"{model_class.__name__} deleted"}), 200 # 200 = OK
+                safe_delete(session, item)
+                return jsonify({"success": True, "message": f"{model_class.__name__} deleted"}), 200
         
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500 # 500 = Internal Server Error
+        return jsonify({"success": False, "message": str(e)}), 500

@@ -1,5 +1,5 @@
-from app.core.database import db_session
-from app.common.visualization.charts import get_filtered_dataframe
+from app._infra.database import db_session
+from app.shared.visualization.charts import get_filtered_dataframe
 from app.modules.time_tracking.models import TimeEntry
 from datetime import datetime, timezone, timedelta
 

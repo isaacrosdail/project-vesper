@@ -1,7 +1,7 @@
 # Keep tests here to stuff like custom methods within models themselves?
 
 from app.modules.groceries.models import Transaction
-from app.core.database import db_session
+from app._infra.database import db_session
 
 def test_transaction_string_representation(sample_product, logged_in_user):
     transaction = Transaction(

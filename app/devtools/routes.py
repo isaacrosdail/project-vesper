@@ -1,0 +1,33 @@
+"""
+Development tools blueprint.
+
+Provides:
+- /health   : JSON health check endpoint (for monitoring)
+- /style-reference  : Internal UI style guide (dev only, owner access)
+"""
+import os
+
+from app.shared.constants import DEFAULT_HEALTH_TIMEZONE
+from app.shared.datetime.helpers import now_local
+from flask import Blueprint, abort, jsonify, render_template
+from flask_login import current_user, login_required
+
+devtools_bp = Blueprint('devtools', __name__, url_prefix='/devtools', template_folder='templates')
+
+@devtools_bp.route('/health')
+def health_check():
+    """Basic health check for monitoring."""
+    status = {
+        'status': 'healthy',
+        'timestamp': now_local(DEFAULT_HEALTH_TIMEZONE)
+    }
+    return jsonify(status)
+
+# Only register style_reference in development
+if os.environ.get('APP_ENV') == 'dev':
+    @devtools_bp.route('/style-reference')
+    @login_required
+    def style_reference():
+        if not current_user.is_owner:
+            abort(403)
+        return render_template('style-reference.html')

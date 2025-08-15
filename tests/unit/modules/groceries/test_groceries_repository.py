@@ -1,6 +1,6 @@
 
 
-from app.core.database import db_session
+from app._infra.database import db_session
 from app.modules.groceries import repository as grocery_repo
 from app.modules.groceries.models import Product
 

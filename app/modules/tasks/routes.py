@@ -1,17 +1,11 @@
-# For created_at / completed_at
+
 from datetime import datetime, timezone
 
-from flask import (Blueprint, flash, jsonify, redirect, render_template,
-                   request, url_for)
-
-from app.core.database import database_connection
-from app.common.sorting import bubble_sort
-
-# Import Task repository
+from app._infra.database import database_connection
 from app.modules.tasks import repository as tasks_repo
-# Import Task model
 from app.modules.tasks.models import Task
-
+from app.shared.sorting import bubble_sort
+from flask import Blueprint, flash, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
@@ -66,7 +60,7 @@ def tasks():
         with database_connection() as session:
             session.add(new_task)
             session.flush()
-            flash("Task added successfully.")
+            flash("Task added successfully.") # TODO: Standardize to new format
             return jsonify({
                 "success": True, 
                 "message": "Task added successfully.",

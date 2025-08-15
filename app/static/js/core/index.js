@@ -225,8 +225,8 @@ function getCurrentTimeString() {
 }
 
 function updateClock() {
-    let timeDisplay = document.querySelector('#time-display'); // Get the element by id
-    timeDisplay.textContent = getCurrentTimeString(); // use getCurrentTimeString to call that and inject that value
+    let timeDisplay = document.querySelector('#time-display');
+    timeDisplay.textContent = getCurrentTimeString(); // use getCurrentTimeString to call that & inject that value
 }
 
 // Get weather info via API, orchestrates our sun movement
@@ -239,8 +239,7 @@ async function getWeatherInfo() {
     try {
         tempDisplay.textContent = "Loading weather info...";
 
-        // Async fetch to call our Flask API endpoint/weather/<city>/<units>
-        const response = await fetch(`/api/weather/${city}/${units}`) // TODO: Note: GET is default method for fetch
+        const response = await fetch(`/api/weather/${city}/${units}`) // TODO: NOTES: GET is default method for fetch
 
         if (!response.ok) {
             throw new Error(`Weather API failed: ${response.status}`);
@@ -248,7 +247,7 @@ async function getWeatherInfo() {
         // Parse JSON response 
         weatherInfo = await response.json();
 
-        // use weather info - to start, grab temp & sunset time
+        // Extract desired vals from weatherInfo data
         const temp = Math.round(weatherInfo.main.temp);
         const sunset = weatherInfo.sys.sunset;
         const desc = weatherInfo.weather[0].description.toLowerCase();
@@ -274,9 +273,8 @@ async function getWeatherInfo() {
             minute: '2-digit'
         });
 
-        // Display temp with units
+        // Display temp with units & formatted sunset time
         tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
-        // Display formatted sunset time
         sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
 
     } catch (error) {
@@ -318,10 +316,7 @@ function calcSunPosition(sunrise, sunset, now) {
      *  else                       -> calc draw sun
      *  Add moon phases later
      */
-
-    // Debug logging
-    // console.log(`Current time: ${now} | Sunrise: ${sunrise} | Sunset: ${sunset} | Progress thru day: ${(now-sunrise)/(sunset-sunrise)}`);
-
+    // Debug: console.log(`Current time: ${now} | Sunrise: ${sunrise} | Sunset: ${sunset} | Progress thru day: ${(now-sunrise)/(sunset-sunrise)}`);
     return { x: xVal, y: yVal }
 }
 
@@ -334,6 +329,7 @@ const SUN_CONFIG = {
     COLOR: 'orange'
 };
 
+// TODO: NOTES: Extract notes from below & trim
 /**
  * Draws a sun with rays, centered at the specified normalized coordinates
  * @param {number} x - Normalized x position (0-1)
@@ -364,7 +360,7 @@ function drawSun(x, y) {
     ctx.arc(canvasX, canvasY, SUN_CONFIG.RADIUS, 0, 2 * Math.PI);
     ctx.fill();
 
-    //Debug: Draw a dot for each of the sunrise and sunset points
+    // Debug: Draw a dot for each of the sunrise and sunset points
     // console.log('Raw x, y from math:', x, y);
     // console.log('Canvas coordinates: ', canvasX, canvasY);
     // console.log('Canvas size: ', canvas.width, canvas.height);
@@ -390,10 +386,6 @@ function drawSun(x, y) {
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.querySelector('#time-entry-modal');
 
-    // Switch to event delegation pattern for habit checkboxes
-    // Idea is: Apply listener to PARENT, then determine where event came from
-    // Consolidate 'change' listener for both habit checkboxes & metric inputs
-    // Now our parent becomes .content, so we need to change the querySelector
     document.addEventListener('change', (e) => {
         if (e.target.matches('.habit-checkbox')) {
             // event.target = the checkbox (what used to be 'this' in our inline onchange)
@@ -435,10 +427,10 @@ window.onload = async () => {
     updateClock();
 
     await getWeatherInfo(); // Cache weather data
-    updateSunPosition(); // Draw sun immediately
+    updateSunPosition();    // Draw sun immediately
 
-    setInterval(getWeatherInfo, 1*60*60*1000); // Update weather every hour
-    setInterval(updateSunPosition, 10*60*1000); // Update sun from weatherInfo every 10mins 10*60*1000
+    setInterval(getWeatherInfo, 1*60*60*1000);  // Update weather every hour
+    setInterval(updateSunPosition, 10*60*1000); // Update sun from weatherInfo every 10 mins => 10*60*1000
 }
 
 // Make function(s) exportable for testing using Jest

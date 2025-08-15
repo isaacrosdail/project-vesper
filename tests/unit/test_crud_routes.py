@@ -1,5 +1,5 @@
 
-from app.core.database import db_session
+from app._infra.database import db_session
 # Import model(s)
 from app.modules.tasks.models import Task
 

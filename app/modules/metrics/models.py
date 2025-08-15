@@ -1,6 +1,6 @@
-from sqlalchemy import String, Column, Float, Integer
+from app._infra.db_base import Base
+from sqlalchemy import Column, Float, Integer, String
 
-from app.core.db_base import Base
 
 # Daily Intention Model - to let intentions persist
 class DailyIntention(Base):

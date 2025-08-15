@@ -1,7 +1,7 @@
 
 import pytest
 
-from app.core.database import db_session, database_connection
+from app._infra.database import db_session, database_connection
 from app.modules.tasks.models import Task
 
 

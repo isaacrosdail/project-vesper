@@ -1,5 +1,5 @@
 
-from app.core.database import db_session, database_connection
+from app._infra.database import db_session, database_connection
 
 
 def test_groceries_dashboard(authenticated_client):

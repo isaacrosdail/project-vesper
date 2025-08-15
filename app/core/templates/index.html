@@ -53,7 +53,7 @@
                     {% if habit_info[habit.id].completed_today %}checked{% endif %}>
 
                 <span class="habit-title">{{ habit.title }}</span>
-                <span class="habit-streak"> <!-- TODO: Replace with own text classes when we do a typography pass -->
+                <span class="habit-streak">
                     {% if habit_info[habit.id].streak_count > 0 %}🔥{{ habit_info[habit.id].streak_count }}{% endif %}
                 </span>
             </label>

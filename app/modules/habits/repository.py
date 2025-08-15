@@ -1,7 +1,8 @@
 # DB logic functions to access data
 
-from .models import Habit, HabitCompletion
 from sqlalchemy import func
+
+from .models import Habit, HabitCompletion
 
 
 # Get all habits for given user id

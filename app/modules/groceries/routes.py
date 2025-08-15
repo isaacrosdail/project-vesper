@@ -1,10 +1,10 @@
-from app.common.sorting import bubble_sort
-from app.core.database import database_connection
-from app.modules.groceries.models import Product, Transaction
+from app._infra.database import database_connection
 from app.modules.groceries import repository as grocery_repo
-from app.modules.groceries.utils import get_price_per_100g
-from app.modules.groceries.validate import (parse_and_validate_form_data,
+from app.modules.groceries.models import Product, Transaction
+from app.modules.groceries.pricing import get_price_per_100g
+from app.modules.groceries.validators import (parse_and_validate_form_data,
                                             validate_product_data)
+from app.shared.sorting import bubble_sort
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, url_for)
 from flask_login import current_user, login_required
@@ -34,7 +34,7 @@ def dashboard():
             transactions = grocery_repo.get_user_transactions(session, current_user.id)
 
             # Compute price_per_100g using our util function => add as new attribute! Thanks SQLAlchemy
-            # TODO: Can I fold this into an instance method for Transaction model?
+            # TODO: MINOR: Fold this into an instance method for Transaction model?
             for transaction in transactions:
                 transaction.price_per_100g = get_price_per_100g(transaction)
 

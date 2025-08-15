@@ -1,18 +1,15 @@
 # For created_at / completed_at
 from datetime import datetime
 
-from flask import (Blueprint, flash, jsonify, redirect, render_template,
-                   request, url_for)
-
-from app.common.sorting import bubble_sort
-
-from app.core.database import database_connection
+from app._infra.database import database_connection
 # Import Habit repository
 from app.modules.habits import repository as habits_repo
 # Import Habit, HabitCompletion model
 from app.modules.habits.models import Habit, HabitCompletion
-
-from flask_login import login_required, current_user
+from app.shared.sorting import bubble_sort
+from flask import (Blueprint, flash, jsonify, redirect, render_template,
+                   request, url_for)
+from flask_login import current_user, login_required
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
@@ -105,6 +102,7 @@ def completions(habit_id):
 # TODO: Rename?
 def completion(habit_id):
     from datetime import date
+
     # Instead of /today in route, pass desired day in as arg/param
     # Want to be able to receive date string from HTTP like "2025-06-26"
     date_received = request.args.get('date', 'today') # default to today

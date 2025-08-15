@@ -1,9 +1,9 @@
-# Handles DB models for tasks module
+"""
+Database models for the Tasks module.
+"""
 
-
+from app._infra.db_base import Base, CustomBaseTaskMixin
 from sqlalchemy import Boolean, Column, String
-
-from app.core.db_base import Base, CustomBaseTaskMixin
 
 
 # Task Model for database of tasks, with varying types (task vs habit, etc)

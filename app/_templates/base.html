@@ -1,0 +1,65 @@
+<!-- Base Class Template -->
+
+{% import '_macros/misc.html' as styles %}
+<!DOCTYPE html>
+<html lang="{{ default_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vesper{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/output.css') }}"> <!-- For Tailwind styling -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/logo_v5_white-bg.png') }}">
+    <!-- nonce: -->
+    <script nonce="{{ nonce }}">
+        // Set data-theme value so CSS can grab & apply proper theme from cookie BEFORE loading rest
+        // Prevents the flash of incorrect theme of doom
+        (function () {
+            const cookie = document.cookie;
+            if (cookie.includes('theme=light')) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else if (cookie.includes('theme=dark')) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            {% include '_partials/_navbar.html' with context %}
+        </header>
+
+        {% include '_partials/_flash.html' %}
+
+        <main class="content">
+            <div class="dashboard-container">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <footer class="bg-muted">
+            &copy; 2025
+        </footer>
+    </div>
+
+    <!-- Site-wide scripts BEFORE the script block -> run everywhere -->
+    <!-- <script src="{{ url_for('static', filename = 'js/plotly-3.0.3.min.js') }}"></script> -->
+    <script src="{{ url_for('static', filename = 'js/shared/navbar.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/shared/theme-manager.js') }}"></script>
+    <!-- Flash message auto-fade -->
+    <script nonce="{{ nonce }}">
+        window.addEventListener('DOMContentLoaded', () => {
+            const flash = document.querySelector('#flash-message');
+            if (flash) {
+                setTimeout(() => {
+                    flash.style.opacity = '0'; // fade?
+                    flash.style.pointerEvents = 'none'; // ?
+                    setTimeout(() => flash.remove(), 1000); // then remove after fade
+                }, 2000);
+            }
+        });
+    </script>
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>

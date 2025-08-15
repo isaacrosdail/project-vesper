@@ -1,51 +1,28 @@
-# Date/Time-related imports
-# Conditional import of our seed_dev_db function
-import os
-import sys
+
 from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
-from app.common.database.seed.seed_db import seed_basic_data, seed_rich_data
-from app.core.auth.models import User
-from app.core.constants import DEFAULT_LANG
-from app.core.database import database_connection
-from app.core.messages import msg
+from app._infra.database import database_connection
+from app.modules.auth.models import User
+from app.modules.auth.repository import create_demo_user, create_owner_user
 from app.modules.habits import repository as habits_repo
 from app.modules.habits.habit_logic import (calculate_habit_streak,
                                             check_if_completed_today)
+from app.modules.habits.models import Habit
 from app.modules.metrics import repository as metrics_repo
 from app.modules.metrics.models import DailyIntention
-from app.modules.habits.models import Habit
 from app.modules.tasks import repository as tasks_repo
+from app.shared.constants import DEFAULT_LANG
+from app.shared.database.operations import delete_all_db_data
+from app.shared.database.seed.seed_db import seed_data_for
+from app.shared.i18n.messages import msg
 from flask import (Blueprint, abort, flash, jsonify, redirect, render_template,
                    request, url_for)
-from flask_login import current_user, login_required, logout_user, login_user
-
+from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import select
-from app.common.database.operations import delete_all_db_data
-
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
-# Helpers to DRY things up
-def create_demo_user(session, username="guest", name="Guest", password="demo123"):
-    user = User(username=username, name=name, role="user")
-    user.set_password(password)
-    session.add(user)
-    return user
-
-def create_owner_user(session, username="owner", name="owner", password="owner123"):
-    user = User(username=username, name=name, role="owner")
-    user.set_password(password)
-    session.add(user)
-    return user
-
-def seed_data_for(session, user):
-    session.flush() # make sure we have user.id
-    if user.role == "owner":
-        seed_rich_data(user.id, session)
-    else:
-        seed_basic_data(user.id, session)
 
 @main_bp.route("/", methods=["GET"])
 def home():
@@ -58,7 +35,7 @@ def home():
             # Calculate time references
             now = datetime.now(ZoneInfo("Europe/London"))
             # Today's 00:00 in Europe/London time
-            # TODO: MINOR: Consider extracting into datetime/date helper functions/utils?
+            # TODO: NOTES: Consider extracting into datetime/date helper functions/utils?
             start_of_day_local = datetime.combine(now.date(), time.min, tzinfo=ZoneInfo("Europe/London"))
             start_of_day_utc = start_of_day_local.astimezone(timezone.utc)
 

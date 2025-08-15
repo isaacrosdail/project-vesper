@@ -1,8 +1,8 @@
 from decimal import Decimal
 
 
-from app.core.database import db_session
-from app.modules.groceries.validate import validate_product_data, validate_transaction_data
+from app._infra.database import db_session
+from app.modules.groceries.validators import validate_product_data, validate_transaction_data
 
 # Missing data test
 def test_add_product_missing_data_raises_error():

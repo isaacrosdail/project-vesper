@@ -2,12 +2,13 @@
 
 from datetime import datetime, timedelta, timezone
 
+from app._infra.db_base import Base, CustomBaseTaskMixin
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.core.db_base import Base, CustomBaseTaskMixin
 
 # Habit/HabitCompletion
+# TODO: NOTES: Extract & prune comments in file.
 # Relationship type: one-to-many (one habit, many completions)
 # Direction: bidirectional (thanks to back_populates)
 # Habit Model

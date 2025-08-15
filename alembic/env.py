@@ -9,12 +9,12 @@ from alembic import context
 
 load_dotenv()
 
-#from app.core.auth.models import User
+#from app.modules.auth.models import User
 #from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
 from app.config import config_map
-from app.core.db_base import Base  # Import SQLAlchemy Base
+from app._infra.db_base import Base  # Import SQLAlchemy Base
 # import our debug util
-from app.common.debug import debug_config
+from app.shared.debug import debug_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
