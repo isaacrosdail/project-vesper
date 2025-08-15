@@ -49,7 +49,7 @@ module_name/
 ├── models.py
 ├── repository.py  
 ├── routes.py
-├── services.py    # Business logic (like habit_logic.py)
+├── services.py    # Business logic
 ├── utils.py       # Module-specific utilities only
 └── templates/
 
@@ -113,4 +113,19 @@ apt-get install -y nodejs
 - cross-env ->
 - browser-sync -> Live reloads, part of npm run dev script
 - concurrently -> ????
-- jest-environment-jsdom -> Needed for Jest to mimic DOM?
+
+
+## TODOS:
+1. D3.js (in leiu of Plotly)
+2. Caching, memoization, repository pattern
+3. Grafana
+
+## Mentionables? TODO: PRUNE THIS
+Module-based structure with blueprints
+Repository pattern (partially implemented)
+Database migrations with Alembic
+User authentication with Flask-Login
+Proper environment configs
+Docker containerization
+Testing infrastructure
+CI/CD pipeline

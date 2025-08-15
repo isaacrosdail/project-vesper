@@ -1,20 +1,25 @@
-# DB logic functions to access data
+"""
+Repository layer for Tasks module.
+"""
+
+from app.shared.repository.base import BaseRepository
 
 from .models import Task
 
 
-# Get all tasks
-def get_all_tasks(session):
-    return session.query(Task).all()
+class TasksRepository(BaseRepository):
 
-# Get all tasks for given user_id
-def get_user_tasks(session, user_id):
-    """
-    Get all task entries for given user id.
-    Args:
-        session: SQLAlchemy Session object.
-        user_id: User id to filter by.
-    Returns:
-        List of Task objects.
-    """
-    return session.query(Task).filter(Task.user_id==user_id).all()
+    def get_all_tasks(self):
+        """Return all tasks for current user."""
+        return self.session.query(Task).filter(
+            Task.user_id==self.user_id
+        ).all()
+    
+    def create_task(self, name: str):
+        """Create & add a new task. Returns said task."""
+        new_task = Task(
+            user_id=self.user_id,
+            name=name
+        )
+        self.session.add(new_task)
+        return new_task

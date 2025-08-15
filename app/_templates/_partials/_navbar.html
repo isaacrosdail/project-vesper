@@ -1,0 +1,69 @@
+<nav aria-label="Main navigation">
+    <div class="navbar-content">
+        {# LEFT: Branding & Links #}
+        <div class="nav-left">
+            <span class="branding">Vesper</span>
+
+            {# Beginning hamburger menu #}
+            <button id="hamburger-btn"
+                    aria-controls="navlinks" 
+                    aria-expanded="false" 
+                    aria-label="Toggle navigation menu">
+                ☰
+            </button>
+            {# Navlinks: folded/column on mobile, shown row on desktop #}
+            <div class="navlinks" id="navlinks"> {# ID makes assistive tech tie btn + navlinks together? #}
+                {{ ui.nav_link('Home', 'main.home', request.endpoint) }}
+
+                {% if current_user.is_authenticated %}
+                    {{ ui.nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
+                    {{ ui.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
+                    {{ ui.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
+                    {{ ui.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
+                    {{ ui.nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
+
+                    {{ ui.nav_link('Log out', 'auth.logout', request.endpoint )}}
+                {% endif %}
+                
+                {% if current_user.is_anonymous %}
+                    {{ ui.nav_link('Log in', 'auth.login', request.endpoint) }}
+                {% endif %}
+
+            </div>
+        </div>
+
+        {# Settings modal, theme select, etc. #}
+        <div class="nav-right">
+
+        </div>
+        
+        {# Baby's first modal #}
+        <button id="settings-btn" aria-label="Settings">⚙️</button>
+        {% if has_dev_tools %}
+        <dialog id="settings-modal" class="dev-buttons">
+            <h3>Hey pal</h3>
+            <p>My Modal Content</p>
+            <a href="/my-fake/route" class="btn btn-primary">Test 404</a>
+            <form action="{{ url_for('auth.reset_dev') }}" method="POST">
+                <button type="submit" class="btn btn-primary">Reset DEV</button>
+            </form>
+            <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Theme Demo Page</a><br>
+            <button type="submit" id="close-dev-modal-btn">Close</button>
+        </dialog>
+        {% endif %}
+
+        <form>
+            <fieldset>
+                {# Legend here is good for accessibility (screen readers) #}
+                <legend class="visually-hidden">Pick a theme</legend>
+                
+                {# Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) #}
+                <select name="theme" id="theme">
+                    <option value="laptop">System</option>
+                    <option value="sun">Light</option>
+                    <option value="moon">Dark</option>
+                </select>
+            </fieldset>
+        </form>
+    </div>
+</nav>
