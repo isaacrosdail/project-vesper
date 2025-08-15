@@ -5,7 +5,7 @@ import { defineConfig } from "eslint/config";
 
 
 export default defineConfig([
-  // Adding ignores
+  // === Ignores ===
   {
     ignores: [
       ".venv/**",
@@ -13,38 +13,37 @@ export default defineConfig([
       "**/werkzeug/**",
       "**/coverage/**",
       "htmlcov/**",
-      "node_modules/**", // redundant?
-
-      // Config files
-      "*.config.js", // Ignore Jest, Tailwind config files
-      "*.config.ts"
+      "node_modules/**",
+      "*.config.js",
+      "*.config.ts",
     ]
   },
-  { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], plugins: { js }, extends: ["js/recommended"] },
+
+  // === Base JS + TS ===
+  js.configs.recommended,
+  tseslint.configs.recommended,
 
   { 
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
-  
-    // Adding rules to make ESLint respect the _ prefix
-    rules: {
+    rules: {  // Adding rules to make ESLint respect the _ prefix
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
           "varsIgnorePattern": "^_", // Ignores unused variables & functions (like our bubbleSort for now)
           "argsIgnorePattern": "^_"  // Ignores unused function parameters
         }
-      ]
+      ],
+      "eqeqeq": "error", // enforces strict equality (=== and !==) instead of looser equality operators (== and !==)
+      "no-console": "off"
     }
   },
-  tseslint.configs.recommended,
 
-  // Special config for test files
+  // === Tests ===
   {
     files: ["**/*.test.{js,ts}", "tests/**/*.{js,ts}"],
     languageOptions: {
       globals: {
-        ...globals.jest,  // Adds test, expect, describe, etc.
         ...globals.node   // Add Node.js globals (includes require, module, etc.)
       }
     }

@@ -1,0 +1,155 @@
+{# devtools dev page for easily drafting/tweaking tokens or component stylings #}
+
+{% extends 'base.html' %}
+
+{% block title %}Theme Token Preview{% endblock %}
+
+{% block content %}
+
+{# === Background Hierarchy === #}
+<div class="demo-grid-container" style="border-radius: var(--border-radius);">
+  <div class="swatch" style="background: var(--bg-dark); color: var(--text)">bg-dark / text</div>
+  <div class="swatch" style="background: var(--bg); color: var(--text)">bg / text</div>
+  <div class="swatch" style="background: var(--bg-light); color: var(--text-muted)">bg-light / text-muted</div>
+</div>
+
+
+{# === Text Variants === #}
+<div class="demo-grid-container">
+  <div class="swatch" style="background: var(--bg); color: var(--text)">text</div>
+  <div class="swatch" style="background: var(--bg); color: var(--text-muted)">text-muted</div>
+  <div class="swatch" style="background: var(--bg); color: var(--text-destructive)">text-destructive</div>
+  <div class="swatch" style="background: var(--text); color: var(--bg)">text-inverse</div>
+</div>
+
+{# === Border === #}
+<div class="demo-grid-container">
+  <div class="swatch" style="border: 4px solid var(--border-color); background: var(--bg)">border color</div>
+</div>
+
+{# === Accent Colors === #}
+<div class="demo-grid-container">
+  <div class="swatch" style="background: var(--accent-strong); color: var(--text)">accent-strong</div>
+  <div class="swatch" style="background: var(--accent-subtle); color: var(--text)">accent-subtle</div>
+  <div class="swatch" style="background: var(--ui-hover); color: var(--text)">ui-hover</div>
+</div>
+
+
+{# === Selection Colors === #}
+<div class="demo-grid-container">
+  <div class="swatch" style="background: var(--bg-selection);">
+    bg-selection
+  </div>
+  <div class="swatch" style="color: var(--text-selection);">
+    text-selection
+  </div>
+</div>
+
+{# === Success & Error === #}
+<div class="demo-grid-container">
+  <div class="swatch" style="background: var(--color-success); color: var(--text-inverse);">color-success</div>
+  <div class="swatch" style="background: var(--color-error); color: var(--text-inverse);">color-error</div>
+</div>
+
+<hr>
+
+<h1 style="font-size: 1.4rem; text-align: center;">Component Samples</h1>
+{# Buttons #}
+<div class="demo-grid-container">
+  <button class="btn">Base Button</button>
+  <button class="btn btn-primary">Primary Button</button>
+  <button class="btn btn-secondary">Secondary Button</button>
+</div>
+<div class="card-dashboard demo-grid-container">
+  <button class="btn btn-secondary">Secondary Button (on card)</button>
+  <button class="btn btn-primary" aria-disabled="true" disabled>Secondary Button (disabled)</button>
+</div>
+<div class="demo-grid-container">
+  <button class="btn btn-destructive">Destructive Button</button>
+  {{ ui.delete_btn() }}
+</div>
+
+{# Inputs #}
+<div class="demo-grid-container">
+  <input type="text" class="input-base" placeholder="Input base">
+  <input type="text" class="input-base input-inline" placeholder="Input inline">
+</div>
+
+{# Custom context menu #}
+{# NOTE: Overriding with a demo class for positioning only, since that is normally dictated by our JS #}
+<ul class="context-menu context-menu-positioning" role="menubar">
+  <li>Edit</li>
+  <li>Delete</li>
+  <li>Give myself a million dollars</li>
+  <li>Go Back</li>
+</ul>
+
+{# Tooltips #}
+<div class="tooltip-popup" id="no-after">
+  Example tooltip.
+</div>
+
+<div class="card-dashboard">
+  <h2 class="card-title">Table (with card)</h2>
+  {# Table #}
+  <table class="table-standard">
+    <thead>
+      <tr>
+        <th class="table-header">Header 1</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="table-row">
+        <td class="table-cell">Cell A</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+      </tr>
+      <tr class="table-row">
+        <td class="table-cell">Cell B</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+      </tr>
+      <tr class="table-row">
+        <td class="table-cell">Cell D</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+      </tr>
+      <tr class="table-row">
+        <td class="table-cell">Cell E</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{# Table (no card behind it) #}
+<table class="table-standard">
+  <thead>
+    <tr>
+      <th class="table-header">Header 1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="table-row">
+      <td class="table-cell">Cell A</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+    </tr>
+    <tr class="table-row">
+      <td class="table-cell">Cell B</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+    </tr>
+    <tr class="table-row">
+      <td class="table-cell">Cell D</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+    </tr>
+    <tr class="table-row">
+      <td class="table-cell">Cell E</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
+    </tr>
+  </tbody>
+</table>
+
+{# Greeting Card Example #}
+<div class="card-dashboard" id="greeting-card">
+  <div>Greeting / Time</div>
+  <div class="divider"></div>
+  <div>Weather Info</div>
+</div>
+{% endblock %}
