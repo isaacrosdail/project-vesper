@@ -1,12 +1,12 @@
 
 from flask import Blueprint, jsonify, render_template, request
-
-from app.common.visualization.charts import (create_metric_chart_html,
-                                             get_filtered_dataframe)
-from app.core.constants import DEFAULT_CHART_DAYS
-from app.core.database import database_connection
-from app.modules.time_tracking.models import TimeEntry
 from flask_login import current_user, login_required
+
+from app._infra.database import database_connection
+from app.modules.time_tracking.models import TimeEntry
+from app.modules.time_tracking.repository import TimeTrackingRepository
+from app.shared.constants import DEFAULT_CHART_DAYS
+from app.shared.datetime.helpers import last_n_days_range
 
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
 
@@ -15,36 +15,24 @@ time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templat
 def dashboard():
     
     with database_connection() as session:
-        df = get_filtered_dataframe(session, TimeEntry, current_user.id, "category", "Programming", "duration", DEFAULT_CHART_DAYS)
-        time_entries_graph = create_metric_chart_html(df, "time_entries")
+        repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
+        start_utc, end_utc = last_n_days_range(DEFAULT_CHART_DAYS, current_user.timezone)
+        entries = repo.get_entries_by_category_in_window("Programming", start_utc, end_utc)
 
-        return render_template("time_tracking/dashboard.html",
-                                time_entries_graph=time_entries_graph)
+        return render_template("time_tracking/dashboard.html")
 
 @time_tracking_bp.route('/', methods=["GET", "POST"])
 @login_required
 def time_entries():
     try:
         if request.method == 'POST':
-            # Get JSON data from request => put in dict form_data
-            form_data =  request.get_json()
+            form_data =  request.get_json() # JSON => dict
 
             with database_connection() as session:
-
-                # New TimeEntry with that data
-                new_time_entry = TimeEntry(
-                    category = form_data.get('category'),
-                    duration = float(form_data.get('duration')),
-                    description = form_data.get('description'),
-                )
-                session.add(new_time_entry)
+                timetracking_repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
+                timetracking_repo.create_time_entry(**form_data)
 
                 return jsonify({"success": True, "message": "Time entry added."}), 201
 
-    
-        # No GET => Modal-driven
-        else:
-            return jsonify({"message": "GET arriving soon"}), 200
-    
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

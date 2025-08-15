@@ -1,11 +1,13 @@
- <!-- Main Dashboard UI -->
+{# Main Dashboard UI #}
 
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
 
+{% block content_mod %}content--narrow{% endblock %}
+
 {% block content %}
-<!-- Greeting & Time/Date Card -->
+{# Greeting & Time/Date Card #}
 <section id="greeting-card" class="card-dashboard">
     <div class="time-section">
         <h2 class="card-title">
@@ -15,33 +17,31 @@
                 {{ greeting }}
             {% endif %}
         </h2>
-        <p><span id="time-display">{{ now.strftime("%H:%M:%S") }}</span> | {{ now.strftime("%A, %B %d") }}</p>
+        <p><span id="time-display">{{ now_time }}</span> | {{ now_date }}</p>
     </div>
     <div class="divider"></div>
     <div class="weather-section">
         <div id="weather-temp"></div>
         <div id="weather-sunset"></div>
-        <!-- Learning canvas for our sun :D -->
         <canvas id="sun-canvas" width="200" height="100"></canvas>
     </div>
 
 </section>
 
-<!-- Critical Task Card -->
+{# Critical Task Card #}
 <section id="today-intention-card" class="card-dashboard">
     <h2 class="card-title">Critical Task</h2>
     <p>
         <span>Today's Intention: </span>
         <span id="intention-text" class="placeholder-text">
-            {{ today_intention.intention if today_intention.intention else "What's your focus today?" }}
+            {{ today_intention.intention if today_intention.intention else "FAIL" }}
         </span>
     </p>
 </section>
 
-<!-- Daily Habits Card -->
+{# Daily Habits Card #}
 <section id="daily-habits-card" class="card-dashboard">
     <h2 class="card-title">Daily Habits</h2>
-    <!-- Just print names in UL for now -->
     <ul class="habit-list">
     {% for habit in habits %}
         <li class="habit-item {% if habit_info[habit.id].completed_today %}completed{% endif %}">
@@ -52,8 +52,8 @@
                     data-habit-id="{{ habit.id }}"
                     {% if habit_info[habit.id].completed_today %}checked{% endif %}>
 
-                <span class="habit-title">{{ habit.title }}</span>
-                <span class="habit-streak"> <!-- TODO: Replace with own text classes when we do a typography pass -->
+                <span class="habit-title">{{ habit.name }}</span>
+                <span class="habit-streak" data-streak-count="{{ habit_info[habit.id].streak_count }}">
                     {% if habit_info[habit.id].streak_count > 0 %}🔥{{ habit_info[habit.id].streak_count }}{% endif %}
                 </span>
             </label>
@@ -62,11 +62,11 @@
     </ul>
 </section>
 
-<!-- Daily Check-In Card -->
-<!-- TODO: Scrap our 'data-' things in this card. Used more for storing custom data on elements not for grabbing them -->
+{# Daily Check-In Card #}
+{# TODO: Scrap our 'data-' things in this card. Used more for storing custom data on elements not for grabbing them #}
 <section id="daily-check-in-card" class="card-dashboard">
     <h2 class="card-title">Daily Check-In</h2>
-    <!-- Content: weight, steps, movement (mins), stress (scale), energy (scale) -->
+    {# Content: weight, steps, movement (mins), stress (scale), energy (scale) #}
 
     <div class="form-group">
         <label for="weight">Weight:</label>
@@ -76,64 +76,23 @@
         <label for="steps">Steps:</label>
         <input class="input-inline" type="number" id="steps" min="0" max="100000" step="1" name="steps" data-metric="steps" data-unit="steps" placeholder="0">
     </div>
+    {# TODO: Compute duration from these #}
     <div class="form-group">
-        <label for="movement">Movement:</label>
-        <input class="input-inline" type="number" id="movement" min="0" max="480" name="movement" data-metric="movement" data-unit="minutes" placeholder="mins">
-    </div>
-    <div class="form-group">
-        <label for="stress">Stress:</label>
-        <input class="input-inline" type="range" id="stress" name="stress" data-checkin="stress_level" min="1" max="10">
-    </div>
-    <div class="form-group">
-        <label for="energy">Energy:</label>
-        <input class="input-inline" type="range" id="energy" name="energy" data-checkin="energy_level" min="1" max="10">
-    </div>
-    <div class="form-group">
-        <label for="mood">Mood:</label>
-        <input class="input-inline" type="range" id="mood" name="mood" data-checkin="mood" min="1" max="10">
-    </div>
-
-    <div class="form-group">
-        <label for="sleep_time">Sleep Time</label>
+        <label for="sleep_time">Sleep</label>
         <input class="input-inline" type="time" id="sleep_time" name="sleep_time">
     </div>
     <div class="form-group">
-        <label for="wake_time">Wake Time</label>
+        <label for="wake_time">Wake</label>
         <input class="input-inline" type="time" id="wake_time" name="wake_time">
     </div>
     <div class="form-group">
         <label for="calories">Calories</label>
         <input class="input-inline" type="number" id="calories" min="0" max="10000" step="1" name="calories">
     </div>
-    <div class="form-group">
-        <label for="screen_time">Screen Time</label>
-        <input class="input-inline" type="number" id="screen_time" min="0" max="1440" name="screen_time">
-    </div>
-    <div class="form-group">
-        <label for="room_tidiness">Room Tidiness?</label>
-        <input class="input-inline" type="range" id="room_tidiness" name="room_tidiness" min="1" max="10">
-    </div>
-    <div class="form-group">
-        <!-- Have a "meds list" table? Then select from here in a dropdown -->
-        <!-- Also: Use created_at for time taken? OR allow for option using datetime form -->
-        <label for="med_taken">Med Taken:</label>
-        <input class="input-inline" type="text" id="med_taken" name="med_taken">
-    </div>
-    <div class="form-group">
-        <label for="eod_balance">EOD Balance: </label>
-        <input class="input-inline" type="number" id="eod_balance" min="0" name="eod_balance">
-    </div>
-    <div class="form-group">
-        <!-- Make a button like "-/+ glass"? More optimal size/UX
-         TODO: Add/implements units display + db field here -->
-        <label for="water_intake">Water Intake</label>
-        <input class="input-inline" type="number" id="water_intake" min="0" max="300" name="water_intake">
-    </div>
 </section>
 
-<!-- Activity Log Entry Card -->
-<!-- Roll our own JS validation for this instead of using form and intercepting with .preventDefault() -->
-<!-- TODO: Consider converting this to a modal rather than being sorta an inline input? -->
+{# Activity Log Entry Card #}
+{# TODO: Consider converting this to a modal rather than being sorta an inline input? #}
 <section id="activity-log-card" class="card-dashboard">
     <button class="btn btn-primary" id="time-entry-modal-btn">Add Time Entry</button>
     <dialog id="time-entry-modal">
@@ -154,7 +113,7 @@
                     <input type="text" id="description" name="description">
                 </div>
                 <button type="button" class="btn btn-primary" id="save-entry-btn">Save Entry</button>
-                <!-- <button type="button" class="btn btn-secondary" id="time-entry-modal-close-btn">Close</button> -->
+                <button type="button" class="btn btn-secondary" id="time-entry-modal-close-btn">Close</button>
             </fieldset>
         </form>
     </dialog>
@@ -162,6 +121,4 @@
 
 {% endblock %}
 
-{% block scripts %}
-    <script src="{{ url_for('static', filename = 'js/core/index.js') }}"></script>
-{% endblock %}
+{% block scripts %}{% endblock %}

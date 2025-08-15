@@ -1,30 +1,36 @@
-from sqlalchemy import String, Column, Float, Integer
+from sqlalchemy import Column, Float, Integer, String, Time
 
-from app.core.db_base import Base
+from app._infra.db_base import Base
 
-# Daily Intention Model - to let intentions persist
+
 class DailyIntention(Base):
+    intention = Column(String(200), server_default="What's your focus today?")
 
-    intention = Column(String(200))
+    def __repr__(self):
+        return f"<Intention id={self.id} text={self.intention}>"
 
-# Daily Metric Model - Quantitative stuff: to store basic metrics like our daily steps counter, for example
-class DailyMetric(Base):
-    # Flexible, quantitative & objective
-    metric_type = Column(String(50), nullable=False) # 'weight', 'steps', 'movement'
-    unit = Column(String(20), nullable=False)         # 'lbs',    'steps', 'minutes'
-    value = Column(Float)
+class DailyEntry(Base):
+    """Stores everything in "master" units, converts based on user preferences."""
+    weight = Column(Float)          # kg
+    steps = Column(Integer)         # count
+    wake_time = Column(Time)        # Stores time.time(7, 30, 0)
+    sleep_time = Column(Time)
+    calories = Column(Integer)      # kcal
 
-class DailyCheckin(Base):
-    # Fixed fields, quantitative & subjective
-    stress_level = Column(Integer) # 1-10
-    energy_level = Column(Integer) # 1-10
-    mood = Column(Integer)   # maybe?
-    # Can add more scales later
+    def __repr__(self):
+        return f"<DailyEntry id={self.id} created_at={self.created_at}>"
     
-# Daily Reflection Model - Just the qualitative stuff, acts as centralized "day log"
-class DailyReflection(Base):
-
-    reflection = Column(String(2000))       # main reflection text
-    accomplished = Column(String(1000))     # what I accomplished
-    learned_today = Column(String(2000))
-    highlights = Column(String(500))        # Optional, blend of "what went well? what was hard?"
+    @property
+    def populated_metrics(self):
+        """Returns list of metrics which have entries."""
+        metrics = []
+        metric_types = ["weight", "steps", "wake_time", "sleep_time", "calories"]
+        # Get corresponding attribute for each column to see if it's populated
+        # If yes, store in metrics list
+        metrics = [metric_type for metric_type in metric_types if getattr(self, metric_type) is not None]
+        return metrics
+    
+    @property
+    def has_sleep_data(self):
+        """True if both sleep & wake times are stored."""
+        return self.sleep_time is not None and self.wake_time is not None

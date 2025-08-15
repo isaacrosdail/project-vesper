@@ -9,21 +9,8 @@
             <legend>Add new habit:</legend>
             <button type="button" class="modal-close btn btn-destructive" id="modal-close-btn" aria-label="Close">&times;</button>
             <div class="form-group">
-                <label for="title">Habit:</label>
-                <input type="text" id="title" name="title"  required>
-            </div>
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <select name="category"  required>
-                    <option value="">-- Category --</option>
-                    <option value="health">Health</option>
-                    <option value="learning">Learning</option>
-                    <option value="work">Work</option>
-                    <option value="personal">Personal</option>
-                    <!-- Household: walking dog, cleaning kitchen, paying taxes..? Need better term/name -->
-                    <option value="household">Household</option>
-                    <option value="misc">Misc.</option>
-                </select>
+                <label for="name">Habit:</label>
+                <input type="text" id="name" name="name"  required>
             </div>
             <button class="btn btn-primary" type="submit">Submit</button>
         </fieldset>
@@ -35,7 +22,6 @@
         <h2 class="card-title">Habits</h2>
         <button id="add-habit-btn" class="btn btn-primary">Add Habit</button>
     </div>
-    {% set headers = ["Title", "Category", "Created"] %}
     <table class="table-standard">
         <caption class="sr-only">Habits</caption>
         <thead class="table-header">
@@ -55,11 +41,11 @@
                     {% if has_dev_tools %}
                         <td>{{ h.id }}</td>
                     {% endif %}
-                    <td class="editable-cell tooltip" data-item-id="{{ h.id }}" data-module="habits" data-field="title" data-tip="Double-click to edit field.">{{ h.title }}</td>
-                    <td>{{ h.category|capitalize }}</td>
+                    <td class="editable-cell tooltip" data-item-id="{{ h.id }}" data-module="habits" data-field="name" data-tip="Double-click to edit field.">{{ h.name }}</td>
+                    <td>{{ h.status.value|title }}</td>
                     <td>{{ h.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}
@@ -75,8 +61,4 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-    <script src="{{ url_for('static', filename = 'js/habits/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename = 'js/common/tables.js') }}"></script>
-    <script src="{{ url_for('static', filename = 'js/common/tooltip.js') }}"></script>
-{% endblock %}
+{% block scripts %}{% endblock %}

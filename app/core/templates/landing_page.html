@@ -1,4 +1,4 @@
-<!-- Landing page for those not signed in -->
+{# Landing page for those not signed in #}
 
 {% extends  "base.html" %}
 
@@ -10,7 +10,7 @@
     <p>Vesper is a personal "life OS" - starting as a routine tracker and evolving into a home OS + automation platform driven by data.</p>
 
     <div class="form-actions">
-        <form action="{{ url_for('main.init_demo') }}" method="POST">
+        <form action="{{ url_for('auth.init_demo') }}" method="POST">
             <button type="submit" class="btn btn-primary tooltip" data-tip="Sign as a guest & open dashboard.">Try the demo 🚀</button>
         </form>
         <a href="{{ url_for('auth.login') }}" class="btn btn-secondary tooltip" data-tip="Go to the login page">Log in / Sign up</a>
@@ -18,6 +18,4 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename = 'js/common/tooltip.js') }}"></script>
-{% endblock %}
+{% block scripts %}{% endblock %}

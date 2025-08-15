@@ -9,12 +9,9 @@ from alembic import context
 
 load_dotenv()
 
-#from app.core.auth.models import User
-#from app.core.config import DevConfig, ProdConfig, TestConfig, config_map
+from app._infra.db_base import Base  # Import SQLAlchemy Base
 from app.config import config_map
-from app.core.db_base import Base  # Import SQLAlchemy Base
-# import our debug util
-from app.common.debug import debug_config
+from app.shared.debug import debug_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,6 +21,14 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+from app.modules.api.models import *
+from app.modules.auth.models import *
+from app.modules.groceries.models import *
+from app.modules.habits.models import *
+from app.modules.metrics.models import *
+from app.modules.tasks.models import *
+from app.modules.time_tracking.models import *
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -41,14 +46,14 @@ target_metadata = Base.metadata
 # ... etc.
 
 # Get config & set the database URL
-env = os.environ.get('APP_ENV', 'dev')
-config_class = config_map[env]
+#env = os.environ.get('APP_ENV', 'dev')
+#config_class = config_map[env]
 
 # Debug prints to display active config & database URI
-debug_config(env, config_class)
-print(f"[ALEMBIC] Using database: {config_class.SQLALCHEMY_DATABASE_URI}")
+#debug_config(env, config_class)
+#print(f"[ALEMBIC] Using database: {config_class.SQLALCHEMY_DATABASE_URI}")
 
-config.set_main_option('sqlalchemy.url', config_class.SQLALCHEMY_DATABASE_URI)
+#config.set_main_option('sqlalchemy.url', config_class.SQLALCHEMY_DATABASE_URI)
 
 
 def run_migrations_offline() -> None:
