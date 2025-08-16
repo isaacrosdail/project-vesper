@@ -43,7 +43,7 @@
                     <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="metrics" data-field="value" title="Double-click to edit value.">{{ m.value | round }}  ({{ m.unit }})</td>
                     <td class="table-cell">{{ m.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}

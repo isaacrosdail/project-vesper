@@ -4,6 +4,7 @@ Manages database URIs, debug settings, and environment-specific settings.
 """
 import os
 from dotenv import load_dotenv
+from flask.config import Config # hijack Flask's config obj
 
 # Only load .env in non-prod
 if os.getenv("APP_ENV", "dev") != "prod":

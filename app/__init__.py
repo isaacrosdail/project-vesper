@@ -18,8 +18,9 @@ from app.modules.habits.routes import habits_bp
 from app.modules.metrics.routes import metrics_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
+from app.errors import errors_bp
 from app.shared.constants import DEFAULT_LANG
-from app.shared.debug import request_debugging
+from app.shared.debug import setup_request_debugging
 
 
 def has_dev_tools() -> bool:
@@ -31,8 +32,10 @@ def has_dev_tools() -> bool:
 
 # Central app factory => Loads configs, inits extensions, runs DB migrations, registers blueprints, & sets global helpers, too
 # Using our APP_ENV over Flask's built-ins
-def create_app(config_name=None):
-    app = Flask(__name__, template_folder='_templates')
+def create_app(config_name: str = None):
+    # Serve built files from static on prod, unminified on dev
+    static_dir = "static_src" if os.environ.get("APP_ENV") == "dev" else "static"
+    app = Flask(__name__, static_folder=static_dir, template_folder='_templates')
 
     # Determine which config to load, if not passed => read the APP_ENV var, default to dev
     config_name = config_name or os.environ.get('APP_ENV', 'dev')
@@ -55,7 +58,7 @@ def create_app(config_name=None):
     # Print full env info (dev or testing)
     if config_name in ('dev', 'testing'):
         print_env_info(app)
-        request_debugging(app)
+        setup_request_debugging(app)
     
     # Initialize Flask-Login
     login_manager = LoginManager()
@@ -69,7 +72,6 @@ def create_app(config_name=None):
         from app.modules.auth.models import User
         return db_session.get(User, int(user_id))
 
-    # TODO: We need to sort out Plotly's nonsense (injects inline styles/JS) or scrap nonces & strict CSP
     # Before each request: Evaluate has_dev_tools, generate nonce (allows our inline theme JS to execute)
     @app.before_request
     def generate_nonce():
@@ -110,7 +112,7 @@ def create_app(config_name=None):
             alembic_cfg.set_main_option("sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"]) # Make Alembic use the same db URL our Flask app is using instead of whatever APP_ENV/alembic.ini/'alembic/env.py' might try to guess.
             command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
 
-    # Remove session after each request or app context teardown
+    # Hook db_session.remove() into teardown so sessions don't leak
     @app.teardown_appcontext
     def remove_session(exception=None):
         db_session.remove()
@@ -131,3 +133,4 @@ def _register_blueprints(app):
     app.register_blueprint(time_tracking_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(devtools_bp)
+    app.register_blueprint(errors_bp)

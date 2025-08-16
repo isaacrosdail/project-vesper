@@ -1,13 +1,16 @@
-// Currently handles add task modal
+// Currently handles add habit modal
 
-document.addEventListener('DOMContentLoaded', (e) => {
-    const modal = document.querySelector('#add-task-modal');
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.querySelector('#add-habit-modal');
     // Event listener for modal click
     document.addEventListener('click', (e) => {
-        if (e.target.matches('#add-task-btn')) {
+        if (e.target.matches('#add-habit-btn')) {
             modal?.showModal();
         }
-        // TODO: Fix bug => Close causes "input field __ not focusable", doesn't seem to break functionality otherwise
+
+
+
+        // TODO: Fix bug => Close causes "input field __ not focusable", doesn't seem to break functionality
         // just causes validation outline upon reopen
         else if (e.target.matches('#modal-close-btn')) {
             const form = modal.querySelector('form');
@@ -16,7 +19,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
         }
     });
     // Use native 'cancel' event for dialog to make Esc key close modal (a11y)
-    modal.addEventListener('cancel', (e) => {
+    modal.addEventListener('cancel', () => {
         modal.querySelector('form')?.reset();
     });
     // Listen for submit event on modal
@@ -30,6 +33,14 @@ document.addEventListener('DOMContentLoaded', (e) => {
         saveModalFormSubmission(formData, e.currentTarget);
 
     });
+
+    // testing
+    modal?.addEventListener('close', () => {
+        //if (modal.returnValue === 'save') saveStuff();
+        const form = modal.querySelector('form');
+        form?.reset();
+        console.log(`Close triggered with value of: ${modal.returnValue}`);
+    });
 });
 
 // Handle submission for modal
@@ -37,7 +48,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 // in our event listener above, but that incurs rewrites I wouldn't
 // like either
 async function saveModalFormSubmission(formData, modal) {
-    const url = '/tasks';
+    const url = '/habits';
 
     // POST fetch
     try {
@@ -50,12 +61,12 @@ async function saveModalFormSubmission(formData, modal) {
         const responseData = await response.json();
 
         if (responseData.success) {
-            const task = responseData.task;
-            // Debug: console.log(`Task id: ${task.title}`)
+            // const habit = responseData.habit;
+            // Debug: console.log(`habit id: ${habit.title}`)
             modal.querySelector('form').reset(); // Clear form on submit
             modal?.close();
         } else {
-            console.error('Error submitting Task form:', responseData.message);
+            console.error('Error submitting Add Habit form:', responseData.message);
         }
     } catch (error) {
         console.error('Error during fetch request:', error);

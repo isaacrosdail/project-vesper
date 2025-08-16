@@ -2,13 +2,18 @@
 from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
+from flask import (Blueprint, abort, flash, jsonify, redirect, render_template,
+                   request, url_for)
+from flask_login import current_user, login_required, login_user, logout_user
+from sqlalchemy import select
+
 from app._infra.database import database_connection
 from app.modules.auth.models import User
 from app.modules.auth.repository import create_demo_user, create_owner_user
 from app.modules.habits import repository as habits_repo
-from app.modules.habits.habit_logic import (calculate_habit_streak,
-                                            check_if_completed_today)
 from app.modules.habits.models import Habit
+from app.modules.habits.service import (calculate_habit_streak,
+                                        check_if_completed_today)
 from app.modules.metrics import repository as metrics_repo
 from app.modules.metrics.models import DailyIntention
 from app.modules.tasks import repository as tasks_repo
@@ -16,10 +21,6 @@ from app.shared.constants import DEFAULT_LANG
 from app.shared.database.operations import delete_all_db_data
 from app.shared.database.seed.seed_db import seed_data_for
 from app.shared.i18n.messages import msg
-from flask import (Blueprint, abort, flash, jsonify, redirect, render_template,
-                   request, url_for)
-from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import select
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 

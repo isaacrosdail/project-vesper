@@ -70,7 +70,7 @@ function editIntention(element) {
 
     // Now set up event listeners for our blur event (to save => call updateIntention)
     input.addEventListener('blur', function() {
-        if (input.value.trim() != '') {
+        if (input.value.trim() !== '') {
             updateIntention(element, input.value); // pass our new text
         } else {
             element.innerHTML = originalText; // Don't save if input is left empty
@@ -78,7 +78,7 @@ function editIntention(element) {
     });
     // Trigger blur on enter key
     input.addEventListener('keydown', function(event) {
-        if (event.key == 'Enter') {
+        if (event.key === 'Enter') {
             input.blur();
         }
     });

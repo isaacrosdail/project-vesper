@@ -1,9 +1,13 @@
 {
     "compilerOptions": {
-        "outDir": "./app/static/js/dist",
-        "rootDir": "./app/static/js/src",
-        "noUnusedLocals": false,
-        "noUnusedParameters": false
+        "outDir": "./app/static/js",        // compiled JS destination
+        "rootDir": "./app/static_src/js",   // TS source files location
+        "strict": true,                     // enables all the strict type checks: null checks, implicit any, etc.?
+        "esModuleInterop": true,            // lets us import CommonJS modules ('require') with ES-style import?
+        "noUnusedLocals": false,            // True = compiler errors on unused local variables (leaving as False while learning)
+        "skipLibCheck": true,               // Don't type-check .d.ts files from libraries
+        "noUnusedParameters": true          // True = errors when function params aren't used
     },
-    "exclude": ["**/*"]
+    "include": ["app/static_src/js/**/*.ts"],
+    "exclude": ["node_modules"]
 }

@@ -1,13 +1,13 @@
 <!-- Base Class Template -->
 
-{% import '_macros/misc.html' as styles %}
+{% import '_macros/misc.html' as ui %}
 <!DOCTYPE html>
 <html lang="{{ default_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vesper{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/output.css') }}"> <!-- For Tailwind styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/app.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/logo_v5_white-bg.png') }}">
     <!-- nonce: -->
     <script nonce="{{ nonce }}">

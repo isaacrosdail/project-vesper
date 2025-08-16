@@ -7,7 +7,7 @@
 {% block content %}
 
 <!-- === Background Hierarchy === -->
-<div class="demo-grid-container">
+<div class="demo-grid-container" style="border-radius: var(--border-radius);">
   <div class="swatch" style="background: var(--bg-dark); color: var(--text)">bg-dark / text</div>
   <div class="swatch" style="background: var(--bg); color: var(--text)">bg / text</div>
   <div class="swatch" style="background: var(--bg-light); color: var(--text-muted)">bg-light / text-muted</div>
@@ -19,48 +19,54 @@
   <div class="swatch" style="background: var(--bg); color: var(--text)">text</div>
   <div class="swatch" style="background: var(--bg); color: var(--text-muted)">text-muted</div>
   <div class="swatch" style="background: var(--bg); color: var(--text-destructive)">text-destructive</div>
-  <div class="swatch" style="background: var(--text-inverse); color: var(--bg)">text-inverse</div>
+  <div class="swatch" style="background: var(--text); color: var(--bg)">text-inverse</div>
 </div>
 
 <!-- === Border === -->
-<div class="swatch" style="border: 4px solid var(--border-color); background: var(--bg)">border</div>
+<div class="demo-grid-container">
+  <div class="swatch" style="border: 4px solid var(--border-color); background: var(--bg)">border color</div>
+</div>
 
 <!-- === Accent Colors === -->
-<div class="swatch" style="background: var(--accent-darker); color: var(--text)">accent-darker</div>
-<div class="swatch" style="background: var(--accent-lighter); color: var(--text)">accent-lighter</div>
-<div class="swatch" style="background: var(--ui-hover); color: var(--text)">ui-hover</div>
+<div class="demo-grid-container">
+  <div class="swatch" style="background: var(--accent-strong); color: var(--text)">accent-strong</div>
+  <div class="swatch" style="background: var(--accent-subtle); color: var(--text)">accent-subtle</div>
+  <div class="swatch" style="background: var(--ui-hover); color: var(--text)">ui-hover</div>
+</div>
+
 
 <!-- === Selection Colors === -->
 <div class="demo-grid-container">
-<div class="swatch" style="background: var(--bg-selection);">
-  bg-selection
-</div>
+  <div class="swatch" style="background: var(--bg-selection);">
+    bg-selection
+  </div>
   <div class="swatch" style="color: var(--text-selection);">
-  text-selection
+    text-selection
   </div>
 </div>
 
 <!-- === Success & Error === -->
 <div class="demo-grid-container">
-  <div class="swatch" style="background: var(--color-success); color: white">color-success</div>
-  <div class="swatch" style="background: var(--color-error); color: white">color-error</div>
+  <div class="swatch" style="background: var(--color-success); color: var(--text-inverse);">color-success</div>
+  <div class="swatch" style="background: var(--color-error); color: var(--text-inverse);">color-error</div>
 </div>
 
 <hr>
 
-<h1>Component Samples</h2>
+<h1 style="font-size: 1.4rem; text-align: center;">Component Samples</h1>
 <!-- Buttons -->
 <div class="demo-grid-container">
   <button class="btn">Base Button</button>
   <button class="btn btn-primary">Primary Button</button>
   <button class="btn btn-secondary">Secondary Button</button>
 </div>
-<div class="card-dashboard">
+<div class="card-dashboard demo-grid-container">
   <button class="btn btn-secondary">Secondary Button (on card)</button>
+  <button class="btn btn-primary" aria-disabled="true" disabled>Secondary Button (disabled)</button>
 </div>
 <div class="demo-grid-container">
   <button class="btn btn-destructive">Destructive Button</button>
-  {{ styles.delete_btn() }}
+  {{ ui.delete_btn() }}
 </div>
 
 <!-- Inputs -->
@@ -95,19 +101,19 @@
     <tbody>
       <tr class="table-row">
         <td class="table-cell">Cell A</td>
-        <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
       </tr>
       <tr class="table-row">
         <td class="table-cell">Cell B</td>
-        <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
       </tr>
       <tr class="table-row">
         <td class="table-cell">Cell D</td>
-        <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
       </tr>
       <tr class="table-row">
         <td class="table-cell">Cell E</td>
-        <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
       </tr>
     </tbody>
   </table>
@@ -123,19 +129,19 @@
   <tbody>
     <tr class="table-row">
       <td class="table-cell">Cell A</td>
-      <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
     </tr>
     <tr class="table-row">
       <td class="table-cell">Cell B</td>
-      <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
     </tr>
     <tr class="table-row">
       <td class="table-cell">Cell D</td>
-      <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
     </tr>
     <tr class="table-row">
       <td class="table-cell">Cell E</td>
-      <td class="table-cell delete-cell">{{ styles.delete_btn() }}</td>
+      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
     </tr>
   </tbody>
 </table>

@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let arrowX = buttonCenterX - tooltipRect.left; // calc carrot position inside tooltip
             tooltip.style.setProperty('--carrot-pos', `${arrowX}px`);
         });
-        element.addEventListener('mouseleave', (e) => {
+        element.addEventListener('mouseleave', () => {
             // Wipe tooltip on leave
             const tooltip = document.querySelector('#tooltip');
             tooltip?.remove();

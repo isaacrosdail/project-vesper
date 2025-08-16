@@ -57,7 +57,7 @@
                         {{ t.completed_at.strftime("%H:%M") if t.completed_at else '--' }} 
                     </td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}

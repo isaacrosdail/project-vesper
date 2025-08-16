@@ -33,7 +33,7 @@
                     <td class="text-right">{{ t.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="text-right">${{ t.price_per_100g | round(2) }}</td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}
@@ -76,7 +76,7 @@
                     <td class="text-right">{{ p.net_weight }} ({{ p.unit_type }})</td>
                     <td class="text-right">{{ p.calories_per_100g|int if p.calories_per_100g else '-' }}</td> <!-- Int filter |int here to chop of decimals -->
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}

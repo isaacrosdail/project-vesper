@@ -49,7 +49,7 @@ module_name/
 ├── models.py
 ├── repository.py  
 ├── routes.py
-├── services.py    # Business logic (like habit_logic.py)
+├── services.py    # Business logic
 ├── utils.py       # Module-specific utilities only
 └── templates/
 

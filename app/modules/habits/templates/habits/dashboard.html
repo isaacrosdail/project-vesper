@@ -59,7 +59,7 @@
                     <td>{{ h.category|capitalize }}</td>
                     <td>{{ h.created_at.strftime("%d.%m.%Y") }}</td>
                     <td class="table-cell delete-cell">
-                        {{ styles.delete_btn() }}
+                        {{ ui.delete_btn() }}
                     </td>
                 </tr>
                 {% endfor %}

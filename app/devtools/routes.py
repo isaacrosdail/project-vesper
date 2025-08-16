@@ -28,6 +28,4 @@ if os.environ.get('APP_ENV') == 'dev':
     @devtools_bp.route('/style-reference')
     @login_required
     def style_reference():
-        if not current_user.is_owner:
-            abort(403)
         return render_template('style-reference.html')

@@ -4,8 +4,15 @@ import sys
 from flask import Flask, current_app, has_app_context, request
 from sqlalchemy.engine.url import make_url
 
+def should_debug_log(app):
+    """Check if we should enable debug logging based on APP_ENV."""
+    return app.config.get('APP_ENV') in ['dev', 'testing']
 
-# TODO: Using stderr since Flask buffers print output, but there is undoubtedly a better way to do this.
+def should_log_requests(app):
+    """Check if we should log requests based on APP_ENV."""
+    return app.config.get('APP_ENV') == 'dev'
+
+# Prefer Flask's logger, fallback to print if no app context
 def log_info(msg: str) -> None:
     if has_app_context():
         current_app.logger.info(msg)
@@ -21,39 +28,51 @@ def safe_db_uri(uri: str) -> str:
 
 def print_env_info(app: Flask = None):
     """ Print current env & config info for debugging """
-    log_info("\n" + "="*20)
-    log_info("ENVIRONMENT DEBUG INFO")
-    log_info("="*20)
+    # Check if we should debug log
+    if app and not should_debug_log(app):
+        return
+    
+    # Prevent repeated logging on every reload
+    if app and getattr(app, "_config_logged", False):
+        return
+    
+    log_info("="*10 + " ENVIRONMENT DEBUG INFO " + "="*15)
 
     if app:
-        log_info(f"APP_ENV (config): {app.config.get('APP_ENV', "Not set")}")
-    log_info(f"APP_ENV (env var): {os.environ.get('APP_ENV', "Not set (default: dev)")}")
-    log_info(f"FLASK_ENV: {os.environ.get('FLASK_ENV', 'Not set')}")
+        config_env = app.config.get('APP_ENV', 'Not set')
+        env_var = os.environ.get('APP_ENV', 'Not set (default: dev)')
+        log_info(f"Config: {config_env} | APP_ENV: {env_var}")
 
-    # Flask app config
-    if app:
+        # Core flags & DB
         db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')
-        log_info(f"\nActive Config: {app.config.get('ENV', 'Not set')}")
-        log_info(f"DEBUG mode: {app.config.get('DEBUG', False)}")
-        log_info(f"TESTING mode: {app.config.get('TESTING', False)}")
+        is_debug = app.config.get('DEBUG', False)
+        is_testing = app.config.get('TESTING', False)
+        log_info(f"DEBUG: {is_debug} | TESTING: {is_testing}")
         log_info(f"Database URI: {safe_db_uri(db_uri)}")
 
-    log_info("="*20 + "\n")
+        app._config_logged = True # don't repeat on reload
+
+    log_info("="*40)
 
 def debug_config(config_name: str, config_class):
     """ Print which config is being loaded """
     log_info(f"\n[CONFIG] Loading {config_name} config: {config_class.__name__}")
 
 
-def request_debugging(app: Flask = None):
+def setup_request_debugging(app: Flask = None):
+    # Only set up request debugging if in dev config
+    if not should_log_requests(app):
+        return
     @app.before_request
     def debug_everything():
+        # Skip logging for CSS/JS files
         if request.endpoint == 'static':
-            return # skip logging for CSS/JS files
-        log_info("\n== REQUEST DEBUG ==")
-        log_info(f"URL: {request.url}")
-        log_info(f"Method: {request.method}")
-        log_info(f"Endpoint: {request.endpoint}")
-        log_info(f"Form data: {dict(request.form)}")
-        log_info(f"Args: {dict(request.args)}")
-        log_info("====================\n")
+            return
+        
+        prefix = "[request_debug]"
+        log_info(f"{prefix} {request.method} {request.path} ({request.endpoint})")
+        # Only log form data & args if they're not empty
+        if request.form:
+            log_info(f"{prefix} Form data: {dict(request.form)}")
+        if request.args:
+            log_info(f"{prefix} Args: {dict(request.args)}")
