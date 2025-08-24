@@ -68,6 +68,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    volumes:
+      - ./static:/app/static # Map container's /app/static to host's ./static for nginx
 
 
 volumes:
