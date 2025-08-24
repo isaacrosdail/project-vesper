@@ -15,7 +15,7 @@ COPY package*.json ./
 RUN npm install
 
 # Copy frontend source & build config
-COPY static_src/ ./static_src/
+COPY app/static_src/ app/static_src/
 COPY build.mjs ./
 
 # Build minified static assets -> outputs into /app/static
