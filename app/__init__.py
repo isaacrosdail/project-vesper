@@ -1,9 +1,10 @@
 import os
 import secrets
 
-from flask import Flask, g
+from flask import Flask, g, request
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from alembic import command
 from alembic.config import Config as AlembicConfig
@@ -91,11 +92,16 @@ def _register_blueprints(app) -> None:
 def _apply_config(app, config_name) -> None:
     # Takes config class (DevConfig, ProdConfig, etc) from config_map & copy all class attrs into app.config
     app.config.from_object(config_map[config_name])
+    
 
     # Makes sure app.config has an "APP_ENV" key
     # If config class already has APP_ENV defined, does nothing?
     # If it doesn't, it sets it to the value from the class    
     app.config.setdefault("APP_ENV", config_map[config_name].APP_ENV)
+
+    # For Flask to play nice with CSP headers
+    if app.config.get('USE_PROXY_FIX', False):
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 
 def _setup_debug(app, config_name) -> None:
@@ -130,8 +136,14 @@ def _setup_request_hooks(app):
     # Apply CSP headers
     @app.after_request
     def apply_csp(response):
+        # Get current domain
+        current_host = request.host
+        nonce = getattr(g, 'nonce', '')
+
         response.headers['Content-Security-Policy'] = (
             f"default-src 'self'; "
+            f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
+            f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
             f"img-src 'self' data:;"
             f"object-src 'none'; "
             f"base-uri 'self';"

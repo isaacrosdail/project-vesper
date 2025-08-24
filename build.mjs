@@ -20,6 +20,7 @@ const cssResult = await esbuild.build({
     logLevel: 'info',
 });
 
+
 console.log('JS Bundle analysis:')
 console.log(await esbuild.analyzeMetafile(jsResult.metafile))
 
