@@ -48,10 +48,10 @@ services:
     env_file:
       - prod.env
     environment:
-      APP_ENV: prod
-      DATABASE_URI: ${DATABASE_URI}
-      SECRET_KEY: ${SECRET_KEY}
-      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      # APP_ENV: prod
+      # DATABASE_URI: ${DATABASE_URI}
+      # SECRET_KEY: ${SECRET_KEY}
+      # OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
     ports:
       - "5000:5000"
     healthcheck:
