@@ -29,7 +29,7 @@ class DevConfig(BaseConfig):
 
 class ProdConfig(BaseConfig):
     APP_ENV = "prod"
-    AUTO_MIGRATE = False    # Override for prod => auto-migrate in CI instead
+    AUTO_MIGRATE = True    # Override for prod => auto-migrate in CI instead
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
 
