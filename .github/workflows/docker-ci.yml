@@ -21,7 +21,7 @@ jobs:
         port: ${{ secrets.LINODE_PORT }}
         script: |
           cd ${{ secrets.PROJECT_PATH }}
-          git pull
+          git fetch origin main && git reset --hard origin/main
           
           # Restart Docker containers
           docker compose -f docker-compose.prod.yml down
