@@ -69,7 +69,7 @@ services:
         max-size: "10m"
         max-file: "3"
     volumes:
-      - ./app/static:/app/static  # Host dir : Container dir
+      - /var/www/project-vesper/static:/app/static  # Host dir : Container dir
 
 volumes:
   pgdata-prod:
