@@ -47,7 +47,9 @@
             <form action="{{ url_for('auth.reset_dev') }}" method="POST">
                 <button type="submit" class="btn btn-primary">Reset DEV</button>
             </form>
+            {% if config.APP_ENV == 'dev' %}
             <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Theme Demo Page</a><br>
+            {% endif %}
             <button type="submit" id="close-dev-modal-btn">Close</button>
         </dialog>
         {% endif %}
