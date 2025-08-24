@@ -14,9 +14,9 @@ RUN apt-get update && apt-get install -y curl && \
 COPY package*.json ./
 RUN npm install
 
-# Copy frontend source
+# Copy frontend source & build config
 COPY static_src/ ./static_src/
-COPY tailwind.config.js postcss.config.js ./
+COPY build.mjs ./
 
 # Build minified static assets -> outputs into /app/static
 RUN npm run build
