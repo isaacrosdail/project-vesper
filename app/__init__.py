@@ -1,7 +1,7 @@
 import os
 import secrets
 
-from flask import Flask, g
+from flask import Flask, g, request
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -136,10 +136,14 @@ def _setup_request_hooks(app):
     # Apply CSP headers
     @app.after_request
     def apply_csp(response):
+        # Get current domain
+        current_host = request.host
+        nonce = getattr(g, 'nonce', '')
+
         response.headers['Content-Security-Policy'] = (
             f"default-src 'self'; "
-            f"script-src 'self' https://vesper.isaacrosdail.com; "
-            f"style-src 'self' https://vesper.isaacrosdail.com; "
+            f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
+            f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
             f"img-src 'self' data:;"
             f"object-src 'none'; "
             f"base-uri 'self';"
