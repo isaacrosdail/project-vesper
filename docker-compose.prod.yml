@@ -12,12 +12,13 @@ services:
     # Use 'expose' to document port
     expose:
       - "5432"
-    env_file:
+    env_file: # only puts vars inside the container at runtime - does not provide vals for Compose's variable substitution
+    # Default behavior is reads .env, hence why using ${DB_USER} worked before. When specifying env_file, tho, that goes out the window, and substitutions become pointless?
       - prod.env
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+    # environment:
+    #   POSTGRES_USER: ${DB_USER}
+    #   POSTGRES_PASSWORD: ${DB_PASSWORD}
+    #   POSTGRES_DB: ${DB_NAME}
     volumes:
       - pgdata-prod:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
