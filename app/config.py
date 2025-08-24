@@ -15,6 +15,7 @@ class BaseConfig:
     DEFAULT_TZ = "Europe/London" # default TZ to be used for some stuff
     APP_ENV = "base"
     AUTO_MIGRATE = True     # Default to run migrations on startup
+    USE_PROXY_FIX = False
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-me")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -30,6 +31,7 @@ class DevConfig(BaseConfig):
 class ProdConfig(BaseConfig):
     APP_ENV = "prod"
     AUTO_MIGRATE = True    # Override for prod => auto-migrate in CI instead
+    USE_PROXY_FIX = True   # For playing nice with our CSP/nginx headers
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
 
