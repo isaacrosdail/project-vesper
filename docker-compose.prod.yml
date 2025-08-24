@@ -2,9 +2,7 @@
 # Keeps current dbs we already have set up
 services:
   db:
-    build:
-      context: . # TODO: NOTES: Use the current folder as the build context (everything not ignored by .dockerignore is sent to the Docker daemon for COPY/ADD)
-      dockerfile: Dockerfile.postgres
+    image: postgres:17.4
     container_name: vesper-db-prod
     # ports:
       # - "5432:5432" <= Doing this on our DB publishes the DB to the host
@@ -24,7 +22,7 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
     healthcheck:
       # The actual command to run inside the container
-      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"POSTGRES_DB\" -h 127.0.0.1"] # returns 'accepting connections' if up
+      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -h 127.0.0.1"] # returns 'accepting connections' if up
       interval: 30s     # How often to run the health check (default: 30s)
       timeout: 5s       # Max time to wait for the command to finish (default: 30s)
       # start-period: 10s # Grace period after container starts before failures count (default: 0s)
