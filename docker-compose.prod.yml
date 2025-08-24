@@ -52,14 +52,14 @@ services:
       # OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
     ports:
       - "5000:5000"
-    healthcheck:
-      # Point curl to our devtools /health route & fail fast
-      # TODO: NOTES: Study these flags a bit
-      test: ["CMD", "curl", "-fsS", "-m", "2", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 5s
-      # start-period: 10s
-      retries: 3
+    # healthcheck:
+    #   # Point curl to our devtools /health route & fail fast
+    #   # TODO: NOTES: Study these flags a bit
+    #   test: ["CMD", "curl", "-fsS", "-m", "2", "http://localhost:5000/health"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   # start-period: 10s
+    #   retries: 3
     restart: always
     # TODO: NOTES: Docker keeps container logs in JSON files. Without rotation, they can grow forever?
     logging:
