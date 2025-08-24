@@ -1,131 +1,29 @@
 # Project Vesper
-Vesper is a personal dashboard + home assistant hybrid focused on intelligent habit tracking, system automation, and self-accountability.
+A personal productivity platform currently in development.
 
-## Core Features
-- Daily habit prompts (anchor routines, reflections)
-- Major goal logging and intention tracking
-- Future: Voice, barcode, and gesture control
-- Modular, expandable system
+## Current Status
+This is an active development project focused on creating a solid foundation before expanding features. 
+The core architecture and infrastructure are in place, with individual modules at various stages of completion.
 
-## Modules
-- Pomodoro Timer
-- Grocery scanning with database to enable shopping tracking, etc (eventually budgeting & calories, TBD)
-- Scanning module (centralized functions for other modules in future)
+### Currently Have:
+- User authentication & registration
+- Multi-module Flask architecture
+- PostgreSQL database with migrations
+- Core CRUD operations for all modules
+- Development environment + production deployment on cloud
+
+### Currently Working On:
+- Writing comprehensive tests
+- Improving UX & implementing data visualization
+- Expanding habit module's business logic
   
 ## Tech Stack
-**Languages & Frameworks**: Python, Flask/Jinja2, SQLAlchemy  
-**Frontend**: HTML, JS, TailwindCSS  
-**Database**: PostgreSQL (via Docker; originally SQLite)  
-**Testing**: Pytest (with coverage via pytest-cov)  
-**Tools**: VScode, Git, Docker  
+**Backend**: Python, Flask, SQLAlchemy, PostgreSQL
+**Frontend**: HTML, JavaScript/TS, CSS
+**Development**: Docker, pytest, npm toolchain
 
-## Notes to Self (Organize Me):
-Python dependencies: pip install -r requirements.txt
-Node.js dependencies: npm install
 
-# Common commands
-npm run dev
-npm audit fix  # Fix security issues
-pip freeze > requirements.txt   # Update Python deps
 
-# Makefile?
-install:
-  pip install -r requirements.txt
-  npm install
-
-audit:
-  npm audit fix
-  pip-audit  # if i use it
-
-clean:
-  rm -rf node_modules/
-  rm -rf __pycache__/
-
-## Note to self:
-Module structure:
-
-module_name/
-├── __init__.py
-├── models.py
-├── repository.py  
-├── routes.py
-├── services.py    # Business logic
-├── utils.py       # Module-specific utilities only
-└── templates/
 
 ## Attributions
 Weather data provided by [OpenWeatherMap](https://openweathermap.org/), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
-
-
-
-## TIDY (From DEV_SETUP.md):
-# Development Setup
-
-## Docker Configs
-- `docker-compose.yml` - Local development (database only)
-- `docker-compose.prod.yml` - Full production stack with Nginx
-- `docker-compose.pi.yml` - My Raspberry Pi deployment
-
-## Development Tools
-
-### TypeScript & Linting
-
-**Commands:**
-- `npm run lint` - Check for issues
-
-### Pre-Commit Hooks
-Husky runs automatic checks before each commit:
-- Linting
-- Type checking
-- Security audit
-
-To bypass: `git commit --no-verify` OR (for the session) simply do `export HUSKY=0`
-
-## Setup / General Config Stuff
-
-1. Install Docker (on linux)
-```
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo apt install docker-compose
-```
-
-2. Install Node.js (on linux)
-```
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-apt-get install -y nodejs
-```
-
-## Package.json Scripts:
-```json
-"build": "cross-env NODE_ENV=production tailwindcss -i .app/static/css/input.css -o .app/static/css/output.css --minify"
-```
-```json
-"scripts": {
-"tailwind": "npx tailwindcss -i ./app/static/css/style.css -o ./app/static/css/output.css --watch",
-"flask": "flask run --debug",
-"sync": "browser-sync start --proxy localhost:5000 --files 'app/**/templates/**/*.html' 'static/css/*.css'",
-"dev": "concurrently \"npm:tailwind\" \"npm:flask\" \"npm:sync\""
-}
-```
-
-## Dependencies Reasoning
-- cross-env ->
-- browser-sync -> Live reloads, part of npm run dev script
-- concurrently -> ????
-
-
-## TODOS:
-1. D3.js (in leiu of Plotly)
-2. Caching, memoization, repository pattern
-3. Grafana
-
-## Mentionables? TODO: PRUNE THIS
-Module-based structure with blueprints
-Repository pattern (partially implemented)
-Database migrations with Alembic
-User authentication with Flask-Login
-Proper environment configs
-Docker containerization
-Testing infrastructure
-CI/CD pipeline
