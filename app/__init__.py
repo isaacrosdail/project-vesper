@@ -132,6 +132,8 @@ def _setup_request_hooks(app):
     def apply_csp(response):
         response.headers['Content-Security-Policy'] = (
             f"default-src 'self'; "
+            f"script-src 'self' https://vesper.isaacrosdail.com; "
+            f"style-src 'self' https://vesper.isaacrosdail.com; "
             f"img-src 'self' data:;"
             f"object-src 'none'; "
             f"base-uri 'self';"
