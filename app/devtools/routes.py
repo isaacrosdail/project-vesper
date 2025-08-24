@@ -26,7 +26,7 @@ def health_check():
 
 # Only register style_reference in development
 if os.environ.get('APP_ENV') == 'dev':
-    @devtools_bp.route('/style-reference')
+    @devtools_bp.route('/style_reference')
     @login_required
     def style_reference():
         return render_template('style-reference.html')

@@ -20,13 +20,13 @@ services:
     volumes:
       - pgdata-prod:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
-    healthcheck:
-      # The actual command to run inside the container
-      test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -h 127.0.0.1"] # returns 'accepting connections' if up
-      interval: 30s     # How often to run the health check (default: 30s)
-      timeout: 5s       # Max time to wait for the command to finish (default: 30s)
-      # start-period: 10s # Grace period after container starts before failures count (default: 0s)
-      retries: 3        # Allowed consecutive failures before marking unhealthy (default: 3)
+    # healthcheck:
+    #   # The actual command to run inside the container
+    #   test: ["CMD-SHELL", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\" -h 127.0.0.1"] # returns 'accepting connections' if up
+    #   interval: 30s     # How often to run the health check (default: 30s)
+    #   timeout: 5s       # Max time to wait for the command to finish (default: 30s)
+    #   # start-period: 10s # Grace period after container starts before failures count (default: 0s)
+    #   retries: 3        # Allowed consecutive failures before marking unhealthy (default: 3)
     restart: always
     # TODO: NOTES: Docker keeps container logs in JSON files. Without rotation, they can grow forever?
     logging:

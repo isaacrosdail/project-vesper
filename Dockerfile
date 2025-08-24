@@ -10,16 +10,29 @@ RUN apt-get update && apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
 
-# Copy Node dependencies
-COPY package*.json ./
+# Copy Node dependencies to container root
+COPY package*.json /
 RUN npm install
 
-# Copy frontend source & build config
-COPY app/static_src/ app/static_src/
-COPY build.mjs ./
+# Copy frontend source to /app/static_src/
+# and build.mjs to container root
+COPY app/static_src/ ./static_src/
+COPY build.mjs /
 
 # Build minified static assets -> outputs into /app/static
+WORKDIR /
 RUN npm run build
+## might not need this one below
+WORKDIR /app
+
+# DEBUG: Let's see what actually exists
+RUN echo "=== PWD ===" && pwd
+RUN echo "=== LS -LA ===" && ls -la
+RUN echo "=== FIND STATIC ===" && find . -name "*static*" -type d
+RUN echo "=== FIND JS/CSS FILES ===" && find . -name "*.js" -o -name "*.css" | head -10
+
+# Debug: see what actually got built
+RUN ls -la /app/ && find /app -name "*.css" -o -name "*.js" | head -10
 
 # =====================
 # Stage 2: Runtime
@@ -27,17 +40,18 @@ RUN npm run build
 FROM python:3.12-slim
 WORKDIR /app
 
-# Install Python dependencies first for caching?
-COPY requirements.txt .
+# Install Python dependencies to root
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy built static assets from builder
+# From /app/static to /app/static
 COPY --from=builder /app/static ./static
 
 # Copy application code & migrations
-COPY app/ ./app
-COPY alembic/ ./alembic
-COPY alembic.ini flask_app.py wsgi.py ./
+COPY app/ /app
+COPY alembic/ /alembic/
+COPY alembic.ini flask_app.py wsgi.py /
 
 # Create user & switch
 RUN adduser --disabled-password appuser && \
@@ -46,4 +60,5 @@ USER appuser
 
 ENV FLASK_APP=flask_app.py
 EXPOSE 5000
+WORKDIR /
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
