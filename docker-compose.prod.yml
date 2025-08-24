@@ -68,6 +68,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    volumes:
+      - ./static:/app/static:rw  # Host dir : Container dir
 
 volumes:
   pgdata-prod:
