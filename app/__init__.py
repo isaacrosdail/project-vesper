@@ -134,18 +134,18 @@ def _setup_request_hooks(app):
         )
     
     # Apply CSP headers
-    @app.after_request
-    def apply_csp(response):
-        # Get current domain
-        current_host = request.host
-        nonce = getattr(g, 'nonce', '')
+    # @app.after_request
+    # def apply_csp(response):
+    #     # Get current domain
+    #     current_host = request.host
+    #     nonce = getattr(g, 'nonce', '')
 
-        response.headers['Content-Security-Policy'] = (
-            f"default-src 'self'; "
-            f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
-            f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
-            f"img-src 'self' data:;"
-            f"object-src 'none'; "
-            f"base-uri 'self';"
-        )
-        return response
+    #     response.headers['Content-Security-Policy'] = (
+    #         f"default-src 'self'; "
+    #         f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
+    #         f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
+    #         f"img-src 'self' data:;"
+    #         f"object-src 'none'; "
+    #         f"base-uri 'self';"
+    #     )
+    #     return response
