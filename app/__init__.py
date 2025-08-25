@@ -47,10 +47,7 @@ def create_app(config_name: str = None):
     if config_name not in config_map:
         raise RuntimeError(f"Unknown APP_ENV '{config_name}'")
 
-    # Serve built files from static on prod, unminified on dev
-    # TODO: FIX DEVEE BELOW
-    static_dir = "static_src" if os.environ.get("APP_ENV") == "devee" else "static"
-    app = Flask(__name__, static_folder=static_dir, template_folder='_templates')
+    app = Flask(__name__, template_folder='_templates')
 
     _apply_config(app, config_name)
     _setup_debug(app, config_name)
