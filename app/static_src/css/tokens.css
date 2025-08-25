@@ -60,8 +60,8 @@
     /* =============== DARK THEME DEFINITIONS =============== */
 
     /* Background Hierarchy */
-    --dark-bg-dark: hsl(0 0% 0%);
-    --dark-bg: hsl(0 0% 5%);
+    --dark-bg-dark: oklch(11.492% 0.00001 271.152);
+    --dark-bg: oklch(0.18 0 0);
     --dark-bg-light: hsl(0 0% 10%);
 
     /* Text Hierarchy */

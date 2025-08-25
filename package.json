@@ -19,11 +19,11 @@
     "wait-on": "^8.0.4"
   },
   "scripts": {
-    "build": "node build.mjs",
-    "dev": "concurrently -k -p \"[{name}]\" -n esbuild,flask,sync \"npm run build:watch\" \"npm run flask:dev\" \"npm run sync\"",
+    "build": "node build.mjs --prod",
     "build:watch": "node build.mjs --watch",
+    "dev": "concurrently -k -p \"[{name}]\" -n esbuild,flask,sync \"npm:build:watch\" \"npm:flask:dev\" \"npm:sync\"",
     "flask:dev": "flask run --debug",
-    "sync": "wait-on tcp:127.0.0.1:5000 --timeout 5000 && browser-sync start --proxy http://127.0.0.1:5000 --port 5001 --files \"app/_templates/**/*.html, app/static/**/*\" --open local",
+    "sync": "wait-on tcp:127.0.0.1:5000 --timeout 5000 && browser-sync start --proxy http://127.0.0.1:5000 --port 5001 --files \"app/_templates/**/*.html, app/static_src/**/*\" --open local",
     "typecheck": "tsc --noEmit",
     "lint": "eslint app/static_src/js",
     "lint:fix": "npm run ts:check && eslint app/static_src/js app/**/*.ts app/**/*.js --fix",

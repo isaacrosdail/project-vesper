@@ -24,6 +24,7 @@
         "**/.husky": true,
         "alembic/README": true,
         "alembic/script.py.mako": true,
+        "nginx/**": true,
     },
     "search.exclude": {
         "node_modules/": true,

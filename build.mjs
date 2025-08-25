@@ -1,28 +1,49 @@
 import * as esbuild from 'esbuild';
 
+const isWatch = process.argv.includes('--watch');
+const isProd = process.argv.includes('--prod');
+
 // Build JS/TS
-const jsResult = await esbuild.build({
+const jsOptions = {
   entryPoints: ['app/static_src/js/app.js'],
-  bundle: true,
   outfile: 'app/static/js/bundle.js',
-  minify: true,
+  bundle: true,
+  sourcemap: !isProd,
+  minify: isProd,
+  format: 'esm',
   metafile: true,
   logLevel: 'info',
-});
+};
 
 // Build CSS
-const cssResult = await esbuild.build({
+const cssOptions = {
     entryPoints: ['app/static_src/css/app.css'],
-    bundle: true,
     outfile: 'app/static/css/app.css',
-    minify: true,
+    bundle: true,
+    sourcemap: !isProd,
+    minify: isProd,
     metafile: true,
     logLevel: 'info',
-});
+};
 
+const jsContext = await esbuild.context(jsOptions);
+const cssContext = await esbuild.context(cssOptions);
 
-console.log('JS Bundle analysis:')
-console.log(await esbuild.analyzeMetafile(jsResult.metafile))
+if (isWatch) {
+  await jsContext.watch();
+  await cssContext.watch();
+  console.log('[esbuild] Watching...')
+} else {
+  const jsResult = await jsContext.rebuild();
+  const cssResult = await cssContext.rebuild();
 
-console.log('\nCSS Bundle analysis:')
-console.log(await esbuild.analyzeMetafile(cssResult.metafile))
+  console.log('JS Bundle analysis:');
+  console.log(await esbuild.analyzeMetafile(jsResult.metafile));
+
+  console.log('\nCSS Bundle analysis:');
+  console.log(await esbuild.analyzeMetafile(cssResult.metafile));
+
+  await jsContext.dispose();
+  await cssContext.dispose();
+}
+

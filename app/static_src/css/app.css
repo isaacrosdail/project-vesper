@@ -248,7 +248,6 @@ nav {
 
 
 /* ==== MEDIA QUERIES ==== */
-/* Small screens only =>  Hide desktop nav & show hamburger button */
 @media (width <= 640px) {
     .navlinks {
         display: none;
