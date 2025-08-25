@@ -80,8 +80,8 @@ services:
       target: static-server
     # Listen on port 80 inside container (nginx.conf => listen 80;)
     ports:
-      - "8080:80"    # host port 8080, container port 80
-      - "8443:443"   # host port 8443, container port 443
+      - "80:80"    # host port 8080, container port 80
+      - "443:443"   # host port 8443, container port 443
     depends_on:
       - flask
     user: "0:0" # run nginx service as root so it can read certs
