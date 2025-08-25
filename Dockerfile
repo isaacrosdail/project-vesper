@@ -37,7 +37,7 @@ RUN ls -la /app/ && find /app -name "*.css" -o -name "*.js" | head -10
 # =====================
 # Stage 2: Runtime
 # =====================
-FROM python:3.12-slim
+FROM python:3.12-slim AS flask-app
 WORKDIR /app
 
 # Install Python dependencies to root
@@ -62,3 +62,16 @@ ENV FLASK_APP=flask_app.py
 EXPOSE 5000
 WORKDIR /
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+
+
+# =====================
+# Stage 3: NGINX Static Server
+# =====================
+FROM nginx:alpine AS static-server
+
+# Copy static files from the builder
+COPY --from=builder /app/static /usr/share/nginx/html
+
+# Copy nginx config INTO container
+# Overwrites Nginx's default config with ours
+COPY nginx/nginx.conf /etc/nginx/nginx.conf

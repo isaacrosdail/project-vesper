@@ -31,16 +31,17 @@ services:
     # TODO: NOTES: Docker keeps container logs in JSON files. Without rotation, they can grow forever?
     logging:
       driver: json-file
-      # This keep ~30MB max per service (3 files * 10MB)
+      # This keeps ~30MB max per service (3 files * 10MB)
       options:
         max-size: "10m"
         max-file: "3"
 
   # Service for Flask app
-  web:
+  flask:
     build:
       context: .
       dockerfile: Dockerfile
+      target: flask-app
     depends_on:
       - db
     env_file:
@@ -50,6 +51,8 @@ services:
       # DATABASE_URI: ${DATABASE_URI}
       # SECRET_KEY: ${SECRET_KEY}
       # OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+    expose:
+      - "5000"
     ports:
       - "5000:5000"
     # healthcheck:
@@ -68,9 +71,23 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    volumes:
-      - /var/www/project-vesper/static:/app/static  # Host dir : Container dir
+    # volumes:
+    #   - /var/www/project-vesper/static:/app/static  # Host dir : Container dir
 
+  nginx:
+    build:
+      context: .
+      target: static-server
+    # Listen on port 80 inside container (nginx.conf => listen 80;)
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - flask
+    user: "0:0" # run nginx service as root so it can read certs
+    volumes:
+      - /etc/letsencrypt/archive/vesper.isaacrosdail.com/fullchain1.pem:/etc/nginx/certs/fullchain.pem:ro
+      - /etc/letsencrypt/archive/vesper.isaacrosdail.com/privkey1.pem:/etc/nginx/certs/privkey.pem:ro
 volumes:
   pgdata-prod:
     name: vesper-pgdata-prod
