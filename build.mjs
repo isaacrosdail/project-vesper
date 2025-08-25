@@ -1,4 +1,6 @@
 import * as esbuild from 'esbuild';
+import fs from 'fs';
+import path from 'path';
 
 // Build JS/TS
 const jsResult = await esbuild.build({
@@ -18,6 +20,17 @@ const cssResult = await esbuild.build({
     minify: true,
     metafile: true,
     logLevel: 'info',
+});
+
+// Simply copy over non-bundled assets
+const staticFiles = ['img/favicons/favicon.png']
+staticFiles.forEach(file => {
+    const src = path.join('app/static_src', file);
+    const dest = path.join('app/static', file);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest);
+      console.log(`Copied ${file}`);
+    }
 });
 
 console.log('JS Bundle analysis:')
