@@ -71,8 +71,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    # volumes:
-    #   - /var/www/project-vesper/static:/app/static  # Host dir : Container dir
+    volumes:
+      - ./app/static_src/img/favicons/favicon.png:/app/static/img/favicons/favicon.png:ro
 
   nginx:
     build:
