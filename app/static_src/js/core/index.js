@@ -408,19 +408,19 @@ export function init() {
     });
 
     document.addEventListener('click', (e) => {
-        const modal = document.querySelector('#time-entry-modal');
+        // const modal = document.querySelector('#time-entry-modal');
 
         if (e.target.matches('#save-entry-btn')) {
             saveTimeEntry(e.target);
         }
-        else if (e.target.matches('#time-entry-modal-btn')) {
-            modal?.showModal();
-        }
-        else if (e.target.matches('#time-entry-modal-close-btn')) {
-            const form = modal?.querySelector('form');
-            form?.reset();
-            modal?.close()
-        }
+        // else if (e.target.matches('#time-entry-modal-btn')) {
+        //     modal?.showModal();
+        // }
+        // else if (e.target.matches('#time-entry-modal-close-btn')) {
+        //     const form = modal?.querySelector('form');
+        //     form?.reset();
+        //     modal?.close()
+        // }
     });
     // Weather setup
     if (hasWeatherSection) {

@@ -20,8 +20,8 @@ def home():
     try:
         with database_connection() as session:
             now = datetime_local(current_user.timezone)
-            now_date = now.strftime("%H:%M:%S")
-            now_time = now.strftime("%A, %B %d")
+            now_time = now.strftime("%H:%M:%S")
+            now_date = now.strftime("%A, %B %d")
 
             if now.hour < 12:
                 greeting = "Good morning"

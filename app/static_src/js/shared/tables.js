@@ -1,6 +1,18 @@
 // Bundler: Auto-runner => wires tables on DOMContentLoaded
 // Functions for our tables, such as editTableField or deleteTableItem?
 
+/**
+ * Creates table row for given item data for realtime modal entries
+ * @param {Object} data - Return data from backend for new item
+ */
+export function makeTableRow(data) {
+    const row = document.createElement("tr");
+
+    // Build cells
+
+}
+
+
 // Currently used by tasks/dashboard & groceries/dashboard
 // DELETE fetch request when clicking delete button
 /**
@@ -11,11 +23,10 @@
  * @param {string} subtype 
  * @returns 
  */
-async function deleteTableItem(module, itemId, subtype = "none") { // Default to none if not passed
+async function deleteTableItem(module, itemId, subtype = "none") {
     if (!confirm(`Are you sure you want to delete this item?`)) return;
 
-    // Construct URL dynamically based on module & itemId
-    const url = `/${module}/${subtype}/${itemId}`
+    const url = `/${module}/${subtype}/${itemId}`;
 
     try {
         const response = await fetch(url, {
@@ -25,15 +36,12 @@ async function deleteTableItem(module, itemId, subtype = "none") { // Default to
         const responseData = await response.json();
 
         if (responseData.success) {
-            // update DOM
             const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
             if (itemRow) itemRow.remove();
         } else {
-            // Route error
             console.error('Failed to delete item:', responseData.message);
         }
     } catch (error) {
-        // If fetch request as a whole failed (network/server errors)
         console.error('Fetch request failed: ', error);
     }
 }
@@ -61,7 +69,7 @@ function editTableField(td, module, field, itemId, subtype) {
     input.focus()           // Focus on the input field for editing
 
     // Listen for blur (click away) or enter to save the update
-    // NOTE: Notice how we're adding another listener for hitting 'enter' below, which actually triggers blur
+    // TODO: NOTES: adding another listener for hitting 'enter' below which triggers blur
     // Isolates the "real change" portion of our logic to only being in one place
     //  what if the user hits enter AND clicks away in rapid succession?
     input.addEventListener('blur', function() {
@@ -115,6 +123,7 @@ async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "
     }
 }
 
+// TODO: Stupid to have such a tiny function
 // Another function to handle "clean up"
 // Remove the input field & display the new title after changes
 /**
@@ -160,11 +169,12 @@ function handleCustomContextMenu(e) {
             menu = document.createElement('ul');
             const menuItems = ['Edit', 'Delete', 'Close'];
         
-            for (const item of menuItems) {
+            const menuElements = menuItems.map(item => {
                 const menuItem = document.createElement('li');
                 menuItem.textContent = item;
-                menu.appendChild(menuItem);
-            }
+                return menuItem;
+            });
+            menuElements.forEach(element => menu.appendChild(element));
             menu.classList.add('context-menu');
         }
 

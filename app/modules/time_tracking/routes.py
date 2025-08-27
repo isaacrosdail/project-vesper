@@ -30,9 +30,19 @@ def time_entries():
 
             with database_connection() as session:
                 timetracking_repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
-                timetracking_repo.create_time_entry(**form_data)
+                new_entry = timetracking_repo.create_time_entry(**form_data)
 
-                return jsonify({"success": True, "message": "Time entry added."}), 201
+                return jsonify({
+                    "success": True, 
+                    "message": "Time entry added.",
+                    "data": {
+                        "id": new_entry.id,
+                        "category": new_entry.category,
+                        "duration": new_entry.duration,
+                        "started_at": new_entry.started_at.toisoformat(), # convert to string
+                        "description": new_entry.description
+                    }
+                }), 201
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

@@ -4,6 +4,7 @@
 // Build DOM node for toast element with specified traits/properties
 // Receives message, then decides _how_ to display it only
 export function makeToast(myMsg) {
+    console.log('Make toast triggered!');
     // Make toast element
     const toast = document.createElement('div');
     toast.classList.add('toast-message');

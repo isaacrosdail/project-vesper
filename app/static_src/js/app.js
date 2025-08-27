@@ -7,6 +7,8 @@ import './shared/tables.js';
 import './shared/theme-manager.js';
 import './shared/toast.js';
 import './shared/tooltip.js';
+import './shared/charts.js';
+import './shared/modal-manager.js';
 
 // Import page-specific modules
 import { init as initCore } from './core/index.js';
@@ -21,8 +23,11 @@ async function initApp() {
         await userStore.fetch();
         console.log('User timezone loaded:', userStore.data.timezone);
     } catch (error) {
-        console.warn('Error loading user timezone: ', error);
         // Fall back to browser timezone
+        userStore.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        console.warn(
+            `Error loading user timezone: ${error}\nFalling back to: ${userStore.data.timezone}`
+        );
     }
     
     // Initialize all page modules (which in turn self-determine if they should init)

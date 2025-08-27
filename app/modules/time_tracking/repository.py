@@ -10,9 +10,10 @@ from app.shared.repository.base import BaseRepository
 
 class TimeTrackingRepository(BaseRepository):
     
-    def create_time_entry(self, started_at: datetime, duration: float, description: str | None = None):
+    def create_time_entry(self, category: str, started_at: datetime, duration: float, description: str | None = None):
         new_time_entry = TimeEntry(
             user_id=self.user_id,
+            category=category,
             started_at=started_at,
             duration=duration,
             description=description
