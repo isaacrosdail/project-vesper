@@ -1,8 +1,21 @@
+{# Navbar template used across site. Note: nav_link macro at bottom of this file #}
+{# === NAV COMPONENTS === #}
+
+{# NOTE: current_user.role is a string, required_role is now an Enum, hence the '.value' #}
+{% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
+    {% if not required_role or (current_user.is_authenticated and current_user.role == required_role.value) %}
+        <a href="{{ url_for(endpoint) }}"
+        class="nav-link {% if current_endpoint == endpoint %}active{% endif %}"
+                        {% if current_endpoint == endpoint %}aria-current="page"{% endif %}>
+            {{ text }}
+        </a>
+    {% endif %}
+{% endmacro %}
 <nav aria-label="Main navigation">
     <div class="navbar-content">
         {# LEFT: Branding & Links #}
         <div class="nav-left">
-            <span class="branding">Vesper</span>
+            <a href="{{ url_for('main.home') }}" class="branding">Vesper</a>
 
             {# Beginning hamburger menu #}
             <button id="hamburger-btn"
@@ -11,22 +24,22 @@
                     aria-label="Toggle navigation menu">
                 ☰
             </button>
-            {# Navlinks: folded/column on mobile, shown row on desktop #}
-            <div class="navlinks" id="navlinks"> {# ID makes assistive tech tie btn + navlinks together? #}
-                {{ ui.nav_link('Home', 'main.home', request.endpoint) }}
+            {# TODO: NOTES: ID makes assistive tech tie btn + navlinks together? #}
+            <div class="navlinks" id="navlinks">
+                {{ nav_link('Home', 'main.home', request.endpoint) }}
 
                 {% if current_user.is_authenticated %}
-                    {{ ui.nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
-                    {{ ui.nav_link('Habits', 'habits.dashboard', request.endpoint) }}
-                    {{ ui.nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
-                    {{ ui.nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
-                    {{ ui.nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
+                    {{ nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
+                    {{ nav_link('Habits', 'habits.dashboard', request.endpoint) }}
+                    {{ nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
+                    {{ nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
+                    {{ nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
 
-                    {{ ui.nav_link('Log out', 'auth.logout', request.endpoint )}}
+                    {{ nav_link('Log out', 'auth.logout', request.endpoint )}}
                 {% endif %}
                 
                 {% if current_user.is_anonymous %}
-                    {{ ui.nav_link('Log in', 'auth.login', request.endpoint) }}
+                    {{ nav_link('Log in', 'auth.login', request.endpoint) }}
                 {% endif %}
 
             </div>

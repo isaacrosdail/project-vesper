@@ -92,31 +92,26 @@
 </section>
 
 {# Activity Log Entry Card #}
-{# TODO: Consider converting this to a modal rather than being sorta an inline input? #}
 <section id="activity-log-card" class="card-dashboard">
-    <button class="btn btn-primary" id="time-entry-modal-btn">Add Time Entry</button>
-    <dialog id="time-entry-modal">
-        <form>
-            <fieldset>
-                <legend class="text-xl font-semibold mb-2">Daily Time Log Entry</legend>
-                <button type="button" class="modal-close btn btn-destructive" id="time-entry-modal-close-btn" aria-label="Close">&times;</button>
-                <div class="form-group">
-                    <label for="category">Category:</label>
-                    <input type="text" id="category" name="category">
-                </div>
-                <div class="form-group">
-                    <label for="duration">Duration:</label>
-                    <input type="number" id="duration" name="duration" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="description">Description (Optional):</label>
-                    <input type="text" id="description" name="description">
-                </div>
-                <button type="button" class="btn btn-primary" id="save-entry-btn">Save Entry</button>
-                <button type="button" class="btn btn-secondary" id="time-entry-modal-close-btn">Close</button>
-            </fieldset>
-        </form>
-    </dialog>
+    <button class="btn btn-primary" id="time-entry-homepage-btn">Add Time Entry</button>
+    {% call ui.modal('time-entry-homepage', 'Add Time Entry') %}
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <input type="text" id="category" name="category">
+        </div>
+        <div class="form-group">
+            <label for="duration">Duration:</label>
+            <input type="number" id="duration" name="duration" min="0">
+        </div>
+        <div class="form-group">
+            <label for="started_at">Started At:</label>
+            <input type="time" id="started_at" name="started_at">
+        </div>
+        <div class="form-group">
+            <label for="description">Description (Optional):</label>
+            <input type="text" id="description" name="description">
+        </div> 
+    {% endcall %}
 </section>
 
 {% endblock %}

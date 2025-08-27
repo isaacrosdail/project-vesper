@@ -11,21 +11,26 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     Notes for custom modals: Keyboard nav, aria-label param,    
 #}
 
-{# === NAV COMPONENTS === #}
 
-{# NOTE: current_user.role is a string, required_role is now an Enum, hence the '.value' #}
+{# === MODALS === #}
 
-{% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
-    {% if not required_role or (current_user.is_authenticated and current_user.role == required_role.value) %}
-        <a href="{{ url_for(endpoint) }}"
-        class="nav-link {% if current_endpoint == endpoint %}active{% endif %}"
-                        {% if current_endpoint == endpoint %}aria-current="page"{% endif %}>
-            {{ text }}
-        </a>
-    {% endif %}
+{# caller() segment here lets us put whatever 'insides' we want in our modals #}
+{# by sandwiching them between 'call ourmacro(ourparameters,..)' and 'endcall' #}
+{# TODO: NOTES: {% call %} doesn't work with a template that doesn't use caller() #}
+{% macro modal(id, title) %}
+<dialog id="{{ id }}-modal">
+    <form>
+        <legend>{{ title }}</legend>
+        <button type="button" class="modal-close btn btn-destructive" id="{{ id }}-modal-close-btn">&times;</button>
+        {{ caller() }}
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</dialog>
 {% endmacro %}
 
+
 {# Link for returning from error page(s) #}
+
 {% macro error_link(text, endpoint) %}
 <a href="{{ url_for(endpoint) }}"
     class="error-link btn btn-primary">
