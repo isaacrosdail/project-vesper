@@ -3,24 +3,18 @@
 {% block title %}Habits{% endblock %}
 
 {% block content %}
-<dialog id="add-habit-modal">
-    <form id="add-habit-form" method="POST">
-        <fieldset>
-            <legend>Add new habit:</legend>
-            <button type="button" class="modal-close btn btn-destructive" id="modal-close-btn" aria-label="Close">&times;</button>
-            <div class="form-group">
-                <label for="name">Habit:</label>
-                <input type="text" id="name" name="name"  required>
-            </div>
-            <button class="btn btn-primary" type="submit">Submit</button>
-        </fieldset>
-    </form>
-</dialog>
+
+{% call ui.modal('habit-entry-dashboard', 'Add Habit') %}
+    <div class="form-group">
+        <label for="name">Habit:</label>
+        <input type="text" id="name" name="name"  required>
+    </div>
+{% endcall%}
 
 <div class="card-dashboard">
     <div class="card-header">
         <h2 class="card-title">Habits</h2>
-        <button id="add-habit-btn" class="btn btn-primary">Add Habit</button>
+        <button id="habit-entry-dashboard-btn" class="btn btn-primary">Add Habit</button>
     </div>
     <table class="table-standard">
         <caption class="sr-only">Habits</caption>
