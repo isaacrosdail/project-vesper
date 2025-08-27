@@ -4,24 +4,17 @@
 
 {% block content %}
 
-<dialog id="add-task-modal">
-    <form id="add-task-form" method="POST">
-        <fieldset>
-            <legend>Add new task:</legend>
-            <button type="button" class="modal-close btn btn-destructive" id="modal-close-btn" aria-label="Close">&times;</button>
-            <div class="form-group">
-                <label for="name">Task:</label>
-                <input type="text" id="name" name="name"  required>
-            </div>
-        </fieldset>
-        <button class="btn btn-primary" type="submit">Submit</button>
-    </form>
-</dialog>
+{% call ui.modal('task-entry-dashboard', 'Add Task') %}
+    <div class="form-group">
+        <label for="name">Task:</label>
+        <input type="text" id="name" name="name"  required>
+    </div>
+{% endcall %}
 
 <div class="card-dashboard">
     <div class="card-header">
         <h2 class="card-title">Tasks</h2>
-        <button id="add-task-btn" class="btn btn-primary">Add Task</button>
+        <button id="task-entry-dashboard-btn" class="btn btn-primary">Add Task</button>
     </div>
     <table class="table-standard">
         <caption class="sr-only">Tasks</caption>
