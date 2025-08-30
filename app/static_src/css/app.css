@@ -97,12 +97,25 @@
     align-items: stretch; /* makes all children same height */
 }
 /* Makes DailyCheckin card consist of grid layout with two columns */
-#daily-check-in-card {
+/* #daily-check-in-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--gap-lg);
+} */
+#daily-habits-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
-
+#daily-habits-card > ul {
+    max-height: 70px;
+}
+#my-day-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+h3 {
+    font-size: var(--font-size-lg);
+}
 
 
 

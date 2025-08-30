@@ -57,12 +57,3 @@ class Transaction(Base):
 	
 	def __repr__(self):
 		return f"<Transaction id={self.id} product_id={self.product_id}>"
-
-	# Human-readable column names
-	COLUMN_LABELS = {
-		"id": "ID",
-		"product_id": "Product ID",
-		"price_at_scan": "Price",
-		"quantity": "Quantity",
-		"created_at": "Created",
-	}
