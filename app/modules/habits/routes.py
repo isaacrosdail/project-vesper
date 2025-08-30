@@ -9,6 +9,7 @@ from app.modules.habits.repository import HabitsRepository
 from app.shared.datetime.helpers import (day_range, parse_js_instant,
                                          today_range)
 from app.shared.sorting import bubble_sort
+from app.modules.habits.viewmodels import HabitPresenter, HabitViewModel
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
@@ -20,13 +21,11 @@ def dashboard(session):
     
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
     habits = habits_repo.get_all_habits_and_tags()
-    bubble_sort(habits, 'created_at', reverse=True)
 
-    # TODO: build_columns() => Make a helper, not internal method
-    headers = ["Name", "Status", "Created"]
+    viewmodels = [HabitViewModel(h, current_user.timezone) for h in habits]
     ctx = {
-        "headers": headers,
-        "habits": habits
+        "headers": HabitPresenter.build_columns(),
+        "habits": viewmodels
     }
     return render_template("habits/dashboard.html", **ctx)
 
