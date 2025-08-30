@@ -24,7 +24,7 @@
                     <th>ID</th>
                 {% endif %}
                 {% for h in headers %}
-                    <th>{{ h }}</th>
+                    <th>{{ h.label }}</th>
                 {% endfor %}
             </tr>
         </thead>
@@ -36,8 +36,8 @@
                         <td>{{ h.id }}</td>
                     {% endif %}
                     <td class="editable-cell tooltip" data-item-id="{{ h.id }}" data-module="habits" data-field="name" data-tip="Double-click to edit field.">{{ h.name }}</td>
-                    <td>{{ h.status.value|title }}</td>
-                    <td>{{ h.created_at.strftime("%d.%m.%Y") }}</td>
+                    <td>{{ h.status_label }}</td>
+                    <td>{{ h.created_at_label }}</td>
                     <td class="table-cell delete-cell">
                         {{ ui.delete_btn() }}
                     </td>

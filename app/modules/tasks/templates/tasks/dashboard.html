@@ -40,17 +40,8 @@
                         {# TODO: NOTES: |safe here to render HTML entities instead of escaping them #}
                         {{ ('&#9745;' if t.is_done else '&#9744;') | safe }}
                     </td>
-                    <td>
-                        {% for tag in t.tags %}
-                            {{ tag.name }}
-                            {% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td class="text-right">{{ t.created_at_local.strftime("%d.%m.%Y") }}</td>
-                    <td class="text-right">
-                        {# EX: 18:09 #}
-                        {{ t.completed_at.strftime("%H:%M") if t.completed_at else '--' }} 
-                    </td>
+                    <td>{{ t.priority.value }}</td>
+                    <td class="text-right">{{ t.due_label }}</td>
                     <td class="table-cell delete-cell">
                         {{ ui.delete_btn() }}
                     </td>
