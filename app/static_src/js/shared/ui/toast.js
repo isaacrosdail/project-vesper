@@ -1,26 +1,45 @@
-// Bundler: Auto-runner (listener) + utility (makeToast)
-// Import + export makeToast() explicitly where needed
 
+class Toast {
+    constructor(message, type = 'info') {
+        this.message = message;
+        this.type = type;
+        this.element = null;
+    }
+
+    createElement() {
+        this.element = document.createElement('div');
+        this.element.classList.add('toast', `toast-${this.type}`);
+        this.element.textContent = this.message;
+        return this.element;
+    }
+
+    // Create + add to DOM
+    show() {
+        if (!this.element) {
+            this.createElement();
+        }
+
+        const container = document.querySelector('#toast-container');
+        container.appendChild(this.element);
+        return this; // for chaining?
+    }
+
+    // Handle hiding/tidying up
+    hide() {
+        if (this.element) {
+            this.element.remove();
+            this.element = null;
+        }
+        return this;
+    }
+}
 // Build DOM node for toast element with specified traits/properties
 // Receives message, then decides _how_ to display it only
-export function makeToast(myMsg) {
-    // Make toast element
-    const toast = document.createElement('div');
-    toast.classList.add('toast-message');
-    // STYLE: NOTE: Using setAttr for consistency even though toast.id = ''; is more idiomatic
-    toast.setAttribute('id', 'toast-message');
-    toast.textContent = myMsg;
-    document.body.appendChild(toast);
-}
+export function makeToast(message, type = 'info', duration = 1000) {
+    console.log('Make toast triggered!');
+    const toast = new Toast(message, type).show();
 
-// Event listener for fade out
-window.addEventListener('DOMContentLoaded', () => {
-    const toast = document.querySelector('#flash-message');
-    if (toast) {
-        setTimeout(() => {
-            toast.style.opacity = '0'; // fade?
-            toast.style.pointerEvents = 'none'; // ?
-            setTimeout(() => toast.remove(), 1000); // then remove after fade
-        }, 2000);
-    }
-});
+    setTimeout(() => toast.hide(), duration); // auto-hide/fade
+
+    return toast; // so the caller can do something with it if desired
+}

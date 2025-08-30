@@ -4,12 +4,30 @@
 {% block title %}Daily Metrics{% endblock %}
 
 {% block content %}
-<div class="charts-container">
-    
-    {# Playground container to check out Plotly #}
-    <div class="metric-graph card-dashboard">
-        {{ weight_graph|safe }} {# |safe is required here to make Jinja not escape HMTL (prevents XSS attacks, but since graph_html is app-generated, safe is good here) #}
+
+{% call ui.modal('/metrics/', 'metric-entry-dashboard', 'Add Metric') %}
+    <div class="tabs">
+        <button type="button" data-tab="steps" class="btn btn-secondary">Steps Entry</button>
+        <button type="button" data-tab="weight" class="btn btn-secondary">Weight Entry</button>
     </div>
+
+    <div class="tab-content" id="tab-steps">
+        <div class="form-group">
+            <label for="steps">Steps:</label>
+            <input type="number" id="steps" name="steps">
+        </div>
+    </div>
+    <div class="tab-content" id="tab-weight" hidden>
+        <div class="form-group">
+            <label for="weight">Weight:</label>
+            <input type="number" id="weight" name="weight">
+        </div>
+    </div>
+
+{% endcall %}
+
+
+<div class="charts-container">
     <div class="metric-graph card-dashboard">
         {{ steps_graph|safe }}
     </div>
@@ -60,7 +78,7 @@
             {% endif %}
         </tbody>
     </table>
-</div>
+</section>
 {% endblock %}
 
 {% block scripts %}{% endblock %}

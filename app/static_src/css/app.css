@@ -80,6 +80,10 @@
     width: 100%;
     aspect-ratio: 16/9; /* fixes one graph being slightly taller than other - check out other options */
 }
+.tabs button.active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
+}
 
 /* ====== CARD STYLINGS ====== */
 /* Now making our greeting card be grid layout within our flexbox content */

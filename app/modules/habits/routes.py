@@ -38,10 +38,9 @@ def habits(session):
     if request.method == "POST":
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
         new_habit = habits_repo.create_habit(request.form.get("name"))
-        flash("Habit added successfully.")
         return jsonify({
             "success": True, 
-            "message": "Habit added successfully.",
+            "message": "Habit added",
             "habit": {
                 "id": new_habit.id,
                 "name": new_habit.name,
