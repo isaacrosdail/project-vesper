@@ -37,17 +37,34 @@ def dashboard():
 # CREATE
 @tasks_bp.route("/", methods=["GET", "POST"])
 @login_required
-def tasks():
+@with_db_session
+def tasks(session):
     if request.method == "POST":
-        with database_connection() as session:
-            tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
-            new_task = tasks_repo.create_task(request.form.get("name"))
-            flash("Task added successfully.") # TODO: Standardize to new format
-            return jsonify({
-                "success": True, 
-                "message": "Task added successfully.",
-                "task": {
-                    "id": new_task.id,
-                    "name": new_task.name
-                }
-            }), 200
+        # Parse form data
+        due_date_str = request.form.get("due_date")
+        # TODO: Hacky & gross, should move this to a helper or something
+        if due_date_str:
+            due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
+            end_of_day_time = time(23, 59, 59)
+            due_datetime = datetime.combine(due_date, end_of_day_time)
+            due_datetime_aware = due_datetime.replace(tzinfo=ZoneInfo(current_user.timezone))
+        else:
+            due_datetime_aware = None
+        priority = Priority(request.form.get("priority", "medium"))
+        is_frog = bool(request.form.get("is_frog"))
+        tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
+        new_task = tasks_repo.create_task(
+            name=request.form.get("name"),
+            priority=priority,
+            is_frog=is_frog,
+            due_date=due_datetime_aware
+        )
+
+        return jsonify({
+            "success": True, 
+            "message": "Task added successfully.",
+            "task": {
+                "id": new_task.id,
+                "name": new_task.name
+            }
+        }), 200
