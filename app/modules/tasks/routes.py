@@ -2,10 +2,13 @@
 from flask import Blueprint, flash, jsonify, render_template, request
 from flask_login import current_user, login_required
 
-from app._infra.database import database_connection
-from app.modules.tasks.models import Task
+from app._infra.database import database_connection, with_db_session
+from app.modules.tasks.models import Task, Priority
 from app.modules.tasks.repository import TasksRepository
 from app.shared.sorting import bubble_sort
+from datetime import datetime, time
+from zoneinfo import ZoneInfo
+from app.modules.tasks.viewmodels import TaskViewModel, TaskPresenter
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
@@ -15,17 +18,16 @@ def dashboard():
 
     try:
         with database_connection() as session:
-            # Column names for Task model
-            task_headers = Task.build_columns()
 
             # Fetch tasks, sort
             tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
             tasks = tasks_repo.get_all_tasks()
-            bubble_sort(tasks, 'created_at_local', reverse=False)
+            
+            viewmodel = [TaskViewModel(t, current_user.timezone) for t in tasks]
 
             ctx = {
-                "task_headers": task_headers,
-                "tasks": tasks
+                "task_headers": TaskPresenter.build_columns(),
+                "tasks": viewmodel
             }
             return render_template("tasks/dashboard.html", **ctx)
         

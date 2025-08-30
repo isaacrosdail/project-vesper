@@ -10,62 +10,48 @@
     </div>
 </div>
 
+
 <section id="activity-log-card" class="card-dashboard">
-    <button class="btn btn-primary" id="time-entry-tracking-btn">Add Time Entry</button>
-
-    {% call ui.modal('time-entry-tracking', 'Add Time Entry') %}
-        {# Now our content from the modal_content block in the macro #}
-        <div class="form-group">
-            <label for="category">Category:</label>
-            <input type="text" id="category" name="category">
-        </div>
-        <div class="form-group">
-            <label for="duration">Duration:</label>
-            <input type="number" id="duration" name="duration" min="0">
-        </div>
-        <div class="form-group">
-            <label for="started_at">Started At:</label>
-            <input type="time" id="started_at" name="started_at">
-        </div>
-        <div class="form-group">
-            <label for="description">Description (Optional):</label>
-            <input type="text" id="description" name="description">
-        </div>
-    {% endcall %}
-</section>
-
-<table class="table-standard">
-    <caption class="sr-only">Time Entries</caption>
-    <thead class="table-header">
-        <tr>
-            {% if has_dev_tools %}
-                <th>ID</th>
-            {% endif %}
-            {% for h in time_entry_headers %}
-                <th>{{ h.label }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% if time_entries %}
-            {% for t in time_entries %}
-            <tr class="table-row" data-item-id="{{ t.id }}" data-module="time_tracking">
-                <td>{{ t.category }}</td>
-                <td>{{ t.duration }}</td>
-                <td>{{ t.started_at.strftime("%d.%m.%Y") }}</td>
-                <td>{{ t.description }}</td>
-                <td class="table-cell delete-cell">
-                    {{ ui.delete_btn() }}
-                </td>
-            </tr>
-            {% endfor %}
-        {% else %}
+    <div class="card-header">
+        <h2 class="card-title">Time Entries</h2>
+        <button id="time-entry-dashboard-btn" class="btn btn-primary">Add Time Entry</button>
+    </div>
+    <table class="table-standard">
+        <caption class="sr-only">Time Entries</caption>
+        <thead class="table-header">
             <tr>
-                <td colspan="999" class="table-empty">
-                    No entries yet.
-                </td>
+                {% if has_dev_tools %}
+                    <th>ID</th>
+                {% endif %}
+                {% for h in time_entry_headers %}
+                    <th>{{ h.label }}</th>
+                {% endfor %}
             </tr>
-        {% endif %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% if time_entries %}
+                {% for t in time_entries %}
+                <tr class="table-row" data-item-id="{{ t.id }}" data-module="time_tracking" data-subtype="timeentry">
+                    {% if has_dev_tools %}
+                        <td>{{ t.id }}</td>
+                    {% endif %}
+                    <td>{{ t.category }}</td>
+                    <td>{{ t.duration_label }}</td>
+                    <td>{{ t.started_at_local }}</td>
+                    <td>{{ t.desc_label }}</td>
+                    <td class="table-cell delete-cell">
+                        {{ ui.delete_btn() }}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="999" class="table-empty">
+                        No entries yet.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</section>
 {% endblock %}

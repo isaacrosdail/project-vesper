@@ -16,10 +16,11 @@
 </div>
 
 
-<div class="card-dashboard">
-    <h2 class="card-title">Daily Metric Entries</h2>
-
-    {% set headers = ["Metric Type", "Value (units)", "Created"] %}
+<section id="metrics-dashboard-table" class="card-dashboard">
+    <div class="card-header">
+        <h2 class="card-title">Daily Metric Entries</h2>
+        <button id="metric-entry-dashboard-btn" class="btn btn-primary">Add Metric</button>
+    </div>
     <table class="table-standard">
         <caption class="sr-only">Metric Entries</caption>
         <thead class="table-header">
@@ -27,21 +28,24 @@
                 {% if has_dev_tools %}
                     <th>ID</th>
                 {% endif %}
-                {% for h in headers %}
-                    <th>{{ h }}</th>
+                {% for h in metric_headers %}
+                    <th>{{ h.label }}</th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% if daily_metrics %}
-                {% for m in daily_metrics %}
+            {% if metrics %}
+                {% for m in metrics %}
                 <tr class="table-row" data-item-id="{{ m.id }}" data-module="daily_metrics" data-subtype="metric">
                     {% if has_dev_tools %}
-                        <td class="table-cell">{{ m.id }}</td>
+                        <td>{{ m.id }}</td>
                     {% endif %}
-                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="daily_metrics" data-field="metric_type" data-subtype="metric" title="Double-click to edit field.">{{ m.metric_type }}</td>
-                    <td class="editable-cell table-cell" data-item-id="{{ m.id }}" data-module="daily_metrics" data-field="value" title="Double-click to edit value.">{{ m.value | round }}  ({{ m.unit }})</td>
-                    <td class="table-cell">{{ m.created_at.strftime("%d.%m.%Y") }}</td>
+                    <td>{{ m.created_at_label }}</td>
+                    <td>{{ m.weight_label }}</td>
+                    <td>{{ m.steps }}</td>
+                    <td>{{ m.wake_time_label }}</td>
+                    <td>{{ m.sleep_time_label }}</td>
+                    <td>{{ m.calories_label }}</td>
                     <td class="table-cell delete-cell">
                         {{ ui.delete_btn() }}
                     </td>
