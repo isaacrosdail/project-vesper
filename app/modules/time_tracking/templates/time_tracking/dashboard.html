@@ -3,6 +3,28 @@
 {% block title %}Time Tracking{% endblock %}
 
 {% block content %}
+
+{% call ui.modal('/time_tracking/', 'time-entry-dashboard', 'Add Time Entry') %}
+    {# Now our content from the modal_content block in the macro #}
+    <div class="form-group">
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category" required>
+    </div>
+    <div class="form-group">
+        <label for="duration">Duration (minutes):</label>
+        <input type="number" id="duration" name="duration" min="0" required>
+    </div>
+    <div class="form-group">
+        <label for="started_at">Started At:</label>
+        <input type="time" id="started_at" name="started_at" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Description (Optional):</label>
+        <input type="text" id="description" name="description">
+    </div>
+{% endcall %}
+
+
 <div class="charts-container">
 
     <div class="card-dashboard">

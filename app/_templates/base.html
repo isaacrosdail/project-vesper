@@ -30,6 +30,8 @@
         </header>
 
         {% include '_partials/_flash.html' %}
+        {{ ui.confirmation_modal() }}
+        {{ ui.toast_container() }}
 
         <main class="content {% block content_mod %}{% endblock %}">
             {% block content %}{% endblock %}
