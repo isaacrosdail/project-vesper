@@ -9,6 +9,7 @@ from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit
 from app.modules.metrics.models import DailyEntry
 from app.modules.tasks.models import Task
+from app.modules.time_tracking.models import TimeEntry
 from app.shared.database.operations import safe_delete
 
 # Blueprint registration
@@ -26,6 +27,7 @@ MODEL_CLASSES = {
     ("tasks", "none"): Task,
     ("habits", "none"): Habit,
     ("metrics", "daily_entry"): DailyEntry,
+    ("time_tracking", "timeentry"): TimeEntry,
 }
 
 def get_model_class(module, subtype: str = "none"):
@@ -38,7 +40,7 @@ def item(session, module, subtype, item_id):
     try:
         model_class = get_model_class(module, subtype) # so 'tasks', 'none' returns Task class
         if model_class is None:
-            current_app.logger.warning("Unknown model for %s%s", module, subtype)
+            current_app.logger.warning(f"Unknown model for {module}, {subtype}")
             abort(404)
 
         item = session.get(model_class, item_id)
@@ -50,7 +52,7 @@ def item(session, module, subtype, item_id):
         check_item_ownership(item, current_user.id)
         
         if request.method == 'PATCH':
-            data = request.get_json() # get request body
+            data = request.get_json()
             for field, value in data.items():
                 setattr(item, field, value)
             return jsonify({"success": True, "message": f"Successfully updated {model_class.__name__}"}), 200

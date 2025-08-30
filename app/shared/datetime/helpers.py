@@ -15,7 +15,7 @@ def parse_js_instant(iso_str: str) -> datetime:
 def now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
-def datetime_local(tz_str: str = 'UTC', dt: datetime | None = None) -> datetime:
+def convert_to_timezone(tz_str: str = 'UTC', dt: datetime | None = None) -> datetime:
     """
     Return a timezone-aware datetime in the given timezone.
 
@@ -33,8 +33,6 @@ def datetime_local(tz_str: str = 'UTC', dt: datetime | None = None) -> datetime:
     else:
         return datetime.now(tz)  # or return 'now' if none provided
 
-    
-
 def start_of_day_utc(dt: datetime, tz: str = "UTC") -> datetime:
     """Get start of day in UTC for a given datetime in given timezone."""
     zone = ZoneInfo(tz)
@@ -46,9 +44,16 @@ def today_range(tz_str: str = "UTC") -> tuple[datetime, datetime]:
     Return (start_of_day_utc, end_of_day_utc) for today in given timezone.
     Helpful for our "Did it happen today?" queries.
     """
-    now = datetime_local(tz_str)
-    start_utc = start_of_day_utc(now, tz_str)
-    end_utc = (start_utc + timedelta(days=1))
+    # Get current time in user's time
+    tz = ZoneInfo(tz_str)
+    now_local = datetime.now(tz)
+
+    # Calculate start of today in user's timezone, convert to UTC
+    start_local = datetime.combine(now_local.date(), time.min, tzinfo=tz)
+    start_utc = start_local.astimezone(timezone.utc)
+
+    # End is start of tomorrow
+    end_utc = start_utc + timedelta(days=1)
     return start_utc, end_utc
 
 def day_range(date: datetime.date, tz_str: str = "UTC") -> tuple[datetime, datetime]:

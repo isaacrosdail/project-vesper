@@ -4,7 +4,7 @@ If it touches the DB directly, it belongs here.
 """
 
 from sqlalchemy.orm import selectinload
-
+from datetime import datetime
 from app.shared.repository.base import BaseRepository
 
 from .models import Habit, HabitCompletion
@@ -36,10 +36,11 @@ class HabitsRepository(BaseRepository):
         self.session.flush()
         return habit
     
-    def create_habit_completion(self, habit_id: int):
+    def create_habit_completion(self, habit_id: int, created_at: datetime | None = None):
         habit_completion = HabitCompletion(
             habit_id=habit_id,
-            user_id=self.user_id
+            user_id=self.user_id,
+            created_at=created_at
         )
         self.session.add(habit_completion)
         return habit_completion

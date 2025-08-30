@@ -51,7 +51,7 @@ def bubble_sort_simple(myList):
                 temp = myList[j]
                 myList[j] = myList[j+1]
                 myList[j+1] = temp
-        if no_swaps == True:
+        if no_swaps:
             break
 
 # Stable
@@ -82,7 +82,7 @@ def bubble_sort(myList: List[Any], key: str, reverse: bool = False) -> None:
                 myList[j] = myList[j+1]
                 myList[j+1] = temp
         # If we traverse the entire array once without swapping, we have fully sorted the list
-        if no_swaps == True:
+        if no_swaps:
             break
 
 # Slightly more efficient than bubble sort

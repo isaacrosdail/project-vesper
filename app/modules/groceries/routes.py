@@ -5,7 +5,7 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
 from flask_login import current_user, login_required
 
 from app._infra.database import database_connection
-from app.modules.groceries.models import Product, Transaction
+from app.modules.groceries.viewmodels import ProductPresenter, TransactionPresenter, ProductViewModel, TransactionViewModel
 from app.modules.groceries.pricing import get_price_per_100g
 from app.modules.groceries.repository import GroceriesRepository
 from app.modules.groceries.service import GroceriesService
@@ -18,20 +18,8 @@ groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url
 @groceries_bp.route("/dashboard", methods=["GET"])
 @login_required
 def dashboard():
-
     try:
         with database_connection() as session:
-            # TODO: build_columns() Column names for Transactions model
-            transaction_headers = [
-                Transaction.COLUMN_LABELS.get(col, col)
-                for col in Transaction.__table__.columns.keys()
-            ]
-            # Column names for Products model
-            product_headers = [
-                Product.COLUMN_LABELS.get(col, col)
-                for col in Product.__table__.columns.keys()
-            ]
-
             # Fetch products and transactions
             groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
             products = groceries_repo.get_all_products()
@@ -41,15 +29,14 @@ def dashboard():
             # TODO: MINOR: Fold this into an instance method for Transaction model?
             for transaction in transactions:
                 transaction.price_per_100g = get_price_per_100g(transaction)
-
-            # Sort transactions by most recent DateTime first
-            bubble_sort(transactions, 'created_at', reverse=True)
             
+            txn_viewmodels = [TransactionViewModel(t, current_user.timezone) for t in transactions]
+            prod_viewmodels = [ProductViewModel(p, current_user.timezone) for p in products]
             ctx = {
-                "products": products,
-                "transactions": transactions,
-                "product_headers": product_headers,
-                "transaction_headers": transaction_headers,
+                "products": prod_viewmodels,
+                "transactions": txn_viewmodels,
+                "product_headers": ProductPresenter.build_columns(),
+                "transaction_headers": TransactionPresenter.build_columns(),
             }
             return render_template(
                 "groceries/dashboard.html", **ctx)

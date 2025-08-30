@@ -34,8 +34,6 @@ class Product(Base):
 	calories_per_100g = Column(Numeric(8, 2), nullable=True)
 	deleted_at = Column(DateTime(timezone=True), nullable=True)
 
-	### TODO: Study __table_args__ options & add here
-
 	def __str__(self):
 		return f"{self.name} ({self.barcode})"
 	
@@ -44,18 +42,6 @@ class Product(Base):
 			f"<Product id={self.id} name='{self.name}' "
 			f"<barcode='{self.barcode}'>"
 		)
-
-	# Human-readable column names
-	COLUMN_LABELS = {
-		"id": "ID",
-		"name": "Product Name",
-		"category": "Category",
-		"barcode": "Barcode",
-		"net_weight": "Net Weight",
-		"unit_type": "Unit",
-		"calories_per_100g": "Kcals per 100g",
-		"created_at": "Created",
-	}
 
 # Transaction Model for 'inventory'
 class Transaction(Base):
@@ -71,12 +57,3 @@ class Transaction(Base):
 	
 	def __repr__(self):
 		return f"<Transaction id={self.id} product_id={self.product_id}>"
-
-	# Human-readable column names
-	COLUMN_LABELS = {
-		"id": "ID",
-		"product_id": "Product ID",
-		"price_at_scan": "Price",
-		"quantity": "Quantity",
-		"created_at": "Created",
-	}

@@ -1,5 +1,18 @@
 // Bundler: Auto-runner => wires tables on DOMContentLoaded
 // Functions for our tables, such as editTableField or deleteTableItem?
+import { confirmationManager } from './ui/modal-manager.js';
+
+/**
+ * Creates table row for given item data for realtime modal entries
+ * @param {Object} data - Return data from backend for new item
+ */
+export function makeTableRow(data) {
+    const row = document.createElement("tr");
+
+    // Build cells
+
+}
+
 
 // Currently used by tasks/dashboard & groceries/dashboard
 // DELETE fetch request when clicking delete button
@@ -11,11 +24,11 @@
  * @param {string} subtype 
  * @returns 
  */
-async function deleteTableItem(module, itemId, subtype = "none") { // Default to none if not passed
-    if (!confirm(`Are you sure you want to delete this item?`)) return;
+async function deleteTableItem(module, itemId, subtype = "none") {
+    const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
+    if (!confirmed) return;
 
-    // Construct URL dynamically based on module & itemId
-    const url = `/${module}/${subtype}/${itemId}`
+    const url = `/${module}/${subtype}/${itemId}`;
 
     try {
         const response = await fetch(url, {
@@ -25,54 +38,65 @@ async function deleteTableItem(module, itemId, subtype = "none") { // Default to
         const responseData = await response.json();
 
         if (responseData.success) {
-            // update DOM
             const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
             if (itemRow) itemRow.remove();
         } else {
-            // Route error
             console.error('Failed to delete item:', responseData.message);
         }
     } catch (error) {
-        // If fetch request as a whole failed (network/server errors)
         console.error('Fetch request failed: ', error);
     }
 }
 
 /** 
- * Inline table cell editing. Allows double-clicking table cells to edit values in place.
- * @param {HTMLElement} td - The table cell element
+ * Handles inline editing for a given element.
+ * @param {HTMLElement} element - Element whose contents are to be edited.
  * @param {string} module  - API module name for the update endpoint 
  * @param {string} field   - Field of table being updated
  * @param {string|number} itemId - ID of the item being updated 
  */
 // Allows us to double-click a table cell and change its value
-function editTableField(td, module, field, itemId, subtype) {
-    // alert(`Module: ${module}, Field: ${field}, ID: ${itemId}, Value: ${td.textContent}`);
+export function inlineEditElement(element, module, field, itemId, subtype) {
+    // Call modal for this!! Maybe a new "confirm" modal macro :D -> alert(`Module: ${module}, Field: ${field}, ID: ${itemId}, Value: ${element.textContent}`);
 
-    // 1. Create an input element to replace cell content
+    const originalText = element.textContent.trim();
+
+    // Create input element
     const input = document.createElement('input');
-    input.className = 'input-inline';
     input.type = 'text';
-    input.value = td.textContent;
+    input.className = 'input-inline';
+    input.value = originalText;
+    input.size = originalText.length + 2;
 
-    // Clear the cell & append the input field
-    td.innerHTML = '';      // Clears the content of the dblclicked <td>
-    td.appendChild(input);  // Add the input field to the <td>
-    input.focus()           // Focus on the input field for editing
+    // Clear element & append input
+    element.textContent = '';
+    element.appendChild(input);
+    input.focus();
 
     // Listen for blur (click away) or enter to save the update
-    // NOTE: Notice how we're adding another listener for hitting 'enter' below, which actually triggers blur
+    // TODO: NOTES: adding another listener for hitting 'enter' below which triggers blur
     // Isolates the "real change" portion of our logic to only being in one place
     //  what if the user hits enter AND clicks away in rapid succession?
     input.addEventListener('blur', function() {
-        const td = this.parentElement; // 'this' = input element, so here we get the parent <td>
-        saveUpdatedField(module, field, itemId, input.value, td, subtype); // Pass td along with other data
+        const newValue = input.value.trim();
+        if (newValue !== '') {
+            onSave(newValue, element);
+        } else {
+            element.textContent = originalText; // don't save if input is left empty
+        }
+        // saveUpdatedField(module, field, itemId, input.value, td, subtype); // Pass td along with other data
     });
 
     input.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             input.blur(); // Trigger the blur event when Enter is pressed
         }
+    });
+}
+
+function editTableField(td, module, field, itemId, subtype) {
+    inlineEditElement(td, {
+        onSave: (val, el) => saveUpdatedField(td, module, field, itemId, val, el, subtype)
     });
 }
 
@@ -115,6 +139,7 @@ async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "
     }
 }
 
+// TODO: Stupid to have such a tiny function
 // Another function to handle "clean up"
 // Remove the input field & display the new title after changes
 /**
@@ -151,7 +176,7 @@ function handleEditClick(e) {
     }
 }
 
-// TODO: Implement real options here
+// TODO: Move to...somewhere else! Implement real options here
 function handleCustomContextMenu(e) {
     if (e.target.closest('.table-row')) {
         // Accessing OR making our custom context menu
@@ -160,11 +185,12 @@ function handleCustomContextMenu(e) {
             menu = document.createElement('ul');
             const menuItems = ['Edit', 'Delete', 'Close'];
         
-            for (const item of menuItems) {
+            const menuElements = menuItems.map(item => {
                 const menuItem = document.createElement('li');
                 menuItem.textContent = item;
-                menu.appendChild(menuItem);
-            }
+                return menuItem;
+            });
+            menuElements.forEach(element => menu.appendChild(element));
             menu.classList.add('context-menu');
         }
 

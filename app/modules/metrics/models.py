@@ -3,12 +3,6 @@ from sqlalchemy import Column, Float, Integer, String, Time
 from app._infra.db_base import Base
 
 
-class DailyIntention(Base):
-    intention = Column(String(200), server_default="What's your focus today?")
-
-    def __repr__(self):
-        return f"<Intention id={self.id} text={self.intention}>"
-
 class DailyEntry(Base):
     """Stores everything in "master" units, converts based on user preferences."""
     weight = Column(Float)          # kg

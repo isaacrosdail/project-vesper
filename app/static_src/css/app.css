@@ -1,13 +1,14 @@
 /* Single entry file, declares layer order + imports
  * Defines cascade precedence: lowest = highest priority
  */
-@layer base, components, utilities, app;
+@layer base, components, utilities, animations, app;
 
 /* Design tokens live OUTSIDE layers so everything can read vars */
 @import './tokens.css';
 @import url('./base.css') layer(base);
 @import url('./components.css') layer(components);
 @import url('./utilities.css') layer(utilities);
+@import url('./animations.css') layer(animations);
 
 /* Breakpoints:
  * width <= 640px   Mobile nav toggle, chart stacking
@@ -80,6 +81,10 @@
     width: 100%;
     aspect-ratio: 16/9; /* fixes one graph being slightly taller than other - check out other options */
 }
+.tabs button.active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
+}
 
 /* ====== CARD STYLINGS ====== */
 /* Now making our greeting card be grid layout within our flexbox content */
@@ -97,12 +102,25 @@
     align-items: stretch; /* makes all children same height */
 }
 /* Makes DailyCheckin card consist of grid layout with two columns */
-#daily-check-in-card {
+/* #daily-check-in-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--gap-lg);
+} */
+#daily-habits-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
-
+#daily-habits-card > ul {
+    max-height: 70px;
+}
+#my-day-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+h3 {
+    font-size: var(--font-size-lg);
+}
 
 
 

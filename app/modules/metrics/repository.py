@@ -3,7 +3,7 @@ from datetime import datetime, time
 
 from app.shared.repository.base import BaseRepository
 
-from .models import DailyEntry, DailyIntention
+from .models import DailyEntry
 
 
 class DailyMetricsRepository(BaseRepository):
@@ -14,33 +14,6 @@ class DailyMetricsRepository(BaseRepository):
             DailyEntry.user_id == self.user_id
         ).all()
 
-    def get_intention_for_day(self, start_utc: datetime, end_utc: datetime):
-        """Return DailyIntention for a given date."""
-        return self.session.query(DailyIntention).filter(
-            DailyIntention.user_id == self.user_id,
-            DailyIntention.created_at >= start_utc,
-            DailyIntention.created_at < end_utc
-        ).first()
-    
-    def create_daily_intention(self, value: str):
-        """Create & add a new daily intention. Returns intention."""
-        intention = DailyIntention(
-            user_id=self.user_id,
-            intention=value
-        )
-        self.session.add(intention)
-        return intention
-
-    def create_or_update_daily_intention(self, value: str, start_utc: datetime, end_utc: datetime):
-        """Create new daily intention or update existing one for given date."""
-        existing = self.get_intention_for_day(start_utc, end_utc)
-        if existing:
-            existing.intention = value
-            return existing
-        else:
-            return self.create_daily_intention(value)
-
-    ### TODO: NOTES: Study these pieces!
     def get_metrics_by_type_in_window(self, metric_type: str, start_utc: datetime, end_utc: datetime):
         if not hasattr(DailyEntry, metric_type):
             raise ValueError(f"DailyEntry has no column '{metric_type}'")
@@ -55,12 +28,17 @@ class DailyMetricsRepository(BaseRepository):
     
     def create_or_update_daily_metric(self, metric_type: str, value: int | float | time, start_utc: datetime, end_utc: datetime):
         """Create new daily metric or update existing one for given date."""
-        existing = self.get_metric_by_type_for_day(metric_type, start_utc, end_utc)
-        if existing:
-            setattr(existing, metric_type, value) # dynamically set existing.weight = value
-            return existing
+        if not hasattr(DailyEntry, metric_type):
+            raise ValueError(f"Invalid metric: {metric_type}")
+        
+        entry = self.get_daily_entry_for_day(start_utc, end_utc)
+
+        if entry:
+            setattr(entry, metric_type, value) # dynamically set entry.weight = value
         else:
-            return self.create_daily_metric(metric_type, value)
+            entry = DailyEntry(user_id=self.user_id, **{metric_type: value})
+            self.session.add(entry)
+        return entry
         
     def create_daily_metric(self, metric_type: str, value: int | float | time):
         """Create & add a new daily metric. Returns metric."""
@@ -72,14 +50,10 @@ class DailyMetricsRepository(BaseRepository):
         self.session.add(metric)
         return metric 
 
-    def get_metric_by_type_for_day(self, metric_type: str, start_utc: datetime, end_utc: datetime):
-        """Get single daily metric of given type for specific day."""
-        if not hasattr(DailyEntry, metric_type):
-            raise ValueError(f"DailyEntry has no column '{metric_type}'")
-        column_obj = getattr(DailyEntry, metric_type)
+    def get_daily_entry_for_day(self, start_utc: datetime, end_utc: datetime):
+        """Get DailyMetric for a given window."""
         return self.session.query(DailyEntry).filter(
             DailyEntry.user_id == self.user_id,
-            column_obj.isnot(None),
             DailyEntry.created_at >= start_utc,
             DailyEntry.created_at < end_utc
         ).first()

@@ -17,6 +17,7 @@
 :root {
     --font-family-primary: 'Manrope', sans-serif;
     --font-weight-default: 400;
+    --font-size-lg: 1.2rem;
     --line-height-default: 1.5;
     --line-height-higher: 1.75rem;
     --container-lg: 72rem;
@@ -60,17 +61,19 @@
     /* =============== DARK THEME DEFINITIONS =============== */
 
     /* Background Hierarchy */
-    --dark-bg-dark: oklch(11.492% 0.00001 271.152);
-    --dark-bg: oklch(0.18 0 0);
-    --dark-bg-light: hsl(0 0% 10%);
+    --dark-bg-dark: oklch(0.22 0 0);
+    --dark-bg: oklch(0.26 0 0);
+    --dark-bg-light: oklch(0.33 0 0);
 
     /* Text Hierarchy */
-    --dark-text: hsl(0 0% 95%);
-    --dark-text-muted: hsl(0 0% 70%);
+    --dark-text: oklch(0.98 0 0);
+    /* --dark-text: hsla(0, 0%, 95%, 0.927); */
+    --dark-text-muted: oklch(0.8 0 0);
+    /* --dark-text-muted: hsl(0 0% 70%); */
     --dark-text-destructive: hsl(0, 84%, 60%);
 
     /* Borders */
-    --dark-border-color: hsl(0 0% 30%);
+    --dark-border-color: oklch(0.45 0 0);
 
     /* Accent Colors */
     --dark-accent-strong: oklch(40% 0.12 250);

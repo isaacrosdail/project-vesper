@@ -54,9 +54,7 @@ def get_weather(session, city, units):
     
     # Build request
     api_key = os.environ.get('OPENWEATHER_API_KEY')
-    # TODO: Pick one & make query params adaptable
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city},{country}&APPID={api_key}&units={units}"
-    # 3.0: url = f"https://api.openweathermap.org/data/3.0/onecall/overview?lat={lat}&lon{lon}&APPID={api_key}&units={units}"
     
     # Call API, release slot on failure
     try:

@@ -1,10 +1,12 @@
-import { formatDateString } from '../shared/datetime.js';
+import { formatTimeString } from '../shared/datetime.js';
 import { getJSInstant } from '../shared/datetime.js';
-import { userStore } from '../shared/userStore.js';
+import { userStore } from '../shared/services/userStore.js';
+import { inlineEditElement } from '../shared/tables.js';
+import { fetchWeatherData } from '../shared/services/weather-service.js';
 
 // Global caches
 let weatherInfo = null;  // for weatherInfo
-let cachedSunPos = null; // for sunPos (for redrawing after Canvas resizing)
+let cachedSunPos = null; // for sunPos
 
 /**
  * Function for inputting time entries via our activity log card inputs
@@ -51,43 +53,13 @@ async function saveTimeEntry(element) {
     }
 }
 
-
-// Handle UI (span -> input field)
-// TODO: Condense into general inlineEdit (w/ editTableField func)
-/**
- * Converts a span element into an input field for inline editing
- * @param {HTMLElement} element - The span element containing text to edit
- * @description
- * - Replaces span content with size-appropriate input field pre-populated with original text
- * - Save changes on blur/enter (if not empty) or reverts to original text
- */
-function editIntention(element) {
-    const originalText = element.textContent.trim();
-
-    // TODO: innerHTML here presents XSS risk?
-    // Replace innerHTML of span with input field & pre-populate with current text
-    element.innerHTML = `<input type="text" value="${originalText}" size="${originalText.length + 2}">`;
-    // Grab the input element inside our span element & focus it
-    const input = element.querySelector('input');
-    input.focus();
-
-    // Now set up event listeners for our blur event (to save => call updateIntention)
-    input.addEventListener('blur', function() {
-        if (input.value.trim() !== '') {
-            updateIntention(element, input.value); // pass our new text
-        } else {
-            element.innerHTML = originalText; // Don't save if input is left empty
-        }
-    });
-    // Trigger blur on enter key
-    input.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            input.blur();
-        }
+function editIntention(span) {
+    inlineEditElement(span, {
+        onSave: (val, el) => updateIntention(el, val)
     });
 }
 
-
+// TODO: Scrap + merge into generalized inline edit function
 async function updateIntention(element, newValue) {
     try {
         const response = await fetch('/daily-intentions/', {
@@ -101,15 +73,14 @@ async function updateIntention(element, newValue) {
         if (responseData.success) {
             element.innerHTML = `${newValue}`; // replace input field with just newValue text upon success
         } else {
-            // Handle the Flask route error
             console.error('Error saving intention:', responseData.message);
         }
-    
     } catch (error) {
         console.error('Failed to save/update:', error);
     }
 }
 
+// TODO: Scrap?
 /**
  * Saves input data based on input's data attributes (metric or checkin)
  * @param {HTMLElement} input - Input element containing data to save
@@ -133,8 +104,6 @@ async function saveData(input) {
         if (responseData.success) {
             alert('Saved!');
         }
-    } else if (input.dataset.checkin) {
-        // TODO: call checkin logic
     }
 }
 
@@ -146,11 +115,6 @@ async function saveData(input) {
  * @returns {Promise<void>} 
  */
 async function markHabitComplete(checkbox, habitId) {
-    // Fetch sends a request to flask server
-    // POSTing to a dynamic URL like /complete_habit/7 => Translation: "Hey, mark habit 7 as complete"
-    // If .checked == True  -> user just checked it
-    // If .checked == False -> user just un-checked it
-
     try {
         // Mark complete => POST HabitCompletion
         // Get instant user clicks "done"
@@ -177,120 +141,64 @@ async function markHabitComplete(checkbox, habitId) {
             } else {
                 console.error('Error marking habit complete:', responseData.message);
             }
-
-            // TODO: CLEAN NOTES
-        // Mark un-complete => DELETE HabitCompletion from today
         } else {
-            // Note: Built this to accept any date via query parameter (the "?=.." thing) for future flexibility
+            // TODO: NOTES: Built this to accept any date via query parameter (the "?=.." thing) for future flexibility
             // but currently we only ever delete today's completion from our main dashboard
             // So the route CAN handle any date, but our JS will stick to today
-            const todayDateOnly = new Date().toISOString().split('T')[0]; // Gives format like "2025-06-26"
-
-            const response = await fetch(`/habits/${habitId}/completions?date=${todayDateOnly}`, {
+            //const todayDateOnly = new Date().toISOString().split('T')[0]; // Gives format like "2025-06-26"
+            const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
+            const response = await fetch(`/habits/${habitId}/completion?date=${todayDateOnly}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
             });
             const responseData = await response.json(); // Wait for JSON parsing
 
-            // DO something with our response data
-            // Runs AFTER fetch + JSON parsing - not in a nested callback anymore
             if (responseData.success) {
                 // un-apply effect/styling (update DOM)
-                const textSpan = checkbox.nextElementSibling; // Grabs span right after checkbox element
-                if (textSpan) {
-                    textSpan.classList.remove('line-through', 'text-gray-400');
+                const row = checkbox.closest('.habit-row');
+                const emojiSpan = row.querySelector('.habit-streak');
+                const listItem = row.closest('.habit-item');
+
+                let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
+                streakCount -= 1;
+                emojiSpan.dataset.streakCount = streakCount;
+
+                listItem?.classList.toggle('completed');
+                if (streakCount > 0) {
+                    emojiSpan.textContent = `🔥${streakCount}`;
+                } else {
+                    emojiSpan.textContent = "";
                 }
             } else {
                 console.error('Error un-marking habit complete:', responseData.message);
             }
         }
     } catch (error) {
-        // Network/fetch errors for either case
-        // With .then, we'd need .catch() at the end of each promise chain
         console.error('Error during habit completion request:', error);
     }
 }
 
-// Update time display in real-time
-function getCurrentTimeString() {
-    let date = new Date(); // First we need to get today's date obj
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    
-    // Pad times & stitch together
-    // TODO: Helper!!
-    let paddedHours = hours.toString().padStart(2, '0');
-    let paddedMinutes = minutes.toString().padStart(2, '0');
-    let timeString = `${paddedHours}:${paddedMinutes}`;
-    
-    return timeString;
-}
-
 function updateClock() {
     let timeDisplay = document.querySelector('#time-display');
-    timeDisplay.textContent = getCurrentTimeString(); // use getCurrentTimeString to call that & inject that value
+    timeDisplay.textContent = formatTimeString();
 }
 
 // Get weather info via API, orchestrates our sun movement
+// TODO: Un-hardcode city + units (get from userStore in fetchWeatherData itself?)
 async function getWeatherInfo() {
     const tempDisplay = document.querySelector('#weather-temp');
     const sunsetDisplay = document.querySelector('#weather-sunset');
     const city = "London";
     const units = "metric";
 
-    try {
-        tempDisplay.textContent = "Loading weather info...";
+    tempDisplay.textContent = "Loading weather info...";
+    weatherInfo = await fetchWeatherData();
 
-        const response = await fetch(`/api/weather/${city}/${units}`) // TODO: NOTES: GET is default method for fetch
-
-        if (!response.ok) {
-            throw new Error(`Weather API failed: ${response.status}`);
-        }
-        weatherInfo = await response.json();
-
-        // Extract desired vals from weatherInfo data
-        const temp = Math.round(weatherInfo.main.temp);
-        const sunset = weatherInfo.sys.sunset;
-        const desc = weatherInfo.weather[0].description.toLowerCase();
-
-        const weatherConditions = {
-            thunder: '⛈️',
-            drizzle: '🌦️',
-            rain: '🌧️',
-            overcast: '☁️',
-            snow: '❄️',
-            mist: '🌫️',
-            fog: '🌫️',
-            clear: '☀️',
-            "few clouds": '🌤️',
-            scattered: '⛅',
-            broken: '⛅',
-            tornado: '🌪️'
-        }
-
-        // Find first weather condition key matching desc, return its emoji or undefined
-        // Terms: variable declaration that stores the result of a complex expression
-        const emoji = Object.entries(weatherConditions).find(
-            ([key]) => desc.includes(key)
-        )?.[1] ?? '🌡️'; // "?? '🌡️'" <= Nullish coalescing: fallback if nothing found
-        
-        // Convert sunset time to date & local
-        // TODO: use new datetime helpers!!
-        const sunsetTime = new Date(sunset * 1000); // comes in Unix-style, so convert first
-        const sunsetFormatted = sunsetTime.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        // Display temp with units & formatted sunset time
-        tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
-        sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
-
-    } catch (error) {
-        console.error('Weather fetch failed:', error);
-        tempDisplay.textContent = "Weather unavailable";
-        sunsetDisplay.textContent = "Sunset: --:--";
-    }
+    // Display temp with units & formatted sunset time
+    // Destructure what we need
+    const { temp, emoji, sunsetFormatted } = weatherInfo;
+    tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
+    sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
 }
 
 function updateSunPosition() {
@@ -383,9 +291,9 @@ function drawSun(x, y) {
 export function init() {
     // Guard
     const hasWeatherSection = document.querySelector('.weather-section');
-    const hasTimeEntry = document.querySelector('#time-entry-modal');
+    // const hasTimeEntry = document.querySelector('#time-entry-modal');
     const hasHabits = document.querySelector('.habit-checkbox');
-    if (!hasWeatherSection && !hasTimeEntry && !hasHabits) return;
+    if (!hasWeatherSection && !hasHabits) return;
 
     // Event listeners for page
     document.addEventListener('change', (e) => {
@@ -399,29 +307,6 @@ export function init() {
         }
     });
 
-    // Intention <span>
-    // TODO: Condense when we adapt editTableField to work for both
-    document.addEventListener('dblclick', (e) => {
-        if (e.target.matches('#intention-text')) {
-            editIntention(e.target);
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        const modal = document.querySelector('#time-entry-modal');
-
-        if (e.target.matches('#save-entry-btn')) {
-            saveTimeEntry(e.target);
-        }
-        else if (e.target.matches('#time-entry-modal-btn')) {
-            modal?.showModal();
-        }
-        else if (e.target.matches('#time-entry-modal-close-btn')) {
-            const form = modal?.querySelector('form');
-            form?.reset();
-            modal?.close()
-        }
-    });
     // Weather setup
     if (hasWeatherSection) {
         getWeatherInfo();    // Cache weather data

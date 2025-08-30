@@ -42,37 +42,13 @@ class Task(Base, CustomBaseTaskMixin):
     name = Column(String(255), unique=True, nullable=False)
     is_done = Column(Boolean, default=False)
     priority = Column(SAEnum(Priority), default=Priority.medium, nullable=False)
+    is_frog = Column(Boolean, default=False)
     due_date = Column(DateTime(timezone=True), nullable=True)
 
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
-    
-    VISIBLE_COLUMNS = {
-        "name", "is_done", "priority", "due_date", "created_at", "completed_at"
-    }
-
-    # Human-readable column names
-    COLUMN_LABELS = {
-        "id": "Task ID",
-        "name": "Task",
-        "is_done": "Status",
-        "priority": "Priority",
-        "due_date": "Due Date",
-        "created_at": "Created",
-        "completed_at": "Completed",
-    }
 
     def __str__(self):
         return self.name
     
     def __repr__(self):
         return f"<Task id={self.id} name='{self.name}'>"
-    
-    # TODO: NOTES: First arg is the class (cls) instead of the instance (self)
-    # Used when the method works with class-level data (metadata, config, alt constructors)
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        """
-        Builds a list of column definitions for use as table headers.
-        Respects the order defined in `VISIBLE_COLUMNS` & excludes fields not explicitly whitelisted.
-        """
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]

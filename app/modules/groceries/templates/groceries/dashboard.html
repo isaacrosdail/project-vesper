@@ -11,27 +11,31 @@
             Log New Transaction
         </a>
     </div>
-
-    {% set headers = ["Barcode", "Product Name", "Price", "Quantity", "Date Scanned", "Price per 100g"] %}
     <table class="table-standard">
         <caption class="sr-only">Grocery - Recent Transactions</caption>
         <thead class="table-header">
             <tr>
-                {% for h in headers %}
-                    <th>{{ h }}</th>
+                {% if has_dev_tools %}
+                    <th>ID</th>
+                {% endif %}
+                {% for h in transaction_headers %}
+                    <th>{{ h.label }}</th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% if transactions %}
                 {% for t in transactions %}
-                <tr class="group table-row" data-item-id="{{ t.id }}" data-module="groceries" data-subtype="transaction">
-                    <td>{{ t.product.barcode }}</td>
-                    <td>{{ t.product.name }}</td>
-                    <td>${{ t.price_at_scan }}</td>
+                <tr class="table-row" data-item-id="{{ t.id }}" data-module="groceries" data-subtype="transaction">
+                    {% if has_dev_tools %}
+                        <td>{{ t.id }}</td>
+                    {% endif %}
+                    <td>{{ t.barcode }}</td>
+                    <td>{{ t.product_name }}</td>
+                    <td>{{ t.price_label }}</td>
                     <td>{{ t.quantity }}</td>
-                    <td class="text-right">{{ t.created_at.strftime("%d.%m.%Y") }}</td>
-                    <td class="text-right">${{ t.price_per_100g | round(2) }}</td>
+                    <td class="text-right">{{ t.created_at_label }}</td>
+                    <td class="text-right">{{ t.price_per_100g_label }}</td>
                     <td class="table-cell delete-cell">
                         {{ ui.delete_btn() }}
                     </td>
@@ -55,14 +59,15 @@
             Add New Product
         </a>
     </div>
-
-    {% set headers = ["Barcode", "Product Name", "Category", "Net Weight (units)", "Cals per 100g"] %}
     <table class="table-standard">
         <caption class="sr-only">Product Catalog</caption>
         <thead class="table-header">
             <tr>
-                {% for h in headers %}
-                    <th>{{ h }}</th>
+                {% if has_dev_tools %}
+                    <th>ID</th>
+                {% endif %}
+                {% for h in product_headers %}
+                    <th>{{ h.label }}</th>
                 {% endfor %}
             </tr>
         </thead>
@@ -70,11 +75,14 @@
             {% if products %}
                 {% for p in products %}
                 <tr class="group table-row" data-item-id="{{ p.id }}" data-module="groceries" data-subtype="product">
+                    {% if has_dev_tools %}
+                        <td>{{ p.id }}</td>
+                    {% endif %}
                     <td>{{ p.barcode }}</td>
                     <td>{{ p.name }}</td>
                     <td class="text-right">{{ p.category }}</td>
-                    <td class="text-right">{{ p.net_weight }} ({{ p.unit_type }})</td>
-                    <td class="text-right">{{ p.calories_per_100g|int if p.calories_per_100g else '-' }}</td> {# Int filter |int here to chop of decimals #}
+                    <td class="text-right">{{ p.net_weight_display }}</td>
+                    <td class="text-right">{{ p.calories_display }}</td>
                     <td class="table-cell delete-cell">
                         {{ ui.delete_btn() }}
                     </td>

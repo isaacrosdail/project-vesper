@@ -14,11 +14,13 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 {# === MODALS === #}
 
+{# Entry form modal #}
+
 {# caller() segment here lets us put whatever 'insides' we want in our modals #}
 {# by sandwiching them between 'call ourmacro(ourparameters,..)' and 'endcall' #}
 {# TODO: NOTES: {% call %} doesn't work with a template that doesn't use caller() #}
-{% macro modal(id, title) %}
-<dialog id="{{ id }}-modal">
+{% macro modal(endpoint, id, title) %}
+<dialog id="{{ id }}-modal" data-endpoint="/{{ endpoint }}/">
     <form>
         <legend>{{ title }}</legend>
         <button type="button" class="modal-close btn btn-destructive" id="{{ id }}-modal-close-btn">&times;</button>
@@ -28,6 +30,27 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 </dialog>
 {% endmacro %}
 
+
+{# Confirmation Modal #}
+
+{% macro confirmation_modal() %}
+<dialog id="confirmation-modal">
+  <div class="confirmation-content">
+    <p class="confirmation-message">Are you sure?</p>
+    <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
+    <button id="confirm-ok" class="btn btn-primary">OK</button>
+  </div>
+</dialog>
+{% endmacro %}
+
+
+{# Toast Container #}
+
+{% macro toast_container() %}
+<div id="toast-container"></div>
+{% endmacro %}
+
+{# === LINKS === #}
 
 {# Link for returning from error page(s) #}
 

@@ -2,8 +2,9 @@
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
-from app._infra.database import database_connection
+from app._infra.database import database_connection, with_db_session
 from app.modules.metrics.repository import DailyMetricsRepository
+from app.modules.metrics.viewmodels import DailyMetricViewModel, DailyMetricPresenter
 from app.shared.datetime.helpers import today_range
 from app.shared.sorting import bubble_sort
 
@@ -12,23 +13,19 @@ metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_pre
 
 @metrics_bp.route('/dashboard', methods=["GET"])
 @login_required
-def dashboard():
+@with_db_session
+def dashboard(session):
 
-    with database_connection() as session:
+    # Instantiate repository class
+    repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+    metric_entries = repo.get_all_daily_metrics()
 
-        # Instantiate repository class
-        repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
-        entries = repo.get_all_daily_metrics()
-
-        ### Add new viz here
-
-        # Get list of all metrics for table, sort by date for now
-        bubble_sort(entries, 'created_at', reverse=True)
-
-        ctx = {
-            "metrics": entries,
-        }
-        return render_template("metrics/dashboard.html", **ctx)
+    viewmodels = [DailyMetricViewModel(e, current_user.timezone) for e in metric_entries]
+    ctx = {
+        "metrics": viewmodels,
+        "metric_headers": DailyMetricPresenter.build_columns()
+    }
+    return render_template("metrics/dashboard.html", **ctx)
 
 
 @metrics_bp.route("/", methods=["POST"])

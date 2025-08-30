@@ -19,7 +19,7 @@ TABLES_WITHOUT_USERS = [
     "transaction",       # FK to product + user
     "timeentry",         # FK to user
     "dailyentry",        # FK to user
-    "dailyintention",    # FK to user
+#    "dailyintention",    # FK to user
     "task",              # FK to user
     "habit",             # FK to user
     "product",           # FK to user

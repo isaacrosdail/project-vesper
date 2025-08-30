@@ -39,24 +39,7 @@ class Habit(Base):
     
     def __repr__(self):
         return f"<Habit id={self.id} name='{self.name}'>"
-    
-    VISIBLE_COLUMNS = {
-        "name", "status", "created_at"
-    }
-    # Human-readable column names
-    COLUMN_LABELS = {
-        "id": "ID",
-        "name": "Name",
-        "tags": "Tag(s)",
-        "status": "Status",
-        "created_at": "Date Added",
-        "established_date": "Date Promoted",
-        "promotion_threshold": "Promotion Threshold"
-    }
 
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]
 
 # Habit Completion Model - enables us to track WHEN and HOW OFTEN specific habits were completed!
 # Stores each "completion" as a new entry

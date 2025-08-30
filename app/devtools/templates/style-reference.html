@@ -5,6 +5,24 @@
 {% block title %}Theme Token Preview{% endblock %}
 
 {% block content %}
+{# Using this specific ID in our guard for JS #}
+<span id="style-reference-root"></span>
+
+{# Getting started with D3.js #}
+<div id="chart-container"></div>
+
+
+{# Buttons to Trigger Confirmation Modal #}
+<div class="demo-grid-container">
+  <button id="default" class="btn btn-primary">Test Confirmation</button>
+  <button id="alt" class="btn btn-primary">Test Confirmation Two</button>
+</div>
+
+{# Buttons to Trigger Various Toasts #}
+<div class="demo-grid-container">
+  <button id="toast-success" class="btn btn-secondary">Toast (Success)</button>
+  <button id="toast-error" class="btn btn-secondary">Toast (Error)</button>
+</div>
 
 {# === Background Hierarchy === #}
 <div class="demo-grid-container" style="border-radius: var(--border-radius);">

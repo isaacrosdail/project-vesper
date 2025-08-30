@@ -9,6 +9,7 @@ from app.modules.habits.repository import HabitsRepository
 from app.shared.datetime.helpers import (day_range, parse_js_instant,
                                          today_range)
 from app.shared.sorting import bubble_sort
+from app.modules.habits.viewmodels import HabitPresenter, HabitViewModel
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
@@ -20,13 +21,11 @@ def dashboard(session):
     
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
     habits = habits_repo.get_all_habits_and_tags()
-    bubble_sort(habits, 'created_at', reverse=True)
 
-    # TODO: build_columns() => Make a helper, not internal method
-    headers = ["Name", "Status", "Created"]
+    viewmodels = [HabitViewModel(h, current_user.timezone) for h in habits]
     ctx = {
-        "headers": headers,
-        "habits": habits
+        "headers": HabitPresenter.build_columns(),
+        "habits": viewmodels
     }
     return render_template("habits/dashboard.html", **ctx)
 
@@ -39,10 +38,9 @@ def habits(session):
     if request.method == "POST":
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
         new_habit = habits_repo.create_habit(request.form.get("name"))
-        flash("Habit added successfully.")
         return jsonify({
             "success": True, 
-            "message": "Habit added successfully.",
+            "message": "Habit added",
             "habit": {
                 "id": new_habit.id,
                 "name": new_habit.name,
@@ -64,7 +62,7 @@ def completions(session, habit_id):
         if not habit:
             return jsonify({"success": False, "message": "Habit not found"}), 404
         
-        habit_completion = habits_repo.create_habit_completion(habit_id)
+        habit_completion = habits_repo.create_habit_completion(habit_id, completed_at)
         return jsonify({"success": True, "message": "Habit marked complete"}), 201
         
     except Exception:
@@ -74,7 +72,7 @@ def completions(session, habit_id):
 # Deletes a given HabitCompletion record (acts as our "habit marked complete")
 # For now, we'll only allow habits to have a single completion record in a given day
 # BUT this is now flexible enough to allow for choosing the day whose completion we wish to delete
-@habits_bp.route("/<int:habit_id>/completions", methods=["DELETE"])
+@habits_bp.route("/<int:habit_id>/completion", methods=["DELETE"])
 @login_required
 @with_db_session
 def completion(session, habit_id):
@@ -97,6 +95,3 @@ def completion(session, habit_id):
         return jsonify({"success": True, "message": "Habit unmarked as complete"}), 200
     else:
         return jsonify({"success": False, "message": "No completion found for today"}), 404
-
-    # except Exception:
-    #     return jsonify({"success": False, "message": "Failed to unmark habit"}), 500 # 500 = Internal Server Error

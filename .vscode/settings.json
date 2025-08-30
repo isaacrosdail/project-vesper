@@ -45,4 +45,5 @@
         "**/.git/subtree-cache/**": true,
         "**/.hg/store/**": true
     },
+    "idf.pythonInstallPath": "/home/user/.pyenv/shims/python",
 }

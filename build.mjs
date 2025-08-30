@@ -33,6 +33,18 @@ if (isWatch) {
   await jsContext.watch();
   await cssContext.watch();
   console.log('[esbuild] Watching...')
+
+  process.on('SIGINT', async () => {
+    console.log('\n[esbuild] Cleaning up...');
+    await jsContext.dispose();
+    await cssContext.dispose();
+    process.exit(0);
+  });
+  process.on('SIGTERM', async () => {
+    await jsContext.dispose();
+    await cssContext.dispose();
+    process.exit(0);
+  });
 } else {
   const jsResult = await jsContext.rebuild();
   const cssResult = await cssContext.rebuild();
