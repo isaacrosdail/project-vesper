@@ -51,43 +51,13 @@ async function saveTimeEntry(element) {
     }
 }
 
-
-// Handle UI (span -> input field)
-// TODO: Condense into general inlineEdit (w/ editTableField func)
-/**
- * Converts a span element into an input field for inline editing
- * @param {HTMLElement} element - The span element containing text to edit
- * @description
- * - Replaces span content with size-appropriate input field pre-populated with original text
- * - Save changes on blur/enter (if not empty) or reverts to original text
- */
-function editIntention(element) {
-    const originalText = element.textContent.trim();
-
-    // TODO: innerHTML here presents XSS risk?
-    // Replace innerHTML of span with input field & pre-populate with current text
-    element.innerHTML = `<input type="text" value="${originalText}" size="${originalText.length + 2}">`;
-    // Grab the input element inside our span element & focus it
-    const input = element.querySelector('input');
-    input.focus();
-
-    // Now set up event listeners for our blur event (to save => call updateIntention)
-    input.addEventListener('blur', function() {
-        if (input.value.trim() !== '') {
-            updateIntention(element, input.value); // pass our new text
-        } else {
-            element.innerHTML = originalText; // Don't save if input is left empty
-        }
-    });
-    // Trigger blur on enter key
-    input.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            input.blur();
-        }
+function editIntention(span) {
+    inlineEditElement(span, {
+        onSave: (val, el) => updateIntention(el, val)
     });
 }
 
-
+// TODO: Scrap + merge into generalized inline edit function
 async function updateIntention(element, newValue) {
     try {
         const response = await fetch('/daily-intentions/', {
@@ -101,15 +71,14 @@ async function updateIntention(element, newValue) {
         if (responseData.success) {
             element.innerHTML = `${newValue}`; // replace input field with just newValue text upon success
         } else {
-            // Handle the Flask route error
             console.error('Error saving intention:', responseData.message);
         }
-    
     } catch (error) {
         console.error('Failed to save/update:', error);
     }
 }
 
+// TODO: Scrap?
 /**
  * Saves input data based on input's data attributes (metric or checkin)
  * @param {HTMLElement} input - Input element containing data to save
@@ -399,29 +368,6 @@ export function init() {
         }
     });
 
-    // Intention <span>
-    // TODO: Condense when we adapt editTableField to work for both
-    document.addEventListener('dblclick', (e) => {
-        if (e.target.matches('#intention-text')) {
-            editIntention(e.target);
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        const modal = document.querySelector('#time-entry-modal');
-
-        if (e.target.matches('#save-entry-btn')) {
-            saveTimeEntry(e.target);
-        }
-        else if (e.target.matches('#time-entry-modal-btn')) {
-            modal?.showModal();
-        }
-        else if (e.target.matches('#time-entry-modal-close-btn')) {
-            const form = modal?.querySelector('form');
-            form?.reset();
-            modal?.close()
-        }
-    });
     // Weather setup
     if (hasWeatherSection) {
         getWeatherInfo();    // Cache weather data
