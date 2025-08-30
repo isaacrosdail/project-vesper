@@ -4,14 +4,28 @@
 
 {% block content %}
 
-{% call ui.modal('task-entry-dashboard', 'Add Task') %}
+{% call ui.modal('/tasks/', 'task-entry-dashboard', 'Add Task') %}
     <div class="form-group">
         <label for="name">Task:</label>
-        <input type="text" id="name" name="name"  required>
+        <input type="text" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+        <label for="priority">Priority</label>
+        <select name="priority" id="priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+        </select>
+    </div>
+    <input type="checkbox" id="is_frog" name="is_frog">
+    <label for="is_frog">"Daily Frog" Task?</label><br>
+    <div class="form-group">
+        <label for="due_date">Due:</label>
+        <input type="date" id="due_date" name="due_date">
     </div>
 {% endcall %}
 
-<div class="card-dashboard">
+<div class="card-dashboard" id="tasks-dashboard-table">
     <div class="card-header">
         <h2 class="card-title">Tasks</h2>
         <button id="task-entry-dashboard-btn" class="btn btn-primary">Add Task</button>

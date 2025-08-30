@@ -4,7 +4,7 @@
 
 {% block content %}
 
-{% call ui.modal('habit-entry-dashboard', 'Add Habit') %}
+{% call ui.modal('/habits/', 'habit-entry-dashboard', 'Add Habit') %}
     <div class="form-group">
         <label for="name">Habit:</label>
         <input type="text" id="name" name="name"  required>

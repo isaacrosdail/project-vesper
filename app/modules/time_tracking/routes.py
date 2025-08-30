@@ -2,8 +2,8 @@
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
-from app._infra.database import database_connection
-from app.modules.time_tracking.models import TimeEntry
+from app._infra.database import with_db_session, database_connection
+from app.modules.time_tracking.service import resolve_start, resolve_end
 from app.modules.time_tracking.repository import TimeTrackingRepository
 from app.shared.datetime.helpers import today_range
 from app.modules.time_tracking.viewmodels import TimeEntryViewModel, TimeEntryPresenter
@@ -30,13 +30,26 @@ def dashboard(session):
 def time_entries():
     try:
         if request.method == 'POST':
-            form_data =  request.get_json() # JSON => dict
+            form_data =  request.form.to_dict() # convert formData to dict
+            started_at = resolve_start(form_data["started_at"], current_user.timezone)
+            form_data["started_at"] = started_at
+            form_data["ended_at"] = resolve_end(started_at, float(form_data["duration"]))
 
             with database_connection() as session:
                 timetracking_repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
-                timetracking_repo.create_time_entry(**form_data)
+                new_entry = timetracking_repo.create_time_entry(**form_data)
 
-                return jsonify({"success": True, "message": "Time entry added."}), 201
+                return jsonify({
+                    "success": True, 
+                    "message": "Time entry added.",
+                    "data": {
+                        "id": new_entry.id,
+                        "category": new_entry.category,
+                        "duration": new_entry.duration,
+                        "started_at": new_entry.started_at.isoformat(), # convert to string
+                        "description": new_entry.description
+                    }
+                }), 201
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
