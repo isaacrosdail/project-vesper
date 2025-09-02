@@ -1,17 +1,28 @@
 /* Single entry file, declares layer order + imports
  * Defines cascade precedence: lowest = highest priority
  */
-@layer base, components, utilities, app;
+@layer base, components, utilities, animations, app;
 
 /* Design tokens live OUTSIDE layers so everything can read vars */
 @import './tokens.css';
 @import url('./base.css') layer(base);
 @import url('./components.css') layer(components);
 @import url('./utilities.css') layer(utilities);
+@import url('./animations.css') layer(animations);
 
 /* Breakpoints:
  * width <= 640px   Mobile nav toggle, chart stacking
  * width > 640px    Hide mobile navlinks?
+ * width <= 768px   Hide 'desktop-only' classed table columns
+*/
+
+/* Thoughts on z-index standardization (as insurance)
+ * 0-99    - Base layout elements
+ * 100-199 - Tooltips, dropdowns
+ * 200-299 - Context menus, popovers, navbar, sticky side panels
+ * 300-399 - Modals, backdrop overlays
+ * 400-499 - Toasts, system-level UI (spinners?)
+ * 500+    - Debug layer, devtools, etc.
 */
 
 :root {
@@ -32,7 +43,7 @@
 .content {
     flex: 1; /* makes flex container's child grow & take up all remaining space */
     width: 100%;
-    max-width: clamp(48rem, 90vw, 90rem);
+    max-width: clamp(100%, 90vw, 90rem);
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -100,12 +111,10 @@
     min-height: 120px;
     align-items: stretch; /* makes all children same height */
 }
-/* Makes DailyCheckin card consist of grid layout with two columns */
-/* #daily-check-in-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--gap-lg);
-} */
+#sky-canvas {
+    width: 100%;
+    height: clamp(150px, 15vh, 300px);
+}
 #daily-habits-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -160,14 +169,20 @@ h3 {
 
 /* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
 
-form input:not([type="checkbox"]):user-valid {
+form input:not([type="checkbox"]):not([type="radio"]):user-valid {
     outline: 2px solid;
     outline-color: var(--color-success);
 }
-form input:not([type="checkbox"]):user-invalid {
+form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
     outline: 2px solid;
     outline-color: var(--color-error);
 }
+.radio-row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap-sm);
+}
+
 
 /* TODO: 
  * FINISH: Tune styling 
@@ -224,23 +239,6 @@ dialog::backdrop {
     top: -0.4rem;
 }
 
-/* ==== NAVIGATION ==== */
-#hamburger-btn {
-    color: var(--text);
-    min-width: 40px;
-    min-height: 40px;
-}
-/* Base navlinks styling (desktop-first) */
-.navlinks {
-    display: flex;
-    gap: var(--gap-lg);
-}
-nav {
-    min-height: var(--min-navbar-height);
-    background-color: var(--accent-strong);
-    padding: 1rem;
-    position: relative; /* creates positioning context for flash-message */
-}
 
 /* Dashboard checkbox completion effect */
 .habit-list {
@@ -262,22 +260,87 @@ nav {
     color: var(--text-muted);
 }
 
+/* ==== NAVIGATION ==== */
+#hamburger-btn {
+    color: var(--text);
+    min-width: 40px;
+    min-height: 40px;
+}
+/* Base navlinks styling (desktop-first) */
+.navlinks {
+    display: flex;
+    gap: var(--gap-lg);
+}
+nav {
+    min-height: var(--min-navbar-height);
+    background-color: var(--accent-strong);
+    padding: 1rem;
+    position: relative; /* forces nav to participate in stacking context so z-index actually applies */
+    z-index: 250; /* to be above mobilenav */
+}
+.nav-anchor {
+    position: relative;
+}
+/* Container: visibility, positioning, stacking */
+.mobilenav {
+    /* display: none; */
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    z-index: 201;
+    background-color: var(--accent-strong);
 
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-300px) scaleY(0.95); /* "out of place" & squished to start, so transition can apply to something */
+    transform-origin: top center;
+    transition: 
+        transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.mobilenav.is-open {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
 
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scaleY(1); /* drops in & stretches to full */
+}
+/* Content: layout of links themselves */
+.mobilenavlist {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* stretch column */
+    gap: var(--gap-lg);
+}
+.mobilenavlist a {
+    display: block; /* each line fills parent's width */
+    width: 100%;
+    text-align: center; /* center text inside */
+    padding: 0.75rem 1rem; /* for easier touch targets */
+}
 /* ==== MEDIA QUERIES ==== */
 @media (width <= 640px) {
     .navlinks {
         display: none;
-        flex-direction: column;
-        row-gap: var(--gap-lg);
     }
-    .navlinks.is-open { display: flex; }
+    /* .navlinks.is-open { display: flex; } */
     .charts-container, #daily-check-in-card {
         grid-template-columns: 1fr; /* stack charts + metric-row divs for smaller widths */
     }
 }
 @media (width > 640px) {
     #hamburger-btn { display: none; }
+}
+
+/* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
+ * Let's us easily "condense" our tables to provide a better mobile experience
+*/
+@media (width <= 768px) {
+    .desktop-only {
+        display: none;
+    }
 }
 
 /* TODO: Tune this later as we add some basic animations/transitions */

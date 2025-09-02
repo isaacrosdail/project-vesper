@@ -48,15 +48,14 @@ class GroceriesRepository(BaseRepository):
 		).first()
 
 	def get_or_create_product(self, **product_data):
-		"""Get existing product or create new one."""
+		"""Get existing product or create new one. Returns tuple (product, was_created)."""
 		barcode = product_data["barcode"]
 		product = self.get_product_by_barcode(barcode)
 		if product:
-			return product
-		return self.create_product(**product_data)
+			return product, False
+		return self.create_product(**product_data), True
 
 	def create_product(self, **product_data) -> Product:
-		# TODO: Invoke validators here!
 		product = Product(
 			barcode=product_data["barcode"],
 			name=product_data["name"],
@@ -70,6 +69,7 @@ class GroceriesRepository(BaseRepository):
 		return product
 		
 	def create_transaction(self, product, **product_data):
+		# TODO: belongs in VALIDATORS!
 		if product is None:
 			raise ValueError("Product must be provided for transaction.")
 		

@@ -34,14 +34,15 @@ def my_graph_data():
     return data
 
 """External API endpoints to call or return data to third-party services. For fetching weather data as well as for our health check."""
-@api_bp.route('/weather/<city>/<units>')
+@api_bp.route('/weather/<city>/<country>/<units>')
 @with_db_session
-def get_weather(session, city, units):
+def get_weather(session, city, country, units):
     """External API call-limiting function to ensure we exceed limits."""
     today = datetime.now(timezone.utc).date()
     api_name = "openweathermap"
     DAILY_CALL_LIMIT = current_app.config.get("OPENWEATHER_DAILY_LIMIT", 700)
-    country = current_app.config.get("OPENWEATHER_COUNTRY", "uk") # TODO: Change default
+    # country = current_app.config.get("OPENWEATHER_COUNTRY", "uk") # TODO: Change default
+    country = country or "uk"
 
     # Reserve a slot atomically
     reserved_count = reserve_slot(session, api_name, today, DAILY_CALL_LIMIT)
@@ -54,9 +55,7 @@ def get_weather(session, city, units):
     
     # Build request
     api_key = os.environ.get('OPENWEATHER_API_KEY')
-    # TODO: Pick one & make query params adaptable
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city},{country}&APPID={api_key}&units={units}"
-    # 3.0: url = f"https://api.openweathermap.org/data/3.0/onecall/overview?lat={lat}&lon{lon}&APPID={api_key}&units={units}"
     
     # Call API, release slot on failure
     try:

@@ -36,7 +36,6 @@ class Toast {
 // Build DOM node for toast element with specified traits/properties
 // Receives message, then decides _how_ to display it only
 export function makeToast(message, type = 'info', duration = 1000) {
-    console.log('Make toast triggered!');
     const toast = new Toast(message, type).show();
 
     setTimeout(() => toast.hide(), duration); // auto-hide/fade

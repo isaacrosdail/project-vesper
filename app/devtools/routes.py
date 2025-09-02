@@ -11,7 +11,7 @@ from flask import Blueprint, jsonify, render_template
 from flask_login import login_required
 
 from app.shared.constants import DEFAULT_HEALTH_TIMEZONE
-from app.shared.datetime.helpers import datetime_local
+from app.shared.datetime.helpers import convert_to_timezone
 
 devtools_bp = Blueprint('devtools', __name__, url_prefix='/devtools', template_folder='templates')
 
@@ -20,7 +20,7 @@ def health_check():
     """Basic health check for monitoring."""
     status = {
         'status': 'healthy',
-        'timestamp': datetime_local(DEFAULT_HEALTH_TIMEZONE)
+        'timestamp': convert_to_timezone(DEFAULT_HEALTH_TIMEZONE)
     }
     return jsonify(status)
 

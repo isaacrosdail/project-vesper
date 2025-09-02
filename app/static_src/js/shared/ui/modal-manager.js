@@ -33,7 +33,11 @@ modals.forEach(modal => {
         const endpoint = window.location.origin + modal.dataset.endpoint; // dialog's data-endpoint
         setupModal(fullId, buttonId, endpoint);
     }
-    console.log(`setupModal done for: ${modal.id}`);
+
+    // Set up tabbed modal handling based on naming conventions
+    if (modal.classList.contains('tabbed-modal') || modal.querySelector('.tabs')) {
+        setupTabbedModal(modal);
+    }
 });
 
 function setupModal(modalId, buttonId, endpoint) {
@@ -57,9 +61,33 @@ function setupModal(modalId, buttonId, endpoint) {
     modal.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        console.log(`Submit event fired for modalId: ${modalId} with endpoint: ${endpoint}!`);
+        // console.log(`Submit event fired for modalId: ${modalId} with endpoint: ${endpoint}!`);
         submitModalForm(modal, endpoint, formData);
+        modal.querySelector('form').reset();
+        modal.close();
     });
+}
+
+function setupTabbedModal(modal) {
+    modal.querySelectorAll('.tabs button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log(`Button ${btn.dataset.tab} clicked`);
+            // hide all panels & remove active
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(p => p.hidden = true);
+            // show selected
+            const tabId = 'tab-' + btn.dataset.tab;
+            const panel = document.querySelector(`#${tabId}`);
+            if (panel) {
+                btn.classList.add('active');
+                panel.hidden = false;
+            };
+        });
+    });
+
+    // Auto-activate first tab
+    const firstTab = modal.querySelector('.tabs button');
+    firstTab?.click();
 }
 
 async function submitModalForm(modal, endpoint, formData) {
@@ -72,8 +100,6 @@ async function submitModalForm(modal, endpoint, formData) {
         
         if (responseData.success) {
             makeTableRow(responseData.data);
-            modal.querySelector('form').reset();
-            modal.close();
             makeToast(responseData.message, 'success');
         } else {
             console.error('Error:', responseData.message);

@@ -1,28 +1,21 @@
 
-from app.shared.view_mixins import TimestampedViewMixin
+from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
-class DailyMetricPresenter:
+class DailyMetricPresenter(BasePresenter):
     VISIBLE_COLUMNS = [
         "created_at", "weight", "steps", "wake_time", "sleep_time", "calories"
     ]
     
-    COLUMN_LABELS = {
-        "created_at": "Created",
-        "updated_at": "Last Updated",
-        "weight": "Weight",
-        "steps": "Steps",
-        "wake_time": "Wake Time",
-        "sleep_time": "Sleep Time",
-        "calories": "Calories"
+    COLUMN_CONFIG = {
+        "created_at": {"label": "Created", "priority": "desktop-only"},
+        "updated_at": {"label": "Last Updated", "priority": "desktop-only"},
+        "weight": {"label": "Weight", "priority": "essential"},
+        "steps": {"label": "Steps", "priority": "essential"},
+        "wake_time": {"label": "Wake Time", "priority": "essential"},
+        "sleep_time": {"label": "Sleep Time", "priority": "essential"},
+        "calories": {"label": "Calories", "priority": "essential"}
     }
 
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        """
-        Builds a list of column definitions for use as table headers.
-        Respects the order defined in `VISIBLE_COLUMNS` & excludes fields not explicitly whitelisted.
-        """
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]
 
 class DailyMetricViewModel(TimestampedViewMixin):
     def __init__(self, metric, tz):

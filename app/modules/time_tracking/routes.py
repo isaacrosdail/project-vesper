@@ -27,29 +27,26 @@ def dashboard(session):
 
 @time_tracking_bp.route('/', methods=["GET", "POST"])
 @login_required
-def time_entries():
-    try:
-        if request.method == 'POST':
-            form_data =  request.form.to_dict() # convert formData to dict
-            started_at = resolve_start(form_data["started_at"], current_user.timezone)
-            form_data["started_at"] = started_at
-            form_data["ended_at"] = resolve_end(started_at, float(form_data["duration"]))
+@with_db_session
+def time_entries(session):
 
-            with database_connection() as session:
-                timetracking_repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
-                new_entry = timetracking_repo.create_time_entry(**form_data)
+    if request.method == 'POST':
+        form_data =  request.form.to_dict() # convert formData to dict
+        started_at = resolve_start(form_data["started_at"], current_user.timezone)
+        form_data["started_at"] = started_at
+        form_data["ended_at"] = resolve_end(started_at, float(form_data["duration"]))
 
-                return jsonify({
-                    "success": True, 
-                    "message": "Time entry added.",
-                    "data": {
-                        "id": new_entry.id,
-                        "category": new_entry.category,
-                        "duration": new_entry.duration,
-                        "started_at": new_entry.started_at.isoformat(), # convert to string
-                        "description": new_entry.description
-                    }
-                }), 201
+        timetracking_repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
+        new_entry = timetracking_repo.create_time_entry(**form_data)
 
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+        return jsonify({
+            "success": True, 
+            "message": "Time entry added.",
+            "data": {
+                "id": new_entry.id,
+                "category": new_entry.category,
+                "duration": new_entry.duration,
+                "started_at": new_entry.started_at.isoformat(),
+                "description": new_entry.description
+            }
+        }), 201

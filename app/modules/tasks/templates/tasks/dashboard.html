@@ -30,46 +30,15 @@
         <h2 class="card-title">Tasks</h2>
         <button id="task-entry-dashboard-btn" class="btn btn-primary">Add Task</button>
     </div>
-    <table class="table-standard">
-        <caption class="sr-only">Tasks</caption>
-        <thead class="table-header">
-            <tr>
-                {% if has_dev_tools %}
-                    <th>ID</th>
-                {% endif %}
-                {% for h in task_headers %}
-                    <th>{{ h.label }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% if tasks %}
-                {% for t in tasks %}
-                <tr class="table-row" data-item-id="{{ t.id }}" data-module="tasks" data-subtype="none">
-                    {% if has_dev_tools%}
-                        <td>{{ t.id }}</td>
-                    {% endif %}
-                    <td class="editable-cell tooltip" data-item-id="{{ t.id }}" data-module="tasks" data-field="name" data-tip="Double-click to edit field.">{{ t.name }}</td>
-                    <td>
-                        {# TODO: NOTES: |safe here to render HTML entities instead of escaping them #}
-                        {{ ('&#9745;' if t.is_done else '&#9744;') | safe }}
-                    </td>
-                    <td>{{ t.priority.value }}</td>
-                    <td class="text-right">{{ t.due_label }}</td>
-                    <td class="table-cell delete-cell">
-                        {{ ui.delete_btn() }}
-                    </td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="999" class="table-empty">
-                        No tasks yet.
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    {% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'none') %}
+        <td class="{{ headers[0].priority }} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="tasks" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
+        <td class="{{ headers[1].priority }}">
+            {# TODO: NOTES: |safe here to render HTML entities instead of escaping them #}
+            {{ ('&#9745;' if item.is_done else '&#9744;') | safe }}
+        </td>
+        <td class="{{ headers[2].priority }}">{{ item.priority.value }}</td>
+        <td class="{{ headers[3].priority }} text-right">{{ item.due_label }}</td>
+    {% endcall %}
 </div>
 
 {% endblock %}

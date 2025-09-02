@@ -30,22 +30,21 @@ def dashboard(session):
 
 @metrics_bp.route("/", methods=["POST"])
 @login_required
-def metrics():
-    data = request.get_json()
-    try:
-        with database_connection() as session:
-            # Instantiate our repository
-            repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+@with_db_session
+def metrics(session):
+        
+    repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+    # TODO: Validators.py
+    data = request.form.to_dict()
+    metric_type, value = next(iter(data.items()))
 
-            # TODO: Validators.py
-            metric_type=data["metric_type"]
-            value=data["value"]
+    start_utc, end_utc = today_range(current_user.timezone)
+    metric, was_created = repo.create_or_update_daily_metric(metric_type, value, start_utc, end_utc)
 
-            start_utc, end_utc = today_range(current_user.timezone)
-            new_metric = repo.create_or_update_daily_metric(metric_type, value, start_utc, end_utc)
-
-            return jsonify({"success": True, "message": "Successfully added metric"}), 201
-
-    # TODO: Security - don't expose internal errors to users, need to adjust
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+    status = 201 if was_created else 200
+    return jsonify({
+        "success": True, 
+        "message": "Added metric",
+        "created": bool(was_created),
+        "metric_type": metric_type
+    }), status

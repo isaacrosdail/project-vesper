@@ -4,10 +4,10 @@ If it touches the DB directly, it belongs here.
 """
 
 from sqlalchemy.orm import selectinload
-
+from datetime import datetime
 from app.shared.repository.base import BaseRepository
 
-from .models import Habit, HabitCompletion
+from .models import Habit, HabitCompletion, LeetCodeRecord
 
 
 class HabitsRepository(BaseRepository):
@@ -36,10 +36,11 @@ class HabitsRepository(BaseRepository):
         self.session.flush()
         return habit
     
-    def create_habit_completion(self, habit_id: int):
+    def create_habit_completion(self, habit_id: int, created_at: datetime | None = None):
         habit_completion = HabitCompletion(
             habit_id=habit_id,
-            user_id=self.user_id
+            user_id=self.user_id,
+            created_at=created_at
         )
         self.session.add(habit_completion)
         return habit_completion
@@ -80,3 +81,22 @@ class HabitsRepository(BaseRepository):
             )
             .first()
         )
+    
+    def create_leetcoderecord(self, leetcode_id: int, difficulty, language, lcstatus, title: str | None = None):
+        new_record = LeetCodeRecord(
+            user_id=self.user_id,
+            leetcode_id=leetcode_id,
+            title=title,
+            difficulty=difficulty, # Note: can pass the enum member itself, no need for .value
+            language=language,
+            status=lcstatus
+        )
+        self.session.add(new_record)
+        self.session.flush()
+        return new_record
+    
+    def get_all_leetcoderecords_in_window(self, start_utc, end_utc) -> list[LeetCodeRecord]:
+        return self.session.query(LeetCodeRecord).filter(
+            LeetCodeRecord.created_at >= start_utc,
+            LeetCodeRecord.created_at < end_utc
+        ).all()
