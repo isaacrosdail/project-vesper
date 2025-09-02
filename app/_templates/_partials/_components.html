@@ -12,6 +12,39 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 #}
 
 
+{# Responsive Tables #}
+
+{% macro responsive_table(caption, headers, items, module_name, subtype) %}
+<table class="table-standard">
+  <caption class="sr-only">{{ caption }}</caption>
+  <thead class="table-header">
+    <tr>
+      {% for col in headers %}
+        <th class="{{ col.priority }}">{{ col.label }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% if items %}
+      {% for item in items %}
+        <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ subtype }}">
+          {{ caller(item, headers) }}
+          <td class="table-cell delete-cell">
+            {{ delete_btn() }}
+          </td>
+        </tr>
+      {% endfor %}
+    {% else %}
+        <tr>
+          <td colspan="99" class="table-empty">
+            No entries yet.
+          </td>
+        </tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endmacro %}
+
 {# === MODALS === #}
 
 {# Entry form modal #}
@@ -20,7 +53,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {# by sandwiching them between 'call ourmacro(ourparameters,..)' and 'endcall' #}
 {# TODO: NOTES: {% call %} doesn't work with a template that doesn't use caller() #}
 {% macro modal(endpoint, id, title) %}
-<dialog id="{{ id }}-modal" data-endpoint="/{{ endpoint }}/">
+<dialog id="{{ id }}-modal" data-endpoint="/{{ endpoint }}">
     <form>
         <legend>{{ title }}</legend>
         <button type="button" class="modal-close btn btn-destructive" id="{{ id }}-modal-close-btn">&times;</button>
@@ -74,3 +107,67 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 </button>
 {% endmacro %}
 
+{# Form Modals - Specific Ones #}
+
+{# Centralized place for our Metric Entry modal #}
+{% macro metric_entry_modal(id='metric-entry-dashboard', title='Add Metric') %}
+  {% call modal('/metrics/', id, title) %}
+      <div class="tabs">
+        <button type="button" role="tab" data-tab="steps" class="btn btn-secondary">Steps Entry</button>
+        <button type="button" role="tab" data-tab="weight" class="btn btn-secondary">Weight Entry</button>
+        <button type="button" role="tab" data-tab="sleep" class="btn btn-secondary">Sleep</button>
+        <button type="button" role="tab" data-tab="calories" class="btn btn-secondary">Calories</button>
+      </div>
+
+      <div role="tabpanel" class="tab-content" id="tab-steps">
+        <div class="form-group">
+          <label for="steps">Steps:</label>
+          <input type="number" id="steps" name="steps" min="0" max="40000" step="1">
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-content" id="tab-weight" hidden>
+        <div class="form-group">
+          <label for="weight">Weight:</label>
+          <input type="number" id="weight" name="weight" min="0" max="500" step="0.1">
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-content" id="tab-calories" hidden>
+        <div class="form-group">
+          <label for="calories">Calories:</label>
+          <input type="number" id="calories" name="calories" min="0" max="10000" step="1">
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-content" id="tab-sleep" hidden>
+        <div class="form-group">
+          <label for="wake_time">Wake Time:</label>
+          <input type="time" id="wake_time" name="wake_time">
+        </div>
+        <div class="form-group">
+          <label for="sleep_time">Sleep Time:</label>
+          <input type="time" id="sleep_time" name="sleep_time">
+        </div>
+      </div>
+  {% endcall %}
+{% endmacro %}
+
+
+{% macro time_entry_modal(id='time-entry-dashboard', title='Add Time Entry') %}
+  {% call modal('/time_tracking/', id, title) %}
+    <div class="form-group">
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category" required>
+    </div>
+    <div class="form-group">
+        <label for="duration">Duration (minutes):</label>
+        <input type="number" id="duration" name="duration" min="0" required>
+    </div>
+    <div class="form-group">
+        <label for="started_at">Started At:</label>
+        <input type="time" id="started_at" name="started_at" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Description (Optional):</label>
+        <input type="text" id="description" name="description">
+    </div>
+  {% endcall %}
+{% endmacro %}

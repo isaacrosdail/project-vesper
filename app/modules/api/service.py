@@ -31,7 +31,7 @@ def release_slot(session, api_name: str, date) -> None:
     session.execute(
         text("""
             UPDATE apicallrecord
-            SET apicallrecord.call_count = GREATEST(apicallrecord.call_count - 1, 0)
+            SET call_count = GREATEST(apicallrecord.call_count - 1, 0)
             WHERE api_called = :a AND date = :d
         """), 
         {"a": api_name, "d": date}

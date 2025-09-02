@@ -9,49 +9,18 @@
         <label for="name">Habit:</label>
         <input type="text" id="name" name="name"  required>
     </div>
-{% endcall%}
+{% endcall %}
 
 <div class="card-dashboard">
     <div class="card-header">
         <h2 class="card-title">Habits</h2>
         <button id="habit-entry-dashboard-btn" class="btn btn-primary">Add Habit</button>
     </div>
-    <table class="table-standard">
-        <caption class="sr-only">Habits</caption>
-        <thead class="table-header">
-            <tr>
-                {% if has_dev_tools %}
-                    <th>ID</th>
-                {% endif %}
-                {% for h in headers %}
-                    <th>{{ h.label }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% if habits %}
-                {% for h in habits %}
-                <tr class="table-row" data-item-id="{{ h.id }}" data-module="habits" data-subtype="none">
-                    {% if has_dev_tools %}
-                        <td>{{ h.id }}</td>
-                    {% endif %}
-                    <td class="editable-cell tooltip" data-item-id="{{ h.id }}" data-module="habits" data-field="name" data-tip="Double-click to edit field.">{{ h.name }}</td>
-                    <td>{{ h.status_label }}</td>
-                    <td>{{ h.created_at_label }}</td>
-                    <td class="table-cell delete-cell">
-                        {{ ui.delete_btn() }}
-                    </td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="999" class="table-empty">
-                        No habits yet.
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    {% call(item, headers) ui.responsive_table('Habits', headers, habits, 'habits', 'none') %}
+        <td class="{{ headers[0].priority}} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="habits" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
+        <td class="{{ headers[1].priority}}">{{ item.status_label }}</td>
+        <td class="{{ headers[2].priority}}">{{ item.created_at_label }}</td>
+    {% endcall %}
 </div>
 {% endblock %}
 

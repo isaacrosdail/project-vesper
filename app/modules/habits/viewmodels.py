@@ -1,24 +1,20 @@
 
-from app.shared.view_mixins import TimestampedViewMixin
+from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
-class HabitPresenter:
+class HabitPresenter(BasePresenter):
     VISIBLE_COLUMNS = [
         "name", "status", "created_at"
     ]
-    # Human-readable column names
-    COLUMN_LABELS = {
-        "id": "ID",
-        "name": "Name",
-        "tags": "Tag(s)",
-        "status": "Status",
-        "created_at": "Created",
-        "established_date": "Date Promoted",
-        "promotion_threshold": "Promotion Threshold"
+    COLUMN_CONFIG = {
+        "id": {"label": "ID", "priority": "desktop-only"},
+        "name": {"label": "Name", "priority": "essential"},
+        "tags": {"label": "Tag(s)", "priority": "desktop-only"},
+        "status": {"label": "Status", "priority": "essential"},
+        "created_at": {"label": "Created", "priority": "desktop-only"},
+        "established_date": {"label": "Date Promoted", "priority": "desktop-only"},
+        "promotion_threshold": {"label": "Promotion Threshold", "priority": "desktop-only"}
     }
 
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]
     
 class HabitViewModel(TimestampedViewMixin):
     def __init__(self, habit, tz):

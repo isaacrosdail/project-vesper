@@ -1,0 +1,16 @@
+
+{% extends 'base.html' %}
+
+{% block title %}500 - Error{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <h1>500</h1>
+    <p>
+        Experiencing technical difficulties. Please try again in a few minutes.
+    </p>
+
+    {{ ui.error_link('Back to Safety', 'main.home') }}
+</div>
+
+{% endblock %}

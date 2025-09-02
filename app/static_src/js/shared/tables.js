@@ -1,5 +1,19 @@
 // Bundler: Auto-runner => wires tables on DOMContentLoaded
 // Functions for our tables, such as editTableField or deleteTableItem?
+import { confirmationManager } from './ui/modal-manager.js';
+import { makeToast } from './ui/toast.js';
+
+/**
+ * Creates table row for given item data for realtime modal entries
+ * @param {Object} data - Return data from backend for new item
+ */
+export function makeTableRow(data) {
+    const row = document.createElement("tr");
+
+    // Build cells
+
+}
+
 
 // Currently used by tasks/dashboard & groceries/dashboard
 // DELETE fetch request when clicking delete button
@@ -11,11 +25,11 @@
  * @param {string} subtype 
  * @returns 
  */
-async function deleteTableItem(module, itemId, subtype = "none") { // Default to none if not passed
-    if (!confirm(`Are you sure you want to delete this item?`)) return;
+async function deleteTableItem(module, itemId, subtype = "none") {
+    const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
+    if (!confirmed) return;
 
-    // Construct URL dynamically based on module & itemId
-    const url = `/${module}/${subtype}/${itemId}`
+    const url = `/${module}/${subtype}/${itemId}`;
 
     try {
         const response = await fetch(url, {
@@ -25,57 +39,56 @@ async function deleteTableItem(module, itemId, subtype = "none") { // Default to
         const responseData = await response.json();
 
         if (responseData.success) {
-            // update DOM
             const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
             if (itemRow) itemRow.remove();
         } else {
-            // Route error
             console.error('Failed to delete item:', responseData.message);
         }
     } catch (error) {
-        // If fetch request as a whole failed (network/server errors)
         console.error('Fetch request failed: ', error);
     }
 }
 
 /** 
- * Inline table cell editing. Allows double-clicking table cells to edit values in place.
- * @param {HTMLElement} td - The table cell element
- * @param {string} module  - API module name for the update endpoint 
- * @param {string} field   - Field of table being updated
- * @param {string|number} itemId - ID of the item being updated 
+ * Enables inline editing of a DOM element's text content via a temporary input field.
+ * On blur or Enter key, input it replaced with text content.
+ * Returns the new value if it was changed, or null if unchanged.
+ * 
+ * @param {HTMLElement} element - Target element to enable inline editing for.
+ * @returns {Promise<string|null>} Resolves with the updated value, or null if unchanged.
  */
-// Allows us to double-click a table cell and change its value
-function editTableField(td, module, field, itemId, subtype) {
-    // alert(`Module: ${module}, Field: ${field}, ID: ${itemId}, Value: ${td.textContent}`);
+export async function inlineEditElement(element) {
+    const originalText = element.textContent.trim();
 
-    // 1. Create an input element to replace cell content
+    // Create input element with similar size to current text
     const input = document.createElement('input');
-    input.className = 'input-inline';
     input.type = 'text';
-    input.value = td.textContent;
+    input.className = 'input-inline';
+    input.value = originalText;
+    input.size = originalText.length + 2;
 
-    // Clear the cell & append the input field
-    td.innerHTML = '';      // Clears the content of the dblclicked <td>
-    td.appendChild(input);  // Add the input field to the <td>
-    input.focus()           // Focus on the input field for editing
+    // Clear element & append input
+    element.textContent = '';
+    element.appendChild(input);
+    input.focus();
 
-    // Listen for blur (click away) or enter to save the update
-    // NOTE: Notice how we're adding another listener for hitting 'enter' below, which actually triggers blur
-    // Isolates the "real change" portion of our logic to only being in one place
-    //  what if the user hits enter AND clicks away in rapid succession?
-    input.addEventListener('blur', function() {
-        const td = this.parentElement; // 'this' = input element, so here we get the parent <td>
-        saveUpdatedField(module, field, itemId, input.value, td, subtype); // Pass td along with other data
-    });
+    // Trigger save on blur or Enter key
+    // Note: Pressing Enter triggers a blur, so the change logic is centralized in handleFinish
+    return new Promise((resolve) => {
+        input.addEventListener('blur', handleFinish);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                input.blur(); // trigger blur => handleFinish => resolve
+            }
+        });
 
-    input.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            input.blur(); // Trigger the blur event when Enter is pressed
+        function handleFinish() {
+            const newValue = input.value.trim();
+            element.textContent = newValue || originalText;
+            resolve(newValue !== originalText ? newValue : null);
         }
     });
 }
-
 
 // 1. Get the value from the input field (represents our edited title)
 // 2. Send it to the backend to update the task in the db
@@ -106,7 +119,7 @@ async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "
         const responseData = await response.json();
 
         if (responseData.success) {
-            updateFieldDisplay(td, newValue);
+            makeToast(responseData.message, 'success');
         } else {
             console.error('Error updating field:', responseData.message);
         }
@@ -115,83 +128,23 @@ async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "
     }
 }
 
-// Another function to handle "clean up"
-// Remove the input field & display the new title after changes
-/**
- * Replaces input field with updated text display
- * @param {HTMLElement} td - Table cell containing the input
- * @param {string} newValue - Updated value to display
- */
-export function updateFieldDisplay(td, newValue) {
-    td.textContent = newValue;
-}
-
-/**
- * Handles delete button clicks using event delegation
- * @param {Event} e - Click event
- */
-function handleDeleteClick(e) {
-    // Handle clicks on delete button or its contents (SVG)
-    if (e.target.matches('.delete-btn') || e.target.closest('.delete-btn')) {
-        const row = e.target.closest('tr');
-        if (!row) return;
-        deleteTableItem(row.dataset.module, row.dataset.itemId, row.dataset.subtype)
-    }
-}
-
-/**
- * Handles double-click editing on table cells
- * To use: Add class 'editable-cell' on given cell
- * @param {Event} e - Double-click event
- */
-function handleEditClick(e) {
-    if (e.target.classList.contains('editable-cell')) {
-        const td = e.target;
-        editTableField(td, td.dataset.module, td.dataset.field, td.dataset.itemId, td.dataset.subtype)
-    }
-}
-
-// TODO: Implement real options here
-function handleCustomContextMenu(e) {
-    if (e.target.closest('.table-row')) {
-        // Accessing OR making our custom context menu
-        let menu = document.querySelector('.context-menu');
-        if (!menu) {
-            menu = document.createElement('ul');
-            const menuItems = ['Edit', 'Delete', 'Close'];
-        
-            for (const item of menuItems) {
-                const menuItem = document.createElement('li');
-                menuItem.textContent = item;
-                menu.appendChild(menuItem);
-            }
-            menu.classList.add('context-menu');
-        }
-
-        // Position menu at cursor
-        menu.style.left = e.clientX + 'px';
-        menu.style.top = e.clientY + 'px';
-        menu.style.display = 'block';
-        document.body.appendChild(menu); // createElement adds to JS mem, appendChild to add to DOM
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    document.addEventListener('click', handleDeleteClick);
-    document.addEventListener('dblclick', handleEditClick);
-    document.addEventListener('contextmenu', (e) => {
-        if (e.ctrlKey) {
-            console.log('shift pressed!');
-            e.preventDefault();
-            handleCustomContextMenu(e); // TODO?: Pull our context menu handling into some kind of global.js
+    document.addEventListener('click', (e) => {
+        // Handle clicks on delete button or its contents (SVG)
+        if (e.target.matches('.delete-btn') || e.target.closest('.delete-btn')) {
+            const row = e.target.closest('tr');
+            if (!row) return;
+            deleteTableItem(row.dataset.module, row.dataset.itemId, row.dataset.subtype)
         }
     });
-
-    // Click away for context menu close
-    document.addEventListener('click', (e) => {
-        if (!e.target.matches('.context-menu')) {
-            const menu = document.querySelector('.context-menu');
-            menu?.remove();
+    document.addEventListener('dblclick', async (e) => {
+        // Handle double-click to edit table cell
+        if (e.target.classList.contains('editable-cell')) {
+            const td = e.target;
+            const newValue = await inlineEditElement(td);
+            if (newValue) {
+                await saveUpdatedField(td.dataset.module, td.dataset.field, td.dataset.itemId, newValue, td, td.dataset.subtype);
+            }
         }
     });
 });

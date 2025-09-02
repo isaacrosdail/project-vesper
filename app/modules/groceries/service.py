@@ -19,9 +19,8 @@ class GroceriesService:
         if error:
             return {
                 "success": False,
-                "message": "Error",
-                "show_product_fields": False,
-                "form_data": form_data
+                "message": error,
+                "error_type": "validation_failed"
             }
 
         # Check if product exists
@@ -49,6 +48,5 @@ class GroceriesService:
             return {
                 "success": False,
                 "message": "Associated product not found. Please add product info.",
-                "show_product_fields": True,
-                "form_data": form_data
+                "error_type": "product_not_found"
             }

@@ -7,7 +7,7 @@
 // Idea is userStore can only be in one of four states at any time, and follows
 // specific rules about how to transition between states
 
-const userStore = {
+export const userStore = {
     data: null,
     state: 'not-loaded',
 
@@ -36,16 +36,3 @@ const userStore = {
         }
     }
 }
-
-// Export to make available for import?
-// Needed for bundler method?
-export { userStore };
-
-// // Test it!
-// console.log('Initial state:', userStore.state);
-// console.log('Initial data:', userStore.data);
-
-// userStore.fetch().then(() => {
-//     console.log('After fetch - state:', userStore.state);
-//     console.log('After fetch - data:', userStore.data);
-// });

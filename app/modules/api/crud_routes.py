@@ -3,7 +3,7 @@
 from flask import Blueprint, abort, current_app, jsonify, request
 from flask_login import current_user, login_required
 
-from app._infra.database import database_connection, with_db_session
+from app._infra.database import with_db_session
 from app.modules.auth.service import check_item_ownership
 from app.modules.groceries.models import Product, Transaction
 from app.modules.habits.models import Habit
@@ -37,29 +37,25 @@ def get_model_class(module, subtype: str = "none"):
 @login_required
 @with_db_session
 def item(session, module, subtype, item_id):
-    try:
-        model_class = get_model_class(module, subtype) # so 'tasks', 'none' returns Task class
-        if model_class is None:
-            current_app.logger.warning(f"Unknown model for {module}, {subtype}")
-            abort(404)
 
-        item = session.get(model_class, item_id)
+    model_class = get_model_class(module, subtype) # so 'tasks', 'none' returns Task class
+    if model_class is None:
+        current_app.logger.warning(f"Unknown model for {module}, {subtype}")
+        abort(404)
 
-        if not item:
-            return jsonify({"success": False, "message": f"{model_class.__name__} not found."}), 404
-        
-        # Ownership check
-        check_item_ownership(item, current_user.id)
-        
-        if request.method == 'PATCH':
-            data = request.get_json()
-            for field, value in data.items():
-                setattr(item, field, value)
-            return jsonify({"success": True, "message": f"Successfully updated {model_class.__name__}"}), 200
-        
-        elif request.method == 'DELETE':
-            safe_delete(session, item)
-            return jsonify({"success": True, "message": f"{model_class.__name__} deleted"}), 200
-        
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+    item = session.get(model_class, item_id)
+    if not item:
+        return jsonify({"success": False, "message": f"{model_class.__name__} not found."}), 404
+    
+    # Ownership check
+    check_item_ownership(item, current_user.id)
+    
+    if request.method == 'PATCH':
+        data = request.get_json()
+        for field, value in data.items():
+            setattr(item, field, value)
+        return jsonify({"success": True, "message": f"Successfully updated {model_class.__name__}"}), 200
+    
+    elif request.method == 'DELETE':
+        safe_delete(session, item)
+        return jsonify({"success": True, "message": f"{model_class.__name__} deleted"}), 200

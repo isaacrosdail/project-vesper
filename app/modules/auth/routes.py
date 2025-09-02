@@ -1,8 +1,7 @@
-import sys
+from flask import Blueprint, redirect, render_template, request, url_for
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
-
+from app.shared.middleware import set_toast
 from app._infra.database import database_connection, with_db_session
 from app.modules.auth.models import UserRole
 from app.modules.auth.repository import UsersRepository
@@ -15,22 +14,19 @@ auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
 @auth_bp.route("/user_dashboard", methods=["GET"])
 def user_dashboard():
-    
     return render_template('user_dashboard.html')
 
 
 @auth_bp.route('/logout', methods=["GET", "POST"])
 @login_required
 def logout():
+    set_toast('Logout successful', 'success')
     logout_user()
-    flash("Logout successful.")
     return redirect(url_for("main.home"))
 
 
 @auth_bp.route('/login', methods=["GET", "POST"])
 def login():
-    # TODO: STUDY: CSRF, rate limiting, & lockout mechanisms
-
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -39,11 +35,8 @@ def login():
             users_repo = UsersRepository(session)
             user = users_repo.get_user_by_username(username)
             
-            if not user:
-                flash(msg("username_nonexistent", DEFAULT_LANG))
-                return redirect(url_for('auth.login'))
-            elif not user.check_password(password):
-                flash(msg("password_incorrect", DEFAULT_LANG))
+            if not user or not user.check_password(password):
+                set_toast('Invalid login credentials', 'error')
                 return redirect(url_for('auth.login'))
             else:
                 remember = 'remember_user' in request.form
@@ -52,7 +45,7 @@ def login():
 
     else:
         return render_template('auth/login.html')
-    
+
 
 @auth_bp.route('/register', methods=["GET", "POST"])
 def register():
@@ -65,33 +58,25 @@ def register():
         password = form_data.get("password", "")
         name = form_data.get("name", "").strip()
         
-        try:
-            with database_connection() as session:
-                auth_service = AuthService(session)
-                user, errors = auth_service.register_user(
-                    username=username, password=password, name=name, role=UserRole.USER
-                )
-                if errors:
-                    for e in errors:
-                        flash(e, "error")
-                    return redirect(url_for("auth.register"))
-                
-        except Exception as e:
-            print(f"DEBUG: Validation failed: {e}", file=sys.stderr)
-            flash("hey")
-            return redirect(url_for("auth.register"))
-                    
-        flash("Account successfully created!")
+        with database_connection() as session:
+            auth_service = AuthService(session)
+            user, errors = auth_service.register_user(
+                username=username, password=password, name=name, role=UserRole.USER
+            )
+            if errors:
+                for e in errors:
+                    set_toast(e, 'error')
+                return redirect(url_for("auth.register"))
+        
+        set_toast('Account successfully created!', 'success')
         return redirect(url_for("main.home"))
-
 
 
 # Create & Seed only
 @auth_bp.route('/init-demo', methods=["POST"])
 def init_demo():
-    # Boot logged in users first just in case
     try:
-        logout_user()
+        logout_user() # boot logged in users just in case
     except Exception:
         pass
 
@@ -100,7 +85,7 @@ def init_demo():
         demo_user = auth_service.get_or_create_demo_user()
         login_user(demo_user)
 
-    flash(msg("demo_ready", DEFAULT_LANG))
+    set_toast('Welcome to the demo!', 'success')
     return redirect(url_for('main.home'))
 
 """
@@ -125,7 +110,7 @@ def reset_users(session): # <= @with_db_session injects session as 1st parameter
     demo_user = auth_service.get_or_create_demo_user()
     owner_user = auth_service.get_or_create_owner_user()
 
-    flash(msg("db_reset_users", DEFAULT_LANG))
+    set_toast('Users reset!', 'success')
     return redirect(url_for('auth.login'))
 
 # Wipe app data only; reset IDs for more predictable seeding
@@ -137,7 +122,7 @@ def reset_database(session):
 
     delete_all_db_data(session, include_users=False, reset_sequences=True)
 
-    flash(msg("db_reset", DEFAULT_LANG))
+    set_toast('DB reset!', 'success')
     return redirect(url_for('main.home'))
 
 
@@ -152,5 +137,5 @@ def reset_dev(session):
     auth_service = AuthService(session)
     owner_user = auth_service.get_or_create_owner_user()
 
-    flash(msg("db_reset_dev", DEFAULT_LANG))
+    set_toast('DEV: DB reset!', 'success')
     return redirect(url_for('main.home'))

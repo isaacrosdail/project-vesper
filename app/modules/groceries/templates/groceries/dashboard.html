@@ -11,45 +11,14 @@
             Log New Transaction
         </a>
     </div>
-    <table class="table-standard">
-        <caption class="sr-only">Grocery - Recent Transactions</caption>
-        <thead class="table-header">
-            <tr>
-                {% if has_dev_tools %}
-                    <th>ID</th>
-                {% endif %}
-                {% for h in transaction_headers %}
-                    <th>{{ h.label }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% if transactions %}
-                {% for t in transactions %}
-                <tr class="table-row" data-item-id="{{ t.id }}" data-module="groceries" data-subtype="transaction">
-                    {% if has_dev_tools %}
-                        <td>{{ t.id }}</td>
-                    {% endif %}
-                    <td>{{ t.barcode }}</td>
-                    <td>{{ t.product_name }}</td>
-                    <td>{{ t.price_label }}</td>
-                    <td>{{ t.quantity }}</td>
-                    <td class="text-right">{{ t.created_at_label }}</td>
-                    <td class="text-right">{{ t.price_per_100g_label }}</td>
-                    <td class="table-cell delete-cell">
-                        {{ ui.delete_btn() }}
-                    </td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="999" class="table-empty">
-                        No transactions yet.
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    {% call(item, headers) ui.responsive_table('Recent Transactions', transaction_headers, transactions, 'groceries', 'transaction') %}
+    <td class="{{ headers[0].priority }}">{{ item.barcode }}</td>
+    <td class="{{ headers[1].priority }}">{{ item.product_name }}</td>
+    <td class="{{ headers[2].priority }}">{{ item.price_label }}</td>
+    <td class="{{ headers[3].priority }}">{{ item.quantity }}</td>
+    <td class="{{ headers[4].priority }} text-right">{{ item.created_at_label }}</td>
+    <td class="{{ headers[5].priority }} text-right">{{ item.price_per_100g_label }}</td>
+    {% endcall %}
 </div>
 
 <div class="card-dashboard">
@@ -59,44 +28,13 @@
             Add New Product
         </a>
     </div>
-    <table class="table-standard">
-        <caption class="sr-only">Product Catalog</caption>
-        <thead class="table-header">
-            <tr>
-                {% if has_dev_tools %}
-                    <th>ID</th>
-                {% endif %}
-                {% for h in product_headers %}
-                    <th>{{ h.label }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% if products %}
-                {% for p in products %}
-                <tr class="group table-row" data-item-id="{{ p.id }}" data-module="groceries" data-subtype="product">
-                    {% if has_dev_tools %}
-                        <td>{{ p.id }}</td>
-                    {% endif %}
-                    <td>{{ p.barcode }}</td>
-                    <td>{{ p.name }}</td>
-                    <td class="text-right">{{ p.category }}</td>
-                    <td class="text-right">{{ p.net_weight_display }}</td>
-                    <td class="text-right">{{ p.calories_display }}</td>
-                    <td class="table-cell delete-cell">
-                        {{ ui.delete_btn() }}
-                    </td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="999" class="table-empty">
-                        No products yet.
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products, 'groceries', 'product') %}
+        <td class="{{ headers[0].priority }}">{{ item.barcode }}</td>
+        <td class="{{ headers[1].priority }}">{{ item.name }}</td>
+        <td class="{{ headers[2].priority }} text-right">{{ item.category }}</td>
+        <td class="{{ headers[3].priority }} text-right">{{ item.net_weight_display }}</td>
+        <td class="{{ headers[4].priority }} text-right">{{ item.calories_display }}</td>
+    {% endcall %}
 </div>
 {% endblock %}
 

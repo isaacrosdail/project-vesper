@@ -27,7 +27,7 @@ class DailyMetricsRepository(BaseRepository):
         ).all()
     
     def create_or_update_daily_metric(self, metric_type: str, value: int | float | time, start_utc: datetime, end_utc: datetime):
-        """Create new daily metric or update existing one for given date."""
+        """Create new daily metric or update existing one for given date. Returns tuple (entry, was_created)."""
         if not hasattr(DailyEntry, metric_type):
             raise ValueError(f"Invalid metric: {metric_type}")
         
@@ -37,8 +37,8 @@ class DailyMetricsRepository(BaseRepository):
             setattr(entry, metric_type, value) # dynamically set entry.weight = value
         else:
             entry = DailyEntry(user_id=self.user_id, **{metric_type: value})
-            self.session.add(entry)
-        return entry
+            self.session.add(entry), True
+        return entry, False
         
     def create_daily_metric(self, metric_type: str, value: int | float | time):
         """Create & add a new daily metric. Returns metric."""

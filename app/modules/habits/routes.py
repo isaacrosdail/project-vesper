@@ -10,6 +10,7 @@ from app.shared.datetime.helpers import (day_range, parse_js_instant,
                                          today_range)
 from app.shared.sorting import bubble_sort
 from app.modules.habits.viewmodels import HabitPresenter, HabitViewModel
+from app.modules.habits.models import Difficulty, Language, LCStatus
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
@@ -29,7 +30,6 @@ def dashboard(session):
     }
     return render_template("habits/dashboard.html", **ctx)
 
-# CREATE
 @habits_bp.route("/", methods=["GET", "POST"])
 @login_required
 @with_db_session
@@ -54,25 +54,25 @@ def habits(session):
 def completions(session, habit_id):
     try:
         body = request.get_json() # returns dict, parse JSON body of POST fetch
+        if not body:
+            return jsonify({"success": False, "message": "Invalid JSON"}), 400
+        
         completed_at = parse_js_instant(body["completed_at"])
-
-        habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
-        habit = habits_repo.get_habit_by_id(habit_id)
-
-        if not habit:
-            return jsonify({"success": False, "message": "Habit not found"}), 404
-        
-        habit_completion = habits_repo.create_habit_completion(habit_id)
-        return jsonify({"success": True, "message": "Habit marked complete"}), 201
-        
-    except Exception:
-        return jsonify({"success": False, "message": "Failed to mark habit complete"}), 500
+    except (KeyError, ValueError, TypeError) as e:
+        return jsonify({"success": False, "message": "Invalid request data"}), 400
     
+    habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
+    habit = habits_repo.get_habit_by_id(habit_id)
 
-# Deletes a given HabitCompletion record (acts as our "habit marked complete")
-# For now, we'll only allow habits to have a single completion record in a given day
-# BUT this is now flexible enough to allow for choosing the day whose completion we wish to delete
-@habits_bp.route("/<int:habit_id>/completions", methods=["DELETE"])
+    if not habit:
+        return jsonify({"success": False, "message": "Habit not found"}), 404
+    
+    habit_completion = habits_repo.create_habit_completion(habit_id, completed_at)
+    return jsonify({"success": True, "message": "Habit marked complete"}), 201
+
+
+# Note: JS-side is flexible enough to delete any given date's completion
+@habits_bp.route("/<int:habit_id>/completion", methods=["DELETE"])
 @login_required
 @with_db_session
 def completion(session, habit_id):
@@ -95,6 +95,35 @@ def completion(session, habit_id):
         return jsonify({"success": True, "message": "Habit unmarked as complete"}), 200
     else:
         return jsonify({"success": False, "message": "No completion found for today"}), 404
+    
 
-    # except Exception:
-    #     return jsonify({"success": False, "message": "Failed to unmark habit"}), 500 # 500 = Internal Server Error
+@habits_bp.route("/leetcode_record", methods=["POST"])
+@login_required
+@with_db_session
+def create_leetcoderecord(session):
+    form_data = request.form.to_dict()
+
+    try:
+        form_data["difficulty"] = Difficulty(form_data["difficulty"])
+        form_data["language"] = Language(form_data["language"])
+        form_data["lcstatus"] = LCStatus(form_data["lcstatus"])
+    except ValueError as e:
+        return jsonify({"success": False, "message": str(e)}), 400
+    
+    form_data["leetcode_id"] = int(form_data["leetcode_id"])
+
+    habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
+    new_record = habits_repo.create_leetcoderecord(**form_data)
+
+    return jsonify({
+        "success": True,
+        "message": "LeetCode record added",
+        "new_record": {
+            "id": new_record.id,
+            "leetcode_id": new_record.leetcode_id,
+            "title": new_record.title,
+            "difficulty": new_record.difficulty.value,
+            "language": new_record.language.value,
+            "lcstatus": new_record.status.value
+        }
+    })
