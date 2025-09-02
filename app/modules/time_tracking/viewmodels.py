@@ -1,28 +1,20 @@
 """
 Presentation layer: Wraps models to provide display-friendly fields. Think: formatting, show in local timezone, etc.
 """
-from app.shared.view_mixins import TimestampedViewMixin
+from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
-class TimeEntryPresenter:
+class TimeEntryPresenter(BasePresenter):
     VISIBLE_COLUMNS = [
         "category", "duration", "started_at", "description"
     ]
 
-    COLUMN_LABELS ={
-        "id": "ID",
-        "category": "Category",
-        "description": "Description",
-        "started_at": "Started At",
-        "duration": "Duration (mins.)"
+    COLUMN_CONFIG = {
+        "id": {"label": "ID", "priority": "desktop-only"},
+        "category": {"label": "Category", "priority": "essential"},
+        "description": {"label": "Description", "priority": "essential"},
+        "started_at": {"label": "Started At", "priority": "essential"},
+        "duration": {"label": "Duration (mins.)", "priority": "essential"}
     }
-
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        """
-        Builds a list of column definitions for use as table headers.
-        Respects the order defined in `VISIBLE_COLUMNS` & excludes fields not explicitly whitelisted.
-        """
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]
 
 
 class TimeEntryViewModel(TimestampedViewMixin):

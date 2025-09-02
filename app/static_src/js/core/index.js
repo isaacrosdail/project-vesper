@@ -1,111 +1,16 @@
-import { formatDateString } from '../shared/datetime.js';
+import { formatTimeString } from '../shared/datetime.js';
 import { getJSInstant } from '../shared/datetime.js';
-import { userStore } from '../shared/userStore.js';
+import { fetchWeatherData } from '../shared/services/weather-service.js';
+import { calcCelestialBodyPos, CelestialRenderer, setupCanvas } from '../shared/canvas.js';
+import { makeToast } from '../shared/ui/toast.js';
 
 // Global caches
 let weatherInfo = null;  // for weatherInfo
-let cachedSunPos = null; // for sunPos (for redrawing after Canvas resizing)
-
-/**
- * Function for inputting time entries via our activity log card inputs
- * @param {HTMLElement} element - The "Save Entry" button in our activity log card
- */
-async function saveTimeEntry(element) {
-    // Grabbing our elements from there
-    const card = element.closest('#activity-log-card');
-    const categoryElement = card.querySelector('[name="category"]');
-    const durationElement = card.querySelector('[name="duration"]');
-    const descriptionElement = card.querySelector('[name="description"]');
-
-    // Getting values for POST
-    const category = categoryElement.value;
-    const duration = durationElement.value;
-    const description = descriptionElement.value;
-
-    try {
-        // Now our async fetch
-        const response = await fetch('/time_tracking/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                category: category,
-                duration: duration,
-                description: description
-            })
-        });
-        const responseData = await response.json();
-
-        if (responseData.success) {
-            // Clear our inputs
-            categoryElement.value = '';
-            durationElement.value = '';
-            descriptionElement.value = '';
-        } else {
-            console.error('Error saving entry: ', responseData.message);
-        }
-    }
-    catch (error) {
-        console.error('Failed to save/update: ', error);
-    }
-}
-
-function editIntention(span) {
-    inlineEditElement(span, {
-        onSave: (val, el) => updateIntention(el, val)
-    });
-}
-
-// TODO: Scrap + merge into generalized inline edit function
-async function updateIntention(element, newValue) {
-    try {
-        const response = await fetch('/daily-intentions/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ intention: newValue })
-        });
-
-        const responseData = await response.json();
-
-        if (responseData.success) {
-            element.innerHTML = `${newValue}`; // replace input field with just newValue text upon success
-        } else {
-            console.error('Error saving intention:', responseData.message);
-        }
-    } catch (error) {
-        console.error('Failed to save/update:', error);
-    }
-}
-
-// TODO: Scrap?
-/**
- * Saves input data based on input's data attributes (metric or checkin)
- * @param {HTMLElement} input - Input element containing data to save
- * @description
- * - Only saves if input has a value (allows partial form completion)
- */
-async function saveData(input) {
-    // Don't bother sending for empty input fields (don't require all to be filled out)
-    if (input.dataset.metric && input.value) {
-        // call metric logic
-        const response = await fetch('/metrics', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                metric_type: input.dataset.metric,
-                value: input.value,
-            })
-        });
-        const responseData = await response.json();
-
-        if (responseData.success) {
-            alert('Saved!');
-        }
-    } else if (input.dataset.checkin) {
-        // TODO: call checkin logic
-    }
-}
+// let cachedSunPos = null; // for sunPos
+// let currentBodyType = 'moon';
+let currentCanvasState = null;
+let resizeTimeout = null;
+let renderer;
 
 /**
  * Marks a habit as complete/incomplete & updates the UI accordingly.
@@ -115,11 +20,6 @@ async function saveData(input) {
  * @returns {Promise<void>} 
  */
 async function markHabitComplete(checkbox, habitId) {
-    // Fetch sends a request to flask server
-    // POSTing to a dynamic URL like /complete_habit/7 => Translation: "Hey, mark habit 7 as complete"
-    // If .checked == True  -> user just checked it
-    // If .checked == False -> user just un-checked it
-
     try {
         // Mark complete => POST HabitCompletion
         // Get instant user clicks "done"
@@ -146,234 +46,134 @@ async function markHabitComplete(checkbox, habitId) {
             } else {
                 console.error('Error marking habit complete:', responseData.message);
             }
-
-            // TODO: CLEAN NOTES
-        // Mark un-complete => DELETE HabitCompletion from today
         } else {
-            // Note: Built this to accept any date via query parameter (the "?=.." thing) for future flexibility
+            // TODO: NOTES: Built this to accept any date via query parameter (the "?=.." thing) for future flexibility
             // but currently we only ever delete today's completion from our main dashboard
             // So the route CAN handle any date, but our JS will stick to today
-            const todayDateOnly = new Date().toISOString().split('T')[0]; // Gives format like "2025-06-26"
-
-            const response = await fetch(`/habits/${habitId}/completions?date=${todayDateOnly}`, {
+            //const todayDateOnly = new Date().toISOString().split('T')[0]; // Gives format like "2025-06-26"
+            const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
+            const response = await fetch(`/habits/${habitId}/completion?date=${todayDateOnly}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
             });
             const responseData = await response.json(); // Wait for JSON parsing
 
-            // DO something with our response data
-            // Runs AFTER fetch + JSON parsing - not in a nested callback anymore
             if (responseData.success) {
                 // un-apply effect/styling (update DOM)
-                const textSpan = checkbox.nextElementSibling; // Grabs span right after checkbox element
-                if (textSpan) {
-                    textSpan.classList.remove('line-through', 'text-gray-400');
+                const row = checkbox.closest('.habit-row');
+                const emojiSpan = row.querySelector('.habit-streak');
+                const listItem = row.closest('.habit-item');
+
+                let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
+                streakCount -= 1;
+                emojiSpan.dataset.streakCount = streakCount;
+
+                listItem?.classList.toggle('completed');
+                if (streakCount > 0) {
+                    emojiSpan.textContent = `🔥${streakCount}`;
+                } else {
+                    emojiSpan.textContent = "";
                 }
             } else {
                 console.error('Error un-marking habit complete:', responseData.message);
             }
         }
     } catch (error) {
-        // Network/fetch errors for either case
-        // With .then, we'd need .catch() at the end of each promise chain
         console.error('Error during habit completion request:', error);
     }
 }
 
-// Update time display in real-time
-function getCurrentTimeString() {
-    let date = new Date(); // First we need to get today's date obj
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    
-    // Pad times & stitch together
-    // TODO: Helper!!
-    let paddedHours = hours.toString().padStart(2, '0');
-    let paddedMinutes = minutes.toString().padStart(2, '0');
-    let timeString = `${paddedHours}:${paddedMinutes}`;
-    
-    return timeString;
-}
-
 function updateClock() {
-    let timeDisplay = document.querySelector('#time-display');
-    timeDisplay.textContent = getCurrentTimeString(); // use getCurrentTimeString to call that & inject that value
+    const timeDisplay = document.querySelector('#time-display');
+    timeDisplay.textContent = formatTimeString();
 }
 
 // Get weather info via API, orchestrates our sun movement
+// TODO: Un-hardcode city + units (get from userStore in fetchWeatherData itself?)
 async function getWeatherInfo() {
     const tempDisplay = document.querySelector('#weather-temp');
     const sunsetDisplay = document.querySelector('#weather-sunset');
     const city = "London";
     const units = "metric";
 
-    try {
-        tempDisplay.textContent = "Loading weather info...";
+    tempDisplay.textContent = "Loading weather info...";
+    weatherInfo = await fetchWeatherData();
 
-        const response = await fetch(`/api/weather/${city}/${units}`) // TODO: NOTES: GET is default method for fetch
+    // Display temp with units & formatted sunset time
+    // Destructure what we need
+    const { temp, emoji, sunsetFormatted } = weatherInfo;
+    tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
+    sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
+}
 
-        if (!response.ok) {
-            throw new Error(`Weather API failed: ${response.status}`);
-        }
-        weatherInfo = await response.json();
+function updateCelestialBodyPos() {
+    if (!weatherInfo) return;
 
-        // Extract desired vals from weatherInfo data
-        const temp = Math.round(weatherInfo.main.temp);
-        const sunset = weatherInfo.sys.sunset;
-        const desc = weatherInfo.weather[0].description.toLowerCase();
+    const now = Math.floor(Date.now() / 1000); // convert to seconds to compare to what API gave
+    const { sunrise, sunset } = weatherInfo;
+    let position;
+    let bodyType = 'moon';
 
-        const weatherConditions = {
-            thunder: '⛈️',
-            drizzle: '🌦️',
-            rain: '🌧️',
-            overcast: '☁️',
-            snow: '❄️',
-            mist: '🌫️',
-            fog: '🌫️',
-            clear: '☀️',
-            "few clouds": '🌤️',
-            scattered: '⛅',
-            broken: '⛅',
-            tornado: '🌪️'
-        }
-
-        // Find first weather condition key matching desc, return its emoji or undefined
-        // Terms: variable declaration that stores the result of a complex expression
-        const emoji = Object.entries(weatherConditions).find(
-            ([key]) => desc.includes(key)
-        )?.[1] ?? '🌡️'; // "?? '🌡️'" <= Nullish coalescing: fallback if nothing found
-        
-        // Convert sunset time to date & local
-        // TODO: use new datetime helpers!!
-        const sunsetTime = new Date(sunset * 1000); // comes in Unix-style, so convert first
-        const sunsetFormatted = sunsetTime.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        // Display temp with units & formatted sunset time
-        tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
-        sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
-
-    } catch (error) {
-        console.error('Weather fetch failed:', error);
-        tempDisplay.textContent = "Weather unavailable";
-        sunsetDisplay.textContent = "Sunset: --:--";
+    if (now >= sunrise && now <= sunset) {
+        // Daytime
+        bodyType = 'sun';
+        position = calcCelestialBodyPos(sunrise, sunset, now);
+    } else if (now > sunset) {
+        // Tonight (after sunset)
+        const nextSunrise = sunrise + (24 * 60 * 60);
+        position = calcCelestialBodyPos(sunset, nextSunrise, now); // Just flip to find progress between sunset and tomorrow's sunrise, close enough for a widget!
+    } else {
+        // Last night (before sunrise)
+        const prevSunset = sunset - (24 * 60 * 60);
+        position = calcCelestialBodyPos(prevSunset, sunrise, now);
     }
-}
 
-function updateSunPosition() {
-    if (weatherInfo) {
-        const now = Math.floor(Date.now() / 1000); // convert to seconds to compare to what API gave
-        cachedSunPos = calcSunPosition(weatherInfo.sys.sunrise, weatherInfo.sys.sunset, now);
-        drawSun(cachedSunPos.x, cachedSunPos.y);
-    }
-}
-// Handle calculation only of new sun position in arc
-/**
- * Calculates normalized sun position along arc for the current time
- * @param {number} sunrise - Sunrise time in ms (Unix)
- * @param {number} sunset - Sunset time in ms (Unix)
- * @param {number} now - Current time in ms (Unix)
- * @returns {{x: number, y: number}} Normalized coordinates (0-1) for sun position
- * @description
- * - X represents progress through the day (0 = sunrise, 1 = sunset)
- * - Y uses sine curve to create natural arc (0 at horizon, peak at noon)
- * - Want to extend for moon calculation using night hours later
- */
-function calcSunPosition(sunrise, sunset, now) {
-    // Calculate horizontal progress through daylight hours (0-1)
-    const xVal = (now - sunrise) / (sunset - sunrise);
-    // Create arc using sine curve
-    const yVal = Math.sin(xVal * Math.PI);
+    currentCanvasState = {
+        bodyType: bodyType,
+        x: position.x,
+        y: position.y
+    };
 
-    /** Notes for adding our moon too:
-     *  Calc becomes: (now - todaySunset) / (tomorrowSunrise - todaySunset)
-     *  Conditionally re-use functions:
-     *  if (now < tomorrowSunrise) -> calc/draw moon
-     *  else                       -> calc draw sun
-     *  Add moon phases later
-     */
-    // Debug: console.log(`Current time: ${now} | Sunrise: ${sunrise} | Sunset: ${sunset} | Progress thru day: ${(now-sunrise)/(sunset-sunrise)}`);
-    return { x: xVal, y: yVal }
+    redrawCanvas();
 }
-
-// Sun drawing constants
-const SUN_CONFIG = {
-    RADIUS: 10,
-    RAY_COUNT: 8,
-    RAY_LENGTH: 15,
-    RAY_OFFSET: 5, // gap between sun & its rays
-    COLOR: 'orange'
-};
 
 /**
- * Draws a sun with rays at normalized coordinates (0-1 range)
- * @param {number} x - Normalized x position (0=sunset, 1=sunset)
- * @param {number} y - Normalized y position (sine arc)
+ * Trigger canvas redraw upon resizing
  */
-function drawSun(x, y) {
-    const canvas = document.querySelector('#sun-canvas');
-    const ctx = canvas.getContext('2d');
-
-    // Convert normalized coordinates to canvas pixels
-    const canvasX = x * canvas.width;
-    const canvasY = y * canvas.height;
-    
-    // Set up coordinate system with bottom-left origin
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.scale(1, -1);
-    ctx.translate(0, -canvas.height);
-
-    // Draw main sun body
-    ctx.fillStyle = SUN_CONFIG.COLOR;
-    ctx.beginPath();
-    ctx.arc(canvasX, canvasY, SUN_CONFIG.RADIUS, 0, 2 * Math.PI);
-    ctx.fill();
-
-    // Draw sun rays
-    ctx.strokeStyle = SUN_CONFIG.COLOR;
-    for (let i = 0; i < SUN_CONFIG.RAY_COUNT; i++) {
-        const angle = (i * 2 * Math.PI) / SUN_CONFIG.RAY_COUNT;
-        const startX = canvasX + (SUN_CONFIG.RADIUS + 5) * Math.cos(angle);
-        const startY = canvasY + (SUN_CONFIG.RADIUS + 5) * Math.sin(angle);
-        const endX = canvasX + (SUN_CONFIG.RADIUS + SUN_CONFIG.RAY_LENGTH) * Math.cos(angle);
-        const endY = canvasY + (SUN_CONFIG.RADIUS + SUN_CONFIG.RAY_LENGTH) * Math.sin(angle);
-    
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
+function redrawCanvas() {
+    setupCanvas();
+    if (currentCanvasState) {
+        //drawCelestialBody(currentCanvasState.x, currentCanvasState.y, currentCanvasState.bodyType);
+        renderer.draw(
+            currentCanvasState.x, 
+            currentCanvasState.y, 
+            currentCanvasState.bodyType
+        );
     }
-    ctx.restore(); // reset canvas to point of .save()
 }
 
 export function init() {
-    // Guard
     const hasWeatherSection = document.querySelector('.weather-section');
-    const hasTimeEntry = document.querySelector('#time-entry-modal');
     const hasHabits = document.querySelector('.habit-checkbox');
-    if (!hasWeatherSection && !hasTimeEntry && !hasHabits) return;
+    if (!hasWeatherSection && !hasHabits) return;
 
-    // Event listeners for page
     document.addEventListener('change', (e) => {
         if (e.target.matches('.habit-checkbox')) {
-            // Pass checkbox element, data-habit-id value
             markHabitComplete(e.target, e.target.dataset.habitId);
-        }
-        // Handles saving of Daily Check-In inputs (only weight, steps, & movement so far though)
-        else if (e.target.matches('input[data-metric]')) {
-            saveData(e.target);
         }
     });
 
     // Weather setup
     if (hasWeatherSection) {
-        getWeatherInfo();    // Cache weather data
-        updateSunPosition(); // Draw sun immediately
+        renderer = new CelestialRenderer('#sky-canvas');
+        getWeatherInfo();         // Cache weather data
+        updateCelestialBodyPos(); // Draw sun immediately
         setInterval(getWeatherInfo, 1*60*60*1000);  // Update weather every hour
-        setInterval(updateSunPosition, 10*60*1000); // Update sun from weatherInfo every 10 mins => 10*60*1000
+        setInterval(updateCelestialBodyPos, 6000); // Update sun from weatherInfo every 10 mins => 10*60*1000
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(redrawCanvas, 100); // debounce redraw
+        });
     }
     // Clock setup
     if (document.querySelector('#time-display')) {
@@ -381,5 +181,3 @@ export function init() {
         updateClock();
     }
 }
-
-export { calcSunPosition };

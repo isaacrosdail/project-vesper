@@ -1,25 +1,20 @@
 
-from app.shared.view_mixins import TimestampedViewMixin
+from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
-class TransactionPresenter:
+class TransactionPresenter(BasePresenter):
 
     VISIBLE_COLUMNS = [
         "barcode", "product_name", "price_at_scan", "quantity", "created_at", "price_per_100g"
     ]
-    COLUMN_LABELS = {
-		"id": "ID",
-        "product_name": "Product Name",
-		"product_id": "Product ID",
-		"price_at_scan": "Price",
-		"quantity": "Qty",
-		"created_at": "Date",
-        "price_per_100g": "Per 100g",
-        "barcode": "Barcode"
-	}
-    
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]
+
+    COLUMN_CONFIG = {
+    "barcode": {"label": "Barcode", "priority": "desktop-only"},
+    "product_name": {"label": "Product Name", "priority": "essential"},
+    "price_at_scan": {"label": "Price", "priority": "essential"},
+    "quantity": {"label": "Qty", "priority": "desktop-only"},
+    "created_at": {"label": "Date", "priority": "essential"},
+    "price_per_100g": {"label": "Per 100g", "priority": "desktop-only"}
+    }
 
 class TransactionViewModel(TimestampedViewMixin):
     def __init__(self, txn, tz):
@@ -47,25 +42,22 @@ class TransactionViewModel(TimestampedViewMixin):
 
 
 
-class ProductPresenter:
+class ProductPresenter(BasePresenter):
 
     VISIBLE_COLUMNS = [
         "barcode", "name", "category", "net_weight_display", "calories_per_100g"
     ]
-    COLUMN_LABELS = {
-		"id": "ID",
-		"name": "Product Name",
-		"category": "Category",
-		"barcode": "Barcode",
-		"net_weight_display": "Net Weight",
-		"unit_type": "Unit",
-		"calories_per_100g": "Cals per 100g",
-		"created_at": "Created",
-	}
+    COLUMN_CONFIG = {
+        "id": {"label": "ID", "priority": "desktop-only"},
+        "name": {"label": "Product Name", "priority": "essential"},
+        "category": {"label": "Category", "priority": "desktop-only"},
+        "barcode": {"label": "Barcode", "priority": "desktop-only"},
+        "net_weight_display": {"label": "Net Weight", "priority": "desktop-only"},
+        "unit_type": {"label": "Unit", "priority": "desktop-only"},
+        "calories_per_100g": {"label": "Cals per 100g", "priority": "desktop-only"},
+        "created_at": {"label": "Created", "priority": "desktop-only"}
+    }
 
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]
     
 class ProductViewModel(TimestampedViewMixin):
     def __init__(self, product, tz):

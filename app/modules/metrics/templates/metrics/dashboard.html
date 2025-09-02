@@ -5,27 +5,7 @@
 
 {% block content %}
 
-{% call ui.modal('/metrics/', 'metric-entry-dashboard', 'Add Metric') %}
-    <div class="tabs">
-        <button type="button" data-tab="steps" class="btn btn-secondary">Steps Entry</button>
-        <button type="button" data-tab="weight" class="btn btn-secondary">Weight Entry</button>
-    </div>
-
-    <div class="tab-content" id="tab-steps">
-        <div class="form-group">
-            <label for="steps">Steps:</label>
-            <input type="number" id="steps" name="steps">
-        </div>
-    </div>
-    <div class="tab-content" id="tab-weight" hidden>
-        <div class="form-group">
-            <label for="weight">Weight:</label>
-            <input type="number" id="weight" name="weight">
-        </div>
-    </div>
-
-{% endcall %}
-
+{{ ui.metric_entry_modal() }}
 
 <div class="charts-container">
     <div class="metric-graph card-dashboard">
@@ -39,45 +19,14 @@
         <h2 class="card-title">Daily Metric Entries</h2>
         <button id="metric-entry-dashboard-btn" class="btn btn-primary">Add Metric</button>
     </div>
-    <table class="table-standard">
-        <caption class="sr-only">Metric Entries</caption>
-        <thead class="table-header">
-            <tr>
-                {% if has_dev_tools %}
-                    <th>ID</th>
-                {% endif %}
-                {% for h in metric_headers %}
-                    <th>{{ h.label }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% if metrics %}
-                {% for m in metrics %}
-                <tr class="table-row" data-item-id="{{ m.id }}" data-module="daily_metrics" data-subtype="metric">
-                    {% if has_dev_tools %}
-                        <td>{{ m.id }}</td>
-                    {% endif %}
-                    <td>{{ m.created_at_label }}</td>
-                    <td>{{ m.weight_label }}</td>
-                    <td>{{ m.steps }}</td>
-                    <td>{{ m.wake_time_label }}</td>
-                    <td>{{ m.sleep_time_label }}</td>
-                    <td>{{ m.calories_label }}</td>
-                    <td class="table-cell delete-cell">
-                        {{ ui.delete_btn() }}
-                    </td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="999" class="table-empty">
-                        No metric entries yet.
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'daily_metrics', 'metric') %}
+    <td class="{{ headers[0].priority}}">{{ item.created_at_label }}</td>
+    <td class="{{ headers[1].priority}}">{{ item.weight_label }}</td>
+    <td class="{{ headers[2].priority}}">{{ item.steps }}</td>
+    <td class="{{ headers[3].priority}}">{{ item.wake_time_label }}</td>
+    <td class="{{ headers[4].priority}}">{{ item.sleep_time_label }}</td>
+    <td class="{{ headers[5].priority}}">{{ item.calories_label }}</td>
+    {% endcall %}
 </section>
 {% endblock %}
 

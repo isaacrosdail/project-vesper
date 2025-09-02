@@ -1,31 +1,21 @@
 
-from app.shared.view_mixins import TimestampedViewMixin
+from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
-class TaskPresenter:
+class TaskPresenter(BasePresenter):
     # View-specific table config
     VISIBLE_COLUMNS = [
         "name", "is_done", "priority", "due_date"
     ]
-    COLUMN_LABELS = {
-        "id": "Task ID",
-        "name": "Task",
-        "is_done": "Status",
-        "priority": "Priority",
-        "is_frog": "'Frog Task'?",
-        "due_date": "Due Date",
-        "created_at": "Created",
-        "completed_at": "Completed",
+    COLUMN_CONFIG = {
+        "id": {"label": "Task ID", "priority": "desktop-only"},
+        "name": {"label": "Task", "priority": "essential"},
+        "is_done": {"label": "Status", "priority": "essential"},
+        "priority": {"label": "Priority", "priority": "essential"},
+        "is_frog": {"label": "'Frog Task'?", "priority": "desktop-only"},
+        "due_date": {"label": "Due Date", "priority": "essential"},
+        "created_at": {"label": "Created", "priority": "desktop-only"},
+        "completed_at": {"label": "Completed", "priority": "desktop-only"}
     }
-
-    # TODO: NOTES: First arg is the class (cls) instead of the instance (self)
-    # Used when the method works with class-level data (metadata, config, alt constructors)
-    @classmethod
-    def build_columns(cls) -> list[dict]:
-        """
-        Builds a list of column definitions for use as table headers.
-        Respects the order defined in `VISIBLE_COLUMNS` & excludes fields not explicitly whitelisted.
-        """
-        return [{"key": c, "label": cls.COLUMN_LABELS.get(c, c)} for c in cls.VISIBLE_COLUMNS]
 
 class TaskViewModel(TimestampedViewMixin):
     def __init__(self, task, tz):

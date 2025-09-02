@@ -9,7 +9,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const tooltipTriggers = document.querySelectorAll('.tooltip');
-    // debug console.log(`Found ${tooltipTriggers.length} triggers`);
 
     // Add listener to each tooltip
     tooltipTriggers.forEach(element => {

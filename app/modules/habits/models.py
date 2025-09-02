@@ -22,6 +22,21 @@ class Status(enum.Enum):
     experimental = "experimental"
     established = "established"
 
+class LCStatus(enum.Enum):
+    SOLVED = "solved"
+    ATTEMPTED = "attempted"
+    REVIEWED = "reviewed"
+
+class Difficulty(enum.Enum):
+    EASY = "easy"
+    MEDIUM = "medium"
+    HARD = "hard"
+
+class Language(enum.Enum):
+    PYTHON = "Python"
+    JS = "JavaScript"
+    CPP = "C++"
+    C = "C"
 
 class Habit(Base):
 
@@ -48,3 +63,11 @@ class HabitCompletion(Base):
 
     habit_id = Column(Integer, ForeignKey('habit.id'))
 
+
+## Uncertain about this placement, but keeps things logically consistent for now
+class LeetCodeRecord(Base):
+    leetcode_id = Column(Integer, nullable=False)
+    title = Column(String(255))
+    difficulty = Column(SAEnum(Difficulty), default=Difficulty.MEDIUM, nullable=False)
+    language = Column(SAEnum(Language), default=Language.PYTHON, nullable=False)
+    status = Column(SAEnum(LCStatus), default=LCStatus.SOLVED, nullable=False)

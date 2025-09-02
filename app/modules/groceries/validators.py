@@ -42,7 +42,7 @@ def parse_and_validate_form_data(form_data):
 
 
 
-def validate_product_data(product_data):
+def validate_and_parse_product_data(product_data):
 	errors = []
 
 	if not product_data.get("name"):
