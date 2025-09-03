@@ -528,7 +528,7 @@
 **Log:**
 - While syncing what I did in my resume site, I made some adjustments in Vesper to match:
 	- Use more semantic HTML (header, main) in base.html
-		- Wrap navbar include in <header>, change block content from being in a div to in <main>
+		- Wrap navbar include in `<header>`, change block content from being in a div to in `<main>`
 	- Condense outside 2 wrapper divs into one in navbar.html
 		- Inside that, we have LEFT div (Branding & Links) then RIGHT div (Reset DB button) -> 2 birds, 1 stone :P
 	- Add cursor pointer styling for btn_classes() macro
@@ -651,11 +651,19 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 
 ## [Fri 13.06.25] - Mobile Nav Polish & Dev Tooling
 **Log:**
-- Set up TypeScript, ESLint, and Husky for code quality and pre-commit checks. (see DEV_SETUP.md)
-- Configured the build pipeline & cleaned up some Docker stuff for sanity
-- Began hamburger menu implementation
-	- Started with JS resize detection (incl throttling) but simplified to CSS media queries with JS for state cleanup later.
- - Also: Fixed some ESLint warnings, cleaned up rest of super() usage, and added notes for future moon implementation.
+1. Began hamburger/mobilenav menu
+  - Started with JS resize detection (incl. throttling) but simplified to CSS media queries with JS for state cleanup later.
+2. Docker & Deployment Standardization
+  - Restructured compose files: docker-compose.yml (dev), docker-compose.pi.yml (pi deployment), docker-compose.prod.yml (production)
+  - Updated all APP_ENV variables from old FLASK_ENV pattern
+  - Added proper volume and container naming conventions (-dev, -pi, -prod suffixes)
+3. CI/CD Updates
+  - Modified Actions to use correct compose files per environment
+  - Added deployment flow for Pi vs prod
+4. Code Quality Infra
+  - Set up TypeScript, ESLint, and Husky for code quality and pre-commit checks
+5. Misc
+ - Fixed some ESLint warnings, cleaned up rest of super() usage, & added notes for future moon implementation.
 
 ## [Sun 15.06.25]
 **Log:**
@@ -763,3 +771,372 @@ Key Changes: DB schema, repository layer, route logic, template rendering
 1. Add Docker checkhealth
 2. Add health/status API endpoints (have Docker checkhealth ping these too)
 3. Add external monitoring (also ping our health/status endpoint(s))
+
+## [Mon 23.06.25]
+1. Routes & REST Improvements
+  - Made route structure more RESTful
+  - Updated completions/delete route to accept arbitrary dates (was hardcoded to /today)
+2. Time Entry Integration
+  - Wired up route for adding time entries
+3. Schema & Repo Layer Changes
+  - Product model: Added deleted_at for soft deletion
+  - Habit model: Added cascade delete on completions to prevent orphan records
+  - Repo functions updated to exclude soft-deleted products (deleted_at.is_(None))
+4. DB Connection Cleanup
+  - Added database_connection() context manager in database.py
+  - Refactored multiple routes to use this, with try/except for route-level error handling
+5. Repo Fixes
+  - Updated add_product() repo function to support newly added fields
+
+## [Tues 29.07.25] - CSS/UI Tweaks
+**Log:**
+1. Style & Theme Adjustments
+  - Changed placeholder text color from blue → red (blue looked too link-like)
+  - Will revisit color once card background is finalized
+  - Moved all theming rules into themes.css, imported via style.css
+2. Misc:
+  - UX Improvement: On double-click edit, auto-highlight text to make field editable state obvious
+  - Found bug: update_daily_intention returning 500, unresolved at this point
+
+## [Wed 30.07.25] - Auth Work, Flask-Login Start
+**Log:**
+1. Flask-Login Setup & User model enhancements
+  - Installed flask-login
+  - Drafted login & register forms, validate_username/validate_password, & register_route
+  - Centralized error messages in app/core/messages.py (currently only login-related msgs)
+  - Added name and role fields to User model
+  - Moved model to app/core/auth/models.py
+2. Misc:
+  - Bug fix: Fixed update_daily_intention 500 error
+  - Dev Tool Streamlining: hid & unified reset buttons used for dev/debugging
+
+
+## [Fri 01.08.25]
+**Log:**
+1. Minor work
+  - Renamed utils/ folders to common/ in both Python and JS
+  - Tweaked seed functions and folded UI into "admin panel" controls
+
+## [Sat 02.08.25]
+**Log:**
+1. Auth Retrofitting & DB Layer Cleanup
+  - Refactored delete_all_db_data to use session instead of engine
+  - Escaped Postgres reserved identifiers (e.g. "user")
+  - Fixed test isolation issues: clear_tables fixture had uncommitted transactions
+  - Added missing timeentry table to DATA_TABLES in constants.py
+  - Found bug: disabled form fields return "" not None
+2. Testing Infrastructure
+  - Added AuthActions class + authenticated_client fixture for protected route testing
+  - Fixed monkeypatching issues by fully switching to db_session in tests
+  - Fixtures updated to include required user_id for sample data
+  - Added commit() calls in clear_tables fixture
+3. Validation Refactor
+  - Switched from pytest.raises to returning error lists (update tests accordingly)
+  - Added conditional validation (e.g. creating_product flag)
+4. Dependencies
+  - Removed mirakuru, port-for (legacy, left breadcrumb), Added ruff==0.12.7 for linting
+5. Monitoring Setup
+  - External: Configured UptimeRobot to ping new _internal/health_routes endpoint
+  - Docker: Added health checks (currently prod only)
+6. Misc
+  - Migrated from docker-compose (binary) → docker compose (plugin)
+
+## [Thurs 07.08.25] - Security Hardening, CSP, Plotly Debugging
+**Log:**
+1. CSP & Security Headers
+  - Added security headers to NGINX config
+  - Injected CSP with per-request nonce for inline theme JS; didn't work with Plotly - injects its own scripts/styles
+  - Removed oninvalid from form (CSP)
+
+## [Fri 08.08.25] - Form Overhaul, Accessibility, UX Improvements
+**Log:**
+1. Form Cleanup & Modals
+  - Added `<fieldset>/<legend>` to all forms
+  - Converted 'add task' & 'add habit' pages to modals using `<dialog>`
+  - Removed now-unused templates for add_task/add_habit
+  - Cleaned up redundant divs (eg, dashboard-container)
+2. Input & Accessibility
+  - Added sensible min/max/maxlength/placeholder attributes
+  - Marked required fields where appropriate
+  - Added basic Cancel/Return buttons to grocery & login/register forms
+  - A11y: Fixed label for/id associations & added aria-labels to icon buttons
+3. Git Workflow
+  - Improved commit message hygiene
+  - Practiced better staging/reset discipline
+
+## [Sat 09.08.25]
+**Log:**
+1. API Limiting Logic (Draft complete)
+  - Only counts successful calls; reverts stored count on upstream failures
+  - Atomicity: explored `ON CONFLICT ... WHERE` (Postgres)
+  - UPSERT pattern with 429 (limit), 502 (fail)
+2. Errors & Debugging
+  - Added `raise` in context manager to allow errors to propagate
+  - Tweaked debug.py: prefer Flask logging over print, mask DB URI password in logs
+3. Docker Compose (prod)
+  - DB kept internal (db:5432, no published port -> 5432:5432)
+  - Added healthchecks:
+    - DB: pg_isready + specific user/db name
+    - Web: curl/health
+  - Added log rotation (limits size & file count)
+4. Dockerfile
+  - env_file: (eg, prod.env) values injected into container; read via os.getenv()
+  - .env + load_dotenv() is for local dev only - never runs in prod
+  - config.py picks up DB URIs etc, loads into app.config. Always read config from current_app.config[], not env
+5. Enforce ENV vs Auth Separation
+  - Roles = what someone can do
+  - ENV = what the app shows/does regardless of user
+  - load_env() gated in prod (in config.py)
+6. ENV Handling Improvements
+  - Switched from os.environ['APP_ENV'] -> app.config['APP_ENV']
+  - Centralized in __init__.py: sets APP_ENV & injects DB URL into Alembic
+  - AUTO_MIGRATE: Defaults on, overridden off in prod.
+7. Updated tests to reflect above changes
+
+## [Sun 10.08.25]
+**Log:**
+1. Practiced git rebase on resume-site backup repo to get acquianted
+2. Updated docker-compose.pi.yml to mirror other compose file updates
+
+## [Wed 13.08.25]
+**Log:**
+1. Created theme-demo page (what is now style-reference.html) for easier styling workflow
+2. Implemented tooltips using JS with custom styling
+3. CSS Overhaul
+  - Clarified roles of .wrapper, .content, .dashboard-container, and .card-dashboard
+  - Pruned & reorganized styles so spacing & layout comes mostly from gap instead of random margins
+  - Moved several utility classes to selector-based approach (nav, navlinks, etc.)
+  - Simplified & streamlined selector usage
+  - Began simplifying/tuning table styling
+  - Stripped remaining Tailwind stylings from codebase (I think?)
+  - Extracted styles to "base" variants for DRY CSS:
+    - .btn (shape/ergo) + variants
+    - Added "pressed" effect to .btn
+    - Used `:where(input..)` + minimal input-inline overrides
+  - Wrapped hover effects in @media queries
+  - Revamped "Daily Habits" section: extracted styling to class selectors, added labels, began planning JS for fire emoji and strikethrough animations
+
+## [Fri 15.08.25]
+**Log:**
+1. Build Pipeline Overhaul
+  - Migrated to esbuild building for JS+CSS
+  - Revamped npm scripts accordingly (dev/watch vs build vs lint/test)
+  - Added cross-env & wait-on for scripts
+  - Some TS / linting config stuff
+2. Refined style-reference.html
+  - Condensed swatches into compact squares to save space
+  - Improved targeting of swatches vs components
+3. Debug Logging Improvements
+  - Compacted output, prevented repeat logs on reloads
+  - Added setup_request debugging to log requests only in dev mode
+4. Error Page Implementation
+  - Added 404 page with solid setup/styling
+  - Learned about SVGs, animate/keyframes, & clamp()
+  - Added animation with @media query for reduced motion
+5. A11y Stuff
+  - Added aria-hidden to SVGs, aria-labelledBy elsewhere
+  - Added aria-labels for main navigation
+
+## [Sat 16.08.25]
+**Log:**
+1. Drilled JS loops/arrays & applied by converting weatherInfo's if/else chain to "Object.entries(..).find()"
+2. Installed Bun
+
+## [Sun 17.08.25]
+**Log:**
+1. Timezone Infrastructure Implementation
+  - Added timezone column to User model (default: Berlin)
+  - Enforcing rule: Store/query in UTC only, convert local -> UTC on input, UTC -> local on output
+  - Added/cleaned helper functions in time_utils.py
+  - Refactored home() route:
+    - Replaced inline datetime math with helpers usage
+    - Isolated  hardcoded "Europe/London" to single location (setting stage for current_user.timezone)
+    - Tied greeting logic to localized 'now'
+2. JS Modules migration to esbuild
+  - Switched to esbuild with bundle.js output
+  - Adopted modular init() pattern with guards
+  - Learning separation between auto-runners vs export-only
+  - Cleaned up theme-manager, toast, tooltip
+3. Misc
+  - Added `/admin/reset-dev` POST route for db reset/reseed workflow
+  - Fixed some activity log bugs
+
+## [Mon 18.08.25]
+**Log:**
+1. Model changes
+  - Drop completed_at column from HabitCompletions, added Priority (enum) to Tasks & changed 'type' column to 'category'
+  - ALL: Changed 'title' columns to 'name' for clarity
+
+
+## [Sat 23.08.25] - Docker/Nginx Cleanup, CI/CD refinements, Theme Work
+**Log:**
+1. DevOps / Infra
+  - Moved NGINX into a third stage of the Docker build (no longer using host NGINX)
+  - Added nginx/nginx.conf & bind mount for favicon.ico (favicon still returning 404)
+  - Cleaned up docker-compose.prod.yml: removed outdated substitutions (now using `env_file:`)
+2. Database & Migrations
+  - Dropped custom Dockerfile.postgres; switched to official postgres:17.4 image
+  - Enabled Alembic auto-migrate under ProdConfig (CI integration planned)
+3. CI/CD Pipeline
+  - Updated deploy workflow to performs `git reset --hard` to resolve conflict issues
+  - Wrapped url_for('style_reference') in APP_ENV check to avoid dev/prod mismatch
+4. Misc Frontend & Theme Refinements
+  - Tweaked black tones in theme definitions to be less harsh
+  - Adjusted scripts: minified builds for prod, build:watch for dev (uses bundled assets in both cases)
+
+## [23.08.25] - Milestone: First Major Refactor
+*(Spanning work from ~15th-21st, finalized & rebased on the 23rd)
+
+1. Architecture Overhaul
+  - Introduced Repository Pattern with BaseRepository inheritance to centralize DB logic
+  - Added Service Layer for clearer separation of business logic (AuthService, GroceriesService, etc.)
+  - Standardized (mostly) DB session handling with @with_db_session decorator
+  - Enhanced models with enums (UserRole, Priority, Status, Unit), improved relationships
+2. Database & Infrastructure
+  - Fixed SQLAlchemy identity map issues with expunge_all() for test isolation
+  - Added timezone-aware datetime utilities (user context)
+  - Added safe_delete helper to easily handle deletes vs soft-deletes
+  - Moved core/database.py → _infra/database.py and core/db_base.py → _infra/db_base.py
+3. Frontend Modernization
+  - Began migration to esbuild for JS/CSS bundling
+  - Converted frontend to ES6 modules with import/export + init guards
+  - Dropped Tailwind in favor of design tokens via CSS custom properties and cascade layering
+  - Fixed a few JS bugs (undefined elements, error handling)
+4. File Structure Reorganization
+  - Split much of core/ into domain-focused modules/ (auth, api, etc.)
+  - Moved base.html & _macros.html → app/_templates/, extracted partials (_navbar.html, _flash.html)
+  - Renamed common/ & utils/ → shared/, _internal/ → devtools/
+  - Cleaned up comments, sorted imports, updated .ini files, refined .gitignore
+
+
+## [Sun 24.08.25] - Dev Environment & Global Tools (pipx)
+1. Dependency Hygiene
+  - Installed pipx & added to PATH (WSL)
+    - pyenv selects Python version; pipx installs global tools in isolated envs
+  - Began global installs via pipx: isort, pipdeptree, pyflakes (initial set)
+
+
+## [Mon 25.08.25] - Build Scripts & Color Work
+**Log**:
+1. Build Tools: Updated scripts & moved to modern esbuild usage: separate “build” vs “watch”
+2. Color Work: Began OKLCH migration; started converting palette & tweaking colors
+
+## [Tues 26.08.25] – D3.js, Modal Refactor, Template/JS Cleanup
+**Log:**
+1. D3 Setup: added shared/charts.js
+2. Modal System Refactor
+  - Created modal macro in _partials/_modal.html using {% call %} / caller()
+  - Standardized modal naming convention: {type}-entry-{context}-modal/btn
+  - Built auto-detecting modal-manager.js with URL-based config
+  - Removed conflicting modal handlers from index.js
+3. Template Architecture
+  - Moved nav_link macro into _navbar.html (co-located with navbar HTML)
+  - Standardized modal structure across forms with parameterized macro + content blocks
+  - Merged macros/misc.html into partials/_components.html
+4. JS Module Organization
+  - Centralized modal behavior in modal-manager.js
+  - Added config object keyed by window.location.pathname
+  - Documented modal system with inline notes / docstrings
+5. Backend Integration Setup
+  - Updated Flask route to return created entity data in response
+  - Set up data flow for real-time table updates after form submission
+  - Prepared for integrating toast notifications + table manipulation functions
+6. Misc
+  - Added per-route CSP policy for style-reference (allow inline styles only there)
+  - Navbar: clicking “Vesper” now routes to home
+
+## [Wed 27.08.25]
+**Log:**
+1. Bugfixing for habit completion checkbox logic
+2. Add SIGTERM SIGNIT things for build.mjs so esbuild properly exits
+
+## [Thurs 28.08.25] - ViewModels, Homepage Redesign, & Some Refactoring
+**Log:**
+1. ViewModel Architecture
+  - Applied ViewModel / Presenter pattern across:
+    - Tasks, Time Tracking, Habits, Metrics
+  - Added build_columns() classmethod for table config
+  - Separated presentation logic from business logic
+  - Created TimestampedViewMixin for datetime formatting
+2. Homepage Redesign
+  - Restructured into "My Day" card layout
+  - Removed Daily Intentions section -> replaced with "Today's Frog" task
+  - Integrated modal forms into homepage sections
+3. Modal System Overhaul
+  - Converted modal system to macro + -modal auto-discovery
+  - Centralized form submission + validation (required fields, etc.)
+  - Cleaned up modal-manager logic to remove config overhead
+4. Task Model Enhancements
+  - Added is_frog boolean to Task (1 frog per day logic) & added get_today_frog() in repository layer
+  - Task creation consists of: priority, due date, frog status
+5. Time Tracking
+  - Added ended_at to TimeEntry model
+  - Improved input processing for time intervals
+  - Refined repo & form logic for time start/end handling
+6. Metrics & Habits
+  - Removed now-deprecated DailyIntention model
+  - Consolidated into new DailyEntry model
+  - Updated habit tracking:
+  - Timestamped completions, streak logic fixed
+7. Frontend & JS Improvements
+  - Modularized modal JS logic,
+  - Improved error handling and inline editing
+  - Enabled real-time updates via dynamic table rows (need to further flesh out)
+
+## [Fri 29.08.25] - Confirmation Modal, JS Refactor, Toast Work
+**Log:**
+1. UI Feedback & Modals
+  - Built initial confirmation modal
+  - Started wiring up toast message logic
+  - Created style-reference.js for shared style hooks (included in app bootstrap via app.js)
+2. JS Refactoring
+  - Reorganized shared/ -> split out services/ and ui/ subfolders
+  - Moved fetchWeatherData() → services/weather-service.js
+  - Cleaned up datetime.ts & reused formatTimeString() in updateClock()
+
+## [Sat 30.08.25] - JS Refactor, Tabbed Modals
+**Log:**
+1. JS Cleanup
+  - Split getWeatherInfo into:
+  - Display-side function
+  - fetchWeatherData() (fetch + parsing from backend)
+  - Added tabbed modal logic in modal-manager (special case):
+  - Checks for .tabbed-modal on `<dialog>` OR .tabs anywhere on page
+2. Macro Work
+  - Added metric entry modal to homepage
+  - Used composition to create time_entry_modal + metric_entry_modal from base form-modal macro
+  - Centralized definitions into _components.html
+  - Replaced metric entry buttons and time entry buttons to use these shared macros
+
+## [Fri 31.08.25] - Canvas Rendering, LeetCode Tracker
+**Log:**
+1. Canvas Work
+  - Created canvas.js (with setupCanvas() to sync internal resolution to display resolution)
+  - Added debounced resize event listener to trigger redrawCanvas()
+  - Began learning JS classes: folded drawCelestialBody into new CelestialRenderer class
+2. LeetCode Tracking
+  - Added LeetCode span + editable-cell (needs renaming) for quick additions
+    - NOTE: Not yet functional, still working through positioning/overall flow ideas
+  - Created LeetCodeRecord model
+  - Wired up modal + button on homepage, POST route, repo (create+read), & integrated route
+
+
+## [Mon 01.09.25] – Entry Point Split, Toast Migration, Error Handling, Table/Styling Work
+**Log**:
+1. Structure Changes
+  - Made app.js solely the esbuild entrypoint
+  - Created main.js as the app bootstrapper (imports, grab toasts, etc.)
+2. Toast Migration
+  - Removed all flash() usage → replaced with set_toast
+  - Added set_toast helper in shared/middleware.py (placement TBD) to reduce route boilerplate
+3. Error Handling Improvements
+  - Implemented first draft of 500.html error page
+  - Added Exception errorhandler: logs error, returns 500.html
+  - Applied cleanup in:
+  - Groceries → products(), transactions() (incl. service.py tweaks), dashboard()
+  - Auth → register() (decided not to preserve form data for login/register)
+4. Tables, Toast Styling, Mobile Nav
+  - Added BasePresenter in view_mixins.py; centralized build_columns() there
+  - Updated COLUMN_LABELS → COLUMN_CONFIG (structured dict)
+  - Extracted table markup into a macro (major line reduction; easier to extend with D3)
+  - Started mobile nav styling: created mobilenavlink, added “swoosh down” behavior
