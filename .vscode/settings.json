@@ -25,6 +25,7 @@
         "alembic/README": true,
         "alembic/script.py.mako": true,
         "nginx/**": true,
+        "PROJECT_LOG_ARCHIVE/**": true,
     },
     "search.exclude": {
         "node_modules/": true,
@@ -33,6 +34,7 @@
         ".pytest_cache/": true,
         ".coverage": true,
         "PROJECT_LOG.md": true,
+        "PROJECT_LOG_ARCHIVE/**": true,
     },
     "files.watcherExclude": {
         "**/node_modules/**": true,
@@ -43,6 +45,7 @@
         "**/.git/**": true,
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
-        "**/.hg/store/**": true
+        "**/.hg/store/**": true,
+        "PROJECT_LOG_ARCHIVE/**": true,
     },
 }
