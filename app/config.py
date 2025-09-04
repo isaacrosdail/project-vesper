@@ -30,7 +30,7 @@ class DevConfig(BaseConfig):
 
 class ProdConfig(BaseConfig):
     APP_ENV = "prod"
-    AUTO_MIGRATE = True    # Override for prod => auto-migrate in CI instead
+    AUTO_MIGRATE = True
     USE_PROXY_FIX = True   # For playing nice with our CSP/nginx headers
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
