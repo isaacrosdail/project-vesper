@@ -9,7 +9,7 @@ from sqlalchemy import text
 from app import create_app
 from app._infra.database import db_session
 from app.modules.auth.models import User
-from app.shared.database.operations import delete_all_db_data
+from app.shared.database.helpers import delete_all_db_data
 
 
 class AuthActions():

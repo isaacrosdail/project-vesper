@@ -12,6 +12,7 @@ import './shared/ui/tooltip.js';
 import './shared/charts.js';
 import './shared/ui/modal-manager.js';
 import './shared/ui/context-menu.js';
+import './shared/forms.js';
 
 // Import page-specific modules
 import { init as initCore } from './core/index.js';

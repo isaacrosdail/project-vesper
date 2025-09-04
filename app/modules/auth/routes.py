@@ -6,8 +6,7 @@ from app._infra.database import database_connection, with_db_session
 from app.modules.auth.models import UserRole
 from app.modules.auth.repository import UsersRepository
 from app.modules.auth.service import AuthService, requires_owner
-from app.shared.constants import DEFAULT_LANG
-from app.shared.database.operations import delete_all_db_data
+from app.shared.database.helpers import delete_all_db_data
 from app.shared.i18n.messages import msg
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')

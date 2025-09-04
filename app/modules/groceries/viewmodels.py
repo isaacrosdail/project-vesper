@@ -54,7 +54,7 @@ class ProductPresenter(BasePresenter):
         "barcode": {"label": "Barcode", "priority": "desktop-only"},
         "net_weight_display": {"label": "Net Weight", "priority": "desktop-only"},
         "unit_type": {"label": "Unit", "priority": "desktop-only"},
-        "calories_per_100g": {"label": "Cals per 100g", "priority": "desktop-only"},
+        "calories_per_100g": {"label": "Cals per 100g", "priority": "essential"},
         "created_at": {"label": "Created", "priority": "desktop-only"}
     }
 
