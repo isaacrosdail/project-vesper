@@ -10,7 +10,4 @@ def not_found_error(error):
 @errors_bp.app_errorhandler(Exception)
 def log_uncaught(e: Exception):
     logging.error("Unhandled exception", exc_info=True)
-
-@errors_bp.app_errorhandler(500)
-def internal_error(error):
     return render_template("errors/500.html"), 500

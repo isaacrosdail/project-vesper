@@ -38,4 +38,6 @@ class TaskViewModel(TimestampedViewMixin):
     
     @property
     def completed_label(self):
-        pass
+        if not self.is_done:
+            return "Not completed"
+        return f"Completed {self.format(self.completed_at, self._tz, '%b %d, %I:%M %p')}"
