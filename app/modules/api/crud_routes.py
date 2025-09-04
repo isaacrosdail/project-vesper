@@ -10,7 +10,7 @@ from app.modules.habits.models import Habit
 from app.modules.metrics.models import DailyEntry
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
-from app.shared.database.operations import safe_delete
+from app.shared.database.helpers import safe_delete
 
 # Blueprint registration
 crud_bp = Blueprint("crud", __name__)

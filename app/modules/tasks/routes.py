@@ -8,6 +8,7 @@ from app.modules.tasks.repository import TasksRepository
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
 from app.modules.tasks.viewmodels import TaskViewModel, TaskPresenter
+from app.shared.datetime.helpers import parse_eod_datetime_from_date
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
@@ -33,24 +34,18 @@ def dashboard(session):
 @with_db_session
 def tasks(session):
     if request.method == "POST":
-        # Parse form data
+        
         due_date_str = request.form.get("due_date")
-        # TODO: Hacky & gross, should move this to a helper or something
-        if due_date_str:
-            due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
-            end_of_day_time = time(23, 59, 59)
-            due_datetime = datetime.combine(due_date, end_of_day_time)
-            due_datetime_aware = due_datetime.replace(tzinfo=ZoneInfo(current_user.timezone))
-        else:
-            due_datetime_aware = None
+        due_date = parse_eod_datetime_from_date(due_date_str, current_user.timezone) if due_date_str else None
         priority = Priority(request.form.get("priority", "medium"))
         is_frog = bool(request.form.get("is_frog"))
+
         tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
         new_task = tasks_repo.create_task(
             name=request.form.get("name"),
             priority=priority,
             is_frog=is_frog,
-            due_date=due_datetime_aware
+            due_date=due_date
         )
 
         return jsonify({

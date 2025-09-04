@@ -3,9 +3,8 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session, database_connection
-from app.modules.time_tracking.service import resolve_start, resolve_end
 from app.modules.time_tracking.repository import TimeTrackingRepository
-from app.shared.datetime.helpers import today_range
+from app.shared.datetime.helpers import today_range, parse_datetime_from_hhmm, add_mins_to_datetime
 from app.modules.time_tracking.viewmodels import TimeEntryViewModel, TimeEntryPresenter
 
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
@@ -32,9 +31,9 @@ def time_entries(session):
 
     if request.method == 'POST':
         form_data =  request.form.to_dict() # convert formData to dict
-        started_at = resolve_start(form_data["started_at"], current_user.timezone)
+        started_at = parse_datetime_from_hhmm(form_data["started_at"], current_user.timezone)
         form_data["started_at"] = started_at
-        form_data["ended_at"] = resolve_end(started_at, float(form_data["duration"]))
+        form_data["ended_at"] = add_mins_to_datetime(started_at, float(form_data["duration"]))
 
         timetracking_repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
         new_entry = timetracking_repo.create_time_entry(**form_data)

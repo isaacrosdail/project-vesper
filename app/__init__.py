@@ -1,13 +1,13 @@
 import os
 import secrets
 
+from alembic import command
+from alembic.config import Config as AlembicConfig
 from flask import Flask, g, request
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from alembic import command
-from alembic.config import Config as AlembicConfig
 from app._infra.database import db_session, init_db
 from app.config import config_map
 from app.core.routes import main_bp
@@ -23,10 +23,8 @@ from app.modules.habits.routes import habits_bp
 from app.modules.metrics.routes import metrics_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
-from app.shared.constants import DEFAULT_LANG
 from app.shared.debug import setup_request_debugging
 
-## TODO: Consider Flask-Compress
 
 def has_dev_tools() -> bool:
     # Before login: current_user.is_authenticated is False, re-evals upon login?
@@ -125,7 +123,6 @@ def _setup_request_hooks(app):
     def inject_globals():
         return dict(
             has_dev_tools=has_dev_tools, # Prefer config over raw os.environ now that we pick config class from env
-            default_lang=DEFAULT_LANG,
             nonce=getattr(g, 'nonce', ''), # inject our nonce here as well,
             UserRole=UserRole   # Make our UserRole Enum available for role checks in templates directly
         )

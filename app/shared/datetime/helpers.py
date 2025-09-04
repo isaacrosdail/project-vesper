@@ -29,9 +29,9 @@ def convert_to_timezone(tz_str: str = 'UTC', dt: datetime | None = None) -> date
         raise ValueError(f"Invalid timezone: {tz_str}")
     
     if dt is not None:
-        return dt.astimezone(tz) # convert provided
+        return dt.astimezone(tz)
     else:
-        return datetime.now(tz)  # or return 'now' if none provided
+        return datetime.now(tz)
 
 def start_of_day_utc(dt: datetime, tz: str = "UTC") -> datetime:
     """Get start of day in UTC for a given datetime in given timezone."""
@@ -78,3 +78,24 @@ def last_n_days_range(days_ago: int, tz_str: str = "UTC") -> tuple[datetime, dat
     # Go back (days_ago - 1) to incl. today as 'day #1'
     new_start_utc = start_utc - timedelta(days=(days_ago - 1))
     return new_start_utc, end_utc
+
+
+def parse_eod_datetime_from_date(date_str: str, tz_str: str) -> datetime:
+    eod_time = time(23, 59, 59)
+    tz = ZoneInfo(tz_str)
+    eod_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    eod_datetime = datetime.combine(eod_date, eod_time)
+    eod_datetime_aware = eod_datetime.replace(tzinfo=tz)
+
+    return eod_datetime_aware
+
+
+def parse_datetime_from_hhmm(time_str: str, tz_str: str) -> datetime:
+    """Parse HH:MM format in given timezone and return proper datetime object."""
+    h, m = map(int, time_str.split(":"))
+    now = convert_to_timezone(tz_str)
+    return now.replace(hour=h, minute=m, second=0, microsecond=0)
+
+def add_mins_to_datetime(started_at: datetime, duration: float) -> datetime:
+    """Return an end datetime from a start time & duration in minutes."""
+    return started_at + timedelta(minutes=duration)
