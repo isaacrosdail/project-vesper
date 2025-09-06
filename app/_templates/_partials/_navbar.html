@@ -45,7 +45,7 @@
                         aria-label="Toggle navigation menu">
                     ☰
                 </button>
-                {# TODO: NOTES: ID makes assistive tech tie btn + navlinks together? #}
+                
                 {{ navigation_links() }}
             </div>
 
@@ -54,27 +54,12 @@
 
                 {# Baby's first modal #}
                 <button id="settings-btn" aria-label="Settings">⚙️</button>
-                {% if has_dev_tools %}
-                <dialog id="settings-modal" class="dev-buttons">
-                    <h3>Hey pal</h3>
-                    <p>My Modal Content</p>
-                    <a href="/my-fake/route" class="btn btn-primary">Test 404</a>
-                    <form action="{{ url_for('auth.reset_dev') }}" method="POST">
-                        <button type="submit" class="btn btn-primary">Reset DEV</button>
-                    </form>
-                    {% if config.APP_ENV == 'dev' %}
-                    <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Theme Demo Page</a><br>
-                    {% endif %}
-                    <button type="submit" id="close-dev-modal-btn">Close</button>
-                </dialog>
-                {% endif %}
 
                 <form>
                     <fieldset>
-                        {# Legend here is good for accessibility (screen readers) #}
                         <legend class="visually-hidden">Pick a theme</legend>
                         
-                        {# Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) #}
+                        {# TODO: Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) #}
                         <select name="theme" id="theme">
                             <option value="laptop">System</option>
                             <option value="sun">Light</option>
@@ -90,3 +75,18 @@
         {{ navigation_links('mobilenavlist') }}
     </div>
 </div>
+
+{% if has_dev_tools %}
+<dialog id="settings-modal" class="dev-buttons">
+    <h3>Hey pal</h3>
+    <p>My Modal Content</p>
+    <a href="/my-fake/route" class="btn btn-primary">Test 404</a>
+    <form action="{{ url_for('auth.reset_dev') }}" method="POST">
+        <button type="submit" class="btn btn-primary">Reset DEV</button>
+    </form>
+    {% if config.APP_ENV == 'dev' %}
+    <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Theme Demo Page</a><br>
+    {% endif %}
+    <button type="submit" id="close-dev-modal-btn">Close</button>
+</dialog>
+{% endif %}

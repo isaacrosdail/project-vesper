@@ -61,7 +61,6 @@ function setupModal(modalId, buttonId, endpoint) {
     modal.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        // console.log(`Submit event fired for modalId: ${modalId} with endpoint: ${endpoint}!`);
         submitModalForm(modal, endpoint, formData);
         modal.querySelector('form').reset();
         modal.close();
@@ -71,7 +70,6 @@ function setupModal(modalId, buttonId, endpoint) {
 function setupTabbedModal(modal) {
     modal.querySelectorAll('.tabs button').forEach(btn => {
         btn.addEventListener('click', () => {
-            console.log(`Button ${btn.dataset.tab} clicked`);
             // hide all panels & remove active
             document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(p => p.hidden = true);

@@ -15,7 +15,7 @@
     width: 1px; /* makes element tiny, small enough to be invisible but not zero (zero dimensions can be ignored by screen readers */
     overflow: hidden; /* hides any content that would spill outside 1x1 px box*/
     position: absolute; /* takes element out of normal document flow - prevents layout spillover */
-    white-space: nowrap; /* prevents text from wrapping to multiple lines */
+    white-space: nowrap;
 }
 
 /* 1:1 Tailwind version */
@@ -24,10 +24,9 @@
     width: 1px;
     height: 1px;
     padding: 0;
-    /* margin: -1px; */
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
-    white-space: nowrap; /* prevent line breaks */
+    white-space: nowrap;
     border: 0;
 }
 

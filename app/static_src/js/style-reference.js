@@ -5,7 +5,6 @@ export function init() {
     if (!document.querySelector('#style-reference-root')) return;
 
     document.addEventListener('click', (e) => {
-        // console.log(`Clicked: ${e.target.textContent}`)
         if (e.target.matches('#default')) {
             confirmationManager.show("Are you sure?");
         }

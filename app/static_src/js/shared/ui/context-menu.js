@@ -28,7 +28,6 @@ function createContextMenu(e) {
 
 document.addEventListener('contextmenu', (e) => {
     if (e.ctrlKey) {
-        console.log('shift pressed!');
         e.preventDefault();
         createContextMenu(e); // TODO?: Pull our context menu handling into some kind of global.js
     }
