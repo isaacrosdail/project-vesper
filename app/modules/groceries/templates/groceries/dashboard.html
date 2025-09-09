@@ -4,6 +4,29 @@
 {% block title %}Groceries{% endblock %}
 
 {% block content %}
+
+<div class="card-dashboard">
+    <h2>Shopping List</h2>
+    <ul>
+        {% for item in shopping_list.items %}
+            <li class="shoppinglist-item" data-item-id="{{ item.id }}" data-quantity-wanted="{{ item.quantity_wanted }}">
+                <button class="inline-delete" data-action="delete">{{ ui.delete_svg() }}</button>
+                <span class="item-text">{{ item.product.name }}</span>
+                <span class="qty-controls">
+                    <span>&nbsp;&nbsp;&nbsp;--</span>
+                    <button data-action="decrement">{{ ui.minus_svg() }}</button>
+                    <!-- Wrapper here so quantity+'x' remain one unit (ex: 3x instead of 3 x) -->
+                    <span class="item-qty-wrapper">
+                        <span class="item-qty">{{ item.quantity_wanted }}</span><span>x</span>
+                    </span>
+                    <button data-action="increment">{{ ui.plus_svg() }}</button>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
 <div class="card-dashboard">
     <div class="card-header">
         <h2 class="card-title">Grocery - Recent Transactions</h2>

@@ -8,7 +8,8 @@ from zoneinfo import ZoneInfo
 from app.modules.habits.repository import HabitsRepository
 from app.shared.datetime.helpers import today_range
 
-
+### TODO: Performance - N+1 query issue for dashboard
+# Inefficient number of queries, should consider batching
 def calculate_habit_streak(session, user_id: int, habit_id: int, user_tz: str) -> int:
     """Calculate current streak for given habit."""
     repo = HabitsRepository(session, user_id, user_tz)

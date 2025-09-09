@@ -3,11 +3,10 @@ import { getJSInstant } from '../shared/datetime.js';
 import { fetchWeatherData } from '../shared/services/weather-service.js';
 import { calcCelestialBodyPos, CelestialRenderer, setupCanvas } from '../shared/canvas.js';
 import { makeToast } from '../shared/ui/toast.js';
+import { apiRequest } from '../shared/services/api.js';
 
 // Global caches
-let weatherInfo = null;  // for weatherInfo
-// let cachedSunPos = null; // for sunPos
-// let currentBodyType = 'moon';
+let weatherInfo = null;
 let currentCanvasState = null;
 let resizeTimeout = null;
 let renderer;
@@ -22,17 +21,12 @@ let renderer;
 async function markHabitComplete(checkbox, habitId) {
     try {
         // Mark complete => POST HabitCompletion
-        // Get instant user clicks "done"
-        const completedAtUTC = getJSInstant();
+        const completedAtUTC = getJSInstant();  // Get instant user clicks "done"
         if (checkbox.checked) {
-            const response = await fetch(`/habits/${habitId}/completions`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({completed_at: completedAtUTC}) // send JSON string
-            });
-            const responseData = await response.json(); // convert json to obj
+            const url = `/habits/${habitId}/completions`;
+            const data = { completed_at: completedAtUTC };
 
-            if (responseData.success) {
+            apiRequest('POST', url, () => {
                 const row = checkbox.closest('.habit-row'); // scope query to right <label> row
                 const emojiSpan = row.querySelector('.habit-streak');
                 const listItem = row.closest('.habit-item'); // grab <li>
@@ -43,22 +37,12 @@ async function markHabitComplete(checkbox, habitId) {
 
                 listItem?.classList.toggle('completed');
                 emojiSpan.textContent = `🔥${streakCount}`;
-            } else {
-                console.error('Error marking habit complete:', responseData.message);
-            }
+            }, data);
         } else {
-            // TODO: NOTES: Built this to accept any date via query parameter (the "?=.." thing) for future flexibility
-            // but currently we only ever delete today's completion from our main dashboard
-            // So the route CAN handle any date, but our JS will stick to today
-            //const todayDateOnly = new Date().toISOString().split('T')[0]; // Gives format like "2025-06-26"
             const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
-            const response = await fetch(`/habits/${habitId}/completion?date=${todayDateOnly}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-            });
-            const responseData = await response.json(); // Wait for JSON parsing
+            const url = `/habits/${habitId}/completion?date=${todayDateOnly}`;
 
-            if (responseData.success) {
+            apiRequest('DELETE', url, () => {
                 // un-apply effect/styling (update DOM)
                 const row = checkbox.closest('.habit-row');
                 const emojiSpan = row.querySelector('.habit-streak');
@@ -74,9 +58,7 @@ async function markHabitComplete(checkbox, habitId) {
                 } else {
                     emojiSpan.textContent = "";
                 }
-            } else {
-                console.error('Error un-marking habit complete:', responseData.message);
-            }
+            });
         }
     } catch (error) {
         console.error('Error during habit completion request:', error);
@@ -133,7 +115,6 @@ function updateCelestialBodyPos() {
         x: position.x,
         y: position.y
     };
-
     redrawCanvas();
 }
 
@@ -143,7 +124,6 @@ function updateCelestialBodyPos() {
 function redrawCanvas() {
     setupCanvas();
     if (currentCanvasState) {
-        //drawCelestialBody(currentCanvasState.x, currentCanvasState.y, currentCanvasState.bodyType);
         renderer.draw(
             currentCanvasState.x, 
             currentCanvasState.y, 

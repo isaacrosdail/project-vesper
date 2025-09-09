@@ -2,11 +2,13 @@
 // Functions for our tables, such as editTableField or deleteTableItem?
 import { confirmationManager } from './ui/modal-manager.js';
 import { makeToast } from './ui/toast.js';
+import { apiRequest } from './services/api.js';
 
 /**
  * Creates table row for given item data for realtime modal entries
  * @param {Object} data - Return data from backend for new item
  */
+// TODO: Implement!
 export function makeTableRow(data) {
     const row = document.createElement("tr");
 
@@ -15,8 +17,6 @@ export function makeTableRow(data) {
 }
 
 
-// Currently used by tasks/dashboard & groceries/dashboard
-// DELETE fetch request when clicking delete button
 /**
  * Deletes item from DB when clicking delete button
  * @async
@@ -31,22 +31,10 @@ async function deleteTableItem(module, itemId, subtype = "none") {
 
     const url = `/${module}/${subtype}/${itemId}`;
 
-    try {
-        const response = await fetch(url, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-        });
-        const responseData = await response.json();
-
-        if (responseData.success) {
-            const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
-            if (itemRow) itemRow.remove();
-        } else {
-            console.error('Failed to delete item:', responseData.message);
-        }
-    } catch (error) {
-        console.error('Fetch request failed: ', error);
-    }
+    apiRequest('DELETE', url, () => {
+        const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
+        if (itemRow) itemRow.remove();
+    });
 }
 
 /** 
@@ -102,30 +90,14 @@ export async function inlineEditElement(element) {
  * @param {HTMLElement} td - Table cell element to update
  */
 async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "none") {
-
     // Construct URL & request body
     const url = `/${module}/${subtype}/${itemId}`;
     const data = {}
     data[field] = newValue;
 
-    try {
-        const response = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        const responseData = await response.json();
-
-        if (responseData.success) {
-            makeToast(responseData.message, 'success');
-        } else {
-            console.error('Error updating field:', responseData.message);
-        }
-    } catch (error) {
-        console.error('Error during fetch request:', error);
-    }
+    apiRequest('PATCH', url, () => {
+        makeToast(responseData.message, 'success');
+    }, data);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

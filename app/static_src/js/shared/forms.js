@@ -2,12 +2,13 @@
 
 
 function filterUnitOptions() {
-    const categorySelection = document.querySelector('#category').value;
-    const unitTypes = document.querySelectorAll('#unit_type option');
+    const categoryElement = document.querySelector('#category').value;
+    const unitSelect = document.querySelectorAll('#unit_type');
+    if (!categoryElement || !unitSelect) return;
 
-    // debugging
-    console.log(`Category selected: ${categorySelection}`);
-
+    const categorySelection = categoryElement.value;
+    const unitTypes = unitSelect.querySelectorAll('option');
+    
     // JS Object, use keys for types of groups, values are list of units allowed for that group
     const unitGroups = {
         weight: ['g', 'kg', 'oz', 'lb'],
@@ -28,7 +29,6 @@ function filterUnitOptions() {
 
     // Use 2-step lookup with dict keys to store the appropriate list of allowed units for the given selection in allowedUnits
     const allowedUnits = unitGroups[unitOptionsMap[categorySelection]];
-    console.log(allowedUnits)
 
     // Then loop through each unit option and hide it if it's NOT n the allowed units list
     unitTypes.forEach(option => {

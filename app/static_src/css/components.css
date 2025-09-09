@@ -14,15 +14,14 @@
 /* ======= BUTTONS ======= */
 /* Base button styling: shape + ergonomics goes here */
 .btn {
-    display: inline-flex; /* icons+text align*/
-    align-items: center; /* for icon+label vertical centering? */
-    justify-content: center; /* center text when full width */
-    min-height: 2.5rem; /* ensure big enough for touch */
+    display: inline-flex;       /* icons+text align*/
+    align-items: center;        /* for icon+label vertical centering? */
+    justify-content: center;    /* center text when full width */
+    min-height: 2.5rem;         /* ensure big enough for touch */
     cursor: pointer;
     user-select: none;
-    appearance: none;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
+    padding: var(--space-sm) var(--space-md);
+    border: var(--border-default);
     border-radius: var(--border-radius);
     gap: var(--gap-sm);
 }
@@ -74,19 +73,18 @@
 .form-group {
     display: flex;
     flex-direction: column;
-    /* gap: var(--gap-sm); */
     margin-bottom: 1rem;
 }
 
 /* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
 .card-dashboard {
     padding: 1.5rem;
+    align-self: stretch;
     border-radius: var(--border-radius);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     background-color: var(--bg);
     border: solid 1px var(--border-color);
     position: relative; /* for card-title positioning */
-    /* Remember: Vertical spacing is gap's job, no button/header-specific margins */
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
@@ -102,41 +100,7 @@
 .form-actions > * {
     min-width: 8rem;
 }
-/* 2nd descendant of nav */
-.navbar-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 80rem;
-    margin: 0 auto;
-}
-/* Direct descendant of nav */
-.nav-left, .nav-right {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-lg);
-}
-.nav-link {
-    text-decoration: none;
-    border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
-    color: var(--text);
-    padding: 0.5rem;
-}
-.nav-link:hover {
-    background-color: var(--ui-hover);
-    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
-}
-.nav-link.active {
-    background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
-    color: var(--text);
-    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
-}
-.branding {
-    color: var(--text);
-    font-size: 1.5rem; /* text-2xl */
-    font-weight: 600; /* font-semibold */
-    margin-right: 1.5rem; /* mr-6 */
-}
+
 /* ======= TABLE COMPONENTS ======= */
 /* Needed higher specificity here to override so delete-cell properly blends in to card */
 /* TODO: BUG: Fix this & sort out why table-cell class is required for delete-btn's to style properly */
@@ -150,19 +114,19 @@
     text-align: center;
     color: var(--text-muted);
     font-style: italic;
-    padding: 0.5rem 0;
+    padding: var(--space-sm) 0;
 }
 .table-standard {
     caption-side: top;
-    table-layout: auto; /* TODO: study */
+    table-layout: auto; /* browser calcs column widths */
     border-collapse: collapse;
     width: 100%;
     font-size: 0.875rem;
 }
 .table-standard th,
 .table-standard td {
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
+    padding: var(--space-sm);
+    border: var(--border-default);
 }
 .table-header th {
     background-color: var(--accent-subtle);
@@ -190,14 +154,14 @@
 .context-menu {
     background-color: var(--bg);
     color: var(--text);
-    border: 1px solid var(--border-color);
+    border: var(--border-default);
     border-radius: var(--border-radius);
     position: fixed;  /* important since it takes it out of the DOM flow? */
     max-width: 50%;
     z-index: 200;
 }
 .context-menu > li {
-    padding: 0.5rem 1rem;
+    padding: var(--space-sm) var(--space-md);
 }
 /* Style hover so its corners don't jut out from ul element itself */
 .context-menu > li:first-child:hover {
@@ -275,7 +239,7 @@
     z-index: 401; /* appear above other content */
     background-color: color-mix(in srgb, var(--color-success) 10%, white); /* Derive bg-color from our color-success var instead of hardcoding */
     color: var(--color-success);
-    padding: 0.5rem 1rem;
+    padding: var(--space-sm) var(--space-md);
     border-radius: var(--border-radius);
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
 }

@@ -133,6 +133,7 @@ def reset_dev(session):
 
     logout_user()
 
+    delete_all_db_data(session, include_users=True, reset_sequences=True)
     auth_service = AuthService(session)
     owner_user = auth_service.get_or_create_owner_user()
 

@@ -1,5 +1,7 @@
 import { makeToast } from './toast.js';
 import { makeTableRow} from '../tables.js';
+import { apiRequest } from '../services/api.js';
+
 /**
  * Modal Manager - Auto-discovers standardized modals
  * 
@@ -59,11 +61,23 @@ function setupModal(modalId, buttonId, endpoint) {
     });
 
     modal.addEventListener('submit', async (e) => {
+        const form = e.target;
+
+        // Skip interception if the form opts out
+        if (form.hasAttribute('data-noajax')) {
+            return;
+        }
+
         e.preventDefault();
-        const formData = new FormData(e.target);
-        // console.log(`Submit event fired for modalId: ${modalId} with endpoint: ${endpoint}!`);
-        submitModalForm(modal, endpoint, formData);
-        modal.querySelector('form').reset();
+
+        const formData = new FormData(form);
+        // submitModalForm(modal, endpoint, formData);
+        apiRequest('POST', endpoint, (responseData) => { // get server responseData response inside success callback
+            makeTableRow(responseData.data);
+            makeToast(responseData.message, 'success');
+        }, formData);
+
+        form.reset();
         modal.close();
     });
 }
@@ -71,7 +85,6 @@ function setupModal(modalId, buttonId, endpoint) {
 function setupTabbedModal(modal) {
     modal.querySelectorAll('.tabs button').forEach(btn => {
         btn.addEventListener('click', () => {
-            console.log(`Button ${btn.dataset.tab} clicked`);
             // hide all panels & remove active
             document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(p => p.hidden = true);
@@ -88,25 +101,6 @@ function setupTabbedModal(modal) {
     // Auto-activate first tab
     const firstTab = modal.querySelector('.tabs button');
     firstTab?.click();
-}
-
-async function submitModalForm(modal, endpoint, formData) {
-    try {
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            body: formData // TODO: NOTES: No headers needed for formData obj
-        });
-        const responseData = await response.json();
-        
-        if (responseData.success) {
-            makeTableRow(responseData.data);
-            makeToast(responseData.message, 'success');
-        } else {
-            console.error('Error:', responseData.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
 }
 
 // Trying out a confirmation manager singleton for dynamically handling confirmation popups

@@ -1,6 +1,18 @@
 {# Navbar template used across site. Note: nav_link macro at bottom of this file #}
 {# === NAV COMPONENTS === #}
 
+{% macro profile_btn() %}
+<button id="settings-btn" aria-label="Profile settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+    aria-hidden="true"
+    >
+    <path d="M12.121 12.78c-.07-.01-.161-.01-.241 0C10.12 12.72 8.72 11.28 8.72 9.51c0-1.81 1.46-3.28 3.28-3.28s3.28 1.47 3.28 3.28c-.01 1.77-1.4 3.22-3.159 3.27z"/>
+    <path d="M18.74 19.38A10 10 0 0 1 12 22a10 10 0 0 1-6.74-2.62c.1-.94.7-1.86 1.77-2.58 2.74-1.82 7.22-1.82 9.94 0 1.07.72 1.67 1.64 1.77 2.58z"/>
+    <circle cx="12" cy="12" r="10"/>
+    </svg>
+</button>
+{% endmacro %}
+
 {# NOTE: current_user.role is a string, required_role is now an Enum, hence the '.value' #}
 {% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
     {% if not required_role or (current_user.is_authenticated and current_user.role == required_role.value) %}
@@ -15,16 +27,12 @@
 {# TODO: Note: navlinks is the desktop name, need to rename after switching over logic/styling #}
 {% macro navigation_links(type='navlinks') %}
 <div class="{{ type }}" id="{{ type }}">
-    {{ nav_link('Home', 'main.home', request.endpoint) }}
-
     {% if current_user.is_authenticated %}
         {{ nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
         {{ nav_link('Habits', 'habits.dashboard', request.endpoint) }}
         {{ nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
         {{ nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
         {{ nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
-
-        {{ nav_link('Log out', 'auth.logout', request.endpoint )}}
     {% endif %}
     
     {% if current_user.is_anonymous %}
@@ -45,7 +53,7 @@
                         aria-label="Toggle navigation menu">
                     ☰
                 </button>
-                {# TODO: NOTES: ID makes assistive tech tie btn + navlinks together? #}
+                
                 {{ navigation_links() }}
             </div>
 
@@ -53,28 +61,14 @@
             <div class="nav-right">
 
                 {# Baby's first modal #}
-                <button id="settings-btn" aria-label="Settings">⚙️</button>
-                {% if has_dev_tools %}
-                <dialog id="settings-modal" class="dev-buttons">
-                    <h3>Hey pal</h3>
-                    <p>My Modal Content</p>
-                    <a href="/my-fake/route" class="btn btn-primary">Test 404</a>
-                    <form action="{{ url_for('auth.reset_dev') }}" method="POST">
-                        <button type="submit" class="btn btn-primary">Reset DEV</button>
-                    </form>
-                    {% if config.APP_ENV == 'dev' %}
-                    <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Theme Demo Page</a><br>
-                    {% endif %}
-                    <button type="submit" id="close-dev-modal-btn">Close</button>
-                </dialog>
-                {% endif %}
+                <!-- <button id="settings-btn" aria-label="Settings">⚙️</button> -->
+                {{ profile_btn() }}
 
                 <form>
                     <fieldset>
-                        {# Legend here is good for accessibility (screen readers) #}
                         <legend class="visually-hidden">Pick a theme</legend>
                         
-                        {# Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) #}
+                        {# TODO: Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) #}
                         <select name="theme" id="theme">
                             <option value="laptop">System</option>
                             <option value="sun">Light</option>
@@ -90,3 +84,24 @@
         {{ navigation_links('mobilenavlist') }}
     </div>
 </div>
+
+<dialog id="settings-modal" class="settings-modal">
+    <h3>User Account Settings</h3>
+    <button type="button" class="modal-close btn btn-destructive" id="close-dev-modal-btn">&times;</button>
+
+    <form action="{{ url_for('auth.logout') }}" method="POST" data-noajax>
+        {# TODO: Add CSRF token here #}
+        <button type="submit" class="btn btn-destructive">Log out</button>
+    </form>
+
+    {% if has_dev_tools %}
+    <h3>Dev Tools</h3>
+    <div class="dev-btns">
+        <a href="/my-fake/route" class="btn btn-primary">Test 404</a>
+        <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Style Reference Page</a>
+        <form action="{{ url_for('auth.reset_dev') }}" method="POST" data-noajax class="btn btn-destructive">
+            <button type="submit">Reset Dev</button>
+        </form>
+    </div>
+    {% endif %}
+</dialog>
