@@ -27,7 +27,82 @@
 
 :root {
     --min-navbar-height: 4rem;
-    --has-hover: 0;
+    --my-bool: clamp(0, 100vw - 640px, 1); /* effectively a media query for above/below 640px width? Need to find use cases */
+}
+
+/* For profile SVG button in navbar, need to refine */
+/* TODO: Ought to move these into components.css, no? */
+#settings-btn {
+    cursor: pointer;
+}
+#settings-btn svg {
+    color: var(--text);
+    pointer-events: none;
+    width: 25px;
+    height: 25px;
+}
+.dev-btns {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+}
+.settings-modal[open] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+}
+
+
+/* Position our "x" button "outside"/"to the side of" the inline content */
+.shoppinglist-item {
+    position: relative; /* positioning context for inline-delete */
+    display: flex;
+    align-items: center;
+    gap: var(--gap-md);
+}
+.shoppinglist-item button {
+    cursor: pointer;
+}
+.shoppinglist-item svg {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+.inline-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: -1.4rem;
+    top: 50%; /* position button's top edge at middle of container */
+    transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--color-error);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Show hidden controls on hover */
+.shoppinglist-item:hover .inline-delete,
+.shoppinglist-item:hover .qty-controls button {
+    opacity: 1;
+}
+.qty-controls {
+    display: flex;
+    gap: var(--gap-sm);
+    align-items: center;
+}
+.qty-controls button {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: var(--accent-subtle);
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border: 1px solid var(--accent-subtle);
+    border-radius: 50%;
 }
 
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
@@ -41,14 +116,16 @@
 }
 /* Main content area: fills remaining viewport space below navbar */
 .content {
-    flex: 1; /* makes flex container's child grow & take up all remaining space */
-    width: 100%;
-    max-width: clamp(100%, 90vw, 90rem);
-    margin: auto;
+    flex: 1 0 auto;                        /* only grow vertically */
+    width: 100%;                           /* take full width by default */
+    max-width: clamp(35rem, 90vw, 90rem);  /* cap width responsively */
+    margin-inline: auto;                   /* center horizontally */
+    padding-inline: clamp(1rem, 4vw, 2rem);
     display: flex;
     flex-direction: column;
     gap: var(--gap-lg);
 }
+
 /* For pages using our content_mod Jinja block to provide narrower styling for content */
 .content--narrow {
     max-width: clamp(35rem, 90vw, 50rem);
@@ -59,9 +136,9 @@
     display: flex;
     overflow: hidden;
     flex-direction: column;
-    align-items: center; /*horizontal center children */
+    place-items: center; /* shorthand for justify-items & */
     gap: var(--gap-lg);
-    padding: 2rem 1rem;
+    padding: var(--space-xl) var(--space-md);
 }
 /* Cap the paragraph for legibility */
 .landing-content p {
@@ -70,21 +147,19 @@
 }
 
 .landing-content h1 {
-    font-size: 1.8rem;
+    font-size: calc(1.2 * var(--font-size-xl));
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    /* text-align: left; */
+    margin-bottom: var(--space-sm);
 }
 .landing-content a {
     text-align: center;
 }
-/* === LANDING PAGE CONTENT STYLING ABOVE === */
 
 
 /* ====== STYLINGS FOR METRICS DASHBOARD/CARDS ====== */
 .charts-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 equal-width columns */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* create as many cols as will fit, where each col is >= 320px wide, but can grow to (EQUALLY) fill space available */
     gap: var(--gap-md);
 }
 .metric-graph {
@@ -97,19 +172,9 @@
 }
 
 /* ====== CARD STYLINGS ====== */
-/* Now making our greeting card be grid layout within our flexbox content */
-/* TODO: Need to fix divider so it spans entire height of greeting card again */
 #greeting-card {
     display: grid;
-    /* grid-template-columns
-    1fr: takes up available space
-    auto: just wide enough for content (our divider)
-    1fr: takes up remaining available space
-    */
-    grid-template-columns: 1fr auto 1fr; /* time | divider | weather */
-    grid-template-rows: 1fr;
-    min-height: 120px;
-    align-items: stretch; /* makes all children same height */
+    grid-template-columns: 1fr 1fr;
 }
 #sky-canvas {
     width: 100%;
@@ -119,9 +184,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
-#daily-habits-card > ul {
-    max-height: 70px;
-}
 #my-day-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -129,9 +191,6 @@
 h3 {
     font-size: var(--font-size-lg);
 }
-
-
-
 
 /* 404 + 500 error pages */
 .error-page {
@@ -160,15 +219,13 @@ h3 {
 /* ===== FORMS, INPUTS ===== */
 /* For dashboard quick-entry & JS inline cell edit inputs */
 .input-inline {
-    padding-block: 0.25rem; /* Slightly tighter */
+    padding-block: var(--space-xs); /* top+bottom Slightly tighter */
     border: none;
-    border-bottom: 1px solid var(--border-color);
-    /* box-shadow: none; */
+    border-bottom: var(--border-default);
     font-size: 0.875rem;
 }
 
 /* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
-
 form input:not([type="checkbox"]):not([type="radio"]):user-valid {
     outline: 2px solid;
     outline-color: var(--color-success);
@@ -183,14 +240,9 @@ form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
     gap: var(--gap-sm);
 }
 
-
-/* TODO: 
- * FINISH: Tune styling 
- * Also consider renaming to modal? Need to determine roles/intentions there
- */
 dialog {
     background-color: var(--bg);
-    padding: 2rem;
+    padding: var(--space-xl);
     position: fixed;
     top: 30%;
     left: 50%;
@@ -206,20 +258,19 @@ dialog::backdrop {
 /* Modal X button styling */
 .modal-close {
     position: absolute;
-    top: 0.5rem;
-    right: 1.5rem;
-    padding: 0.25rem 0.5rem; /* override btn: smaller box */
+    inset: 0.5rem 1.5rem auto auto; /* top right bottom left */
+    padding: var(--space-xs) var(--space-sm); /* override btn: smaller box */
     color: var(--text-muted);
     background: transparent;
     border: none;
-    font-size: 1.5rem;
+    font-size: var(--font-size-xl);
 }
 .modal-close:hover {
     color: var(--text-destructive);
 }
 .tooltip-popup { 
     position: relative; /* also makes it act as anchor for ::after ? */
-    border: 1px solid var(--border-color);
+    border: var(--border-default);
     border-radius: var(--border-radius);
     background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
     color: var(--bg); /* then use current bg as text for color parity */
@@ -274,19 +325,57 @@ dialog::backdrop {
 nav {
     min-height: var(--min-navbar-height);
     background-color: var(--accent-strong);
-    padding: 1rem;
+    padding: var(--space-md);
     position: relative; /* forces nav to participate in stacking context so z-index actually applies */
     z-index: 250; /* to be above mobilenav */
 }
 .nav-anchor {
     position: relative;
 }
+/* 2nd descendant of nav */
+.navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* content starts left now for everything */
+    max-width: 80rem;
+    margin: 0 auto;
+}
+/* Direct descendant of nav */
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.5rem, 1.5vw, var(--gap-md));
+}
+.nav-right {
+    margin-left: auto; /* ...but retain the "push some stuff to the right side" effect */
+}
+.nav-link {
+    text-decoration: none;
+    border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
+    color: var(--text);
+    padding: var(--space-sm);
+    flex-shrink: 1;
+    white-space: nowrap;
+}
+.nav-link:hover {
+    background-color: var(--ui-hover);
+    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
+}
+.nav-link.active {
+    background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
+    color: var(--text);
+    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
+}
+.branding {
+    color: var(--text);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin-right: var(--space-lg);
+}
 /* Container: visibility, positioning, stacking */
 .mobilenav {
-    /* display: none; */
     position: absolute;
-    top: 100%;
-    left: 0; right: 0;
+    inset: 100% 0 auto 0; /* top right bottom left */
     z-index: 201;
     background-color: var(--accent-strong);
 
@@ -318,16 +407,12 @@ nav {
     display: block; /* each line fills parent's width */
     width: 100%;
     text-align: center; /* center text inside */
-    padding: 0.75rem 1rem; /* for easier touch targets */
+    padding: var(--space-md) var(--space-md); /* for easier touch targets */
 }
 /* ==== MEDIA QUERIES ==== */
 @media (width <= 640px) {
     .navlinks {
         display: none;
-    }
-    /* .navlinks.is-open { display: flex; } */
-    .charts-container, #daily-check-in-card {
-        grid-template-columns: 1fr; /* stack charts + metric-row divs for smaller widths */
     }
 }
 @media (width > 640px) {
