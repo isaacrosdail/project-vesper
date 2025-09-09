@@ -98,7 +98,9 @@
     <h3>Dev Tools</h3>
     <div class="dev-btns">
         <a href="/my-fake/route" class="btn btn-primary">Test 404</a>
-        <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Style Reference Page</a>
+        {% if config.APP_ENV == 'dev' %}
+            <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Style Reference Page</a>
+        {% endif %}
         <form action="{{ url_for('auth.reset_dev') }}" method="POST" data-noajax class="btn btn-destructive">
             <button type="submit">Reset Dev</button>
         </form>
