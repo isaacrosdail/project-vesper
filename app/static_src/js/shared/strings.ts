@@ -2,10 +2,12 @@
 // between(): From a given string, return the substring that is between two markers (left and right)
 // EX: between("theme=dark;", "=", ";") would return "dark"
 
-function between(string: string, left: string, right: string): string {
+export function between(string: string, left: string, right: string): string {
     const l = string.indexOf(left) + left.length;
+    if (l === -1) return "";
     console.log(l)
-    const r = string.indexOf(right);
+    let r = string.indexOf(right);
+    if (r === -1) r = string.length;
     console.log(r)
     return string.slice(l, r);
 }
@@ -111,11 +113,31 @@ function extractQuoted(string: string, delimiter: string): string[] {
     return results;
 }
 
-// const myStr = "hellooo"
-const myStr2 = "hello.world!how are.you"
-const myStr3 = "((hello)world(test))"
-const myStr4 = 'name="John Doe" age="25"'
-// console.log(removeConsecutive(myStr, "o"));
-// console.log(capitalizeAfter(myStr2, ".!"));
-// console.log(countNested(myStr3, "(", ")"));
-console.log(extractQuoted(myStr4, '"'))
+// // const myStr = "hellooo"
+// const myStr2 = "hello.world!how are.you"
+// const myStr3 = "((hello)world(test))"
+// const myStr4 = 'name="John Doe" age="25"'
+// // console.log(removeConsecutive(myStr, "o"));
+// // console.log(capitalizeAfter(myStr2, ".!"));
+// // console.log(countNested(myStr3, "(", ")"));
+// // console.log(extractQuoted(myStr4, '"'))
+
+// // Normal case
+// console.log(between("Hello [World]!", "[", "]"));
+// // expected: "World"
+
+// // Multiple candidates
+// console.log(between("foo<bar>baz<qux>", "<", ">"));
+// // expected: "bar" (stops at first ">")
+
+// // No right delimiter
+// console.log(between("abc [def", "[", "]"));
+// // expected: "" (r = -1, slice(l, -1) → everything until last char)
+
+// // No left delimiter
+// console.log(between("abcdef]", "[", "]"));
+// // expected: "abcdef" (l = -1 + 1 + length → weird index)
+
+// // Overlapping markers
+// console.log(between("start--middle--end", "--", "--"));
+// // expected: "middle"

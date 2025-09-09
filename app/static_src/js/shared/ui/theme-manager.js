@@ -1,39 +1,37 @@
 // Runs on DOMContentLoaded, syncs cookie + <select>, applies theme
+import { between } from '../strings.js';
 
 const themeMap = {
     sun: 'light',
     moon: 'dark',
+    laptop: 'system'
 }
 const reverseThemeMap = {
     light: 'sun',
-    dark: 'moon'
+    dark: 'moon',
+    system: 'laptop'
 }
 
 function getCookie() {
-    const cookie = document.cookie;
     const themeSelect = document.querySelector('#theme');
     if (!themeSelect) return;
 
-    themeSelect.value = ``
+    const cookie = document.cookie;
+    const themeValue = between(cookie, "=", ";");
 
-    if (cookie.includes('theme=light')) {
-        themeSelect.value = 'sun';
-    } else if (cookie.includes('theme=dark')) {
-        themeSelect.value = 'moon';
-    } else {
-        themeSelect.value = 'laptop';
-    }
+    themeSelect.value = reverseThemeMap[themeValue] ?? "laptop";
 }
 
 
 function setCookie() {
-    const themeSetting = document.querySelector('#theme').value;
+    const themeSelect = document.querySelector('#theme');
+    if (!themeSelect) return;
 
-    console.log(`Theme detected from form as: ${themeSetting}`);
+    const themeSetting = themeSelect.value;
+    const cookieVal = themeMap[themeSetting] ?? "system";
 
-    document.cookie = `theme=${themeMap[themeSetting] || system }; path=/; max-age=31536000`;
-
-    console.log(`Cookie set/saved as: ${document.cookie}`);
+    document.cookie = `theme=${cookieVal}; path=/; max-age=31536000`;
+    console.log(`Cookie set as: ${document.cookie}`)
 }
 
 function applyThemeFromCookie() {

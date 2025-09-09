@@ -23,6 +23,8 @@ def dashboard(session):
     products = groceries_repo.get_all_products()
     transactions = groceries_repo.get_all_transactions()
 
+    shopping_list, _ = groceries_repo.get_or_create_shoppinglist()
+
     for transaction in transactions:
         transaction.price_per_100g = get_price_per_100g(transaction)
     
@@ -33,6 +35,7 @@ def dashboard(session):
         "transactions": txn_viewmodels,
         "product_headers": ProductPresenter.build_columns(),
         "transaction_headers": TransactionPresenter.build_columns(),
+        "shopping_list": shopping_list
     }
     return render_template("groceries/dashboard.html", **ctx)
 
@@ -119,3 +122,21 @@ def transactions():
             show_product_fields=show_product_fields,
             transaction_data=saved_form_data
         )
+    
+@groceries_bp.route("/shopping-list/items", methods=["POST"])
+@login_required
+@with_db_session
+def add_shoppinglist_item(session):
+    groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
+    
+    data = request.get_json()
+    product_id = data.get("product_id")
+
+    item, _ = groceries_repo.add_item_to_shoppinglist(product_id)
+
+    return jsonify({
+        "success": True, 
+        "message": "Added item to shopping list!",
+        "item_id": item.id,
+        "product_id": item.product_id
+    })

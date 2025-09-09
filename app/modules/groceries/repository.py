@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import joinedload
 
-from app.modules.groceries.models import Product, Transaction, Unit
+from app.modules.groceries.models import Product, Transaction, Unit, ShoppingList, ShoppingListItem
 from app.shared.datetime.helpers import today_range
 from app.shared.repository.base import BaseRepository
 
@@ -19,6 +19,12 @@ class GroceriesRepository(BaseRepository):
 			Product.barcode == barcode,
 			Product.user_id == self.user_id,
 			Product.deleted_at.is_(None) # TODO: Needed if we have safe_delete now?
+		).first()
+	
+	def get_product_by_id(self, product_id: int):
+		return self.session.query(Product).filter(
+			Product.user_id == self.user_id,
+			Product.id == product_id
 		).first()
 	
 	def get_all_products(self):
@@ -107,3 +113,46 @@ class GroceriesRepository(BaseRepository):
 		else:
 			new_transaction = self.create_transaction(product, **product_data)
 			return new_transaction, True
+		
+	def create_shoppinglist(self, name: str = "DefaultListName"):
+		shopping_list = ShoppingList(
+			user_id=self.user_id,
+			name=name
+		)
+		self.session.add(shopping_list)
+		self.session.flush()
+		return shopping_list
+
+	def get_or_create_shoppinglist(self):
+		"""Return ShoppingList from database, else create new and return that."""
+		shopping_list = self.session.query(ShoppingList).filter(
+			ShoppingList.user_id == self.user_id,
+		).first()
+
+		if shopping_list:
+			return shopping_list, False
+		return self.create_shoppinglist(), True
+	
+	def add_item_to_shoppinglist(self, product_id):
+		"""Add a given product to ShoppingList and return item. If one already exists, simply increment its quantity."""
+		shopping_list, _ = self.get_or_create_shoppinglist()
+
+		existing_item = self.session.query(ShoppingListItem).filter(
+			ShoppingListItem.shopping_list_id == shopping_list.id,
+			ShoppingListItem.product_id == product_id,
+			ShoppingListItem.user_id == self.user_id
+		).first()
+
+		if existing_item:
+			existing_item.quantity_wanted += 1
+			return existing_item, False
+		else:
+			# Adding an item to the list entails simply creating the link between list & product
+			item = ShoppingListItem(
+				user_id=self.user_id,
+				shopping_list_id=shopping_list.id,
+				product_id=product_id
+			)
+			self.session.add(item)
+			self.session.flush()
+			return item, True

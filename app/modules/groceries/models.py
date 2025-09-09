@@ -19,9 +19,7 @@ class Unit(enum.Enum):
 	fl_oz = "fl_oz"
 	ea = "ea" 	# each
 
-# Acts as catalog of 'known' products
-# TODO: Sort out logic for "re-adding a product that is marked as having been soft-deleted"
-#		ie, "un-soft-delete it"
+# Acts as our catalog of "known" products
 class Product(Base):
 
 	name = Column(String(100), nullable=False)
@@ -57,3 +55,21 @@ class Transaction(Base):
 	
 	def __repr__(self):
 		return f"<Transaction id={self.id} product_id={self.product_id}>"
+
+# Essentially our container for shoppinglistitems, provides an entrypoint for working with shoppinglistitems for a given list
+class ShoppingList(Base):
+	name = Column(String(100), default="Current List")
+
+	items = relationship("ShoppingListItem", back_populates="shopping_list")
+
+# Actual items in the list
+# Note to self: Effectively acts as a pointer to the actual product item itself
+class ShoppingListItem(Base):
+
+	quantity_wanted = Column(Integer, nullable=False, default=1)
+	shopping_list_id = Column(Integer, ForeignKey('shoppinglist.id'), nullable=False)
+	product_id = Column(Integer, ForeignKey('product.id'), nullable=False)
+
+	# Relationships
+	shopping_list = relationship("ShoppingList", back_populates="items")
+	product = relationship("Product")

@@ -5,14 +5,13 @@ from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
 from app.modules.auth.service import check_item_ownership
-from app.modules.groceries.models import Product, Transaction
+from app.modules.groceries.models import Product, Transaction, ShoppingList, ShoppingListItem
 from app.modules.habits.models import Habit
 from app.modules.metrics.models import DailyEntry
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
 from app.shared.database.helpers import safe_delete
 
-# Blueprint registration
 crud_bp = Blueprint("crud", __name__)
 
 # Generalized PATCH, DELETE which supports:
@@ -24,6 +23,8 @@ crud_bp = Blueprint("crud", __name__)
 MODEL_CLASSES = {
     ("groceries", "product"): Product,
     ("groceries", "transaction"): Transaction,
+    ("groceries", "shoppinglist"): ShoppingList,
+    ("groceries", "shoppinglistitem"): ShoppingListItem,
     ("tasks", "none"): Task,
     ("habits", "none"): Habit,
     ("metrics", "daily_entry"): DailyEntry,
@@ -45,7 +46,10 @@ def item(session, module, subtype, item_id):
 
     item = session.get(model_class, item_id)
     if not item:
-        return jsonify({"success": False, "message": f"{model_class.__name__} not found."}), 404
+        return jsonify({
+            "success": False, 
+            "message": f"{model_class.__name__} not found."
+        }), 404
     
     # Ownership check
     check_item_ownership(item, current_user.id)
@@ -54,8 +58,14 @@ def item(session, module, subtype, item_id):
         data = request.get_json()
         for field, value in data.items():
             setattr(item, field, value)
-        return jsonify({"success": True, "message": f"Successfully updated {model_class.__name__}"}), 200
+        return jsonify({
+            "success": True, 
+            "message": f"Successfully updated {model_class.__name__}"
+        }), 200
     
     elif request.method == 'DELETE':
         safe_delete(session, item)
-        return jsonify({"success": True, "message": f"{model_class.__name__} deleted"}), 200
+        return jsonify({
+            "success": True, 
+            "message": f"{model_class.__name__} deleted"
+        }), 200
