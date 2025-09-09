@@ -9,7 +9,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const hamburgerBtn = document.querySelector('#hamburger-btn');
 
     document.addEventListener('click', (e) => {
-        console.log(`Clicked: ${e.target.id}`)
         // Toggle mobile nav
         if (e.target.matches('#hamburger-btn')) {
             mobilenavlinks?.classList.toggle('is-open');

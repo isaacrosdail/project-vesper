@@ -1,6 +1,6 @@
 // TODO: NOTES: Bundler => utility/singleton, defines userStore class instance
 // Import explicitly where needed
-
+import { apiRequest } from '../services/api.js';
 // TODO: NOTES: Container Pattern / state machine pattern?
 // userStore acting as a "container"
 // Keeps related data/state + behavior nicely bundled together
