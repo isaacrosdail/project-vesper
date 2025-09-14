@@ -2,7 +2,7 @@
 {# === NAV COMPONENTS === #}
 
 {% macro profile_btn() %}
-<button id="settings-btn" aria-label="Profile settings">
+<button id="profile-btn" aria-label="Profile settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
     aria-hidden="true"
     >
@@ -60,9 +60,9 @@
             {# Settings modal, theme select, etc. #}
             <div class="nav-right">
 
-                {# Baby's first modal #}
-                <!-- <button id="settings-btn" aria-label="Settings">⚙️</button> -->
-                {{ profile_btn() }}
+                {% if current_user.is_authenticated %}
+                    {{ profile_btn() }}
+                {% endif %}
 
                 <form>
                     <fieldset>
@@ -85,9 +85,9 @@
     </div>
 </div>
 
-<dialog id="settings-modal" class="settings-modal">
+<dialog id="profile-modal" class="profile-modal">
     <h3>User Account Settings</h3>
-    <button type="button" class="modal-close btn btn-destructive" id="close-dev-modal-btn">&times;</button>
+    <button type="button" class="modal-close btn btn-destructive" id="close-profile-modal-btn">&times;</button>
 
     <form action="{{ url_for('auth.logout') }}" method="POST" data-noajax>
         {# TODO: Add CSRF token here #}

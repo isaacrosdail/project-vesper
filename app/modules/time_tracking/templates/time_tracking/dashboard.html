@@ -4,12 +4,12 @@
 
 {% block content %}
 
-{{ ui.time_entry_modal() }}
+{{ forms.time_entry_modal() }}
 
 <section id="activity-log-card" class="card-dashboard">
-    <div class="card-header">
-        <h2 class="card-title">Time Entries</h2>
-        <button id="time-entry-dashboard-btn" class="btn btn-primary">Add Time Entry</button>
+    <div class="card-title">
+        <h2>Time Entries</h2>
+        <button id="time-entry-dashboard-btn" class="btn btn-primary btn-icon">{{ ui.plus_svg() }}</button>
     </div>
     {% call(item, headers) ui.responsive_table('Time Entries', time_entry_headers, time_entries, 'time_tracking', 'timeentry') %}
     <td class="{{ headers[0].priority }}">{{ item.category }}</td>

@@ -17,8 +17,10 @@
 :root {
     --font-family-primary: 'Manrope', sans-serif;
     --font-weight-default: 400;
+    --font-weight-bigger: 600;
     --font-size-lg: 1.2rem;
     --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
     --line-height-default: 1.5;
     --line-height-higher: 1.75rem;
     --container-lg: 72rem;
@@ -41,6 +43,8 @@
     --space-xl: 2rem;
 
     --gutters-md: 2rem;
+
+    --fade-in: opacity 0.2s ease;
 
     --color-success: #166534;
     --color-error: #dc2626;

@@ -11,8 +11,8 @@
 @import url('./animations.css') layer(animations);
 
 /* Breakpoints:
- * width <= 640px   Mobile nav toggle, chart stacking
- * width > 640px    Hide mobile navlinks?
+ * width <= 768px   Mobile nav toggle, chart stacking
+ * width > 768px    Hide mobile navlinks?
  * width <= 768px   Hide 'desktop-only' classed table columns
 */
 
@@ -30,12 +30,30 @@
     --my-bool: clamp(0, 100vw - 640px, 1); /* effectively a media query for above/below 640px width? Need to find use cases */
 }
 
+/* for delete_btn svg, need to move to components.css */
+.delete-btn {
+    width: 2.5rem;
+    padding: var(--space-sm);
+}
+.delete-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+/* For app-wide legend text, move to components.css */
+legend {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bigger);
+    color: var(--text);
+    margin-bottom: var(--space-md);
+    padding: 0 0 var(--space-lg);
+}
+
 /* For profile SVG button in navbar, need to refine */
 /* TODO: Ought to move these into components.css, no? */
-#settings-btn {
+#profile-btn {
     cursor: pointer;
 }
-#settings-btn svg {
+#profile-btn svg {
     color: var(--text);
     pointer-events: none;
     width: 25px;
@@ -46,10 +64,17 @@
     flex-direction: column;
     gap: var(--gap-md);
 }
-.settings-modal[open] {
+.profile-modal[open] {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
+}
+/* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
+.highlight-label { font-weight: 600; }
+
+.card-highlight {
+    display: flex;
+    align-items: center;
 }
 
 
@@ -81,7 +106,7 @@
     border: 1px solid var(--color-error);
     border-radius: 50%;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: var(--fade-in);
 }
 
 /* Show hidden controls on hover */
@@ -96,7 +121,7 @@
 }
 .qty-controls button {
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: var(--fade-in);
     color: var(--accent-subtle);
     width: 20px;
     height: 20px;
@@ -201,7 +226,7 @@ h3 {
     align-items: center;
 }
 .error-page > h1 {
-    font-size: 2rem;
+    font-size: var(--font-size-xxl);
 }
 /* Let's take a stab at animations */
 @keyframes wiggle {
@@ -292,21 +317,20 @@ dialog::backdrop {
 
 
 /* Dashboard checkbox completion effect */
-.habit-list {
-    list-style: none;
+.item-list {
     display: grid;
     gap: var(--gap-sm);
 }
-.habit-row {
+.item-row {
     display: flex;
     align-items: center;
     gap: var(--gap-sm);
 }
-.habit-title {
+.item-title {
     color: var(--text);
 }
 
-.habit-item.completed .habit-title {
+.item.completed .item-title {
     text-decoration: line-through;
     color: var(--text-muted);
 }
@@ -410,12 +434,12 @@ nav {
     padding: var(--space-md) var(--space-md); /* for easier touch targets */
 }
 /* ==== MEDIA QUERIES ==== */
-@media (width <= 640px) {
+@media (width <= 768px) {
     .navlinks {
         display: none;
     }
 }
-@media (width > 640px) {
+@media (width > 768px) {
     #hamburger-btn { display: none; }
 }
 

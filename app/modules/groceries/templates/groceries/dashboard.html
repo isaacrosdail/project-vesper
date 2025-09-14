@@ -5,9 +5,26 @@
 
 {% block content %}
 
+{# So JS can clone from template to append li's #}
+<template id="shoppinglist-item-template">
+    <li class="shoppinglist-item" data-item-id="" data-quantity-wanted="">
+        <button class="inline-delete" data-action="delete">{{ ui.delete_svg() }}</button>
+        <span class="item-text"></span>
+        <span class="qty-controls">
+            <span>&nbsp;&nbsp;&nbsp;--</span>
+            <button data-action="decrement">{{ ui.minus_svg() }}</button>
+            <span class="item-qty-wrapper">
+                <span class="item-qty"></span><span>x</span>
+            </span>
+            <button data-action="increment">{{ ui.plus_svg() }}</button>
+        </span>
+    </li>
+</template>
+
 <div class="card-dashboard">
     <h2>Shopping List</h2>
-    <ul>
+    <ul class="shopping-list">
+    {% if shopping_list.items %}
         {% for item in shopping_list.items %}
             <li class="shoppinglist-item" data-item-id="{{ item.id }}" data-quantity-wanted="{{ item.quantity_wanted }}">
                 <button class="inline-delete" data-action="delete">{{ ui.delete_svg() }}</button>
@@ -24,14 +41,18 @@
             </li>
         {% endfor %}
     </ul>
+    {% endif %}
+    {% if not shopping_list.items %}
+        <p id="list-empty">No items in your shopping list yet.</p>
+    {% endif %}
 </div>
 
 
 <div class="card-dashboard">
-    <div class="card-header">
-        <h2 class="card-title">Grocery - Recent Transactions</h2>
-        <a href="{{ url_for('groceries.transactions')}}" class="btn btn-primary">
-            Log New Transaction
+    <div class="card-title">
+        <h2>Grocery - Recent Transactions</h2>
+        <a href="{{ url_for('groceries.transactions')}}" class="btn btn-primary btn-icon">
+            {{ ui.plus_svg() }}
         </a>
     </div>
     {% call(item, headers) ui.responsive_table('Recent Transactions', transaction_headers, transactions, 'groceries', 'transaction') %}
@@ -45,10 +66,10 @@
 </div>
 
 <div class="card-dashboard">
-    <div class="card-header">
-        <h2 class="card-title">Product Catalog</h2>
-        <a href="{{ url_for('groceries.products')}}" class="btn btn-primary">
-            Add New Product
+    <div class="card-title">
+        <h2>Product Catalog</h2>
+        <a href="{{ url_for('groceries.products')}}" class="btn btn-primary btn-icon">
+            {{ ui.plus_svg() }}
         </a>
     </div>
     {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products, 'groceries', 'product') %}

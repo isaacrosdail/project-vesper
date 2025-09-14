@@ -4,8 +4,8 @@
 
 window.addEventListener('DOMContentLoaded', () => {
     const mobilenavlinks = document.querySelector('#mobilenav');
-    const modal = document.querySelector('#settings-modal');
-    const mq = window.matchMedia('(max-width: 640px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
+    const modal = document.querySelector('#profile-modal');
+    const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
     const hamburgerBtn = document.querySelector('#hamburger-btn');
 
     document.addEventListener('click', (e) => {
@@ -19,13 +19,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // TODO: Auto-close mobile-nav upon click elsewhere
 
-        // Open settings modal
-        if (e.target.matches('#settings-btn')) {
+        // Open profile settings modal
+        if (e.target.matches('#profile-btn')) {
             // Optional chaining avoids null errors if modal is missing
             modal?.showModal(); // ESC key & blur automatically handled
         }
-        // Close settings modal
-        if (e.target.matches('#close-dev-modal-btn')) {
+        // Close profile settings modal
+        if (e.target.matches('#close-profile-modal-btn')) {
             modal?.close();
         }
     });

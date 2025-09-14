@@ -5,12 +5,12 @@
 
 {% block content %}
 
-{{ ui.metric_entry_modal() }}
+{{ forms.metric_entry_modal() }}
 
 <section id="metrics-dashboard-table" class="card-dashboard">
-    <div class="card-header">
-        <h2 class="card-title">Daily Metric Entries</h2>
-        <button id="metric-entry-dashboard-btn" class="btn btn-primary">Add Metric</button>
+    <div class="card-title">
+        <h2>Daily Metric Entries</h2>
+        <button id="metric-entry-dashboard-btn" class="btn btn-primary btn-icon">{{ ui.plus_svg() }}</button>
     </div>
     {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'daily_metrics', 'metric') %}
     <td class="{{ headers[0].priority}}">{{ item.created_at_label }}</td>
