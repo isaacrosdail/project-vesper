@@ -11,7 +11,7 @@
         <h2>Time Entries</h2>
         <button id="time-entry-dashboard-btn" class="btn btn-primary btn-icon">{{ ui.plus_svg() }}</button>
     </div>
-    {% call(item, headers) ui.responsive_table('Time Entries', time_entry_headers, time_entries, 'time_tracking', 'timeentry') %}
+    {% call(item, headers) ui.responsive_table('Time Entries', time_entry_headers, time_entries, 'time_tracking', 'time_entry') %}
     <td class="{{ headers[0].priority }}">{{ item.category }}</td>
     <td class="{{ headers[1].priority }}">{{ item.duration_label }}</td>
     <td class="{{ headers[2].priority }}">{{ item.started_at_local }}</td>

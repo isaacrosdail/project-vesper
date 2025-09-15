@@ -37,7 +37,7 @@
             </div>
             {# net_weight, category, unit_type, & cals per 100g are all to be conditionally shown depending on whether we need to add_product from here #}
             {# Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing #}
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="category">Category</label>
                 <select name="category" id="category" 
                     {% if not show_product_fields%}disabled{% endif %}>
@@ -75,7 +75,7 @@
             </div>
             <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
                 <label for="calories_per_100g">Cals per 100g:</label>
-                <input type="text" id="calories_per_100g" name="calories_per_100g"
+                <input type="number" step="0.1" min="0" max="900" id="calories_per_100g" name="calories_per_100g"
                     {% if not show_product_fields%}disabled{% endif %}>
             </div>
             <div class="form-actions">

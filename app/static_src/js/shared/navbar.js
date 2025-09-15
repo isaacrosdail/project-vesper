@@ -4,13 +4,13 @@
 
 window.addEventListener('DOMContentLoaded', () => {
     const mobilenavlinks = document.querySelector('#mobilenav');
-    const modal = document.querySelector('#profile-modal');
+    const modal = document.querySelector('.profile-modal');
     const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
-    const hamburgerBtn = document.querySelector('#hamburger-btn');
+    const hamburgerBtn = document.querySelector('.hamburger-btn');
 
     document.addEventListener('click', (e) => {
         // Toggle mobile nav
-        if (e.target.matches('#hamburger-btn')) {
+        if (e.target.matches('.hamburger-btn')) {
             mobilenavlinks?.classList.toggle('is-open');
             const isOpen = mobilenavlinks?.classList.contains('is-open'); // set proper bool for is-open state
             hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value 
@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // TODO: Auto-close mobile-nav upon click elsewhere
 
         // Open profile settings modal
-        if (e.target.matches('#profile-btn')) {
+        if (e.target.matches('.profile-btn')) {
             // Optional chaining avoids null errors if modal is missing
             modal?.showModal(); // ESC key & blur automatically handled
         }

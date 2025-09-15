@@ -16,7 +16,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 {% macro responsive_table(caption, headers, items, module_name, subtype) %}
 <table id="{{ subtype }}-table" class="table-standard">
-  <caption class="sr-only">{{ caption }}</caption>
+  <caption class="_sr-only">{{ caption }}</caption>
   <thead class="table-header">
     <tr>
       {% for col in headers %}
@@ -45,15 +45,6 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 </table>
 {% endmacro %}
 
-{# TODO: Macro for td template for makeTableRow() #}
-<template id="{{ subtype }}-template">
-  <tr class="table-row" data-module="{{ module_name }}" data-subtype="{{ subtype }}" data-item-id="">
-    {% for col in headers %}
-      <td class="{{ col.priority }}" data-field=""></td>
-    {% endfor %}
-    <td class="table-cell delete-cell"></td>
-  </tr>
-</template>
 
 {# === MODALS === #}
 
@@ -66,7 +57,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 <dialog id="{{ id }}-modal" data-endpoint="/{{ endpoint }}">
     <form>
         <legend>{{ title }}</legend>
-        <button type="button" class="modal-close btn btn-destructive" id="{{ id }}-modal-close-btn">&times;</button>
+        <button type="button" class="modal-close btn" id="{{ id }}-modal-close-btn">&times;</button>
         {{ caller() }}
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
@@ -113,8 +104,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {% macro delete_btn() %}
 <button aria-label="Delete item" class="btn btn-destructive delete-btn">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4" aria-hidden="true">
-        <title></title>
-        <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
+        <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
     </svg>
 </button>
 {% endmacro %}

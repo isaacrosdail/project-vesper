@@ -1,15 +1,6 @@
 /* ==== COMPONENTS ==== */
 /* Reusable blocks: buttons, cards, tables */
 
-/* Utilities:
- * Token-based classes. No hardcoded colors or template macros, more scalable this way.
- * Components handle only internal spacing & appearance.
- * 
- * Margins = parent's job.
- * Design token-based component classes that adapt to theme changes automatically.
- *
- * Can either have left this in: @layer components {.. OR simply specify layer(components) in import */
-
 
 /* ======= BUTTONS ======= */
 /* Base button styling: shape + ergonomics goes here */
@@ -36,6 +27,16 @@
     height: 1rem;
     pointer-events: none;
 }
+/* for delete_btn svg, need to move to components.css */
+.delete-btn {
+    width: 2.5rem;
+    padding: var(--space-sm);
+}
+.delete-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+
 /* Subtle "pressed" effect for active buttons */
 .btn:active {
     transform: translateY(1px);
@@ -55,12 +56,10 @@
 }
 .btn-primary {
     background-color: var(--accent-subtle);
-    color: var(--text);
     border-color: var(--border-color);
 }
 .btn-secondary {
     background-color: var(--bg-light);
-    color: var(--text-muted);
     border-color: var(--border-color);
 }
 .btn-destructive {
@@ -81,26 +80,102 @@
         background-color: var(--text-destructive);
     }
 }
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
+/* For profile SVG button in navbar, need to refine */
+/* TODO: Ought to move these into components.css, no? */
+.profile-btn {
+    cursor: pointer;
 }
-
-/* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
-.card-dashboard {
-    padding: 1.5rem;
-    align-self: stretch;
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    background-color: var(--bg);
-    border: solid 1px var(--border-color);
-    position: relative; /* for card-title positioning */
+.profile-btn svg {
+    pointer-events: none;
+    width: 25px;
+    height: 25px;
+}
+.profile-modal[open] {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
 }
+dialog {
+    background-color: var(--bg);
+    padding: var(--space-xl);
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+/* Modal X button styling */
+.modal-close {
+    position: absolute;
+    inset: 0.5rem 1.5rem auto auto; /* top right bottom left */
+    padding: var(--space-xs) var(--space-sm); /* override btn: smaller box */
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    font-size: var(--font-size-xl);
+}
+.modal-close:hover {
+    color: var(--text-destructive);
+}
 
+.tooltip-popup { 
+    position: relative; /* also makes it act as anchor for ::after ? */
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
+    color: var(--bg); /* then use current bg as text for color parity */
+    overflow-wrap: break-word;
+    padding: 4px 4px;
+    margin-top: 8px;
+    max-width: 28ch;
+}
+.tooltip-popup:not(#no-after)::after {
+    content: "";
+    position: absolute;
+    left: var(--carrot-pos, 50%); /* --carrot-pos calculated via JS */
+    transform: translate(-50%, -40%);
+    border: 0.4rem solid transparent; /* forms our triangle "arrow" */
+    border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
+    opacity: 1;
+    top: -0.4rem;
+}
+
+/* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
+.card-dashboard {
+    padding: var(--space-lg);
+    align-self: stretch;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background-color: var(--bg);
+    border: var(--border-default);
+    position: relative; /* for card-title positioning */
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
+
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-md);
+}
+/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
+form input:not([type="checkbox"]):not([type="radio"]):user-valid {
+    outline: 2px solid;
+    outline-color: var(--color-success);
+}
+form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
+    outline: 2px solid;
+    outline-color: var(--color-error);
+}
 /* For consistent spacing/styling for "CTA + secondary buttons that might be anchor elements" pattern */
 .form-actions {
     display: flex;
@@ -110,6 +185,34 @@
 }
 .form-actions > * {
     min-width: 8rem;
+}
+/* ===== FORMS, INPUTS ===== */
+
+/* Base input stylings */
+/* Base input stylings */
+input, select, textarea {
+    background-color: var(--bg-light);
+    color: var(--text);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+}
+:where(input, select, textarea):focus-visible {
+    outline: 2px solid var(--accent-subtle);
+    outline-offset: 1px;
+}
+
+/* For dashboard quick-entry & JS inline cell edit inputs */
+.input-inline {
+    padding-block: var(--space-xs); /* top+bottom Slightly tighter */
+    border: none;
+    border-bottom: var(--border-default);
+    font-size: 0.875rem;
+}
+.radio-row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap-sm);
 }
 
 /* ======= TABLE COMPONENTS ======= */
@@ -121,6 +224,7 @@
     width: 0; /* prevent us from consuming extra table width */
     background-color: var(--bg);
 }
+/* TODO: Could prob clean this up, italics to utility class? */
 .table-empty {
     text-align: center;
     color: var(--text-muted);
@@ -141,8 +245,7 @@
 }
 .table-header th {
     background-color: var(--accent-subtle);
-    color: var(--text);    /* TODO */
-    font-weight: 600; /* equivalent to font-semibold in Tailwind */
+    font-weight: var(--font-weight-semibold); /* equivalent to font-semibold in Tailwind */
 }
 .table-row {
     transition: background-color 25ms ease-out;
@@ -157,14 +260,13 @@
     background-color: var(--bg-light);
 }
 .table-row:hover {
-    background-color: var(--ui-hover);
-    color: var(--text); /* TODO */
+    background-color: var(--accent-subtle);
+    color: var(--text-inverse); /* TODO: Needs fixing/tuning */
 }
 
 /* ===== CUSTOM COMPONENT STYLINGS ===== */
 .context-menu {
     background-color: var(--bg);
-    color: var(--text);
     border: var(--border-default);
     border-radius: var(--border-radius);
     position: fixed;  /* important since it takes it out of the DOM flow? */
@@ -188,8 +290,8 @@
     background-color: var(--ui-hover);
     cursor: pointer;
 }
-/* ======= LAYOUT COMPONENTS ======= */
 
+/* ======= LAYOUT COMPONENTS ======= */
 /* Mimick <fieldset>'s 'title intersects border' effect for container headers */
 /* TODO: We'll have to re-tune this since we're using the usual button stylings, need to tweak padding again here too, and font weight? */
 .card-title {
@@ -210,10 +312,11 @@
 .card-title h2 {
     font-size: var(--font-size-lg);
     line-height: var(--line-height-higher);
-    font-weight: var(--font-weight-bigger);
+    font-weight: var(--font-weight-semibold);
     pointer-events: none;
 }
 
+/* ======= TOAST COMPONENTS ======= */
 #toast-container {
     position: fixed;
     display: flex;
@@ -241,13 +344,112 @@
     border-color: var(--color-error);
 }
 
-.shadow-card {
-    box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
-}
-
 /* ==== FOOTER ==== */
 footer {
     text-align: center;
     padding: 10px;
     font-size: 0.9em;
+}
+
+/* TABS (for tabbed modal(s) */
+.tabs button.active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
+}
+
+/* NAVLINKS */
+/* Base navlinks styling (desktop-first) */
+.navlinks {
+    display: flex;
+    gap: var(--gap-lg);
+}
+.nav-link {
+    text-decoration: none;
+    border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
+    padding: var(--space-sm);
+    flex-shrink: 1;
+    white-space: nowrap;
+}
+.nav-link:hover {
+    background-color: var(--ui-hover);
+    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
+}
+.nav-link.active {
+    background-color: var(--accent-subtle); /* might add 'nav-active' for separate styling */
+    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
+}
+.nav-link:focus-visible {
+    outline: 2px solid var(--accent-subtle);
+    outline-offset: 2px;
+}
+
+/* NAV COMPONENT STYLINGS */
+nav {
+    min-height: var(--min-navbar-height);
+    background-color: var(--accent-strong);
+    padding: var(--space-md);
+    position: relative; /* forces nav to participate in stacking context so z-index actually applies */
+    z-index: 250; /* to be above mobilenav */
+}
+.nav-anchor {
+    position: relative; /* positioning context for mobilenav slidedown */
+}
+/* 2nd descendant of nav */
+.navbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* content starts left now for everything */
+    max-width: 80rem;
+    margin: 0 auto;
+}
+/* Direct descendant of nav */
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: clamp(var(--gap-sm), 1.5vw, var(--gap-md));
+}
+.nav-right {
+    margin-left: auto; /* ...but retain the "push some stuff to the right side" effect */
+}
+.branding {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-right: var(--space-lg);
+}
+/* Container: visibility, positioning, stacking */
+.mobilenav {
+    position: absolute;
+    inset: 100% 0 auto 0; /* top right bottom left */
+    z-index: 201;
+    background-color: var(--accent-strong);
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-300px) scaleY(0.95); /* "out of place" & squished to start, so transition can apply to something */
+    transform-origin: top center;
+    transition: 
+        transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.mobilenav.is-open {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
+
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scaleY(1); /* drops in & stretches to full */
+}
+/* Content: layout of links themselves */
+.mobilenavlist {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* stretch column */
+    gap: var(--gap-lg);
+}
+.mobilenavlist a {
+    display: block; /* each line fills parent's width */
+    width: 100%;
+    text-align: center;
+    padding: var(--space-md) var(--space-md); /* for easier touch targets */
 }

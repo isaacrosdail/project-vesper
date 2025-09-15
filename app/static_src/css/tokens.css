@@ -17,7 +17,10 @@
 :root {
     --font-family-primary: 'Manrope', sans-serif;
     --font-weight-default: 400;
-    --font-weight-bigger: 600;
+    --font-weight-semibold: 600;
+
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
     --font-size-lg: 1.2rem;
     --font-size-xl: 1.5rem;
     --font-size-xxl: 2rem;
@@ -59,7 +62,7 @@
 
     /* Text Hierarchy */
     --light-text: hsl(0 0% 5%);                  /* Headers, high contrast text */
-    --light-text-muted: hsl(0 0% 30%);           /* Body text, labels */
+    --light-text-muted: hsl(0 0% 30%);           /* Body text, labels */ /* TODO: Make this more distinct */
     --light-text-destructive: hsl(0, 84%, 60%);  /* Error states, delete buttons */
 
     /* Borders */
@@ -68,7 +71,7 @@
     /* Accent Colors */
     --light-accent-strong: oklch(60% 0.12 250);  /* Navigation, table headers (AND primary buttons?) */
     --light-accent-subtle: oklch(70% 0.12 250);  /* CTAs, highlights, subtler visual notes throughout app */
-    --light-ui-hover: oklch(85% 0.05 250);       /* ?? */
+    --light-ui-hover: oklch(95% 0.02 250);       /* ?? */
 
     /* Selection */
     --light-bg-selection: grey;                  /* Selection background */
