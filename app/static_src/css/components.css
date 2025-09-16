@@ -2,71 +2,57 @@
 /* Reusable blocks: buttons, cards, tables */
 
 
-/* ======= BUTTONS ======= */
-/* Base button styling: shape + ergonomics goes here */
+/* =========================================
+   Base button shapes/ergonomics
+   ========================================= */
+
 .btn {
     display: inline-flex;       /* icons+text align*/
     align-items: center;        /* for icon+label vertical centering? */
     justify-content: center;    /* center text when full width */
-    cursor: pointer;
     user-select: none;
     padding: var(--space-sm) var(--space-md);
     border: var(--border-default);
     border-radius: var(--border-radius);
     gap: var(--gap-sm);
 }
-/* For icon-only (eg, '+' buttons) */
 .btn-icon {
-    width: 2rem;
-    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
-    border-radius: 50%;
+    width: var(--btn-size-md);
+    height: var(--btn-size-md);
 }
-.btn-icon svg {
-    width: 1rem;
-    height: 1rem;
-    pointer-events: none;
+.btn, .btn-icon {
+    cursor: pointer;
 }
-/* for delete_btn svg, need to move to components.css */
-.delete-btn {
-    width: 2.5rem;
-    padding: var(--space-sm);
-}
-.delete-btn svg {
-    width: 1rem;
-    height: 1rem;
-}
+/* =========================================
+   Shared states
+   ========================================= */
 
-/* Subtle "pressed" effect for active buttons */
-.btn:active {
-    transform: translateY(1px);
-    filter: brightness(0.95);
-}
 /* TODO: Focus ring: visual feedback for keyboard users */
-.btn:focus-visible {
-    outline: red;
-    outline-offset: 2px;
+.btn:focus-visible,
+.btn-icon:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
 }
 /* Catch native + ARIA-disabled buttons */
 .btn[disabled],
-.btn[aria-disabled="true"] {
+.btn-icon[disabled],
+.btn[aria-disabled="true"],
+.btn-icon[aria-disabled="true"] {
     opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
 }
-.btn-primary {
-    background-color: var(--accent-subtle);
-    border-color: var(--border-color);
+/* Pressed effect (only for text buttons) */
+.btn:active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
 }
-.btn-secondary {
-    background-color: var(--bg-light);
-    border-color: var(--border-color);
-}
-.btn-destructive {
-    color: var(--text-destructive);
-    border-color: var(--text-destructive);
-}
-/* Scope hover styles (skip on touchscreen) */
+
+/* Hover states (skip on touchscreen) */
 /* Color-mixing with --text ensures light mode buttons get lighter AND dark mode buttons get darker */
 @media (hover: hover) {
     .btn-primary:hover {
@@ -80,21 +66,55 @@
         background-color: var(--text-destructive);
     }
 }
-/* For profile SVG button in navbar, need to refine */
-/* TODO: Ought to move these into components.css, no? */
-.profile-btn {
-    cursor: pointer;
+/* =========================================
+   Intent variants
+   ========================================= */
+.btn-primary {
+    background-color: var(--accent-subtle);
 }
-.profile-btn svg {
+.btn-secondary {
+    background-color: var(--bg-light);
+}
+.btn-destructive {
+    color: var(--text-destructive);
+    border-color: var(--text-destructive);
+}
+
+/* =========================================
+   Form factor modifiers
+   ========================================= */
+/* Icon sizing (proportional: always 50% of buttons) */
+.btn-icon svg {
     pointer-events: none;
-    width: 25px;
-    height: 25px;
+    width: calc(var(--btn-size-md) * var(--icon-scale));
+    height: calc(var(--btn-size-md) * var(--icon-scale));
 }
+.btn-round {
+    border-radius: 50%;
+}
+.btn-square {
+    border-radius: var(--border-radius);
+}
+
+/* =========================================
+   Size modifiers
+   ========================================= */
+.btn-lg {
+    width: var(--btn-size-lg);
+    height: var(--btn-size-lg);
+}
+.btn-lg svg {
+    width: calc(var(--btn-size-lg) * var(--icon-scale));
+    height: calc(var(--btn-size-lg) * var(--icon-scale));
+}
+
+
 .profile-modal[open] {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
 }
+
 dialog {
     background-color: var(--bg);
     padding: var(--space-xl);
@@ -154,27 +174,30 @@ dialog::backdrop {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     background-color: var(--bg);
     border: var(--border-default);
-    position: relative; /* for card-title positioning */
+    position: relative; /* positioning context for card-title */
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
-    box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
+    /* box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15); */
 
 }
 
+/* FORMS */
+
+/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
+/* TODO: Tune & learn how to specify rules here. Might actually be worth just nuking & doing entirely my own validation? */
+form input:not([type="checkbox"]):not([type="radio"]):user-valid {
+    outline: 2px solid var(--color-success);
+}
+form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
+    outline: 2px solid var(--color-error);
+}
+
+/* TODO: Should we replace form-group's with stack-md utility? */
 .form-group {
     display: flex;
     flex-direction: column;
     margin-bottom: var(--space-md);
-}
-/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
-form input:not([type="checkbox"]):not([type="radio"]):user-valid {
-    outline: 2px solid;
-    outline-color: var(--color-success);
-}
-form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
-    outline: 2px solid;
-    outline-color: var(--color-error);
 }
 /* For consistent spacing/styling for "CTA + secondary buttons that might be anchor elements" pattern */
 .form-actions {
@@ -186,10 +209,8 @@ form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
 .form-actions > * {
     min-width: 8rem;
 }
-/* ===== FORMS, INPUTS ===== */
 
-/* Base input stylings */
-/* Base input stylings */
+/* INPUTS */
 input, select, textarea {
     background-color: var(--bg-light);
     color: var(--text);
@@ -198,22 +219,22 @@ input, select, textarea {
     padding: 0.5rem 0.75rem;
 }
 :where(input, select, textarea):focus-visible {
-    outline: 2px solid var(--accent-subtle);
-    outline-offset: 1px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
 }
-
-/* For dashboard quick-entry & JS inline cell edit inputs */
+/* TODO: Tune this a bit for table cells */
 .input-inline {
     padding-block: var(--space-xs); /* top+bottom Slightly tighter */
     border: none;
     border-bottom: var(--border-default);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
 }
 .radio-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: row; /* TODO: Research why removing this makes radio buttons appear stacked instead of row? */
     gap: var(--gap-sm);
 }
+
 
 /* ======= TABLE COMPONENTS ======= */
 /* Needed higher specificity here to override so delete-cell properly blends in to card */
@@ -264,7 +285,7 @@ input, select, textarea {
     color: var(--text-inverse); /* TODO: Needs fixing/tuning */
 }
 
-/* ===== CUSTOM COMPONENT STYLINGS ===== */
+/* ===== CONTEXT MENU ===== */
 .context-menu {
     background-color: var(--bg);
     border: var(--border-default);
@@ -344,6 +365,22 @@ input, select, textarea {
     border-color: var(--color-error);
 }
 
+/* Checklist/item completion styling */
+.item-list {
+    display: grid;
+    gap: var(--gap-sm);
+}
+.item-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.item.completed .item-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
 /* ==== FOOTER ==== */
 footer {
     text-align: center;
@@ -351,105 +388,8 @@ footer {
     font-size: 0.9em;
 }
 
-/* TABS (for tabbed modal(s) */
+/* TABBED MODALS */
 .tabs button.active {
     transform: translateY(1px);
     filter: brightness(0.95);
-}
-
-/* NAVLINKS */
-/* Base navlinks styling (desktop-first) */
-.navlinks {
-    display: flex;
-    gap: var(--gap-lg);
-}
-.nav-link {
-    text-decoration: none;
-    border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
-    padding: var(--space-sm);
-    flex-shrink: 1;
-    white-space: nowrap;
-}
-.nav-link:hover {
-    background-color: var(--ui-hover);
-    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
-}
-.nav-link.active {
-    background-color: var(--accent-subtle); /* might add 'nav-active' for separate styling */
-    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
-}
-.nav-link:focus-visible {
-    outline: 2px solid var(--accent-subtle);
-    outline-offset: 2px;
-}
-
-/* NAV COMPONENT STYLINGS */
-nav {
-    min-height: var(--min-navbar-height);
-    background-color: var(--accent-strong);
-    padding: var(--space-md);
-    position: relative; /* forces nav to participate in stacking context so z-index actually applies */
-    z-index: 250; /* to be above mobilenav */
-}
-.nav-anchor {
-    position: relative; /* positioning context for mobilenav slidedown */
-}
-/* 2nd descendant of nav */
-.navbar-content {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* content starts left now for everything */
-    max-width: 80rem;
-    margin: 0 auto;
-}
-/* Direct descendant of nav */
-.nav-left, .nav-right {
-    display: flex;
-    align-items: center;
-    gap: clamp(var(--gap-sm), 1.5vw, var(--gap-md));
-}
-.nav-right {
-    margin-left: auto; /* ...but retain the "push some stuff to the right side" effect */
-}
-.branding {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    margin-right: var(--space-lg);
-}
-/* Container: visibility, positioning, stacking */
-.mobilenav {
-    position: absolute;
-    inset: 100% 0 auto 0; /* top right bottom left */
-    z-index: 201;
-    background-color: var(--accent-strong);
-
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-300px) scaleY(0.95); /* "out of place" & squished to start, so transition can apply to something */
-    transform-origin: top center;
-    transition: 
-        transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-.mobilenav.is-open {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-lg);
-
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0) scaleY(1); /* drops in & stretches to full */
-}
-/* Content: layout of links themselves */
-.mobilenavlist {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%; /* stretch column */
-    gap: var(--gap-lg);
-}
-.mobilenavlist a {
-    display: block; /* each line fills parent's width */
-    width: 100%;
-    text-align: center;
-    padding: var(--space-md) var(--space-md); /* for easier touch targets */
 }
