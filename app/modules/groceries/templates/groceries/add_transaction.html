@@ -41,7 +41,7 @@
                 <label for="category">Category</label>
                 <select name="category" id="category" 
                     {% if not show_product_fields%}disabled{% endif %}>
-                    <option value="">-- Category --</option>
+                    <option value="" disabled selected>-- Category --</option>
                     <option value="drink">Drink</option>
                     <option value="energy_drink">Energy Drink</option>
                     <option value="produce">Produce</option>
@@ -63,7 +63,7 @@
                 <label for="unit_type">Units:</label>
                 <select name="unit_type" id="unit_type" 
                     {% if not show_product_fields%}disabled{% endif %}>
-                    <option value="">-- Units --</option>
+                    <option value="" disabled selected>-- Units --</option>
                     <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
                     <option value="oz">oz (ounces)</option>
