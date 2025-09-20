@@ -15,6 +15,32 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+## [Tues 16.09.25]
+**Log:**
+1. Stepped down all neutrals in light mode to make facilitate stepping UP for hover/active states
+
+## [Mon 15.09.25] - CSS Cleanup/Refactoring
+**Log:**
+1. CSS for buttons: Retooled to better accommodate text buttons vs icon (SVG) buttons
+	- Separated base types: btn -> text-first buttons, btn-icon -> icon-only buttons
+	- Split into composable modifiers for intent (Already had -> primary, secondary, destructive), form factor (btn-round, btn-square), & size (defaults are medium, modifier for btn-lg)
+	- Centralized icon sizing: SVGs scale proportionately
+	- Above changes include adding btn-size-* & icon-scale tokens as well
+	- Add plus_btn macro for centralization
+	- Accessibility & states:
+		- Cursor, :focus-visible outlines, etc.
+	- Now .delete-btn styling is decoupled from JS/behavior
+
+## [Sun 14.09.25]
+**Log:**
+1. Quick fixes:
+	- Apply type=number, step+min+max changes for cals per 100g to add_transaction form page
+2. Standardize module/subtype naming conventions a bit, added new CONVENTIONS.md for documenting these centrally
+3. CSS tidying
+	- Move to components.css: dialog, modal-close, tooltip-popup, 
+	- Declare text color in base.css (why didn't I start with this??), prune stupid excess declarations everywhere else
+	- Tidied up base.css a bit - de-duped, reorganized
+
 ## [Sat 13.09.25]
 **Log:**
 1. Navbar adjustments

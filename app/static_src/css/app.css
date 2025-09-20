@@ -29,7 +29,9 @@
 :root {
     --min-navbar-height: 4rem;
 }
-
+::selection {
+    background-color: var(--bg-selection);
+}
 
 legend {
     font-size: var(--font-size-lg);
@@ -43,24 +45,22 @@ h3 {
 
 /* ==== MEDIA QUERIES ==== */
 @media (width <= 768px) {
-    .navlinks {
+    .nav-desktop {
+        display: none;
+    }
+    /* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
+       Let's us easily "condense" our tables to provide a better mobile experience */
+    .desktop-only {
         display: none;
     }
 }
 @media (width > 768px) {
     .hamburger-btn { display: none; }
-}
-/* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
- * Let's us easily "condense" our tables to provide a better mobile experience
-*/
-@media (width <= 768px) {
-    .desktop-only {
-        display: none;
-    }
+    .nav-mobile-container { display: none; }
 }
 /* TODO: Tune this later as we add some basic animations/transitions */
 @media (prefers-reduced-motion: reduce) {
-    .navlinks { transition: none; }
+    .nav-desktop { transition: none; }
     .icon-wiggle { animation: none; transition: none; }
 }
 
@@ -89,10 +89,10 @@ h3 {
     transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
     width: 20px;
     height: 20px;
-    border: 1px solid var(--color-error);
-    border-radius: 50%;
+    border: 1px solid var(--clr-error);
+    /* border-radius: 50%; */
     opacity: 0;
-    transition: var(--fade-in);
+    transition: var(--transition-fade);
 }
 
 /* Show hidden controls on hover */
@@ -107,7 +107,7 @@ h3 {
 }
 .qty-controls button {
     opacity: 0;
-    transition: var(--fade-in);
+    transition: var(--transition-fade);
     color: var(--accent-subtle);
     width: 20px;
     height: 20px;

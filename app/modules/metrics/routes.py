@@ -34,17 +34,18 @@ def dashboard(session):
 def metrics(session):
         
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
-    # TODO: Validators.py
+
     data = request.form.to_dict()
-    metric_type, value = next(iter(data.items()))
-
     start_utc, end_utc = today_range(current_user.timezone)
-    metric, was_created = repo.create_or_update_daily_metric(metric_type, value, start_utc, end_utc)
+    # Iterate over key-value pairs, calling create/update for each whose value is a non-empty string (which is falsy in Python)
+    processed_metrics = []
+    for metric_type, value in data.items():
+        if value:
+            metric, was_created = repo.create_or_update_daily_metric(metric_type, value, start_utc, end_utc)
+            processed_metrics.append({"metric_type": metric_type, "created": was_created })
 
-    status = 201 if was_created else 200
     return jsonify({
         "success": True, 
-        "message": "Added metric",
-        "created": bool(was_created),
-        "metric_type": metric_type
-    }), status
+        "message": f"Added {len(processed_metrics)} metrics",
+        "metrics": processed_metrics
+    }), 201

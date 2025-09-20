@@ -46,10 +46,10 @@
     cursor: not-allowed;
     pointer-events: none;
 }
-/* Pressed effect (only for text buttons) */
+/* Pressed effect (only for text buttons & tabbed modal tabs) */
 .btn:active {
     transform: translateY(1px);
-    filter: brightness(0.95);
+    filter: brightness(0.9);
 }
 
 /* Hover states (skip on touchscreen) */
@@ -60,7 +60,7 @@
     }
     .btn-secondary:hover {
         /* background-color: color-mix(in srgb, var(--bg-light) 80%, var(--text)); */
-        background-color: var(--bg-light);
+        background-color: var(--bg-hover);
     }
     .btn-destructive:hover {
         color: var(--bg-light);
@@ -188,10 +188,10 @@ dialog::backdrop {
 /* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
 /* TODO: Tune & learn how to specify rules here. Might actually be worth just nuking & doing entirely my own validation? */
 form input:not([type="checkbox"]):not([type="radio"]):user-valid {
-    outline: 2px solid var(--color-success);
+    outline: 2px solid var(--clr-success);
 }
 form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
-    outline: 2px solid var(--color-error);
+    outline: 2px solid var(--clr-error);
 }
 
 /* TODO: Should we replace form-group's with stack-md utility? */
@@ -282,7 +282,7 @@ input, select, textarea {
     background-color: var(--bg-light);
 }
 .table-row:hover {
-    background-color: var(--accent-subtle);
+    background-color: var(--accent-hover);
     color: var(--text-inverse); /* TODO: Needs fixing/tuning */
 }
 
@@ -356,14 +356,14 @@ input, select, textarea {
     padding: var(--gap-xs) var(--gap-sm);
 }
 .toast-success {
-    background-color: color-mix(in srgb, var(--color-success) 10%, white); /* Derive from bg-success */
-    color: var(--color-success);
-    border-color: var(--color-success);
+    background-color: color-mix(in srgb, var(--clr-success) 10%, white); /* Derive from clr-success */
+    color: var(--clr-success);
+    border-color: var(--clr-success);
 }
 .toast-error {
-    background-color: color-mix(in srgb, var(--color-error) 10%, white);
-    color: var(--color-error);
-    border-color: var(--color-error);
+    background-color: color-mix(in srgb, var(--clr-error) 10%, white);
+    color: var(--clr-error);
+    border-color: var(--clr-error);
 }
 
 /* Checklist/item completion styling */
@@ -386,11 +386,53 @@ input, select, textarea {
 footer {
     text-align: center;
     padding: 10px;
-    font-size: 0.9em;
+    font-size: var(--font-size-sm);
 }
 
 /* TABBED MODALS */
-.tabs button.active {
+.tab-group {
+    display: flex;
+    align-items: stretch;
+    padding: var(--space-xs);
+    gap: var(--gap-xs);
+    background-color: var(--bg-light);
+}
+.tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--space-sm);
+}
+.tab svg {
+    width: 1em;
+    height: 1em;
+}
+.tab-group, .tab {
+    border-radius: var(--border-radius);
+}
+.tab:hover {
+    background-color: var(--bg-hover);
+    filter: brightness(0.9);
+}
+.tab:active {
+    background-color: var(--bg-hover);
     transform: translateY(1px);
-    filter: brightness(0.95);
+    filter: brightness(0.9);
+}
+.tab.active {
+    background-color: var(--accent-subtle);
+    transform: translateY(1px);
+    filter: brightness(1.2);
+}
+
+.test {
+    border: 1px solid red;
+    position: relative;
+}
+.first-svg {
+    position: absolute;
+}
+.second-svg {
+    position: absolute;
 }
