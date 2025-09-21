@@ -92,7 +92,7 @@ h3 {
     border: 1px solid var(--clr-error);
     /* border-radius: 50%; */
     opacity: 0;
-    transition: var(--transition-fade);
+    transition: opacity var(--transition-fade);
 }
 
 /* Show hidden controls on hover */
@@ -107,7 +107,7 @@ h3 {
 }
 .qty-controls button {
     opacity: 0;
-    transition: var(--transition-fade);
+    transition: opacity var(--transition-fade);
     color: var(--accent-subtle);
     width: 20px;
     height: 20px;

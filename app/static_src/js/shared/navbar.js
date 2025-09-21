@@ -3,7 +3,8 @@
 function toggleMobileNav(mobileNav, hamburgerBtn) {
     mobileNav?.classList.toggle('is-open');
     let isOpen = mobileNav?.classList.contains('is-open'); // set proper bool for is-open state
-    hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value 
+    hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value
+    hamburgerBtn.classList.toggle('is-open', isOpen);
     if (isOpen) {
         mobileNav.removeAttribute('inert');
         mobileNav.querySelector('a')?.focus(); // focus on first anchor el in nav

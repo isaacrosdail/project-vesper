@@ -80,7 +80,6 @@ async function markTaskComplete(checkbox, taskId) {
             completed_at: null
         }
     }
-    console.log(data)
     apiRequest('PATCH', url, () => {
         const listItem = checkbox.closest('.item');
         listItem?.classList.toggle('completed');
