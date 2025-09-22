@@ -1,43 +1,27 @@
-from app.shared.constants import (MAX_NAME_LENGTH,
-                                  MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH)
 
-# Password: Needs to: exist, have min length, and ideally be complex (TODO: Enforce complexity later)
-# Name: Needs to: exist, stay under max length
 
-def validate_username(username: str) -> list[str]:
-    """
-    Validates username requirements: Uniqueness and length (under MAX_NAME_LENGTH)
-
-    Args:
-        username: Username to validate
-
-    Returns:
-        List of error message strings (empty if valid)
-    """
+def validate_user(data: dict) -> list[str]:
+    
     errors = []
 
-    # TODO: MINOR: Add pattern matching (alphanumeric)
-    if not 3 <= len(username) <= 30: # pythonic range test, drill these
-        errors.append("invalid username len")
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    name = data.get("name", "").strip()
 
-    return errors
+    # Username: 3-50 chars
+    if not username:
+        errors.append("Username is required")
+    if not 3 <= len(username) <= 50:
+        errors.append("Username must be 3-50 characters")
 
-def validate_password(password: str) -> list[str]:
-    errors = []
+    # Password: 8-50 chars
+    if not password:
+        errors.append("Password is required")
+    if not 8 <= len(password) <= 50:
+        errors.append("Password must be 8-50 characters")
 
-    # Check length
-    if not MIN_PASSWORD_LENGTH <= len(password) <= MAX_PASSWORD_LENGTH:
-        errors.append("password too short")
-
-    return errors
-
-def validate_name(name: str) -> list[str]:
-    errors = []
-
-    # Validate existent & not whitespace only
-    if not name:
-        errors.append("name invalid") 
-    if (len(name) > MAX_NAME_LENGTH):
-        errors.append("name invalid")
-
+    # Name (optional)
+    if name and len(name) > 50:
+        errors.append("Name must be under 50 characters")
+    
     return errors

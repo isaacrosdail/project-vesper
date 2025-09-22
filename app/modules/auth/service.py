@@ -6,11 +6,10 @@ from sqlalchemy.exc import IntegrityError
 
 from app.modules.auth.models import User, UserLang, UserRole
 from app.modules.auth.repository import UsersRepository
-from app.modules.auth.validators import (validate_name, validate_password,
-                                         validate_username)
+from app.modules.auth.validators import validate_user
 from app.shared.database.seed.seed_db import seed_demo_data, seed_rich_data
 
-
+# TODO: Prune these
 # Custom decorator for enforcing owner role permissions
 def requires_owner(f):
     """
@@ -45,6 +44,7 @@ def check_item_ownership(item, user_id):
         abort(403)
 
 class AuthService:
+    # TODO: Extract to notes
     # Dependency injection: session is injected from outside
     # Composition: AuthService "has a" UsersRepository (not "is a")
     def __init__(self, session): # <= inject the session dependency
@@ -58,11 +58,12 @@ class AuthService:
     def register_user(self, *, username: str, password: str, name: str,
                       role: UserRole = UserRole.USER, lang: UserLang = UserLang.EN):
         
-        errors = (
-            validate_username(username, self.session, lang)
-            + validate_password(password, lang)
-            + validate_name(name, lang)
-        )
+        user_data = {
+            "username": username,
+            "password": password,
+            "name": name
+        }
+        errors = validate_user(user_data)
         if errors:
             return None, errors
 

@@ -10,6 +10,7 @@
     /* By default, browsers sometimes use the whole SVG's viewBox as the transform reference */
     /* fill-box forces it to use the _bounding box of the actual shape(s)_ inside .line1, etc */
     /* This way, each group behaves more like a div wrapping content so we can rotate _that group's box_, thus making transform-origin below use left center _of THIS current line_ not the viewbox as a whole */
+    /* With fill-box, the origin resolves to the line's own bounding box, so rotations are local and predictable */
     transform-box: fill-box;
     transition: transform 0.2s ease-out;
 }
@@ -37,12 +38,22 @@
     padding: var(--space-sm);
     flex-shrink: 1;
     white-space: nowrap;
+    position: relative;
 }
-.nav-link:hover {
-    background-color: var(--accent-hover);
+.nav-link::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 3px;
+    left: 0; /* "pin left edge of rectangle to pos 0 (far left of parent)" */
+    /* note that here if we wanted to make the underline start at right and expand to left, we could replace left 0 with right 0 instead! */
+    bottom: 0;
+    background: var(--accent-subtle);
+    transition: width 0.1s ease;
 }
-.nav-link.active {
-    background-color: var(--accent-hover); /* might add 'nav-active' for separate styling */
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
 }
 .nav-link:focus-visible {
     outline: var(--focus-ring);
