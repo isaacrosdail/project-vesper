@@ -24,7 +24,7 @@ It's why we can do User.query(..) despite never having defined a query attribute
 class User(Base, UserMixin):
     username = Column(String(50), nullable=False, unique=True)
     name = Column(String(50), nullable=True)
-    password_hash = Column(String(256), nullable=False) # Large enough? bcrypt = 60chars, Werkzeug's default uses pbkdf2:sha256 = around 95 chars
+    password_hash = Column(String(256), nullable=False) # Large enough? bcrypt = 60chars, Werkzeug's default uses pbkdf2:sha256 = ~95 chars
     role = Column(String(20), nullable=False, default=UserRole.USER.value)
     timezone = Column(String(50), nullable=False, server_default="America/Chicago")
     lang = Column(String(20), nullable=False, server_default="en")

@@ -24,7 +24,7 @@ class Product(Base):
 
 	name = Column(String(100), nullable=False)
 	category = Column(String(100), nullable=True) # eg, dairy, produce
-	barcode = Column(String(64), unique=True, nullable=False)
+	barcode = Column(String(64), unique=True, nullable=False) # TODO: Change to 16 to match validation/reqs
 
 	net_weight = Column(Numeric(10, 3), nullable=False) # "asdecimal" false?
 	unit_type = Column(SAEnum(Unit, name="unit_enum"), nullable=False, default=Unit.g)
