@@ -15,10 +15,63 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
-
-## [Fri 05.09.25] - Tying Up Loose Ends, Day 3
+## [Sat 13.09.25]
 **Log:**
-1. 
+1. Navbar adjustments
+	- Fix: Gated profile settings behind login
+	- Adjusted navbar -> hamburger breakpoint to 768px
+2. Dashboard Visuals
+	- Bolded Today’s Frog & LeetCode text for emphasis (WIP)
+	- Lined up tasks list styling to that of habits checklist (Need to apply AJAX completion, too)
+	- Moved "Add Habit" button into title row, intersecting border (did the same with 'Add Task' for 'My Day' section)
+	- Unified card header pattern -> `[Title] (+)` now consistent/applied across all cards and dashboards
+		- Added new `.btn-icon` styling to pair with `plus_svg()` for denser UI
+3. Macro Cleanup (WIP)
+	- Renamed _components.html -> _ui.html
+	- Moved all form modal markup into new _forms.html (imports _ui.html)
+
+## [Tues 09.09.25] - Tying Up Loose Ends
+**Log:**
+1. Groceries Module
+	- Scrap "next_item" flow for add_X pages, not worth the headache right now
+	- Add basic placeholder text for "no items in shopping list" on card
+
+## [Mon 08.09.25]
+**Log:**
+1. Shopping List feature:
+	- Add qty to model + add basic "increment if exists" logic to repo function
+	- Start on inline x/-/+ controls for shopping list items list
+		- Use SVGs for plus/minus (added to macros)
+		- Drafting styling for item-controls (outer span for above elements)
+		- Hover states to show/hide controls
+		- Add increment/decrement/delete logic
+			- Button disabled states during API calls to prevent double-clicks
+2. Added api.js to clean up that disgusting fetch boilerplate all over & centralize response formats
+	- Switched almost all fetch() requests to using new apiRequest helper
+		- Eliminated entire submitModalForm function :D
+	- Made apiRequest able to handle both FormData & JSON bodies
+	- Left userStore & weather service with manual fetch due to different state mgmt needs
+
+## [Sun 07.09.25]
+**Log:**
+1. Shopping List feature: Started small but extensible:
+	1. Added ShoppingList model
+	2. Added context menu option "Add to ShoppingList" for Transaction table by conjoining base options (Delete, Close, etc) for options to transaction-specific options
+	3. Dead simple list UI in its own card for now simply displaying our current list
+2. Navbar: Reorganizing & trimming
+	- Scrap "Home" navlink entirely (clicking branding already now takes us home)
+	Settings modal:
+	- Move "Log out" into the settings cog options (this will inevitably become a sidebar in the future, but in the interim, this'll work)
+	- Replaced settings cog with profile SVG
+	- Use proper form for both Log out & Reset Dev buttons
+3. Misc:
+	- Tweaked modal-manager submit listener to return early if any form has a "data-noajax" attribute, for modals with forms that shouldn't be treated the same (ie, our log out button)
+	- Add guards to forms.js
+	- Removed debug borders from app.css/components.css
+
+## [Fri 05.09.25]
+**Log:**
+1. Divied up PROJECT_LOG into archival files, separated by year/month
 
 ## [Thurs 04.09.25] - Tying Up Loose Ends, Day 2
 **Log:**
