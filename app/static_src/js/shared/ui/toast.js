@@ -33,8 +33,21 @@ class Toast {
         return this;
     }
 }
-// Build DOM node for toast element with specified traits/properties
-// Receives message, then decides _how_ to display it only
+
+/**
+ * 
+ * @param {string} message - The text to display inside the toast.
+ * @param {string} type - Visual style variant of toast.
+ * @param {number} duration - Time (in ms) before auto-hide.
+ * @returns {Toast} - The Toast instance
+ * 
+ * @example
+ * makeToast("Saved successfully", "success", 2000);
+ * 
+ * // Or handle manually:
+ * const toast = makeToast("Working..", "info", 0);
+ * setTimeout(() => toast.hide(), 5000);
+ */
 export function makeToast(message, type = 'info', duration = 1000) {
     const toast = new Toast(message, type).show();
 

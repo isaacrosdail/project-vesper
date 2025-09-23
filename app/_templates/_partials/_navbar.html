@@ -96,10 +96,10 @@
     {% if has_dev_tools %}
     <h3>Dev Tools</h3>
     <div class="_stack-md">
-        <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
         {% if config.APP_ENV == 'dev' %}
             <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
         {% endif %}
+        <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
         <form action="{{ url_for('auth.reset_dev') }}" method="POST" data-noajax>
             <button class="btn btn-destructive" type="submit">Reset Dev</button>
         </form>
