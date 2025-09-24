@@ -144,7 +144,7 @@ dialog::backdrop {
 .modal-close:hover {
     color: var(--text-destructive);
 }
-
+/* TODO: Add some delay on hover & refine styles setup */
 .tooltip-popup { 
     position: relative; /* also makes it act as anchor for ::after ? */
     border: var(--border-default);
