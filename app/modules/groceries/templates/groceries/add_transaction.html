@@ -18,7 +18,7 @@
                     placeholder="Scan or enter barcode"
                     required>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="name">Product Name</label>
                 <input type="text" id="name" name="name"
                     {% if not show_product_fields%}disabled{% endif %}>
@@ -54,12 +54,12 @@
                     <option value="condiments_and_sauces">Condiment/Sauce</option>
                 </select>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="net_weight">Net Weight:</label>
                 <input type="number" step="0.01" min="0" id="net_weight" name="net_weight"
                     {% if not show_product_fields%}disabled{% endif %}>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="unit_type">Units:</label>
                 <select name="unit_type" id="unit_type" 
                     {% if not show_product_fields%}disabled{% endif %}>
@@ -73,7 +73,7 @@
                     <option value="fl_oz">fl oz (fluid ounces)</option>
                 </select>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="calories_per_100g">Cals per 100g:</label>
                 <input type="number" step="0.1" min="0" max="900" id="calories_per_100g" name="calories_per_100g"
                     {% if not show_product_fields%}disabled{% endif %}>
