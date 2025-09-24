@@ -107,8 +107,6 @@ def transactions():
             action = request.form.get("action")
             if action == "submit":
                 return redirect(url_for("groceries.dashboard"))
-            elif action == "next_item":
-                return redirect(url_for("groceries.add_transaction"))
                 
         return redirect(url_for("groceries.dashboard"))
     

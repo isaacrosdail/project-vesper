@@ -12,16 +12,13 @@
             <legend>Add new transaction</legend>
             <div class="form-group">
                 <label for="barcode">Barcode:</label>
-                {# TODO: Combine length constraints & pattern matching. REGEX IS WRONG HERE #}
                 <input type="text" id="barcode" name="barcode"
                     value="{{ transaction_data.barcode if transaction_data else ''}}"
                     minlength="8" maxlength="14"
-                    pattern="[0-9]{8-14}"
-                    title="Barcode must be 8-14 digits only"
                     placeholder="Scan or enter barcode"
-                     required>
+                    required>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="name">Product Name</label>
                 <input type="text" id="name" name="name"
                     {% if not show_product_fields%}disabled{% endif %}>
@@ -30,22 +27,21 @@
                 <label for="price_at_scan">Price:</label>
                 <input type="number" step="0.01" min="0" id="price_at_scan" name="price_at_scan"
                     value="{{ transaction_data.price_at_scan if transaction_data else '' }}"
-                    title="Price you actually paid (may differ from listed price)"
-                     required>
+                    required>
             </div>
             <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="text" id="quantity" name="quantity"
+                <input type="number" step="1" min="1" id="quantity" name="quantity"
                     value="{{ transaction_data.quantity if transaction_data else '' }}"
-                     required>
+                    required>
             </div>
             {# net_weight, category, unit_type, & cals per 100g are all to be conditionally shown depending on whether we need to add_product from here #}
             {# Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing #}
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="category">Category</label>
                 <select name="category" id="category" 
                     {% if not show_product_fields%}disabled{% endif %}>
-                    <option value="">-- Category --</option>
+                    <option value="" disabled selected>-- Category --</option>
                     <option value="drink">Drink</option>
                     <option value="energy_drink">Energy Drink</option>
                     <option value="produce">Produce</option>
@@ -58,16 +54,16 @@
                     <option value="condiments_and_sauces">Condiment/Sauce</option>
                 </select>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="net_weight">Net Weight:</label>
-                <input type="text" id="net_weight" name="net_weight"
+                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight"
                     {% if not show_product_fields%}disabled{% endif %}>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="unit_type">Units:</label>
                 <select name="unit_type" id="unit_type" 
                     {% if not show_product_fields%}disabled{% endif %}>
-                    <option value="">-- Units --</option>
+                    <option value="" disabled selected>-- Units --</option>
                     <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
                     <option value="oz">oz (ounces)</option>
@@ -77,14 +73,13 @@
                     <option value="fl_oz">fl oz (fluid ounces)</option>
                 </select>
             </div>
-            <div class="form-group {% if not show_product_fields %}hidden{% endif %}">
+            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
                 <label for="calories_per_100g">Cals per 100g:</label>
-                <input type="text" id="calories_per_100g" name="calories_per_100g"
+                <input type="number" step="0.1" min="0" max="900" id="calories_per_100g" name="calories_per_100g"
                     {% if not show_product_fields%}disabled{% endif %}>
             </div>
             <div class="form-actions">
                 <button type="submit" name="action" value="submit" class="btn btn-primary">Submit</button>
-                {# TODO: Make a toggle instead: <button class="btn btn-secondary" type="submit" name="action" value="next_item">Add Next Item</button> #}
                 <a href="{{ url_for('groceries.dashboard') }}" class="btn btn-secondary">Cancel / Return</a>
             </div>
         </fieldset>
