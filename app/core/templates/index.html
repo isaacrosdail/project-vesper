@@ -43,13 +43,19 @@
     </div>
 
     <div>
-        <span>Today's Frog: </span>
-        <span id="intention-text">
+        <span class="highlight-label">Today's Frog: </span>
+        <span>
             {{ today_frog.name if today_frog else "" }}
         </span>
-        <ul class="task-list">
+        <ul class="item-list">
         {% for task in tasks %}
-            <li>{{ task.name }}</li>
+            <li class="item {% if task.is_done %}completed{% endif %}">
+                <label class="item-row">
+                    <input  type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}"
+                        {% if task.is_done %}checked{% endif %}>
+                    <span class="item-title">{{ task.name }}</span>
+                </label>
+            </li>
         {% endfor %}
         </ul>
     </div>
@@ -78,15 +84,11 @@
 
         <ul class="item-list">
         {% for habit in habits %}
-            <li class="habit-item {% if habit_info[habit.id].completed_today %}completed{% endif %}">
-                <label class="habit-row">
-                    <input 
-                        type="checkbox"
-                        class="habit-checkbox"
-                        data-habit-id="{{ habit.id }}"
+            <li class="item {% if habit_info[habit.id].completed_today %}completed{% endif %}">
+                <label class="item-row">
+                    <input  type="checkbox" class="habit-checkbox" data-habit-id="{{ habit.id }}"
                         {% if habit_info[habit.id].completed_today %}checked{% endif %}>
-
-                    <span class="habit-title">{{ habit.name }}</span>
+                    <span class="item-title">{{ habit.name }}</span>
                     <span class="habit-streak" data-streak-count="{{ habit_info[habit.id].streak_count }}">
                         {% if habit_info[habit.id].streak_count > 0 %}🔥{{ habit_info[habit.id].streak_count }}{% endif %}
                     </span>
