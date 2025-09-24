@@ -9,7 +9,7 @@ global.document = {
 function getCookie() {
     // Parse document.cookie, which is a plain string
     const cookie = document.cookie;
-    const themeSelect = document.querySelector('#theme');
+    const themeSelect = document.querySelector('.theme');
 
     if (cookie.includes('theme=light')) {
         // set our form to light

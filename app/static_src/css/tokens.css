@@ -40,8 +40,14 @@
     --space-lg: 1.5rem;
     --space-xl: 2rem;
 
-    --gutters-md: 2rem;
+    --transition-fade: 0.2s ease;
 
+<<<<<<< HEAD
+=======
+    --hamburger-angle: 38deg;
+    --hamburger-scale: 1.27;
+
+>>>>>>> 12412df (navbar: add navigation.css, refactor structure & add animations/effects)
     --color-success: #166534;
     --color-error: #dc2626;
 

@@ -254,3 +254,9 @@ footer {
     padding: 10px;
     font-size: 0.9em;
 }
+
+/* TABS (for tabbed modal(s) */
+.tabs button.active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
+}
