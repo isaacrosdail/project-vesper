@@ -29,7 +29,9 @@
 :root {
     --min-navbar-height: 4rem;
 }
-
+::selection {
+    background-color: var(--bg-selection);
+}
 
 legend {
     font-size: var(--font-size-lg);
