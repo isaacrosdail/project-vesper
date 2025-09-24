@@ -18,7 +18,7 @@
             {{ ('&#9745;' if item.is_done else '&#9744;') | safe }}
         </td>
         <td class="{{ headers[2].priority }}">{{ item.priority.value }}</td>
-        <td class="{{ headers[3].priority }} text-right">{{ item.due_label }}</td>
+        <td class="{{ headers[3].priority }} _text-right">{{ item.due_label }}</td>
     {% endcall %}
 </div>
 

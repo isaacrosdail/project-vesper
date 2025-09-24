@@ -16,7 +16,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 {% macro responsive_table(caption, headers, items, module_name, subtype) %}
 <table id="{{ subtype }}-table" class="table-standard">
-  <caption class="sr-only">{{ caption }}</caption>
+  <caption class="_sr-only">{{ caption }}</caption>
   <thead class="table-header">
     <tr>
       {% for col in headers %}
@@ -45,15 +45,6 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 </table>
 {% endmacro %}
 
-{# TODO: Macro for td template for makeTableRow() #}
-<template id="{{ subtype }}-template">
-  <tr class="table-row" data-module="{{ module_name }}" data-subtype="{{ subtype }}" data-item-id="">
-    {% for col in headers %}
-      <td class="{{ col.priority }}" data-field=""></td>
-    {% endfor %}
-    <td class="table-cell delete-cell"></td>
-  </tr>
-</template>
 
 {# === MODALS === #}
 

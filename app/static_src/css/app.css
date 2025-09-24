@@ -31,20 +31,11 @@
     --my-bool: clamp(0, 100vw - 640px, 1); /* effectively a media query for above/below 640px width? Need to find use cases */
 }
 
-/* for delete_btn svg, need to move to components.css */
-.delete-btn {
-    width: 2.5rem;
-    padding: var(--space-sm);
-}
-.delete-btn svg {
-    width: 1rem;
-    height: 1rem;
-}
+
 /* For app-wide legend text, move to components.css */
 legend {
     font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bigger);
-    color: var(--text);
+    font-weight: var(--font-weight-semibold);
     margin-bottom: var(--space-md);
     padding: 0 0 var(--space-lg);
 }
@@ -103,9 +94,6 @@ h3 {
 /* Position our "x" button "outside"/"to the side of" the inline content */
 .shoppinglist-item {
     position: relative; /* positioning context for inline-delete */
-    display: flex;
-    align-items: center;
-    gap: var(--gap-md);
 }
 .shoppinglist-item button {
     cursor: pointer;
@@ -152,6 +140,60 @@ h3 {
     border-radius: 50%;
 }
 
+/* Dashboard checkbox completion effect */
+.item-list {
+    display: grid;
+    gap: var(--gap-sm);
+}
+.item-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.item.completed .item-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+/* ==== NAVIGATION ==== */
+.hamburger-btn {
+    min-width: 40px;
+    min-height: 40px;
+}
+
+
+
+
+/* ==== MEDIA QUERIES ==== */
+@media (width <= 768px) {
+    .navlinks {
+        display: none;
+    }
+}
+@media (width > 768px) {
+    .hamburger-btn { display: none; }
+}
+
+/* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
+ * Let's us easily "condense" our tables to provide a better mobile experience
+*/
+@media (width <= 768px) {
+    .desktop-only {
+        display: none;
+    }
+}
+
+/* TODO: Tune this later as we add some basic animations/transitions */
+@media (prefers-reduced-motion: reduce) {
+    .navlinks { transition: none; }
+    .icon-wiggle { animation: none; transition: none; }
+}
+
+/* ===================================
+    APP LAYOUT / PAGE SHELL
+   ===================================*/
+
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
 /* Flex container for header/content/footer */
 .wrapper {
@@ -172,7 +214,6 @@ h3 {
     flex-direction: column;
     gap: var(--gap-lg);
 }
-
 /* For pages using our content_mod Jinja block to provide narrower styling for content */
 .content--narrow {
     max-width: clamp(35rem, 90vw, 50rem);
@@ -218,11 +259,8 @@ h3 {
 
 /* Container for landing page content */
 .landing-content {
-    display: flex;
     overflow: hidden;
-    flex-direction: column;
-    place-items: center; /* shorthand for justify-items & */
-    gap: var(--gap-lg);
+    align-items: center;
     padding: var(--space-xl) var(--space-md);
 }
 /* Cap the paragraph for legibility */
@@ -230,53 +268,18 @@ h3 {
     max-width: 60ch;
     color: var(--text-muted);
 }
-
 .landing-content h1 {
-    font-size: calc(1.2 * var(--font-size-xl));
-    font-weight: 600;
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-semibold);
     margin-bottom: var(--space-sm);
 }
 .landing-content a {
     text-align: center;
 }
 
-
-/* ====== STYLINGS FOR METRICS DASHBOARD/CARDS ====== */
-.charts-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* create as many cols as will fit, where each col is >= 320px wide, but can grow to (EQUALLY) fill space available */
-    gap: var(--gap-md);
-}
-.metric-graph {
-    width: 100%;
-    aspect-ratio: 16/9; /* fixes one graph being slightly taller than other - check out other options */
-}
-.tabs button.active {
-    transform: translateY(1px);
-    filter: brightness(0.95);
-}
-
-/* ====== CARD STYLINGS ====== */
-#greeting-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-#sky-canvas {
-    width: 100%;
-    height: clamp(150px, 15vh, 300px);
-}
-#daily-habits-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-#my-day-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-h3 {
-    font-size: var(--font-size-lg);
-}
-
+/* ===================================
+    PAGE-SPECIFIC: Error Page(s)
+   ===================================*/
 /* 404 + 500 error pages */
 .error-page {
     display: flex;
@@ -288,239 +291,18 @@ h3 {
 .error-page > h1 {
     font-size: var(--font-size-xxl);
 }
-/* Let's take a stab at animations */
-@keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-3deg); }
-    75% { transform: rotate(3deg); }
-}
+/* TODO: Rename*/
 .icon-wiggle {
     width: clamp(12rem, 30vw, 20rem);
     height: auto;
     display: block;
-    animation: wiggle 0.4s ease-in-out 1;
 }
 
-/* ===== FORMS, INPUTS ===== */
-/* For dashboard quick-entry & JS inline cell edit inputs */
-.input-inline {
-    padding-block: var(--space-xs); /* top+bottom Slightly tighter */
-    border: none;
-    border-bottom: var(--border-default);
-    font-size: 0.875rem;
-}
+/* ===================================
+    PAGE-SPECIFIC: Style-reference Page
+   ===================================*/
 
-/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
-form input:not([type="checkbox"]):not([type="radio"]):user-valid {
-    outline: 2px solid;
-    outline-color: var(--color-success);
-}
-form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
-    outline: 2px solid;
-    outline-color: var(--color-error);
-}
-.radio-row {
-    display: flex;
-    flex-direction: row;
-    gap: var(--gap-sm);
-}
-
-dialog {
-    background-color: var(--bg);
-    padding: var(--space-xl);
-    position: fixed;
-    top: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: none;
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-}
-/* Modal X button styling */
-.modal-close {
-    position: absolute;
-    inset: 0.5rem 1.5rem auto auto; /* top right bottom left */
-    padding: var(--space-xs) var(--space-sm); /* override btn: smaller box */
-    color: var(--text-muted);
-    background: transparent;
-    border: none;
-    font-size: var(--font-size-xl);
-}
-.modal-close:hover {
-    color: var(--text-destructive);
-}
-.tooltip-popup { 
-    position: relative; /* also makes it act as anchor for ::after ? */
-    border: var(--border-default);
-    border-radius: var(--border-radius);
-    background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
-    color: var(--bg); /* then use current bg as text for color parity */
-    overflow-wrap: break-word;
-    padding: 4px 4px;
-    margin-top: 8px;
-    max-width: 28ch;
-}
-.tooltip-popup:not(#no-after)::after {
-    content: "";
-    position: absolute;
-    left: var(--carrot-pos, 50%); /* --carrot-pos calculated via JS */
-    transform: translate(-50%, -40%);
-    border: 0.4rem solid transparent; /* forms our triangle "arrow" */
-    border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
-    opacity: 1;
-    top: -0.4rem;
-}
-
-
-/* Dashboard checkbox completion effect */
-.item-list {
-    display: grid;
-    gap: var(--gap-sm);
-}
-.item-row {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-sm);
-}
-.item-title {
-    color: var(--text);
-}
-
-.item.completed .item-title {
-    text-decoration: line-through;
-    color: var(--text-muted);
-}
-
-/* ==== NAVIGATION ==== */
-#hamburger-btn {
-    color: var(--text);
-    min-width: 40px;
-    min-height: 40px;
-}
-/* Base navlinks styling (desktop-first) */
-.navlinks {
-    display: flex;
-    gap: var(--gap-lg);
-}
-nav {
-    min-height: var(--min-navbar-height);
-    background-color: var(--accent-strong);
-    padding: var(--space-md);
-    position: relative; /* forces nav to participate in stacking context so z-index actually applies */
-    z-index: 250; /* to be above mobilenav */
-}
-.nav-anchor {
-    position: relative;
-}
-/* 2nd descendant of nav */
-.navbar-content {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* content starts left now for everything */
-    max-width: 80rem;
-    margin: 0 auto;
-}
-/* Direct descendant of nav */
-.nav-left, .nav-right {
-    display: flex;
-    align-items: center;
-    gap: clamp(0.5rem, 1.5vw, var(--gap-md));
-}
-.nav-right {
-    margin-left: auto; /* ...but retain the "push some stuff to the right side" effect */
-}
-.nav-link {
-    text-decoration: none;
-    border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
-    color: var(--text);
-    padding: var(--space-sm);
-    flex-shrink: 1;
-    white-space: nowrap;
-}
-.nav-link:hover {
-    background-color: var(--ui-hover);
-    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
-}
-.nav-link.active {
-    background-color: var(--ui-hover); /* might add 'nav-active' for separate styling */
-    color: var(--text);
-    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
-}
-.branding {
-    color: var(--text);
-    font-size: var(--font-size-xl);
-    font-weight: 600;
-    margin-right: var(--space-lg);
-}
-/* Container: visibility, positioning, stacking */
-.mobilenav {
-    position: absolute;
-    inset: 100% 0 auto 0; /* top right bottom left */
-    z-index: 201;
-    background-color: var(--accent-strong);
-
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-300px) scaleY(0.95); /* "out of place" & squished to start, so transition can apply to something */
-    transform-origin: top center;
-    transition: 
-        transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-.mobilenav.is-open {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-lg);
-
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0) scaleY(1); /* drops in & stretches to full */
-}
-/* Content: layout of links themselves */
-.mobilenavlist {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%; /* stretch column */
-    gap: var(--gap-lg);
-}
-.mobilenavlist a {
-    display: block; /* each line fills parent's width */
-    width: 100%;
-    text-align: center; /* center text inside */
-    padding: var(--space-md) var(--space-md); /* for easier touch targets */
-}
-/* ==== MEDIA QUERIES ==== */
-@media (width <= 768px) {
-    .navlinks {
-        display: none;
-    }
-}
-@media (width > 768px) {
-    #hamburger-btn { display: none; }
-}
-
-/* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
- * Let's us easily "condense" our tables to provide a better mobile experience
-*/
-@media (width <= 768px) {
-    .desktop-only {
-        display: none;
-    }
-}
-
-/* TODO: Tune this later as we add some basic animations/transitions */
-@media (prefers-reduced-motion: reduce) {
-    .navlinks { transition: none; }
-    .icon-wiggle { animation: none; transition: none; }
-}
-
-
-/* Stylings for style-reference.html */
-/* Override stylng to position dummy context menu on style-reference page */
+/* Override stylng to position dummy context menu */
 .context-menu-positioning {
     position: relative;
 }
@@ -546,3 +328,4 @@ nav {
 .demo-grid-container:has(:not(div)) {
     grid-template-columns:  repeat(auto-fit, minmax(80px, 1fr));
 }
+
