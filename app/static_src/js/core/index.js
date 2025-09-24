@@ -27,9 +27,9 @@ async function markHabitComplete(checkbox, habitId) {
             const data = { completed_at: completedAtUTC };
 
             apiRequest('POST', url, () => {
-                const row = checkbox.closest('.habit-row'); // scope query to right <label> row
+                const row = checkbox.closest('.item-row'); // scope query to right <label> row
                 const emojiSpan = row.querySelector('.habit-streak');
-                const listItem = row.closest('.habit-item'); // grab <li>
+                const listItem = row.closest('.item'); // grab <li>
 
                 let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
                 streakCount += 1;
@@ -44,9 +44,9 @@ async function markHabitComplete(checkbox, habitId) {
 
             apiRequest('DELETE', url, () => {
                 // un-apply effect/styling (update DOM)
-                const row = checkbox.closest('.habit-row');
+                const row = checkbox.closest('.item-row');
                 const emojiSpan = row.querySelector('.habit-streak');
-                const listItem = row.closest('.habit-item');
+                const listItem = row.closest('.item');
 
                 let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
                 streakCount -= 1;

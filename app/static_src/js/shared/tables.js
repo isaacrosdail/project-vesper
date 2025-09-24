@@ -25,7 +25,7 @@ export function makeTableRow(data) {
  * @param {string} subtype 
  * @returns 
  */
-async function deleteTableItem(module, itemId, subtype = "none") {
+async function deleteTableItem(module, itemId, subtype) {
     const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
     if (!confirmed) return;
 
@@ -89,7 +89,7 @@ export async function inlineEditElement(element) {
  * @param {string} newValue - New field value
  * @param {HTMLElement} td - Table cell element to update
  */
-async function saveUpdatedField(module, field, itemId, newValue, td, subtype = "none") {
+async function saveUpdatedField(module, field, itemId, newValue, td, subtype) {
     // Construct URL & request body
     const url = `/${module}/${subtype}/${itemId}`;
     const data = {}
