@@ -88,6 +88,29 @@ async function markTaskComplete(checkbox, taskId) {
 
 }
 
+async function markTaskComplete(checkbox, taskId) {
+    const completedAtUTC = getJSInstant();
+    const url = `/tasks/task/${taskId}`;
+
+    let data;
+    if (checkbox.checked) {
+        data = {
+            is_done: true,
+            completed_at: completedAtUTC 
+        };
+    } else {
+        data = {
+            is_done: false,
+            completed_at: null
+        }
+    }
+    apiRequest('PATCH', url, () => {
+        const listItem = checkbox.closest('.item');
+        listItem?.classList.toggle('completed');
+    }, data);
+
+}
+
 function updateClock() {
     const timeDisplay = document.querySelector('#time-display');
     timeDisplay.textContent = formatTimeString();

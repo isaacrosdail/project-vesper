@@ -11,7 +11,9 @@ from app._infra.db_base import Base
 
 NEVER_DELETE = {
     "apicallrecord",
-    "alembic_version"
+    "alembic_version",
+    "habit_tags", # Association tables for these two, which use composite keys & do not receive auto-inc IDs or *_id_seq
+    "task_tags"
 }
 
 def _delete_rows(session, table, where=None, params=None):
