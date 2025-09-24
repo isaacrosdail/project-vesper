@@ -47,27 +47,8 @@ legend {
     margin-bottom: var(--space-md);
     padding: 0 0 var(--space-lg);
 }
-
-/* For profile SVG button in navbar, need to refine */
-/* TODO: Ought to move these into components.css, no? */
-#profile-btn {
-    cursor: pointer;
-}
-#profile-btn svg {
-    color: var(--text);
-    pointer-events: none;
-    width: 25px;
-    height: 25px;
-}
-.dev-btns {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
-}
-.profile-modal[open] {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
+h3 {
+    font-size: var(--font-size-lg);
 }
 /* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
 .highlight-label { font-weight: 600; }
