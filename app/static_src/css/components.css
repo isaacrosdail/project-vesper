@@ -390,7 +390,38 @@ footer {
 }
 
 /* TABBED MODALS */
-.tabs button.active {
+.tab-group {
+    display: flex;
+    align-items: stretch;
+    padding: var(--space-xs);
+    gap: var(--gap-xs);
+    background-color: var(--bg-light);
+}
+.tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--space-sm);
+}
+.tab svg {
+    width: 1em;
+    height: 1em;
+}
+.tab-group, .tab {
+    border-radius: var(--border-radius);
+}
+.tab:hover {
+    background-color: var(--bg-hover);
+    filter: brightness(0.9);
+}
+.tab:active {
+    background-color: var(--bg-hover);
+    transform: translateY(1px);
+    filter: brightness(0.9);
+}
+.tab.active {
+    background-color: var(--accent-subtle);
     transform: translateY(1px);
     filter: brightness(0.95);
 }
