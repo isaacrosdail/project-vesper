@@ -1,16 +1,16 @@
 
 from datetime import date
 
-from flask import Blueprint, flash, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
 from app.modules.habits.repository import HabitsRepository
 from app.shared.datetime.helpers import (day_range, parse_js_instant,
                                          today_range)
-from app.shared.sorting import bubble_sort
 from app.modules.habits.viewmodels import HabitPresenter, HabitViewModel
 from app.modules.habits.models import Difficulty, Language, LCStatus
+from app.modules.habits.validators import validate_habit, validate_leetcode_record
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
@@ -34,10 +34,18 @@ def dashboard(session):
 @login_required
 @with_db_session
 def habits(session):
-    # Process form data from modal
     if request.method == "POST":
+
+        habit_data = {
+            "name": request.form.get("name", "")
+        }
+        errors = validate_habit(habit_data)
+        if errors:
+            return jsonify({"success": False, "message": errors[0]}), 400
+        
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
-        new_habit = habits_repo.create_habit(request.form.get("name"))
+        new_habit = habits_repo.create_habit(habit_data["name"])
+
         return jsonify({
             "success": True, 
             "message": "Habit added",
@@ -101,19 +109,33 @@ def completion(session, habit_id):
 @login_required
 @with_db_session
 def create_leetcoderecord(session):
-    form_data = request.form.to_dict()
 
+    leetcode_data = {
+        "leetcode_id": request.form.get("leetcode_id", ""),
+        "title": request.form.get("title", ""),
+        "difficulty": request.form.get("difficulty", ""),
+        "language": request.form.get("language", ""),
+        "status": request.form.get("lcstatus", "")
+    }
+
+    errors = validate_leetcode_record(leetcode_data)
+    if errors:
+        return jsonify({"success": False, "message": errors[0]}), 400
+
+    # Convert to proper types
     try:
-        form_data["difficulty"] = Difficulty(form_data["difficulty"])
-        form_data["language"] = Language(form_data["language"])
-        form_data["lcstatus"] = LCStatus(form_data["lcstatus"])
-    except ValueError as e:
-        return jsonify({"success": False, "message": str(e)}), 400
-    
-    form_data["leetcode_id"] = int(form_data["leetcode_id"])
+        processed_data = {
+            "leetcode_id": int(leetcode_data["leetcode_id"]),
+            "title": leetcode_data["title"],
+            "difficulty": Difficulty(leetcode_data["difficulty"]),
+            "language": Language(leetcode_data["language"]),
+            "lcstatus": LCStatus(leetcode_data["status"])
+        }
+    except (ValueError, KeyError):
+        return jsonify({"success": False, "message": "Invalid data format"}), 400
 
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
-    new_record = habits_repo.create_leetcoderecord(**form_data)
+    new_record = habits_repo.create_leetcoderecord(**processed_data)
 
     return jsonify({
         "success": True,

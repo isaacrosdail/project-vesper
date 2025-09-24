@@ -2,10 +2,12 @@
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
-from app._infra.database import with_db_session, database_connection
+from app._infra.database import with_db_session
 from app.modules.time_tracking.repository import TimeTrackingRepository
+from app.modules.time_tracking.service import TimeTrackingService
 from app.shared.datetime.helpers import today_range, parse_datetime_from_hhmm, add_mins_to_datetime
 from app.modules.time_tracking.viewmodels import TimeEntryViewModel, TimeEntryPresenter
+from app.modules.time_tracking.validators import validate_time_entry
 
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
 
@@ -28,24 +30,26 @@ def dashboard(session):
 @login_required
 @with_db_session
 def time_entries(session):
-
     if request.method == 'POST':
-        form_data =  request.form.to_dict() # convert formData to dict
-        started_at = parse_datetime_from_hhmm(form_data["started_at"], current_user.timezone)
-        form_data["started_at"] = started_at
-        form_data["ended_at"] = add_mins_to_datetime(started_at, float(form_data["duration"]))
+        form_data = request.form.to_dict()
 
         timetracking_repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
-        new_entry = timetracking_repo.create_time_entry(**form_data)
+        service = TimeTrackingService(timetracking_repo)
 
+        result = service.create_entry_from_form(form_data, current_user.timezone)
+
+        if not result["success"]:
+            return jsonify(result), 400
+
+        entry = result["entry"]
         return jsonify({
             "success": True, 
-            "message": "Time entry added.",
+            "message": "Time entry added",
             "data": {
-                "id": new_entry.id,
-                "category": new_entry.category,
-                "duration": new_entry.duration,
-                "started_at": new_entry.started_at.isoformat(),
-                "description": new_entry.description
+                "id": entry.id,
+                "category": entry.category,
+                "duration": entry.duration,
+                "started_at": entry.started_at.isoformat(),
+                "description": entry.description
             }
         }), 201
