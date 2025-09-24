@@ -21,7 +21,7 @@ function createContextMenu(e) {
         // If clicked row is from the Transactions table, extend the list
         // Append our shopping list option if it's the transactions table
         // so: items = ['Edit', 'Delete', 'Add to shopping list']
-        if (row.dataset.subtype === 'transaction') {
+        if (row.dataset.subtype === 'transaction' || row.dataset.subtype === 'product') {
             items = [...items, ...menuItemsGroceries];
         }
     
@@ -70,14 +70,14 @@ document.addEventListener('click', async (e) => {
         const url = '/groceries/shopping-list/items';
         const data = { product_id: productId };
 
-        apiRequest('POST', url, () => {
-            const existingLi = document.querySelector(`li[data-item-id="${productId}"]`);
+        apiRequest('POST', url, (responseData) => {
+            const existingLi = document.querySelector(`li[data-product-id="${productId}"]`);
             if (existingLi) {
                 const newQty = updateQty(existingLi);
                 makeToast(`Updated ${productName} quantity to ${newQty}`, 'success');
                 return;
             }
-            addShoppingListItemToDOM(productId, productName);
+            addShoppingListItemToDOM(responseData.item_id, responseData.product_id, productName);
         }, data);
     }
 
@@ -96,7 +96,7 @@ function updateQty(existingLi) {
     return newQty;
 }
 
-function addShoppingListItemToDOM(productId, productName, quantity = 1) {
+function addShoppingListItemToDOM(itemId, productId, productName, quantity = 1) {
     const ul = document.querySelector('.shopping-list');
     const emptyText = document.querySelector('#list-empty');
     emptyText?.remove();
@@ -109,7 +109,8 @@ function addShoppingListItemToDOM(productId, productName, quantity = 1) {
     const liEl = li.querySelector('li');
     liEl.querySelector('.item-text').textContent = productName;
     liEl.querySelector('.item-qty').textContent = quantity;
-    liEl.dataset.itemId = productId;
+    liEl.dataset.itemId = itemId;
+    liEl.dataset.productId = productId;
     liEl.dataset.quantityWanted = quantity;
     ul.appendChild(liEl);
 }

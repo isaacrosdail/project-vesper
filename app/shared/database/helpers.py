@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from flask import current_app
 from sqlalchemy import text
 from app._infra.db_base import Base
+from app.modules.groceries.models import Product, ShoppingListItem
 
 NEVER_DELETE = {
     "apicallrecord",
@@ -70,6 +71,11 @@ def safe_delete(session, item):
     """
     Soft-delete if `deleted_at` column exists, else hard-delete. Returns the item.
     """
+    if isinstance(item, Product):
+        # Clean up shopping list items
+        session.query(ShoppingListItem).filter(
+            ShoppingListItem.product_id == item.id
+        ).delete()
     if hasattr(item, 'deleted_at'):
         if item.deleted_at is None:
             item.deleted_at = datetime.now(timezone.utc)

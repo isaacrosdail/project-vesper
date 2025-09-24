@@ -135,5 +135,6 @@ def add_shoppinglist_item(session):
     return jsonify({
         "success": True, 
         "message": "Added item to shopping list!",
-        "item_id": item.id
+        "item_id": item.id,
+        "product_id": item.product_id
     })

@@ -7,36 +7,38 @@
 
 {# So JS can clone from template to append li's #}
 <template id="shoppinglist-item-template">
-    <li class="shoppinglist-item" data-item-id="" data-quantity-wanted="">
-        <button class="inline-delete" data-action="delete">{{ ui.delete_svg() }}</button>
+    <li class="shoppinglist-item _inline-flex-md" data-product-id="" data-item-id="" data-quantity-wanted="">
+        <button class="btn-icon btn-round inline-delete" data-action="delete" aria-label="Remove shopping list item">{{ ui.x_svg() }}</button>
         <span class="item-text"></span>
         <span class="qty-controls">
             <span>&nbsp;&nbsp;&nbsp;--</span>
-            <button data-action="decrement">{{ ui.minus_svg() }}</button>
+            <button data-action="decrement" aria-label="Decrement item quantity">{{ ui.minus_svg() }}</button>
             <span class="item-qty-wrapper">
-                <span class="item-qty"></span><span>x</span>
+                <span class="item-qty"></span><span></span>
             </span>
-            <button data-action="increment">{{ ui.plus_svg() }}</button>
+            <button data-action="increment" aria-label="Increment item quantity">{{ ui.plus_svg() }}</button>
         </span>
     </li>
 </template>
 
 <div class="card-dashboard">
-    <h2>Shopping List</h2>
+    <div class="card-title">
+        <h2>Shopping List</h2>
+    </div>
     <ul class="shopping-list">
     {% if shopping_list.items %}
         {% for item in shopping_list.items %}
-            <li class="shoppinglist-item _inline-flex-md" data-item-id="{{ item.id }}" data-quantity-wanted="{{ item.quantity_wanted }}">
-                <button class="inline-delete" data-action="delete">{{ ui.delete_svg() }}</button>
+            <li class="shoppinglist-item _inline-flex-md" data-product-id="{{ item.product_id }}" data-item-id="{{ item.id }}" data-quantity-wanted="{{ item.quantity_wanted }}">
+                <button class="btn-icon btn-round inline-delete" data-action="delete" aria-label="Remove shopping list item">{{ ui.x_svg() }}</button>
                 <span class="item-text">{{ item.product.name }}</span>
                 <span class="qty-controls">
                     <span>&nbsp;&nbsp;&nbsp;--</span>
-                    <button data-action="decrement">{{ ui.minus_svg() }}</button>
+                    <button data-action="decrement" aria-label="Decrement item quantity">{{ ui.minus_svg() }}</button>
                     <!-- Wrapper here so quantity+'x' remain one unit (ex: 3x instead of 3 x) -->
                     <span class="item-qty-wrapper">
                         <span class="item-qty">{{ item.quantity_wanted }}</span><span>x</span>
                     </span>
-                    <button data-action="increment">{{ ui.plus_svg() }}</button>
+                    <button data-action="increment" aria-label="Increment item quantity">{{ ui.plus_svg() }}</button>
                 </span>
             </li>
         {% endfor %}
