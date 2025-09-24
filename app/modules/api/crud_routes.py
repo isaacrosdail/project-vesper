@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 from app._infra.database import with_db_session
 from app.modules.auth.service import check_item_ownership
 from app.modules.groceries.models import Product, Transaction, ShoppingList, ShoppingListItem
-from app.modules.habits.models import Habit
+from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
 from app.modules.metrics.models import DailyEntry
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
@@ -19,16 +19,18 @@ crud_bp = Blueprint("crud", __name__)
 # 2. Any number of sub-models within each (eg, grocery product, grocery transaction)
 
 # Map to correct model based on module passed in
-# This uses module and subtype to resolve to the specific model of item altered
+# This uses module + subtype to resolve to the specific model
 MODEL_CLASSES = {
     ("groceries", "product"): Product,
     ("groceries", "transaction"): Transaction,
-    ("groceries", "shoppinglist"): ShoppingList,
-    ("groceries", "shoppinglistitem"): ShoppingListItem,
+    ("groceries", "shopping_list"): ShoppingList,
+    ("groceries", "shopping_list_item"): ShoppingListItem,
     ("tasks", "task"): Task,
     ("habits", "habit"): Habit,
+    ("habits", "habit_completion"): HabitCompletion,
+    ("habits", "leetcode_record"): LeetCodeRecord,
     ("metrics", "daily_entry"): DailyEntry,
-    ("time_tracking", "timeentry"): TimeEntry,
+    ("time_tracking", "time_entry"): TimeEntry,
 }
 
 def get_model_class(module, subtype: str):

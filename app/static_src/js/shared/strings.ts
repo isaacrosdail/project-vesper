@@ -5,10 +5,8 @@
 export function between(string: string, left: string, right: string): string {
     const l = string.indexOf(left) + left.length;
     if (l === -1) return "";
-    console.log(l)
     let r = string.indexOf(right);
     if (r === -1) r = string.length;
-    console.log(r)
     return string.slice(l, r);
 }
 
