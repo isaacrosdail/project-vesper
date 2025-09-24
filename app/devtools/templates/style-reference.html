@@ -2,27 +2,191 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Theme Token Preview{% endblock %}
+{% block title %}Style Reference{% endblock %}
 
 {% block content %}
-{# Using this specific ID in our guard for JS #}
-<span id="style-reference-root"></span>
+
+<h1 class="demo-heading">Style Reference & Component Library</h1>
 
 {# Getting started with D3.js #}
 <!-- <div id="chart-container"></div> -->
 
+<section class="demo-section card-dashboard">
+  <h2>Components & Interactives</h2>
 
-{# Buttons to Trigger Confirmation Modal #}
-<div class="demo-grid-container">
-  <button id="default" class="btn btn-primary">Test Confirmation</button>
-  <button id="alt" class="btn btn-primary">Test Confirmation Two</button>
+  {# Confirmation Modal triggers #}
+  <div class="demo-grid-container">
+    <button id="default" class="btn btn-primary">Test Confirmation</button>
+    <button id="alt" class="btn btn-primary">Test Confirmation Two</button>
+  </div>
+
+  {# Toast Triggers #}
+  <div class="demo-grid-container">
+    <button id="toast-success" class="btn btn-secondary">Show Success Toast</button>
+    <button id="toast-error" class="btn btn-secondary">Show Error Toast</button>
+    <button id="toast-info" class="btn btn-secondary">Show Info Toast</button>
+  </div>
+
+  {# Buttons #}
+  <div class="demo-grid-container">
+    <button class="btn">Base Button</button>
+    <button class="btn btn-primary">Primary Button</button>
+    <button class="btn btn-secondary">Secondary Button</button>
+    <button class="btn btn-destructive">Destructive Button</button>
+  </div>
+  <div class="demo-grid-container">
+    <button class="btn btn-primary" aria-disabled="true" disabled>Disabled Primary</button>
+    <button class="btn-icon btn-round">🏠</button>
+    <button class="btn-icon btn-square">⚙️</button>
+    {{ ui.delete_btn() }}
+  </div>
+
+  {# Inputs #}
+  <div class="card-dashboard">
+    <h2>Form Inputs</h2>
+
+    <div class="demo-grid-container">
+      <input type="text" class="input-base" placeholder="Input base">
+      <input type="text" class="input-base input-inline" placeholder="Input inline">
+    </div>
+    <div class="demo-grid-container">
+      <input type="text" placeholder="Text input">
+      <input type="email" placeholder="Email input">
+      <input type="password" placeholder="Password input">
+    </div>
+    <div class="demo-grid-container">
+      <select>
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+      </select>
+      <textarea placeholder="Textarea input" rows="3"></textarea>
+    </div>
+    <div class="demo-grid-container">
+      <input type="number" placeholder="Number input">
+      <input type="date">
+      <input type="time">
+    </div>
+  </div>
+
+  {# Form Components #}
+  <div class="card-dashboard">
+    <h2>Form Components</h2>
+
+    <div>
+      <fieldset>
+        <legend>Login Example</legend>
+        <div class="form-group">
+          <label for="demo-username">Username:</label>
+          <input type="text" id="demo-username" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label for="demo-password">Password:</label>
+          <div class="password-input-group">
+            <input type="password" id="demo-password" placeholder="Enter password">
+            <button type="button" class="btn-icon" data-password-toggle="demo-password">
+              {{ ui.eye_slash_svg() }}
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="demo-remember">
+          <label for="demo-remember">Remember me</label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary">Sign In</button>
+          <button class="btn btn-secondary">Cancel</button>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+
+{# Dropdown Demo #}
+  <div class="card-dashboard">
+    <h2>Dropdown Menu(s)</h2>
+
+    <div class="dropdown">
+      <button class="dropdown-toggle">
+        Dropdown 1
+        <span class="dropdown-toggle-chevron">{{ ui.chevron_svg() }}</span>
+      </button>
+      <div class="dropdown-menu">
+        <button>Option 1</button>
+        <button>Option 2</button>
+        <button>Option 3</button>
+      </div>
+    </div>
+  </div>
+
+  {# Form Modal Demo #}
+  <div class="card-dashboard">
+    <h2 class="card-title">Modal Demo</h2>
+  <button class="btn btn-primary" id="demo-entry-styleref-btn">Open Demo Modal</button>
+
+  {% call ui.modal('/nowhere/', 'demo-entry-styleref', title='Demo Modal') %}
+    <p>This is a demo modal body.</p>
+    <p>You can put any arbitrary content here.</p>
+  {% endcall %}
 </div>
 
-{# Buttons to Trigger Various Toasts #}
-<div class="demo-grid-container">
-  <button id="toast-success" class="btn btn-secondary">Toast (Success)</button>
-  <button id="toast-error" class="btn btn-secondary">Toast (Error)</button>
+
+{# Custom context menu #}
+{# NOTE: Overriding with a demo class for positioning only, since that is normally dictated by our JS #}
+<ul class="context-menu context-menu-positioning" role="menubar">
+  <li>Edit</li>
+  <li>Delete</li>
+  <li>Give myself a million dollars</li>
+  <li>Go Back</li>
+</ul>
+
+
+  {# Tooltips #}
+  <div class="card-dashboard">
+    <h2>Tooltips</h2>
+
+    {# Tooltips #}
+    <div class="tooltip-popup" id="no-after">
+      Example tooltip.
+    </div>
+    <div class="demo-grid-container">
+      <button class="btn btn-secondary" title="This is a native tooltip">Native Tooltip</button>
+      <div style="display: inline-block;">
+        <span>Custom tooltip:</span>
+        <div class="tooltip-popup" id="no-after" style="position: static; margin: 0; margin-left: 1rem;">
+          Custom tooltip content
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div class="card-dashboard">
+  <h2 class="card-title">Table Demo (using macro)</h2>
+
+  {% call(item, headers) ui.responsive_table(
+      caption="Demo Table",
+      headers=[
+        {"label": "Name", "priority": "high"},
+        {"label": "Status", "priority": "med"}
+      ],
+      items=[
+        {"id": 1, "name": "Item Alpha", "status": "Active"},
+        {"id": 2, "name": "Item Beta", "status": "Pending"},
+        {"id": 3, "name": "Item Gamma", "status": "Completed"}
+      ],
+      module_name="demo",
+      subtype="sample"
+  ) %}
+    <td class="table-cell">{{ item.name }}</td>
+    <td class="table-cell">{{ item.status }}</td>
+  {% endcall %}
 </div>
+
+</section>
+
+<!-- Design Tokens Section -->
+<section class="card-dashboard">
+  <h2>Design Tokens</h2>
 
 {# === Background Hierarchy === #}
 <div class="demo-grid-container" style="border-radius: var(--border-radius);">
@@ -63,111 +227,14 @@
   </div>
 </div>
 
-{# === Success & Error === #}
+{# === Status Colors === #}
 <div class="demo-grid-container">
   <div class="swatch" style="background: var(--clr-success); color: var(--text-inverse);">clr-success</div>
   <div class="swatch" style="background: var(--clr-error); color: var(--text-inverse);">clr-error</div>
+  <div class="swatch" style="background: var(--bg-selection); color: var(--text-selection);">selection</div>
 </div>
 
-<hr>
+</section>
 
-<h1 style="font-size: 1.4rem; text-align: center;">Component Samples</h1>
-{# Buttons #}
-<div class="demo-grid-container">
-  <button class="btn">Base Button</button>
-  <button class="btn btn-primary">Primary Button</button>
-  <button class="btn btn-secondary">Secondary Button</button>
-</div>
-<div class="card-dashboard demo-grid-container">
-  <button class="btn btn-secondary">Secondary Button (on card)</button>
-  <button class="btn btn-primary" aria-disabled="true" disabled>Secondary Button (disabled)</button>
-</div>
-<div class="demo-grid-container">
-  <button class="btn btn-destructive">Destructive Button</button>
-  {{ ui.delete_btn() }}
-</div>
 
-{# Inputs #}
-<div class="demo-grid-container">
-  <input type="text" class="input-base" placeholder="Input base">
-  <input type="text" class="input-base input-inline" placeholder="Input inline">
-</div>
-
-{# Custom context menu #}
-{# NOTE: Overriding with a demo class for positioning only, since that is normally dictated by our JS #}
-<ul class="context-menu context-menu-positioning" role="menubar">
-  <li>Edit</li>
-  <li>Delete</li>
-  <li>Give myself a million dollars</li>
-  <li>Go Back</li>
-</ul>
-
-{# Tooltips #}
-<div class="tooltip-popup" id="no-after">
-  Example tooltip.
-</div>
-
-<div class="card-dashboard">
-  <h2 class="card-title">Table (with card)</h2>
-  {# Table #}
-  <table class="table-standard">
-    <thead>
-      <tr>
-        <th class="table-header">Header 1</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="table-row">
-        <td class="table-cell">Cell A</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-      <tr class="table-row">
-        <td class="table-cell">Cell B</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-      <tr class="table-row">
-        <td class="table-cell">Cell D</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-      <tr class="table-row">
-        <td class="table-cell">Cell E</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-{# Table (no card behind it) #}
-<table class="table-standard">
-  <thead>
-    <tr>
-      <th class="table-header">Header 1</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr class="table-row">
-      <td class="table-cell">Cell A</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-    <tr class="table-row">
-      <td class="table-cell">Cell B</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-    <tr class="table-row">
-      <td class="table-cell">Cell D</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-    <tr class="table-row">
-      <td class="table-cell">Cell E</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-  </tbody>
-</table>
-
-{# Greeting Card Example #}
-<div class="card-dashboard" id="greeting-card">
-  <div>Greeting / Time</div>
-  <div class="divider"></div>
-  <div>Weather Info</div>
-</div>
 {% endblock %}
