@@ -2,7 +2,7 @@
 {# === NAV COMPONENTS === #}
 
 {% macro profile_btn() %}
-<button id="settings-btn" aria-label="Profile settings">
+<button class="btn-icon btn-round btn-lg profile-btn" aria-label="Profile settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
     aria-hidden="true"
     >
@@ -16,17 +16,19 @@
 {# NOTE: current_user.role is a string, required_role is now an Enum, hence the '.value' #}
 {% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
     {% if not required_role or (current_user.is_authenticated and current_user.role == required_role.value) %}
-        <a href="{{ url_for(endpoint) }}"
+        <a
         class="nav-link {% if current_endpoint == endpoint %}active{% endif %}"
-                        {% if current_endpoint == endpoint %}aria-current="page"{% endif %}>
+        href="{{ url_for(endpoint) }}"
+        {% if current_endpoint == endpoint %}aria-current="page"{% endif %}
+        >
             {{ text }}
         </a>
     {% endif %}
 {% endmacro %}
 
-{# TODO: Note: navlinks is the desktop name, need to rename after switching over logic/styling #}
-{% macro navigation_links(type='navlinks') %}
-<div class="{{ type }}" id="{{ type }}">
+{# TODO: Note: nav-desktop is the desktop name, need to rename after switching over logic/styling #}
+{% macro navigation_links(type='nav-desktop') %}
+<div id="{{ type }}" class="{{ type }}">
     {% if current_user.is_authenticated %}
         {{ nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
         {{ nav_link('Habits', 'habits.dashboard', request.endpoint) }}
@@ -40,6 +42,7 @@
     {% endif %}
 </div>
 {% endmacro %}
+
 <div class="nav-anchor">
     <nav aria-label="Main navigation">
         <div class="navbar-content">
@@ -47,11 +50,11 @@
             <div class="nav-left">
                 <a href="{{ url_for('main.home') }}" class="branding">Vesper</a>
 
-                <button id="hamburger-btn"
-                        aria-controls="mobilenav" 
+                <button class="btn-icon btn-square hamburger-btn"
+                        aria-controls="nav-mobile-container" 
                         aria-expanded="false" 
                         aria-label="Toggle navigation menu">
-                    ☰
+                    {{ ui.split_hamburger_svg() }}
                 </button>
                 
                 {{ navigation_links() }}
@@ -60,16 +63,14 @@
             {# Settings modal, theme select, etc. #}
             <div class="nav-right">
 
-                {# Baby's first modal #}
-                <!-- <button id="settings-btn" aria-label="Settings">⚙️</button> -->
-                {{ profile_btn() }}
+                {% if current_user.is_authenticated %}
+                    {{ profile_btn() }}
+                {% endif %}
 
                 <form>
                     <fieldset>
-                        <legend class="visually-hidden">Pick a theme</legend>
-                        
-                        {# TODO: Pivot this to fancier custom toggle (circle of moon/sun moves from one side to another when clicked) #}
-                        <select name="theme" id="theme">
+                        <legend class="_sr-only">Pick a theme</legend>
+                        <select id="theme" name="theme">
                             <option value="laptop">System</option>
                             <option value="sun">Light</option>
                             <option value="moon">Dark</option>
@@ -80,29 +81,29 @@
         </div>
     </nav>
 
-    <div id="mobilenav" class="mobilenav">
-        {{ navigation_links('mobilenavlist') }}
+    <div id="nav-mobile-container" class="nav-mobile-container" inert>
+        {{ navigation_links('nav-mobile') }}
     </div>
 </div>
 
-<dialog id="settings-modal" class="settings-modal">
+<dialog class="profile-modal">
     <h3>User Account Settings</h3>
-    <button type="button" class="modal-close btn btn-destructive" id="close-dev-modal-btn">&times;</button>
+    <button id="close-profile-modal-btn" class="btn-icon btn-round modal-close" type="button">&times;</button>
 
     <form action="{{ url_for('auth.logout') }}" method="POST" data-noajax>
         {# TODO: Add CSRF token here #}
-        <button type="submit" class="btn btn-destructive">Log out</button>
+        <button class="btn btn-destructive" type="submit">Log out</button>
     </form>
 
     {% if has_dev_tools %}
     <h3>Dev Tools</h3>
-    <div class="dev-btns">
-        <a href="/my-fake/route" class="btn btn-primary">Test 404</a>
+    <div class="_stack-md">
         {% if config.APP_ENV == 'dev' %}
-            <a href="{{ url_for('devtools.style_reference')}}" class="btn btn-secondary">Style Reference Page</a>
+            <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
         {% endif %}
-        <form action="{{ url_for('auth.reset_dev') }}" method="POST" data-noajax class="btn btn-destructive">
-            <button type="submit">Reset Dev</button>
+        <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
+        <form action="{{ url_for('auth.reset_dev') }}" method="POST" data-noajax>
+            <button class="btn btn-destructive" type="submit">Reset Dev</button>
         </form>
     </div>
     {% endif %}

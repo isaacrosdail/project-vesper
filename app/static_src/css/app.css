@@ -7,12 +7,13 @@
 @import './tokens.css';
 @import url('./base.css') layer(base);
 @import url('./components.css') layer(components);
+@import url('./navigation.css') layer(components);
 @import url('./utilities.css') layer(utilities);
 @import url('./animations.css') layer(animations);
 
 /* Breakpoints:
- * width <= 640px   Mobile nav toggle, chart stacking
- * width > 640px    Hide mobile navlinks?
+ * width <= 768px   Mobile nav toggle, chart stacking
+ * width > 768px    Hide mobile navlinks?
  * width <= 768px   Hide 'desktop-only' classed table columns
 */
 
@@ -30,26 +31,53 @@
     --my-bool: clamp(0, 100vw - 640px, 1); /* effectively a media query for above/below 640px width? Need to find use cases */
 }
 
-/* For profile SVG button in navbar, need to refine */
-/* TODO: Ought to move these into components.css, no? */
-#settings-btn {
-    cursor: pointer;
+/* for delete_btn svg, need to move to components.css */
+.delete-btn {
+    width: 2.5rem;
+    padding: var(--space-sm);
 }
-#settings-btn svg {
+.delete-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+/* For app-wide legend text, move to components.css */
+legend {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bigger);
     color: var(--text);
-    pointer-events: none;
-    width: 25px;
-    height: 25px;
+    margin-bottom: var(--space-md);
+    padding: 0 0 var(--space-lg);
 }
-.dev-btns {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
+h3 {
+    font-size: var(--font-size-lg);
 }
-.settings-modal[open] {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
+
+/* ==== MEDIA QUERIES ==== */
+@media (width <= 768px) {
+    .nav-desktop {
+        display: none;
+    }
+    /* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
+       Let's us easily "condense" our tables to provide a better mobile experience */
+    .desktop-only {
+        display: none;
+    }
+    /* Suppress underline effect on mobile nav, use bg again */
+    .nav-link::after {
+        display: none;
+    }
+    .nav-link:hover {
+        background-color: var(--accent-subtle);
+    }
+}
+@media (width > 768px) {
+    .hamburger-btn { display: none; }
+    .nav-mobile-container { display: none; }
+}
+/* TODO: Tune this later as we add some basic animations/transitions */
+@media (prefers-reduced-motion: reduce) {
+    .nav-desktop { transition: none; }
+    .icon-wiggle { animation: none; transition: none; }
 }
 
 
@@ -410,12 +438,12 @@ nav {
     padding: var(--space-md) var(--space-md); /* for easier touch targets */
 }
 /* ==== MEDIA QUERIES ==== */
-@media (width <= 640px) {
+@media (width <= 768px) {
     .navlinks {
         display: none;
     }
 }
-@media (width > 640px) {
+@media (width > 768px) {
     #hamburger-btn { display: none; }
 }
 
