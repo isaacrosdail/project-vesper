@@ -1,13 +1,6 @@
 import pytest
-from app.modules.time_tracking.validators import validate_time_entry
+from app.modules.time_tracking.validators import *
 
-# Time tracking constants
-CATEGORY_REQUIRED = "Category is required"
-CATEGORY_LENGTH = "Category must be under 50 characters"
-DESCRIPTION_LENGTH = "Description must be under 200 characters"
-DURATION_REQUIRED = "Duration is required"
-DURATION_POSITIVE = "Duration must be greater than 0"
-DURATION_INVALID = "Duration must be a valid number"
 
 @pytest.mark.parametrize("entry_data", [
     # Basic valid entry

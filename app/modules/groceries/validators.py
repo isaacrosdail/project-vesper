@@ -1,7 +1,35 @@
-# Validation logic for grocery stuff - product/transaction data, etc.
-# TODO: Needs attention
-from decimal import Decimal
+
 from app.modules.groceries.models import Unit
+
+PRODUCT_NAME_REQUIRED = "Product name is required"
+PRODUCT_NAME_LENGTH = "Product name must be 100 or fewer characters"
+BARCODE_REQUIRED = "Barcode is required"
+BARCODE_LENGTH = "Barcode must be 16 or fewer characters"
+NET_WEIGHT_REQUIRED = "Net weight is required"
+NET_WEIGHT_POSITIVE = "Net weight must be greater than 0"
+NET_WEIGHT_INVALID = "Net weight must be a valid number"
+UNIT_TYPE_REQUIRED = "Unit type is required"
+UNIT_TYPE_INVALID = "Invalid unit type"
+CATEGORY_LENGTH = "Category must be 100 or fewer characters"
+CALORIES_NEGATIVE = "Calories cannot be negative"
+CALORIES_INVALID = "Calories must be a valid number"
+
+PRICE_REQUIRED = "Price is required"
+PRICE_NEGATIVE = "Price cannot be negative"
+PRICE_INVALID = "Price must be a valid number"
+QUANTITY_REQUIRED = "Quantity is required"
+QUANTITY_POSITIVE = "Quantity must be greater than 0"
+QUANTITY_INVALID = "Quantity must be a valid whole number"
+PRODUCT_ID_INVALID = "Invalid product ID"
+
+SHOPPING_LIST_NAME_LENGTH = "Shopping list name must be 100 or fewer characters"
+
+QUANTITY_WANTED_REQUIRED = "Quantity is required"
+QUANTITY_WANTED_POSITIVE = "Quantity must be greater than 0" 
+QUANTITY_WANTED_INVALID = "Quantity must be a valid whole number"
+PRODUCT_REQUIRED = "Product is required"
+SHOPPING_LIST_ID_INVALID = "Invalid shopping list ID"
+
 
 def validate_product(data: dict) -> list[str]:
 	"""Validate product data. Returns list of error messages."""
@@ -15,49 +43,50 @@ def validate_product(data: dict) -> list[str]:
 	unit_type = data.get("unit_type", "").strip()
 	calories = data.get("calories_per_100g", "")
 
-	# Validate required fields
+	# Name: Required, max 100 chars
 	if not name:
-		errors.append("Product name is required")
-	elif len(name) > 100:
-		errors.append("Product name must be under 100 characters")
+		errors.append(PRODUCT_NAME_REQUIRED)
+	if name and len(name) > 100:
+		errors.append(PRODUCT_NAME_LENGTH)
 	
+	# Barcode: Required, max 16 chars
 	if not barcode:
-		errors.append("Barcode is required")
-	elif len(barcode) > 64:
-		errors.append("Barcode must be under 64 characters")
+		errors.append(BARCODE_REQUIRED)
+	if barcode and len(barcode) > 16:
+		errors.append(BARCODE_LENGTH)
 	
 	# Validate net_weight (required numeric)
 	if not net_weight:
-		errors.append("Net weight is required")
-	else:
+		errors.append(NET_WEIGHT_REQUIRED)
+	if net_weight:
 		try:
 			weight = float(net_weight)
 			if weight <= 0:
-				errors.append("Net weight must be greater than 0")
+				errors.append(NET_WEIGHT_POSITIVE)
 		except (ValueError, TypeError):
-			errors.append("Net weight must be a valid number")
+			errors.append(NET_WEIGHT_INVALID)
 	
-	# Validate unit type (required enum)
+	# Validate unit_type: Required, valid enum
 	if not unit_type:
-		errors.append("Unit type is required")
-	else:
+		errors.append(UNIT_TYPE_REQUIRED)
+	if unit_type:
 		valid_units = [unit.value for unit in Unit]
 		if unit_type not in valid_units:
-			errors.append("Invalid unit type")
+			errors.append(UNIT_TYPE_INVALID)
 	
-	# Optional category
 	# TODO: Make category Enum
+	# Category (optional): max 100 chars
 	if category and len(category) > 100:
-		errors.append("Category must be under 100 characters")
+		errors.append(CATEGORY_LENGTH)
 	
-	# Optional calories
+	# Calories (optional): non-negative number
 	if calories:
 		try:
 			calories_val = float(calories)
 			if calories_val < 0:
-				errors.append("Calories cannot be negative")
+				errors.append(CALORIES_NEGATIVE)
 		except:
-			errors.append("Calories must be a valid number!")
+			errors.append(CALORIES_INVALID)
 
 	return errors
 
@@ -71,25 +100,25 @@ def validate_transaction(data: dict) -> list[str]:
 
 	# Price
 	if not price:
-		errors.append("Price is required")
-	else:
+		errors.append(PRICE_REQUIRED)
+	if price:
 		try:
 			price_value = float(price)
 			if price_value < 0:
-				errors.append("Price cannot be negative")
+				errors.append(PRICE_NEGATIVE)
 		except (ValueError, TypeError):
-			errors.append("Price must be a valid number")
+			errors.append(PRICE_INVALID)
 	
 	# Quantity
 	if not quantity:
-		errors.append("Quantity is required")
-	else:
+		errors.append(QUANTITY_REQUIRED)
+	if quantity:
 		try:
 			qty_value = int(quantity)
 			if qty_value <= 0:
-				errors.append("Quantity must be greater than 0")
+				errors.append(QUANTITY_POSITIVE)
 		except (ValueError, TypeError):
-			errors.append("Quantity must be a valid whole number")
+			errors.append(QUANTITY_INVALID)
 	
 	# TODO: Product_id too? Or integrityerror check that in service layer?
 
@@ -102,7 +131,7 @@ def validate_shopping_list(data: dict) -> list[str]:
     
 	# Name is optional (has default), but if provided, validate length
 	if name and len(name) > 100:
-		errors.append("Shopping list name must be under 100 characters")
+		errors.append(SHOPPING_LIST_NAME_LENGTH)
 
 	return errors
 
@@ -115,31 +144,30 @@ def validate_shopping_list_item(data: dict) -> list[str]:
 
 	# Quantity validation
 	if not quantity:
-		errors.append("Quantity is required")
-	else:
+		errors.append(QUANTITY_WANTED_REQUIRED)
+	if quantity:
 		try:
 			qty_val = int(quantity)
-	
 			if qty_val <= 0:
-				errors.append("Quantity must be greater than 0")
+				errors.append(QUANTITY_WANTED_POSITIVE)
 		except (ValueError, TypeError):
-			errors.append("Quantity must be a valid whole number")
+			errors.append(QUANTITY_WANTED_INVALID)
 
 	# Product ID validation
 	if product_id is None:
-		errors.append("Product is required")
-	else:
+		errors.append(PRODUCT_REQUIRED)
+	if product_id is not None:
 		try:
 			int(product_id)
 		except (ValueError, TypeError):
-			errors.append("Invalid product ID")
+			errors.append(PRODUCT_ID_INVALID)
 
 	# Shopping list ID validation (usually set by system, but just in case)
 	if shopping_list_id is not None:
 		try:
 			int(shopping_list_id)
 		except (ValueError, TypeError):
-			errors.append("Invalid shopping list ID")
+			errors.append(SHOPPING_LIST_ID_INVALID)
 
 	return errors
 
@@ -172,6 +200,6 @@ def validate_and_parse_product_data(product_data):
 	errors = []
 
 	if not product_data.get("name"):
-		errors.append("Product name is required.")
+		errors.append(PRODUCT_REQUIRED)
 
 	return errors

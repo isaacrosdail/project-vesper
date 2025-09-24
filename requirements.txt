@@ -28,6 +28,7 @@ pytest==8.4.1
 pytest-cov==6.2.1
 pytest-mock==3.14.1
 python-dotenv==1.1.1
+regex==2025.9.18
 requests==2.32.5
 SQLAlchemy==2.0.43
 typing_extensions==4.15.0

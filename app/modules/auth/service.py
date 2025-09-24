@@ -47,9 +47,8 @@ class AuthService:
     # TODO: Extract to notes
     # Dependency injection: session is injected from outside
     # Composition: AuthService "has a" UsersRepository (not "is a")
-    def __init__(self, session): # <= inject the session dependency
-        self.session = session
-        self.users = UsersRepository(session)
+    def __init__(self, repository: UsersRepository): # <= inject the repository dependency
+        self.repo = repository
 
     # '*' here is a Python argument marker
     # "Everything after this must be passed by keyword, not by position."
@@ -57,54 +56,58 @@ class AuthService:
     # Must call with explicit keywords
     def register_user(self, *, username: str, password: str, name: str,
                       role: UserRole = UserRole.USER, lang: UserLang = UserLang.EN):
+        """Programmatic user creation (seeds, admin operations, API)"""
         
-        user_data = {
-            "username": username,
-            "password": password,
-            "name": name
-        }
-        errors = validate_user(user_data)
-        if errors:
-            return None, errors
+        username = username.strip()
+        name = name.strip()
 
         user = User(
-            username=username.strip(),
-            name=name.strip(),
+            username=username,
+            name=name,
             role=role.value,
             lang=lang.value
         )
         user.hash_password(password)
 
-        self.users.add(user)
         try:
-            self.session.commit()
+            self.repo.add_user(user)
+            return {"success": True, "user": user}
         except IntegrityError:
-            self.session.rollback()
-            return None, ["Username already exists."]
+            return {"success": False, "message": "User already exists"}
+
+    
+    def register_user_from_form(self, form_data: dict, role: UserRole = UserRole.USER):
+        """Web form user registration"""
+        errors = validate_user(form_data)
+        if errors:
+            return {"success": False, "message": errors[0]}
         
-        return user, []
+        return self.register_user(
+            username=form_data["username"].strip(),
+            password=form_data["password"],
+            name=(form_data.get("name") or "").strip(),
+            role=role
+        )
     
     def get_or_create_demo_user(self, seed_data: bool = True):
         """Find existing demo user or create one."""
         # self.users => UsersRepository instance
-        # self.users.get_user_by_username => access the method on that instance
+        # self.repo.get_user_by_username => access the method on that instance
         # This is a 'bound method'
-        demo_user = self.users.get_user_by_username("guest")
+        demo_user = self.repo.get_user_by_username("guest")
 
         if demo_user is None:
-            demo_user = self.users.create_demo_user()
-            self.session.flush()
+            demo_user = self.repo.create_demo_user()
             if seed_data:
-                seed_demo_data(self.session, demo_user.id)
+                seed_demo_data(self.repo.session, demo_user.id)
         return demo_user
 
     def get_or_create_owner_user(self, seed_data: bool = True):
         """Find existing owner user or create one."""
-        owner_user = self.users.get_user_by_username("owner")
+        owner_user = self.repo.get_user_by_username("owner")
 
         if owner_user is None:
-            owner_user = self.users.create_owner_user()
-            self.session.flush()
+            owner_user = self.repo.create_owner_user()
             if seed_data:
-                seed_rich_data(self.session, owner_user.id)
+                seed_rich_data(self.repo.session, owner_user.id)
         return owner_user

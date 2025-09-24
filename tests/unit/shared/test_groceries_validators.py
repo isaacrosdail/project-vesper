@@ -1,41 +1,13 @@
 import pytest
-from app.modules.groceries.validators import validate_product, validate_transaction, validate_shopping_list, validate_shopping_list_item
+from app.modules.groceries.validators import *
 from app.modules.groceries.models import Unit
 
 # Error message constants for groceries
-PRODUCT_NAME_REQUIRED = "Product name is required"
-PRODUCT_NAME_LENGTH = "Product name must be under 100 characters"
-BARCODE_REQUIRED = "Barcode is required"
-BARCODE_LENGTH = "Barcode must be under 64 characters"
-NET_WEIGHT_REQUIRED = "Net weight is required"
-NET_WEIGHT_POSITIVE = "Net weight must be greater than 0"
-NET_WEIGHT_INVALID = "Net weight must be a valid number"
-UNIT_TYPE_REQUIRED = "Unit type is required"
-UNIT_TYPE_INVALID = "Invalid unit type"
-CATEGORY_LENGTH = "Category must be under 100 characters"
-CALORIES_NEGATIVE = "Calories cannot be negative"
-CALORIES_INVALID = "Calories must be a valid number"
-
-PRICE_REQUIRED = "Price is required"
-PRICE_NEGATIVE = "Price cannot be negative"
-PRICE_INVALID = "Price must be a valid number"
-QUANTITY_REQUIRED = "Quantity is required"
-QUANTITY_POSITIVE = "Quantity must be greater than 0"
-QUANTITY_INVALID = "Quantity must be a valid whole number"
-PRODUCT_ID_INVALID = "Invalid product ID"
-
-SHOPPING_LIST_NAME_LENGTH = "Shopping list name must be under 100 characters"
-
-QUANTITY_WANTED_REQUIRED = "Quantity is required"
-QUANTITY_WANTED_POSITIVE = "Quantity must be greater than 0" 
-QUANTITY_WANTED_INVALID = "Quantity must be a valid whole number"
-PRODUCT_REQUIRED = "Product is required"
-SHOPPING_LIST_ID_INVALID = "Invalid shopping list ID"
 
 @pytest.mark.parametrize("product_data", [
     {"name": "Milk", "barcode": "123456", "net_weight": "1.0", "unit_type": "l"},
     {"name": "Bread", "barcode": "789", "net_weight": "500", "unit_type": "g", "category": "grain", "calories_per_100g": "250"},
-    {"name": "a" * 100, "barcode": "b" * 64, "net_weight": "1", "unit_type": "kg"},
+    {"name": "a" * 100, "barcode": "b" * 16, "net_weight": "1", "unit_type": "kg"},
     {"name": "Cheese", "barcode": "456", "net_weight": "0.5", "unit_type": "lb"},
 ])
 def test_validate_product_success(product_data):

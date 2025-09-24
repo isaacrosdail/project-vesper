@@ -7,7 +7,8 @@ from app.modules.auth.models import UserRole
 from app.modules.auth.repository import UsersRepository
 from app.modules.auth.service import AuthService, requires_owner
 from app.shared.database.helpers import delete_all_db_data
-from app.shared.i18n.messages import msg
+from app.modules.auth.validators import validate_user
+
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
@@ -53,19 +54,15 @@ def register():
     
     elif request.method == "POST":
         form_data = request.form.to_dict()
-        username = form_data.get("username", "")
-        password = form_data.get("password", "")
-        name = form_data.get("name", "").strip()
         
         with database_connection() as session:
-            auth_service = AuthService(session)
-            user, errors = auth_service.register_user(
-                username=username, password=password, name=name, role=UserRole.USER
-            )
-            if errors:
-                for e in errors:
-                    set_toast(e, 'error')
-                return redirect(url_for("auth.register"))
+            repo = UsersRepository(session)
+            service = AuthService(repo)
+            result = service.register_user_from_form(form_data)
+
+        if not result["success"]:
+            set_toast(result["message"], 'error')
+            return redirect(url_for("auth.register"))
         
         set_toast('Account successfully created!', 'success')
         return redirect(url_for("main.home"))
@@ -74,13 +71,11 @@ def register():
 # Create & Seed only
 @auth_bp.route('/init-demo', methods=["POST"])
 def init_demo():
-    try:
-        logout_user() # boot logged in users just in case
-    except Exception:
-        pass
+    logout_user() # boot logged in users just in case
 
     with database_connection() as session:
-        auth_service = AuthService(session)
+        repo = UsersRepository(session)
+        auth_service = AuthService(repo)
         demo_user = auth_service.get_or_create_demo_user()
         login_user(demo_user)
 
@@ -105,7 +100,8 @@ def reset_users(session): # <= @with_db_session injects session as 1st parameter
     logout_user()
 
     delete_all_db_data(session, include_users=True, reset_sequences=True)
-    auth_service = AuthService(session)
+    repo = UsersRepository(session)
+    auth_service = AuthService(repo)
     demo_user = auth_service.get_or_create_demo_user()
     owner_user = auth_service.get_or_create_owner_user()
 
@@ -134,7 +130,8 @@ def reset_dev(session):
     logout_user()
 
     delete_all_db_data(session, include_users=True, reset_sequences=True)
-    auth_service = AuthService(session)
+    repo = UsersRepository(session)
+    auth_service = AuthService(repo)
     owner_user = auth_service.get_or_create_owner_user()
 
     set_toast('DEV: DB reset!', 'success')

@@ -1,26 +1,22 @@
 import pytest
-from app.modules.metrics.validators import validate_daily_entry
+from app.modules.metrics.validators import *
 
-# Metrics constants
-WEIGHT_POSITIVE = "Weight must be greater than 0"
-WEIGHT_INVALID = "Weight must be a valid number"
-STEPS_NEGATIVE = "Steps cannot be negative"
-STEPS_INVALID = "Steps must be a valid whole number"
-CALORIES_POSITIVE = "Calories must be greater than 0"
-CALORIES_INVALID = "Calories must be a valid whole number"
 
 @pytest.mark.parametrize("entry_data", [
-    # Empty entry (all optional)
     {},
     # Single fields
     {"weight": "70.5"},
     {"steps": "10000"},
     {"calories": "2000"},
+    {"wake_time": "07:30"},
+    {"sleep_time": "23:15"},
     # Multiple fields
     {"weight": "65.2", "steps": "8500", "calories": "1800"},
-    # Edge cases
+    {"wake_time": "06:00", "sleep_time": "22:30"},
+
     {"weight": "0.1", "steps": "0", "calories": "1"},  # Minimal values
     {"weight": "200", "steps": "50000", "calories": "5000"},  # Large values
+    {"wake_time": "00:00", "sleep_time": "23:59"},  # Time edge cases
 ])
 def test_validate_daily_entry_success(entry_data):
     assert validate_daily_entry(entry_data) == []
