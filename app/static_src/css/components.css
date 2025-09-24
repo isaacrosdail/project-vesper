@@ -1,15 +1,6 @@
 /* ==== COMPONENTS ==== */
 /* Reusable blocks: buttons, cards, tables */
 
-/* Utilities:
- * Token-based classes. No hardcoded colors or template macros, more scalable this way.
- * Components handle only internal spacing & appearance.
- * 
- * Margins = parent's job.
- * Design token-based component classes that adapt to theme changes automatically.
- *
- * Can either have left this in: @layer components {.. OR simply specify layer(components) in import */
-
 
 /* =========================================
    Base button shapes/ergonomics
@@ -75,12 +66,6 @@
         background-color: var(--text-destructive);
     }
 }
-<<<<<<< HEAD
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-=======
 /* =========================================
    Intent variants
    ========================================= */
@@ -179,7 +164,6 @@ dialog::backdrop {
     border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
     opacity: 1;
     top: -0.4rem;
->>>>>>> 8a11495 (macros: expand component classes, add macros & SVGs, begin tabbed modal setup)
 }
 
 /* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
@@ -189,18 +173,29 @@ dialog::backdrop {
     border-radius: var(--border-radius);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     background-color: var(--bg);
-<<<<<<< HEAD
-    border: solid 1px var(--border-color);
-    position: relative; /* for card-title positioning */
-=======
     border: var(--border-default);
     position: relative; /* positioning context for card-title */
->>>>>>> 8a11495 (macros: expand component classes, add macros & SVGs, begin tabbed modal setup)
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
+    box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
+
 }
 
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-md);
+}
+/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
+form input:not([type="checkbox"]):not([type="radio"]):user-valid {
+    outline: 2px solid;
+    outline-color: var(--color-success);
+}
+form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
+    outline: 2px solid;
+    outline-color: var(--color-error);
+}
 /* For consistent spacing/styling for "CTA + secondary buttons that might be anchor elements" pattern */
 .form-actions {
     display: flex;
@@ -210,6 +205,34 @@ dialog::backdrop {
 }
 .form-actions > * {
     min-width: 8rem;
+}
+/* ===== FORMS, INPUTS ===== */
+
+/* Base input stylings */
+/* Base input stylings */
+input, select, textarea {
+    background-color: var(--bg-light);
+    color: var(--text);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+}
+:where(input, select, textarea):focus-visible {
+    outline: 2px solid var(--accent-subtle);
+    outline-offset: 1px;
+}
+
+/* For dashboard quick-entry & JS inline cell edit inputs */
+.input-inline {
+    padding-block: var(--space-xs); /* top+bottom Slightly tighter */
+    border: none;
+    border-bottom: var(--border-default);
+    font-size: 0.875rem;
+}
+.radio-row {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap-sm);
 }
 
 /* ======= TABLE COMPONENTS ======= */
@@ -221,6 +244,7 @@ dialog::backdrop {
     width: 0; /* prevent us from consuming extra table width */
     background-color: var(--bg);
 }
+/* TODO: Could prob clean this up, italics to utility class? */
 .table-empty {
     text-align: center;
     color: var(--text-muted);
@@ -241,8 +265,7 @@ dialog::backdrop {
 }
 .table-header th {
     background-color: var(--accent-subtle);
-    color: var(--text);    /* TODO */
-    font-weight: 600; /* equivalent to font-semibold in Tailwind */
+    font-weight: var(--font-weight-semibold); /* equivalent to font-semibold in Tailwind */
 }
 .table-row {
     transition: background-color 25ms ease-out;
@@ -257,14 +280,13 @@ dialog::backdrop {
     background-color: var(--bg-light);
 }
 .table-row:hover {
-    background-color: var(--ui-hover);
-    color: var(--text); /* TODO */
+    background-color: var(--accent-subtle);
+    color: var(--text-inverse); /* TODO: Needs fixing/tuning */
 }
 
 /* ===== CUSTOM COMPONENT STYLINGS ===== */
 .context-menu {
     background-color: var(--bg);
-    color: var(--text);
     border: var(--border-default);
     border-radius: var(--border-radius);
     position: fixed;  /* important since it takes it out of the DOM flow? */
@@ -288,9 +310,10 @@ dialog::backdrop {
     background-color: var(--ui-hover);
     cursor: pointer;
 }
-/* ======= LAYOUT COMPONENTS ======= */
 
+/* ======= LAYOUT COMPONENTS ======= */
 /* Mimick <fieldset>'s 'title intersects border' effect for container headers */
+/* TODO: We'll have to re-tune this since we're using the usual button stylings, need to tweak padding again here too, and font weight? */
 .card-title {
     position: absolute; /* TODO: NOTES: breaks the title out of normal flow */
     top: -0.9rem;
@@ -309,10 +332,11 @@ dialog::backdrop {
 .card-title h2 {
     font-size: var(--font-size-lg);
     line-height: var(--line-height-higher);
-    font-weight: var(--font-weight-bigger);
+    font-weight: var(--font-weight-semibold);
     pointer-events: none;
 }
 
+/* ======= TOAST COMPONENTS ======= */
 #toast-container {
     position: fixed;
     display: flex;
@@ -320,9 +344,9 @@ dialog::backdrop {
     gap: var(--gap-sm);
     top: calc(1.3 * var(--min-navbar-height));
     right: 1rem;
-    /* border: 2px solid red; */
     z-index: 400;
     border-radius: var(--border-radius-mild);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
 }
 .toast {
     border-radius: var(--border-radius-mild);
@@ -338,25 +362,6 @@ dialog::backdrop {
     background-color: color-mix(in srgb, var(--color-error) 10%, white);
     color: var(--color-error);
     border-color: var(--color-error);
-}
-
-/* Warnings? Messages? Success? idk */
-.flash-message {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%; /* match navbar width */
-    height: var(--min-navbar-height);
-    z-index: 401; /* appear above other content */
-    background-color: color-mix(in srgb, var(--color-success) 10%, white); /* Derive bg-color from our color-success var instead of hardcoding */
-    color: var(--color-success);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--border-radius);
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
-}
-
-.shadow-card {
-    box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
 }
 
 /* ==== FOOTER ==== */

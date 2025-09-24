@@ -16,15 +16,17 @@
 {{ forms.leetcode_entry_modal() }}
 
 {# Greeting & Time/Date Card #}
-<section id="greeting-card" class="card-dashboard">
+<section id="greeting-card" class="card-dashboard _grid-2col">
     <div class="time-section">
-        <h2 class="card-title">
-            {% if current_user.is_authenticated %}
-                {{ greeting }}, {{ current_user.name }}!
-            {% else %}
-                {{ greeting }}
-            {% endif %}
-        </h2>
+        <div class="card-title">
+            <h2>
+                {% if current_user.is_authenticated %}
+                    {{ greeting }}, {{ current_user.name }}!
+                {% else %}
+                    {{ greeting }}
+                {% endif %}
+            </h2>
+        </div>
         <p><span id="time-display">{{ now_time }}</span> | {{ now_date }}</p>
     </div>
     <div class="weather-section">
@@ -36,7 +38,7 @@
 </section>
 
 {# "My Day" Card #}
-<section id="my-day-card" class="card-dashboard">
+<section id="my-day-card" class="card-dashboard _grid-2col">
     <div class="card-title">
         <h2>My Day</h2>
         {{ ui.plus_btn('task-entry-homepage-btn', 'Add Task') }}
@@ -68,14 +70,14 @@
 </section>
 
 {# Daily Habits Card #}
-<section id="daily-habits-card" class="card-dashboard">
+<section id="daily-habits-card" class="card-dashboard _grid-2col">
     <div class="card-title">
         <h2>Daily Habits</h2>
         {{ ui.plus_btn('habit-entry-homepage-btn', 'Add Habit') }}
     </div>
     <div>
         <!-- Leetcode thing -->
-        <div class="card-highlight">
+        <div class="_inline-flex-sm">
             <span class="highlight-label">LeetCode: </span>
             <span class="editable-cell">{{ leetcode_records[0].id if leetcode_records else "EXAMPLE" }}</span>
             <button id="leetcode-entry-homepage-btn" class="btn btn-primary">Add Record</button>
