@@ -2,7 +2,7 @@ import { confirmationManager } from './shared/ui/modal-manager.js';
 import { makeToast } from './shared/ui/toast.js';
 
 export function init() {
-    if (!document.querySelector('#style-reference-root')) return;
+    // if (!document.querySelector('#style-reference-root')) return;
 
     document.addEventListener('click', (e) => {
         if (e.target.matches('#default')) {
