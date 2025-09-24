@@ -53,6 +53,13 @@ h3 {
     .desktop-only {
         display: none;
     }
+    /* Suppress underline effect on mobile nav, use bg again */
+    .nav-link::after {
+        display: none;
+    }
+    .nav-link:hover {
+        background-color: var(--accent-subtle);
+    }
 }
 @media (width > 768px) {
     .hamburger-btn { display: none; }

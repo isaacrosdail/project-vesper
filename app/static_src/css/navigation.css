@@ -38,12 +38,22 @@
     padding: var(--space-sm);
     flex-shrink: 1;
     white-space: nowrap;
+    position: relative;
 }
-.nav-link:hover {
-    background-color: var(--accent-hover);
+.nav-link::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 3px;
+    left: 0; /* "pin left edge of rectangle to pos 0 (far left of parent)" */
+    /* note that here if we wanted to make the underline start at right and expand to left, we could replace left 0 with right 0 instead! */
+    bottom: 0;
+    background: var(--accent-subtle);
+    transition: width 0.1s ease;
 }
-.nav-link.active {
-    background-color: var(--accent-hover); /* might add 'nav-active' for separate styling */
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
 }
 .nav-link:focus-visible {
     outline: var(--focus-ring);
