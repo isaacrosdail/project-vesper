@@ -4,17 +4,12 @@
 
 {% block content %}
 
-{% call ui.modal('/habits/', 'habit-entry-dashboard', 'Add Habit') %}
-    <div class="form-group">
-        <label for="name">Habit:</label>
-        <input type="text" id="name" name="name"  required>
-    </div>
-{% endcall %}
+{{ forms.habit_entry_modal() }}
 
 <div class="card-dashboard">
-    <div class="card-header">
-        <h2 class="card-title">Habits</h2>
-        <button id="habit-entry-dashboard-btn" class="btn btn-primary">Add Habit</button>
+    <div class="card-title">
+        <h2>Habits</h2>
+        {{ ui.plus_btn('habit-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Habits', headers, habits, 'habits', 'none') %}
         <td class="{{ headers[0].priority}} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="habits" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>

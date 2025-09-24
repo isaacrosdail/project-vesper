@@ -27,3 +27,26 @@ The core architecture and infrastructure are in place, with individual modules a
 
 ## Attributions
 Weather data provided by [OpenWeatherMap](https://openweathermap.org/), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+
+## Icons
+- Heroicons (MIT License) [LICENSE.heroicons](app/static_src/img/icons/originals/LICENSE.heroicons)
+  © Tailwind Labs, Inc.
+  https://heroicons.com | https://github.com/tailwindlabs/heroicons
+  Used icons (some modified for sizing/positioning):
+  - minus
+  - plus
+  - bars-3
+  - x-mark
+  - scale
+  - fire
+  - trash
+  - user-circle
+  - chevron-down
+  - eye
+  - eye-slash
+
+- SVG Repo (MIT / CC0) [LICENSE.svgrepo](app/static_src/img/icons/originals/LICENSE.svgrepo)
+  Used icons (some modified for sizing/positioning):
+  - Moon Zzz SVG Vector
+  - Tracking Shoe SVG
+  - Construction SVG

@@ -1,0 +1,219 @@
+{# _macros.html - Style macros for consistent styling across templates #}
+{# <!--
+REMEMBER:
+If we're defining reusable batch styles → style.css (.input-standard, .form-group)
+If we're defining reusable COMPONENTS (with structure/behavior/logic) → here ({{ form_input() }}, {{ card() }})
+  - Components = HTML structure + behavior + logic
+  - Styles = just CSS classes
+--> #}
+
+{#
+    Notes for custom modals: Keyboard nav, aria-label param,    
+#}
+
+
+{# Responsive Tables #}
+
+{% macro responsive_table(caption, headers, items, module_name, subtype) %}
+<table id="{{ subtype }}-table" class="table-standard">
+  <caption class="sr-only">{{ caption }}</caption>
+  <thead class="table-header">
+    <tr>
+      {% for col in headers %}
+        <th class="{{ col.priority }}">{{ col.label }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% if items %}
+      {% for item in items %}
+        <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ subtype }}">
+          {{ caller(item, headers) }}
+          <td class="table-cell delete-cell">
+            {{ delete_btn() }}
+          </td>
+        </tr>
+      {% endfor %}
+    {% else %}
+        <tr>
+          <td colspan="99" class="table-empty">
+            No entries yet.
+          </td>
+        </tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endmacro %}
+
+{# TODO: Macro for td template for makeTableRow() #}
+<template id="{{ subtype }}-template">
+  <tr class="table-row" data-module="{{ module_name }}" data-subtype="{{ subtype }}" data-item-id="">
+    {% for col in headers %}
+      <td class="{{ col.priority }}" data-field=""></td>
+    {% endfor %}
+    <td class="table-cell delete-cell"></td>
+  </tr>
+</template>
+
+{# === MODALS === #}
+
+{# Entry form modal #}
+
+{# caller() segment here lets us put whatever 'insides' we want in our modals #}
+{# by sandwiching them between 'call ourmacro(ourparameters,..)' and 'endcall' #}
+{# TODO: NOTES: {% call %} doesn't work with a template that doesn't use caller() #}
+{% macro modal(endpoint, id, title) %}
+<dialog id="{{ id }}-modal" data-endpoint="/{{ endpoint }}">
+    <form>
+        <legend>{{ title }}</legend>
+        <button type="button" class="btn-icon btn-round btn-lg modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>
+        {{ caller() }}
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</dialog>
+{% endmacro %}
+
+
+{# Confirmation Modal #}
+
+{% macro confirmation_modal() %}
+<dialog id="confirmation-modal">
+  <div class="confirmation-content">
+    <p class="confirmation-message">Are you sure?</p>
+    <div class="form-actions">
+      <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
+      <button id="confirm-ok" class="btn btn-primary">OK</button>
+    </div>
+  </div>
+</dialog>
+{% endmacro %}
+
+
+{# Toast Container #}
+
+{% macro toast_container() %}
+<div id="toast-container"></div>
+{% endmacro %}
+
+{# === LINKS === #}
+
+{# Link for returning from error page(s) #}
+
+{% macro error_link(text, endpoint) %}
+<a href="{{ url_for(endpoint) }}"
+    class="error-link btn btn-primary">
+    {{ text }}
+</a>
+{% endmacro %}
+
+
+{# === BUTTON COMPONENTS === #}
+
+{# Note: btn-icon btn-destructive for styling, delete-btn for our JS event listener #}
+{% macro delete_btn() %}
+<button aria-label="Delete item" class="btn-icon btn-square btn-destructive delete-btn">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+  </svg>
+</button>
+{% endmacro %}
+
+{% macro plus_btn(id=None, aria_label=None, extra_classes="") %}
+<button class="btn-icon btn-round btn-primary {{ extra_classes }}"
+        {% if id %} id="{{ id }}"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}
+>
+  {{ plus_svg() }}
+</button>
+{% endmacro %}
+
+{# Plus/Minus SVGs #}
+
+{% macro plus_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+</svg>
+{% endmacro %}
+
+{% macro minus_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12h12" />
+</svg>
+{% endmacro %}
+
+
+{% macro chevron_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+</svg>
+{% endmacro %}
+
+{% macro hamburger_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.5h16.5M3.75 12h16.5m-16.5 6.5h16.5" />
+</svg>
+{% endmacro %}
+
+{% macro split_hamburger_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" aria-hidden="true">
+<g class="line1">
+  <line x1="3.75" y1="5.5" x2="20.25" y2="5.5" stroke-linecap="round"/>
+</g>
+<g class="line2">
+  <line x1="3.75" y1="12" x2="20.25" y2="12" stroke-linecap="round"/>
+</g>
+<g class="line3">
+  <line x1="3.75" y1="18.5" x2="20.25" y2="18.5" stroke-linecap="round"/>
+</g>
+</svg>
+{% endmacro %}
+
+{% macro x_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+</svg>
+{% endmacro %}
+
+{% macro scale_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0 0 12 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 0 1-2.031.352 5.988 5.988 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971Zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 0 1-2.031.352 5.989 5.989 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971Z" />
+</svg>
+{% endmacro %}
+
+{% macro sleep_svg() %}
+<svg class="first-svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M16.78 12.05c.27 0 .46.18.46.46 0 .29-.19.47-.46.47H14.45c-.29 0-.49-.19-.49-.45 0-.19.07-.33.25-.57l1.4-1.87v-.04H14.4c-.27 0-.47-.18-.47-.47 0-.28.2-.47.47-.47h2.17c.29 0 .51.17.51.46 0 .17-.08.3-.26.56L15.4 12.01v.04h1.38ZM11.1 21.96c2.51 0 4.75-1.07 6-2.81-.42.15-1.24.26-2.15.26-5.05 0-8.46-3.31-8.46-8.25 0-.97.14-1.97.38-2.62C5 9.96 3.82 12.19 3.82 14.72c0 4.12 2.99 7.24 7.28 7.24Zm-.02 1.53c-5.19 0-8.78-3.76-8.78-8.65 0-3.75 2.12-6.97 5.2-8.22.47-.2.81-.12 1.01.1.17.21.19.55-.02.95-.31.63-.54 1.84-.54 3.05 0 4.41 2.9 7.22 7.39 7.22 1.15 0 2.07-.17 2.83-.48.36-.14.66-.1.84.08.19.19.25.53.07.96-1.35 3.14-4.33 4.99-8 4.99ZM21.21 8.62c.29 0 .49.2.49.49 0 .31-.2.5-.49.5H18.59c-.31 0-.52-.21-.52-.48 0-.2.07-.36.26-.61l1.65-2.16V6.32H18.53c-.28 0-.49-.2-.49-.51 0-.29.21-.49.49-.49h2.46c.31 0 .54.19.54.48 0 .18-.08.33-.27.59L19.59 8.57v.05h1.62Zm-4.7-3.85c.3 0 .52.21.52.51 0 .33-.22.53-.52.53H13.12c-.34 0-.57-.22-.57-.51 0-.21.08-.35.29-.63l2.37-3.08V1.54H13.05c-.3 0-.53-.19-.53-.52 0-.31.23-.51.53-.51h3.23c.33 0 .57.19.57.5 0 .18-.08.35-.29.62L14.22 4.72v.05h2.29Z"/>
+</svg>
+{% endmacro %}
+
+{% macro calories_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M17 6q2 1 3 3A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 007 11q3-3 3-8 4 3 5 7 2-1 2-4Z" />
+</svg>
+{% endmacro %}
+
+{% macro steps_svg() %}
+<svg xlmns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M1.183 8.285c-.125.196-.125.457.02.656.114.156.291.239.471.239.05 0 .1-.007.149-.02.313.383.705.818 1.197 1.338-.091.209-.054.462.114.637.114.119.267.178.419.178.072 0 .145-.013.213-.04.362.371.767.779 1.219 1.232-.087.211-.045.462.127.634.114.114.263.17.412.17.076 0 .151-.015.222-.044.378.377.784.781 1.222 1.216-.086.211-.044.462.128.633.114.113.262.169.411.169.076 0 .152-.015.223-.045.385.383.79.787 1.219 1.214-.087.211-.045.463.127.634.114.113.262.17.411.17.076 0 .152-.015.223-.044.066.066.133.133.2.2.369.369.757.704 1.162 1.01-.054.227.032.474.236.614.101.069.216.103.329.103.117 0 .232-.035.33-.102.522.324 1.065.608 1.626.857-.003.233.136.455.365.547.071.029.145.042.217.042.16 0 .313-.068.423-.184.562.205 1.138.382 1.722.535.035.227.203.422.441.478.045.011.091.016.135.016.189 0 .365-.093.473-.244.576.125 1.158.231 1.741.324.056.221.24.398.479.434.029.004.058.006.086.006.207 0 .395-.111.499-.283.239.032.477.063.716.093.174.021.346.032.511.032 1.522 0 2.301-.875 2.524-1.694.263-.97-.171-1.979-1.08-2.512-2.425-1.421-3.617-2.628-4.637-4.761-.018-.095-.06-.183-.119-.255-.652-1.427-1.249-3.26-2.08-5.807l-.059-.18c-.074-.226-.285-.386-.523-.401 0 0-.019-.001-.055-.001-.192 0-1.8.058-2.189 1.98-.157.049-.324.073-.501.073-1.558 0-3.603-1.875-4.186-3.409-.117-.307-.27-.86.014-1.111.711-.63.967-1.452.683-2.198C8.924.704 8.2.209 7.433.209c-.336 0-.67.094-.964.273-1.562.949-4.787 3.834-5.87 5.722-.07.122-.093.264-.066.402.119.606.288 1.1.65 1.679zM7.074 1.478c.114-.069.235-.104.36-.104.289 0 .571.191.671.454.108.284-.023.609-.367.914-.346.307-.85 1.027-.331 2.396.745 1.964 3.159 4.161 5.274 4.161.467 0 .904-.105 1.297-.312.17-.09.285-.258.307-.45.088-.777.425-1.089.713-1.213.343 1.052.649 1.986.94 2.826h-.923c-.322 0-.582.261-.582.582 0 .322.261.582.582.582h1.341c.123.329.245.642.368.94h-.835c-.322 0-.582.261-.582.582 0 .322.261.582.582.582h1.356c1.083 2.204 2.397 3.541 5.01 5.072.249.146.425.353.514.585-.093-.003-.189-.01-.288-.022-3.783-.467-7.648-1.264-10.298-3.913-.493-.493-.96-.959-1.401-1.4C4.691 7.654 3.456 6.42 3.064 4.931c1.259-1.354 2.927-2.796 4.01-3.453zM2.185 5.951c.66 1.504 2.363 3.206 7.775 8.613.441.441.908.907 1.401 1.4 2.899 2.899 6.99 3.754 10.979 4.246.035.004.07.008.105.011-.251.196-.61.306-1.044.306-.117 0-.241-.008-.368-.024-.401-.049-.803-.103-1.205-.162-.005-.001-.01-.002-.015-.003s-.011-.001-.016-.002c-.901-.133-1.799-.293-2.676-.502-.003-.001-.005-.002-.007-.002-.002 0-.004-.001-.006-.001-2.401-.574-4.645-1.514-6.373-3.242-1.107-1.107-2.075-2.07-2.929-2.919-.596-.592-1.132-1.126-1.615-1.608 0 0-.001-.001-.001-.001s-.001-.001-.001-.001c-.78-.779-1.422-1.425-1.951-1.973-.002-.003-.004-.005-.007-.008-.003-.003-.006-.005-.008-.008-1.776-1.84-2.276-2.562-2.5-3.476.127-.2.283-.417.462-.644z"/>
+</svg>
+{% endmacro %}
+
+{% macro eye_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg>
+{% endmacro %}
+
+{% macro eye_slash_svg() %}
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <!-- Eye shape -->
+    <path d="M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395" />
+
+    <!-- Pupil -->
+    <path d="M9.88 9.88a3 3 0 1 0 4.243 4.243" />
+
+    <!-- Slash line -->
+    <path class="slash" stroke-linecap="round" stroke-linejoin="round"
+          d="M3 3l18 18" />
+  </svg>
+{% endmacro %}
