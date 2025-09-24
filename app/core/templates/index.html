@@ -42,6 +42,14 @@
     <div class="card-title">
         <h2>My Day</h2>
         {{ ui.plus_btn('task-entry-homepage-btn', 'Add Task') }}
+        <div class="dropdown">
+            <button class="dropdown-toggle">Quick Add <span class="dropdown-toggle-chevron">{{ ui.chevron_svg() }}</span></button>
+            <div class="dropdown-menu">
+                <button id="time-entry-homepage-btn">Time Entry</button>
+                <button id="metric-entry-homepage-btn">Metric Entry</button>
+                <button id="leetcode-entry-homepage-btn">LeetCode Record</button>
+            </div>
+        </div>
     </div>
 
     <div>
@@ -63,8 +71,7 @@
     </div>
 
     <div>
-        <button class="btn btn-primary" id="time-entry-homepage-btn">Add Time Entry</button>
-        <button class="btn btn-primary" id="metric-entry-homepage-btn">Add Metric Entry</button>
+
     </div>
 
 </section>
@@ -76,14 +83,6 @@
         {{ ui.plus_btn('habit-entry-homepage-btn', 'Add Habit') }}
     </div>
     <div>
-        <!-- Leetcode thing -->
-        <div class="_inline-flex-sm">
-            <span class="highlight-label">LeetCode: </span>
-            <span class="editable-cell">{{ leetcode_records[0].id if leetcode_records else "EXAMPLE" }}</span>
-            <button id="leetcode-entry-homepage-btn" class="btn btn-primary">Add Record</button>
-        </div>
-
-
         <ul class="item-list">
         {% for habit in habits %}
             <li class="item {% if habit_info[habit.id].completed_today %}completed{% endif %}">
