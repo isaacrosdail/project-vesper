@@ -30,7 +30,24 @@
 	- Renamed _components.html -> _ui.html
 	- Moved all form modal markup into new _forms.html (imports _ui.html)
 
-## [Tues 09.09.25] - Tying Up Loose Ends
+## [Wed 10.09.25]
+**Log:**
+0. Added last few days to project log
+1. Quick UI Fixes
+	- delete_btn: Fixed SVG icon display issues (sizing/visibility)
+	- Legends: Added basic styling for presentable appearance
+	- Changed product table barcode column to essential in groceries viewmodels.py
+2. Form Improvements
+	- Add Transaction form: Quantity -> type="number" with step + min attributes
+	- Add Transaction & Add Product forms:
+		- Net weight -> type="number" with step + min
+		- Cals per 100g -> type="number" with step + min
+3. Table Functionality
+	- Added "No items yet" text when removing the last row of a table via JS
+	- Table references: Added id="{{subtype}}-table" attribute to responsive_table marco for consistent, maintainable references
+	- Subtype standardization: Updated tasks & habits to use consistent subtypes (task, habit instead of "none")
+
+## [Tues 09.09.25]
 **Log:**
 1. Groceries Module
 	- Scrap "next_item" flow for add_X pages, not worth the headache right now
@@ -73,7 +90,7 @@
 **Log:**
 1. Divied up PROJECT_LOG into archival files, separated by year/month
 
-## [Thurs 04.09.25] - Tying Up Loose Ends, Day 2
+## [Thurs 04.09.25]
 **Log:**
 1. JS
 	- theme-manager.js: Refactored if/else chains to clean object lookups, now uses between() string helper
@@ -88,7 +105,7 @@
 	- Simplified grid layouts in greeting card a bit
 
 
-## [Wed 03.09.25] - Tidying & Tying up loose ends
+## [Wed 03.09.25]
 **Log:**
 0. Extensions: Learn Vim & Vim
 	- ESC => Normal mode (ie, Vim mode) // `i` => Insert mode (ie, what we're used to)
