@@ -366,6 +366,22 @@ input, select, textarea {
     border-color: var(--clr-error);
 }
 
+/* Checklist/item completion styling */
+.item-list {
+    display: grid;
+    gap: var(--gap-sm);
+}
+.item-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.item.completed .item-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
 /* ==== FOOTER ==== */
 footer {
     text-align: center;
@@ -411,13 +427,65 @@ footer {
     filter: brightness(1.2);
 }
 
-.test {
-    border: 1px solid red;
+/* Dropdown menu stuff */
+.dropdown {
     position: relative;
 }
-.first-svg {
-    position: absolute;
+.dropdown-toggle {
+    background-color: var(--bg-light);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    padding: var(--space-sm);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    cursor: pointer;
 }
-.second-svg {
+.dropdown-toggle-chevron svg {
+    width: 1em;
+    height: 1em;
+    transition: transform 0.2s ease;
+}
+.dropdown-menu {
+    display: none;
+    flex-direction: column;
     position: absolute;
+    background-color: var(--bg);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+}
+/* TODO: After prototyping, these will become applied on click, not hover */
+.dropdown:hover svg {
+    transform: rotate(180deg);
+}
+.dropdown:hover .dropdown-menu {
+    display: flex;
+}
+.dropdown-menu {
+    background-color: var(--bg-light);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    position: fixed;  /* important since it takes it out of the DOM flow? */
+    max-width: 50%;
+    z-index: 200;
+}
+.dropdown-menu > button {
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+}
+/* Style hover so its corners don't jut out from ul element itself */
+.dropdown-menu > button:first-child:hover {
+    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
+}
+.dropdown-menu > button:last-child:hover {
+    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
+}
+.dropdown-menu > button:only-child:hover {
+    border-radius: var(--border-radius);
+}
+.dropdown-menu > button:hover {
+    background-color: var(--accent-hover);
+    cursor: pointer;
 }

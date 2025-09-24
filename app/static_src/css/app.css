@@ -179,7 +179,10 @@ h3 {
     width: 100%;
     height: clamp(150px, 15vh, 300px);
 }
-
+/* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
+.highlight-label { 
+    font-weight: var(--font-weight-semibold);
+}
 
 /* ===================================
     PAGE-SPECIFIC: Login / Register Pages
