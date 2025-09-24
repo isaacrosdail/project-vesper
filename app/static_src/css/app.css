@@ -11,8 +11,8 @@
 @import url('./animations.css') layer(animations);
 
 /* Breakpoints:
- * width <= 640px   Mobile nav toggle, chart stacking
- * width > 640px    Hide mobile navlinks?
+ * width <= 768px   Mobile nav toggle, chart stacking
+ * width > 768px    Hide mobile navlinks?
  * width <= 768px   Hide 'desktop-only' classed table columns
 */
 
@@ -32,10 +32,10 @@
 
 /* For profile SVG button in navbar, need to refine */
 /* TODO: Ought to move these into components.css, no? */
-#settings-btn {
+#profile-btn {
     cursor: pointer;
 }
-#settings-btn svg {
+#profile-btn svg {
     color: var(--text);
     pointer-events: none;
     width: 25px;
@@ -46,7 +46,7 @@
     flex-direction: column;
     gap: var(--gap-md);
 }
-.settings-modal[open] {
+.profile-modal[open] {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
@@ -410,12 +410,12 @@ nav {
     padding: var(--space-md) var(--space-md); /* for easier touch targets */
 }
 /* ==== MEDIA QUERIES ==== */
-@media (width <= 640px) {
+@media (width <= 768px) {
     .navlinks {
         display: none;
     }
 }
-@media (width > 640px) {
+@media (width > 768px) {
     #hamburger-btn { display: none; }
 }
 
