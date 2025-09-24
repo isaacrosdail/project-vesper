@@ -1,41 +1,49 @@
 // Auto-runner, attaches DOM listeners on DOMContentLoaded at top level
-// Optional chaining defends against issues on pages w/o a navbar?
-// Safe to import in index.js (entry point for shared/)
+
+function toggleMobileNav(mobileNav, hamburgerBtn) {
+    mobileNav?.classList.toggle('is-open');
+    let isOpen = mobileNav?.classList.contains('is-open'); // set proper bool for is-open state
+    hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value 
+    if (isOpen) {
+        mobileNav.removeAttribute('inert');
+        mobileNav.querySelector('a')?.focus(); // focus on first anchor el in nav
+    } else {
+        mobileNav.setAttribute('inert', '');
+    }
+}
 
 window.addEventListener('DOMContentLoaded', () => {
-    const mobilenavlinks = document.querySelector('#mobilenav');
+    const mobileNav = document.querySelector('#nav-mobile-container');
     const modal = document.querySelector('.profile-modal');
     const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
     const hamburgerBtn = document.querySelector('.hamburger-btn');
 
     document.addEventListener('click', (e) => {
+        let isOpen = mobileNav?.classList.contains('is-open');
+        
         // Toggle mobile nav
         if (e.target.matches('.hamburger-btn')) {
-            mobilenavlinks?.classList.toggle('is-open');
-            const isOpen = mobilenavlinks?.classList.contains('is-open'); // set proper bool for is-open state
-            hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value 
-            if (isOpen) mobilenavlinks.querySelector('a')?.focus(); // focus on first anchor el in nav
+            toggleMobileNav(mobileNav, hamburgerBtn);
         }
 
         // TODO: Auto-close mobile-nav upon click elsewhere
-
-        // Open profile settings modal
-        if (e.target.matches('.profile-btn')) {
-            // Optional chaining avoids null errors if modal is missing
-            modal?.showModal(); // ESC key & blur automatically handled
+        // mobile nav is open + click wasnt in navbar
+        if (isOpen && !e.target.closest('#mobilenav') && !e.target.matches('.hamburger-btn')) {
+            toggleMobileNav(mobileNav, hamburgerBtn);
         }
-        // Close profile settings modal
+        if (e.target.matches('.profile-btn')) {
+            modal?.showModal();
+        }
         if (e.target.matches('#close-profile-modal-btn')) {
             modal?.close();
         }
     });
 
-    // Reset nav state when switching to desktop (close, reset aria-expanded)
+    // Reset nav state when switching to desktop
     mq.addEventListener('change', (e) => {
-        // True when window <= 640px
-        if (!e.matches) {
-            mobilenavlinks.classList.remove('is-open');
-            hamburgerBtn.setAttribute('aria-expanded', 'false');
+        // True when window <= 768px
+        if (mobileNav?.classList.contains('is-open') && !e.matches) {
+            toggleMobileNav(mobileNav, hamburgerBtn);
         }
     });
 });

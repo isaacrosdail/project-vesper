@@ -2,17 +2,11 @@
 /* NAVLINKS */
 /* Base navlinks styling (desktop-first) */
 /* ==== NAVIGATION ==== */
-/* TODO: Should use our btn-icon for these instead, and perhaps btn-lg */
-.hamburger-btn {
-    min-width: 40px;
-    min-height: 40px;
-}
-.navlinks {
+.nav-desktop {
     display: flex;
     gap: var(--gap-lg);
 }
 .nav-link {
-    text-decoration: none;
     border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
     padding: var(--space-sm);
     flex-shrink: 1;
@@ -20,11 +14,9 @@
 }
 .nav-link:hover {
     background-color: var(--accent-hover);
-    /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
 }
 .nav-link.active {
     background-color: var(--accent-hover); /* might add 'nav-active' for separate styling */
-    /* color: var(--text-inverse); TODO: Again, well on dark, not light */
 }
 .nav-link:focus-visible {
     outline: var(--focus-ring);
@@ -65,20 +57,21 @@ nav {
     margin-right: var(--space-lg);
 }
 /* Container: visibility, positioning, stacking */
-.mobilenav {
+.nav-mobile-container {
     position: absolute;
     inset: 100% 0 auto 0; /* top right bottom left */
     z-index: 201;
     background-color: var(--accent-strong);
+    padding: var(--space-xs);
 
     opacity: 0;
     pointer-events: none;
     transform: translateY(-300px) scaleY(0.95); /* "out of place" & squished to start, so transition can apply to something */
     transform-origin: top center;
     transition: 
-        transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
-.mobilenav.is-open {
+.nav-mobile-container.is-open {
     display: flex;
     flex-direction: column;
     gap: var(--gap-lg);
@@ -88,14 +81,14 @@ nav {
     transform: translateY(0) scaleY(1); /* drops in & stretches to full */
 }
 /* Content: layout of links themselves */
-.mobilenavlist {
+.nav-mobile {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%; /* stretch column */
     gap: var(--gap-lg);
 }
-.mobilenavlist a {
+.nav-mobile a {
     display: block; /* each line fills parent's width */
     width: 100%;
     text-align: center;

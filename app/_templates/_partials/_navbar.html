@@ -22,8 +22,8 @@
     {% endif %}
 {% endmacro %}
 
-{# TODO: Note: navlinks is the desktop name, need to rename after switching over logic/styling #}
-{% macro navigation_links(type='navlinks') %}
+{# TODO: Note: nav-desktop is the desktop name, need to rename after switching over logic/styling #}
+{% macro navigation_links(type='nav-desktop') %}
 <div id="{{ type }}" class="{{ type }}">
     {% if current_user.is_authenticated %}
         {{ nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
@@ -38,6 +38,7 @@
     {% endif %}
 </div>
 {% endmacro %}
+
 <div class="nav-anchor">
     <nav aria-label="Main navigation">
         <div class="navbar-content">
@@ -45,11 +46,11 @@
             <div class="nav-left">
                 <a href="{{ url_for('main.home') }}" class="branding">Vesper</a>
 
-                <button class="hamburger-btn"
-                        aria-controls="mobilenav" 
+                <button class="btn-icon btn-square hamburger-btn"
+                        aria-controls="nav-mobile-container" 
                         aria-expanded="false" 
                         aria-label="Toggle navigation menu">
-                    ☰
+                    {{ ui.hamburger_svg() }}
                 </button>
                 
                 {{ navigation_links() }}
@@ -76,8 +77,8 @@
         </div>
     </nav>
 
-    <div id="mobilenav" class="mobilenav">
-        {{ navigation_links('mobilenavlist') }}
+    <div id="nav-mobile-container" class="nav-mobile-container" inert>
+        {{ navigation_links('nav-mobile') }}
     </div>
 </div>
 

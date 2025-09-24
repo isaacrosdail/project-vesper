@@ -43,24 +43,22 @@ h3 {
 
 /* ==== MEDIA QUERIES ==== */
 @media (width <= 768px) {
-    .navlinks {
+    .nav-desktop {
+        display: none;
+    }
+    /* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
+       Let's us easily "condense" our tables to provide a better mobile experience */
+    .desktop-only {
         display: none;
     }
 }
 @media (width > 768px) {
     .hamburger-btn { display: none; }
-}
-/* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
- * Let's us easily "condense" our tables to provide a better mobile experience
-*/
-@media (width <= 768px) {
-    .desktop-only {
-        display: none;
-    }
+    .nav-mobile-container { display: none; }
 }
 /* TODO: Tune this later as we add some basic animations/transitions */
 @media (prefers-reduced-motion: reduce) {
-    .navlinks { transition: none; }
+    .nav-desktop { transition: none; }
     .icon-wiggle { animation: none; transition: none; }
 }
 
