@@ -2,6 +2,32 @@
 /* NAVLINKS */
 /* Base navlinks styling (desktop-first) */
 /* ==== NAVIGATION ==== */
+
+/* Hamburger button -> X effect */
+.hamburger-btn .line1,
+.hamburger-btn .line2,
+.hamburger-btn .line3 {
+    /* By default, browsers sometimes use the whole SVG's viewBox as the transform reference */
+    /* fill-box forces it to use the _bounding box of the actual shape(s)_ inside .line1, etc */
+    /* This way, each group behaves more like a div wrapping content so we can rotate _that group's box_, thus making transform-origin below use left center _of THIS current line_ not the viewbox as a whole */
+    transform-box: fill-box;
+    transition: transform 0.2s ease-out;
+}
+.hamburger-btn .line2 {
+    transition: opacity var(--transition-fade, 0.2s ease-out);
+}
+.hamburger-btn.is-open .line1 {
+    transform-origin: left center;
+    transform: rotate(var(--hamburger-angle)) scaleX(var(--hamburger-scale));
+}
+.hamburger-btn.is-open .line3 {
+    transform-origin: left bottom;
+    transform: rotate(calc(-1 * var(--hamburger-angle))) scaleX(var(--hamburger-scale));
+}
+.hamburger-btn.is-open .line2 {
+    opacity: 0;
+}
+
 .nav-desktop {
     display: flex;
     gap: var(--gap-lg);
