@@ -51,8 +51,13 @@ def tasks(session):
         return jsonify({
             "success": True, 
             "message": "Task added successfully.",
-            "task": {
+            "data": {
                 "id": new_task.id,
-                "name": new_task.name
+                "name": new_task.name,
+                "is_done": new_task.is_done,
+                "priority": new_task.priority.value,
+                "is_frog": new_task.is_frog,
+                "due_date": new_task.due_date.isoformat() if new_task.due_date else None,
+                "subtype": "task"
             }
         }), 200

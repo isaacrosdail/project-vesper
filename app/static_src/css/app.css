@@ -85,10 +85,18 @@ h3 {
     flex-direction: column;
     gap: var(--gap-md);
 }
+
 /* TODO: Tune this later as we add some basic animations/transitions */
 @media (prefers-reduced-motion: reduce) {
     .nav-desktop { transition: none; }
     .icon-wiggle { animation: none; transition: none; }
+}
+/* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
+.highlight-label { font-weight: 600; }
+
+.card-highlight {
+    display: flex;
+    align-items: center;
 }
 
 
@@ -331,21 +339,20 @@ dialog::backdrop {
 
 
 /* Dashboard checkbox completion effect */
-.habit-list {
-    list-style: none;
+.item-list {
     display: grid;
     gap: var(--gap-sm);
 }
-.habit-row {
+.item-row {
     display: flex;
     align-items: center;
     gap: var(--gap-sm);
 }
-.habit-title {
+.item-title {
     color: var(--text);
 }
 
-.habit-item.completed .habit-title {
+.item.completed .item-title {
     text-decoration: line-through;
     color: var(--text-muted);
 }
