@@ -125,7 +125,7 @@ dialog {
     transform: translate(-50%, -50%);
     border: none;
     border-radius: var(--border-radius);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); /* tODO: Tune!/tokenize */
 }
 dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
