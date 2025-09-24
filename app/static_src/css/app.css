@@ -87,10 +87,10 @@ h3 {
     transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
     width: 20px;
     height: 20px;
-    border: 1px solid var(--color-error);
-    border-radius: 50%;
+    border: 1px solid var(--clr-error);
+    /* border-radius: 50%; */
     opacity: 0;
-    transition: var(--fade-in);
+    transition: var(--transition-fade);
 }
 
 /* Show hidden controls on hover */
@@ -105,7 +105,7 @@ h3 {
 }
 .qty-controls button {
     opacity: 0;
-    transition: var(--fade-in);
+    transition: var(--transition-fade);
     color: var(--accent-subtle);
     width: 20px;
     height: 20px;
