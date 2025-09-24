@@ -249,25 +249,74 @@ h3 {
 .context-menu-positioning {
     position: relative;
 }
-/* Grid defaults for token swatches */
-.demo-grid-container { 
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 100px));
-    gap: var(--gap-md);
-    align-items: center;
+/* Override btn-icon styling to show borders for debug/tuning */
+html[data-page="devtools.style_reference"] .btn-icon {
+    border: 1px solid red;
 }
-/* Default stylings for component swatches */
-/* Only size (aspect-ratio, max-width) and centering content */
-.demo-grid-container > div {
+
+/* Base grid styles, shared by all demo containers */
+.demo-section,
+.demo-subsection,
+.demo-grid-container {
+    display: grid;
+    gap: var(--gap-md);
+}
+/* Overall section-level grids */
+.demo-section {
+    grid-template-rows: auto 1fr; /* Headers + "rest" */
+}
+/* Subsections within said section grids (per component) */
+.demo-subsection {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+/* Grid defaults for token tiles */
+.demo-grid-container { 
+    /* Creates as many columns as will fit, each a min of 40px but grows evenly to fill space */
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    align-items: center; /* controls vertical alignment of content inside each grid cell */
+}
+/* To make border-color clearly visible for tuning */
+.token-container {
+    border: 4px solid var(--border-color);
+}
+.tile,
+.stepped-bg,
+.stepped-accents {
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+}
+/* Design token tiles - smaller */
+.tile {
     aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     max-width: 100px;
-    border: 1px solid var(--text);
-    border-radius: var(--border-radius);
 }
-/* Target components to let them breathe */
-.demo-grid-container:has(:not(div)) {
-    grid-template-columns:  repeat(auto-fit, minmax(80px, 1fr));
+/* Stepped gradient tiles for bg/accents */
+.stepped-bg,
+.stepped-accents {
+    grid-column: 1 / -1; /* span the whole row */
+    display: flex;
+    justify-content: space-evenly; /* distribute labels evenly across */
+    align-items: center;
+    height: 80px;
+}
+/* Stepped gradient backgrounds */
+.stepped-bg {
+    background: linear-gradient(
+        to right,
+        var(--bg-dark)   0%, var(--bg-dark)  25%,
+        var(--bg)       25%, var(--bg)       50%,
+        var(--bg-light) 50%, var(--bg-light) 75%,
+        var(--bg-hover) 75%, var(--bg-hover) 100%
+    );
+}
+.stepped-accents {
+    background: linear-gradient(
+        to right,
+        var(--accent-strong)   0%, var(--accent-strong)  33%,
+        var(--accent-subtle)  33%, var(--accent-subtle)  66%,
+        var(--accent-hover)   66%, var(--accent-hover)   100%
+    );
 }
