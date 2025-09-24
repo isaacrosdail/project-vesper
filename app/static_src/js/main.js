@@ -35,14 +35,14 @@ export async function initMain() {
 async function initUserStore() {
     try {
         await userStore.fetch();
-        console.log('User timezone loaded:', userStore.data.timezone);
+        // console.log('User timezone loaded:', userStore.data.timezone);
     } catch (error) {
         if (!userStore.data) {
             userStore.data = {};
         }
         // Fall back to browser timezone
         userStore.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        console.log(`Fallback to browser timezone: `, userStore.data.timezone);
+        // console.log(`Fallback to browser timezone: `, userStore.data.timezone);
     }
 }
 

@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tooltip.className = 'tooltip-popup';
             tooltip.setAttribute('role', 'tooltip'); // For a11y
             tooltip.setAttribute('aria-hidden', 'false');
-            tooltip.setAttribute('aria-describedby', tooltip.id)
+            element.setAttribute('aria-describedby', tooltip.id) // Needs to be on trigger, not tooltip itself
             tooltip.textContent = element.getAttribute('data-tip'); // get text from HTML's data attr
 
             const tooltipPos = e.target.getBoundingClientRect(); // gives us position info for triggers
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tooltip.style.position = 'fixed';
             tooltip.style.left = tooltipPos.left + 'px';
             tooltip.style.top = tooltipPos.bottom + 'px';
-            tooltip.style.zIndex = '1000';
+            tooltip.style.zIndex = '1000'; // TODO: Consider dropping to 100-199 range to adhere to z-index notes in app.css
             document.body.appendChild(tooltip);
 
             const tooltipRect = tooltip.getBoundingClientRect();

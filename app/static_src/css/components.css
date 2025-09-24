@@ -144,7 +144,7 @@ dialog::backdrop {
 .modal-close:hover {
     color: var(--text-destructive);
 }
-
+/* TODO: Add some delay on hover & refine styles setup */
 .tooltip-popup { 
     position: relative; /* also makes it act as anchor for ::after ? */
     border: var(--border-default);
@@ -218,6 +218,7 @@ input, select, textarea {
     border: var(--border-default);
     border-radius: var(--border-radius);
     padding: 0.5rem 0.75rem;
+    accent-color: var(--accent-subtle);
 }
 :where(input, select, textarea):focus-visible {
     outline: var(--focus-ring);
@@ -283,7 +284,6 @@ input, select, textarea {
 }
 .table-row:hover {
     background-color: var(--accent-hover);
-    color: var(--text-inverse); /* TODO: Needs fixing/tuning */
 }
 
 /* ===== CONTEXT MENU ===== */
