@@ -4,31 +4,12 @@
 
 {% block content %}
 
-{% call ui.modal('/tasks/', 'task-entry-dashboard', 'Add Task') %}
-    <div class="form-group">
-        <label for="name">Task:</label>
-        <input type="text" id="name" name="name" required>
-    </div>
-    <div class="form-group">
-        <label for="priority">Priority</label>
-        <select name="priority" id="priority">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-        </select>
-    </div>
-    <input type="checkbox" id="is_frog" name="is_frog">
-    <label for="is_frog">"Daily Frog" Task?</label><br>
-    <div class="form-group">
-        <label for="due_date">Due:</label>
-        <input type="date" id="due_date" name="due_date">
-    </div>
-{% endcall %}
+{{ forms.task_entry_modal() }}
 
 <div class="card-dashboard" id="tasks-dashboard-table">
-    <div class="card-header">
-        <h2 class="card-title">Tasks</h2>
-        <button id="task-entry-dashboard-btn" class="btn btn-primary">Add Task</button>
+    <div class="card-title">
+        <h2>Tasks</h2>
+        {{ ui.plus_btn('task-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'none') %}
         <td class="{{ headers[0].priority }} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="tasks" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>

@@ -11,52 +11,57 @@
  * Can either have left this in: @layer components {.. OR simply specify layer(components) in import */
 
 
-/* ======= BUTTONS ======= */
-/* Base button styling: shape + ergonomics goes here */
+/* =========================================
+   Base button shapes/ergonomics
+   ========================================= */
+
 .btn {
     display: inline-flex;       /* icons+text align*/
     align-items: center;        /* for icon+label vertical centering? */
     justify-content: center;    /* center text when full width */
-    min-height: 2.5rem;         /* ensure big enough for touch */
-    cursor: pointer;
     user-select: none;
     padding: var(--space-sm) var(--space-md);
     border: var(--border-default);
     border-radius: var(--border-radius);
     gap: var(--gap-sm);
 }
-/* Subtle "pressed" effect for active buttons */
-.btn:active {
-    transform: translateY(1px);
-    filter: brightness(0.95);
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: var(--btn-size-md);
+    height: var(--btn-size-md);
 }
+.btn, .btn-icon {
+    cursor: pointer;
+}
+/* =========================================
+   Shared states
+   ========================================= */
+
 /* TODO: Focus ring: visual feedback for keyboard users */
-.btn:focus-visible {
-    outline: red;
-    outline-offset: 2px;
+.btn:focus-visible,
+.btn-icon:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
 }
 /* Catch native + ARIA-disabled buttons */
 .btn[disabled],
-.btn[aria-disabled="true"] {
+.btn-icon[disabled],
+.btn[aria-disabled="true"],
+.btn-icon[aria-disabled="true"] {
     opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
 }
-.btn-primary {
-    background-color: var(--accent-subtle);
-    color: var(--text);
-    border-color: var(--border-color);
+/* Pressed effect (only for text buttons) */
+.btn:active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
 }
-.btn-secondary {
-    background-color: var(--bg-light);
-    color: var(--text-muted);
-    border-color: var(--border-color);
-}
-.btn-destructive {
-    color: var(--text-destructive);
-    border-color: var(--text-destructive);
-}
-/* Scope hover styles (skip on touchscreen) */
+
+/* Hover states (skip on touchscreen) */
 /* Color-mixing with --text ensures light mode buttons get lighter AND dark mode buttons get darker */
 @media (hover: hover) {
     .btn-primary:hover {
@@ -70,10 +75,111 @@
         background-color: var(--text-destructive);
     }
 }
+<<<<<<< HEAD
 .form-group {
     display: flex;
     flex-direction: column;
     margin-bottom: 1rem;
+=======
+/* =========================================
+   Intent variants
+   ========================================= */
+.btn-primary {
+    background-color: var(--accent-subtle);
+}
+.btn-secondary {
+    background-color: var(--bg-light);
+}
+.btn-destructive {
+    color: var(--text-destructive);
+    border-color: var(--text-destructive);
+}
+
+/* =========================================
+   Form factor modifiers
+   ========================================= */
+/* Icon sizing (proportional: always 50% of buttons) */
+.btn-icon svg {
+    pointer-events: none;
+    width: calc(var(--btn-size-md) * var(--icon-scale));
+    height: calc(var(--btn-size-md) * var(--icon-scale));
+}
+.btn-round {
+    border-radius: 50%;
+}
+.btn-square {
+    border-radius: var(--border-radius);
+}
+
+/* =========================================
+   Size modifiers
+   ========================================= */
+.btn-lg {
+    width: var(--btn-size-lg);
+    height: var(--btn-size-lg);
+}
+.btn-lg svg {
+    width: calc(var(--btn-size-lg) * var(--icon-scale));
+    height: calc(var(--btn-size-lg) * var(--icon-scale));
+}
+
+
+.profile-modal[open] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+}
+
+dialog {
+    background-color: var(--bg);
+    padding: var(--space-xl);
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+/* Modal X button styling */
+.modal-close {
+    position: absolute;
+    inset: 0.5rem 1.5rem auto auto; /* top right bottom left */
+    padding: var(--space-xs) var(--space-sm); /* override btn: smaller box */
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    font-size: var(--font-size-xl);
+}
+.modal-close:hover {
+    color: var(--text-destructive);
+}
+
+.tooltip-popup { 
+    position: relative; /* also makes it act as anchor for ::after ? */
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
+    color: var(--bg); /* then use current bg as text for color parity */
+    overflow-wrap: break-word;
+    padding: 4px 4px;
+    margin-top: 8px;
+    max-width: 28ch;
+}
+.tooltip-popup:not(#no-after)::after {
+    content: "";
+    position: absolute;
+    left: var(--carrot-pos, 50%); /* --carrot-pos calculated via JS */
+    transform: translate(-50%, -40%);
+    border: 0.4rem solid transparent; /* forms our triangle "arrow" */
+    border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
+    opacity: 1;
+    top: -0.4rem;
+>>>>>>> 8a11495 (macros: expand component classes, add macros & SVGs, begin tabbed modal setup)
 }
 
 /* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
@@ -83,8 +189,13 @@
     border-radius: var(--border-radius);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     background-color: var(--bg);
+<<<<<<< HEAD
     border: solid 1px var(--border-color);
     position: relative; /* for card-title positioning */
+=======
+    border: var(--border-default);
+    position: relative; /* positioning context for card-title */
+>>>>>>> 8a11495 (macros: expand component classes, add macros & SVGs, begin tabbed modal setup)
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
@@ -189,17 +300,17 @@
         var(--bg-dark) 48%, /* Top half */
         var(--bg) 52%      /* Bottom half */
     );
-    padding: 0 0.02rem;
-    font-size: 1.25rem;
-    line-height: var(--line-height-higher);
-    font-weight: 600;
-    pointer-events: none;
-}
-/* Getting our "Add __" buttons to appear above top right of tables */
-.card-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: var(--gap-sm);
+
+    padding: 0 0.05rem;
+}
+.card-title h2 {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-higher);
+    font-weight: var(--font-weight-bigger);
+    pointer-events: none;
 }
 
 #toast-container {
@@ -255,8 +366,40 @@ footer {
     font-size: 0.9em;
 }
 
-/* TABS (for tabbed modal(s) */
-.tabs button.active {
+
+/* TABBED MODALS */
+.tab-group {
+    display: flex;
+    align-items: stretch;
+    padding: var(--space-xs);
+    gap: var(--gap-xs);
+    background-color: var(--bg-light);
+}
+.tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--space-sm);
+}
+.tab svg {
+    width: 1em;
+    height: 1em;
+}
+.tab-group, .tab {
+    border-radius: var(--border-radius);
+}
+.tab:hover {
+    background-color: var(--bg-hover);
+    filter: brightness(0.9);
+}
+.tab:active {
+    background-color: var(--bg-hover);
+    transform: translateY(1px);
+    filter: brightness(0.9);
+}
+.tab.active {
+    background-color: var(--accent-subtle);
     transform: translateY(1px);
     filter: brightness(0.95);
 }
