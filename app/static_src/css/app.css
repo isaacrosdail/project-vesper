@@ -30,6 +30,24 @@
     --my-bool: clamp(0, 100vw - 640px, 1); /* effectively a media query for above/below 640px width? Need to find use cases */
 }
 
+/* for delete_btn svg, need to move to components.css */
+.delete-btn {
+    width: 2.5rem;
+    padding: var(--space-sm);
+}
+.delete-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+/* For app-wide legend text, move to components.css */
+legend {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bigger);
+    color: var(--text);
+    margin-bottom: var(--space-md);
+    padding: 0 0 var(--space-lg);
+}
+
 /* For profile SVG button in navbar, need to refine */
 /* TODO: Ought to move these into components.css, no? */
 #profile-btn {

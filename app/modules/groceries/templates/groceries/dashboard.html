@@ -28,10 +28,10 @@
 
 
 <div class="card-dashboard">
-    <div class="card-header">
-        <h2 class="card-title">Grocery - Recent Transactions</h2>
-        <a href="{{ url_for('groceries.transactions')}}" class="btn btn-primary">
-            Log New Transaction
+    <div class="card-title">
+        <h2>Grocery - Recent Transactions</h2>
+        <a href="{{ url_for('groceries.transactions')}}" class="btn btn-primary btn-icon">
+            {{ ui.plus_svg() }}
         </a>
     </div>
     {% call(item, headers) ui.responsive_table('Recent Transactions', transaction_headers, transactions, 'groceries', 'transaction') %}
@@ -45,10 +45,10 @@
 </div>
 
 <div class="card-dashboard">
-    <div class="card-header">
-        <h2 class="card-title">Product Catalog</h2>
-        <a href="{{ url_for('groceries.products')}}" class="btn btn-primary">
-            Add New Product
+    <div class="card-title">
+        <h2>Product Catalog</h2>
+        <a href="{{ url_for('groceries.products')}}" class="btn btn-primary btn-icon">
+            {{ ui.plus_svg() }}
         </a>
     </div>
     {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products, 'groceries', 'product') %}

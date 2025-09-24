@@ -25,6 +25,18 @@
     border-radius: var(--border-radius);
     gap: var(--gap-sm);
 }
+/* For icon-only (eg, '+' buttons) */
+.btn-icon {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 50%;
+}
+.btn-icon svg {
+    width: 1rem;
+    height: 1rem;
+    pointer-events: none;
+}
 /* Subtle "pressed" effect for active buttons */
 .btn:active {
     transform: translateY(1px);
@@ -189,17 +201,17 @@
         var(--bg-dark) 48%, /* Top half */
         var(--bg) 52%      /* Bottom half */
     );
-    padding: 0 0.02rem;
-    font-size: 1.25rem;
-    line-height: var(--line-height-higher);
-    font-weight: 600;
-    pointer-events: none;
-}
-/* Getting our "Add __" buttons to appear above top right of tables */
-.card-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: var(--gap-sm);
+
+    padding: 0 0.05rem;
+}
+.card-title h2 {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-higher);
+    font-weight: var(--font-weight-bigger);
+    pointer-events: none;
 }
 
 #toast-container {

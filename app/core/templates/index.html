@@ -7,6 +7,14 @@
 {% block content_mod %}content--narrow{% endblock %}
 
 {% block content %}
+
+{# Modals #}
+{{ forms.task_entry_modal('task-entry-homepage', 'Add Task') }}
+{{ forms.habit_entry_modal('habit-entry-homepage', 'Add Habit') }}
+{{ forms.metric_entry_modal('metric-entry-homepage', 'Add Metric Entry') }}
+{{ forms.time_entry_modal('time-entry-homepage', 'Add Time Entry') }}
+{{ forms.leetcode_entry_modal() }}
+
 {# Greeting & Time/Date Card #}
 <section id="greeting-card" class="card-dashboard">
     <div class="time-section">
@@ -29,7 +37,11 @@
 
 {# "My Day" Card #}
 <section id="my-day-card" class="card-dashboard">
-    <h2 class="card-title">My Day</h2>
+    <div class="card-title">
+        <h2>My Day</h2>
+        <button class="btn btn-primary btn-icon" id="task-entry-homepage-btn">{{ ui.plus_svg() }}</button>
+    </div>
+
     <div>
         <span>Today's Frog: </span>
         <span id="intention-text">
@@ -44,77 +56,27 @@
 
     <div>
         <button class="btn btn-primary" id="time-entry-homepage-btn">Add Time Entry</button>
-        {{ ui.time_entry_modal('time-entry-homepage', 'Add Time Entry') }}
         <button class="btn btn-primary" id="metric-entry-homepage-btn">Add Metric Entry</button>
-        {{ ui.metric_entry_modal('metric-entry-homepage', 'Add Metric Entry') }}
     </div>
 
 </section>
 
 {# Daily Habits Card #}
 <section id="daily-habits-card" class="card-dashboard">
-    <h2 class="card-title">Daily Habits</h2>
+    <div class="card-title">
+        <h2>Daily Habits</h2>
+        <button class="btn btn-primary btn-icon" id="habit-entry-homepage-btn">{{ ui.plus_svg() }}</button>
+    </div>
     <div>
-        <button class="btn btn-primary" id="habit-entry-homepage-btn">Add Habit</button>
-        {% call ui.modal('/habits/', 'habit-entry-homepage', 'Add Habit') %}
-        <div class="form-group">
-            <label for="name">Habit:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        {% endcall %}
-
         <!-- Leetcode thing -->
-        <span>LeetCode: </span>
-        <span class="editable-cell">{{ leetcode_records[0].id if leetcode_records else "EXAMPLE" }}</span>
-        <button id="leetcode-entry-homepage-btn" class="btn btn-primary">Add LeetCode Record</button>
-        {% call ui.modal('/habits/leetcode_record', 'leetcode-entry-homepage', 'Add LeetCode Record') %}
-            <div class="form-group">
-                <label for="leetcode_id">LeetCode Problem ID:</label>
-                <input type="number" id="leetcode_id" name="leetcode_id" min="1" step="1" required>
-            </div>
-            <fieldset class="radio-row form-group">
-                <legend>Difficulty:</legend>
-                <div>
-                    <input type="radio" id="easy" name="difficulty" value="easy" checked>
-                    <label for="easy">Easy</label>
-                </div>
-                <div>
-                    <input type="radio" id="medium" name="difficulty" value="medium">
-                    <label for="medium">Medium</label>
-                </div>
-                <div>
-                    <input type="radio" id="hard" name="difficulty" value="hard">
-                    <label for="hard">Hard</label>
-                </div>
-            </fieldset>
-            <div class="form-group">
-                <label for="language">Language Used:</label>
-                <select name="language" id="language">
-                    <option value="Python">Python</option>
-                    <option value="JavaScript">JavaScript</option>
-                    <option value="C">C</option>
-                    <option value="C++">C++</option>
-                </select>
-            </div>
-            <fieldset class="radio-row form-group">
-                <legend>Status:</legend>
-                <div>
-                    <input type="radio" id="solved" name="lcstatus" value="solved" checked>
-                    <label for="solved">Solved</label>
-                </div>
-                <div>
-                    <input type="radio" id="attempted" name="lcstatus" value="attempted">
-                    <label for="attempted">Attempted</label>
-                </div>
-                <div>
-                    <input type="radio" id="reviewed" name="lcstatus" value="reviewed">
-                    <label for="reviewed">Reviewed</label>
-                </div>
-            </fieldset>
-            
-        {% endcall %}
+        <div class="card-highlight">
+            <span class="highlight-label">LeetCode: </span>
+            <span class="editable-cell">{{ leetcode_records[0].id if leetcode_records else "EXAMPLE" }}</span>
+            <button id="leetcode-entry-homepage-btn" class="btn btn-primary">Add Record</button>
+        </div>
 
-        <ul class="habit-list">
+
+        <ul class="item-list">
         {% for habit in habits %}
             <li class="habit-item {% if habit_info[habit.id].completed_today %}completed{% endif %}">
                 <label class="habit-row">
