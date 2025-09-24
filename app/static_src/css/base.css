@@ -80,10 +80,6 @@ ol,ul,menu {
 button, input, select, optgroup, textarea, ::file-selector-button {
   font: inherit; font-feature-settings: inherit; font-variation-settings: inherit; letter-spacing: inherit;
 }
-::selection {
-    background-color: var(--accent-subtle);
-    color: var(--text-inverse);
-}
 ::placeholder, .placeholder-text {
     color: var(--text-muted);
 }
