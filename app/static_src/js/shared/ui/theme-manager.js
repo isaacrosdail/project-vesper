@@ -31,7 +31,6 @@ function setCookie() {
     const cookieVal = themeMap[themeSetting] ?? "system";
 
     document.cookie = `theme=${cookieVal}; path=/; max-age=31536000`;
-    console.log(`Cookie set as: ${document.cookie}`)
 }
 
 function applyThemeFromCookie() {

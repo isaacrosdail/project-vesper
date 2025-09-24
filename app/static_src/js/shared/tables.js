@@ -10,14 +10,12 @@ import { apiRequest } from './services/api.js';
  */
 // TODO: Implement!
 export function makeTableRow(item, subtype) {
-    const row = document.createElement("tr");
-    console.log("makeTableRow hit")
-    // Build cells
-    const template = document.querySelector(`#template-${subtype}`);
-    const clone = template.content.firstElementChild.cloneNode(true);
-
-    clone.dataset.itemId = item.id;
-
+    // const row = document.createElement("tr");
+    // console.log("makeTableRow hit")
+    // // Build cells
+    // const template = document.querySelector(`#template-${subtype}`);
+    // const clone = template.content.firstElementChild.cloneNode(true);
+    // clone.dataset.itemId = item.id;
 }
 
 

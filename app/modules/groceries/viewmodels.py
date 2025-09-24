@@ -4,7 +4,7 @@ from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 class TransactionPresenter(BasePresenter):
 
     VISIBLE_COLUMNS = [
-        "barcode", "product_name", "price_at_scan", "quantity", "created_at", "price_per_100g"
+        "barcode", "product_name", "price_at_scan", "price_per_100g", "quantity", "created_at"
     ]
 
     COLUMN_CONFIG = {
