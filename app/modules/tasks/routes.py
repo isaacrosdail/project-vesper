@@ -9,6 +9,7 @@ from datetime import datetime, time
 from zoneinfo import ZoneInfo
 from app.modules.tasks.viewmodels import TaskViewModel, TaskPresenter
 from app.shared.datetime.helpers import parse_eod_datetime_from_date
+from app.modules.tasks.validators import validate_task
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
@@ -35,14 +36,31 @@ def dashboard(session):
 def tasks(session):
     if request.method == "POST":
         
-        due_date_str = request.form.get("due_date")
-        due_date = parse_eod_datetime_from_date(due_date_str, current_user.timezone) if due_date_str else None
-        priority = Priority(request.form.get("priority", "medium"))
+        form_data = {
+            "name": request.form.get("name", ""),
+            "priority": request.form.get("priority", "medium"),
+            "due_date": request.form.get("due_date", "")
+        }
+        
+        errors = validate_task(form_data)
+        if errors:
+            return jsonify({"success": False, "message": errors[0]}), 400
+
+        due_date = (
+            parse_eod_datetime_from_date(form_data["due_date"], current_user.timezone)
+            if form_data["due_date"]
+            else None
+        )
+        try:
+            priority = Priority(form_data["priority"])
+        except ValueError:
+            return jsonify({"success": False, "message": "Invalid priority"}), 400
+        
         is_frog = bool(request.form.get("is_frog"))
 
         tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
         new_task = tasks_repo.create_task(
-            name=request.form.get("name"),
+            name=form_data["name"],
             priority=priority,
             is_frog=is_frog,
             due_date=due_date
