@@ -17,9 +17,12 @@
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" 
-                        required minlength="8" maxlength="50"
-                        placeholder="Enter your password">
+                <div class="password-input-group">
+                    <input type="password" id="password" name="password" 
+                            required minlength="8" maxlength="50"
+                            placeholder="Enter your password">
+                    <button type="button" data-password-toggle="password" class="btn-icon password-toggle">{{ ui.eye_slash_svg() }}</button>
+                </div>
             </div>
             <div>
                 <input type="checkbox" id="remember_user" name="remember_user">
