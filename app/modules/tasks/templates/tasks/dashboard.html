@@ -9,7 +9,7 @@
 <div class="card-dashboard" id="tasks-dashboard-table">
     <div class="card-title">
         <h2>Tasks</h2>
-        <button id="task-entry-dashboard-btn" class="btn btn-primary btn-icon">{{ ui.plus_svg() }}</button>
+        {{ ui.plus_btn('task-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'task') %}
         <td class="{{ headers[0].priority }} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="tasks" data-subtype="task" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>

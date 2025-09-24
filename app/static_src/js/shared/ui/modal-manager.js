@@ -37,7 +37,7 @@ modals.forEach(modal => {
     }
 
     // Set up tabbed modal handling based on naming conventions
-    if (modal.classList.contains('tabbed-modal') || modal.querySelector('.tabs')) {
+    if (modal.classList.contains('tabbed-modal') || modal.querySelector('.tab-group')) {
         setupTabbedModal(modal);
     }
 });
@@ -82,10 +82,10 @@ function setupModal(modalId, buttonId, endpoint) {
 }
 
 function setupTabbedModal(modal) {
-    modal.querySelectorAll('.tabs button').forEach(btn => {
+    modal.querySelectorAll('.tab-group button').forEach(btn => {
         btn.addEventListener('click', () => {
             // hide all panels & remove active
-            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-group button').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(p => p.hidden = true);
             // show selected
             const tabId = 'tab-' + btn.dataset.tab;
@@ -98,7 +98,7 @@ function setupTabbedModal(modal) {
     });
 
     // Auto-activate first tab
-    const firstTab = modal.querySelector('.tabs button');
+    const firstTab = modal.querySelector('.tab-group button');
     firstTab?.click();
 }
 

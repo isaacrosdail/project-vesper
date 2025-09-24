@@ -10,7 +10,7 @@
 <section id="metrics-dashboard-table" class="card-dashboard">
     <div class="card-title">
         <h2>Daily Metric Entries</h2>
-        <button id="metric-entry-dashboard-btn" class="btn btn-primary btn-icon">{{ ui.plus_svg() }}</button>
+        {{ ui.plus_btn('metric-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'daily_metrics', 'metric') %}
     <td class="{{ headers[0].priority}}">{{ item.created_at_label }}</td>

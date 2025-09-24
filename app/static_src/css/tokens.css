@@ -50,6 +50,15 @@
     --hamburger-angle: 38deg;
     --hamburger-scale: 1.27;
 
+    --focus-ring: 2px solid var(--accent-subtle);
+    --focus-offset: 2px;
+
+    --btn-size-sm: 1rem;
+    --btn-size-md: 2rem;
+    --btn-size-lg: 2.5rem;
+
+    --icon-scale: 0.6; /* for button to SVG icon ratio sizing for btn-icon */
+
     --color-success: #166534;
     --color-error: #dc2626;
 

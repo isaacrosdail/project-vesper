@@ -2,71 +2,57 @@
 /* Reusable blocks: buttons, cards, tables */
 
 
-/* ======= BUTTONS ======= */
-/* Base button styling: shape + ergonomics goes here */
+/* =========================================
+   Base button shapes/ergonomics
+   ========================================= */
+
 .btn {
     display: inline-flex;       /* icons+text align*/
     align-items: center;        /* for icon+label vertical centering? */
     justify-content: center;    /* center text when full width */
-    cursor: pointer;
     user-select: none;
     padding: var(--space-sm) var(--space-md);
     border: var(--border-default);
     border-radius: var(--border-radius);
     gap: var(--gap-sm);
 }
-/* For icon-only (eg, '+' buttons) */
 .btn-icon {
-    width: 2rem;
-    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
-    border-radius: 50%;
+    width: var(--btn-size-md);
+    height: var(--btn-size-md);
 }
-.btn-icon svg {
-    width: 1rem;
-    height: 1rem;
-    pointer-events: none;
+.btn, .btn-icon {
+    cursor: pointer;
 }
-/* for delete_btn svg, need to move to components.css */
-.delete-btn {
-    width: 2.5rem;
-    padding: var(--space-sm);
-}
-.delete-btn svg {
-    width: 1rem;
-    height: 1rem;
-}
+/* =========================================
+   Shared states
+   ========================================= */
 
-/* Subtle "pressed" effect for active buttons */
-.btn:active {
-    transform: translateY(1px);
-    filter: brightness(0.95);
-}
 /* TODO: Focus ring: visual feedback for keyboard users */
-.btn:focus-visible {
-    outline: red;
-    outline-offset: 2px;
+.btn:focus-visible,
+.btn-icon:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
 }
 /* Catch native + ARIA-disabled buttons */
 .btn[disabled],
-.btn[aria-disabled="true"] {
+.btn-icon[disabled],
+.btn[aria-disabled="true"],
+.btn-icon[aria-disabled="true"] {
     opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
 }
-.btn-primary {
-    background-color: var(--accent-subtle);
-    border-color: var(--border-color);
+/* Pressed effect (only for text buttons) */
+.btn:active {
+    transform: translateY(1px);
+    filter: brightness(0.95);
 }
-.btn-secondary {
-    background-color: var(--bg-light);
-    border-color: var(--border-color);
-}
-.btn-destructive {
-    color: var(--text-destructive);
-    border-color: var(--text-destructive);
-}
-/* Scope hover styles (skip on touchscreen) */
+
+/* Hover states (skip on touchscreen) */
 /* Color-mixing with --text ensures light mode buttons get lighter AND dark mode buttons get darker */
 @media (hover: hover) {
     .btn-primary:hover {
@@ -80,21 +66,55 @@
         background-color: var(--text-destructive);
     }
 }
-/* For profile SVG button in navbar, need to refine */
-/* TODO: Ought to move these into components.css, no? */
-.profile-btn {
-    cursor: pointer;
+/* =========================================
+   Intent variants
+   ========================================= */
+.btn-primary {
+    background-color: var(--accent-subtle);
 }
-.profile-btn svg {
+.btn-secondary {
+    background-color: var(--bg-light);
+}
+.btn-destructive {
+    color: var(--text-destructive);
+    border-color: var(--text-destructive);
+}
+
+/* =========================================
+   Form factor modifiers
+   ========================================= */
+/* Icon sizing (proportional: always 50% of buttons) */
+.btn-icon svg {
     pointer-events: none;
-    width: 25px;
-    height: 25px;
+    width: calc(var(--btn-size-md) * var(--icon-scale));
+    height: calc(var(--btn-size-md) * var(--icon-scale));
 }
+.btn-round {
+    border-radius: 50%;
+}
+.btn-square {
+    border-radius: var(--border-radius);
+}
+
+/* =========================================
+   Size modifiers
+   ========================================= */
+.btn-lg {
+    width: var(--btn-size-lg);
+    height: var(--btn-size-lg);
+}
+.btn-lg svg {
+    width: calc(var(--btn-size-lg) * var(--icon-scale));
+    height: calc(var(--btn-size-lg) * var(--icon-scale));
+}
+
+
 .profile-modal[open] {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
 }
+
 dialog {
     background-color: var(--bg);
     padding: var(--space-xl);
@@ -154,7 +174,7 @@ dialog::backdrop {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     background-color: var(--bg);
     border: var(--border-default);
-    position: relative; /* for card-title positioning */
+    position: relative; /* positioning context for card-title */
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
@@ -351,8 +371,40 @@ footer {
     font-size: 0.9em;
 }
 
-/* TABS (for tabbed modal(s) */
-.tabs button.active {
+
+/* TABBED MODALS */
+.tab-group {
+    display: flex;
+    align-items: stretch;
+    padding: var(--space-xs);
+    gap: var(--gap-xs);
+    background-color: var(--bg-light);
+}
+.tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--space-sm);
+}
+.tab svg {
+    width: 1em;
+    height: 1em;
+}
+.tab-group, .tab {
+    border-radius: var(--border-radius);
+}
+.tab:hover {
+    background-color: var(--bg-hover);
+    filter: brightness(0.9);
+}
+.tab:active {
+    background-color: var(--bg-hover);
+    transform: translateY(1px);
+    filter: brightness(0.9);
+}
+.tab.active {
+    background-color: var(--accent-subtle);
     transform: translateY(1px);
     filter: brightness(0.95);
 }

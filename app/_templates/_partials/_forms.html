@@ -5,11 +5,11 @@
 
 {% macro metric_entry_modal(id='metric-entry-dashboard', title='Add Metric') %}
   {% call ui.modal('/metrics/', id, title) %}
-      <div class="tabs">
-        <button type="button" role="tab" data-tab="steps" class="btn btn-secondary">Steps Entry</button>
-        <button type="button" role="tab" data-tab="weight" class="btn btn-secondary">Weight Entry</button>
-        <button type="button" role="tab" data-tab="sleep" class="btn btn-secondary">Sleep</button>
-        <button type="button" role="tab" data-tab="calories" class="btn btn-secondary">Calories</button>
+      <div class="tab-group">
+        <button type="button" role="tab" data-tab="steps" class="tab">{{ ui.steps_svg() }} Steps</button>
+        <button type="button" role="tab" data-tab="weight" class="tab">{{ ui.scale_svg() }} Weight</button>
+        <button type="button" role="tab" data-tab="sleep" class="tab">{{ ui.sleep_svg() }} Sleep</button>
+        <button type="button" role="tab" data-tab="calories" class="tab">{{ ui.calories_svg() }} Calories</button>
       </div>
 
       <div role="tabpanel" class="tab-content" id="tab-steps">
