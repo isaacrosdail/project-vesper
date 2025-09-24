@@ -65,9 +65,9 @@
     color-scheme: light;
 
     /* Background Hierarchy */
-    --light-bg-dark: hsl(0 0% 90%);              /* Darkest: Main page/canvas background */
-    --light-bg: hsl(0 0% 95%);                   /* Moderate: Cards, modals, main content areas */
-    --light-bg-light: hsl(0 0% 100%);            /* Input fields, secondary button backgrounds, table rows  */
+    --light-bg-dark: oklch(85% 0 0);              /* Darkest: Main page/canvas background */
+    --light-bg: oklch(90% 0 0);                   /* Moderate: Cards, modals, main content areas */
+    --light-bg-light: oklch(95% 0 0);            /* Input fields, secondary button backgrounds, table rows  */
 
     /* Text Hierarchy */
     --light-text: hsl(0 0% 5%);                  /* Headers, high contrast text */
@@ -80,7 +80,7 @@
     /* Accent Colors */
     --light-accent-strong: oklch(60% 0.12 250);  /* Navigation, table headers (AND primary buttons?) */
     --light-accent-subtle: oklch(70% 0.12 250);  /* CTAs, highlights, subtler visual notes throughout app */
-    --light-ui-hover: oklch(95% 0.02 250);       /* ?? */
+    --light-accent-hover: oklch(85% 0.09 250);       /* Rename to -accent-hover */
 
     /* Selection */
     --light-bg-selection: grey;                  /* Selection background */
@@ -105,9 +105,9 @@
     --dark-border-color: oklch(0.45 0 0);
 
     /* Accent Colors */
-    --dark-accent-strong: oklch(40% 0.12 250);
-    --dark-accent-subtle: oklch(70% 0.12 250);
-    --dark-ui-hover: oklch(85% 0.05 250);
+    --dark-accent-strong: oklch(40% 0.13 250);
+    --dark-accent-subtle: oklch(50% 0.13 250);
+    --dark-accent-hover: oklch(65% 0.10 250);
 
     /* Selection */
     --dark-bg-selection: grey;
@@ -138,7 +138,7 @@
     /* Accents */
     --accent-strong: var(--light-accent-strong);
     --accent-subtle: var(--light-accent-subtle);
-    --ui-hover: var(--light-ui-hover);
+    --accent-hover: var(--light-accent-hover);
 
     /* Selection */
     --bg-selection: var(--light-bg-selection);
@@ -169,7 +169,7 @@
         /* Accents */
         --accent-strong: var(--dark-accent-strong);
         --accent-subtle: var(--dark-accent-subtle);
-        --ui-hover: var(--dark-ui-hover);
+        --accent-hover: var(--dark-accent-hover);
 
         /* Selection */
         --bg-selection: var(--dark-bg-selection);
@@ -198,7 +198,7 @@
 
     --accent-strong: var(--light-accent-strong);
     --accent-subtle: var(--light-accent-subtle);
-    --ui-hover: var(--light-ui-hover);
+    --accent-hover: var(--light-accent-hover);
 
     --bg-selection: var(--light-bg-selection);
     --text-selection: var(--light-text-selection);
@@ -224,7 +224,7 @@
 
         --accent-strong: var(--dark-accent-strong);
         --accent-subtle: var(--dark-accent-subtle);
-        --ui-hover: var(--dark-ui-hover);
+        --accent-hover: var(--dark-accent-hover);
 
         --bg-selection: var(--dark-bg-selection);
         --text-selection: var(--dark-text-selection);

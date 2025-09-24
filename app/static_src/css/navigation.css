@@ -2,6 +2,7 @@
 /* NAVLINKS */
 /* Base navlinks styling (desktop-first) */
 /* ==== NAVIGATION ==== */
+/* TODO: Should use our btn-icon for these instead, and perhaps btn-lg */
 .hamburger-btn {
     min-width: 40px;
     min-height: 40px;
@@ -18,11 +19,11 @@
     white-space: nowrap;
 }
 .nav-link:hover {
-    background-color: var(--ui-hover);
+    background-color: var(--accent-hover);
     /* color: var(--text-inverse); TODO: Works well on dark mode, but light mode not at all */
 }
 .nav-link.active {
-    background-color: var(--accent-subtle); /* might add 'nav-active' for separate styling */
+    background-color: var(--accent-hover); /* might add 'nav-active' for separate styling */
     /* color: var(--text-inverse); TODO: Again, well on dark, not light */
 }
 .nav-link:focus-visible {
