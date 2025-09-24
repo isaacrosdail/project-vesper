@@ -21,7 +21,7 @@
         <div class="card-title">
             <h2>
                 {% if current_user.is_authenticated %}
-                    {{ greeting }}, {{ current_user.name }}!
+                    {{ greeting }}, {{ current_user.name if current_user.name else "Guest" }}!
                 {% else %}
                     {{ greeting }}
                 {% endif %}

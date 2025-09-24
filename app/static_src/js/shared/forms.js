@@ -8,9 +8,6 @@ function filterUnitOptions() {
 
     const categorySelection = categoryElement.value;
     const unitTypes = unitSelect.querySelectorAll('option');
-
-    console.log(unitTypes)
-    console.log(unitSelect)
     
     // JS Object, use keys for types of groups, values are list of units allowed for that group
     const unitGroups = {
@@ -49,6 +46,21 @@ export function initProductForms() {
     });
 }
 
+/**
+ * Initialize "click eye icon for password/text toggle".
+ * 
+ * Conventions:
+ * - Buttons must have a [data-password-toggle] attribute
+ * - whose value = the ID of the <input type="password">
+ * Script will:
+ * - Find the target <input>
+ * - Toggle type="password" <-> type="text" on click
+ * - Reflect toggle state in `aria-pressed`
+ * 
+ * @example
+ * <input id="pwd1" type="password">
+ * <button data-password-toggle="pwd1">(eye)</button>
+ */
 export function initPasswordToggles() {
     const toggleButtons = document.querySelectorAll('[data-password-toggle]');
     if (toggleButtons.length === 0) return;

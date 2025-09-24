@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, url_for, jsonify
 
 from flask_login import login_required, login_user, logout_user
 from app.shared.middleware import set_toast
