@@ -25,13 +25,13 @@ MODEL_CLASSES = {
     ("groceries", "transaction"): Transaction,
     ("groceries", "shoppinglist"): ShoppingList,
     ("groceries", "shoppinglistitem"): ShoppingListItem,
-    ("tasks", "none"): Task,
-    ("habits", "none"): Habit,
+    ("tasks", "task"): Task,
+    ("habits", "habit"): Habit,
     ("metrics", "daily_entry"): DailyEntry,
     ("time_tracking", "timeentry"): TimeEntry,
 }
 
-def get_model_class(module, subtype: str = "none"):
+def get_model_class(module, subtype: str):
     return MODEL_CLASSES.get((module, subtype))
 
 @crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH", "DELETE"])
@@ -39,7 +39,7 @@ def get_model_class(module, subtype: str = "none"):
 @with_db_session
 def item(session, module, subtype, item_id):
 
-    model_class = get_model_class(module, subtype) # so 'tasks', 'none' returns Task class
+    model_class = get_model_class(module, subtype) # so 'tasks', 'task' returns Task class
     if model_class is None:
         current_app.logger.warning(f"Unknown model for {module}, {subtype}")
         abort(404)

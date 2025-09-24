@@ -11,8 +11,8 @@
         <h2>Tasks</h2>
         <button id="task-entry-dashboard-btn" class="btn btn-primary btn-icon">{{ ui.plus_svg() }}</button>
     </div>
-    {% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'none') %}
-        <td class="{{ headers[0].priority }} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="tasks" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
+    {% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'task') %}
+        <td class="{{ headers[0].priority }} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="tasks" data-subtype="task" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
         <td class="{{ headers[1].priority }}">
             {# TODO: NOTES: |safe here to render HTML entities instead of escaping them #}
             {{ ('&#9745;' if item.is_done else '&#9744;') | safe }}
