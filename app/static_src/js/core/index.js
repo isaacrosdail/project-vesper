@@ -64,6 +64,29 @@ async function markHabitComplete(checkbox, habitId) {
         console.error('Error during habit completion request:', error);
     }
 }
+async function markTaskComplete(checkbox, taskId) {
+    const completedAtUTC = getJSInstant();
+    const url = `/tasks/task/${taskId}`;
+
+    let data;
+    if (checkbox.checked) {
+        data = {
+            is_done: true,
+            completed_at: completedAtUTC 
+        };
+    } else {
+        data = {
+            is_done: false,
+            completed_at: null
+        }
+    }
+    console.log(data)
+    apiRequest('PATCH', url, () => {
+        const listItem = checkbox.closest('.item');
+        listItem?.classList.toggle('completed');
+    }, data);
+
+}
 
 function updateClock() {
     const timeDisplay = document.querySelector('#time-display');
@@ -140,6 +163,9 @@ export function init() {
     document.addEventListener('change', (e) => {
         if (e.target.matches('.habit-checkbox')) {
             markHabitComplete(e.target, e.target.dataset.habitId);
+        }
+        if (e.target.matches('.task-checkbox')) {
+            markTaskComplete(e.target, e.target.dataset.taskId);
         }
     });
 

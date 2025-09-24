@@ -70,13 +70,7 @@ h3 {
     .nav-desktop { transition: none; }
     .icon-wiggle { animation: none; transition: none; }
 }
-/* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
-.highlight-label { font-weight: 600; }
 
-.card-highlight {
-    display: flex;
-    align-items: center;
-}
 
 /* ===================================
     PAGE-SPECIFIC: Groceries Dashboard
@@ -167,7 +161,10 @@ h3 {
     width: 100%;
     height: clamp(150px, 15vh, 300px);
 }
-
+/* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
+.highlight-label { 
+    font-weight: var(--font-weight-semibold);
+}
 
 /* ===================================
     PAGE-SPECIFIC: Login / Register Pages
