@@ -71,8 +71,7 @@ function setupModal(modalId, buttonId, endpoint) {
         e.preventDefault();
 
         const formData = new FormData(form);
-        // submitModalForm(modal, endpoint, formData);
-        apiRequest('POST', endpoint, (responseData) => { // get server responseData response inside success callback
+        apiRequest('POST', endpoint, (responseData) => { // get server response inside success callback
             makeTableRow(responseData.data);
             makeToast(responseData.message, 'success');
         }, formData);

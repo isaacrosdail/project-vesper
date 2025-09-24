@@ -106,7 +106,7 @@ legend {
     border: 1px solid var(--color-error);
     border-radius: 50%;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: var(--fade-in);
 }
 
 /* Show hidden controls on hover */
@@ -121,7 +121,7 @@ legend {
 }
 .qty-controls button {
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: var(--fade-in);
     color: var(--accent-subtle);
     width: 20px;
     height: 20px;
@@ -226,7 +226,7 @@ h3 {
     align-items: center;
 }
 .error-page > h1 {
-    font-size: 2rem;
+    font-size: var(--font-size-xxl);
 }
 /* Let's take a stab at animations */
 @keyframes wiggle {
