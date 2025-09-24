@@ -365,6 +365,22 @@ input, select, textarea {
     border-color: var(--color-error);
 }
 
+/* Checklist/item completion styling */
+.item-list {
+    display: grid;
+    gap: var(--gap-sm);
+}
+.item-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.item.completed .item-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
 /* ==== FOOTER ==== */
 footer {
     text-align: center;
