@@ -178,23 +178,26 @@ dialog::backdrop {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
-    box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
+    /* box-shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15); */
 
 }
 
+/* FORMS */
+
+/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
+/* TODO: Tune & learn how to specify rules here. Might actually be worth just nuking & doing entirely my own validation? */
+form input:not([type="checkbox"]):not([type="radio"]):user-valid {
+    outline: 2px solid var(--color-success);
+}
+form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
+    outline: 2px solid var(--color-error);
+}
+
+/* TODO: Should we replace form-group's with stack-md utility? */
 .form-group {
     display: flex;
     flex-direction: column;
     margin-bottom: var(--space-md);
-}
-/* Form & Input Validation Styling (user-valid/invalid is a relatively new feature? Check browser support) */
-form input:not([type="checkbox"]):not([type="radio"]):user-valid {
-    outline: 2px solid;
-    outline-color: var(--color-success);
-}
-form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
-    outline: 2px solid;
-    outline-color: var(--color-error);
 }
 /* For consistent spacing/styling for "CTA + secondary buttons that might be anchor elements" pattern */
 .form-actions {
@@ -206,10 +209,8 @@ form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
 .form-actions > * {
     min-width: 8rem;
 }
-/* ===== FORMS, INPUTS ===== */
 
-/* Base input stylings */
-/* Base input stylings */
+/* INPUTS */
 input, select, textarea {
     background-color: var(--bg-light);
     color: var(--text);
@@ -218,22 +219,22 @@ input, select, textarea {
     padding: 0.5rem 0.75rem;
 }
 :where(input, select, textarea):focus-visible {
-    outline: 2px solid var(--accent-subtle);
-    outline-offset: 1px;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
 }
-
-/* For dashboard quick-entry & JS inline cell edit inputs */
+/* TODO: Tune this a bit for table cells */
 .input-inline {
     padding-block: var(--space-xs); /* top+bottom Slightly tighter */
     border: none;
     border-bottom: var(--border-default);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
 }
 .radio-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: row; /* TODO: Research why removing this makes radio buttons appear stacked instead of row? */
     gap: var(--gap-sm);
 }
+
 
 /* ======= TABLE COMPONENTS ======= */
 /* Needed higher specificity here to override so delete-cell properly blends in to card */
@@ -284,7 +285,7 @@ input, select, textarea {
     color: var(--text-inverse); /* TODO: Needs fixing/tuning */
 }
 
-/* ===== CUSTOM COMPONENT STYLINGS ===== */
+/* ===== CONTEXT MENU ===== */
 .context-menu {
     background-color: var(--bg);
     border: var(--border-default);
@@ -371,7 +372,7 @@ footer {
     font-size: 0.9em;
 }
 
-/* TABS (for tabbed modal(s) */
+/* TABBED MODALS */
 .tabs button.active {
     transform: translateY(1px);
     filter: brightness(0.95);

@@ -28,11 +28,9 @@
 
 :root {
     --min-navbar-height: 4rem;
-    --my-bool: clamp(0, 100vw - 640px, 1); /* effectively a media query for above/below 640px width? Need to find use cases */
 }
 
 
-/* For app-wide legend text, move to components.css */
 legend {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
@@ -43,12 +41,32 @@ h3 {
     font-size: var(--font-size-lg);
 }
 
-/* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
-.highlight-label { 
-    font-weight: 600; 
+/* ==== MEDIA QUERIES ==== */
+@media (width <= 768px) {
+    .navlinks {
+        display: none;
+    }
+}
+@media (width > 768px) {
+    .hamburger-btn { display: none; }
+}
+/* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
+ * Let's us easily "condense" our tables to provide a better mobile experience
+*/
+@media (width <= 768px) {
+    .desktop-only {
+        display: none;
+    }
+}
+/* TODO: Tune this later as we add some basic animations/transitions */
+@media (prefers-reduced-motion: reduce) {
+    .navlinks { transition: none; }
+    .icon-wiggle { animation: none; transition: none; }
 }
 
-
+/* ===================================
+    PAGE-SPECIFIC: Groceries Dashboard
+   ===================================*/
 /* Position our "x" button "outside"/"to the side of" the inline content */
 .shoppinglist-item {
     position: relative; /* positioning context for inline-delete */
@@ -98,55 +116,6 @@ h3 {
     border-radius: 50%;
 }
 
-/* Dashboard checkbox completion effect */
-.item-list {
-    display: grid;
-    gap: var(--gap-sm);
-}
-.item-row {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-sm);
-}
-
-.item.completed .item-title {
-    text-decoration: line-through;
-    color: var(--text-muted);
-}
-
-/* ==== NAVIGATION ==== */
-.hamburger-btn {
-    min-width: 40px;
-    min-height: 40px;
-}
-
-
-
-
-/* ==== MEDIA QUERIES ==== */
-@media (width <= 768px) {
-    .navlinks {
-        display: none;
-    }
-}
-@media (width > 768px) {
-    .hamburger-btn { display: none; }
-}
-
-/* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
- * Let's us easily "condense" our tables to provide a better mobile experience
-*/
-@media (width <= 768px) {
-    .desktop-only {
-        display: none;
-    }
-}
-
-/* TODO: Tune this later as we add some basic animations/transitions */
-@media (prefers-reduced-motion: reduce) {
-    .navlinks { transition: none; }
-    .icon-wiggle { animation: none; transition: none; }
-}
 
 /* ===================================
     APP LAYOUT / PAGE SHELL
