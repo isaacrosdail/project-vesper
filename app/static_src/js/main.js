@@ -21,15 +21,22 @@ import { init as initGroceries } from './groceries/dashboard.js';
 import { init as initHabits } from './habits/dashboard.js';
 import { init as initTasks } from './tasks/dashboard.js';
 
+const initRegistry = {
+    "main.home": () => initCore(),
+    "devtools.style_reference": () => initStyleRef(),
+    "groceries.dashboard": () => initGroceries(),
+    "habits.dashboard": () => initHabits(),
+    "tasks.dashboard": () => initTasks(),
+};
+
 export async function initMain() {
     await initUserStore();
     showToastsFromFlask();
 
-    initCore();
-    initStyleRef();
-    initGroceries();
-    initHabits(); 
-    initTasks();
+    const page = document.documentElement.dataset.page;
+    if (initRegistry[page]) {
+        initRegistry[page]();
+    }
 }
 
 async function initUserStore() {
