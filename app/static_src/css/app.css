@@ -178,6 +178,44 @@ h3 {
     max-width: clamp(35rem, 90vw, 50rem);
 }
 
+/* ===================================
+    PAGE-SPECIFIC: Homepage
+   ===================================*/
+#sky-canvas {
+    width: 100%;
+    height: clamp(150px, 15vh, 300px);
+}
+
+
+/* ===================================
+    PAGE-SPECIFIC: Login / Register Pages
+   ===================================*/
+.password-input-group {
+    position: relative;
+}
+.password-input-group input {
+    width: 100%;
+    padding-right: 2rem;
+}
+.password-input-group > button {
+    position: absolute;
+    top: 50%;                    /* puts top edge at the middle */
+    transform: translateY(-50%); /* move down by half its height */
+    right: 0.5rem;
+}
+.password-toggle .slash {
+    stroke-dasharray: 26;  /* total length of slash line */
+    stroke-dashoffset: 26; /* hide line to start */
+    transition: stroke-dashoffset 0.2s ease;
+}
+.password-toggle[aria-pressed="true"] .slash {
+    stroke-dashoffset: 0; /* draw line in */
+}
+
+/* ===================================
+    PAGE-SPECIFIC: Landing Page
+   ===================================*/
+
 /* Container for landing page content */
 .landing-content {
     display: flex;
