@@ -2,12 +2,15 @@
 
 
 function filterUnitOptions() {
-    const categoryElement = document.querySelector('#category').value;
-    const unitSelect = document.querySelectorAll('#unit_type');
+    const categoryElement = document.querySelector('#category');
+    const unitSelect = document.querySelector('#unit_type');
     if (!categoryElement || !unitSelect) return;
 
     const categorySelection = categoryElement.value;
     const unitTypes = unitSelect.querySelectorAll('option');
+
+    console.log(unitTypes)
+    console.log(unitSelect)
     
     // JS Object, use keys for types of groups, values are list of units allowed for that group
     const unitGroups = {
@@ -44,7 +47,6 @@ export function initProductForms() {
             filterUnitOptions();
         }
     });
-    filterUnitOptions();
 }
 
 initProductForms();
