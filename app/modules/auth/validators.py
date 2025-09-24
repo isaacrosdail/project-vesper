@@ -1,43 +1,45 @@
-from app.shared.constants import (MAX_NAME_LENGTH,
-                                  MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH)
 
-# Password: Needs to: exist, have min length, and ideally be complex (TODO: Enforce complexity later)
-# Name: Needs to: exist, stay under max length
+import regex
 
-def validate_username(username: str) -> list[str]:
-    """
-    Validates username requirements: Uniqueness and length (under MAX_NAME_LENGTH)
+# Error message constants
+USERNAME_REQUIRED = "Username is required"
+USERNAME_CHARSET = "Username can only contain up to 50 characters of letters, numbers, and underscores"
 
-    Args:
-        username: Username to validate
+PASSWORD_REQUIRED = "Password is required"
+PASSWORD_LENGTH = "Password must be 8-50 characters"
 
-    Returns:
-        List of error message strings (empty if valid)
-    """
+NAME_CHARSET = "Name can only contain up to 50 characters of letters, spaces, apostrophes, and hyphens"
+
+# USERNAME: 3–50 chars, Unicode letters, numbers, and underscores
+USERNAME_VALID = r"^[\p{L}0-9_]{3,50}$"
+
+# PASSWORD: 8–50 chars, any characters allowed
+PASSWORD_VALID = r"^.{8,50}$"
+
+# NAME (optional): 1–50 chars, Unicode letters plus space, apostrophe, hyphen
+NAME_VALID = r"^[\p{L}' -]{1,50}$"
+
+
+def validate_user(data: dict) -> list[str]:
     errors = []
 
-    # TODO: MINOR: Add pattern matching (alphanumeric)
-    if not 3 <= len(username) <= 30: # pythonic range test, drill these
-        errors.append("invalid username len")
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    name = data.get("name", "").strip()
 
-    return errors
+    if not username:
+        errors.append("Username is required")
+    if username and not regex.match(USERNAME_VALID, username):
+        errors.append("Username can only contain up to 50 characters of letters, numbers, and underscores")
 
-def validate_password(password: str) -> list[str]:
-    errors = []
 
-    # Check length
-    if not MIN_PASSWORD_LENGTH <= len(password) <= MAX_PASSWORD_LENGTH:
-        errors.append("password too short")
+    if not password:
+        errors.append("Password is required")
+    if password and not regex.match(PASSWORD_VALID, password):
+        errors.append("Password must be 8-50 characters")
 
-    return errors
 
-def validate_name(name: str) -> list[str]:
-    errors = []
-
-    # Validate existent & not whitespace only
-    if not name:
-        errors.append("name invalid") 
-    if (len(name) > MAX_NAME_LENGTH):
-        errors.append("name invalid")
-
+    if name and not regex.match(NAME_VALID, name):
+        errors.append("Name can only contain up to 50 characters of letters, spaces, apostrophes, and hyphens")
+    
     return errors
