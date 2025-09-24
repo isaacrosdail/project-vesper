@@ -57,7 +57,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 <dialog id="{{ id }}-modal" data-endpoint="/{{ endpoint }}">
     <form>
         <legend>{{ title }}</legend>
-        <button type="button" class="btn-icon btn-round modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>
+        <button type="button" class="btn-icon btn-round btn-lg modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>
         {{ caller() }}
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
