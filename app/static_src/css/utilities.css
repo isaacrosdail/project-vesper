@@ -1,35 +1,47 @@
 /* Utilities: Tiny helpers, atomic styles */
 
+._stack-md {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+}
+._stack-lg {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
+}
+._grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
 /* Applied to SVG icon for table rows */
-@layer utilities {
-    .hidden {
-        display: none;
-    }
+/* Using important here only to ensure this rule always wins */
+._hidden {
+    display: none !important;
 }
-
-
-/* Hide text for theme toggle */
-.visually-hidden {
-    clip-path: inset(50%); /* Clips (hides) 50% from all sides of element - creates 1x1 pixel visible area in center */
-    height: 1px;
-    width: 1px; /* makes element tiny, small enough to be invisible but not zero (zero dimensions can be ignored by screen readers */
-    overflow: hidden; /* hides any content that would spill outside 1x1 px box*/
-    position: absolute; /* takes element out of normal document flow - prevents layout spillover */
-    white-space: nowrap;
+._inline-flex-sm {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
 }
-
-/* 1:1 Tailwind version */
-.sr-only {
+._inline-flex-md {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-md);
+}
+._sr-only {
     position: absolute;
     width: 1px;
     height: 1px;
     padding: 0;
+    margin: -1px;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     white-space: nowrap;
     border: 0;
 }
 
-.text-right {
+._text-right {
     text-align: right;
 }
