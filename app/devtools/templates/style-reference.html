@@ -2,172 +2,219 @@
 
 {% extends 'base.html' %}
 
-{% block title %}Theme Token Preview{% endblock %}
+{% block title %}Style Reference{% endblock %}
 
 {% block content %}
-{# Using this specific ID in our guard for JS #}
-<span id="style-reference-root"></span>
 
-{# Getting started with D3.js #}
-<!-- <div id="chart-container"></div> -->
+{# Design Tokens #}
+<section class="card-dashboard token-container">
+    <h2>Design Tokens</h2>
 
+    {# === Background Hierarchy === #}
+    <div class="demo-grid-container">
+        <div class="stepped-bg">
+        <span class="label">bg-dark</span>
+        <span class="label">bg</span>
+        <span class="label">bg-light</span>
+        <span class="label">bg-hover</span>
+        </div>
+    </div>
 
-{# Buttons to Trigger Confirmation Modal #}
-<div class="demo-grid-container">
-  <button id="default" class="btn btn-primary">Test Confirmation</button>
-  <button id="alt" class="btn btn-primary">Test Confirmation Two</button>
-</div>
+    {# === Accent Colors === #}
+    <div class="demo-grid-container">
+        <div class="stepped-accents">
+        <div class="label">accent-strong</div>
+        <div class="label">accent-subtle</div>
+        <div class="label">accent-hover</div>
+        </div>
+    </div>
 
-{# Buttons to Trigger Various Toasts #}
-<div class="demo-grid-container">
-  <button id="toast-success" class="btn btn-secondary">Toast (Success)</button>
-  <button id="toast-error" class="btn btn-secondary">Toast (Error)</button>
-</div>
+    {# === Text Variants === #}
+    <div class="demo-grid-container">
+        <div class="tile" style="background: var(--bg); color: var(--text)">text</div>
+        <div class="tile" style="background: var(--bg); color: var(--text-muted)">text-muted</div>
+        <div class="tile" style="background: var(--bg); color: var(--text-destructive)">text-destructive</div>
+        <div class="tile" style="background: var(--text); color: var(--bg)">text-inverse</div>
+    </div>
 
-{# === Background Hierarchy === #}
-<div class="demo-grid-container" style="border-radius: var(--border-radius);">
-  <div class="swatch" style="background: var(--bg-dark); color: var(--text)">bg-dark / text</div>
-  <div class="swatch" style="background: var(--bg); color: var(--text)">bg / text</div>
-  <div class="swatch" style="background: var(--bg-light); color: var(--text-muted)">bg-light / text-muted</div>
-</div>
+    {# === Selection Colors === #}
+    <div class="demo-grid-container">
+        <div class="tile" style="background: var(--bg-selection);">
+        bg-selection
+        </div>
+        <div class="tile" style="color: var(--text-selection);">
+        text-selection
+        </div>
+    </div>
 
+    {# === Status Colors === #}
+    <div class="demo-grid-container">
+        <div class="tile" style="background: var(--clr-success); color: var(--text-inverse);">clr-success</div>
+        <div class="tile" style="background: var(--clr-error); color: var(--text-inverse);">clr-error</div>
+        <div class="tile" style="background: var(--bg-selection); color: var(--text-selection);">selection</div>
+    </div>
+</section>
 
-{# === Text Variants === #}
-<div class="demo-grid-container">
-  <div class="swatch" style="background: var(--bg); color: var(--text)">text</div>
-  <div class="swatch" style="background: var(--bg); color: var(--text-muted)">text-muted</div>
-  <div class="swatch" style="background: var(--bg); color: var(--text-destructive)">text-destructive</div>
-  <div class="swatch" style="background: var(--text); color: var(--bg)">text-inverse</div>
-</div>
-
-{# === Border === #}
-<div class="demo-grid-container">
-  <div class="swatch" style="border: 4px solid var(--border-color); background: var(--bg)">border color</div>
-</div>
-
-{# === Accent Colors === #}
-<div class="demo-grid-container">
-  <div class="swatch" style="background: var(--accent-strong); color: var(--text)">accent-strong</div>
-  <div class="swatch" style="background: var(--accent-subtle); color: var(--text)">accent-subtle</div>
-  <div class="swatch" style="background: var(--ui-hover); color: var(--text)">ui-hover</div>
-</div>
-
-
-{# === Selection Colors === #}
-<div class="demo-grid-container">
-  <div class="swatch" style="background: var(--bg-selection);">
-    bg-selection
-  </div>
-  <div class="swatch" style="color: var(--text-selection);">
-    text-selection
-  </div>
-</div>
-
-{# === Success & Error === #}
-<div class="demo-grid-container">
-  <div class="swatch" style="background: var(--clr-success); color: var(--text-inverse);">clr-success</div>
-  <div class="swatch" style="background: var(--clr-error); color: var(--text-inverse);">clr-error</div>
-</div>
-
-<hr>
-
-<h1 style="font-size: 1.4rem; text-align: center;">Component Samples</h1>
 {# Buttons #}
-<div class="demo-grid-container">
-  <button class="btn">Base Button</button>
-  <button class="btn btn-primary">Primary Button</button>
-  <button class="btn btn-secondary">Secondary Button</button>
-</div>
-<div class="card-dashboard demo-grid-container">
-  <button class="btn btn-secondary">Secondary Button (on card)</button>
-  <button class="btn btn-primary" aria-disabled="true" disabled>Secondary Button (disabled)</button>
-</div>
-<div class="demo-grid-container">
-  <button class="btn btn-destructive">Destructive Button</button>
-  {{ ui.delete_btn() }}
-</div>
+<section class="demo-section card-dashboard">
+    <h2>Intent Variants, States, & Icon Buttons</h2>
+    <div class="demo-subsection">
+        <button class="btn">Base Button</button>
+        <button class="btn btn-primary">Primary Button</button>
+        <button class="btn btn-secondary">Secondary Button</button>
+        <button class="btn btn-destructive">Destructive Button</button>
+        <button class="btn btn-primary" aria-disabled="true" disabled>Disabled Primary</button>
+        <button class="btn-icon btn-round">🏠</button>
+        <button class="btn-icon btn-square">⚙️</button>
+        {{ ui.delete_btn() }}
 
-{# Inputs #}
-<div class="demo-grid-container">
-  <input type="text" class="input-base" placeholder="Input base">
-  <input type="text" class="input-base input-inline" placeholder="Input inline">
-</div>
+        {# TODO: Add .btn-lg size variant #}
+        {# TODO: Add button groups/clusters? #}
+    </div>
+</section>
 
-{# Custom context menu #}
-{# NOTE: Overriding with a demo class for positioning only, since that is normally dictated by our JS #}
-<ul class="context-menu context-menu-positioning" role="menubar">
-  <li>Edit</li>
-  <li>Delete</li>
-  <li>Give myself a million dollars</li>
-  <li>Go Back</li>
-</ul>
+{# Interactive Demos - Elements that need JS to show behavior #}
+<section class="demo-section card-dashboard">
+    <h2>Interactive Demos</h2>
 
-{# Tooltips #}
-<div class="tooltip-popup" id="no-after">
-  Example tooltip.
-</div>
+    {# Modal triggers #}
+    <h2>Modals</h2>
+    <div class="demo-subsection">
+        {# Form Modal Demo #}
+        <button class="btn btn-primary" id="demo-entry-styleref-btn">Open Demo Modal</button>
+        {% call ui.modal('/nowhere/', 'demo-entry-styleref', title='Demo Modal') %}
+            <p>This is the demo modal body.</p>
+        {% endcall %}
+        <button id="default" class="btn btn-primary">Test Confirmation</button>
+    </div>
 
-<div class="card-dashboard">
-  <h2 class="card-title">Table (with card)</h2>
-  {# Table #}
-  <table class="table-standard">
-    <thead>
-      <tr>
-        <th class="table-header">Header 1</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="table-row">
-        <td class="table-cell">Cell A</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-      <tr class="table-row">
-        <td class="table-cell">Cell B</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-      <tr class="table-row">
-        <td class="table-cell">Cell D</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-      <tr class="table-row">
-        <td class="table-cell">Cell E</td>
-        <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    {# Toast Triggers #}
+    <h2>Toast Notifications</h2>
+    <div class="demo-subsection">
+        <button id="toast-success" class="btn btn-secondary">Show Success Toast</button>
+        <button id="toast-error" class="btn btn-secondary">Show Error Toast</button>
+        <button id="toast-info" class="btn btn-secondary">Show Info Toast</button>
+    </div>
 
-{# Table (no card behind it) #}
-<table class="table-standard">
-  <thead>
-    <tr>
-      <th class="table-header">Header 1</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr class="table-row">
-      <td class="table-cell">Cell A</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-    <tr class="table-row">
-      <td class="table-cell">Cell B</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-    <tr class="table-row">
-      <td class="table-cell">Cell D</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-    <tr class="table-row">
-      <td class="table-cell">Cell E</td>
-      <td class="table-cell delete-cell">{{ ui.delete_btn() }}</td>
-    </tr>
-  </tbody>
-</table>
+    {# Dropdown Demo #}
+    <h2>Dropdown Menu(s)</h2>
+    <div class="demo-subsection">
+        <div class="dropdown">
+            <button class="dropdown-toggle">
+                Dropdown 1
+                <span class="dropdown-toggle-chevron">{{ ui.chevron_svg() }}</span>
+            </button>
+            <div class="dropdown-menu">
+                <button>Option 1</button>
+                <button>Option 2</button>
+                <button>Option 3</button>
+            </div>
+        </div>
+    </div>
 
-{# Greeting Card Example #}
-<div class="card-dashboard" id="greeting-card">
-  <div>Greeting / Time</div>
-  <div class="divider"></div>
-  <div>Weather Info</div>
-</div>
+    {# Tooltip Positioning Demo #}
+    <h2>Tooltips</h2>
+    <div class="demo-subsection">
+        {# Static visual reference #}
+        <div>
+            <span>Static styling example:</span>
+            <div class="tooltip-popup" id="no-after">
+            Tooltip visual styling
+            </div>
+        </div>
+
+        {# Interactive triggers - using your actual .tooltip class and data-tip attr #}
+        <button class="btn btn-secondary tooltip" data-tip="This tooltip should position normally">Normal Button</button>
+        <button class="btn btn-secondary tooltip" data-tip="Edge case positioning test">Edge Button</button>
+        <button class="btn btn-secondary tooltip" data-tip="Another positioning test">Right Side</button>
+    </div>
+
+    {# Context Menu Demo #}
+    <h2>Context Menus</h2>
+    <div class="demo-subsection">
+        {# Interactive Trigger Area #}
+        <div>
+            <p>Right-click in this area to test context menu</p>
+            {# TODO: Add JS triggers here for mimicking various tables for context menu options #}
+        </div>
+
+        {# Static Visual Reference #}
+        <span>Static Styling example:</span>
+        {# NOTE: Overriding with a demo class for positioning only, since that is normally dictated by our JS #}
+        <ul class="context-menu context-menu-positioning" role="menubar">
+            <li>Edit</li>
+            <li>Delete</li>
+            <li>Give myself a million dollars</li>
+            <li>Go Back</li>
+        </ul>
+    </div>
+    
+    {# Password Toggle Demo #}
+    <h2>Password Toggle</h2>
+    <div class="demo-subsection">
+        <div class="password-input-group">
+            <input type="password" id="demo-password" placeholder="Enter password">
+            <button type="button" class="btn-icon" data-password-toggle="demo-password">
+                {{ ui.eye_slash_svg() }}
+            </button>
+        </div>
+    </div>
+
+    {# TODO: Tabbed interface demo #}
+    {# TODO: Password toggle demo #}
+</section>
+
+{# Forms & Inputs #}
+<section class="demo-section card-dashboard">
+    <h2>Forms & Inputs</h2>
+
+    {# Input Types #}
+    <div class="demo-subsection">
+        <input type="text" placeholder="Text input">
+        <input type="email" placeholder="Email input">
+        <input type="password" placeholder="Password input">
+        <input type="number" placeholder="Number input">
+        <input type="date">
+        <input type="time">
+        <select>
+            <option>Option 1</option>
+            <option>Option 2</option>
+            <option>Option 3</option>
+        </select>
+    </div>
+    <div class="demo-subsection">
+        <textarea placeholder="Textarea input" rows="3"></textarea>
+    </div>
+
+    {# Input Variants #}
+    <div class="demo-subsection">
+        <input type="text" class="input-base" placeholder="Input base">
+        <input type="text" class="input-base input-inline" placeholder="Input inline">
+    </div>
+
+    {# TODO: Validation states (success/error styling) #}
+    {# TODO: Radio button groups #}
+</section>
+
+<section class="demo-section card-dashboard">
+    <h2>Table Demo (using macro)</h2>
+    {% call(item, headers) ui.responsive_table(
+        caption="Demo Table",
+        headers=[
+            {"label": "Name", "priority": "high"},
+            {"label": "Status", "priority": "med"}
+        ],
+        items=[
+            {"id": 1, "name": "Item Alpha", "status": "Active"},
+            {"id": 2, "name": "Item Beta", "status": "Pending"},
+            {"id": 3, "name": "Item Gamma", "status": "Completed"}
+        ],
+        module_name="demo",
+        subtype="sample"
+    ) %}
+        <td class="table-cell">{{ item.name }}</td>
+        <td class="table-cell">{{ item.status }}</td>
+    {% endcall %}
+</section>
+
 {% endblock %}
