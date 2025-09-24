@@ -2,12 +2,15 @@
 
 
 function filterUnitOptions() {
-    const categoryElement = document.querySelector('#category').value;
-    const unitSelect = document.querySelectorAll('#unit_type');
+    const categoryElement = document.querySelector('#category');
+    const unitSelect = document.querySelector('#unit_type');
     if (!categoryElement || !unitSelect) return;
 
     const categorySelection = categoryElement.value;
     const unitTypes = unitSelect.querySelectorAll('option');
+
+    console.log(unitTypes)
+    console.log(unitSelect)
     
     // JS Object, use keys for types of groups, values are list of units allowed for that group
     const unitGroups = {
@@ -44,7 +47,25 @@ export function initProductForms() {
             filterUnitOptions();
         }
     });
-    filterUnitOptions();
+}
+
+export function initPasswordToggles() {
+    const toggleButtons = document.querySelectorAll('[data-password-toggle]');
+    if (toggleButtons.length === 0) return;
+
+    toggleButtons.forEach(btn => {
+        const inputId = btn.dataset.passwordToggle;
+        const input = document.querySelector(`#${inputId}`);
+        if (!input) return;
+        btn.setAttribute('aria-pressed', input.type === 'text' ? 'true' : 'false')
+
+        btn.addEventListener('click', () => {
+            const isPressed = btn.getAttribute('aria-pressed') === 'true';
+            input.type = isPressed ? 'password' : 'text';
+            btn.setAttribute('aria-pressed', String(!isPressed));
+        })
+    })
 }
 
 initProductForms();
+initPasswordToggles();
