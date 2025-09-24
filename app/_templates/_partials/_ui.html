@@ -15,7 +15,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {# Responsive Tables #}
 
 {% macro responsive_table(caption, headers, items, module_name, subtype) %}
-<table class="table-standard">
+<table id="{{ subtype }}-table" class="table-standard">
   <caption class="sr-only">{{ caption }}</caption>
   <thead class="table-header">
     <tr>
@@ -45,6 +45,16 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 </table>
 {% endmacro %}
 
+{# TODO: Macro for td template for makeTableRow() #}
+<template id="{{ subtype }}-template">
+  <tr class="table-row" data-module="{{ module_name }}" data-subtype="{{ subtype }}" data-item-id="">
+    {% for col in headers %}
+      <td class="{{ col.priority }}" data-field=""></td>
+    {% endfor %}
+    <td class="table-cell delete-cell"></td>
+  </tr>
+</template>
+
 {# === MODALS === #}
 
 {# Entry form modal #}
@@ -70,8 +80,10 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 <dialog id="confirmation-modal">
   <div class="confirmation-content">
     <p class="confirmation-message">Are you sure?</p>
-    <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
-    <button id="confirm-ok" class="btn btn-primary">OK</button>
+    <div class="form-actions">
+      <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
+      <button id="confirm-ok" class="btn btn-primary">OK</button>
+    </div>
   </div>
 </dialog>
 {% endmacro %}
@@ -125,69 +137,4 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor"  viewBox="0 0 24 24">
   <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/>
 </svg>
-{% endmacro %}
-
-{# Form Modals - Specific Ones #}
-
-{# Centralized place for our Metric Entry modal #}
-{% macro metric_entry_modal(id='metric-entry-dashboard', title='Add Metric') %}
-  {% call modal('/metrics/', id, title) %}
-      <div class="tabs">
-        <button type="button" role="tab" data-tab="steps" class="btn btn-secondary">Steps Entry</button>
-        <button type="button" role="tab" data-tab="weight" class="btn btn-secondary">Weight Entry</button>
-        <button type="button" role="tab" data-tab="sleep" class="btn btn-secondary">Sleep</button>
-        <button type="button" role="tab" data-tab="calories" class="btn btn-secondary">Calories</button>
-      </div>
-
-      <div role="tabpanel" class="tab-content" id="tab-steps">
-        <div class="form-group">
-          <label for="steps">Steps:</label>
-          <input type="number" id="steps" name="steps" min="0" max="40000" step="1">
-        </div>
-      </div>
-      <div role="tabpanel" class="tab-content" id="tab-weight" hidden>
-        <div class="form-group">
-          <label for="weight">Weight:</label>
-          <input type="number" id="weight" name="weight" min="0" max="500" step="0.1">
-        </div>
-      </div>
-      <div role="tabpanel" class="tab-content" id="tab-calories" hidden>
-        <div class="form-group">
-          <label for="calories">Calories:</label>
-          <input type="number" id="calories" name="calories" min="0" max="10000" step="1">
-        </div>
-      </div>
-      <div role="tabpanel" class="tab-content" id="tab-sleep" hidden>
-        <div class="form-group">
-          <label for="wake_time">Wake Time:</label>
-          <input type="time" id="wake_time" name="wake_time">
-        </div>
-        <div class="form-group">
-          <label for="sleep_time">Sleep Time:</label>
-          <input type="time" id="sleep_time" name="sleep_time">
-        </div>
-      </div>
-  {% endcall %}
-{% endmacro %}
-
-
-{% macro time_entry_modal(id='time-entry-dashboard', title='Add Time Entry') %}
-  {% call modal('/time_tracking/', id, title) %}
-    <div class="form-group">
-        <label for="category">Category:</label>
-        <input type="text" id="category" name="category" required>
-    </div>
-    <div class="form-group">
-        <label for="duration">Duration (minutes):</label>
-        <input type="number" id="duration" name="duration" min="0" required>
-    </div>
-    <div class="form-group">
-        <label for="started_at">Started At:</label>
-        <input type="time" id="started_at" name="started_at" required>
-    </div>
-    <div class="form-group">
-        <label for="description">Description (Optional):</label>
-        <input type="text" id="description" name="description">
-    </div>
-  {% endcall %}
 {% endmacro %}
