@@ -17,7 +17,6 @@
     display: inline-flex;       /* icons+text align*/
     align-items: center;        /* for icon+label vertical centering? */
     justify-content: center;    /* center text when full width */
-    min-height: 2.5rem;         /* ensure big enough for touch */
     cursor: pointer;
     user-select: none;
     padding: var(--space-sm) var(--space-md);
@@ -192,6 +191,7 @@
 /* ======= LAYOUT COMPONENTS ======= */
 
 /* Mimick <fieldset>'s 'title intersects border' effect for container headers */
+/* TODO: We'll have to re-tune this since we're using the usual button stylings, need to tweak padding again here too, and font weight? */
 .card-title {
     position: absolute; /* TODO: NOTES: breaks the title out of normal flow */
     top: -0.9rem;
@@ -221,9 +221,9 @@
     gap: var(--gap-sm);
     top: calc(1.3 * var(--min-navbar-height));
     right: 1rem;
-    /* border: 2px solid red; */
     z-index: 400;
     border-radius: var(--border-radius-mild);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
 }
 .toast {
     border-radius: var(--border-radius-mild);
@@ -239,21 +239,6 @@
     background-color: color-mix(in srgb, var(--color-error) 10%, white);
     color: var(--color-error);
     border-color: var(--color-error);
-}
-
-/* Warnings? Messages? Success? idk */
-.flash-message {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%; /* match navbar width */
-    height: var(--min-navbar-height);
-    z-index: 401; /* appear above other content */
-    background-color: color-mix(in srgb, var(--color-success) 10%, white); /* Derive bg-color from our color-success var instead of hardcoding */
-    color: var(--color-success);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--border-radius);
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
 }
 
 .shadow-card {

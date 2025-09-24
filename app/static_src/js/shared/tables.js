@@ -6,13 +6,17 @@ import { apiRequest } from './services/api.js';
 
 /**
  * Creates table row for given item data for realtime modal entries
- * @param {Object} data - Return data from backend for new item
+ * @param {Object} item - Return data from backend for new item
  */
 // TODO: Implement!
-export function makeTableRow(data) {
+export function makeTableRow(item, subtype) {
     const row = document.createElement("tr");
-
+    console.log("makeTableRow hit")
     // Build cells
+    const template = document.querySelector(`#template-${subtype}`);
+    const clone = template.content.firstElementChild.cloneNode(true);
+
+    clone.dataset.itemId = item.id;
 
 }
 
@@ -33,7 +37,21 @@ async function deleteTableItem(module, itemId, subtype) {
 
     apiRequest('DELETE', url, () => {
         const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
+        const tableBody = itemRow.closest('tbody');
+
         if (itemRow) itemRow.remove();
+
+        // Insert "No items yet" placeholder text for table if we just removed last itemRow
+        // TODO: This is functional for now, need to extract/streamline
+        if (tableBody.children.length === 0) {
+            const emptyRow = document.createElement('tr');
+            const emptyCell = document.createElement('td');
+            emptyCell.colSpan = 99;
+            emptyCell.classList.add('table-empty');
+            emptyCell.textContent = "No entries yet.";
+            emptyRow.appendChild(emptyCell);
+            tableBody.appendChild(emptyRow);
+        }
     });
 }
 
