@@ -44,6 +44,7 @@ def check_item_ownership(item, user_id):
         abort(403)
 
 class AuthService:
+    # TODO: Extract to notes
     # Dependency injection: session is injected from outside
     # Composition: AuthService "has a" UsersRepository (not "is a")
     def __init__(self, session): # <= inject the session dependency

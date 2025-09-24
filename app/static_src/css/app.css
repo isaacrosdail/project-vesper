@@ -157,6 +157,12 @@ h3 {
 .highlight-label { 
     font-weight: var(--font-weight-semibold);
 }
+/* .habit-streak::before {
+    content: "🔥";
+}
+.habit-streak::after {
+    content: attr(data-streak-count);
+} */
 
 /* ===================================
     PAGE-SPECIFIC: Landing Page
@@ -233,4 +239,3 @@ h3 {
 .demo-grid-container:has(:not(div)) {
     grid-template-columns:  repeat(auto-fit, minmax(80px, 1fr));
 }
-
