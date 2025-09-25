@@ -18,26 +18,22 @@
 
 ## [Wed 24.09.25] - WIP: Models & Validation
 **Log:**
-0. Rebased to squash/edit a bunch of commits
-1. Model standardization & Enum implementation
-	- Updated all models.py - Added proper enums with *Enum suffix and name="my_enum" properties
-	- Implemented `ProductCategoryEnum` with analytics-focused categories (fruits, vegetables, legumes, processed_convenience, etc.)
-	- Standardized field constraints - Tuned string lengths & numeric precision across all models
-	- Added database constraints - CheckConstraint on promotion_threshold column
-	- Updated enum implementations: UserRoleEnum, UserLangEnum, PriorityEnum, StatusEnum, DifficultyEnum, etc. (afaik, all refs & imports are updated)
+0. Rebased to squash/edit quite a few commits
+1. Model standardization & Enum overhaul
+	- Went through `models.py` systematically
+	- Introduced proper enums (*Enum suffix, name="my_enum" property)
+	- Unified `UserRoleEnum`, `UserLangEnum`, `PriorityEnum`, `StatusEnum`, `DifficultyEnum`, etc. (all refs & imports should now be up-to-date)
+		- Added `ProductCategoryEnum` with categories meaningful for analytics (vegetables, legumes, processed_convenience, etc.)
+	- Standardized field definitions: consistent string lengths, numeric precision, constraints.
+	- Added database constraints (eg, CheckConstraint on promotion_threshold)
+
 2. Validation Infrastructure
-	- Created module-level `constants.py` for auth, groceries, habits
-	- Updated validators.py for auth, groceries, habits with proper error messages & field validation
-		- Both tests & validators will now pull from centralized constants for consistency
-		- TODO: ensure these constants are applied in models.py too
-	- Built shared/validators.py with check_numeric() helper for decimal validation
-	- Model changes/tweaks:
-		- Tuned more sensible limits/values/constraints for most model fields
-		- Added `CheckConstraint` to `promtion_threshold` column
-		- Made UserRole/UserLang/others proper enums; added `ProductCategoryEnum` for product categories instead of using strings
-		- Imposed `*Enum` suffix on all enums & added `name="my_enum"` properties
-X. JavaScript Cleanup
-	- Fixed strings.ts - Removed debug console.log statements & moved test code out of production functions
+	- Created module-level constants.py for: auth, groceries, habits
+	- Updated `validators.py` in each to pull error messages + field rules from these constants
+	- Added shared/validators.py with check_numeric() helper for `Decimal` validation
+	- Extended model constraints (numeric limits, better defaults)
+	- Validations and tests now share a central definition of rules
+
 
 ## [Tues 23.09.25] - Style Reference Page Refinement/Overhaul
 **Log:**
