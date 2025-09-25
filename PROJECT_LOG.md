@@ -15,9 +15,123 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+
+## [Wed 24.09.25] - WIP: Models & Validation
+**Log:**
+0. Rebased to squash/edit quite a few commits
+1. Model standardization & Enum overhaul
+	- Went through `models.py` systematically
+	- Introduced proper enums (*Enum suffix, name="my_enum" property)
+	- Unified `UserRoleEnum`, `UserLangEnum`, `PriorityEnum`, `StatusEnum`, `DifficultyEnum`, etc. (all refs & imports should now be up-to-date)
+		- Added `ProductCategoryEnum` with categories meaningful for analytics (vegetables, legumes, processed_convenience, etc.)
+	- Standardized field definitions: consistent string lengths, numeric precision, constraints.
+	- Added database constraints (eg, CheckConstraint on promotion_threshold)
+
+2. Validation Infrastructure
+	- Created module-level constants.py for: auth, groceries, habits
+	- Updated `validators.py` in each to pull error messages + field rules from these constants
+	- Added shared/validators.py with check_numeric() helper for `Decimal` validation
+	- Extended model constraints (numeric limits, better defaults)
+	- Validations and tests now share a central definition of rules
+
+
+## [Tues 23.09.25] - Style Reference Page Refinement/Overhaul
+**Log:**
+1. Continued organization/trimming of style-reference Page
+	- Made notes on catalog of components to avoid missing anything
+	- Refactored CSS: tidier with `-section` & `-subsection` classes for grids
+	- Flattened markup & stripped inline styles
+	- Organized into logical sections with clearer hierarchy
+		- Separated "visual reference" from "iteractive demos"
+	- Use stepped gradients for bg/accent tiles
+	- Added btn-icons page-specific styling using `data-page` attribute on `<html>`
+X. Misc
+	- Added docstrings for: `makeToast`, `initPasswordToggles`
+
+
+## [Mon 22.09.25] - Validators & Service/Route Integration
+**Log:**
+1. Solidifying validators.py across all modules
+	- Installed regex module for Unicode pattern matching for User stuff
+	- Centralized error strings in validators.py for each module, then import in tests
+	- Set up a bunch of initial parametrized tests / test cases
+2. Started integrating `validators.py` changes into routes/service layers
+	- Made service.py for time_tracking (timeentries), mirroring `GroceriesService`
+	- Updated `AuthService` constructor to take repository; adjusted methods to match current patterns
+3. Login/Register form pages
+	- Draft "click eye icon to toggle password visibility" effect with basic JS hookup
+4. Style reference:
+	- Reorganized into two main sections: Swatches/tokens & Components
+X. Misc:
+	- Added registry mapping in main.js so page-specific JS is executed based on our new data-page attribute in the html tag itself
+	- Added dev CSP rules so we can win back our style-reference page
+
+
+## [Sun 21.09.25] - Validators & CSS Experimenting
+**Log:**
+1. CSS: practice with `::before`/`::after` & transitions
+	- Replace bg-color nav-link effect with expanding underline using `::before`/`::after`
+2. Added basic validation + test cases to get us mostly functional
+	- Made up-to-date validators.py for all modules (excl. api/)
+	- Made some parametrized tests to cover our basics
+	- Integrated validators into routes/services (mostly, needs more testing)
+	- Also: refactored parse_and_validate_form_data to use our validators (needs more work)
+X. Misc:
+	- Added `habit_tags` & `task_tags` to NEVER_DELETE list (assoc. tables use composite keys & no *_id_seq)
+
+## [Sat 20.09.25] - Tabbed Modal, Homepage Redesign Work, & Navigation
+**Log:**
+1. Tabbed modal
+	- Added SVG icons to each tab
+	- Dialed in more on pill-shaped design for tab buttons
+2. Homepage
+	- Folded time/metric/leetcode entry buttons into custom dropdown
+	- "Animated" chevron SVG with rotate for that too
+3. Drafted hamburger menu -> X transition effect too
+	- Learned `transform-box: fill-box;`, `transform-origin`, & stacking rotate+scaleX in one transform
+	- Also split SVG into 3 separate lines so we could manipulate independently
+X. Misc:
+	- Cleaned up SVGs/usage & added proper attributions
+	- Purged a few console logs
+
+## [Fri 19.09.25] - Task Completion & Metric Modal
+**Log:**
+1. Implemented `markTaskComplete` for tasks list on homepage as well
+2. Tabbed modal (metric_entry) work:
+	- Adjusted metrics route to handle multiple metrics & ignore empty-valued entries (ie, populated only)
+	- Revise classes: tab-group for container, tab for each button/tab
+	- Adjust styling to follow a ??	
+3. Attempting moon/sleep SVG
+
+## [Thurs 18.09.25] - Shopping List & Navbar Improvements
+**Log:**
+1. ShoppingList feature
+	- Added "Add to shopping list" from Product table menu
+	- Fixed bug where AJAX gave new shopping list item entry the product ID instead of the shoppinglistitem ID from backend
+	- Fixed duplicate detection logic => now properly checks for existing products before adding to list
+	- Implemented realtime quantity updates when adding existing items
+2. Navbar improvements
+	- Implemented click-away closing for mobile nav
+	- Cleaned up navbar.js (better parameters, removed duplicates)
+	- Refactored naming conventions across navbar system (nav-desktop, nav-mobile, nav-mobile-container)
+X. Misc:
+	- Fixed bug preventing add_transaction form fields from being hidden
+
+## [Wed 17.09.25] Dark Mode & Color System Tuning
+**Log:**
+1. CSS: Completed dark mode color tuning & OKLCH conversion
+	- Converted all remaining HSL/hex colors to OKLCH for consistency
+	- Added hover states: Created --bg-hover token for secondary button hover (neutral counterpart to accent hover)
+	- Introduced tertiary color: Added amber/orange selection colors as third color family (will support future data visualization)
+	- Replaced global color-error & color-success tokens with theme-specific ones for better control -> *-clr-success & *-clr-error
+	- Made --text-destructive reference --clr-error to reduce duplication while maintaining semantic naming
+	- Some organization stuff:
+		- Moved ::selection styling from base.css to app.css
+		- Renamed `--fade-in` to `--transition-fade`
+
 ## [Tues 16.09.25]
 **Log:**
-1. Stepped down all neutrals in light mode to make facilitate stepping UP for hover/active states
+1. Stepped down all neutrals in light mode facilitate stepping UP for hover/active states
 
 ## [Mon 15.09.25] - CSS Cleanup/Refactoring
 **Log:**
@@ -50,7 +164,7 @@
 	- Bolded Today’s Frog & LeetCode text for emphasis (WIP)
 	- Lined up tasks list styling to that of habits checklist (Need to apply AJAX completion, too)
 	- Moved "Add Habit" button into title row, intersecting border (did the same with 'Add Task' for 'My Day' section)
-	- Unified card header pattern -> `[Title] (+)` now consistent/applied across all cards and dashboards
+	- Unified card header pattern -> `[Title] (+)` now consistent/applied across all cards & dashboards
 		- Added new `.btn-icon` styling to pair with `plus_svg()` for denser UI
 3. Macro Cleanup (WIP)
 	- Renamed _components.html -> _ui.html
@@ -152,7 +266,7 @@
 3. Improving some of our older JS
 	-Fixing product-forms.js
 		- Move to shared/forms.js & have guarded init there instead of groceries dashboard.js
-		- Rewrite filterUnitOptions to use a 2-stage dict lookup and single loop!
+		- Rewrite filterUnitOptions to use a 2-stage dict lookup & single loop!
 	- Fixing theme-manager.js:
 		- Apply similar refactor here: scrap if/else & instead 
 4. JS strings practice
