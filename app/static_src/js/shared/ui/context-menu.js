@@ -77,7 +77,7 @@ document.addEventListener('click', async (e) => {
                 makeToast(`Updated ${productName} quantity to ${newQty}`, 'success');
                 return;
             }
-            addShoppingListItemToDOM(responseData.item_id, responseData.product_id, productName);
+            addShoppingListItemToDOM(responseData.data.item_id, responseData.data.product_id, productName);
         }, data);
     }
 

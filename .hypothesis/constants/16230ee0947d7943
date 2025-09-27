@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/.venv/bin/pytest
+# hypothesis_version: 6.140.2
+
+['.exe', '__main__']

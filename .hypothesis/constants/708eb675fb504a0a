@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/database/seed/seed_db.py
+# hypothesis_version: 6.140.2
+
+['demo', 'guest_habit']

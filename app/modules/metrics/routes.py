@@ -3,9 +3,11 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
+from app.modules.api.responses import api_response, validation_failed
+from app.modules.metrics.service import DailyMetricsService
 from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.viewmodels import DailyMetricViewModel, DailyMetricPresenter
-from app.shared.datetime.helpers import today_range
+from app.shared.datetime.helpers import today_range_utc
 from app.modules.metrics.validators import validate_daily_entry
 
 metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_prefix='/metrics')
@@ -36,24 +38,16 @@ def metrics(session):
     form_data = request.form.to_dict()
     errors = validate_daily_entry(form_data)
     if errors:
-        return jsonify({
-            "success": False,
-            "message": errors[0]
-        }), 400
+        return validation_failed(errors), 400
     
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+    service = DailyMetricsService(repo, current_user.timezone)
 
-    start_utc, end_utc = today_range(current_user.timezone)
-    processed_metrics = []
+    result = service.process_daily_metrics(form_data)
 
-    # Iterate over key-value pairs, calling create/update for each whose value is a non-empty string (which is falsy in Python)
-    for metric_type, value in form_data.items():
-        if value:
-            metric, was_created = repo.create_or_update_daily_metric(metric_type, value, start_utc, end_utc)
-            processed_metrics.append({"metric_type": metric_type, "created": was_created })
 
-    return jsonify({
-        "success": True, 
-        "message": f"Added {len(processed_metrics)} metrics",
-        "metrics": processed_metrics
-    }), 201
+    return api_response(
+        True,
+        result["message"],
+        data = result["data"] # pass through the data dict
+    ), 201

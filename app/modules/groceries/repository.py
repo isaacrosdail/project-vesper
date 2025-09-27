@@ -7,152 +7,91 @@ from decimal import Decimal
 
 from sqlalchemy.orm import joinedload
 
-from app.modules.groceries.models import Product, Transaction, Unit, ShoppingList, ShoppingListItem
-from app.shared.datetime.helpers import today_range
+from app.modules.groceries.models import Product, Transaction, UnitEnum, ShoppingList, ShoppingListItem
 from app.shared.repository.base import BaseRepository
 
 
 class GroceriesRepository(BaseRepository):
+    def __init__(self, session, user_id, user_tz):
+        super().__init__(session, user_id, user_tz, model_cls=Product)
 
-	def get_product_by_barcode(self, barcode: str):
-		return self.session.query(Product).filter(
-			Product.barcode == barcode,
-			Product.user_id == self.user_id,
-			Product.deleted_at.is_(None) # TODO: Needed if we have safe_delete now?
-		).first()
-	
-	def get_product_by_id(self, product_id: int):
-		return self.session.query(Product).filter(
-			Product.user_id == self.user_id,
-			Product.id == product_id
-		).first()
-	
-	def get_all_products(self):
-		"""Get all products for current user."""
-		return self.session.query(Product).filter(
-			Product.deleted_at.is_(None),
-			Product.user_id == self.user_id
-		).all()
 
-	# TODO: NOTES: Eager load 'product' relationship using joinedload so we can safely access transaction.product.* fields in templates
-	# after session is closed (avoids DetachedInstanceError)
-	def get_all_transactions(self):
-		"""Get all transaction for current user with eager-loaded products."""
-		return self.session.query(Transaction).options(
-			joinedload(Transaction.product)
-		).filter(
-			Transaction.user_id == self.user_id
-		).all()
+    def get_product_by_barcode(self, barcode: str):
+        return self._user_query(Product).filter(
+            Product.barcode == barcode,
+            Product.deleted_at.is_(None)
+        ).first()
 
-	def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime):
-		"""Get a transaction within a certain datetime window (UTC)."""
-		return self.session.query(Transaction).filter(
-			Transaction.product_id == product_id,
-			Transaction.created_at >= start_utc,
-			Transaction.created_at < end_utc,
-			Transaction.user_id == self.user_id
-		).first()
+    def get_product_by_id(self, product_id: int):
+        return self.get_by_id(product_id)
 
-	def get_or_create_product(self, **product_data):
-		"""Get existing product or create new one. Returns tuple (product, was_created)."""
-		barcode = product_data["barcode"]
-		product = self.get_product_by_barcode(barcode)
-		if product:
-			return product, False
-		return self.create_product(**product_data), True
+    def get_all_products(self):
+        return self._user_query(Product).filter(
+            Product.deleted_at.is_(None)
+        ).all()
 
-	def create_product(self, **product_data) -> Product:
-		product = Product(
-			barcode=product_data["barcode"],
-			name=product_data["name"],
-			category=product_data["category"],
-			net_weight=float(product_data["net_weight"]),
-			unit_type=Unit(product_data["unit_type"]),
-			calories_per_100g=float(product_data["calories_per_100g"]),
-			user_id=self.user_id
-		)
-		self.session.add(product)
-		return product
-		
-	def create_transaction(self, product, **product_data):
-		# TODO: belongs in VALIDATORS!
-		if product is None:
-			raise ValueError("Product must be provided for transaction.")
-		
-		quantity = int(product_data.get("quantity") or 1)
 
-		new_transaction = Transaction(
-			product_id=product.id,
-			price_at_scan=Decimal(product_data["price"]),
-			quantity=quantity,
-			created_at=datetime.now(timezone.utc),
-			user_id=self.user_id
-		)
-		self.session.add(new_transaction)
-		return new_transaction
+    # TODO: NOTES: Eager load 'product' relationship using joinedload so we can safely access transaction.product.* fields in templates
+    # after session is closed (avoids DetachedInstanceError)
+    def get_all_transactions(self):
+        """Get all transaction for current user with eager-loaded products."""
+        return self._user_query(Transaction).options(
+            joinedload(Transaction.product)
+        ).all()
 
-	def increment_transaction_quantity(self, transaction: Transaction, quantity: int = 1):
-		"""Add quantity to an existing transaction."""
-		transaction.quantity += quantity
-		return transaction
+    def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime):
+        """Get a transaction within a certain datetime window (UTC)."""
+        return self._user_query(Transaction).filter(
+            Transaction.product_id == product_id,
+            Transaction.created_at >= start_utc,
+            Transaction.created_at < end_utc,
+        ).first()
 
-	def add_or_increment_transaction(self, product, **product_data):
-		"""
-		Add transaction or increment existing one in today's window.
-		Returns (transaction, was_created)
-		"""
-		if product is None:
-			raise ValueError("Product must be provided for transaction.")
-		start_utc, end_utc = today_range()
-		existing = self.get_transaction_in_window(product.id, start_utc, end_utc)
-		quantity = int(product_data.get("quantity") or 1)
 
-		if existing:
-			self.increment_transaction_quantity(existing, quantity)
-			return existing, False
-		else:
-			new_transaction = self.create_transaction(product, **product_data)
-			return new_transaction, True
-		
-	def create_shoppinglist(self, name: str = "DefaultListName"):
-		shopping_list = ShoppingList(
-			user_id=self.user_id,
-			name=name
-		)
-		self.session.add(shopping_list)
-		self.session.flush()
-		return shopping_list
+    def create_product(self, **product_data) -> Product:
+        product = Product(
+            user_id=self.user_id,
+            barcode=product_data["barcode"],
+            name=product_data["name"],
+            category=product_data["category"],
+            net_weight=product_data["net_weight"],
+            unit_type=product_data["unit_type"],
+            calories_per_100g=product_data["calories_per_100g"],
+        )
+        return self.add(product)
 
-	def get_or_create_shoppinglist(self):
-		"""Return ShoppingList from database, else create new and return that."""
-		shopping_list = self.session.query(ShoppingList).filter(
-			ShoppingList.user_id == self.user_id,
-		).first()
+        
+    def create_transaction(self, product, **product_data):
+        transaction = Transaction(
+            user_id=self.user_id,
+            product_id=product.id,
+            price_at_scan=product_data["price"],
+            quantity=product_data["quantity"],
+        )
+        return self.add(transaction)
 
-		if shopping_list:
-			return shopping_list, False
-		return self.create_shoppinglist(), True
-	
-	def add_item_to_shoppinglist(self, product_id):
-		"""Add a given product to ShoppingList and return item. If one already exists, simply increment its quantity."""
-		shopping_list, _ = self.get_or_create_shoppinglist()
+        
+    def create_shoppinglist(self, name: str = "DefaultListName"):
+        shopping_list = ShoppingList(
+            user_id=self.user_id,
+            name=name
+        )
+        return self.add(shopping_list)
 
-		existing_item = self.session.query(ShoppingListItem).filter(
-			ShoppingListItem.shopping_list_id == shopping_list.id,
-			ShoppingListItem.product_id == product_id,
-			ShoppingListItem.user_id == self.user_id
-		).first()
+    # One list per user, for now
+    def get_shopping_list(self):
+        return self._user_query(ShoppingList).first()
+    
+    def get_shopping_list_item(self, shopping_list_id, product_id):
+        return self._user_query(ShoppingListItem).filter(
+            ShoppingListItem.shopping_list_id == shopping_list_id,
+            ShoppingListItem.product_id == product_id
+        ).first()
 
-		if existing_item:
-			existing_item.quantity_wanted += 1
-			return existing_item, False
-		else:
-			# Adding an item to the list entails simply creating the link between list & product
-			item = ShoppingListItem(
-				user_id=self.user_id,
-				shopping_list_id=shopping_list.id,
-				product_id=product_id
-			)
-			self.session.add(item)
-			self.session.flush()
-			return item, True
+    def create_shopping_list_item(self, shopping_list_id, product_id):
+        shopping_list_item = ShoppingListItem(
+            user_id=self.user_id,
+            shopping_list_id=shopping_list_id,
+            product_id=product_id
+        )
+        return self.add(shopping_list_item)

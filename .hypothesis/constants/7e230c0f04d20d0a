@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/auth/models.py
+# hypothesis_version: 6.140.2
+
+[256, 'ADMIN', 'America/Chicago', 'OWNER', 'USER', 'de', 'en', 'user_lang_enum', 'user_role_enum']

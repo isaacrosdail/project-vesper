@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/time_tracking/service.py
+# hypothesis_version: 6.140.2
+
+['category', 'description', 'duration', 'entry', 'errors', 'general', 'message', 'started_at', 'success']

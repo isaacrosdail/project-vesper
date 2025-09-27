@@ -4,16 +4,16 @@ from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 class TransactionPresenter(BasePresenter):
 
     VISIBLE_COLUMNS = [
-        "barcode", "product_name", "price_at_scan", "price_per_100g", "quantity", "created_at"
+        "barcode", "product_name", "price_at_scan", "price_per_100g", "created_at"
     ]
 
     COLUMN_CONFIG = {
     "barcode": {"label": "Barcode", "priority": "desktop-only"},
     "product_name": {"label": "Product Name", "priority": "essential"},
-    "price_at_scan": {"label": "Price", "priority": "essential"},
+    "price_at_scan": {"label": "Price (qty)", "priority": "essential"},
     "quantity": {"label": "Qty", "priority": "desktop-only"},
     "created_at": {"label": "Date", "priority": "essential"},
-    "price_per_100g": {"label": "Per 100g", "priority": "desktop-only"}
+    "price_per_100g": {"label": "Price (100g)", "priority": "desktop-only"}
     }
 
 class TransactionViewModel(TimestampedViewMixin):
@@ -30,7 +30,8 @@ class TransactionViewModel(TimestampedViewMixin):
     
     @property
     def price_label(self):
-        return f"${self.price_at_scan:.2f}"
+        total_price = self.price_at_scan * self.quantity
+        return f"${total_price:.2f} ({self.quantity}x)"
     
     @property
     def price_per_100g_label(self):
@@ -54,7 +55,7 @@ class ProductPresenter(BasePresenter):
         "barcode": {"label": "Barcode", "priority": "essential"},
         "net_weight_display": {"label": "Net Weight", "priority": "desktop-only"},
         "unit_type": {"label": "Unit", "priority": "desktop-only"},
-        "calories_per_100g": {"label": "Cals per 100g", "priority": "essential"},
+        "calories_per_100g": {"label": "Cals (100g)", "priority": "essential"},
         "created_at": {"label": "Created", "priority": "desktop-only"}
     }
 
@@ -71,8 +72,12 @@ class ProductViewModel(TimestampedViewMixin):
         self._tz = tz
 
     @property
+    def category_display(self):
+        return f"{self.category.value.title()}"
+
+    @property
     def net_weight_display(self):
-        return f"{self.net_weight:.2f} ({self.unit_type.value})"
+        return f"{self.net_weight:.2f} ({self.unit_type.value.lower()})"
     
     @property
     def calories_display(self):

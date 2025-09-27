@@ -10,13 +10,13 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app._infra.database import db_session, init_db
 from app.config import config_map
-from app.core.routes import main_bp
+from app.routes import main_bp
 from app.devtools.routes import devtools_bp
 from app.errors import errors_bp
 from app.extensions import _setup_extensions
 from app.modules.api.crud_routes import crud_bp
 from app.modules.api.routes import api_bp
-from app.modules.auth.models import UserRole
+from app.modules.auth.models import UserRoleEnum
 from app.modules.auth.routes import auth_bp
 from app.modules.groceries.routes import groceries_bp
 from app.modules.habits.routes import habits_bp
@@ -124,7 +124,7 @@ def _setup_request_hooks(app):
         return dict(
             has_dev_tools=has_dev_tools, # Prefer config over raw os.environ now that we pick config class from env
             nonce=getattr(g, 'nonce', ''), # inject our nonce here as well,
-            UserRole=UserRole   # Make our UserRole Enum available for role checks in templates directly
+            UserRole=UserRoleEnum   # Make our UserRoleEnum available for role checks in templates directly
         )
     
     # Apply CSP headers

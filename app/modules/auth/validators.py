@@ -1,45 +1,52 @@
 
 import regex
 
-# Error message constants
-USERNAME_REQUIRED = "Username is required"
-USERNAME_CHARSET = "Username can only contain up to 50 characters of letters, numbers, and underscores"
+from app.modules.auth.models import UserRoleEnum, UserLangEnum
+from app.modules.auth.constants import *
+from app.shared.validators import validate_enum
 
-PASSWORD_REQUIRED = "Password is required"
-PASSWORD_LENGTH = "Password must be 8-50 characters"
-
-NAME_CHARSET = "Name can only contain up to 50 characters of letters, spaces, apostrophes, and hyphens"
-
-# USERNAME: 3–50 chars, Unicode letters, numbers, and underscores
-USERNAME_VALID = r"^[\p{L}0-9_]{3,50}$"
-
-# PASSWORD: 8–50 chars, any characters allowed
-PASSWORD_VALID = r"^.{8,50}$"
-
-# NAME (optional): 1–50 chars, Unicode letters plus space, apostrophe, hyphen
-NAME_VALID = r"^[\p{L}' -]{1,50}$"
-
-
-def validate_user(data: dict) -> list[str]:
+def validate_username(username: str) -> list[str]:
     errors = []
-
-    username = data.get("username", "").strip()
-    password = data.get("password", "").strip()
-    name = data.get("name", "").strip()
-
     if not username:
-        errors.append("Username is required")
-    if username and not regex.match(USERNAME_VALID, username):
-        errors.append("Username can only contain up to 50 characters of letters, numbers, and underscores")
+        errors.append(USERNAME_REQUIRED)
+    elif not regex.match(USERNAME_REGEX, username):
+        errors.append(USERNAME_CHARSET)
+    return errors
 
-
+def validate_password(password: str) -> list[str]:
+    errors = []
     if not password:
-        errors.append("Password is required")
-    if password and not regex.match(PASSWORD_VALID, password):
-        errors.append("Password must be 8-50 characters")
+        errors.append(PASSWORD_REQUIRED)
+    elif not regex.match(PASSWORD_REGEX, password):
+        errors.append(PASSWORD_LENGTH)
+    return errors
+
+def validate_name(name: str) -> list[str]:
+    errors = []
+    if name and not regex.match(NAME_REGEX, name):
+        errors.append(NAME_CHARSET)
+    return errors
+
+def validate_role(role: str) -> list[str]:
+    return validate_enum(role, UserRoleEnum, USERROLE_REQUIRED, USERROLE_INVALID)
+
+def validate_lang(lang: str) -> list[str]:
+    return validate_enum(lang, UserLangEnum, USERLANG_REQUIRED, USERLANG_INVALID)
 
 
-    if name and not regex.match(NAME_VALID, name):
-        errors.append("Name can only contain up to 50 characters of letters, spaces, apostrophes, and hyphens")
-    
+VALIDATION_FUNCS = {
+    "username": validate_username,
+    "password": validate_password,
+    "role": validate_role,
+    "lang": validate_lang
+}
+
+def validate_user(data: dict) -> dict[str, list[str]]:
+    errors = {}
+
+    for field, func in VALIDATION_FUNCS.items():
+        value = data.get(field)
+        field_errors = func(value)
+        if field_errors:
+            errors[field] = field_errors
     return errors

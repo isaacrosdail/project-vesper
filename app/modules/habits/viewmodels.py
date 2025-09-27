@@ -28,7 +28,7 @@ class HabitViewModel(TimestampedViewMixin):
     
     @property
     def status_label(self):
-        return f"{self.status.value}"
+        return f"{self.status.value.title()}"
     
     @property
     def created_at_label(self):

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/debug.py
+# hypothesis_version: 6.140.2
+
+['=', 'APP_ENV', 'DEBUG', 'Not set', 'TESTING', '[request_debug]', '_config_logged', 'dev', 'static', 'testing']

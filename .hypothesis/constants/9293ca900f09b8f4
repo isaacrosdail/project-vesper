@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/habits/validators.py
+# hypothesis_version: 6.140.2
+
+['difficulty', 'established_date', 'habit_id', 'language', 'leetcode_id', 'name', 'promotion_threshold', 'status', 'title']

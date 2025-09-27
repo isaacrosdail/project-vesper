@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/routes.py
+# hypothesis_version: 6.140.2
+
+[201, '/dashboard', '/groceries', '/products', '/shopping-list/items', '/transactions', 'GET', 'POST', 'action', 'barcode', 'data', 'error', 'error_type', 'errors', 'form_data', 'groceries', 'groceries.dashboard', 'groceries.products', 'item_id', 'message', 'product_headers', 'product_id', 'product_not_found', 'products', 'shopping_list', 'show_product_fields', 'submit', 'success', 'templates', 'transaction_headers', 'transactions']

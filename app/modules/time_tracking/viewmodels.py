@@ -21,7 +21,7 @@ class TimeEntryViewModel(TimestampedViewMixin):
     def __init__(self, entry, tz):
         self.id = entry.id
         self.category = entry.category
-        self.duration = entry.duration
+        self.duration = entry.duration_minutes
         self.description = entry.description
         self.started_at = entry.started_at
         self.ended_at = entry.ended_at

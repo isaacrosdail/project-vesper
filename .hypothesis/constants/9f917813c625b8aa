@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/auth/repository.py
+# hypothesis_version: 6.140.2
+
+['Guest', 'Owner', 'demo123', 'guest', 'owner', 'owner123']

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/habits/constants.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.7, 1.0, 100, 200, 'Difficulty required', 'Habit is required', 'Invalid difficulty', 'Invalid habit ID', 'Invalid language', 'Invalid status', 'Language required', 'Status is required']

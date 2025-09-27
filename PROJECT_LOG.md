@@ -16,7 +16,73 @@
 - Whitelisted all local IPs for access from laptop/etc
 
 
-## [Wed 24.09.25] - WIP: Models & Validation
+
+## [Sun 28.09.25]
+**Log:**
+0. Dissolve `core/` -> Move templates to _templates, healthcheck to app/routes.py
+1. Smoke Testing Forms: tasks (frog + normal), habits (promotion-based + normal)
+2. Tweaking
+	- Habits: Make status nullable & add as an option toggle on form. Users can opt-in to promotion-based mechanic. Also removed the promotion-threshold field: Letting the user dictate target days + threshold would let them game the system, which defeats the purpose. Habit-building SHOULD have friction, so we'll handle the math/targets/etc behind the scenes, based on actual behavioral psychology notes.
+	- Updated enum/string parsing logic
+		- Switched from form_data.get("field", "") to the safer (form_data.get("field") or "") idiom.
+			- Reason: dict.get(key, default) only uses the default if the key is missing, not if the value is None. Without this, None.upper() could occur.
+			- Added _upper_or_none helper for enum fields so parsers now return either an uppercased string or None. This shifts all “required vs. optional” decisions to the validators.
+	- Validation changes
+		- Made validate_status optional-aware: if status is None, skip enum validation entirely.
+		- Added cross-field invariant: status and promotion_threshold must both be set, or both be None.
+	- Tweaked due_date viewmodel property for due_date_label with some "fancier" logic for displaying due dates
+
+## [Sat 27.09.25]
+**Log:**
+1. Repository Layer Improvements
+	- Expanded BaseRepository class with automatic user scoping across all modules
+		- Created _user_query() helper to eliminate repetitive user_id scoping with .filter()
+		- Added base CRUD operations to BaseRepository
+	- Refactored Habits, Tasks, Metrics, Time Tracking, Groceries to use more consistent patterns
+	- Cleaned up typecasting => Moved to services/routes instead
+2. Service Layer work
+	- Moved business logic out of repositories to service layer (shoppinglist operations, transaction upserts)
+		- Generally enforced separation: repos stay pure, services handle orchestration
+	- Introduced shared/parsers.py to clean raw form_data, update validators to assume clean inputs
+	- Trying out casting in Service layer, unsure about it
+
+
+
+## [Fri 26.09.25] - Validation Cleanup/Standardization
+**Log:**
+0. Explored Hypothesis (property-based testing); tweaked parse_decimal to handle Inf, added `.coveragerc` to exclude certain paths from pytext-cov
+1. Models refactoring:
+  - Extracted Tag model + association tables to shared/models.py
+  - Applied constants.py across models, validators, DB constraints
+  - Added CheckConstraints + table_args for business rules
+  - Habits: added `__repr__` to HabitCompletion & LeetCodeRecord
+2. Validation standardization:
+  - Completed: auth, groceries, metrics modules
+  - Centralized constants usage in validators & models
+  - Updated return type hints (`dict[str, list[str]]`)
+  - Formatting pass on all models.py files
+
+## [Thurs 25.09.25] - Validation & API Response Standardization
+**Log:**
+1. Infrastructure Changes
+    - Updated `check_numeric()` to return `(is_valid, error_type)` tuples & added minimum/strict_min params
+2. API response standardization
+    - Introduced api/responses.py with:
+        - `api_response(success, message, data=None)`
+        - `validation_failed(errors)`
+    - Replaced manual `jsonify({...})` responses across routes with these helpers
+    - API routes now return payloads under a uniform `data` key instead of ad-hoc structures
+    - Errors are now returned in a consistent format instead of arbitrary inline messages
+3. Validation Work (cont.)
+    - Moved from `validate_{model}` functions toward field-specific validators (eg `validate_username`, `validate_price`)
+    - 'Coordinator' validators now return `dict[str, list[str]]` keyed by field instead of dumping all errors in one list, to make it easier to consume by frontend/UI
+    - Removed hardcoded strings & magic numbers; now pulled from `constants.py` & enums
+    - Updated some / added new parametrized tests to align with changes from today as well
+4. Routes standardization
+    - Converted all success/error responses to use `api_response()`/`validation_failed()`
+    - Structured data responses more consistently under `data`
+
+## [Wed 24.09.25] - Models & Validation
 **Log:**
 0. Rebased to squash/edit quite a few commits
 1. Model standardization & Enum overhaul
@@ -30,9 +96,9 @@
 2. Validation Infrastructure
 	- Created module-level constants.py for: auth, groceries, habits
 	- Updated `validators.py` in each to pull error messages + field rules from these constants
-	- Added shared/validators.py with check_numeric() helper for `Decimal` validation
+	- Added shared/validators.py with `check_numeric()` helper for `Decimal` validation
 	- Extended model constraints (numeric limits, better defaults)
-	- Validations and tests now share a central definition of rules
+	- Validations & tests now share a central definition of rules
 
 
 ## [Tues 23.09.25] - Style Reference Page Refinement/Overhaul
@@ -51,7 +117,7 @@ X. Misc
 
 ## [Mon 22.09.25] - Validators & Service/Route Integration
 **Log:**
-1. Solidifying validators.py across all modules
+1. Validators (all modules)
 	- Installed regex module for Unicode pattern matching for User stuff
 	- Centralized error strings in validators.py for each module, then import in tests
 	- Set up a bunch of initial parametrized tests / test cases
@@ -86,13 +152,12 @@ X. Misc:
 	- Dialed in more on pill-shaped design for tab buttons
 2. Homepage
 	- Folded time/metric/leetcode entry buttons into custom dropdown
-	- "Animated" chevron SVG with rotate for that too
+	- "Animated" chevron SVG with rotate
 3. Drafted hamburger menu -> X transition effect too
 	- Learned `transform-box: fill-box;`, `transform-origin`, & stacking rotate+scaleX in one transform
 	- Also split SVG into 3 separate lines so we could manipulate independently
 X. Misc:
 	- Cleaned up SVGs/usage & added proper attributions
-	- Purged a few console logs
 
 ## [Fri 19.09.25] - Task Completion & Metric Modal
 **Log:**

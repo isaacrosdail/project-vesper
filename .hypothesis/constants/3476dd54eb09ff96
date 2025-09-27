@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/__init__.py
+# hypothesis_version: 6.140.2
+
+['APP_ENV', 'AUTO_MIGRATE', 'USE_PROXY_FIX', '_templates', 'alembic.ini', 'dev', 'head', 'is_authenticated', 'is_owner', 'nonce', 'sqlalchemy.url', 'testing']

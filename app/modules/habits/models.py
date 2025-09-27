@@ -3,51 +3,65 @@ Model definitions for Habits module.
 """
 import enum
 
-from sqlalchemy import Column, DateTime
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, CheckConstraint
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import Float, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
 from app._infra.db_base import Base
+from app.shared.models import Tag, habit_tags
 
-# Association table
-habit_tags = Table(
-    "habit_tags",
-    Base.metadata,
-    Column("habit_id", ForeignKey("habit.id"), primary_key=True),
-    Column("tag_id", ForeignKey("tag.id"), primary_key=True),
+from app.modules.habits.constants import (
+    HABIT_NAME_MAX_LENGTH,
+    LC_TITLE_MAX_LENGTH,
+    PROMOTION_THRESHOLD_DEFAULT,
+    PROMOTION_THRESHOLD_MIN,
+    PROMOTION_THRESHOLD_MAX,
 )
 
-class Status(enum.Enum):
-    experimental = "experimental"
-    established = "established"
 
-class LCStatus(enum.Enum):
-    SOLVED = "solved"
-    ATTEMPTED = "attempted"
-    REVIEWED = "reviewed"
+class StatusEnum(enum.Enum):
+    EXPERIMENTAL = "EXPERIMENTAL"
+    ESTABLISHED = "ESTABLISHED"
 
-class Difficulty(enum.Enum):
-    EASY = "easy"
-    MEDIUM = "medium"
-    HARD = "hard"
+class LCStatusEnum(enum.Enum):
+    SOLVED = "SOLVED"
+    ATTEMPTED = "ATTEMPTED"
+    REVIEWED = "REVIEWED"
 
-class Language(enum.Enum):
-    PYTHON = "Python"
-    JS = "JavaScript"
-    CPP = "C++"
+class DifficultyEnum(enum.Enum):
+    EASY = "EASY"
+    MEDIUM = "MEDIUM"
+    HARD = "HARD"
+
+class LanguageEnum(enum.Enum):
+    PYTHON = "PYTHON"
+    JS = "JS"
+    CPP = "CPP"
     C = "C"
 
 class Habit(Base):
 
-    habit_completions = relationship("HabitCompletion", back_populates="habit", cascade="all, delete-orphan")
+    name = Column(
+        String(HABIT_NAME_MAX_LENGTH),
+        unique=True, 
+        nullable=False
+    )
 
-    name = Column(String(255), unique=True, nullable=False)
-    status = Column(SAEnum(Status), default=Status.experimental, nullable=False)
+    status = Column(
+        SAEnum(StatusEnum, name="status_enum"),
+        nullable=True
+    )
+
     established_date = Column(DateTime(timezone=True), nullable=True)
-    promotion_threshold = Column(Float, default=0.7)
+
+    promotion_threshold = Column(
+        Float,
+        CheckConstraint(f'promotion_threshold is NULL OR (promotion_threshold >= {PROMOTION_THRESHOLD_MIN} AND promotion_threshold <= {PROMOTION_THRESHOLD_MAX})', name='ck_promotion_threshold_range_0_1'),
+        nullable=True
+    )
     
     tags = relationship("Tag", secondary=habit_tags, back_populates="habits")
+    habit_completions = relationship("HabitCompletion", back_populates="habit", cascade="all, delete-orphan")
 
     def __str__(self):
         return self.name
@@ -56,18 +70,40 @@ class Habit(Base):
         return f"<Habit id={self.id} name='{self.name}'>"
 
 
-# Habit Completion Model - enables us to track WHEN and HOW OFTEN specific habits were completed!
-# Stores each "completion" as a new entry
 class HabitCompletion(Base):
+    """Stores each completion as a new entry, enabling better analytics."""
+
+    habit_id = Column(Integer, ForeignKey('habit.id'), nullable=False)
+    
     habit = relationship("Habit", back_populates="habit_completions")
 
-    habit_id = Column(Integer, ForeignKey('habit.id'))
+    def __repr__(self):
+        return f"<HabitCompletion id={self.id} habit_id={self.habit_id}>"
 
-
-## Uncertain about this placement, but keeps things logically consistent for now
+# NOTE: Unsure about this placement
 class LeetCodeRecord(Base):
+
     leetcode_id = Column(Integer, nullable=False)
-    title = Column(String(255))
-    difficulty = Column(SAEnum(Difficulty), default=Difficulty.MEDIUM, nullable=False)
-    language = Column(SAEnum(Language), default=Language.PYTHON, nullable=False)
-    status = Column(SAEnum(LCStatus), default=LCStatus.SOLVED, nullable=False)
+    
+    title = Column(String(LC_TITLE_MAX_LENGTH))
+
+    difficulty = Column(
+        SAEnum(DifficultyEnum, name="difficulty_enum"),
+        default=DifficultyEnum.MEDIUM,
+        nullable=False
+    )
+
+    language = Column(
+        SAEnum(LanguageEnum, name="language_enum"),
+        default=LanguageEnum.PYTHON,
+        nullable=False
+    )
+
+    status = Column(
+        SAEnum(LCStatusEnum, name="lcstatus_enum"),
+        default=LCStatusEnum.SOLVED,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"<LeetCodeRecord id={self.id} title='{self.title}'>"

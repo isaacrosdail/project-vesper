@@ -4,10 +4,11 @@ from flask import abort
 from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.auth.models import User, UserLang, UserRole
+from app.modules.auth.models import User, UserLangEnum, UserRoleEnum
 from app.modules.auth.repository import UsersRepository
 from app.modules.auth.validators import validate_user
 from app.shared.database.seed.seed_db import seed_demo_data, seed_rich_data
+from app.shared.parsers import parse_user_form_data
 
 # TODO: Prune these
 # Custom decorator for enforcing owner role permissions
@@ -27,7 +28,7 @@ def requires_owner(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def requires_role(role: UserRole):
+def requires_role(role: UserRoleEnum):
     """Trying out a decorator factory?"""
     def decorator(f):
         @wraps(f)
@@ -55,7 +56,7 @@ class AuthService:
     # eg, this won't work: .register_user("myuser", "blah", "Steve")
     # Must call with explicit keywords
     def register_user(self, *, username: str, password: str, name: str,
-                      role: UserRole = UserRole.USER, lang: UserLang = UserLang.EN):
+                      role: UserRoleEnum = UserRoleEnum.USER, lang: UserLangEnum = UserLangEnum.EN):
         """Programmatic user creation (seeds, admin operations, API)"""
         
         username = username.strip()
@@ -76,16 +77,18 @@ class AuthService:
             return {"success": False, "message": "User already exists"}
 
     
-    def register_user_from_form(self, form_data: dict, role: UserRole = UserRole.USER):
+    def register_user_from_form(self, form_data: dict, role: UserRoleEnum = UserRoleEnum.USER):
         """Web form user registration"""
-        errors = validate_user(form_data)
+        parsed_data = parse_user_form_data(form_data)
+
+        errors = validate_user(parsed_data)
         if errors:
-            return {"success": False, "message": errors[0]}
+            return {"success": False, "message": errors}
         
         return self.register_user(
-            username=form_data["username"].strip(),
-            password=form_data["password"],
-            name=(form_data.get("name") or "").strip(),
+            username=parsed_data["username"],
+            password=parsed_data["password"],
+            name=parsed_data["name"],
             role=role
         )
     
