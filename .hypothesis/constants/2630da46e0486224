@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/models.py
+# hypothesis_version: 6.140.2
+
+['BAKERY', 'BEVERAGES', 'CONDIMENTS_SAUCES', 'Current List', 'DAIRY_EGGS', 'EA', 'FATS_OILS', 'FL_OZ', 'FRUITS', 'G', 'GRAINS', 'KG', 'L', 'LB', 'LEGUMES', 'MEATS', 'ML', 'OZ', 'Product', 'SEAFOOD', 'SNACKS', 'SUPPLEMENTS', 'SWEETS', 'ShoppingList', 'ShoppingListItem', 'VEGETABLES', 'items', 'price_at_scan >= 0', 'product.id', 'quantity > 0', 'quantity_wanted > 0', 'shopping_list', 'shoppinglist.id', 'unit_enum']

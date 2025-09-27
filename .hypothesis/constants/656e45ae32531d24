@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/api/models.py
+# hypothesis_version: 6.140.2
+
+[255, '0', 'api_called', 'date', 'uq_api_called_date']

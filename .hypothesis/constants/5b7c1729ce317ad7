@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/service.py
+# hypothesis_version: 6.140.2
+
+['Transaction added', 'Validation failed', 'barcode', 'barcode_invalid', 'calories_per_100g', 'error_type', 'net_weight', 'price', 'price_at_scan', 'product', 'product_invalid', 'product_not_found', 'quantity', 'transaction', 'transaction_invalid', 'unit_type']

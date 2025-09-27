@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/repository.py
+# hypothesis_version: 6.140.2
+
+['DefaultListName', 'barcode', 'calories_per_100g', 'category', 'name', 'net_weight', 'price', 'quantity', 'unit_type']

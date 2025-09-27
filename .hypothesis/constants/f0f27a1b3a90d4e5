@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/errors.py
+# hypothesis_version: 6.140.2
+
+[404, 500, 'Unhandled exception', 'errors', 'errors/404.html', 'errors/500.html']

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/datetime/helpers.py
+# hypothesis_version: 6.140.2
+
+['%Y-%m-%d', '+00:00', ':', 'UTC', 'Z']

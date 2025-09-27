@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/viewmodels.py
+# hypothesis_version: 6.140.2
+
+['%d.%m.%Y', '--', 'Barcode', 'Cals (100g)', 'Category', 'Created', 'Date', 'ID', 'Net Weight', 'Price (100g)', 'Price (qty)', 'Product Name', 'Qty', 'Unit', 'barcode', 'calories_per_100g', 'category', 'created_at', 'desktop-only', 'essential', 'id', 'label', 'name', 'net_weight_display', 'price_at_scan', 'price_per_100g', 'priority', 'product_name', 'quantity', 'unit_type']

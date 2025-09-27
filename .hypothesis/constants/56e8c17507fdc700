@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/devtools/routes.py
+# hypothesis_version: 6.140.2
+
+['/devtools', '/health', '/style_reference', 'APP_ENV', 'dev', 'devtools', 'healthy', 'status', 'style-reference.html', 'templates', 'timestamp']

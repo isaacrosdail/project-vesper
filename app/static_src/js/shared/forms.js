@@ -16,15 +16,22 @@ function filterUnitOptions() {
     }
     // Map categories to groups: keys are categories, values are groups (in turn, keys for above dict)
     const unitOptionsMap = {
-        drink: "volume",
-        energy_drink: "volume",
-        condiments_and_sauces: "volume",
+        beverages: "volume",
+        condiments_sauces: "volume",
+        fats_oils: "volume",
 
-        produce: "weight",
-        dairy: "weight",
-        grain: "weight",
-        nut: "weight",
-        meat: "weight",
+        fruits: "weight",
+        vegetables: "weight", 
+        legumes: "weight",
+        grains: "weight",
+        bakery: "weight",
+        dairy_eggs: "weight",
+        meats: "weight",
+        seafood: "weight",
+        snacks: "weight",
+        sweets: "weight",
+        processed_convenience: "weight",
+        supplements: "weight"
     }
 
     // Use 2-step lookup with dict keys to store the appropriate list of allowed units for the given selection in allowedUnits

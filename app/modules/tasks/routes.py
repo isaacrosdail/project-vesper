@@ -3,13 +3,15 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
-from app.modules.tasks.models import Priority
+from app.modules.api.responses import api_response, validation_failed
+from app.modules.tasks.models import PriorityEnum
+from app.modules.tasks.service import TasksService
 from app.modules.tasks.repository import TasksRepository
-from datetime import datetime, time
-from zoneinfo import ZoneInfo
 from app.modules.tasks.viewmodels import TaskViewModel, TaskPresenter
 from app.shared.datetime.helpers import parse_eod_datetime_from_date
 from app.modules.tasks.validators import validate_task
+from app.shared.parsers import parse_task_form_data
+
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
@@ -36,46 +38,28 @@ def dashboard(session):
 def tasks(session):
     if request.method == "POST":
         
-        form_data = {
-            "name": request.form.get("name", ""),
-            "priority": request.form.get("priority", "medium"),
-            "due_date": request.form.get("due_date", "")
-        }
+        # Parse from form + clean
+        form_data = request.form.to_dict()
+        task_data = parse_task_form_data(form_data)
         
-        errors = validate_task(form_data)
-        if errors:
-            return jsonify({"success": False, "message": errors[0]}), 400
-
-        due_date = (
-            parse_eod_datetime_from_date(form_data["due_date"], current_user.timezone)
-            if form_data["due_date"]
-            else None
-        )
-        try:
-            priority = Priority(form_data["priority"])
-        except ValueError:
-            return jsonify({"success": False, "message": "Invalid priority"}), 400
-        
-        is_frog = bool(request.form.get("is_frog"))
-
         tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
-        new_task = tasks_repo.create_task(
-            name=form_data["name"],
-            priority=priority,
-            is_frog=is_frog,
-            due_date=due_date
-        )
+        tasks_service = TasksService(tasks_repo, current_user.timezone)
+        result = tasks_service.create_task(task_data)
 
-        return jsonify({
-            "success": True, 
-            "message": "Task added successfully.",
-            "data": {
-                "id": new_task.id,
-                "name": new_task.name,
-                "is_done": new_task.is_done,
-                "priority": new_task.priority.value,
-                "is_frog": new_task.is_frog,
-                "due_date": new_task.due_date.isoformat() if new_task.due_date else None,
+        if not result["success"]:
+            return validation_failed(result["errors"]), 400
+        
+        task = result["data"]["task"]
+        return api_response(
+            True,
+            "Task added successfully",
+            data = {
+                "id": task.id,
+                "name": task.name,
+                "is_done": task.is_done,
+                "priority": task.priority.value,
+                "is_frog": task.is_frog,
+                "due_date": task.due_date.isoformat() if task.due_date else None,
                 "subtype": "task"
             }
-        }), 200
+        ), 201

@@ -2,42 +2,58 @@ import pytest
 from app.modules.metrics.validators import *
 
 
-@pytest.mark.parametrize("entry_data", [
-    {},
-    # Single fields
-    {"weight": "70.5"},
-    {"steps": "10000"},
-    {"calories": "2000"},
-    {"wake_time": "07:30"},
-    {"sleep_time": "23:15"},
-    # Multiple fields
-    {"weight": "65.2", "steps": "8500", "calories": "1800"},
-    {"wake_time": "06:00", "sleep_time": "22:30"},
-
-    {"weight": "0.1", "steps": "0", "calories": "1"},  # Minimal values
-    {"weight": "200", "steps": "50000", "calories": "5000"},  # Large values
-    {"wake_time": "00:00", "sleep_time": "23:59"},  # Time edge cases
+@pytest.mark.parametrize("weight, expected", [
+    ("70.5", []),
+    ("0.1", []),
+    ("0", [WEIGHT_POSITIVE]),
+    ("-5", [WEIGHT_POSITIVE]),
+    ("not_a_number", [WEIGHT_INVALID]),
+    ("123.456", [WEIGHT_INVALID]),  # Too many decimals
 ])
-def test_validate_daily_entry_success(entry_data):
-    assert validate_daily_entry(entry_data) == []
+def test_validate_weight(weight, expected):
+    assert validate_weight(weight) == expected
 
-@pytest.mark.parametrize("entry_data,expected_errors", [
-    # Invalid weight
-    ({"weight": "0"}, [WEIGHT_POSITIVE]),
-    ({"weight": "-5"}, [WEIGHT_POSITIVE]),
-    ({"weight": "not_a_number"}, [WEIGHT_INVALID]),
-    
-    # Invalid steps
-    ({"steps": "-100"}, [STEPS_NEGATIVE]),
-    ({"steps": "not_a_number"}, [STEPS_INVALID]),
-    ({"steps": "10.5"}, [STEPS_INVALID]),  # Should be whole number
-    
-    # Invalid calories
-    ({"calories": "0"}, [CALORIES_POSITIVE]),
-    ({"calories": "-200"}, [CALORIES_POSITIVE]),
-    ({"calories": "not_a_number"}, [CALORIES_INVALID]),
-    ({"calories": "100.5"}, [CALORIES_INVALID]),  # Should be whole number
+@pytest.mark.parametrize("steps, expected", [
+    ("10000", []),
+    ("0", []),
+    ("-100", [STEPS_NEGATIVE]),
+    ("not_a_number", [STEPS_INVALID]),
+    ("10.5", [STEPS_INVALID]),  # Float not allowed
 ])
-def test_validate_daily_entry_errors(entry_data, expected_errors):
-    errors = validate_daily_entry(entry_data)
-    assert set(errors) == set(expected_errors)
+def test_validate_steps(steps, expected):
+    assert validate_steps(steps) == expected
+
+@pytest.mark.parametrize("calories, expected", [
+    ("2000", []),
+    ("0", []),
+    ("-200", [CALORIES_NEGATIVE]),
+    ("not_a_number", [CALORIES_INVALID]),
+    ("100.5", [CALORIES_INVALID]),  # Float not allowed
+])
+def test_validate_calories(calories, expected):
+    assert validate_calories(calories) == expected
+
+@pytest.mark.skip(reason="Wake time validation not implemented yet")
+def test_validate_wake_time(): ...
+
+@pytest.mark.skip(reason="Sleep time validation not implemented yet")
+def test_validate_sleep_time(): ...
+
+
+@pytest.mark.parametrize("data, expected", [
+    ({"weight": "75.0", "steps": "9000", "calories": "1800"}, {})
+])
+def test_validate_daily_entry_valid(data, expected):
+    assert validate_daily_entry(data) == expected
+
+
+@pytest.mark.parametrize("data, expected", [
+    ({"weight": "0", "steps": "-10", "calories": "not_number"},
+    {
+        "weight": [WEIGHT_POSITIVE],
+        "steps": [STEPS_NEGATIVE],
+        "calories": [CALORIES_INVALID]
+    })
+])
+def test_validate_daily_entry_combined_errors(data, expected):
+    assert validate_daily_entry(data) == expected

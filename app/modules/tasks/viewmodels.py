@@ -1,8 +1,9 @@
 
+from datetime import datetime
+
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class TaskPresenter(BasePresenter):
-    # View-specific table config
     VISIBLE_COLUMNS = [
         "name", "is_done", "priority", "due_date"
     ]
@@ -22,19 +23,23 @@ class TaskViewModel(TimestampedViewMixin):
         self.id = task.id
         self.name = task.name
         self.is_done = task.is_done
-        self.priority = task.priority   # Enum instance
+        self.priority = task.priority
         self.is_frog = task.is_frog
         self.due_date = task.due_date
         self.tags = task.tags
         self._tz = tz
 
     @property
-    def due_date_local(self):
-        return self._to_local(self.due_date, self._tz)
+    def priority_label(self):
+        return f"{self.priority.value.title()}"
     
     @property
+    def due_date_local(self):
+        return self._to_local(self.due_date, self._tz)
+
+    @property
     def due_label(self):
-        return self.format(self.due_date, self._tz, "%I:%M %p")
+        return self.format_due_label(self._tz)
     
     @property
     def completed_label(self):

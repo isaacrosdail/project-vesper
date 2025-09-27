@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/api/crud_routes.py
+# hypothesis_version: 6.140.2
+
+[200, 404, 'DELETE', 'PATCH', 'crud', 'daily_entry', 'groceries', 'habit', 'habit_completion', 'habits', 'leetcode_record', 'metrics', 'product', 'shopping_list', 'shopping_list_item', 'task', 'tasks', 'time_entry', 'time_tracking', 'transaction']

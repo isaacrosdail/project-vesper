@@ -1,28 +1,32 @@
-from datetime import datetime
 
-from app.modules.time_tracking.models import TimeEntry
+from datetime import timedelta
+
 from app.modules.time_tracking.repository import TimeTrackingRepository
 from app.modules.time_tracking.validators import validate_time_entry
-from app.shared.datetime.helpers import parse_datetime_from_hhmm, add_mins_to_datetime
+from app.shared.datetime.helpers import parse_time_to_datetime, now_in_timezone
+from app.modules.api.responses import service_response
+
 
 class TimeTrackingService:
 
-    def __init__(self, repository: TimeTrackingRepository):
+    def __init__(self, repository: TimeTrackingRepository, user_tz: str):
         self.repo = repository
+        self.user_tz = user_tz
 
-    def create_entry_from_form(self, form_data: dict, user_timezone: str) -> dict:
+    def create_entry_from_form(self, form_data: dict) -> dict:
 
         errors = validate_time_entry(form_data)
         if errors:
-            return {"success": False, "message": errors[0]}
+            return service_response(False, "Validation failed", errors=errors)
         
         try:
             # Transform raw input -> domain values
-            started_at = parse_datetime_from_hhmm(form_data["started_at"], user_timezone)
-            duration_minutes = float(form_data["duration"])
-            ended_at = add_mins_to_datetime(started_at, duration_minutes)
+            today = now_in_timezone(self.user_tz)
+            started_at = parse_time_to_datetime(form_data["started_at"], today, self.user_tz)
+            duration_minutes = float(form_data["duration_minutes"])
+            ended_at = started_at + timedelta(minutes=duration_minutes)
         except (ValueError, KeyError):
-            return {"success": False, "message": "Invalid time or duration format"}
+            return service_response(False, "Time/duration error", data={"general": ["Invalid time or duration format"]})
         
         # Business validation (eg, handling overlapping times, etc)
 
@@ -32,11 +36,6 @@ class TimeTrackingService:
             description=form_data.get("description").strip(),
             started_at=started_at,
             ended_at=ended_at,
-            duration=duration_minutes
+            duration_minutes=duration_minutes
         )
-
-        # Return success + created entry
-        return {
-            "success": True,
-            "entry": entry
-        }
+        return service_response(True, "Time entry added", data={"entry": entry})

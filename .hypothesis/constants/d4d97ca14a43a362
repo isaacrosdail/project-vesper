@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/tasks/validators.py
+# hypothesis_version: 6.140.2
+
+['due_date', 'name', 'priority', 'scope']

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/time_tracking/service.py
+# hypothesis_version: 6.140.2
+
+['Time entry added', 'Time/duration error', 'Validation failed', 'category', 'description', 'duration_minutes', 'entry', 'general', 'started_at']

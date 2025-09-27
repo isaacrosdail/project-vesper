@@ -1,0 +1,4 @@
+# file: /home/user/.vscode-server/extensions/ms-python.python-2025.12.0-linux-x64/python_files/vscode_pytest/run_pytest_script.py
+# hypothesis_version: 6.140.2
+
+['--cov', '--cov-branch', '--cov=', '--cov=.', '-p', 'COVERAGE_ENABLED', 'PATH', 'Path', 'RUN_TEST_IDS_PIPE', 'True', '__main__', 'lib', 'python', 'scripts', 'utf-8', 'vscode_pytest']

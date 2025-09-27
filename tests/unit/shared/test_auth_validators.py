@@ -1,38 +1,67 @@
 import pytest
+
+from hypothesis import given, strategies as st
+
 from app.modules.auth.validators import *
+from app.modules.auth.constants import *
 
 
-@pytest.mark.parametrize("user_data", [
-    {"username": "abc", "password": "password123", "name": "John"},
-    {"username": "validuser", "password": "password123", "name": ""},
-    {"username": "valid_user123", "password": "password123", "name": ""},
-    {"username": "abc123", "password": "password123", "name": ""},
-    {"username": "long_but_still_valid_username", "password": "password123", "name": ""},
-    {"username": "a" * 50, "password": "password123"},
-    {"username": "  validuser  ", "password": "  password123  ", "name": "  John  "},
-    {"username": "user123", "password": "pass@word!", "name": "John Doe"},
-    {"username": "user_name", "password": "12345678"},
-    {"username": "testuser", "password": "a" * 50},
+# NOTE: Trying out Hypothesis
+@given(st.text(min_size=0, max_size=5))
+def test_validate_lang_random(lang):
+    result = validate_lang(lang)
+
+    # Invariants we expect, regardless of input:
+    if lang == "":
+        assert result == [USERLANG_REQUIRED]
+    elif lang == "en" or lang == "de":
+        assert result == []
+    else:
+        assert result == [USERLANG_INVALID]
+
+
+@pytest.mark.parametrize("username, expected", [
+    ("", [USERNAME_REQUIRED]),
+    ("ab", [USERNAME_CHARSET]),
+    ("valid_user123", []),
+    ("$bad_username!", [USERNAME_CHARSET]),
+    ("    ", [USERNAME_CHARSET]),
 ])
-def test_validate_user_success(user_data):
-    assert validate_user(user_data) == []
+def test_validate_username(username, expected):
+    errors = validate_username(username)
+    assert set(errors) == set(expected)
 
-@pytest.mark.parametrize("user_data,expected_errors", [
-    ({"username": "", "password": "password123"}, [USERNAME_REQUIRED]),
-    ({"username": "   ", "password": "password123"}, [USERNAME_REQUIRED]),
-    ({"username": "ab", "password": "password123"}, [USERNAME_CHARSET]),
-    ({"username": "a" * 51, "password": "password123"}, [USERNAME_CHARSET]),
-    ({"username": "validuser", "password": "        "}, [PASSWORD_REQUIRED]),
-    ({"username": "user name", "password": "password123"}, [USERNAME_CHARSET]),
-    ({"username": "weird!name", "password": "password123"}, [USERNAME_CHARSET]),
-    ({"username": "dollar$name", "password": "password123"}, [USERNAME_CHARSET]),
-    ({"username": "validuser", "password": ""}, [PASSWORD_REQUIRED]),
-    ({"username": "validuser", "password": "1234567"}, [PASSWORD_LENGTH]),
-    ({"username": "validuser", "password": "a" * 51}, [PASSWORD_LENGTH]),
-    ({"username": "validuser", "password": "password123", "name": "a" * 51}, [NAME_CHARSET]),
-    ({"username": "validuser", "password": "password123", "name": "John@"}, [NAME_CHARSET]),
-    ({"username": "", "password": ""}, [USERNAME_REQUIRED, PASSWORD_REQUIRED]),
+@pytest.mark.parametrize("password, expected", [
+    ("", [PASSWORD_REQUIRED]),
+    ("short", [PASSWORD_LENGTH]),
+    ("a" * 51, [PASSWORD_LENGTH]),
+    ("validpass", []),
 ])
-def test_validate_user_errors(user_data, expected_errors):
-    errors = validate_user(user_data)
-    assert set(errors) == set(expected_errors)
+def test_validate_password(password, expected):
+    assert validate_password(password) == expected
+
+@pytest.mark.parametrize("name, expected", [
+    ("", []),
+    ("Valid Name", []),
+    ("J'onn-Doe", []),
+    ("@" * 10, [NAME_CHARSET]),
+    ("A" * 51, [NAME_CHARSET]),
+])
+def test_validate_name(name, expected):
+    assert validate_name(name) == expected
+
+@pytest.mark.parametrize("role, expected", [
+    ("", [USERROLE_REQUIRED]),
+    ("ADMIN", []),
+    ("notarole", [USERROLE_INVALID]),
+])
+def test_validate_role(role, expected):
+    assert validate_role(role) == expected
+
+@pytest.mark.parametrize("lang, expected", [
+    ("", [USERLANG_REQUIRED]),
+    ("en", []),
+    ("xx", [USERLANG_INVALID]),
+])
+def test_validate_lang(lang, expected):
+    assert validate_lang(lang) == expected

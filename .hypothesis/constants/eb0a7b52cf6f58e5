@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/_infra/db_base.py
+# hypothesis_version: 6.140.2
+
+['ApiCallRecord', 'DEFAULT_TZ', 'Europe/London', 'User', 'user.id']

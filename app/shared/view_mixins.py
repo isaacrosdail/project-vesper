@@ -1,3 +1,6 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from app.shared.datetime.helpers import convert_to_timezone
 
 class TimestampedViewMixin:
@@ -7,6 +10,45 @@ class TimestampedViewMixin:
     def format(self, dt, tz, fmt="%Y-%m-%d %H:%M"):
         local = self._to_local(dt, tz)
         return local.strftime(fmt) if local else ""
+    
+    def format_due_label(self, tz):
+        today = datetime.now(ZoneInfo(tz)).date()
+        due = self.due_date.date()
+        delta_days = (due - today).days
+
+        rules = {
+            -1: "Yesterday",
+            0: "Today",
+            1: "Tomorrow"
+        }
+
+        if delta_days in rules:
+            return rules[delta_days]
+        elif 2 <= delta_days < 7:
+            return self.format(self.due_date, tz, "%a")
+        else:
+            return self.format(self.due_date, tz, "%b %d")
+
+    def format_created_at_label(self, tz):
+        today = datetime.now(ZoneInfo(tz)).date()
+        created = self.created_at.date()
+        delta_days = (created - today).days
+
+        rules = {
+            -1: "Yesterday",
+            0: "Today"
+        }
+
+        if delta_days in rules:
+            return rules[delta_days]
+        elif 2 <= delta_days <= 7:
+            return self.format(self.created_at, self._tz, "%a")
+        else:
+            return "hiya" # TODO: fix obviously
+    
+    def _label(self, attr: str, fmt=str, default="--"):
+        val = getattr(self, attr)
+        return fmt(val) if val is not None else default
     
 
 class BasePresenter:
