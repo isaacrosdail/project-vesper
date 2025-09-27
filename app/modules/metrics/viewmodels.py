@@ -7,7 +7,7 @@ class DailyMetricPresenter(BasePresenter):
     ]
     
     COLUMN_CONFIG = {
-        "created_at": {"label": "Created", "priority": "desktop-only"},
+        "created_at": {"label": "Created", "priority": "essential"},
         "updated_at": {"label": "Last Updated", "priority": "desktop-only"},
         "weight": {"label": "Weight", "priority": "essential"},
         "steps": {"label": "Steps", "priority": "essential"},
@@ -28,27 +28,31 @@ class DailyMetricViewModel(TimestampedViewMixin):
         self.calories = metric.calories
         self._tz = tz
 
-    # Perhaps options for 24H vs 12H time displays based on user prefs?
+
     @property
     def created_at_local(self):
         return self._to_local(self.created_at, self._tz)
     
     @property
     def created_at_label(self):
-        return self.format(self.created_at, self._tz, "%I:%M %p")
+        return self.format_created_at_label(self._tz)
     
     @property
     def weight_label(self):
         return f"{self.weight:.2f}" if self.weight else "--"
     
     @property
+    def steps_label(self):
+        return self._label("steps")
+    
+    @property
     def wake_time_label(self):
-        return f"{self.wake_time}" if self.wake_time is not None else "--"
+        return self._label("wake_time")
     
     @property
     def sleep_time_label(self):
-        return f"{self.sleep_time}" if self.sleep_time is not None else "--"
+        return self._label("sleep_time")
     
     @property
     def calories_label(self):
-        return f"{self.calories}" if self.calories is not None else "--"
+        return self._label("calories")

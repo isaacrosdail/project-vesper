@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/habits/models.py
+# hypothesis_version: 6.140.2
+
+['ATTEMPTED', 'C', 'CPP', 'EASY', 'ESTABLISHED', 'EXPERIMENTAL', 'HARD', 'Habit', 'HabitCompletion', 'JS', 'MEDIUM', 'PYTHON', 'REVIEWED', 'SOLVED', 'Tag', 'all, delete-orphan', 'difficulty_enum', 'habit', 'habit.id', 'habit_completions', 'habits', 'language_enum', 'lcstatus_enum', 'status_enum']

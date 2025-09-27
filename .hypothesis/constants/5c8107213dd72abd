@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/validators.py
+# hypothesis_version: 6.140.2
+
+['barcode', 'calories', 'category', 'name', 'net_weight', 'price_at_scan', 'product_id', 'quantity', 'quantity_wanted', 'shopping_list_id', 'unit_type']

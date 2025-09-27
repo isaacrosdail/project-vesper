@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/tasks/routes.py
+# hypothesis_version: 6.140.2
+
+[201, 400, '/', '/dashboard', '/tasks', 'GET', 'POST', 'due_date', 'id', 'is_done', 'is_frog', 'medium', 'name', 'priority', 'subtype', 'task', 'task_headers', 'tasks', 'tasks/dashboard.html', 'templates']

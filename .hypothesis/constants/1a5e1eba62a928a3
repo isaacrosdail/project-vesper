@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/habits/viewmodels.py
+# hypothesis_version: 6.140.2
+
+['%d.%m.%Y', 'Created', 'Date Promoted', 'ID', 'Name', 'Promotion Threshold', 'Status', 'Tag(s)', 'created_at', 'desktop-only', 'essential', 'established_date', 'id', 'label', 'name', 'priority', 'promotion_threshold', 'status', 'tags']

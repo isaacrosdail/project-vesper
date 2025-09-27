@@ -1,120 +1,117 @@
 
-from app.modules.habits.models import Status, LCStatus, Difficulty, Language
+from app.modules.habits.models import StatusEnum, LCStatusEnum, DifficultyEnum, LanguageEnum
+from app.modules.habits.constants import *
+from app.shared.validators import validate_id_field, validate_enum
 
-# Habit constants
-HABIT_NAME_REQUIRED = "Habit name is required"
-HABIT_NAME_LENGTH = "Habit name must be under 255 characters"
-STATUS_INVALID = "Invalid status"
-PROMOTION_THRESHOLD_INVALID = "Promotion threshold must be a valid number"
-PROMOTION_THRESHOLD_RANGE = "Promotion threshold must be between 0 and 1"
 
-# Habit completion constants
-HABIT_REQUIRED = "Habit is required"
-HABIT_ID_INVALID = "Invalid habit ID"
-
-# LeetCode constants
-LEETCODE_ID_REQUIRED = "LeetCode ID is required"
-LEETCODE_ID_INVALID = "LeetCode ID must be a valid number"
-TITLE_LENGTH = "Title must be under 255 characters"
-
-DIFFICULTY_INVALID = "Invalid difficulty"
-DIFFICULTY_REQUIRED = "Difficulty required"
-LANGUAGE_INVALID = "Invalid language"
-LANGUAGE_REQUIRED = "Language required"
-LC_STATUS_INVALID = "Invalid status"
-LC_STATUS_REQUIRED = "Language required"
-
-def validate_habit(data: dict) -> list[str]:
+def validate_habit_name(name: str) -> list[str]:
     errors = []
-    
-    # Clean data
-    name = data.get("name", "").strip()
-    status = data.get("status", "").strip()
-    promotion_threshold = data.get("promotion_threshold", "")
-    
-    # Name: Required, max 255 chars
     if not name:
         errors.append(HABIT_NAME_REQUIRED)
-    if name and len(name) > 255:
-        errors.append(HABIT_NAME_LENGTH)
-    
-    # Status (optional): Valid enum
-    if status:
-        valid_statuses = [s.value for s in Status]
-        if status not in valid_statuses:
-            errors.append(STATUS_INVALID)
-    
-    # Promotion threshold (optional): Float, between 0-1 (incl.)
+    elif len(name) > HABIT_NAME_MAX_LENGTH:
+        errors.append(HABIT_NAME_TOO_LONG)
+    return errors
+
+def validate_habit_status(status: str) -> list[str]:
+    if status is None: # optional
+        return []
+    return validate_enum(status, StatusEnum, STATUS_REQUIRED, STATUS_INVALID)
+
+def validate_promotion_threshold(promotion_threshold: str) -> list[str]:
+    errors = []
     if promotion_threshold:
         try:
             threshold = float(promotion_threshold)
-            if not 0 <= threshold <= 1:
+            if not PROMOTION_THRESHOLD_MIN <= threshold <= PROMOTION_THRESHOLD_MAX:
                 errors.append(PROMOTION_THRESHOLD_RANGE)
         except (ValueError, TypeError):
             errors.append(PROMOTION_THRESHOLD_INVALID)
-    
     return errors
 
-def validate_habit_completion(data: dict) -> list[str]:
+def validate_established_date(established_date: str) -> list[str]:
     errors = []
-    
+    # TODO: Add datetime validation once datetime architecture is finalized
+    return errors
+
+
+HABIT_VALIDATION_FUNCS = {
+    "name": validate_habit_name,
+    "status": validate_habit_status,
+    "promotion_threshold": validate_promotion_threshold,
+    "established_date": validate_established_date,
+}
+
+def validate_habit(data: dict) -> dict[str, list[str]]:
+    errors = {}
+    for field, func in HABIT_VALIDATION_FUNCS.items():
+        value = data.get(field)
+        field_errors = func(value)
+        if field_errors:
+            errors[field] = field_errors
+
+    # Interdependency check
+    if bool(data["status"]) != bool(data["promotion_threshold"]):
+        message = "Status & promotion_threshold must either both be set or both be None"
+        errors.setdefault("status", []).append(message)
+        errors.setdefault("promotion_threshold", []).append(message)
+
+    return errors
+
+
+def validate_habit_completion(data: dict) -> dict[str, list[str]]:
+    errors = {}
     habit_id = data.get("habit_id")
-    
-    # Habit ID: Required
-    # TODO: Will need to simply enforce this in service layer
-    if habit_id is None:
-        errors.append(HABIT_REQUIRED)
-    if habit_id is not None:
+    if not habit_id:
+        errors["habit_id"] = [HABIT_REQUIRED]
+    else:
         try:
             int(habit_id)
         except (ValueError, TypeError):
-            errors.append(HABIT_ID_INVALID)
-    
+            errors["habit_id"] = [HABIT_ID_INVALID]
     return errors
 
-def validate_leetcode_record(data: dict) -> list[str]:
+
+def validate_leetcode_id(leetcode_id: str) -> list[str]:
     errors = []
-    
-    # Clean data
-    leetcode_id = data.get("leetcode_id", "")
-    title = data.get("title", "").strip()
-    difficulty = data.get("difficulty", "").strip()
-    language = data.get("language", "").strip()
-    status = data.get("status", "").strip()
-    
-    # Leetcode_id: Required
     if not leetcode_id:
-        errors.append(LEETCODE_ID_REQUIRED)
-    if leetcode_id:
-        try:
-            int(leetcode_id)
-        except (ValueError, TypeError):
-            errors.append(LEETCODE_ID_INVALID)
-    
-    # Title (optional): max 255 chars
-    if title and len(title) > 255:
-        errors.append(TITLE_LENGTH)
-    
-    # Enums: All required, all valid enums
-    if not difficulty:
-        errors.append(DIFFICULTY_REQUIRED)
-    if difficulty:
-        valid_difficulties = [d.value for d in Difficulty]
-        if difficulty not in valid_difficulties:
-            errors.append(DIFFICULTY_INVALID)
+        errors.append(LC_ID_REQUIRED)
+        return errors
+    try:
+        int(leetcode_id)
+    except (ValueError, TypeError):
+        errors.append(LC_ID_INVALID)
+    return errors
 
-    if not language:
-        errors.append(LANGUAGE_REQUIRED)
-    if language:
-        valid_languages = [l.value for l in Language]
-        if language not in valid_languages:
-            errors.append(LANGUAGE_INVALID)
+def validate_leetcode_title(title: str) -> list[str]:
+    errors = []
+    if title and len(title) > LC_TITLE_MAX_LENGTH:
+        errors.append(LC_TITLE_TOO_LONG)
+    return errors
 
-    if not status:
-        errors.append(LC_STATUS_REQUIRED)
-    if status:
-        valid_statuses = [s.value for s in LCStatus]
-        if status not in valid_statuses:
-            errors.append(LC_STATUS_INVALID)
-    
+def validate_difficulty(difficulty: str) -> list[str]:
+    return validate_enum(difficulty, DifficultyEnum, DIFFICULTY_REQUIRED, DIFFICULTY_INVALID)
+
+def validate_language(language: str) -> list[str]:
+    return validate_enum(language, LanguageEnum, LANGUAGE_REQUIRED, LANGUAGE_INVALID)
+
+def validate_leetcode_status(status: str) -> list[str]:
+    return validate_enum(status, LCStatusEnum, LC_STATUS_REQUIRED, LC_STATUS_INVALID)
+
+LC_VALIDATION_FUNCS = {
+    "leetcode_id": validate_leetcode_id,
+    "title": validate_leetcode_title,
+    "difficulty": validate_difficulty,
+    "language": validate_language,
+    "status": validate_leetcode_status,
+}
+
+def validate_leetcode_record(data: dict) -> dict[str, list[str]]:
+    errors = {}
+
+    for field, func in LC_VALIDATION_FUNCS.items():
+        value = data.get(field)
+        field_errors = func(value)
+        if field_errors:
+            errors[field] = field_errors
+
     return errors

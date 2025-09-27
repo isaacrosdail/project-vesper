@@ -8,6 +8,7 @@ from flask import Blueprint, current_app, jsonify
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
+from app.modules.api.responses import api_response
 from app.modules.api.service import release_slot, reserve_slot
 
 api_bp = Blueprint('api', __name__, url_prefix='/api', template_folder='templates')
@@ -22,7 +23,7 @@ def get_my_profile():
         'timezone': current_user.timezone
     })
 
-# Draft API endpoint for D3-based visualizations.
+# TODO: Draft API endpoint for D3-based visualizations.
 @api_bp.route('/my-graph')
 @login_required
 def my_graph_data():
@@ -48,10 +49,7 @@ def get_weather(session, city, country, units):
     reserved_count = reserve_slot(session, api_name, today, DAILY_CALL_LIMIT)
     current_app.logger.info(f"Reserved count after upsert: {reserved_count}")
     if reserved_count is None:
-        return jsonify({
-            "success": False,
-            "message": "Error: Conservative usage limit reached."
-        }), 429 # Too many requests, rate limiting
+        return api_response(False, "Error: Conservative usage limit reached"), 429 # Too many requests/rate limiting
     
     # Build request
     api_key = os.environ.get('OPENWEATHER_API_KEY')
@@ -64,10 +62,10 @@ def get_weather(session, city, country, units):
     except requests.Timeout:
         current_app.logger.exception("Upstream weather API timeout.")
         release_slot(api_name, today)
-        return jsonify({"success": False, "message": "upstream_timeout"}), 504
+        return api_response(False, "upstream_timeout"), 504
     except requests.RequestException:
         current_app.logger.exception("Upstream weather API failed.")
         release_slot(session, api_name, today)
-        return jsonify({"success": False, "message": "upstream_failed"}), 502
+        return api_response(False, "upstream_failed"), 502
     else:
         return jsonify(response.json()), 200

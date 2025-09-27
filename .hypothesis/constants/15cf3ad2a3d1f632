@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/view_mixins.py
+# hypothesis_version: 6.140.2
+
+['%Y-%m-%d %H:%M', 'key', 'label', 'priority']

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/metrics/viewmodels.py
+# hypothesis_version: 6.140.2
+
+['%I:%M %p', '--', 'Calories', 'Created', 'Last Updated', 'Sleep Time', 'Steps', 'Wake Time', 'Weight', 'calories', 'created_at', 'desktop-only', 'essential', 'label', 'priority', 'sleep_time', 'steps', 'updated_at', 'wake_time', 'weight']

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/constants.py
+# hypothesis_version: 6.140.2
+
+['Barcode is required', 'Category is required', 'Invalid category', 'Invalid unit type', 'Price is required', 'Product is required', 'Quantity is required']

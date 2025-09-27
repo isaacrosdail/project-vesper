@@ -1,36 +1,22 @@
 
+from app.modules.metrics.constants import *
+from app.shared.validators import *
 
-# Error message constants
-WEIGHT_POSITIVE = "Weight must be greater than 0"
-WEIGHT_INVALID = "Weight must be a valid number"
-STEPS_NEGATIVE = "Steps cannot be negative"
-STEPS_INVALID = "Steps must be a valid whole number"
-CALORIES_POSITIVE = "Calories must be greater than 0"
-CALORIES_INVALID = "Calories must be a valid whole number"
-WAKE_TIME_INVALID = "Wake time must be in HH:MM format"
-SLEEP_TIME_INVALID = "Sleep time must be in HH:MM format"
-
-def validate_daily_entry(data: dict) -> list[str]:
-    """Validate daily entry data. Returns list of error messages."""
+def validate_weight(weight: str) -> list[str]:
+    """Positive Numeric(5, 2)"""
     errors = []
-    
-    # Clean data
-    weight = data.get("weight", "")
-    steps = data.get("steps", "")
-    wake_time = data.get("wake_time", "").strip()
-    sleep_time = data.get("sleep_time", "").strip()
-    calories = data.get("calories", "")
-    
-    # Weight (optional): Positive float
     if weight:
-        try:
-            weight_val = float(weight)
-            if weight_val <= 0:
+        is_valid, error_type = validate_numeric(weight, WEIGHT_PRECISION, WEIGHT_SCALE, WEIGHT_MINIMUM, strict_min=True)
+        if not is_valid:
+            if error_type in [FORMAT_ERROR, SCALE_EXCEEDED, PRECISION_EXCEEDED]:
+                errors.append(WEIGHT_INVALID)
+            elif error_type == CONSTRAINT_VIOLATION:
                 errors.append(WEIGHT_POSITIVE)
-        except (ValueError, TypeError):
-            errors.append(WEIGHT_INVALID)
-    
-    # Steps validation (optional int)
+    return errors
+
+def validate_steps(steps:str) -> list[str]:
+    """Non-negative int"""
+    errors = []
     if steps:
         try:
             steps_val = int(steps)
@@ -38,31 +24,44 @@ def validate_daily_entry(data: dict) -> list[str]:
                 errors.append(STEPS_NEGATIVE)
         except (ValueError, TypeError):
             errors.append(STEPS_INVALID)
-    
-    # Calories validation (optional int)
+    return errors
+def validate_calories(calories:str) -> list[str]:
+    """Non-negative int"""
+    errors = []
     if calories:
         try:
             cal_val = int(calories)
-            if cal_val <= 0:
-                errors.append(CALORIES_POSITIVE)
+            if cal_val < 0:
+                errors.append(CALORIES_NEGATIVE)
         except (ValueError, TypeError):
             errors.append(CALORIES_INVALID)
-    
-    # Time (optional): HH:MM format
-    if wake_time:
-        if not _is_valid_time_format(wake_time):
-            errors.append(WAKE_TIME_INVALID)
-
-    if sleep_time:
-        if not _is_valid_time_format(sleep_time):
-            errors.append(SLEEP_TIME_INVALID)
-    
     return errors
 
-def _is_valid_time_format(time_str: str) -> bool:
-    try:
-        from datetime import datetime
-        datetime.strptime(time_str, "%H:%M")
-        return True
-    except ValueError:
-        return False
+# TODO: Implement wake_time + sleep_time
+def validate_wake_time(wake_time:str) -> list[str]:
+    errors = []
+
+    return errors
+def validate_sleep_time(sleep_time:str) -> list[str]:
+    errors = []
+
+    return errors
+
+VALIDATION_FUNCS = {
+    "weight": validate_weight,
+    "steps": validate_steps,
+    "wake_time": validate_wake_time,
+    "sleep_time": validate_sleep_time,
+    "calories": validate_calories,
+}
+
+def validate_daily_entry(data: dict) -> dict[str, list[str]]:
+    errors = {}
+
+    for field, func in VALIDATION_FUNCS.items():
+        value = data.get(field)
+        field_errors = func(value)
+        if field_errors:
+            errors[field] = field_errors
+
+    return errors

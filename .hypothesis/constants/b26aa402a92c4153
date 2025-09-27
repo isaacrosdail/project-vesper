@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/tasks/viewmodels.py
+# hypothesis_version: 6.140.2
+
+['%I:%M %p', "'Frog Task'?", 'Completed', 'Created', 'Due Date', 'Not completed', 'Priority', 'Status', 'Task', 'Task ID', 'completed_at', 'created_at', 'desktop-only', 'due_date', 'essential', 'id', 'is_done', 'is_frog', 'label', 'name', 'priority']

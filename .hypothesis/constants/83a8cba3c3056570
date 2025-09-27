@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/extensions.py
+# hypothesis_version: 6.140.2
+
+[300, 'CACHE_TYPE', 'SimpleCache', 'auth.login']

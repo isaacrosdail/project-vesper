@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/time_tracking/constants.py
+# hypothesis_version: 6.140.2
+
+[200, 'Category is required', 'Duration is required', 'End time is required']
