@@ -1,6 +1,4 @@
-from datetime import datetime
 
-from app.modules.time_tracking.models import TimeEntry
 from app.modules.time_tracking.repository import TimeTrackingRepository
 from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.datetime.helpers import parse_datetime_from_hhmm, add_mins_to_datetime
@@ -14,7 +12,7 @@ class TimeTrackingService:
 
         errors = validate_time_entry(form_data)
         if errors:
-            return {"success": False, "message": errors[0]}
+            return {"success": False, "message": errors}
         
         try:
             # Transform raw input -> domain values
@@ -22,7 +20,7 @@ class TimeTrackingService:
             duration_minutes = float(form_data["duration"])
             ended_at = add_mins_to_datetime(started_at, duration_minutes)
         except (ValueError, KeyError):
-            return {"success": False, "message": "Invalid time or duration format"}
+            return {"success": False, "errors": {"general": ["Invalid time or duration format"]}}
         
         # Business validation (eg, handling overlapping times, etc)
 
@@ -36,7 +34,4 @@ class TimeTrackingService:
         )
 
         # Return success + created entry
-        return {
-            "success": True,
-            "entry": entry
-        }
+        return {"success": True, "entry": entry }

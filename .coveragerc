@@ -1,0 +1,15 @@
+[run]
+omit =
+    */__init__.py
+    */constants.py
+    */models.py
+    */viewmodels.py
+    */migrations/*
+    */tests/*
+    app/devtools/*
+
+[report]
+exclude_lines =
+    if __name__ == "__main__":
+    def __repr__
+    def __str__

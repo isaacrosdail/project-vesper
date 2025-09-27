@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/metrics/routes.py
+# hypothesis_version: 6.140.2
+
+[201, 400, '/', '/dashboard', '/metrics', 'GET', 'POST', 'created', 'metric_headers', 'metric_type', 'metrics', 'templates']

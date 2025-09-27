@@ -15,6 +15,25 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+## [Thurs 25.09.25] - Validation & API Response Standardization
+**Log:**
+1. Infrastructure Changes
+    - Updated `check_numeric()` to return `(is_valid, error_type)` tuples & added minimum/strict_min params
+2. API response standardization
+    - Introduced api/responses.py with:
+        - `api_response(success, message, data=None)`
+        - `validation_failed(errors)`
+    - Replaced manual `jsonify({...})` responses across routes with these helpers
+    - API routes now return payloads under a uniform `data` key instead of ad-hoc structures
+    - Errors are now returned in a consistent format instead of arbitrary inline messages
+3. Validation Work (cont.)
+    - Moved from `validate_{model}` functions toward field-specific validators (eg `validate_username`, `validate_price`)
+    - 'Coordinator' validators now return `dict[str, list[str]]` keyed by field instead of dumping all errors in one list, to make it easier to consume by frontend/UI
+    - Removed hardcoded strings & magic numbers; now pulled from `constants.py` & enums
+    - Updated some / added new parametrized tests to align with changes from today as well
+4. Routes standardization
+    - Converted all success/error responses to use `api_response()`/`validation_failed()`
+    - Structured data responses more consistently under `data`
 
 ## [Wed 24.09.25] - WIP: Models & Validation
 **Log:**
@@ -30,9 +49,9 @@
 2. Validation Infrastructure
 	- Created module-level constants.py for: auth, groceries, habits
 	- Updated `validators.py` in each to pull error messages + field rules from these constants
-	- Added shared/validators.py with check_numeric() helper for `Decimal` validation
+	- Added shared/validators.py with `check_numeric()` helper for `Decimal` validation
 	- Extended model constraints (numeric limits, better defaults)
-	- Validations and tests now share a central definition of rules
+	- Validations & tests now share a central definition of rules
 
 
 ## [Tues 23.09.25] - Style Reference Page Refinement/Overhaul

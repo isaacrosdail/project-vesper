@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/api/responses.py
+# hypothesis_version: 6.140.2
+
+['Validation failed', 'data', 'errors', 'message', 'success']

@@ -4,7 +4,7 @@ AuthRepository class doesn't make sense here yet, but will add for some useful "
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from app.modules.auth.models import User, UserRole
+from app.modules.auth.models import User, UserRoleEnum
 
 
 class UsersRepository:
@@ -19,7 +19,7 @@ class UsersRepository:
         new_user = User(
             username=username,
             name=name,
-            role=UserRole.USER.value
+            role=UserRoleEnum.USER
         )
         new_user.hash_password(password)
         self.session.add(new_user)
@@ -30,7 +30,7 @@ class UsersRepository:
         new_owner_user = User(
             username=username,
             name=name,
-            role=UserRole.OWNER.value
+            role=UserRoleEnum.OWNER
         )
         new_owner_user.hash_password(password)
         self.session.add(new_owner_user)

@@ -7,7 +7,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import joinedload
 
-from app.modules.groceries.models import Product, Transaction, Unit, ShoppingList, ShoppingListItem
+from app.modules.groceries.models import Product, Transaction, UnitEnum, ShoppingList, ShoppingListItem
 from app.shared.datetime.helpers import today_range
 from app.shared.repository.base import BaseRepository
 
@@ -67,7 +67,7 @@ class GroceriesRepository(BaseRepository):
 			name=product_data["name"],
 			category=product_data["category"],
 			net_weight=float(product_data["net_weight"]),
-			unit_type=Unit(product_data["unit_type"]),
+			unit_type=UnitEnum(product_data["unit_type"]),
 			calories_per_100g=float(product_data["calories_per_100g"]),
 			user_id=self.user_id
 		)

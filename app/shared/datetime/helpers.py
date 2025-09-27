@@ -90,6 +90,7 @@ def parse_eod_datetime_from_date(date_str: str, tz_str: str) -> datetime:
     return eod_datetime_aware
 
 
+# TODO: Assumes today => Need to adjust to accommodate wake_time/sleep_time DateTime objects now
 def parse_datetime_from_hhmm(time_str: str, tz_str: str) -> datetime:
     """Parse HH:MM format in given timezone and return proper datetime object."""
     h, m = map(int, time_str.split(":"))

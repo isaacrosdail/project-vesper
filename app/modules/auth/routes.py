@@ -3,11 +3,9 @@ from flask import Blueprint, redirect, render_template, request, url_for, jsonif
 from flask_login import login_required, login_user, logout_user
 from app.shared.middleware import set_toast
 from app._infra.database import database_connection, with_db_session
-from app.modules.auth.models import UserRole
 from app.modules.auth.repository import UsersRepository
 from app.modules.auth.service import AuthService, requires_owner
 from app.shared.database.helpers import delete_all_db_data
-from app.modules.auth.validators import validate_user
 
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')

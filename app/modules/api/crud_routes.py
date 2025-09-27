@@ -4,6 +4,7 @@ from flask import Blueprint, abort, current_app, jsonify, request
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
+from app.modules.api.responses import api_response
 from app.modules.auth.service import check_item_ownership
 from app.modules.groceries.models import Product, Transaction, ShoppingList, ShoppingListItem
 from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
@@ -48,10 +49,7 @@ def item(session, module, subtype, item_id):
 
     item = session.get(model_class, item_id)
     if not item:
-        return jsonify({
-            "success": False, 
-            "message": f"{model_class.__name__} not found."
-        }), 404
+        return api_response(False, f"{model_class.__name__} not found."), 404
     
     # Ownership check
     check_item_ownership(item, current_user.id)
@@ -60,14 +58,8 @@ def item(session, module, subtype, item_id):
         data = request.get_json()
         for field, value in data.items():
             setattr(item, field, value)
-        return jsonify({
-            "success": True, 
-            "message": f"Successfully updated {model_class.__name__}"
-        }), 200
+        return api_response(True, f"Successfully updated {model_class.__name__}"), 200
     
     elif request.method == 'DELETE':
         safe_delete(session, item)
-        return jsonify({
-            "success": True, 
-            "message": f"{model_class.__name__} deleted"
-        }), 200
+        return api_response(True, f"{model_class.__name__} deleted"), 200

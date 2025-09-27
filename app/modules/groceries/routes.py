@@ -4,11 +4,12 @@ from flask_login import current_user, login_required
 from flask import session as fsession
 
 from app._infra.database import database_connection, with_db_session
+from app.modules.api.responses import api_response
 from app.modules.groceries.viewmodels import ProductPresenter, TransactionPresenter, ProductViewModel, TransactionViewModel
 from app.modules.groceries.pricing import get_price_per_100g
 from app.modules.groceries.repository import GroceriesRepository
 from app.modules.groceries.service import GroceriesService
-from app.modules.groceries.validators import validate_and_parse_product_data
+from app.modules.groceries.validators import validate_product
 from app.shared.middleware import set_toast
 
 groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
@@ -53,7 +54,7 @@ def products():
             "calories_per_100g": request.form.get("calories_per_100g")
         }
 
-        errors = validate_and_parse_product_data(product_data)
+        errors = validate_product(product_data)
         if errors:
             fsession['form_data'] = request.form.to_dict() # save form_data for UX
             for e in errors:
@@ -132,9 +133,11 @@ def add_shoppinglist_item(session):
 
     item, _ = groceries_repo.add_item_to_shoppinglist(product_id)
 
-    return jsonify({
-        "success": True, 
-        "message": "Added item to shopping list!",
-        "item_id": item.id,
-        "product_id": item.product_id
-    })
+    return api_response(
+        True,
+        "Added item to shopping list",
+        data={
+            "item_id": item.id,
+            "product_id": item.product_id
+        }
+    ), 201

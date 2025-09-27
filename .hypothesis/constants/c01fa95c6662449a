@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/middleware.py
+# hypothesis_version: 6.140.2
+
+['info', 'message', 'toast', 'type']

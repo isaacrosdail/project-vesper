@@ -52,7 +52,7 @@ def logged_in_user(app): # add clear_tables as dependency to ensure it runs befo
         user = User(
             username="Test_username", 
             name="Test_user", 
-            role='user'
+            role='USER'
         )
         user.hash_password('password123')
         db_session.add(user)

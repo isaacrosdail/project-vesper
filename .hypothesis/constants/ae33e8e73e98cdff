@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/validators.py
+# hypothesis_version: 6.140.2
+
+['constraint_violation', 'format_error', 'precision_exceeded', 'scale_exceeded']

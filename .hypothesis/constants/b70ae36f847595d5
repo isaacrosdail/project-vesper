@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/config.py
+# hypothesis_version: 6.140.2
+
+['APP_ENV', 'DATABASE_URI', 'DEV_DATABASE_URI', 'Europe/London', 'SECRET_KEY', 'TEST_DATABASE_URI', 'base', 'change-me', 'dev', 'prod', 'testing']

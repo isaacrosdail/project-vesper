@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/tasks/constants.py
+# hypothesis_version: 6.140.2
+
+[150, 'Invalid priority', 'Priority is required', 'Tag name is required']

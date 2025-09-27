@@ -6,7 +6,7 @@ from app.shared.repository.base import BaseRepository
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
 from app.shared.datetime.helpers import start_of_day_utc, now_utc, day_range, convert_to_timezone
-from app.modules.tasks.models import Task, Priority
+from app.modules.tasks.models import Task, PriorityEnum
 
 
 class TasksRepository(BaseRepository):
@@ -34,7 +34,7 @@ class TasksRepository(BaseRepository):
             Task.due_date < end_utc
         ).first()
     
-    def create_task(self, name: str, priority: Priority = Priority.medium, due_date: datetime | None = None, is_frog: bool | None = None):
+    def create_task(self, name: str, priority: PriorityEnum = PriorityEnum.MEDIUM, due_date: datetime | None = None, is_frog: bool | None = None):
         """Create & add a new task. Returns said task."""
 
         if is_frog:
