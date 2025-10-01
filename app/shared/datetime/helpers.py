@@ -40,22 +40,19 @@ def convert_to_timezone(tz_str: str, dt: datetime) -> datetime:
     return dt.astimezone(tz)
 
 
-def day_range_utc(dt: datetime, tz_str: str) -> tuple[datetime, datetime]:
-    """Return (start_utc, end_utc) UTC bounds for given datetime in given timezone."""
-    if dt.tzinfo is None:
-        raise ValueError("Naive datetimes not allowed")
-    
+def day_range_utc(date: datetime.date, tz_str: str) -> tuple[datetime, datetime]:
+    """Return (start, end) UTC bounds of the given *calendar day* in the specified timezone. Interval is [start, end)"""
     tz = ZoneInfo(tz_str)
     # Extract date, make midnight in target timezone
-    start_local = datetime.combine(dt.date(), time.min, tzinfo=tz)
+    start_local = datetime.combine(date, time.min, tzinfo=tz)
     start_utc = start_local.astimezone(timezone.utc)
     end_utc = start_utc + timedelta(days=1) # end is midnight
     return start_utc, end_utc
 
 
 def today_range_utc(tz_str: str) -> tuple[datetime, datetime]:
-    """Return (start_utc, end_utc) UTC bounds for today in given timezone."""
-    return day_range_utc(datetime.now(ZoneInfo(tz_str)), tz_str)
+    """Return (start, end) UTC bounds for today in the specified timezone. Interval is [start, end)"""
+    return day_range_utc(datetime.now(ZoneInfo(tz_str)).date(), tz_str)
 
 
 def last_n_days_range(days_ago: int, tz_str: str = "UTC") -> tuple[datetime, datetime]:
