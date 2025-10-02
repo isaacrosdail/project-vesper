@@ -24,6 +24,7 @@ CALORIES_INVALID = "Calories must be a valid whole number"
 CALORIES_TOO_HIGH = f"Calories cannot exceed {CALORIES_MAX} per day"
 
 # Wake/Sleep datetime
-# TODO: Fix, now that we have proper datetimes for these
-WAKE_TIME_INVALID = "Wake time must be in HH:MM format"
-SLEEP_TIME_INVALID = "Sleep time must be in HH:MM format"
+TIME_HHMM_INVALID = "Time must be in HH:MM format"
+TIME_HHMM_DIGITS = "Wake time must contain only digits"
+TIME_HHMM_HOUR = "Hour must be 00-23"
+TIME_HHMM_MINUTE = "Minute must be 00-59"
