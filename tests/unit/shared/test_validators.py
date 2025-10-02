@@ -1,9 +1,11 @@
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
-from hypothesis import given, strategies as st
-
-from app.shared.validators import validate_numeric, FORMAT_ERROR, CONSTRAINT_VIOLATION, PRECISION_EXCEEDED, SCALE_EXCEEDED
+from app.shared.validators import (CONSTRAINT_VIOLATION, FORMAT_ERROR,
+                                   PRECISION_EXCEEDED, SCALE_EXCEEDED,
+                                   validate_numeric)
 
 
 # NOTE: Trying out Hypothesis

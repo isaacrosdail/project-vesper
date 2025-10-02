@@ -3,8 +3,8 @@ from typing import Any
 
 import regex
 
-from app.modules.auth.models import UserRoleEnum, UserLangEnum
 from app.modules.auth.constants import *
+from app.modules.auth.models import UserLangEnum, UserRoleEnum
 from app.shared.validators import validate_enum
 
 

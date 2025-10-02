@@ -1,10 +1,10 @@
-import regex
 from typing import Any
 
-from app.modules.groceries.models import UnitEnum, ProductCategoryEnum
-from app.modules.groceries.constants import *
-from app.shared.validators import *
+import regex
 
+from app.modules.groceries.constants import *
+from app.modules.groceries.models import ProductCategoryEnum, UnitEnum
+from app.shared.validators import *
 
 
 def validate_product_name(product_name: str) -> tuple[str | None, list[str]]:
