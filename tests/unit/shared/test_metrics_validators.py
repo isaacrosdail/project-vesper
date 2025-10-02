@@ -49,12 +49,12 @@ def test_validate_calories(calories, expected_value, expected_errors):
     ("garbage", None, [TIME_HHMM_INVALID]),
     ("12:34:23", None, [TIME_HHMM_INVALID]),
     ("12", None, [TIME_HHMM_INVALID]),
-    ("1a:4b", None, [TIME_HHMM_DIGITS]),
+    ("1a:4b", None, [TIME_HHMM_INVALID]),
     # Range issues
-    ("25:34", None, [TIME_HHMM_HOUR]),
-    ("22:78", None, [TIME_HHMM_MINUTE]),
-    ("-1:30", None, [TIME_HHMM_DIGITS]),
-    ("26:89", None, [TIME_HHMM_HOUR, TIME_HHMM_MINUTE])
+    ("25:34", None, [TIME_HHMM_INVALID_RANGE]),
+    ("22:78", None, [TIME_HHMM_INVALID_RANGE]),
+    ("-1:30", None, [TIME_HHMM_INVALID]),
+    ("26:89", None, [TIME_HHMM_INVALID_RANGE])
 ])
 def test_validate_time_hhmm_format(time_str, expected_value, expected_errors):
     typed_value, errors = validate_time_hhmm_format(time_str)

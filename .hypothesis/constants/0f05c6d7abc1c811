@@ -1,0 +1,4 @@
+# file: /home/user/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/_debug_adapter/pydevd_base_schema.py
+# hypothesis_version: 6.140.2
+
+['*', 'Response', 'command', 'event', 'request', 'response', 'seq', 'success', 'type', 'utf-8']

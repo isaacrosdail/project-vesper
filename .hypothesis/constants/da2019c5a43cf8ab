@@ -1,0 +1,4 @@
+# file: /home/user/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_additional_thread_info_regular.py
+# hypothesis_version: 6.140.2
+
+['.invalid.', 'is_in_wait_loop', 'is_tracing', 'pydev_func_name', 'pydev_message', 'pydev_next_line', 'pydev_notify_kill', 'pydev_state', 'pydev_step_cmd', 'pydev_step_stop', 'suspend_type', 'thread_tracer', 'trace', 'trace_suspend_type', 'weak_thread']

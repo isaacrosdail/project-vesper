@@ -1,7 +1,9 @@
+import regex
 
 from datetime import datetime
 
 from app.modules.time_tracking.constants import *
+from app.shared.validators import validate_time_hhmm
 
 
 def validate_category(category: str) -> tuple[str | None, list[str]]:
@@ -24,9 +26,6 @@ def validate_description(description: str) -> tuple[str | None, list[str]]:
     return (description, [])
 
 
-# TODO: Add datetime validation for started_at/ended_at
-
-
 def validate_duration_minutes(duration_minutes: str) -> tuple[int | None, list[str]]:
     """Required. Positive integer."""
     if not duration_minutes:
@@ -45,6 +44,7 @@ def validate_duration_minutes(duration_minutes: str) -> tuple[int | None, list[s
 VALIDATION_FUNCS = {
     "category": validate_category,
     "description": validate_description,
+    "started_at": validate_time_hhmm,
     "duration_minutes": validate_duration_minutes,
 }
 
