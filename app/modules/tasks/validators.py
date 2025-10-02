@@ -1,9 +1,8 @@
 
 from typing import Any
 
-from app.modules.tasks.models import PriorityEnum
-
 from app.modules.tasks.constants import *
+from app.modules.tasks.models import PriorityEnum
 from app.shared.validators import validate_enum
 
 

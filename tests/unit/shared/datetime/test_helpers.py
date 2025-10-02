@@ -1,10 +1,10 @@
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+
 import pytest
 import time_machine
 
 from app.shared.datetime.helpers import *
-from datetime import datetime, timezone, timedelta
-from zoneinfo import ZoneInfo
-
 
 
 @pytest.mark.parametrize("iso_str, expected", [

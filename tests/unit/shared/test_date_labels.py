@@ -1,8 +1,8 @@
-import pytest
-import time_machine
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import pytest
+import time_machine
 
 from app.shared.view_mixins import TimestampedViewMixin
 
