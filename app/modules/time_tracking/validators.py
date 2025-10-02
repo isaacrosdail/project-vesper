@@ -4,36 +4,42 @@ from datetime import datetime
 from app.modules.time_tracking.constants import *
 
 
-def validate_category(category: str) -> list[str]:
-    errors = []
+def validate_category(category: str) -> tuple[str | None, list[str]]:
+    """Required. String, max 50 chars."""
     if not category:
-        errors.append(CATEGORY_REQUIRED)
-    if category and len(category) > CATEGORY_MAX_LENGTH:
-        errors.append(CATEGORY_TOO_LONG)
-    return errors
+        return (None, [CATEGORY_REQUIRED])
+    if len(category) > CATEGORY_MAX_LENGTH:
+        return (None, [CATEGORY_TOO_LONG])
 
-def validate_description(description:str) -> list[str]:
-    errors = []
-    if description and len(description) > DESCRIPTION_MAX_LENGTH:
-        errors.append(DESCRIPTION_LENGTH)
-    return errors
+    return (category, [])
 
-def validate_duration_minutes(duration_minutes:str) -> list[str]:
-    """Positive float"""
-    errors = []
-    if not duration_minutes:
-        errors.append(DURATION_REQUIRED)
-    if duration_minutes:
-        try:
-            duration_minutes_val = float(duration_minutes)
-            if duration_minutes_val <= 0:
-                errors.append(DURATION_POSITIVE)
-        except (ValueError, TypeError):
-            errors.append(DURATION_INVALID)
-    return errors
+
+def validate_description(description: str) -> tuple[str | None, list[str]]:
+    """Optional. String, max 200 chars."""
+    if not description:
+        return (None, [])
+    if len(description) > DESCRIPTION_MAX_LENGTH:
+        return (None, [DESCRIPTION_LENGTH])
+
+    return (description, [])
 
 
 # TODO: Add datetime validation for started_at/ended_at
+
+
+def validate_duration_minutes(duration_minutes: str) -> tuple[int | None, list[str]]:
+    """Required. Positive integer."""
+    if not duration_minutes:
+        return (None, [DURATION_REQUIRED])
+
+    try:
+        duration_minutes_int = int(duration_minutes)
+        if duration_minutes_int <= 0:
+            return (None, [DURATION_POSITIVE])
+    except (ValueError, TypeError):
+        return (None, [DURATION_INVALID])
+    
+    return (duration_minutes_int, [])
 
 
 VALIDATION_FUNCS = {
@@ -42,13 +48,17 @@ VALIDATION_FUNCS = {
     "duration_minutes": validate_duration_minutes,
 }
 
-def validate_time_entry(data: dict) -> dict[str, list[str]]:
+def validate_time_entry(data: dict) -> tuple[dict, dict[str, list[str]]]:
+    """Validate time entry data. Returns (typed_data, errors)."""
+    typed_data = {}
     errors = {}
 
     for field, func in VALIDATION_FUNCS.items():
         value = data.get(field)
-        field_errors = func(value)
+        typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
+        elif typed_value is not None:
+            typed_data[field] = typed_value
 
-    return errors
+    return (typed_data, errors)

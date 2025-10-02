@@ -13,55 +13,83 @@ def test_validate_lang_random(lang):
 
     # Invariants we expect, regardless of input:
     if lang == "":
-        assert result == [USERLANG_REQUIRED]
+        assert result == (None, [USERLANG_REQUIRED])
     elif lang == "en" or lang == "de":
-        assert result == []
+        assert result == (lang, [])
     else:
-        assert result == [USERLANG_INVALID]
+        assert result == (None, [USERLANG_INVALID])
 
 
-@pytest.mark.parametrize("username, expected", [
-    ("", [USERNAME_REQUIRED]),
-    ("ab", [USERNAME_CHARSET]),
-    ("valid_user123", []),
-    ("$bad_username!", [USERNAME_CHARSET]),
-    ("    ", [USERNAME_CHARSET]),
+@pytest.mark.parametrize("username, expected_value, expected_errors", [
+    ("", None, [USERNAME_REQUIRED]),
+    ("ab", None, [USERNAME_CHARSET]),
+    ("valid_user123", "valid_user123", []),
+    ("$bad_username!", None, [USERNAME_CHARSET]),
+    ("    ", None, [USERNAME_CHARSET]),
 ])
-def test_validate_username(username, expected):
-    errors = validate_username(username)
-    assert set(errors) == set(expected)
+def test_validate_username(username, expected_value, expected_errors):
+    typed_value, errors = validate_username(username)
+    assert typed_value == expected_value
+    assert errors == expected_errors
 
-@pytest.mark.parametrize("password, expected", [
-    ("", [PASSWORD_REQUIRED]),
-    ("short", [PASSWORD_LENGTH]),
-    ("a" * 51, [PASSWORD_LENGTH]),
-    ("validpass", []),
-])
-def test_validate_password(password, expected):
-    assert validate_password(password) == expected
 
-@pytest.mark.parametrize("name, expected", [
-    ("", []),
-    ("Valid Name", []),
-    ("J'onn-Doe", []),
-    ("@" * 10, [NAME_CHARSET]),
-    ("A" * 51, [NAME_CHARSET]),
+@pytest.mark.parametrize("password, expected_value, expected_errors", [
+    ("", None, [PASSWORD_REQUIRED]),
+    ("short", None, [PASSWORD_INVALID]),
+    ("a" * 51, None, [PASSWORD_INVALID]),
+    ("validpass", "validpass", []),
 ])
-def test_validate_name(name, expected):
-    assert validate_name(name) == expected
+def test_validate_password(password, expected_value, expected_errors):
+    typed_value, errors = validate_password(password)
+    assert typed_value == expected_value
+    assert errors == expected_errors
 
-@pytest.mark.parametrize("role, expected", [
-    ("", [USERROLE_REQUIRED]),
-    ("ADMIN", []),
-    ("notarole", [USERROLE_INVALID]),
-])
-def test_validate_role(role, expected):
-    assert validate_role(role) == expected
 
-@pytest.mark.parametrize("lang, expected", [
-    ("", [USERLANG_REQUIRED]),
-    ("en", []),
-    ("xx", [USERLANG_INVALID]),
+@pytest.mark.parametrize("name, expected_value, expected_errors", [
+    ("", None, []),
+    ("Valid Name", "Valid Name", []),
+    ("J'onn-Doe", "J'onn-Doe", []),
+    ("@" * 10, None, [NAME_CHARSET]),
+    ("A" * 51, None, [NAME_CHARSET]),
 ])
-def test_validate_lang(lang, expected):
-    assert validate_lang(lang) == expected
+def test_validate_name(name, expected_value, expected_errors):
+    typed_value, errors = validate_name(name)
+    assert typed_value == expected_value
+    assert errors == expected_errors
+
+
+@pytest.mark.parametrize("role, expected_value, expected_errors", [
+    ("", None, [USERROLE_REQUIRED]),
+    ("ADMIN", UserRoleEnum.ADMIN, []),
+    ("notarole", None, [USERROLE_INVALID]),
+])
+def test_validate_role(role, expected_value, expected_errors):
+    typed_value, errors = validate_role(role)
+    assert typed_value == expected_value
+    assert errors == expected_errors
+
+
+@pytest.mark.parametrize("lang, expected_value, expected_errors", [
+    ("", None, [USERLANG_REQUIRED]),
+    ("en", UserLangEnum.EN, []),
+    ("xx", None, [USERLANG_INVALID]),
+])
+def test_validate_lang(lang, expected_value, expected_errors):
+    typed_value, errors = validate_lang(lang)
+    assert typed_value == expected_value
+    assert errors == expected_errors
+
+
+@pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
+    (
+        {"username": "steve123", "password": "god12@", "role": "ADMIN", "lang": "EN"},
+        {"username": "steve123", "role": UserRoleEnum.ADMIN, "lang": UserLangEnum.EN},
+        {
+            "password": [PASSWORD_INVALID]
+        }
+    ),
+])
+def test_validate_user(data, expected_typed_data, expected_errors):
+    typed_data, errors = validate_user(data)
+    assert typed_data == expected_typed_data
+    assert errors == expected_errors

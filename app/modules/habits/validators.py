@@ -1,37 +1,50 @@
 
+from typing import Any
+
 from app.modules.habits.models import StatusEnum, LCStatusEnum, DifficultyEnum, LanguageEnum
 from app.modules.habits.constants import *
 from app.shared.validators import validate_id_field, validate_enum
 
 
-def validate_habit_name(name: str) -> list[str]:
-    errors = []
+def validate_habit_name(name: str) -> tuple[str | None, list[str]]:
+    """Required. String, max 100 chars."""
     if not name:
-        errors.append(HABIT_NAME_REQUIRED)
-    elif len(name) > HABIT_NAME_MAX_LENGTH:
-        errors.append(HABIT_NAME_TOO_LONG)
-    return errors
+        return (None, [HABIT_NAME_REQUIRED])
 
-def validate_habit_status(status: str) -> list[str]:
+    if len(name) > HABIT_NAME_MAX_LENGTH:
+        return (None, [HABIT_NAME_TOO_LONG])
+
+    return (name, [])
+
+
+def validate_habit_status(status: str) -> tuple[Any | None, list[str]]:
+    """Optional. Valid StatusEnum value."""
     if status is None: # optional
-        return []
+        return (None, [])
     return validate_enum(status, StatusEnum, STATUS_REQUIRED, STATUS_INVALID)
 
-def validate_promotion_threshold(promotion_threshold: str) -> list[str]:
-    errors = []
-    if promotion_threshold:
-        try:
-            threshold = float(promotion_threshold)
-            if not PROMOTION_THRESHOLD_MIN <= threshold <= PROMOTION_THRESHOLD_MAX:
-                errors.append(PROMOTION_THRESHOLD_RANGE)
-        except (ValueError, TypeError):
-            errors.append(PROMOTION_THRESHOLD_INVALID)
-    return errors
 
-def validate_established_date(established_date: str) -> list[str]:
+def validate_established_date(established_date: str) -> tuple[str | None, list[str]]:
+    """Optional. Datetime string (validation pending)."""
     errors = []
     # TODO: Add datetime validation once datetime architecture is finalized
-    return errors
+    return (established_date, [])
+
+
+def validate_promotion_threshold(promotion_threshold: str) -> tuple[float | None, list[str]]:
+    """Optional. Float, 0.0-1.0 range."""
+    if not promotion_threshold:
+        return (None, [])
+
+    try:
+        threshold_float = float(promotion_threshold)
+        if not PROMOTION_THRESHOLD_MIN <= threshold_float <= PROMOTION_THRESHOLD_MAX:
+            return (None, [PROMOTION_THRESHOLD_RANGE])
+    except (ValueError, TypeError):
+        return (None, [PROMOTION_THRESHOLD_INVALID])
+
+    return (threshold_float, [])
+
 
 
 HABIT_VALIDATION_FUNCS = {
@@ -41,61 +54,89 @@ HABIT_VALIDATION_FUNCS = {
     "established_date": validate_established_date,
 }
 
-def validate_habit(data: dict) -> dict[str, list[str]]:
+def validate_habit(data: dict) -> tuple[dict, dict[str, list[str]]]:
+    """Validate habit data. Returns (typed_data, errors)."""
+    typed_data = {}
     errors = {}
+
     for field, func in HABIT_VALIDATION_FUNCS.items():
         value = data.get(field)
-        field_errors = func(value)
+        typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
+        elif typed_value is not None:
+            typed_data[field] = typed_value
 
     # Interdependency check
-    if bool(data["status"]) != bool(data["promotion_threshold"]):
+    if bool(data.get("status")) != bool(data.get("promotion_threshold")):
         message = "Status & promotion_threshold must either both be set or both be None"
         errors.setdefault("status", []).append(message)
         errors.setdefault("promotion_threshold", []).append(message)
+        # Remove from dict (TODO: Better solution)
+        typed_data.pop("status", None)
+        typed_data.pop("promotion_threshold", None)
 
-    return errors
+    return (typed_data, errors)
 
 
-def validate_habit_completion(data: dict) -> dict[str, list[str]]:
+
+
+def validate_habit_completion(data: dict) -> tuple[dict, dict[str, list[str]]]:
+    """Validate habit completion. Returns (typed_data, errors)."""
+    typed_data = {}
     errors = {}
+    
     habit_id = data.get("habit_id")
     if not habit_id:
         errors["habit_id"] = [HABIT_REQUIRED]
     else:
         try:
-            int(habit_id)
+            habit_id_int = int(habit_id)
+            typed_data["habit_id"] = habit_id_int
         except (ValueError, TypeError):
             errors["habit_id"] = [HABIT_ID_INVALID]
-    return errors
+
+    return (typed_data, errors)
 
 
-def validate_leetcode_id(leetcode_id: str) -> list[str]:
-    errors = []
+
+
+def validate_leetcode_id(leetcode_id: str) -> tuple[int | None, list[str]]:
+    """Required. Valid integer ID."""
     if not leetcode_id:
-        errors.append(LC_ID_REQUIRED)
-        return errors
+        return (None, [LC_ID_REQUIRED])
     try:
-        int(leetcode_id)
+        leetcode_id_int = int(leetcode_id)
     except (ValueError, TypeError):
-        errors.append(LC_ID_INVALID)
-    return errors
+        return (None, [LC_ID_INVALID])
 
-def validate_leetcode_title(title: str) -> list[str]:
-    errors = []
-    if title and len(title) > LC_TITLE_MAX_LENGTH:
-        errors.append(LC_TITLE_TOO_LONG)
-    return errors
+    return (leetcode_id_int, [])
 
-def validate_difficulty(difficulty: str) -> list[str]:
+
+def validate_leetcode_title(title: str) -> tuple[str | None, list[str]]:
+    """Optional. String, max 200 chars."""
+    if not title:
+        return (None, [])
+    if len(title) > LC_TITLE_MAX_LENGTH:
+        return (None, [LC_TITLE_TOO_LONG])
+
+    return (title, [])
+
+
+def validate_difficulty(difficulty: str) -> tuple[Any, list[str]]:
+    """Required. Valid DifficultyEnum value."""
     return validate_enum(difficulty, DifficultyEnum, DIFFICULTY_REQUIRED, DIFFICULTY_INVALID)
 
-def validate_language(language: str) -> list[str]:
+
+def validate_language(language: str) -> tuple[Any, list[str]]:
+    """Required. Valid LanguageEnum value."""
     return validate_enum(language, LanguageEnum, LANGUAGE_REQUIRED, LANGUAGE_INVALID)
 
-def validate_leetcode_status(status: str) -> list[str]:
+
+def validate_leetcode_status(status: str) -> tuple[Any, list[str]]:
+    """Required. Valid LCStatusEnum value."""
     return validate_enum(status, LCStatusEnum, LC_STATUS_REQUIRED, LC_STATUS_INVALID)
+
 
 LC_VALIDATION_FUNCS = {
     "leetcode_id": validate_leetcode_id,
@@ -106,12 +147,16 @@ LC_VALIDATION_FUNCS = {
 }
 
 def validate_leetcode_record(data: dict) -> dict[str, list[str]]:
+    """Validate LeetCode record. Returns (typed_data, errors)."""
+    typed_data = {}
     errors = {}
 
     for field, func in LC_VALIDATION_FUNCS.items():
         value = data.get(field)
-        field_errors = func(value)
+        typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
+        elif typed_value is not None:
+            typed_data[field] = typed_value
 
-    return errors
+    return (typed_data, errors)
