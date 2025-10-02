@@ -14,43 +14,33 @@
 
 Note: Will begin defaulting to classes over IDs for everything except: form inputs and auto-discovery modal-related stuff
 
-Utility classes will be prefixed with _ to distinguish themselves from other styling classes
+Utility classes will be prefixed with `_` to distinguish themselves from other styling classes
 
 ## API Response Standardization
 
-# Use api_response() wrapper for all JSON responses
-```python
-return api_response((success: bool, message: str, data: dict = None, errors: dict = None))
-```
-
-# Validation errors use validation_failed()
-```python
-return validation_failed(errors), 400
-```
+# TODO: Under construction
 
 ## Validation Architecture Pattern
-```python
-## Constants in each module's constants.py, from which validators & tests draw
 
-# 1. Individual field validation functions
-def validate_field_name(field_value: str) -> list[str]:
-    errors = []
-    # validation logic with elif chains
-    return errors
+Overall Notes:
+1. Validators own type conversion (with some bespoke exceptions)
+2. Optional vs Required handled via tuple returns:
+    - `(None, [])` = "I'm empty but that's okay (optional)"
+    - `(None, [ERROR])` = "I'm empty but that's not okay (required)"
+3. `typed_data` dict structure:
+    - Only contains successfully validated fields
+    - Omits keys entirely rather than storing `None` values
+    - Applies to both error cases and optional-empty cases
 
-# 2. Mapping dictionary
-ENTITY_VALIDATION_FUNCS = {
-    "field1": validate_field1,
-    "field2": validate_field2,
-}
+Field validators:
+Return: `(typed_value | None, list[str])`
+Handles type conversion: str → int/float/enum/str
+Uses `(None, [])` for "optional field, empty is valid"
+Uses `(None, [ERROR])` for "required field, empty is invalid"
+Pattern uses `if not X` checks for normalization
 
-# 3. Main validation function using loop
-def validate_entity(data: dict) -> dict[str, list[str]]:
-    errors = {}
-    for field, func in ENTITY_VALIDATION_FUNCS.items():
-        value = data.get(field, "").strip()
-        field_errors = func(value)
-        if field_errors:
-            errors[field] = field_errors
-    return errors
-```
+Composite validators:
+- Return: `(typed_data: dict, errors: dict[str, list[str]])`
+- Aggregates individual field validation results
+- `typed_data` only includes successfully validated fields (omits keys with errors or optional empty fields rather than storing `None` values)
+- Pattern: loop through field validators, add to `typed_data` only if `typed_value` is not None

@@ -17,6 +17,36 @@
 
 
 
+## [Wed 1.10.25] - Validator Refactor
+**Log:**
+1. Validators key notes
+    - Validators own type conversion - Receive strings, return typed values
+    - Optional vs Required - Denoted via tuple returns
+    - Clean typed_data - Omits invalid/empty keys entirely
+    - Expanded & aligned tests to match
+    - Overall pattern is:
+        - Route: pulls raw form_data, gets parsed_data via parsers, gets typed_data validators
+        - Service: assumes input is valid & typed, applies business logic/validation (if any), persists data, & returns plain dict responses.
+2. Bug fix:
+    - `validate_numeric` - Now correctly enforces (precision - scale) digits before decimal
+
+## [Tues 30.09.25]
+**Log:**
+0. Install time-machine to start testing datetime-related functions
+1. Testing datetimes
+	- view_mixins: Test for due_date_label
+	- Generally start testing other datetime helpers
+2. Datetime helpers changes/improvements
+	- Make `now_in_timezone()` to clean up `convert_to_timezone` (had two different jobs - bad)
+	- Simplify: 
+        - scrap start_of_day_utc, add_mins_to_datetime
+        - inlined logic for day_range & made today_range ref day_range, then renamed the latter two to "xx_utc" for clarity
+
+## [Mon 29.09.25]
+**Log:**
+0. Uppercase unit_enum values (tweak models.py, revision with manual op.executes since Postgres is touchy about this). Updated viewmodel to include .lower()
+1. Smoke testing forms
+
 ## [Sun 28.09.25]
 **Log:**
 0. Dissolve `core/` -> Move templates to _templates, healthcheck to app/routes.py
@@ -45,8 +75,6 @@
 		- Generally enforced separation: repos stay pure, services handle orchestration
 	- Introduced shared/parsers.py to clean raw form_data, update validators to assume clean inputs
 	- Trying out casting in Service layer, unsure about it
-
-
 
 ## [Fri 26.09.25] - Validation Cleanup/Standardization
 **Log:**
