@@ -27,12 +27,12 @@ def validate_numeric(value, precision, scale, minimum=None, strict_min=False) ->
     # Check precision/scale
     digits = dec.as_tuple().digits
     exponent = dec.as_tuple().exponent
-    total_digits = len(digits)
     fractional_digits = abs(exponent) if exponent < 0 else 0
+    integer_digits = (len(digits) - fractional_digits)
 
     if fractional_digits > scale:
         return False, SCALE_EXCEEDED
-    if total_digits > precision:
+    if integer_digits > (precision - scale):
         return False, PRECISION_EXCEEDED
 
     return True, None
