@@ -5,7 +5,9 @@ from hypothesis import strategies as st
 
 from app.shared.validators import (CONSTRAINT_VIOLATION, FORMAT_ERROR,
                                    PRECISION_EXCEEDED, SCALE_EXCEEDED,
-                                   validate_numeric)
+                                   TIME_HHMM_INVALID, TIME_HHMM_REQUIRED,
+                                   TIME_HHMM_INVALID_RANGE,
+                                   validate_numeric, validate_date_iso, validate_time_hhmm)
 
 
 # NOTE: Trying out Hypothesis
@@ -18,6 +20,31 @@ def test_validate_numeric_never_crashes(value, precision, scale):
     is_valid, error_type = validate_numeric(value, precision, scale)
     assert isinstance(is_valid, bool)
     assert (error_type is None) or isinstance(error_type, str)
+
+
+# @pytest.mark.parametrize("date_str, expected_value, expected_errors", [
+#     ("2025-09-20", , []),
+# ])
+# def test_validate_date_iso(date_str, expected_value, expected_errors):
+#     typed_value, errors = validate_date_iso(date_str)
+#     assert typed_value == expected_value
+#     assert errors == expected_errors
+
+
+@pytest.mark.parametrize("time_str, expected_value, expected_errors", [
+    ("22:00", "22:00", []),
+    ("00:00", "00:00", []),
+    ("09:05", "09:05", []),
+    (None, None, [TIME_HHMM_REQUIRED]),
+    ("9:05", None, [TIME_HHMM_INVALID]),
+    ("12-14", None, [TIME_HHMM_INVALID]),
+    ("99:99", None, [TIME_HHMM_INVALID_RANGE]),
+    ("24:00", None, [TIME_HHMM_INVALID_RANGE]),
+])
+def test_validate_time_hhmm(time_str, expected_value, expected_errors):
+    typed_value, errors = validate_time_hhmm(time_str)
+    assert typed_value == expected_value
+    assert errors == expected_errors
 
 
 @pytest.mark.parametrize("value, minimum, strict_min, expected_valid, expected_error", [

@@ -8,8 +8,6 @@ from app.modules.tasks.models import PriorityEnum
 from app.modules.tasks.service import TasksService
 from app.modules.tasks.repository import TasksRepository
 from app.modules.tasks.viewmodels import TaskViewModel, TaskPresenter
-from app.shared.datetime.helpers import parse_eod_datetime_from_date
-from app.modules.tasks.validators import validate_task
 from app.shared.parsers import parse_task_form_data
 
 

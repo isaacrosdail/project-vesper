@@ -26,11 +26,6 @@ def test_validate_description(description, expected_value, expected_errors):
     assert errors == expected_errors
 
 
-@pytest.mark.skip(reason="Implement validators for this")
-def test_validate_start_end():
-    pass
-
-
 @pytest.mark.parametrize("duration_minutes, expected_value, expected_errors", [
     ("60", 60, []),
     ("0.5", None, [DURATION_INVALID]),
@@ -49,13 +44,13 @@ def test_validate_duration_minutes(duration_minutes, expected_value, expected_er
 
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
-        {"category": "Study", "description": "Algorithms", "duration_minutes": "45"},
-        {"category": "Study", "description": "Algorithms", "duration_minutes": 45},
+        {"category": "Study", "description": "Algorithms", "started_at": "12:00", "duration_minutes": "45"},
+        {"category": "Study", "description": "Algorithms", "started_at": "12:00", "duration_minutes": 45},
         {}
     ),
     (
-        {"category": "", "description": "a" * 201, "duration_minutes": "-5"},
-        {},
+        {"category": "", "description": "a" * 201, "started_at": "12:00", "duration_minutes": "-5"},
+        {"started_at": "12:00"},
         {
             "category": [CATEGORY_REQUIRED],
             "description": [DESCRIPTION_LENGTH],

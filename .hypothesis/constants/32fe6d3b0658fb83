@@ -1,0 +1,4 @@
+# file: /home/user/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_daemon_thread.py
+# hypothesis_version: 6.140.2
+
+['LOAD_ATTR', 'LOAD_GLOBAL', 'LOAD_METHOD', 'NULL + list', 'NULL|self + values', '_active', '_active_limbo_lock', '_limbo', 'list', 'list + NULL', 'values', 'values + NULL|self']

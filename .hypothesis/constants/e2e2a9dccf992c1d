@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/auth/validators.py
+# hypothesis_version: 6.140.2
+
+['lang', 'password', 'role', 'username']

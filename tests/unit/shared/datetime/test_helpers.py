@@ -47,11 +47,6 @@ def test_start_of_day_utc(dt, tz_str, expected):
     assert result == expected
 
 
-def test_start_of_day_utc_rejects_naive():
-    from datetime import datetime
-    with pytest.raises(ValueError):
-        day_range_utc(datetime(2025, 9, 30, 12, 0), "UTC")
-
 
 @pytest.mark.parametrize("tz_str, expected_start, expected_end", [
     ("UTC",

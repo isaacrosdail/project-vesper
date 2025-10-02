@@ -17,6 +17,10 @@ def parse_barcode(val: str) -> dict:
     """Parse barcode. Strip whitespace, return None if empty."""
     return val.strip() if val else None
 
+def parse_checkbox(val: str | None) -> bool:
+    """Resolve HTML checkbox states (on, None) to (True, False)"""
+    return val is not None
+
 
 def parse_product_data(form_data: dict) -> dict:
     return {
@@ -46,7 +50,7 @@ def parse_task_form_data(form_data: dict) -> dict:
         "name": (form_data.get("name") or "").strip(),
         "priority": _upper_or_none(form_data.get("priority")),
         "due_date": form_data.get("due_date") or None,
-        "is_frog": form_data.get("is_frog") is not None # resolves checkbox states (on, None) to (true, false)
+        "is_frog": parse_checkbox(form_data.get("is_frog"))
     }
 
 def parse_leetcode_form_data(form_data: dict) -> dict:
