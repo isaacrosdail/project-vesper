@@ -20,11 +20,11 @@ class GroceriesService:
     def process_product_form(self, form_data: dict):
         product_data = parse_product_data(form_data)
 
-        errors = validate_product(product_data)
+        typed_product_data, errors = validate_product(product_data)
         if errors:
             return service_response(False, "Validation failed", errors=errors)
         
-        product, was_created = self.get_or_create_product(product_data)
+        product, was_created = self.get_or_create_product(typed_product_data)
         message = "Product created successfully" if was_created else "Product already exists"
 
         return service_response(True, message, data={"product": product})
@@ -35,7 +35,7 @@ class GroceriesService:
 
         # 1. Parse + Validate barcode
         barcode = parse_barcode(form_data.get("barcode"))
-        barcode_errors = validate_barcode(barcode)
+        typed_barcode, barcode_errors = validate_barcode(barcode)
         if barcode_errors:
             return service_response(
                 False,
@@ -45,11 +45,11 @@ class GroceriesService:
             )
         
         # 2. Check if product exists
-        product = self.repo.get_product_by_barcode(barcode)
+        product = self.repo.get_product_by_barcode(typed_barcode)
 
         # 3. Always parse/validate transaction (need it either way)
         transaction_data = parse_transaction_data(form_data)
-        transaction_errors = validate_transaction(transaction_data)
+        typed_transaction_data, transaction_errors = validate_transaction(transaction_data)
         if transaction_errors:
             return service_response(
                 False,
@@ -60,13 +60,13 @@ class GroceriesService:
         
         # 4. Case A: If product exists, we do NOT validate product form fields => Add/increment transaction
         if product:
-            self.add_or_increment_transaction(product, **transaction_data)
+            self.add_or_increment_transaction(product, **typed_transaction_data)
             return service_response(True, "Transaction added")
 
         # 5. Case B: Complete submission. Product doesn't exist, but we have enough info => create product+transaction
         elif show_product_fields:
             product_data = parse_product_data(form_data)
-            product_errors = validate_product(product_data)
+            typed_product_data, product_errors = validate_product(product_data)
             if product_errors:
                 return service_response(
                     False,
@@ -75,8 +75,8 @@ class GroceriesService:
                     data={"error_type": "product_invalid"}
                 )
             
-            new_product = self.get_or_create_product(**product_data)
-            self.add_or_increment_transaction(new_product, **transaction_data)
+            new_product = self.get_or_create_product(**typed_product_data)
+            self.add_or_increment_transaction(new_product, **typed_transaction_data)
 
             return service_response(True, "Product & transaction added")
 
@@ -89,21 +89,21 @@ class GroceriesService:
                 data = {"error_type": "product_not_found"}
             )
         
-    def add_or_increment_transaction(self, product, **transaction_data):
+    def add_or_increment_transaction(self, product, **typed_transaction_data):
         """Add or increment transaction for today. Returns (transaction, was_created)"""
         start_utc, end_utc = today_range_utc()
         existing = self.repo.get_transaction_in_window(product.id, start_utc, end_utc)
-        prepped_data = {
-            **transaction_data,
-            "price": Decimal(transaction_data["price_at_scan"]),
-            "quantity": int(transaction_data["quantity"]),
-        }
+        # prepped_data = {
+        #     **transaction_data,
+        #     "price": Decimal(transaction_data["price_at_scan"]),
+        #     "quantity": int(transaction_data["quantity"]),
+        # }
 
         if existing:
-            existing.quantity += prepped_data["quantity"]
+            existing.quantity += typed_transaction_data["quantity"]
             return existing, False
         else:
-            transaction = self.repo.create_transaction(product, **prepped_data)
+            transaction = self.repo.create_transaction(product, **typed_transaction_data)
             return transaction, True
         
 
@@ -130,18 +130,18 @@ class GroceriesService:
             return shopping_list, False
         return self.repo.create_shoppinglist(), True
 
-    def get_or_create_product(self, product_data):
+    def get_or_create_product(self, typed_product_data):
         """Get existing product or create new one. Returns tuple (product, was_created)."""
         # Cast after validation
-        prepped_data = {
-            **product_data,
-            "net_weight": float(product_data["net_weight"]),
-            "unit_type": UnitEnum(product_data["unit_type"]),
-            "calories_per_100g": float(product_data["calories_per_100g"])
-                if product_data["calories_per_100g"] else None,
-        }
-        barcode = prepped_data["barcode"]
+        # prepped_data = {
+        #     **product_data,
+        #     "net_weight": float(product_data["net_weight"]),
+        #     "unit_type": UnitEnum(product_data["unit_type"]),
+        #     "calories_per_100g": float(product_data["calories_per_100g"])
+        #         if product_data["calories_per_100g"] else None,
+        # }
+        barcode = typed_product_data["barcode"]
         product = self.repo.get_product_by_barcode(barcode)
         if product:
             return product, False
-        return self.repo.create_product(**prepped_data), True
+        return self.repo.create_product(**typed_product_data), True
