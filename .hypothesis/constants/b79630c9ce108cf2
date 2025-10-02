@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/auth/constants.py
+# hypothesis_version: 6.140.2
+
+['Password is required', 'UserLang is required', 'UserRole is required', 'Username is required']
