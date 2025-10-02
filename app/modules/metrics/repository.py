@@ -1,5 +1,5 @@
 
-from datetime import datetime, time
+from datetime import datetime
 
 from app.shared.repository.base import BaseRepository
 
@@ -34,23 +34,28 @@ class DailyMetricsRepository(BaseRepository):
         ).all()
 
     # TODO
-    def create_or_update_daily_metric(self, metric_type: str, value: int | float | time, start_utc: datetime, end_utc: datetime):
-        """Create new daily metric or update existing one for given date. Returns tuple (entry, was_created)."""
-        # TODO: Move this check to validators/service layer
-        if not hasattr(DailyEntry, metric_type):
-            raise ValueError(f"Invalid metric: {metric_type}")
-        
+    def create_or_update_daily_metric(
+            self,
+            metric_type: str,
+            value: int | float | datetime,
+            start_utc: datetime,
+            end_utc: datetime
+        ):
+        """Create new daily metric or update existing one for given date. Returns tuple (entry, was_created)."""        
         entry = self.get_daily_entry_for_day(start_utc, end_utc)
 
         if entry:
             setattr(entry, metric_type, value) # dynamically set entry.weight = value
             return entry, False
         else:
-            entry = DailyEntry(user_id=self.user_id, **{metric_type: value})
+            entry = DailyEntry(
+                user_id=self.user_id,
+                **{metric_type: value}
+            )
             return self.add(entry), True
 
         
-    def create_daily_metric(self, metric_type: str, value: int | float | time):
+    def create_daily_metric(self, metric_type: str, value: int | float | datetime):
         """Create & add a new daily metric. Returns metric."""
         metric = DailyEntry(
             user_id=self.user_id,
