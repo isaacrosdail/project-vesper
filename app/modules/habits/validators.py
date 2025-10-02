@@ -1,9 +1,10 @@
 
 from typing import Any
 
-from app.modules.habits.models import StatusEnum, LCStatusEnum, DifficultyEnum, LanguageEnum
 from app.modules.habits.constants import *
-from app.shared.validators import validate_id_field, validate_enum
+from app.modules.habits.models import (DifficultyEnum, LanguageEnum,
+                                       LCStatusEnum, StatusEnum)
+from app.shared.validators import validate_enum, validate_id_field
 
 
 def validate_habit_name(name: str) -> tuple[str | None, list[str]]:

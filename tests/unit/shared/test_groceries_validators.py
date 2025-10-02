@@ -1,8 +1,8 @@
 import pytest
 
-from app.modules.groceries.validators import *
 from app.modules.groceries.constants import *
-from app.modules.groceries.models import UnitEnum, ProductCategoryEnum
+from app.modules.groceries.models import ProductCategoryEnum, UnitEnum
+from app.modules.groceries.validators import *
 
 
 @pytest.mark.parametrize("product_name, expected_value, expected_errors", [

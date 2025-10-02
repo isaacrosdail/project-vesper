@@ -1,9 +1,9 @@
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
-from hypothesis import given, strategies as st
-
-from app.modules.auth.validators import *
 from app.modules.auth.constants import *
+from app.modules.auth.validators import *
 
 
 # NOTE: Trying out Hypothesis
