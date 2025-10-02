@@ -9,6 +9,8 @@ from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.viewmodels import DailyMetricViewModel, DailyMetricPresenter
 from app.shared.datetime.helpers import today_range_utc
 from app.modules.metrics.validators import validate_daily_entry
+from app.shared.parsers import parse_daily_entry_form_data
+
 
 metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_prefix='/metrics')
 
@@ -36,14 +38,16 @@ def dashboard(session):
 def metrics(session):
     
     form_data = request.form.to_dict()
-    errors = validate_daily_entry(form_data)
+    parsed_data = parse_daily_entry_form_data(form_data)
+
+    typed_data, errors = validate_daily_entry(parsed_data)
     if errors:
         return validation_failed(errors), 400
     
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
     service = DailyMetricsService(repo, current_user.timezone)
 
-    result = service.process_daily_metrics(form_data)
+    result = service.process_daily_metrics(typed_data)
 
 
     return api_response(

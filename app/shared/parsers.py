@@ -73,3 +73,12 @@ def parse_habit_form_data(form_data: dict) -> dict:
         "status": _upper_or_none(form_data.get("status")),
         "promotion_threshold": form_data.get("promotion_threshold") or None,
     }
+
+def parse_daily_entry_form_data(form_data: dict) -> dict:
+    return {
+        "steps": (form_data.get("steps") or "").strip(),
+        "weight": (form_data.get("weight") or "").strip(),
+        "calories": (form_data.get("calories") or "").strip(),
+        "wake_time": (form_data.get("wake_time" or "")).strip(),
+        "sleep_time": (form_data.get("sleep_time" or "")).strip(),
+    }

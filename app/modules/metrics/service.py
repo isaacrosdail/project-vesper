@@ -17,11 +17,16 @@ class DailyMetricsService:
 
         # Iterate over key-value pairs, calling create/update for each whose value is a non-empty string (which is falsy in Python)
         for metric_type, value in form_data.items():
-            if value:
-                processed_value = self._process_metric_value(metric_type, value)
+            if value is None:
+                continue
 
-                metric, was_created = self.repo.create_or_update_daily_metric(metric_type, processed_value, start_utc, end_utc)
-                processed_metrics.append({"metric_type": metric_type, "created": was_created })
+            if metric_type in ("wake_time", "sleep_time"):
+                value = self._convert_time_to_datetime(metric_type, value)
+
+            metric, was_created = self.repo.create_or_update_daily_metric(
+                metric_type, value, start_utc, end_utc
+            )
+            processed_metrics.append({"metric_type": metric_type, "created": was_created })
         
         return service_response(
             True,
@@ -29,12 +34,10 @@ class DailyMetricsService:
             data = {"metrics": processed_metrics}
         )
     
-    def _process_metric_value(self, metric_type: str, value: str):
+    def _convert_time_to_datetime(self, metric_type: str, value: str) -> datetime:
         if metric_type == "wake_time":
             today = datetime.now(ZoneInfo(self.user_tz)).date()
             return parse_time_to_datetime(value, today, self.user_tz)
-        elif metric_type == "sleep_time":
+        else:
             yesterday = (datetime.now(ZoneInfo(self.user_tz)) - timedelta(days=1)).date()
             return parse_time_to_datetime(value, yesterday, self.user_tz)
-        else:
-            return value # pass through as-is for other metrics
