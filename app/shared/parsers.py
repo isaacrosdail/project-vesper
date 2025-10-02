@@ -17,6 +17,7 @@ def parse_barcode(val: str) -> dict:
     """Parse barcode. Strip whitespace, return None if empty."""
     return val.strip() if val else None
 
+
 def parse_product_data(form_data: dict) -> dict:
     return {
         "barcode": (form_data.get("barcode") or "").strip(),
