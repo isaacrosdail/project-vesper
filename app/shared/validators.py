@@ -1,5 +1,8 @@
 
+from typing import Any
+
 from decimal import Decimal, InvalidOperation
+
 
 FORMAT_ERROR = 'format_error'
 CONSTRAINT_VIOLATION = 'constraint_violation'
@@ -7,7 +10,11 @@ PRECISION_EXCEEDED = 'precision_exceeded'
 SCALE_EXCEEDED = 'scale_exceeded'
 
 def validate_numeric(value, precision, scale, minimum=None, strict_min=False) -> tuple[bool, str | None]:
-    """Returns `(is_valid: bool, error_type: str | None)`"""
+    """Validate numeric string against precision/scale/minimum constraints.
+    
+    Returns (is_valid, error_type). Error types: FORMAT_ERROR, CONSTRAINT_VIOLATION, 
+    PRECISION_EXCEEDED, SCALE_EXCEEDED.
+    """
     
     ok, dec = parse_decimal(value)
     if not ok:
@@ -38,28 +45,32 @@ def validate_numeric(value, precision, scale, minimum=None, strict_min=False) ->
     return True, None
 
 
-def validate_id_field(id_value: str, required_error: str, invalid_error: str) -> list[str]:
-    errors = []
+def validate_id_field(id_value: str, required_error: str, invalid_error: str) -> tuple[int | None, list[str]]:
+    # TODO: Could probably streamline/just use these outright in other validators. Need to do a condensing pass.
     if not id_value:
-        errors.append(required_error)
-    else:
-        try:
-            int(id_value)
-        except (ValueError, TypeError):
-            errors.append(invalid_error)
-    return errors
+        return (None, [required_error])
 
-def validate_enum(enum_str: str, enum_cls, required_error: str, invalid_error: str) -> list[str]:
-    errors = []
+    try:
+        id_int = int(id_value)
+        return (id_int, [])
+    except (ValueError, TypeError):
+        return (None, [invalid_error])
+
+
+def validate_enum(enum_str: str, enum_cls, required_error: str, invalid_error: str) -> tuple[Any, list[str]]:
+    # TODO: Could probably streamline/just use these outright in other validators. Need to do a condensing pass.
     if not enum_str:
-        errors.append(required_error)
-    else:
-        valid_enums = [enum_val.value for enum_val in enum_cls]
-        if enum_str not in valid_enums:
-            errors.append(invalid_error)
-    return errors
+        return (None, [required_error])
+    
+    try:
+        enum_member = enum_cls[enum_str]
+        return (enum_member, [])
+    except KeyError:
+        return (None, [invalid_error])
+
 
 def parse_decimal(value):
+    """Parse value to Decimal, rejecting inf/nan. Returns (ok, decimal_value)."""
     try:
         dec = Decimal(str(value)) # str() avoids float artifacts & ensures proper parsing?
     except InvalidOperation:
