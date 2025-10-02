@@ -70,16 +70,6 @@ def last_n_days_range(days_ago: int, tz_str: str = "UTC") -> tuple[datetime, dat
     return new_start_utc, end_utc
 
 
-def parse_eod_datetime_from_date(date_str: str, tz_str: str) -> datetime:
-    """Parse date string, return exclusive EOD (midnight next day) in given timezone."""
-    dt = datetime.strptime(date_str, "%Y-%m-%d").date()
-    tz = ZoneInfo(tz_str)
-    start_of_day = datetime.combine(dt, time.min, tzinfo=tz)
-    end_of_day = start_of_day + timedelta(days=1)
-    return end_of_day
-
-
-# TODO: Assumes today => Need to adjust to accommodate wake_time/sleep_time DateTime objects now
 def parse_time_to_datetime(time_str: str, date: datetime.date, tz_str: str) -> datetime:
     """Parse HH:MM and attach to specific date in given timezone."""
     h, m = map(int, time_str.split(":"))

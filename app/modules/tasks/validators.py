@@ -3,7 +3,7 @@ from typing import Any
 
 from app.modules.tasks.constants import *
 from app.modules.tasks.models import PriorityEnum
-from app.shared.validators import validate_enum
+from app.shared.validators import validate_enum, validate_date_iso
 
 
 def validate_task_name(name: str) -> tuple[str | None, list[str]]:
@@ -23,9 +23,10 @@ def validate_task_priority(priority: str) -> tuple[Any, list[str]]:
 
 def validate_due_date(due_date: str) -> tuple[str | None, list[str]]:
     """Optional. Datetime string (validation pending)."""
-    errors = []
-    # TODO: Add datetime parsing validation once datetime architecture is finalized
-    return (due_date, errors)
+    if not due_date:
+        return (None, [])
+
+    return validate_date_iso(due_date)
 
 
 TASK_VALIDATION_FUNCS = {

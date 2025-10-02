@@ -1,0 +1,4 @@
+# file: /home/user/.vscode-server/extensions/ms-python.debugpy-2025.10.0-linux-x64/bundled/libs/debugpy/adapter/../../debugpy/launcher/../../debugpy/../debugpy/__init__.py
+# hypothesis_version: 6.140.2
+
+['__version__', 'breakpoint', 'configure', 'connect', 'debug_this_thread', 'is_client_connected', 'listen', 'log_to', 'trace_this_thread', 'wait_for_client']

@@ -61,30 +61,11 @@ def validate_calories(calories:str) -> tuple[int | None, list[str]]:
 
 
 def validate_time_hhmm_format(time_str: str) -> tuple[str | None, list[str]]:
-    """Time entry from form in format HH:MM."""
+    """Optional. Time string in HH:MM format."""
     if not time_str:
         return (None, [])
 
-    errors = []
-    # 2. Invalid format: no colon, not two parts
-    if ":" not in time_str or len(time_str.split(":")) != 2:
-        return (None, [TIME_HHMM_INVALID])
-
-    h, m = time_str.split(":")
-    if not (h.isdigit() and m.isdigit()):
-        return (None, [TIME_HHMM_DIGITS])
-    
-    hour, minute = int(h), int(m)
-    if not (0 <= hour <= 23):
-        errors.append(TIME_HHMM_HOUR)
-    if not (0 <= minute <= 59):
-        errors.append(TIME_HHMM_MINUTE)
-
-    if errors:
-        return (None, errors)
-
-
-    return (time_str, []) # return validated string as is
+    return validate_time_hhmm(time_str)
 
 
 VALIDATION_FUNCS = {

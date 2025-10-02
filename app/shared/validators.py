@@ -1,6 +1,7 @@
+import regex
 
 from typing import Any
-
+from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
 
 
@@ -8,6 +9,14 @@ FORMAT_ERROR = 'format_error'
 CONSTRAINT_VIOLATION = 'constraint_violation'
 PRECISION_EXCEEDED = 'precision_exceeded'
 SCALE_EXCEEDED = 'scale_exceeded'
+
+DATE_REQUIRED = "Required date value"
+DATE_INVALID = "Invalid date format"
+
+TIME_HHMM_INVALID = "Invalid: Time must be in HH:MM format (00:00 - 23:59)"
+TIME_HHMM_INVALID_RANGE = "Invalid time range (must be in 00:00 - 23:59)"
+TIME_HHMM_REQUIRED = "Time value is required"
+
 
 def validate_numeric(value, precision, scale, minimum=None, strict_min=False) -> tuple[bool, str | None]:
     """Validate numeric string against precision/scale/minimum constraints.
@@ -43,6 +52,40 @@ def validate_numeric(value, precision, scale, minimum=None, strict_min=False) ->
         return False, PRECISION_EXCEEDED
 
     return True, None
+
+
+def validate_date_iso(date_str: str) -> tuple[date | None, list[str]]:
+    """Validate date string in YYYY-MM-DD format."""
+    if not date_str:
+        return (None, [DATE_REQUIRED])
+    
+    try:
+        return (datetime.strptime(date_str, "%Y-%m-%d").date(), [])
+    except ValueError:
+        return (None, [DATE_INVALID])
+
+
+def validate_time_hhmm(time_str: str) -> tuple[str | None, list[str]]:
+    """Validate time string in HH:MM format (00:00 - 23:59)."""
+    
+    if not time_str:
+        return (None, [TIME_HHMM_REQUIRED])
+    
+    # Format
+    if not regex.match(r'^\d{2}:\d{2}$', time_str):
+        return (None, [TIME_HHMM_INVALID])
+    
+    # Range
+    try:
+        hours, minutes = map(int, time_str.split(":"))
+
+        if not (0 <= hours <= 23 and 0 <= minutes <= 59):
+            return (None, [TIME_HHMM_INVALID_RANGE])
+
+    except ValueError:
+        return (None, [TIME_HHMM_INVALID])
+    
+    return (time_str, [])
 
 
 def validate_id_field(id_value: str, required_error: str, invalid_error: str) -> tuple[int | None, list[str]]:

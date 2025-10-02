@@ -1,7 +1,9 @@
+from datetime import datetime, time, timedelta, date
+from zoneinfo import ZoneInfo
 
 from app.modules.tasks.models import PriorityEnum
 from app.modules.tasks.repository import TasksRepository
-from app.shared.datetime.helpers import day_range_utc, parse_eod_datetime_from_date
+from app.shared.datetime.helpers import day_range_utc
 from app.modules.tasks.validators import validate_task
 from app.modules.api.responses import service_response
 
@@ -13,37 +15,40 @@ class TasksService:
     
     def create_task(self, task_data: dict):
 
-        errors = validate_task(task_data)
+        typed_data, errors = validate_task(task_data)
         if errors:
             return service_response(False, "Validation failed", errors=errors)
 
 
         # Parse due_date "2025-09-22" -> datetime(2025, 9, 22, 23:59:59, tz=user_tz)
-        due_date = (
-            parse_eod_datetime_from_date(task_data["due_date"], self.user_tz)
-            if task_data["due_date"]
-            else None
-        )
+        typed_data["due_date"] = self.to_eod_datetime(typed_data.get("due_date"), self.user_tz)
 
-        # check if existing frog task
-        if task_data.get("is_frog") and due_date:
-            start_utc, end_utc = day_range_utc(due_date.date(), self.user_tz)
+        # check if existing frog task TODO: move check to validators instead, then keep this "assumes valid/good"?
+        if typed_data.get("is_frog") and typed_data["due_date"]:
+            start_utc, end_utc = day_range_utc(typed_data["due_date"].date(), self.user_tz)
 
             existing_frog = self.repo.get_frog_task_in_window(start_utc, end_utc)
             if existing_frog:
                 return service_response(
                     False,
                     "Validation failed",
-                    errors={"frog_task": [f"You already have a 'frog' task for {due_date.date().isoformat()}"]}
+                    errors={"frog_task": [f"You already have a 'frog' task for {typed_data["due_date"].date().isoformat()}"]}
                 )
         
         # Typecasts
-        prepped_data = {
-            **task_data,
-            "priority": PriorityEnum(task_data["priority"]),
-            "is_frog": bool(task_data["is_frog"]),
-            "due_date": due_date
-        }
+        # prepped_data = {
+        #     **typed_data,
+        #     "priority": PriorityEnum(typed_data["priority"]),
+        #     "due_date": due_date
+        # }
 
-        task = self.repo.create_task(**prepped_data)
+        task = self.repo.create_task(**typed_data)
         return service_response(True, "Task added", data={"task": task})
+    
+    def to_eod_datetime(self, date: date | None, tz_str: str) -> datetime | None:
+        """Convert a date to exclusive EOD datetime in given timezone."""
+        if not date:
+            return None
+        tz = ZoneInfo(tz_str)
+        start_of_day = datetime.combine(date, time.min, tzinfo=tz)
+        return start_of_day + timedelta(days=1)

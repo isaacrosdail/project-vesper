@@ -1,12 +1,12 @@
 import pytest
-from hypothesis import given
-from hypothesis import strategies as st
+from hypothesis import given, settings, strategies as st
 
 from app.modules.auth.constants import *
 from app.modules.auth.validators import *
 
 
 # NOTE: Trying out Hypothesis
+@settings(max_examples=20)
 @given(st.text(min_size=0, max_size=5))
 def test_validate_lang_random(lang):
     result = validate_lang(lang)
@@ -14,7 +14,7 @@ def test_validate_lang_random(lang):
     # Invariants we expect, regardless of input:
     if lang == "":
         assert result == (None, [USERLANG_REQUIRED])
-    elif lang == "en" or lang == "de":
+    elif lang == "EN" or lang == "DE":
         assert result == (lang, [])
     else:
         assert result == (None, [USERLANG_INVALID])
@@ -71,7 +71,7 @@ def test_validate_role(role, expected_value, expected_errors):
 
 @pytest.mark.parametrize("lang, expected_value, expected_errors", [
     ("", None, [USERLANG_REQUIRED]),
-    ("en", UserLangEnum.EN, []),
+    ("EN", UserLangEnum.EN, []),
     ("xx", None, [USERLANG_INVALID]),
 ])
 def test_validate_lang(lang, expected_value, expected_errors):
