@@ -17,7 +17,7 @@ PASSWORD_MAX_LENGTH = 50
 PASSWORD_REGEX = rf"^.{{{PASSWORD_MIN_LENGTH},{PASSWORD_MAX_LENGTH}}}$" # 8-50 chars, any allowed
 
 PASSWORD_REQUIRED = "Password is required"
-PASSWORD_LENGTH = f"Password must be {PASSWORD_MIN_LENGTH}-{PASSWORD_MAX_LENGTH} characters"
+PASSWORD_INVALID = f"Password must be {PASSWORD_MIN_LENGTH}-{PASSWORD_MAX_LENGTH} characters"
 
 # Name (optional): 1-50, Unicode letters, plus space/apostrophe/hyphen
 NAME_MIN_LENGTH = 1
