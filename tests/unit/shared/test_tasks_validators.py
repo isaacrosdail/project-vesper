@@ -1,6 +1,6 @@
 
 import pytest
-
+import datetime
 from app.modules.tasks.validators import *
 
 
@@ -17,7 +17,7 @@ def test_validate_task_name(task_name, expected_value, expected_errors):
 
 @pytest.mark.parametrize("priority, expected_value, expected_errors", [
     ("HIGH", PriorityEnum.HIGH, []),
-    ("", None, [PRIORITY_REQUIRED]),
+    ("", None, []), # Optional at field-level, existence enforced in validate_task
     ("not_a_priority", None, [PRIORITY_INVALID]),
 ])
 def test_validate_task_priority(priority, expected_value, expected_errors):
@@ -26,16 +26,43 @@ def test_validate_task_priority(priority, expected_value, expected_errors):
     assert errors == expected_errors
 
 
-@pytest.mark.skip(reason="Due_date validation not implemented yet")
-def test_validate_due_date(): ...
-
 
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     pytest.param(
-        {"name": "Implement due_date validation", "priority": "MEDIUM"},
-        {"name": "Implement due_date validation", "priority": PriorityEnum.MEDIUM},
+        {"name": "Walk dog", "priority": "MEDIUM"},
+        {"name": "Walk dog", "priority": PriorityEnum.MEDIUM},
         {},
-        id="valid-name-priority"
+        id="valid-non-frog-task"
+    ),
+    pytest.param(
+        {"name": "Eat", "is_frog": True, "due_date": "2025-10-04"},
+        {"name": "Eat", "is_frog": True, "due_date": datetime.date(2025, 10, 4)},
+        {},
+        id="valid-frog-task"
+    ),
+    pytest.param(
+        {"name": "Dust shelves"},
+        {"name": "Dust shelves"},
+        {
+            "priority": [PRIORITY_REQUIRED_NON_FROG]
+        },
+        id="non-frog-priority-required"
+    ),
+    pytest.param(
+        {"name": "Make bed", "is_frog": True, "priority": None},
+        {"name": "Make bed", "is_frog": True},
+        {
+            "due_date": [FROG_REQUIRES_DUE_DATE]
+        },
+        id="frog-requires-due-date"
+    ),
+    pytest.param(
+        {"name": "Grab snacks", "is_frog": True, "due_date": "2025-09-28", "priority": "HIGH"},
+        {"name": "Grab snacks", "is_frog": True, "due_date": datetime.date(2025, 9, 28), "priority": PriorityEnum.HIGH},
+        {
+            "priority": [FROG_REQUIRES_NO_PRIORITY]
+        },
+        id="frog-priority-must-be-none"
     ),
 ])
 def test_validate_task(data, expected_typed_data, expected_errors):

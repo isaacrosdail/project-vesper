@@ -20,11 +20,10 @@ class TasksService:
             return service_response(False, "Validation failed", errors=errors)
 
 
-        # Parse due_date "2025-09-22" -> datetime(2025, 9, 22, 23:59:59, tz=user_tz)
         typed_data["due_date"] = self.to_eod_datetime(typed_data.get("due_date"), self.user_tz)
 
-        # check if existing frog task TODO: move check to validators instead, then keep this "assumes valid/good"?
-        if typed_data.get("is_frog") and typed_data["due_date"]:
+        # Check for existing frog task
+        if typed_data.get("is_frog"):
             start_utc, end_utc = day_range_utc(typed_data["due_date"].date(), self.user_tz)
 
             existing_frog = self.repo.get_frog_task_in_window(start_utc, end_utc)
@@ -34,13 +33,6 @@ class TasksService:
                     "Validation failed",
                     errors={"frog_task": [f"You already have a 'frog' task for {typed_data["due_date"].date().isoformat()}"]}
                 )
-        
-        # Typecasts
-        # prepped_data = {
-        #     **typed_data,
-        #     "priority": PriorityEnum(typed_data["priority"]),
-        #     "due_date": due_date
-        # }
 
         task = self.repo.create_task(**typed_data)
         return service_response(True, "Task added", data={"task": task})
