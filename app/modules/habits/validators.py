@@ -3,8 +3,8 @@ from typing import Any
 
 from app.modules.habits.constants import *
 from app.modules.habits.models import (DifficultyEnum, LanguageEnum,
-                                       LCStatusEnum, StatusEnum)
-from app.shared.validators import validate_enum, validate_id_field
+                                       LCStatusEnum)
+from app.shared.validators import validate_enum
 
 
 def validate_habit_name(name: str) -> tuple[str | None, list[str]]:
@@ -18,41 +18,8 @@ def validate_habit_name(name: str) -> tuple[str | None, list[str]]:
     return (name, [])
 
 
-def validate_habit_status(status: str) -> tuple[Any | None, list[str]]:
-    """Optional. Valid StatusEnum value."""
-    if status is None: # optional
-        return (None, [])
-    return validate_enum(status, StatusEnum, STATUS_REQUIRED, STATUS_INVALID)
-
-
-def validate_established_date(established_date: str) -> tuple[str | None, list[str]]:
-    """Optional. Datetime string (validation pending)."""
-    errors = []
-    # TODO: Add datetime validation once datetime architecture is finalized
-    return (established_date, [])
-
-
-def validate_promotion_threshold(promotion_threshold: str) -> tuple[float | None, list[str]]:
-    """Optional. Float, 0.0-1.0 range."""
-    if not promotion_threshold:
-        return (None, [])
-
-    try:
-        threshold_float = float(promotion_threshold)
-        if not PROMOTION_THRESHOLD_MIN <= threshold_float <= PROMOTION_THRESHOLD_MAX:
-            return (None, [PROMOTION_THRESHOLD_RANGE])
-    except (ValueError, TypeError):
-        return (None, [PROMOTION_THRESHOLD_INVALID])
-
-    return (threshold_float, [])
-
-
-
 HABIT_VALIDATION_FUNCS = {
     "name": validate_habit_name,
-    "status": validate_habit_status,
-    "promotion_threshold": validate_promotion_threshold,
-    "established_date": validate_established_date,
 }
 
 def validate_habit(data: dict) -> tuple[dict, dict[str, list[str]]]:
@@ -67,15 +34,6 @@ def validate_habit(data: dict) -> tuple[dict, dict[str, list[str]]]:
             errors[field] = field_errors
         elif typed_value is not None:
             typed_data[field] = typed_value
-
-    # Interdependency check
-    if bool(data.get("status")) != bool(data.get("promotion_threshold")):
-        message = "Status & promotion_threshold must either both be set or both be None"
-        errors.setdefault("status", []).append(message)
-        errors.setdefault("promotion_threshold", []).append(message)
-        # Remove from dict (TODO: Better solution)
-        typed_data.pop("status", None)
-        typed_data.pop("promotion_threshold", None)
 
     return (typed_data, errors)
 

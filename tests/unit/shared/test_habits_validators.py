@@ -14,34 +14,6 @@ def test_validate_habit_name(habit_name, expected_value, expected_errors):
     assert errors == expected_errors
 
 
-@pytest.mark.parametrize("habit_status, expected_value, expected_errors", [
-    ("ESTABLISHED", StatusEnum.ESTABLISHED, []),
-    ("EXPERIMENTAL", StatusEnum.EXPERIMENTAL, []),
-    ("", None, [STATUS_REQUIRED]),
-    ("not_valid_status", None, [STATUS_INVALID])
-])
-def test_validate_habit_status(habit_status, expected_value, expected_errors):
-    typed_value, errors = validate_habit_status(habit_status)
-    assert typed_value == expected_value
-    assert errors == expected_errors
-
-
-# TODO: test_validate_established_date?
-
-
-@pytest.mark.parametrize("threshold, expected_value, expected_errors", [
-    (None, None, []),
-    ("0.5", 0.5, []),
-    ("-0.1", None, [PROMOTION_THRESHOLD_RANGE]),
-    ("2.0", None, [PROMOTION_THRESHOLD_RANGE]),
-    ("not_number", None, [PROMOTION_THRESHOLD_INVALID])
-])
-def test_validate_promotion_threshold(threshold, expected_value, expected_errors):
-    typed_value, errors = validate_promotion_threshold(threshold)
-    assert typed_value == expected_value
-    assert errors == expected_errors
-
-
 
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
@@ -50,12 +22,9 @@ def test_validate_promotion_threshold(threshold, expected_value, expected_errors
         {}
     ),
     (
-        {"name": "Clean dishes", "status": "EXPERIMENTAL"},
         {"name": "Clean dishes"},
-        {
-            "status": ["Status & promotion_threshold must either both be set or both be None"],
-            "promotion_threshold": ["Status & promotion_threshold must either both be set or both be None"]
-        }
+        {"name": "Clean dishes"},
+        {}
     ),
 ])
 def test_validate_habit(data, expected_typed_data, expected_errors):

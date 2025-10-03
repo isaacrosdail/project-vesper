@@ -72,11 +72,9 @@ def parse_time_entry_form_data(form_data: dict) -> dict:
     }
 
 def parse_habit_form_data(form_data: dict) -> dict:
-    raw_status = form_data.get("status")
     return {
         "name": (form_data.get("name") or "").strip(),
-        "status": _upper_or_none(form_data.get("status")),
-        "promotion_threshold": form_data.get("promotion_threshold") or None,
+        "is_promotable": parse_checkbox(form_data.get("is_promotable")),
     }
 
 def parse_daily_entry_form_data(form_data: dict) -> dict:
