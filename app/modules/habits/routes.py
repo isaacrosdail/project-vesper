@@ -41,11 +41,6 @@ def habits(session):
     if request.method == "POST":
 
         form_data = request.form.to_dict()
-        # If toggle is on, set promotion-based habits info
-        is_promotable = form_data.get("is_promotable") == "on" # HMTL checkbox
-        form_data["status"] = StatusEnum.EXPERIMENTAL.value if is_promotable else None
-        form_data["promotion_threshold"] = PROMOTION_THRESHOLD_DEFAULT if is_promotable else None
-        
         habit_data = parse_habit_form_data(form_data)
 
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
