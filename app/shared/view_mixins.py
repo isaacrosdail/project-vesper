@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.shared.datetime.helpers import convert_to_timezone
@@ -12,8 +12,12 @@ class TimestampedViewMixin:
         return local.strftime(fmt) if local else ""
     
     def format_due_label(self, tz):
+        if not self.due_date:
+            return ""
+        
         today = datetime.now(ZoneInfo(tz)).date()
-        due = self.due_date.date()
+        # Stored at exclusive EOD (ie 00:00 next day), so timedelta -1 second to adjust
+        due = (self.due_date - timedelta(seconds=1)).date()
         delta_days = (due - today).days
 
         rules = {
