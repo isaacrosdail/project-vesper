@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/parsers.py
+# hypothesis_version: 6.140.2
+
+['barcode', 'calories', 'calories_per_100g', 'category', 'description', 'difficulty', 'due_date', 'duration', 'duration_minutes', 'ended_at', 'is_frog', 'is_promotable', 'language', 'lcstatus', 'leetcode_id', 'name', 'net_weight', 'password', 'price_at_scan', 'priority', 'quantity', 'sleep_time', 'started_at', 'status', 'steps', 'title', 'unit_type', 'username', 'wake_time', 'weight']
