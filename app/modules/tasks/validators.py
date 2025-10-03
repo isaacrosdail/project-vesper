@@ -17,7 +17,12 @@ def validate_task_name(name: str) -> tuple[str | None, list[str]]:
 
 
 def validate_task_priority(priority: str) -> tuple[Any, list[str]]:
-    """Required. Valid PriorityEnum value."""
+    """
+    Optional*. Valid PriorityEnum value.
+    *Required if task is not a frog; must be None if it is.
+    """
+    if not priority:
+        return (None, [])
     return validate_enum(priority, PriorityEnum, PRIORITY_REQUIRED, PRIORITY_INVALID)
 
 
@@ -35,12 +40,16 @@ TASK_VALIDATION_FUNCS = {
     "due_date": validate_due_date,
 }
 
-# TODO: Validate is_frog + due_date constraint here or in service?
+
 def validate_task(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate task data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
     
+    # Insert is_frog directly
+    if data.get("is_frog") is not None:
+        typed_data["is_frog"] = data.get("is_frog")
+
     for field, func in TASK_VALIDATION_FUNCS.items():
         value = data.get(field)
         typed_value, field_errors = func(value)
@@ -48,6 +57,22 @@ def validate_task(data: dict) -> tuple[dict, dict[str, list[str]]]:
             errors[field] = field_errors
         elif typed_value is not None:
             typed_data[field] = typed_value
+
+    is_frog = typed_data.get("is_frog")
+    due_date = typed_data.get("due_date")
+    priority = typed_data.get("priority")
+
+    if is_frog:
+        # Frog tasks must have due_date
+        if not due_date:
+            errors.setdefault("due_date", []).append(FROG_REQUIRES_DUE_DATE)
+        # Frog tasks must not have priority
+        if priority is not None:
+            errors.setdefault("priority", []).append(FROG_REQUIRES_NO_PRIORITY)
+    else:
+        # Non-frog tasks must have priority
+        if priority is None:
+            errors.setdefault("priority", []).append(PRIORITY_REQUIRED_NON_FROG)
     
     return (typed_data, errors)
 
