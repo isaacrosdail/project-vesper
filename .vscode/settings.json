@@ -35,6 +35,7 @@
         ".coverage": true,
         "PROJECT_LOG.md": true,
         "PROJECT_LOG_ARCHIVE/**": true,
+        ".hypothesis/**": true,
     },
     "files.watcherExclude": {
         "**/node_modules/**": true,
