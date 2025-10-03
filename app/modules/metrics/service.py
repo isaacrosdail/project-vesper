@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.modules.metrics.repository import DailyMetricsRepository
+from app.modules.metrics.constants import WAKE_MUST_BE_AFTER_SLEEP
 from app.shared.datetime.helpers import today_range_utc, parse_time_to_datetime
 from app.modules.api.responses import service_response
 
@@ -11,12 +12,26 @@ class DailyMetricsService:
         self.repo = repository
         self.user_tz = user_tz
 
-    def process_daily_metrics(self, form_data: dict) -> dict:
+    def process_daily_metrics(self, metric_data: dict) -> dict:
         start_utc, end_utc = today_range_utc(self.user_tz)
         processed_metrics = []
 
-        # Iterate over key-value pairs, calling create/update for each whose value is a non-empty string (which is falsy in Python)
-        for metric_type, value in form_data.items():
+        # Check wake/sleep times are sensible
+        if "wake_time" in metric_data and "sleep_time" in metric_data:
+            wake_dt = self._convert_time_to_datetime("wake_time", metric_data["wake_time"])
+            sleep_dt = self._convert_time_to_datetime("sleep_time", metric_data["sleep_time"])
+
+            if wake_dt <= sleep_dt:
+                return service_response(
+                    False,
+                    "Wake/Sleep time check failed",
+                    errors={
+                        "wake_time": [WAKE_MUST_BE_AFTER_SLEEP],
+                        "sleep_time": [WAKE_MUST_BE_AFTER_SLEEP]
+                    }
+                )
+
+        for metric_type, value in metric_data.items():
             if value is None:
                 continue
 
