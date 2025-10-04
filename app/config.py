@@ -3,7 +3,7 @@ Configuration classes for different environments.
 Manages database URIs, debug settings, and environment-specific settings.
 """
 import os
-
+from datetime import timedelta
 from dotenv import load_dotenv
 from flask.config import Config  # hijack Flask's config obj
 
@@ -18,6 +18,7 @@ class BaseConfig:
     USE_PROXY_FIX = False
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-me")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    REMEMBER_COOKIE_DURATION = timedelta(days=30) # Flask automatically picks this up
 
 class DevConfig(BaseConfig):
     APP_ENV = "dev"
