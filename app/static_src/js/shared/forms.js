@@ -18,20 +18,20 @@ function filterUnitOptions() {
     const unitOptionsMap = {
         beverages: "volume",
         condiments_sauces: "volume",
-        fats_oils: "volume",
+        fats_oils: ["weight", "volume"],
 
         fruits: "weight",
         vegetables: "weight", 
         legumes: "weight",
         grains: "weight",
         bakery: "weight",
-        dairy_eggs: "weight",
+        dairy_eggs: ["weight", "volume"],
         meats: "weight",
         seafood: "weight",
         snacks: "weight",
         sweets: "weight",
-        processed_convenience: "weight",
-        supplements: "weight"
+        processed_convenience: ["weight", "volume"],
+        supplements: ["weight", "volume"]
     }
 
     // Use 2-step lookup with dict keys to store the appropriate list of allowed units for the given selection in allowedUnits
