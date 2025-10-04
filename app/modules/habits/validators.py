@@ -105,7 +105,7 @@ LC_VALIDATION_FUNCS = {
     "status": validate_leetcode_status,
 }
 
-def validate_leetcode_record(data: dict) -> dict[str, list[str]]:
+def validate_leetcode_record(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate LeetCode record. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
