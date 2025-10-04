@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/auth/service.py
+# hypothesis_version: 6.140.2
+
+[403, 'Guest', 'Owner', 'demo', 'demo123', 'guest', 'lang', 'message', 'name', 'owner', 'owner123', 'password', 'role', 'success', 'user', 'user_id', 'username']

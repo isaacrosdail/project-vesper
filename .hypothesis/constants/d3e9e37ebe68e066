@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/time_tracking/routes.py
+# hypothesis_version: 6.140.2
+
+[201, 400, '/', '/dashboard', '/time_tracking', 'GET', 'POST', 'category', 'data', 'description', 'duration', 'entry', 'errors', 'id', 'message', 'started_at', 'success', 'templates', 'time_entries', 'time_entry_headers', 'time_tracking']
