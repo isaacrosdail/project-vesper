@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/tasks/service.py
+# hypothesis_version: 6.140.2
+
+['Task added', 'due_date', 'frog_task', 'is_frog', 'name', 'priority', 'task']
