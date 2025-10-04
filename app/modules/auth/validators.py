@@ -51,8 +51,7 @@ def validate_lang(lang: str) -> tuple[Any, list[str]]:
 VALIDATION_FUNCS = {
     "username": validate_username,
     "password": validate_password,
-    "role": validate_role,
-    "lang": validate_lang
+    "name": validate_name,
 }
 
 def validate_user(data: dict) -> tuple[dict, dict[str, list[str]]]:

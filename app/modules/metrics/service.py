@@ -32,8 +32,6 @@ class DailyMetricsService:
                 )
 
         for metric_type, value in metric_data.items():
-            if value is None:
-                continue
 
             if metric_type in ("wake_time", "sleep_time"):
                 value = self._convert_time_to_datetime(metric_type, value)

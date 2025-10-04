@@ -9,6 +9,7 @@ from app.modules.tasks.service import TasksService
 from app.modules.tasks.repository import TasksRepository
 from app.modules.tasks.viewmodels import TaskViewModel, TaskPresenter
 from app.shared.parsers import parse_task_form_data
+from app.modules.tasks.validators import validate_task
 
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
@@ -35,22 +36,24 @@ def dashboard(session):
 @with_db_session
 def tasks(session):
     if request.method == "POST":
-        
-        # Parse from form + clean
-        form_data = request.form.to_dict()
-        task_data = parse_task_form_data(form_data)
-        
+
+        parsed_data = parse_task_form_data(request.form.to_dict())
+
+        typed_data, errors = validate_task(parsed_data)
+        if errors:
+            return validation_failed(errors), 400
+
         tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
         tasks_service = TasksService(tasks_repo, current_user.timezone)
-        result = tasks_service.create_task(task_data)
+        result = tasks_service.create_task(typed_data)
 
         if not result["success"]:
-            return validation_failed(result["errors"]), 400
+            return api_response(False, result["message"], errors=result["errors"])
         
         task = result["data"]["task"]
         return api_response(
             True,
-            "Task added successfully",
+            result["message"],
             data = {
                 "id": task.id,
                 "name": task.name,

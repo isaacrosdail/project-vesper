@@ -6,18 +6,9 @@ from app.modules.auth.validators import *
 
 
 # NOTE: Trying out Hypothesis
-@settings(max_examples=20)
-@given(st.text(min_size=0, max_size=5))
-def test_validate_lang_random(lang):
-    result = validate_lang(lang)
+# @settings(max_examples=20)
+# @given(st.text(min_size=0, max_size=5))
 
-    # Invariants we expect, regardless of input:
-    if lang == "":
-        assert result == (None, [USERLANG_REQUIRED])
-    elif lang == "EN" or lang == "DE":
-        assert result == (lang, [])
-    else:
-        assert result == (None, [USERLANG_INVALID])
 
 
 @pytest.mark.parametrize("username, expected_value, expected_errors", [
@@ -82,8 +73,8 @@ def test_validate_lang(lang, expected_value, expected_errors):
 
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
-        {"username": "steve123", "password": "god12@", "role": "ADMIN", "lang": "EN"},
-        {"username": "steve123", "role": UserRoleEnum.ADMIN, "lang": UserLangEnum.EN},
+        {"username": "steve123", "password": "god12@"},
+        {"username": "steve123"},
         {
             "password": [PASSWORD_INVALID]
         }

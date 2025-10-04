@@ -1,9 +1,10 @@
 
 from datetime import datetime
+from decimal import Decimal
 
 from app.shared.repository.base import BaseRepository
 
-from .models import DailyEntry
+from app.modules.metrics.models import DailyEntry
 
 
 class DailyMetricsRepository(BaseRepository):
@@ -13,11 +14,6 @@ class DailyMetricsRepository(BaseRepository):
     def get_all_daily_metrics(self):
         return self.get_all()
 
-    # def get_all_daily_metrics(self):
-    #     """Return all DailyEntry entries."""
-    #     return self.session.query(DailyEntry).filter(
-    #         DailyEntry.user_id == self.user_id
-    #     ).all()
 
     # TODO
     def get_metrics_by_type_in_window(self, metric_type: str, start_utc: datetime, end_utc: datetime):
@@ -55,7 +51,7 @@ class DailyMetricsRepository(BaseRepository):
             return self.add(entry), True
 
         
-    def create_daily_metric(self, metric_type: str, value: int | float | datetime):
+    def create_daily_metric(self, metric_type: str, value: int | Decimal | datetime):
         """Create & add a new daily metric. Returns metric."""
         metric = DailyEntry(
             user_id=self.user_id,

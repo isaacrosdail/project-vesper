@@ -102,11 +102,6 @@ def validate_product(data: dict) -> tuple[dict, dict[str, list[str]]]:
 
 
 
-def validate_product_id(product_id: str) -> tuple[int | None, list[str]]:
-    """Required. Valid integer ID."""
-    return validate_id_field(product_id, PRODUCT_ID_REQUIRED, PRODUCT_ID_INVALID)
-
-
 def validate_price(price: str) -> tuple[float | None, list[str]]:
     """Required. Numeric(7,2), non-negative."""
     if not price:
@@ -140,7 +135,6 @@ def validate_quantity(quantity: str) -> tuple[int | None, list[str]]:
 TRANSACTION_VALIDATION_FUNCS = {
     "price_at_scan": validate_price,
     "quantity": validate_quantity,
-    "product_id": validate_product_id
 }
 
 def validate_transaction(data: dict) -> tuple[dict, dict[str, list[str]]]:

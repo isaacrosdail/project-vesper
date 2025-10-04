@@ -36,19 +36,19 @@ def dashboard(session):
 @login_required
 @with_db_session
 def metrics(session):
-    
-    form_data = request.form.to_dict()
-    parsed_data = parse_daily_entry_form_data(form_data)
 
+    parsed_data = parse_daily_entry_form_data(request.form.to_dict())
     typed_data, errors = validate_daily_entry(parsed_data)
+
     if errors:
         return validation_failed(errors), 400
     
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
     service = DailyMetricsService(repo, current_user.timezone)
-
     result = service.process_daily_metrics(typed_data)
 
+    if not result["success"]:
+        return api_response(False, result["message"], errors=result["errors"])
 
     return api_response(
         True,

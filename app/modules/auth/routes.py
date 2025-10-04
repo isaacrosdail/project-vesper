@@ -1,15 +1,21 @@
-from flask import Blueprint, redirect, render_template, request, url_for, jsonify
 
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
-from app.shared.middleware import set_toast
+
 from app._infra.database import database_connection, with_db_session
+from app.modules.auth.models import UserLangEnum, UserRoleEnum
 from app.modules.auth.repository import UsersRepository
 from app.modules.auth.service import AuthService, requires_owner
+from app.modules.auth.validators import validate_user
 from app.shared.database.helpers import delete_all_db_data
+from app.shared.middleware import set_toast
+from app.shared.parsers import parse_user_form_data
 
 
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
+
+# TODO: Implement
 @auth_bp.route("/user_dashboard", methods=["GET"])
 def user_dashboard():
     return render_template('user_dashboard.html')
@@ -26,37 +32,47 @@ def logout():
 @auth_bp.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        parsed_data = parse_user_form_data(request.form.to_dict())
 
         with database_connection() as session:
             users_repo = UsersRepository(session)
-            user = users_repo.get_user_by_username(username)
+            user = users_repo.get_user_by_username(parsed_data["username"])
             
-            if not user or not user.check_password(password):
-                set_toast('Invalid login credentials', 'error')
+            if not user or not user.check_password(parsed_data["password"]):
+                set_toast('Invalid username or password', 'error')
                 return redirect(url_for('auth.login'))
             else:
                 remember = 'remember_user' in request.form
-                login_user(user, remember=remember)  # Stores session data in persistent cookie, with expiration date, and cookie survives browser restarts
+                login_user(user, remember=remember)
                 return redirect(url_for('main.home'))
 
-    else:
-        return render_template('auth/login.html')
+    return render_template('auth/login.html')
 
 
 @auth_bp.route('/register', methods=["GET", "POST"])
 def register():
-    if request.method == "GET":
-        return render_template('auth/register.html')
-    
-    elif request.method == "POST":
+    if request.method == "POST":
         form_data = request.form.to_dict()
-        
+        parsed_data = parse_user_form_data(form_data)
+        typed_data, errors = validate_user(parsed_data)
+
+        if errors:
+            for field_errors in errors.values():
+                for error in field_errors:
+                    set_toast(error, 'error')
+            return redirect(url_for('auth.register'))
+
+
         with database_connection() as session:
             repo = UsersRepository(session)
             service = AuthService(repo)
-            result = service.register_user_from_form(form_data)
+            result = service.register_user(
+                username=typed_data["username"],
+                password=typed_data["password"],
+                name=typed_data.get("name"),
+                role=UserRoleEnum.USER,
+                lang=UserLangEnum.EN
+            )
 
         if not result["success"]:
             set_toast(result["message"], 'error')
@@ -64,6 +80,8 @@ def register():
         
         set_toast('Account successfully created!', 'success')
         return redirect(url_for("main.home"))
+
+    return render_template('auth/register.html')
 
 
 # Create & Seed only
@@ -74,41 +92,30 @@ def init_demo():
     with database_connection() as session:
         repo = UsersRepository(session)
         auth_service = AuthService(repo)
-        demo_user = auth_service.get_or_create_demo_user()
+        demo_user = auth_service.get_or_create_template_user("demo")
         login_user(demo_user)
 
     set_toast('Welcome to the demo!', 'success')
     return redirect(url_for('main.home'))
 
-"""
-Using multiple decorators! From BOTTOM to TOP:
-1. @with_db_session - Wraps the function, injects the session
-2. @requires_owner  - Wraps that result, checks role
-3. @login_required     - Wraps that result, checks login
-4. @auth_bp.route('/admin/reset-users', methods=["POST"]) - Wraps everything, handles HTTP routing
 
-Bottom-up application order, top-down call order
-"""
 @auth_bp.route('/admin/reset-users', methods=["POST"])
-@login_required
 @requires_owner
 @with_db_session
-def reset_users(session): # <= @with_db_session injects session as 1st parameter, so we need to pass it in here
-    """Delete all data + users, then create fresh demo + owner users."""
+def reset_users(session):
     logout_user()
 
     delete_all_db_data(session, include_users=True, reset_sequences=True)
     repo = UsersRepository(session)
     auth_service = AuthService(repo)
-    demo_user = auth_service.get_or_create_demo_user()
-    owner_user = auth_service.get_or_create_owner_user()
+    demo_user = auth_service.get_or_create_template_user("demo")
+    owner_user = auth_service.get_or_create_template_user("owner")
 
     set_toast('Users reset!', 'success')
     return redirect(url_for('auth.login'))
 
 # Wipe app data only; reset IDs for more predictable seeding
 @auth_bp.route('/admin/reset-db', methods=["POST"])
-@login_required
 @requires_owner
 @with_db_session
 def reset_database(session):
@@ -120,7 +127,6 @@ def reset_database(session):
 
 
 @auth_bp.route('/admin/reset-dev', methods=["POST"])
-@login_required
 @requires_owner
 @with_db_session
 def reset_dev(session):
@@ -130,7 +136,7 @@ def reset_dev(session):
     delete_all_db_data(session, include_users=True, reset_sequences=True)
     repo = UsersRepository(session)
     auth_service = AuthService(repo)
-    owner_user = auth_service.get_or_create_owner_user()
+    owner_user = auth_service.get_or_create_template_user("owner")
 
     set_toast('DEV: DB reset!', 'success')
     return redirect(url_for('main.home'))

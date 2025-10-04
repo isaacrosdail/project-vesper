@@ -4,12 +4,11 @@ Habit service layer, to evaluate streaks & completions.
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from app.modules.api.responses import service_response
 from app.modules.habits.constants import PROMOTION_THRESHOLD_DEFAULT
 from app.modules.habits.models import StatusEnum
 from app.modules.habits.repository import HabitsRepository
 from app.shared.datetime.helpers import today_range_utc
-from app.modules.habits.validators import validate_habit
-from app.modules.api.responses import service_response
 
 
 class HabitsService:
@@ -17,18 +16,18 @@ class HabitsService:
         self.repo = repository
         self.user_tz = user_tz
 
-    def create_habit(self, habit_data: dict):
-
-        typed_data, errors = validate_habit(habit_data)
-        if errors:
-            return service_response(False, "Validation failed", errors=errors)
+    def create_habit(self, typed_data: dict):
         
         # Promotion-based habits
         if typed_data.get("is_promotable"):
             typed_data["status"] = StatusEnum.EXPERIMENTAL
             typed_data["promotion_threshold"] = PROMOTION_THRESHOLD_DEFAULT
 
-        habit = self.repo.create_habit(**typed_data)
+        habit = self.repo.create_habit(
+            name=typed_data["name"],
+            status=typed_data.get("status"),
+            promotion_threshold=typed_data.get("promotion_threshold")
+        )
         return service_response(True, "Habit added", data={"habit": habit})
 
 
