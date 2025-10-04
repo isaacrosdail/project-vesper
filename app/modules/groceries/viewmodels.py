@@ -1,4 +1,6 @@
 
+from app.modules.groceries.models import ProductCategoryEnum as Category
+from app.modules.groceries.models import UnitEnum as UnitType
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class TransactionPresenter(BasePresenter):
@@ -39,7 +41,7 @@ class TransactionViewModel(TimestampedViewMixin):
     
     @property
     def created_at_label(self):
-        return self.format(self.created_at, self._tz, "%d.%m.%Y")
+        return self.format_created_at_label()
 
 
 
@@ -61,6 +63,34 @@ class ProductPresenter(BasePresenter):
 
     
 class ProductViewModel(TimestampedViewMixin):
+    CATEGORY_LABELS = {
+        Category.FRUITS: "Fruits",
+        Category.VEGETABLES: "Vegetables",
+        Category.LEGUMES: "Legumes",
+        Category.GRAINS: "Grains",
+        Category.BAKERY: "Bakery",
+        Category.DAIRY_EGGS: "Dairy & Eggs",
+        Category.MEATS: "Meats",
+        Category.SEAFOOD: "Seafood",
+        Category.FATS_OILS: "Fats/Oils",
+        Category.SNACKS: "Snacks",
+        Category.SWEETS: "Sweets",
+        Category.BEVERAGES: "Beverages",
+        Category.CONDIMENTS_SAUCES: "Condiments & Sauces",
+        Category.PROCESSED_CONVENIENCE: "Processed & Convenience",
+        Category.SUPPLEMENTS: "Supplements",
+    }
+    UNIT_TYPE_LABELS = {
+        UnitType.G: "g",
+        UnitType.KG: "kg",
+        UnitType.OZ: "oz",
+        UnitType.LB: "lb",
+        UnitType.ML: "ml",
+        UnitType.L: "l",
+        UnitType.FL_OZ: "fl oz",
+        UnitType.EA: "ea.",
+    }
+
     def __init__(self, product, tz):
         self.id = product.id
         self.barcode = product.barcode
@@ -72,13 +102,14 @@ class ProductViewModel(TimestampedViewMixin):
         self._tz = tz
 
     @property
-    def category_display(self):
-        return f"{self.category.value.title()}"
+    def category_label(self):
+        # return f"{self.category.value.title()}"
+        return ProductViewModel.CATEGORY_LABELS[self.category]
 
     @property
-    def net_weight_display(self):
-        return f"{self.net_weight:.2f} ({self.unit_type.value.lower()})"
+    def net_weight_label(self):
+        return f"{self.net_weight:.2f} ({ProductViewModel.UNIT_TYPE_LABELS[self.unit_type]})"
     
     @property
-    def calories_display(self):
-        return int(self.calories_per_100g) if self.calories_per_100g else "--"
+    def calories_label(self):
+        return int(round(self.calories_per_100g)) if self.calories_per_100g else "--"
