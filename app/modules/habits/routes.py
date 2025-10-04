@@ -122,7 +122,13 @@ def create_leetcoderecord(session):
         return validation_failed(errors), 400
 
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
-    record = habits_repo.create_leetcoderecord(**typed_data)
+    record = habits_repo.create_leetcoderecord(
+        leetcode_id=typed_data["leetcode_id"],
+        title=typed_data.get("title"),
+        difficulty=typed_data["difficulty"],
+        language=typed_data["language"],
+        status=typed_data["status"],
+    )
 
     return api_response(
         True,
