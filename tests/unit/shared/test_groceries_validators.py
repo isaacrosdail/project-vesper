@@ -144,15 +144,14 @@ def test_validate_quantity(transaction_quantity, expected_value, expected_errors
 
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
-        {"price_at_scan": "5.99", "quantity": "3", "product_id": "4"},
-        {"price_at_scan": 5.99, "quantity": 3, "product_id": 4},
+        {"price_at_scan": "5.99", "quantity": "3"},
+        {"price_at_scan": 5.99, "quantity": 3},
         {}
     ),
     (
         {"price_at_scan": "-1.00", "quantity": "0"},
         {},
         {
-            "product_id": [PRODUCT_ID_REQUIRED],
             "price_at_scan": [PRICE_NEGATIVE],
             "quantity": [QUANTITY_POSITIVE]
         }

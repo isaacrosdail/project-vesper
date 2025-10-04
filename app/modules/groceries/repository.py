@@ -2,12 +2,12 @@
 Repository layer for groceries module.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy.orm import joinedload
 
-from app.modules.groceries.models import Product, Transaction, UnitEnum, ShoppingList, ShoppingListItem
+from app.modules.groceries.models import Product, Transaction, UnitEnum, ShoppingList, ShoppingListItem, ProductCategoryEnum
 from app.shared.repository.base import BaseRepository
 
 
@@ -48,25 +48,28 @@ class GroceriesRepository(BaseRepository):
         ).first()
 
 
-    def create_product(self, **product_data) -> Product:
+    def create_product(self, barcode: str, name: str, category: ProductCategoryEnum,
+                       net_weight: Decimal, unit_type: UnitEnum,
+                       calories_per_100g: Decimal | None) -> Product:
         product = Product(
             user_id=self.user_id,
-            barcode=product_data["barcode"],
-            name=product_data["name"],
-            category=product_data["category"],
-            net_weight=product_data["net_weight"],
-            unit_type=product_data["unit_type"],
-            calories_per_100g=product_data["calories_per_100g"],
+            barcode=barcode,
+            name=name,
+            category=category,
+            net_weight=net_weight,
+            unit_type=unit_type,
+            calories_per_100g=calories_per_100g,
         )
         return self.add(product)
 
         
-    def create_transaction(self, product, **product_data):
+    def create_transaction(self, product: Product, price_at_scan: Decimal,
+                           quantity: int) -> Transaction:
         transaction = Transaction(
             user_id=self.user_id,
             product_id=product.id,
-            price_at_scan=product_data["price"],
-            quantity=product_data["quantity"],
+            price_at_scan=price_at_scan,
+            quantity=quantity,
         )
         return self.add(transaction)
 
@@ -82,13 +85,13 @@ class GroceriesRepository(BaseRepository):
     def get_shopping_list(self):
         return self._user_query(ShoppingList).first()
     
-    def get_shopping_list_item(self, shopping_list_id, product_id):
+    def get_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem:
         return self._user_query(ShoppingListItem).filter(
             ShoppingListItem.shopping_list_id == shopping_list_id,
             ShoppingListItem.product_id == product_id
         ).first()
 
-    def create_shopping_list_item(self, shopping_list_id, product_id):
+    def create_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem:
         shopping_list_item = ShoppingListItem(
             user_id=self.user_id,
             shopping_list_id=shopping_list_id,

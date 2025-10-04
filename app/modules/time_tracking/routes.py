@@ -33,21 +33,24 @@ def dashboard(session):
 @with_db_session
 def time_entries(session):
     if request.method == 'POST':
-        form_data = request.form.to_dict()
-        time_entry_data = parse_time_entry_form_data(form_data)
+
+        parsed_data = parse_time_entry_form_data(request.form.to_dict())
+
+        typed_data, errors = validate_time_entry(parsed_data)
+        if errors:
+            return validation_failed(errors), 400
 
         repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
         service = TimeTrackingService(repo, current_user.timezone)
-
-        result = service.create_entry_from_form(time_entry_data)
+        result = service.create_entry_from_form(typed_data)
 
         if not result["success"]:
-            return validation_failed(result["errors"]), 400
+            return api_response(False, result["message"], errors=result["errors"])
 
         entry = result["data"]["entry"]
         return api_response(
             True,
-            "Time entry added",
+            result["message"],
             data = {
                 "id": entry.id,
                 "category": entry.category,

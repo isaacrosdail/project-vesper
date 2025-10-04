@@ -23,6 +23,10 @@ class BaseRepository:
         self.session.add(item)
         return item
     
+    def delete(self, item):
+        self.session.delete(item)
+        return item
+    
     # Leaving the end blank (no .first()/.all(), etc) lets caller decide what to use there
     def _user_query(self, model_cls):
         return self.session.query(model_cls).filter(
