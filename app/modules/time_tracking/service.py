@@ -30,7 +30,7 @@ class TimeTrackingService:
         # Persist
         entry = self.repo.create_time_entry(
             category=typed_data["category"],
-            description=typed_data["description"],
+            description=typed_data.get("description"),
             started_at=started_at,
             ended_at=ended_at,
             duration_minutes=typed_data["duration_minutes"]
