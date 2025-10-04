@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/service.py
+# hypothesis_version: 6.140.2
+
+['Product not found', 'Transaction added', 'barcode', 'error_type', 'product', 'product_not_found', 'quantity']
