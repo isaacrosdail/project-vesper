@@ -1,16 +1,14 @@
 
+from datetime import date
+
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from app.shared.validators import (CONSTRAINT_VIOLATION, FORMAT_ERROR,
-                                   PRECISION_EXCEEDED, SCALE_EXCEEDED,
-                                   TIME_HHMM_INVALID, TIME_HHMM_REQUIRED,
-                                   TIME_HHMM_INVALID_RANGE,
-                                   validate_numeric, validate_date_iso, validate_time_hhmm)
+from app.shared.validators import *
 
 
-# NOTE: Trying out Hypothesis
+# Trying out Hypothesis
 @given(
         value=st.text(),
         precision=st.integers(1, 10),
@@ -22,13 +20,15 @@ def test_validate_numeric_never_crashes(value, precision, scale):
     assert (error_type is None) or isinstance(error_type, str)
 
 
-# @pytest.mark.parametrize("date_str, expected_value, expected_errors", [
-#     ("2025-09-20", , []),
-# ])
-# def test_validate_date_iso(date_str, expected_value, expected_errors):
-#     typed_value, errors = validate_date_iso(date_str)
-#     assert typed_value == expected_value
-#     assert errors == expected_errors
+@pytest.mark.parametrize("date_str, expected_value, expected_errors", [
+    ("2025-09-20", date(2025, 9, 20), []),
+    ("", None, [DATE_REQUIRED]),
+    ("-not-date", None, [DATE_INVALID]),
+])
+def test_validate_date_iso(date_str, expected_value, expected_errors):
+    typed_value, errors = validate_date_iso(date_str)
+    assert typed_value == expected_value
+    assert errors == expected_errors
 
 
 @pytest.mark.parametrize("time_str, expected_value, expected_errors", [
