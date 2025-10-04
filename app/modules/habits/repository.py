@@ -76,7 +76,7 @@ class HabitsRepository(BaseRepository):
         )
     
     def create_leetcoderecord(self, leetcode_id: int, difficulty: DifficultyEnum,
-                              language: LanguageEnum, lcstatus: LCStatusEnum,
+                              language: LanguageEnum, status: LCStatusEnum,
                               title: str | None) -> LeetCodeRecord:
         new_record = LeetCodeRecord(
             user_id=self.user_id,
@@ -84,7 +84,7 @@ class HabitsRepository(BaseRepository):
             title=title,
             difficulty=difficulty, # Note: can pass the enum member itself, no need for .value
             language=language,
-            status=lcstatus
+            status=status
         )
         return self.add(new_record)
 
