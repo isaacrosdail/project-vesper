@@ -30,12 +30,8 @@ class DailyMetricViewModel(TimestampedViewMixin):
 
 
     @property
-    def created_at_local(self):
-        return self._to_local(self.created_at, self._tz)
-    
-    @property
     def created_at_label(self):
-        return self.format_created_at_label(self._tz)
+        return self.format_created_at_label()
     
     @property
     def weight_label(self):
@@ -43,16 +39,16 @@ class DailyMetricViewModel(TimestampedViewMixin):
     
     @property
     def steps_label(self):
-        return self._label("steps")
+        return self.steps if self.steps is not None else "--"
     
     @property
     def wake_time_label(self):
-        return self._label("wake_time")
+        return self.format_dt(self.wake_time, "%H:%M") if self.wake_time is not None else "--"
     
     @property
     def sleep_time_label(self):
-        return self._label("sleep_time")
+        return self.format_dt(self.sleep_time, "%H:%M") if self.sleep_time is not None else "--"
     
     @property
     def calories_label(self):
-        return self._label("calories")
+        return int(round(self.calories)) if self.calories is not None else "--"
