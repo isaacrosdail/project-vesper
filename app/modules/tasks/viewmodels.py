@@ -32,14 +32,10 @@ class TaskViewModel(TimestampedViewMixin):
     @property
     def priority_label(self):
         return f"{self.priority.value.title()}"
-    
-    @property
-    def due_date_local(self):
-        return self._to_local(self.due_date, self._tz)
 
     @property
     def due_label(self):
-        return self.format_due_label(self._tz)
+        return self.format_due_label()
     
     @property
     def completed_label(self):

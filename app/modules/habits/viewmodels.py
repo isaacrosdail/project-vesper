@@ -32,4 +32,4 @@ class HabitViewModel(TimestampedViewMixin):
     
     @property
     def created_at_label(self):
-        return self.format(self.created_at, self._tz, "%d.%m.%Y")
+        return self.format_created_at_label()

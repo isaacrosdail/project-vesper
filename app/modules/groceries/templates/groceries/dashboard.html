@@ -76,9 +76,9 @@
     {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products, 'groceries', 'product') %}
         <td class="{{ headers[0].priority }}">{{ item.barcode }}</td>
         <td class="{{ headers[1].priority }}">{{ item.name }}</td>
-        <td class="{{ headers[2].priority }} _text-right">{{ item.category_display }}</td>
-        <td class="{{ headers[3].priority }} _text-right">{{ item.net_weight_display }}</td>
-        <td class="{{ headers[4].priority }} _text-right">{{ item.calories_display }}</td>
+        <td class="{{ headers[2].priority }} _text-right">{{ item.category_label }}</td>
+        <td class="{{ headers[3].priority }} _text-right">{{ item.net_weight_label }}</td>
+        <td class="{{ headers[4].priority }} _text-right">{{ item.calories_label }}</td>
     {% endcall %}
 </div>
 {% endblock %}

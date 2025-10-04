@@ -29,18 +29,13 @@ class TimeEntryViewModel(TimestampedViewMixin):
 
     @property
     def duration_label(self):
-        mins = int(round(self.duration))
+        mins = self.duration
         h, m = divmod(mins, 60)
         return f"{h}h {m:02d}m" if h else f"{m}m"
 
     @property
-    def started_at_local(self):
-        dt = self._to_local(self.started_at, self._tz)
-        return dt.strftime("%I:%M%p (%d.%m.%y)")
-    
-    @property
-    def started_label(self):
-        return self.format(self.started_at, self._tz, "%I:%M %p")
+    def started_at_label(self):
+        return self.format_dt(self.started_at, fmt="%I:%M%p (%d.%m.%y)")
     
     @property
     def desc_label(self):

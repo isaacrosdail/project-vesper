@@ -4,18 +4,18 @@ from zoneinfo import ZoneInfo
 from app.shared.datetime.helpers import convert_to_timezone
 
 class TimestampedViewMixin:
-    def _to_local(self, dt, tz):
-        return convert_to_timezone(tz, dt) if dt else None
-    
-    def format(self, dt, tz, fmt="%Y-%m-%d %H:%M"):
-        local = self._to_local(dt, tz)
-        return local.strftime(fmt) if local else ""
-    
-    def format_due_label(self, tz):
+    """Adds datetime-related conversion & formatting methods to inheriting classes."""
+
+    def format_dt(self, dt, fmt="%Y-%m-%d %H:%M"):
+        """Format datetime in user's timezone."""
+        local = convert_to_timezone(self._tz, dt)
+        return local.strftime(fmt)
+
+    def format_due_label(self):
         if not self.due_date:
             return ""
         
-        today = datetime.now(ZoneInfo(tz)).date()
+        today = datetime.now(ZoneInfo(self._tz)).date()
         # Stored at exclusive EOD (ie 00:00 next day), so timedelta -1 second to adjust
         due = (self.due_date - timedelta(seconds=1)).date()
         delta_days = (due - today).days
@@ -29,12 +29,12 @@ class TimestampedViewMixin:
         if delta_days in rules:
             return rules[delta_days]
         elif 2 <= delta_days < 7:
-            return self.format(self.due_date, tz, "%a")
+            return self.format_dt(self.due_date, "%a")
         else:
-            return self.format(self.due_date, tz, "%b %d")
+            return self.format_dt(self.due_date, "%b %d")
 
-    def format_created_at_label(self, tz):
-        today = datetime.now(ZoneInfo(tz)).date()
+    def format_created_at_label(self):
+        today = datetime.now(ZoneInfo(self._tz)).date()
         created = self.created_at.date()
         delta_days = (created - today).days
 
@@ -46,13 +46,11 @@ class TimestampedViewMixin:
         if delta_days in rules:
             return rules[delta_days]
         elif 2 <= delta_days <= 7:
-            return self.format(self.created_at, self._tz, "%a")
+            return self.format_dt(self.created_at, "%a")
         else:
-            return "hiya" # TODO: fix obviously
+            return self.format_dt(self.created_at, "%b %d")
     
-    def _label(self, attr: str, fmt=str, default="--"):
-        val = getattr(self, attr)
-        return fmt(val) if val is not None else default
+
     
 
 class BasePresenter:
