@@ -26,6 +26,7 @@
         "alembic/script.py.mako": true,
         "nginx/**": true,
         "PROJECT_LOG_ARCHIVE/**": true,
+        ".hypothesis/**": true,
     },
     "search.exclude": {
         "node_modules/": true,
