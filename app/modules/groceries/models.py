@@ -1,7 +1,7 @@
 # Handles DB models for grocery module
 import enum
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import relationship
 
@@ -44,48 +44,52 @@ class ProductCategoryEnum(enum.Enum):
 	
 
 class Product(Base):
-	"""Acts as a catalog of 'known' products and includes more static data regarding the product."""
+    """Acts as a catalog of 'known' products and includes the more 'static' data about the product."""
 
-	name = Column(
-		String(PRODUCT_NAME_MAX_LENGTH),
-		nullable=False
-	)
-	
-	category = Column(
-		SAEnum(ProductCategoryEnum, name="product_category_enum"),
-		nullable=False
-	)
-	
-	barcode = Column(
-		String(BARCODE_MAX_LENGTH),
-		unique=True,
-		nullable=False
-	)
+    __table_args__ = (
+        UniqueConstraint('user_id', 'name', name='uq_user_product_name'),
+        UniqueConstraint('user_id', 'barcode', name='uq_user_product_barcode'),
+    )
 
-	net_weight = Column(
-		Numeric(NET_WEIGHT_PRECISION, NET_WEIGHT_SCALE),
-		nullable=False
-	)
-	
-	unit_type = Column(
-		SAEnum(UnitEnum, name="unit_enum", values_callable=lambda x: [e.value for e in x]),
-		nullable=False,
-		default=UnitEnum.G
-	)
+    name = Column(
+        String(PRODUCT_NAME_MAX_LENGTH),
+        nullable=False
+    )
 
-	calories_per_100g = Column(
-		Numeric(CALORIES_PRECISION, CALORIES_SCALE),
-		CheckConstraint('calories_per_100g >= 0', name='ck_product_calories_non_negative'),
-		nullable=True
-	)
-	
-	deleted_at = Column(DateTime(timezone=True), nullable=True)
+    category = Column(
+        SAEnum(ProductCategoryEnum, name="product_category_enum"),
+        nullable=False
+    )
 
-	def __str__(self):
-		return f"{self.name} ({self.barcode})"
-	
-	def __repr__(self):
-		return f"<Product id={self.id} name='{self.name}' barcode='{self.barcode}'>"
+    barcode = Column(
+        String(BARCODE_MAX_LENGTH),
+        nullable=False
+    )
+
+    net_weight = Column(
+        Numeric(NET_WEIGHT_PRECISION, NET_WEIGHT_SCALE),
+        nullable=False
+    )
+
+    unit_type = Column(
+        SAEnum(UnitEnum, name="unit_enum", values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=UnitEnum.G
+    )
+
+    calories_per_100g = Column(
+        Numeric(CALORIES_PRECISION, CALORIES_SCALE),
+        CheckConstraint('calories_per_100g >= 0', name='ck_product_calories_non_negative'),
+        nullable=True
+    )
+
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.barcode})"
+
+    def __repr__(self):
+        return f"<Product id={self.id} name='{self.name}' barcode='{self.barcode}'>"
 
 
 class Transaction(Base):

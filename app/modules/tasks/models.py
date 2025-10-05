@@ -3,7 +3,7 @@ Database models for the Tasks module.
 """
 import enum
 
-from sqlalchemy import Boolean, Column, DateTime, String, CheckConstraint
+from sqlalchemy import Boolean, Column, DateTime, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import relationship
 
@@ -24,11 +24,11 @@ class Task(Base, CustomBaseTaskMixin):
             "NOT is_frog OR due_date IS NOT NULL",
             name='ck_task_frog_requires_due_date'
         ),
+        UniqueConstraint('user_id', 'name', name='uq_user_task_name'),
     )
 
     name = Column(
         String(TASK_NAME_MAX_LENGTH),
-        unique=True,
         nullable=False
     )
 

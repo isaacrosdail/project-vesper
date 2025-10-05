@@ -3,7 +3,7 @@ Model definitions for Habits module.
 """
 import enum
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, CheckConstraint
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import relationship
 
@@ -41,9 +41,12 @@ class LanguageEnum(enum.Enum):
 
 class Habit(Base):
 
+    __table_args__ = (
+        UniqueConstraint('user_id', 'name', name='uq_user_habit_name'),
+    )
+
     name = Column(
         String(HABIT_NAME_MAX_LENGTH),
-        unique=True, 
         nullable=False
     )
 

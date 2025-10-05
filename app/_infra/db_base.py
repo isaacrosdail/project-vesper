@@ -5,9 +5,19 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from flask import current_app
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData
 from sqlalchemy.orm import declarative_base, declared_attr
 
+# Auto-assigns constraint names when we don't explicitly name them
+metadata = MetaData(
+    naming_convention={
+        "ix": "ix_%(column_0_label)s",
+        "uq": "uq_%(table_name)s_%(column_0_name)s",
+        "ck": "ck_%(table_name)s_%(constraint_name)s",
+        "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+        "pk": "pk_%(table_name)s",
+    }
+)
 
 # Core mixins
 class TimestampMixin:
@@ -42,7 +52,7 @@ class BaseModel(TimestampMixin):
             return Column(Integer, ForeignKey('user.id'), nullable=False)
 
 # SQLAlchemy declarative base with automatic timestamps & user association
-Base = declarative_base(cls=BaseModel)
+Base = declarative_base(cls=BaseModel, metadata=metadata)
 
 # Mixin for models that track completion status (unsure about this one)
 class CustomBaseTaskMixin:

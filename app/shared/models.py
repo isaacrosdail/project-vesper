@@ -1,5 +1,5 @@
 
-from sqlalchemy import ForeignKey, Table, Column, String
+from sqlalchemy import ForeignKey, Table, Column, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app._infra.db_base import Base
@@ -22,7 +22,12 @@ habit_tags = Table(
 )
 
 class Tag(Base):
-    name = Column(String(TAG_NAME_MAX_LENGTH), unique=True, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'name', name='uq_user_tag_name'),
+    )
+
+    name = Column(String(TAG_NAME_MAX_LENGTH), nullable=False)
     scope = Column(String(TAG_SCOPE_MAX_LENGTH), default="universal")
 
     # Reciprocal relationships for many-to-many
