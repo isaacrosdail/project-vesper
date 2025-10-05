@@ -23,9 +23,9 @@ def validate_category(category: str) -> tuple[Any, list[str]]:
 
 
 def validate_barcode(barcode: str) -> tuple[str | None, list[str]]:
-    """Required. Alphanumeric string."""
+    """Optional. Alphanumeric string."""
     if not barcode:
-        return (None, [BARCODE_REQUIRED])
+        return (None, [])
     if not regex.match(BARCODE_REGEX, barcode):
         return (None, [BARCODE_INVALID])
     

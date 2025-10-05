@@ -63,7 +63,7 @@ class Product(Base):
 
     barcode = Column(
         String(BARCODE_MAX_LENGTH),
-        nullable=False
+        nullable=True
     )
 
     net_weight = Column(

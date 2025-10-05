@@ -28,7 +28,7 @@ def test_validate_category(category, expected_value, expected_errors):
 
 @pytest.mark.parametrize("barcode, expected_value, expected_errors", [
     ("123456789012", "123456789012", []),
-    ("", None, [BARCODE_REQUIRED]),
+    ("", None, []),
     ("invalid!!", None, [BARCODE_INVALID]),
 ])
 def test_validate_barcode(barcode, expected_value, expected_errors):
