@@ -21,6 +21,12 @@ class GroceriesRepository(BaseRepository):
             Product.barcode == barcode,
             Product.deleted_at.is_(None)
         ).first()
+    
+    def get_product_by_name(self, name: str):
+        return self._user_query(Product).filter(
+            Product.name == name,
+            Product.deleted_at.is_(None)
+        )
 
     def get_product_by_id(self, product_id: int):
         return self.get_by_id(product_id)
