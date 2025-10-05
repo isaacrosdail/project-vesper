@@ -10,16 +10,15 @@
         <fieldset>
             <legend>Add new product:</legend>
             <div class="form-group">
+                <label for="name">Product Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
                 <label for="barcode">Barcode:</label>
                 <input type="text" id="barcode" name="barcode"
                     minlength="8" maxlength="14"
                     pattern="[0-9]{8,14}"
-                    required
                     placeholder="Scan or enter barcode">
-            </div>
-            <div class="form-group">
-                <label for="name">Product Name:</label>
-                <input type="text" id="name" name="name">
             </div>
             <div class="form-group">
                 <label for="category">Category</label>
@@ -44,7 +43,7 @@
             </div>
             <div class="form-group">
                 <label for="net_weight">Net Weight:</label>
-                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight">
+                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" required>
             </div>
             <div class="form-group">
                 <label for="unit_type">Units:</label>

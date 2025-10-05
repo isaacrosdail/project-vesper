@@ -13,28 +13,27 @@ class GroceriesService:
 
     def create_product(self, typed_data: dict):
         # NOTE: Simple for now, but plan to expand. Therefore keeping this in service.
-        product, was_created = self.get_or_create_product(typed_data)
-        message = "Product created successfully" if was_created else "Product already exists"
-        return service_response(True, message, data={"product": product})
+        product = self.repo.create_product(
+            barcode=typed_data.get("barcode"),
+            name=typed_data["name"],
+            category=typed_data["category"],
+            net_weight=typed_data["net_weight"],
+            unit_type=typed_data["unit_type"],
+            calories_per_100g=typed_data.get("calories_per_100g"),
+        )
+        self.repo.session.flush() # might need ID for transaction downstream
+
+        return service_response(True, "Product created", data={"product": product})
 
 
-    def create_transaction(self, typed_barcode,typed_transaction_data, typed_product_data=None):
+    def create_transaction(self, product_id: int, typed_transaction_data: dict):
         """Process transaction form submission."""
-        product = self.repo.get_product_by_barcode(typed_barcode)
+        product = self.repo.get_product_by_id(product_id)
 
-        # Case C: Product doesn't exist & we don't have info => Show product fields for resubmit
-        if not product and not typed_product_data:
-            return service_response(False, "Product not found", data={"error_type": "product_not_found"})
-
-        # Case B: Product doesn't exist, but we have enough info => create product+transaction
-        if not product:
-            product = self.repo.create_product(**typed_product_data)
-
-        # Case A: Product exists (fall through, use existing product)
         start_utc, end_utc = today_range_utc(self.repo.user_tz)
         existing = self.repo.get_transaction_in_window(product.id, start_utc, end_utc)
 
-        if existing:
+        if existing and (existing.price_at_scan == typed_transaction_data["price_at_scan"]):
             existing.quantity += typed_transaction_data["quantity"]
         else:
             self.repo.create_transaction(product, **typed_transaction_data)

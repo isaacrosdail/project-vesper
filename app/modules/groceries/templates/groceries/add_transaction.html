@@ -10,19 +10,13 @@
     <form method="POST" class="grocery-form">
         <fieldset>
             <legend>Add new transaction</legend>
-            <div class="form-group">
-                <label for="barcode">Barcode:</label>
-                <input type="text" id="barcode" name="barcode"
-                    value="{{ transaction_data.barcode if transaction_data else ''}}"
-                    minlength="8" maxlength="14"
-                    placeholder="Scan or enter barcode"
-                    required>
-            </div>
-            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
-                <label for="name">Product Name</label>
-                <input type="text" id="name" name="name"
-                    {% if not show_product_fields%}disabled{% endif %}>
-            </div>
+            <select name="product_id" id="product_id" required>
+                <option value="">-- Select Product --</option>
+                {% for product in products %}
+                    <option value="{{ product.id }}">{{ product.name }}</option>
+                {% endfor %}
+                <option value="__new__">+ Create New Product</option>
+            </select>
             <div class="form-group">
                 <label for="price_at_scan">Price (each):</label>
                 <input type="number" step="0.01" min="0" id="price_at_scan" name="price_at_scan"
@@ -35,12 +29,20 @@
                     value="{{ transaction_data.quantity if transaction_data else '' }}"
                     required>
             </div>
-            {# net_weight, category, unit_type, & cals per 100g are all to be conditionally shown depending on whether we need to add_product from here #}
-            {# Add hidden to not show via Jinja (CSS class) but also disabled (HTML attr) to the input so it sends nothing #}
-            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
+            <div class="form-group product-field _hidden">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" name="name" disabled>
+            </div>
+            <div class="form-group product-field _hidden">
+                <label for="barcode">Barcode:</label>
+                <input type="text" id="barcode" name="barcode"
+                    value="{{ transaction_data.barcode if transaction_data else ''}}"
+                    minlength="8" maxlength="14"
+                    placeholder="Scan or enter barcode">
+            </div>
+            <div class="form-group product-field _hidden">
                 <label for="category">Category</label>
-                <select name="category" id="category" 
-                    {% if not show_product_fields%}disabled{% endif %}>
+                <select name="category" id="category" disabled>
                     <option value="" disabled selected>-- Category --</option>
                     <option value="fruits">Fruits</option>
                     <option value="vegetables">Vegetables</option>
@@ -59,15 +61,13 @@
                     <option value="supplements">Supplements</option>
                 </select>
             </div>
-            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
+            <div class="form-group product-field _hidden">
                 <label for="net_weight">Net Weight:</label>
-                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight"
-                    {% if not show_product_fields%}disabled{% endif %}>
+                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" disabled>
             </div>
-            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
+            <div class="form-group product-field _hidden">
                 <label for="unit_type">Units:</label>
-                <select name="unit_type" id="unit_type" 
-                    {% if not show_product_fields%}disabled{% endif %}>
+                <select name="unit_type" id="unit_type" disabled>
                     <option value="" disabled selected>-- Units --</option>
                     <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
@@ -78,10 +78,9 @@
                     <option value="fl_oz">fl oz (fluid ounces)</option>
                 </select>
             </div>
-            <div class="form-group {% if not show_product_fields %}_hidden{% endif %}">
+            <div class="form-group product-field _hidden">
                 <label for="calories_per_100g">Cals per 100g:</label>
-                <input type="number" step="0.1" min="0" max="900" id="calories_per_100g" name="calories_per_100g"
-                    {% if not show_product_fields%}disabled{% endif %}>
+                <input type="number" step="0.1" min="0" max="900" id="calories_per_100g" name="calories_per_100g" disabled>
             </div>
             <div class="form-actions">
                 <button type="submit" name="action" value="submit" class="btn btn-primary">Submit</button>

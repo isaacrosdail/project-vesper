@@ -58,11 +58,10 @@
         </a>
     </div>
     {% call(item, headers) ui.responsive_table('Recent Transactions', transaction_headers, transactions, 'groceries', 'transaction') %}
-    <td class="{{ headers[0].priority }}">{{ item.barcode }}</td>
-    <td class="{{ headers[1].priority }}">{{ item.product_name }}</td>
-    <td class="{{ headers[2].priority }} _text-right">{{ item.price_label }}</td>
-    <td class="{{ headers[3].priority }} _text-right">{{ item.price_per_100g_label }}</td>
-    <td class="{{ headers[4].priority }} _text-right">{{ item.created_at_label }}</td>
+    <td class="{{ headers[0].priority }}">{{ item.product_name }}</td>
+    <td class="{{ headers[1].priority }} _text-right">{{ item.price_label }}</td>
+    <td class="{{ headers[2].priority }} _text-right">{{ item.price_per_100g_label }}</td>
+    <td class="{{ headers[3].priority }} _text-right">{{ item.created_at_label }}</td>
     {% endcall %}
 </div>
 
@@ -74,7 +73,7 @@
         </a>
     </div>
     {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products, 'groceries', 'product') %}
-        <td class="{{ headers[0].priority }}">{{ item.barcode }}</td>
+        <td class="{{ headers[0].priority }}">{{ item.barcode_label }}</td>
         <td class="{{ headers[1].priority }}">{{ item.name }}</td>
         <td class="{{ headers[2].priority }} _text-right">{{ item.category_label }}</td>
         <td class="{{ headers[3].priority }} _text-right">{{ item.net_weight_label }}</td>

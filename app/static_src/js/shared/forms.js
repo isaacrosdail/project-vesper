@@ -53,6 +53,30 @@ export function initProductForms() {
     });
 }
 
+export function initTransactionForm() {
+    if (document.documentElement.dataset.page !== 'groceries.transactions') return;
+
+    const productSelect = document.querySelector('#product_id');
+
+    productSelect?.addEventListener('change', (e) => {
+        const productFields = document.querySelectorAll('.product-field input, .product-field select');
+
+        if (e.target.value == '__new__') {
+            console.log(productFields);
+            for (const field of productFields) {
+                field.parentElement.classList.remove('_hidden');
+                field.disabled = false;
+            }
+        } else {
+            // Re-hide & disable
+            for (const field of productFields) {
+                field.parentElement.classList.add('_hidden');
+                field.disabled = true;
+            }
+        }
+    });
+}
+
 /**
  * Initialize "click eye icon for password/text toggle".
  * 
@@ -87,4 +111,5 @@ export function initPasswordToggles() {
 }
 
 initProductForms();
+initTransactionForm();
 initPasswordToggles();

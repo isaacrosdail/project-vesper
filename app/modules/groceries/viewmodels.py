@@ -6,11 +6,10 @@ from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 class TransactionPresenter(BasePresenter):
 
     VISIBLE_COLUMNS = [
-        "barcode", "product_name", "price_at_scan", "price_per_100g", "created_at"
+        "product_name", "price_at_scan", "price_per_100g", "created_at"
     ]
 
     COLUMN_CONFIG = {
-    "barcode": {"label": "Barcode", "priority": "desktop-only"},
     "product_name": {"label": "Product Name", "priority": "essential"},
     "price_at_scan": {"label": "Price (qty)", "priority": "essential"},
     "quantity": {"label": "Qty", "priority": "desktop-only"},
@@ -29,7 +28,7 @@ class TransactionViewModel(TimestampedViewMixin):
         self.created_at = txn.created_at
         self.price_per_100g = txn.price_per_100g        # calculated field
         self._tz = tz
-    
+
     @property
     def price_label(self):
         total_price = self.price_at_scan * self.quantity
@@ -54,7 +53,7 @@ class ProductPresenter(BasePresenter):
         "id": {"label": "ID", "priority": "desktop-only"},
         "name": {"label": "Product Name", "priority": "essential"},
         "category": {"label": "Category", "priority": "desktop-only"},
-        "barcode": {"label": "Barcode", "priority": "essential"},
+        "barcode": {"label": "Barcode", "priority": "desktop-only"},
         "net_weight_display": {"label": "Net Weight", "priority": "desktop-only"},
         "unit_type": {"label": "Unit", "priority": "desktop-only"},
         "calories_per_100g": {"label": "Cals (100g)", "priority": "essential"},
@@ -100,6 +99,10 @@ class ProductViewModel(TimestampedViewMixin):
         self.unit_type = product.unit_type
         self.calories_per_100g = product.calories_per_100g
         self._tz = tz
+
+    @property
+    def barcode_label(self):
+        return self.barcode if self.barcode is not None else "--"
 
     @property
     def category_label(self):

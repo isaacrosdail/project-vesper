@@ -83,19 +83,33 @@ def products():
 
 @groceries_bp.route("/transactions", methods=["GET", "POST"])
 @login_required
-def transactions():
+@with_db_session
+def transactions(session):
+    groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
     if request.method == "POST":
-        with database_connection() as session:
+            groceries_service = GroceriesService(groceries_repo)
             form_data = request.form.to_dict()
-            show_product_fields = fsession.get('show_product_fields', False)
+            product_id = form_data.get("product_id")
 
-            parsed_barcode = parse_barcode(form_data.get("barcode"))
-            typed_barcode, barcode_errors = validate_barcode(parsed_barcode)
-            if barcode_errors:
-                fsession['form_data'] = form_data
-                set_toast('Invalid barcode', 'error')
-                return redirect(url_for('groceries.transactions'))
-            
+            # Case A: Create new product first
+            if product_id == '__new__':
+                # 1. Validate product
+                parsed_product_data = parse_product_data(form_data)
+                typed_product_data, product_errors = validate_product(parsed_product_data)
+                if product_errors:
+                    fsession['form_data'] = form_data
+                    # fsession['product_id'] = '__new__' # so we know to show
+                    for field_errors in product_errors.values():
+                        for error in field_errors:
+                            set_toast(error, 'error')
+                    return redirect(url_for('groceries.transactions'))
+                
+                # 3. Call service to create product, use its id for below transaction add
+                result = groceries_service.create_product(typed_product_data)
+                product_id = result['data']['product'].id
+
+            # Case B (fall through): Use existing product, create transaction only
+            # 1. Validate transaction
             parsed_transaction_data = parse_transaction_data(form_data)
             typed_transaction_data, transaction_errors = validate_transaction(parsed_transaction_data)
             if transaction_errors:
@@ -105,45 +119,20 @@ def transactions():
                         set_toast(error, 'error')
                 return redirect(url_for('groceries.transactions'))
 
+            # 2. Call service to create transaction
+            result = groceries_service.create_transaction(product_id, typed_transaction_data)
 
-            # Validate product only if needed
-            typed_product_data = None
-            if show_product_fields:
-                parsed_product_data = parse_product_data(form_data)
-                typed_product_data, product_errors = validate_product(parsed_product_data)
-                if product_errors:
-                    fsession['form_data'] = form_data
-                    fsession['show_produc_fields'] = True
-                    for field_errors in product_errors.values():
-                        for error in field_errors:
-                            set_toast(error, 'error')
-                    return redirect(url_for('groceries.transactions'))
-
-            groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
-            groceries_service = GroceriesService(groceries_repo)
-            result = groceries_service.create_transaction(typed_barcode,typed_transaction_data, typed_product_data)
-
-            # Handle 'need product info' case
-            if not result['success'] and result.get("data", {}).get('error_type') == 'product_not_found':
-                fsession['form_data'] = form_data
-                fsession['show_product_fields'] = True
-                set_toast(result['message'], 'error')
-                return redirect(url_for('groceries.transactions'))
-            
-            # Success, clear session flags
             set_toast(result['message'], 'success')
-            fsession.pop('show_product_fields', None)
-            fsession.pop('form_data', None)
-            return redirect(url_for("groceries.dashboard"))
+            return redirect(url_for('groceries.dashboard'))
 
+    # GET
+    # Need to now grab products to populate dropdown
+    products = groceries_repo.get_all_products()
 
     saved_form_data = fsession.pop('form_data', {})
-    show_product_fields = fsession.get('show_product_fields', False)
-    barcode = request.args.get("barcode")
     return render_template(
         "groceries/add_transaction.html",
-        barcode=barcode,
-        show_product_fields=show_product_fields,
+        products=products,
         transaction_data=saved_form_data
     )
 
