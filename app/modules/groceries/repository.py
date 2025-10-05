@@ -54,8 +54,9 @@ class GroceriesRepository(BaseRepository):
         ).first()
 
 
-    def create_product(self, barcode: str, name: str, category: ProductCategoryEnum,
+    def create_product(self, name: str, category: ProductCategoryEnum,
                        net_weight: Decimal, unit_type: UnitEnum,
+                       barcode: str | None,
                        calories_per_100g: Decimal | None) -> Product:
         product = Product(
             user_id=self.user_id,
