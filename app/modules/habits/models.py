@@ -42,6 +42,9 @@ class LanguageEnum(enum.Enum):
 class Habit(Base):
 
     __table_args__ = (
+        CheckConstraint(
+            f'promotion_threshold is NULL OR (promotion_threshold >= {PROMOTION_THRESHOLD_MIN} AND promotion_threshold <= {PROMOTION_THRESHOLD_MAX})',name='ck_promotion_threshold_range_0_1'
+        ),
         UniqueConstraint('user_id', 'name', name='uq_user_habit_name'),
     )
 
@@ -59,7 +62,6 @@ class Habit(Base):
 
     promotion_threshold = Column(
         Float,
-        CheckConstraint(f'promotion_threshold is NULL OR (promotion_threshold >= {PROMOTION_THRESHOLD_MIN} AND promotion_threshold <= {PROMOTION_THRESHOLD_MAX})', name='ck_promotion_threshold_range_0_1'),
         nullable=True
     )
     
@@ -92,19 +94,16 @@ class LeetCodeRecord(Base):
 
     difficulty = Column(
         SAEnum(DifficultyEnum, name="difficulty_enum"),
-        default=DifficultyEnum.MEDIUM,
         nullable=False
     )
 
     language = Column(
         SAEnum(LanguageEnum, name="language_enum"),
-        default=LanguageEnum.PYTHON,
         nullable=False
     )
 
     status = Column(
         SAEnum(LCStatusEnum, name="lcstatus_enum"),
-        default=LCStatusEnum.SOLVED,
         nullable=False
     )
 
