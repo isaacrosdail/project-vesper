@@ -30,7 +30,9 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
         <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ subtype }}">
           {{ caller(item, headers) }}
           <td class="table-cell delete-cell">
-            {{ delete_btn() }}
+            <button class="row-actions dots-btn btn-icon btn-square" data-item-id="{{ item.id }}">
+                ooo
+            </button>
           </td>
         </tr>
       {% endfor %}

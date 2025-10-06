@@ -71,11 +71,21 @@ function setupModal(modalId, buttonId, endpoint) {
         e.preventDefault();
 
         const formData = new FormData(form);
-        apiRequest('POST', endpoint, (responseData) => { // get server response inside success callback
-            makeTableRow(responseData.data);
-            makeToast(responseData.message, 'success');
-        }, formData);
-
+        
+        // PATCH
+        if (modal.dataset.mode === 'edit') {
+            const url = `${endpoint}/${modal.dataset.itemId}`;
+            apiRequest('PATCH', url, (responseData) => {
+                makeToast(responseData.message, 'success');
+            }, formData);
+        }
+        // POST
+        else {
+            apiRequest('POST', endpoint, (responseData) => { // get server response inside success callback
+                makeTableRow(responseData.data);
+                makeToast(responseData.message, 'success');
+            }, formData);
+        }
         form.reset();
         modal.close();
     });
