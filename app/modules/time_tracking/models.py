@@ -10,11 +10,12 @@ class TimeEntry(Base):
 
     __table_args__ = (
         CheckConstraint("ended_at > started_at", name="ck_ended_after_started"),
+        CheckConstraint('duration_minutes > 0', name='ck_time_entry_duration_positive'),
+        CheckConstraint(f'length(category) > 0', name='ck_time_entry_category_non_empty'),
     )
     
     category = Column(
         String(CATEGORY_MAX_LENGTH),  # 'Programming', 'Workout', etc
-        CheckConstraint(f'length(category) > 0', name='ck_time_entry_category_non_empty'),
         nullable=False
     )
 
@@ -22,11 +23,7 @@ class TimeEntry(Base):
     started_at = Column(DateTime(timezone=True), nullable=False)
     ended_at = Column(DateTime(timezone=True), nullable=False)
 
-    duration_minutes = Column(
-        Integer,
-        CheckConstraint('duration_minutes > 0', name='ck_time_entry_duration_positive'),
-        nullable=False
-    )
+    duration_minutes = Column(Integer, nullable=False)
     
     def __repr__(self):
         return f"<TimeEntry id={self.id} category='{self.category}' started_at={self.started_at}>"

@@ -32,7 +32,7 @@ def upgrade() -> None:
     op.execute("CREATE TYPE user_lang_enum AS ENUM ('EN', 'DE')")
     op.execute("CREATE TYPE product_category_enum AS ENUM ('FRUITS', 'VEGETABLES', 'LEGUMES', 'GRAINS', 'BAKERY', 'DAIRY_EGGS', 'MEATS', 'SEAFOOD', 'FATS_OILS', 'SNACKS', 'SWEETS', 'BEVERAGES', 'CONDIMENTS_SAUCES', 'PROCESSED_CONVENIENCE', 'SUPPLEMENTS')")
 
-    op.drop_constraint(op.f('apicallrecord_api_called_date_key'), 'apicallrecord', type_='unique')
+    # op.drop_constraint(op.f('apicallrecord_api_called_date_key'), 'apicallrecord', type_='unique')
     op.create_unique_constraint('uq_api_called_date', 'apicallrecord', ['api_called', 'date'])
     op.alter_column('dailyentry', 'weight',
                existing_type=sa.DOUBLE_PRECISION(precision=53),
