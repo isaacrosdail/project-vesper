@@ -12,30 +12,44 @@ class TasksService:
         self.user_tz = user_tz
 
 
-    def create_task(self, data: dict):
+    def save_task(self, data: dict, task_id: int | None = None):
 
         # Attach due_date datetime
         data["due_date"] = self.to_eod_datetime(data.get("due_date"), self.user_tz)
 
-        # Check for existing frog task
-        if data["is_frog"]:
-            start_utc, end_utc = day_range_utc(data["due_date"].date(), self.user_tz)
+        ### UPDATE
+        if task_id:
+            task = self.repo.get_task_by_id(task_id)
+            if not task:
+                return service_response(False, "Task not found")
+            
+            # Update fields
+            for field, value in data.items():
+                setattr(task, field, value)
+            
+            return service_response(True, "Task updated", data={"task": task})
 
-            existing_frog = self.repo.get_frog_task_in_window(start_utc, end_utc)
-            if existing_frog:
-                return service_response(
-                    False,
-                    "Error: Duplicate frog task",
-                    errors={"frog_task": [f"You already have a 'frog' task for {data["due_date"].date().isoformat()}"]}
-                )
+        else:
+            ### CREATE
+            # Check for existing frog task
+            if data["is_frog"]:
+                start_utc, end_utc = day_range_utc(data["due_date"].date(), self.user_tz)
 
-        task = self.repo.create_task(
-            name=data["name"],
-            priority=data.get("priority"),
-            due_date=data.get("due_date"),
-            is_frog=data["is_frog"]
-        )
-        return service_response(True, "Task added", data={"task": task})
+                existing_frog = self.repo.get_frog_task_in_window(start_utc, end_utc)
+                if existing_frog:
+                    return service_response(
+                        False,
+                        "Error: Duplicate frog task",
+                        errors={"frog_task": [f"You already have a 'frog' task for {data["due_date"].date().isoformat()}"]}
+                    )
+
+            task = self.repo.create_task(
+                name=data["name"],
+                priority=data.get("priority"),
+                due_date=data.get("due_date"),
+                is_frog=data["is_frog"]
+            )
+            return service_response(True, "Task added", data={"task": task})
 
 
     def to_eod_datetime(self, date: date | None, tz_str: str) -> datetime | None:

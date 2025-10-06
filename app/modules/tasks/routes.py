@@ -32,10 +32,10 @@ def dashboard(session):
 
 
 @tasks_bp.route("/", methods=["GET", "POST"])
+@tasks_bp.route("/<int:task_id>", methods=["PATCH"])
 @login_required
 @with_db_session
-def tasks(session):
-    if request.method == "POST":
+def tasks(session, task_id=None):
 
         parsed_data = parse_task_form_data(request.form.to_dict())
 
@@ -45,7 +45,8 @@ def tasks(session):
 
         tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
         tasks_service = TasksService(tasks_repo, current_user.timezone)
-        result = tasks_service.create_task(typed_data)
+
+        result = tasks_service.save_task(typed_data, task_id) # None -> POST, else -> PATCH
 
         if not result["success"]:
             return api_response(False, result["message"], errors=result["errors"])
