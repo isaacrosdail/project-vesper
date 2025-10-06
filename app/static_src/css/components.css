@@ -273,10 +273,10 @@ input, select, textarea {
 .table-row {
     transition: background-color 25ms ease-out;
 }
-.table-row .delete-btn {
+.table-row .row-actions {
     visibility: hidden; /* All (table) delete buttons start hidden */
 }
-.table-row:hover .delete-btn {
+.table-row:hover .row-actions {
     visibility: visible; /* ..and become visible on hover of row */
 }
 .table-row:nth-child(even) {

@@ -4,65 +4,93 @@ import { apiRequest } from '../services/api.js';
 const menuItems = ['Edit', 'Delete'];
 const menuItemsGroceries = ['Add to shopping list'];
 
-// TODO: Properly implement & wire into tables.js functionalities
-function createContextMenu(e) {
-    const row = e.target.closest('.table-row');
-    if (!row) return;
+/**
+ * 
+ * @param {string} type - Type of menu to open. Determines which actions array to use, how to position (cursor vs rect)
+ * @param {object} triggerInfo - Object containing relevant positioning + data context needed, bound to menu itself before finishing
+ * @returns 
+ */
+function openMenu(type, triggerInfo) {
+    document.querySelector('.context-menu')?.remove(); // Always remove any menus before opening a new one to ensure clean slate
 
-    // Accessing OR making our custom context menu
-    let menu = document.querySelector('.context-menu');
-    if (!menu) {
-        menu = document.createElement('ul');
+    const menu = document.createElement('ul');
+    menu.classList.add(`context-menu`);
 
-        // Start with copy of the base items
-        // spread operator here [...menuItems] makes a shallow copy
-        let items = [...menuItems];
+    // Shallow copy of menuItems using spread operator: [...menuItems]
+    let items = [...menuItems];
 
-        // If clicked row is from the Transactions table, extend the list
-        // Append our shopping list option if it's the transactions table
-        // so: items = ['Edit', 'Delete', 'Add to shopping list']
-        if (row.dataset.subtype === 'transaction' || row.dataset.subtype === 'product') {
-            items = [...items, ...menuItemsGroceries];
-        }
-    
-        // Now we map over 'items' to render <li> elements
-        const menuElements = items.map(label => {
-            const li = document.createElement('li');
-            li.textContent = label;
-            return li;
-        });
-        menuElements.forEach(element => menu.appendChild(element));
-        menu.classList.add('context-menu');
+    // Append our shopping list option if it's the transactions table
+    // so: items = ['Edit', 'Delete', 'Add to shopping list']
+    if (triggerInfo.context.subtype === 'transaction' || triggerInfo.context.subtype === 'product') {
+        items = [...items, ...menuItemsGroceries];
     }
 
-    // Position menu at cursor
-    menu.style.left = e.clientX + 'px';
-    menu.style.top = e.clientY + 'px';
+    // Now we map over 'items' to render <li> elements
+    const menuElements = items.map(label => {
+        const li = document.createElement('li');
+        li.textContent = label;
+        return li;
+    });
+
+    menuElements.forEach(element => menu.appendChild(element));
+
+    // Position menu either at cursor (type context) OR button (type dots)
+    if (type === 'context') {
+        menu.style.left = triggerInfo.x + 'px';
+        menu.style.top = triggerInfo.y + 'px';
+    }
+    else if (type === 'dots') {
+        const { left, top } = triggerInfo.rect;
+        menu.style.left = `${left}px`;
+        menu.style.top  = `${top}px`;
+    }
+
     menu.style.display = 'block';
+    menu.context = triggerInfo.context; // bind context info to menu itself
 
-    // Bind data to menu for retrieval elsewhere without relying on DOM traversal + relationships
-    menu.context = {
-        itemId: row.dataset.itemId,
-        name: row.querySelector('td:nth-child(2)').textContent,
-        subtype: row.dataset.subtype
-    }
     document.body.appendChild(menu);
 }
 
 document.addEventListener('contextmenu', (e) => {
     if (e.ctrlKey) {
         e.preventDefault();
-        createContextMenu(e); // TODO?: Pull our context menu handling into some kind of global.js
+
+        const row = e.target.closest('.table-row');
+        if (!row) return;
+
+        const triggerInfo =
+        {
+            x: e.clientX,
+            y: e.clientY,
+            context: {
+                itemId: row.dataset.itemId,
+                name: row.querySelector('td:nth-child(2)').textContent,
+                module: row.dataset.module,
+                subtype: row.dataset.subtype
+            }
+        };
+
+        openMenu('context', triggerInfo); // TODO?: Pull our context menu handling into some kind of global.js
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelector('.context-menu')?.remove();
     }
 });
 
 document.addEventListener('click', async (e) => {
     const menu = document.querySelector('.context-menu');
 
+    if (menu && !menu.contains(e.target)) {
+        menu?.remove();
+        return;
+    }
+
     // TODO: Should rewrite this to separate concerns but have got to stop committing to rewrites for now
     if (e.target.textContent === 'Add to shopping list') {
-        const productId = menu.context.itemId;
-        const productName = menu.context.name;
+        const { productId, productName } = menu.context;
         const quantity = 1;
         menu?.remove();
 
@@ -81,8 +109,71 @@ document.addEventListener('click', async (e) => {
         }, data);
     }
 
-    else if (!e.target.matches('.context-menu')) {
-        menu?.remove();
+    // SCRATCH WORK
+    if (e.target.matches('.dots-btn')) {
+        const button = e.target.closest('.row-actions');
+        const row = e.target.closest('.table-row');
+        const triggerInfo =
+        {
+            rect: button.getBoundingClientRect(),
+            context: {
+                itemId: row.dataset.itemId,
+                name: row.querySelector('td:nth-child(2)').textContent,
+                module: row.dataset.module,
+                subtype: row.dataset.subtype
+            }
+        };
+
+        openMenu('dots', triggerInfo);
+    }
+    if (e.target.textContent === 'Delete') {
+        const { itemId, module, subtype } = menu.context;
+        const url = `/${module}/${subtype}/${itemId}`;
+
+        apiRequest('DELETE', url, (responseData) => {
+            console.log(`Deleted item: ${responseData.data.name}`);
+        });
+    }
+    // Prototype - refine/delete
+    if (e.target.textContent === 'Edit') {
+        const { itemId, module, subtype } = menu.context;
+
+        const url = `/${module}/${subtype}/${itemId}`;
+
+        apiRequest('GET', url, (responseData) => {
+            console.log(responseData.data.name);
+
+            // Grab our modal (tasks first here) & pre-fill name input
+            const modal = document.querySelector('#task-entry-dashboard-modal');
+            modal.dataset.mode = 'edit'; // to direct submits to PATCH instead of POST
+            modal.dataset.itemId = responseData.data.id;
+            modal.dataset.subtype = subtype;
+            modal.showModal();
+
+            // Use Object.entries(..) to take the responseData object and make it iterable
+            // Then forEach to loop through each entry, using [fieldName, fieldValue] here to
+            // destructure each entry into its key-value parts
+            // Inside the loop body (predicate?) we can select the current input since the IDs align with the to_dict key names
+            // 
+            console.log(responseData.data)
+            Object.entries(responseData.data).forEach(([fieldName, fieldValue]) => {
+                const currentInput = modal.querySelector(`#${fieldName}`);
+                if (currentInput) {
+                    if (fieldValue == null) {
+                        return; // skip null/undefined fields to leave them empty
+                    }
+                    if (currentInput.type === 'checkbox') {
+                        currentInput.checked = fieldValue;
+                    } else if (currentInput.type === 'date') {
+                        currentInput.value = fieldValue.slice(0, 10);
+                    } else if (currentInput.type === 'select-one') {
+                        currentInput.value = fieldValue.toLowerCase();
+                    } else {
+                        currentInput.value = fieldValue;
+                    }
+                }
+            });
+        })
     }
 });
 

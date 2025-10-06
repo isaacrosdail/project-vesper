@@ -12,6 +12,8 @@ from app.modules.metrics.models import DailyEntry
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
 from app.shared.database.helpers import safe_delete
+from app.shared.datetime.helpers import convert_to_timezone
+
 
 crud_bp = Blueprint("crud", __name__)
 
@@ -37,7 +39,7 @@ MODEL_CLASSES = {
 def get_model_class(module, subtype: str):
     return MODEL_CLASSES.get((module, subtype))
 
-@crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["PATCH", "DELETE"])
+@crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["GET", "PATCH", "DELETE"])
 @login_required
 @with_db_session
 def item(session, module, subtype, item_id):
@@ -54,6 +56,15 @@ def item(session, module, subtype, item_id):
     # Ownership check
     check_item_ownership(item, current_user.id)
     
+    if request.method == 'GET':
+        item_dict = item.to_dict()
+
+        # Convert dt fields to user's timezone first
+        if item_dict.get("due_date"):
+            item_dict["due_date"] = convert_to_timezone(item_dict["due_date"], current_user.timezone).isoformat()
+
+        return api_response(True, "Item retrieved", data=item_dict), 200
+
     if request.method == 'PATCH':
         data = request.get_json()
         for field, value in data.items():
