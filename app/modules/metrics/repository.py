@@ -62,8 +62,7 @@ class DailyMetricsRepository(BaseRepository):
 
     def get_daily_entry_for_day(self, start_utc: datetime, end_utc: datetime):
         """Get DailyMetric for a given window."""
-        return self.session.query(DailyEntry).filter(
-            DailyEntry.user_id == self.user_id,
+        return self._user_query(DailyEntry).filter(
             DailyEntry.created_at >= start_utc,
             DailyEntry.created_at < end_utc
         ).first()
