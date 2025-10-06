@@ -24,6 +24,10 @@ class Task(Base, CustomBaseTaskMixin):
             "NOT is_frog OR due_date IS NOT NULL",
             name='ck_task_frog_requires_due_date'
         ),
+        CheckConstraint(
+            "(is_frog = true AND priority IS NULL) OR (NOT is_frog AND priority IS NOT NULL)",
+            name='ck_frog_priority_mutually_exclusive'
+        ),
         UniqueConstraint('user_id', 'name', name='uq_user_task_name'),
     )
 
@@ -34,8 +38,7 @@ class Task(Base, CustomBaseTaskMixin):
 
     priority = Column(
         SAEnum(PriorityEnum, name="priority_enum"),
-        default=PriorityEnum.MEDIUM,
-        nullable=False
+        nullable=True
     )
 
     is_frog = Column(Boolean, default=False)
@@ -49,3 +52,12 @@ class Task(Base, CustomBaseTaskMixin):
     
     def __repr__(self):
         return f"<Task id={self.id} name='{self.name}'>"
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "priority": self.priority.value if self.priority else None,
+            "due_date": self.due_date if self.due_date else None,
+            "is_frog": self.is_frog
+        }

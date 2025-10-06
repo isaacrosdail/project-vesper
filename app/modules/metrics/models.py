@@ -16,20 +16,19 @@ from app.modules.metrics.constants import (
 class DailyEntry(Base):
     """Stores everything in "master" units (kg, count, kcal), will convert based on user preferences."""
 
+    __table_args__ = (
+        CheckConstraint(f'weight > {WEIGHT_MINIMUM}', name='ck_weight_positive'),
+        CheckConstraint(f'steps >= {STEPS_MINIMUM}', name='ck_steps_non_negative'),
+        CheckConstraint(f'calories >= {CALORIES_MINIMUM}', name='ck_calories_non_negative'),
+    )
+
     weight = Column(
         Numeric(WEIGHT_PRECISION, WEIGHT_SCALE),
-        CheckConstraint(f'weight > {WEIGHT_MINIMUM}', name='ck_weight_positive')
     )
 
-    steps = Column(
-        Integer,
-        CheckConstraint(f'steps >= {STEPS_MINIMUM}', name='ck_steps_non_negative')
-    )
+    steps = Column(Integer)
 
-    calories = Column(
-        Integer,
-        CheckConstraint(f'calories >= {CALORIES_MINIMUM}', name='ck_calories_non_negative')
-    )
+    calories = Column(Integer)
 
     wake_time = Column(DateTime(timezone=True))
 

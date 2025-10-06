@@ -28,25 +28,26 @@ class UnitEnum(enum.Enum):
 class ProductCategoryEnum(enum.Enum):
     FRUITS = "FRUITS"
     VEGETABLES = "VEGETABLES"
-    LEGUMES = "LEGUMES" # beans, lentils, peas
-    GRAINS = "GRAINS" # rice, oats, pasta (I rarely eat pasta, so it's either so uncommon I'd be fine throwing it here OR a restaurant/prepped food anyway)
+    LEGUMES = "LEGUMES"
+    GRAINS = "GRAINS"
     BAKERY = "BAKERY"
     DAIRY_EGGS = "DAIRY_EGGS"
     MEATS = "MEATS"
     SEAFOOD = "SEAFOOD"
-    FATS_OILS = "FATS_OILS" # Cooking oils, butter, avocado, nuts / nut butters
+    FATS_OILS = "FATS_OILS"
     SNACKS = "SNACKS"
     SWEETS = "SWEETS"
     BEVERAGES = "BEVERAGES"
     CONDIMENTS_SAUCES = "CONDIMENTS_SAUCES"
-    PROCESSED_CONVENIENCE = "PROCESSED_CONVENIENCE" # Restaurant, fast food, frozen meals, packaged stuff. This is the “buddy, don’t live here” category
-    SUPPLEMENTS = "SUPPLEMENTS" # Protein powder, bars, vitamins, creatine, etc.
+    PROCESSED_CONVENIENCE = "PROCESSED_CONVENIENCE"
+    SUPPLEMENTS = "SUPPLEMENTS"
 	
 
 class Product(Base):
     """Acts as a catalog of 'known' products and includes the more 'static' data about the product."""
 
     __table_args__ = (
+        CheckConstraint('calories_per_100g >= 0', name='ck_product_calories_non_negative'),
         UniqueConstraint('user_id', 'name', name='uq_user_product_name'),
         UniqueConstraint('user_id', 'barcode', name='uq_user_product_barcode'),
     )
@@ -79,7 +80,6 @@ class Product(Base):
 
     calories_per_100g = Column(
         Numeric(CALORIES_PRECISION, CALORIES_SCALE),
-        CheckConstraint('calories_per_100g >= 0', name='ck_product_calories_non_negative'),
         nullable=True
     )
 
@@ -93,32 +93,35 @@ class Product(Base):
 
 
 class Transaction(Base):
-	"""Acts as 'instance of buying a given item'."""
+    """Acts as 'instance of buying a given item'."""
 
-	product_id = Column(
-		Integer, ForeignKey("product.id"),
-		nullable=False
-	)
-	
-	price_at_scan = Column(
-		Numeric(PRICE_PRECISION, PRICE_SCALE),
-		CheckConstraint('price_at_scan >= 0', name='ck_transaction_price_non_negative'),
-		nullable=False
-	)
-	
-	quantity = Column(
-		Integer,
-		CheckConstraint('quantity > 0', name='ck_transaction_quantity_positive'),
-		nullable=False
-	)
+    __table_args__ = (
+        CheckConstraint('price_at_scan >= 0', name='ck_transaction_price_non_negative'),
+        CheckConstraint('quantity > 0', name='ck_transaction_quantity_positive'),
+    )
 
-	product = relationship("Product")
+    product_id = Column(
+        Integer, ForeignKey("product.id"),
+        nullable=False
+    )
 
-	def __str__(self):
-		return f"Transaction:{self.id}: {self.quantity}x {self.product.name} @ {self.price_at_scan}"
-	
-	def __repr__(self):
-		return f"<Transaction id={self.id} product_id={self.product_id}>"
+    price_at_scan = Column(
+        Numeric(PRICE_PRECISION, PRICE_SCALE),
+        nullable=False
+    )
+
+    quantity = Column(
+        Integer,
+        nullable=False
+    )
+
+    product = relationship("Product")
+
+    def __str__(self):
+        return f"Transaction:{self.id}: {self.quantity}x {self.product.name} @ {self.price_at_scan}"
+
+    def __repr__(self):
+        return f"<Transaction id={self.id} product_id={self.product_id}>"
 
 
 class ShoppingList(Base):
@@ -133,26 +136,28 @@ class ShoppingList(Base):
 
 
 class ShoppingListItem(Base):
-	"""Items in the list. Effectively acts as a pointer to the actual product item itself."""
+    """Items in the list. Effectively acts as a pointer to the actual product item itself."""
 
-	quantity_wanted = Column(
-		Integer,
-		CheckConstraint('quantity_wanted > 0', name='ck_shopping_quantity_wanted_positive'),
-		nullable=False,
-		default=1
-	)
-	
-	shopping_list_id = Column(
-		Integer,
-		ForeignKey('shoppinglist.id'),
-		nullable=False
-	)
-	
-	product_id = Column(
-		Integer,
-		ForeignKey('product.id'),
-		nullable=False
-	)
+    __table_args__ = (
+        CheckConstraint('quantity_wanted > 0', name='ck_shopping_quantity_wanted_positive'),
+    )
 
-	shopping_list = relationship("ShoppingList", back_populates="items")
-	product = relationship("Product")
+    quantity_wanted = Column(
+        Integer,
+        nullable=False,
+    )
+
+    shopping_list_id = Column(
+        Integer,
+        ForeignKey('shoppinglist.id'),
+        nullable=False
+    )
+
+    product_id = Column(
+        Integer,
+        ForeignKey('product.id'),
+        nullable=False
+    )
+
+    shopping_list = relationship("ShoppingList", back_populates="items")
+    product = relationship("Product")
