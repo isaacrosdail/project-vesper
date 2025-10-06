@@ -11,20 +11,21 @@ class UsersRepository:
         self.session = session
 
     def add_user(self, user: User):
-        return self.session.add(user)
+        self.session.add(user)
+        return user
 
 
     def create_user(self, username: str, password: str, name: str | None,
                     role: UserRoleEnum, lang: UserLangEnum):
         user = User(
             username=username,
-            password=password,
             name=name,
             role=role.value,
             lang=lang.value
         )
         user.hash_password(password)
-        return self.session.add(user)
+        self.session.add(user)
+        return user
 
 
     def get_user_by_username(self, username: str):

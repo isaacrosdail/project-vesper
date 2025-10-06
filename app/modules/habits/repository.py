@@ -90,7 +90,7 @@ class HabitsRepository(BaseRepository):
 
     # TODO
     def get_all_leetcoderecords_in_window(self, start_utc: datetime, end_utc: datetime) -> list[LeetCodeRecord]:
-        return self.session.query(LeetCodeRecord).filter(
+        return self._user_query(LeetCodeRecord).filter(
             LeetCodeRecord.created_at >= start_utc,
             LeetCodeRecord.created_at < end_utc
         ).all()
