@@ -1,0 +1,19 @@
+
+<table>
+    <thead>
+        <tr>
+            <th>Methods</th>
+            <th>Endpoint</th>
+            <th>Function</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for route in routes %}
+        <tr>
+            <th>{{ route.method }}</th>
+            <th>{{ route.endpoint }}</th>
+            <th>{{ route.function }}</th>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
