@@ -4,7 +4,7 @@ Habit service layer, to evaluate streaks & completions.
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app.modules.api.responses import service_response
+from app.api.responses import service_response
 from app.modules.habits.constants import PROMOTION_THRESHOLD_DEFAULT
 from app.modules.habits.models import StatusEnum
 from app.modules.habits.repository import HabitsRepository

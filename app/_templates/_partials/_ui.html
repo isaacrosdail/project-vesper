@@ -55,8 +55,16 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {# caller() segment here lets us put whatever 'insides' we want in our modals #}
 {# by sandwiching them between 'call ourmacro(ourparameters,..)' and 'endcall' #}
 {# TODO: NOTES: {% call %} doesn't work with a template that doesn't use caller() #}
-{% macro modal(endpoint, id, title) %}
-<dialog id="{{ id }}-modal" data-endpoint="/{{ endpoint }}">
+
+{# Since our API is getting standardized, we can build endpoints directly from module+subtype consistently.
+    This means for a module like Tasks, we have module tasks + subtype tasks => endpoint /tasks/tasks #}
+
+{% macro modal(module, subtype, id, title) %}
+<dialog 
+    id="{{ id }}-modal"
+    data-module="{{ module }}"
+    data-subtype="{{ subtype }}"
+    data-endpoint="/{{ module }}/{{ subtype }}">
     <form>
         <legend>{{ title }}</legend>
         <button type="button" class="btn-icon btn-round btn-lg modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>

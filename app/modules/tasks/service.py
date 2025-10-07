@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 
 from app.modules.tasks.repository import TasksRepository
 from app.shared.datetime.helpers import day_range_utc
-from app.modules.api.responses import service_response
+from app.api.responses import service_response
 
 
 class TasksService:
