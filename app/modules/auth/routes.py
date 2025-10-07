@@ -99,6 +99,21 @@ def init_demo():
     return redirect(url_for('main.home'))
 
 
+# Create & Seed only
+@auth_bp.route('/init-owner', methods=["POST"])
+def init_owner():
+    logout_user() # boot logged in users just in case
+
+    with database_connection() as session:
+        repo = UsersRepository(session)
+        auth_service = AuthService(repo)
+        owner_user = auth_service.get_or_create_template_user("owner")
+        login_user(owner_user)
+
+    set_toast('Welcome to the demo (OWNER)!', 'success')
+    return redirect(url_for('main.home'))
+
+
 @auth_bp.route('/admin/reset-users', methods=["POST"])
 @requires_owner
 @with_db_session
