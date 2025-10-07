@@ -10,41 +10,39 @@ function nowUTC(): string {
 export const getJSInstant = (): string =>
     new Date().toISOString(); // Always UTC "..Z"
 
-export function formatTimeString(date: Date): string {
-    // Use user timezone if available
-    if (userStore.state === 'loaded') {
-        // format using userStore.data.timezone
-        const formatter = new Intl.DateTimeFormat('en-US', {
-            timeZone: userStore.data.timezone,
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false       // could override with user region?
-        });
-        return formatter.format(date);
-    } else {
-        // fall back to browser timezone
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        
-        const timeString = `${padTime(hours)}:${padTime(minutes)}`;
-        return timeString;
+export function isoToTimeInput(isoString: string): string {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) {
+        throw new Error(`isoToTimeInput: Invalid ISO date string "${isoString}"`)
     }
+    return formatToUserTimeString(date);
 }
 
-// export function formatDateString(date: Date) {
-//     if (userStore.state === 'loaded') {
-//         const formatter = new Intl.DateTimeFormat('en-CA', {
-//             timeZone: userStore.data.timezone,
-//             year: 'numeric',
-//             month: '2-digit',
-//             day: '2-digit'
-//         });
-//         return formatter.format(date);  // "2025-08-17"
-//     } else {
-//         // Fall back to browser timezone
-//         return new Date().toISOString().split('T')[0];
-//     }
-// }
+export function isoToDateInput(isoString: string): string {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) {
+        throw new Error(`isoToDateInput: Invalid ISO date string "${isoString}"`)
+    }
+    return formatToUserTimeString(date, {year: 'numeric', month: '2-digit', day: '2-digit'});
+}
+
+export function formatTimeString(date: Date): string {
+    return formatToUserTimeString(date);
+}
+
+export function formatToUserTimeString(
+    date: Date,
+    opts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' }, // default to "HH:MM"
+    hour12: boolean = false // could override with user region? OR possible userTimeFormat setting
+): string {
+    // format using userStore.data.timezone
+    const formatter = new Intl.DateTimeFormat('en-CA', { // gives ISO -> "2025-10-04"
+        ...opts, // spread operator - takes every key-value pair in opts, copy them into new object, then override/add timeZone
+        hour12,
+        timeZone: (userStore.state === 'loaded' && userStore.data?.timezone) ? userStore.data.timezone : 'UTC',
+    });
+    return formatter.format(date); // eg, "03:45"
+}
 
 function padTime(number: number): string {
     return number.toString().padStart(2, '0');
