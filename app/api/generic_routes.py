@@ -1,10 +1,11 @@
 ## Generalized CRUD handling routes for ANY module/model_class
 
-from flask import Blueprint, abort, current_app, jsonify, request
+from flask import abort, current_app, request
 from flask_login import current_user, login_required
 
+from app.api import api_bp
 from app._infra.database import with_db_session
-from app.modules.api.responses import api_response
+from app.api.responses import api_response
 from app.modules.auth.service import check_item_ownership
 from app.modules.groceries.models import Product, Transaction, ShoppingList, ShoppingListItem
 from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
@@ -15,31 +16,29 @@ from app.shared.database.helpers import safe_delete
 from app.shared.datetime.helpers import convert_to_timezone
 
 
-crud_bp = Blueprint("crud", __name__)
-
-# Generalized PATCH, DELETE which supports:
+# Generalized PATCH, DELETE, GET which support:
 # 1. Any number of modules (eg, groceries, tasks, etc.)
 # 2. Any number of sub-models within each (eg, grocery product, grocery transaction)
 
 # Map to correct model based on module passed in
 # This uses module + subtype to resolve to the specific model
 MODEL_CLASSES = {
-    ("groceries", "product"): Product,
-    ("groceries", "transaction"): Transaction,
-    ("groceries", "shopping_list"): ShoppingList,
-    ("groceries", "shopping_list_item"): ShoppingListItem,
-    ("tasks", "task"): Task,
-    ("habits", "habit"): Habit,
-    ("habits", "habit_completion"): HabitCompletion,
-    ("habits", "leetcode_record"): LeetCodeRecord,
-    ("metrics", "daily_entry"): DailyEntry,
-    ("time_tracking", "time_entry"): TimeEntry,
+    ("groceries", "products"): Product,
+    ("groceries", "transactions"): Transaction,
+    ("groceries", "shopping_lists"): ShoppingList,
+    ("groceries", "shopping_list_items"): ShoppingListItem,
+    ("tasks", "tasks"): Task,
+    ("habits", "habits"): Habit,
+    ("habits", "completions"): HabitCompletion,
+    ("habits", "leetcode_records"): LeetCodeRecord,
+    ("metrics", "entries"): DailyEntry,
+    ("time_tracking", "entries"): TimeEntry,
 }
 
 def get_model_class(module, subtype: str):
     return MODEL_CLASSES.get((module, subtype))
 
-@crud_bp.route("/<module>/<subtype>/<int:item_id>", methods=["GET", "PATCH", "DELETE"])
+@api_bp.route("/<module>/<subtype>/<int:item_id>", methods=["GET", "PATCH", "DELETE"])
 @login_required
 @with_db_session
 def item(session, module, subtype, item_id):

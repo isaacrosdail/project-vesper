@@ -1,21 +1,20 @@
 import os
 import secrets
 import sys
-from alembic import command
-from alembic.config import Config as AlembicConfig
+
 from flask import Flask, g, request
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from alembic import command
+from alembic.config import Config as AlembicConfig
 from app._infra.database import db_session, init_db
+from app.api import api_bp
 from app.config import config_map
-from app.routes import main_bp
 from app.devtools.routes import devtools_bp
 from app.errors import errors_bp
 from app.extensions import _setup_extensions
-from app.modules.api.crud_routes import crud_bp
-from app.modules.api.routes import api_bp
 from app.modules.auth.models import UserRoleEnum
 from app.modules.auth.routes import auth_bp
 from app.modules.groceries.routes import groceries_bp
@@ -23,6 +22,7 @@ from app.modules.habits.routes import habits_bp
 from app.modules.metrics.routes import metrics_bp
 from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
+from app.routes import main_bp
 from app.shared.debug import setup_request_debugging
 
 
@@ -77,8 +77,8 @@ def _setup_database(app) -> None:
 
 def _register_blueprints(app) -> None:
     blueprints = [
-        main_bp, auth_bp, crud_bp, groceries_bp, tasks_bp, habits_bp, 
-        api_bp, metrics_bp, time_tracking_bp, devtools_bp, errors_bp
+        main_bp, auth_bp, api_bp, groceries_bp, tasks_bp, habits_bp, 
+        metrics_bp, time_tracking_bp, devtools_bp, errors_bp
     ]
     for bp in blueprints:
         app.register_blueprint(bp)

@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.constants import WAKE_MUST_BE_AFTER_SLEEP
 from app.shared.datetime.helpers import today_range_utc, parse_time_to_datetime
-from app.modules.api.responses import service_response
+from app.api.responses import service_response
 
 
 class DailyMetricsService:

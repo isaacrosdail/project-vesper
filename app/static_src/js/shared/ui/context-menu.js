@@ -21,7 +21,7 @@ function openMenu(type, triggerInfo) {
 
     // Append our shopping list option if it's the transactions table
     // so: items = ['Edit', 'Delete', 'Add to shopping list']
-    if (triggerInfo.context.subtype === 'transaction' || triggerInfo.context.subtype === 'product') {
+    if (triggerInfo.context.subtype === 'transactions' || triggerInfo.context.subtype === 'products') {
         items = [...items, ...menuItemsGroceries];
     }
 
@@ -95,8 +95,8 @@ document.addEventListener('click', async (e) => {
         menu?.remove();
 
         // Actually send to backend:
-        const url = '/groceries/shopping-list/items';
-        const data = { product_id: productId };
+        const url = '/groceries/shopping-lists/items';
+        const data = { product_id: itemId };
 
         apiRequest('POST', url, (responseData) => {
             const existingLi = document.querySelector(`li[data-product-id="${productId}"]`);

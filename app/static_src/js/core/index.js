@@ -40,7 +40,7 @@ async function markHabitComplete(checkbox, habitId) {
             }, data);
         } else {
             const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
-            const url = `/habits/${habitId}/completion?date=${todayDateOnly}`;
+            const url = `/habits/${habitId}/completions?date=${todayDateOnly}`;
 
             apiRequest('DELETE', url, () => {
                 // un-apply effect/styling (update DOM)
@@ -66,7 +66,7 @@ async function markHabitComplete(checkbox, habitId) {
 }
 async function markTaskComplete(checkbox, taskId) {
     const completedAtUTC = getJSInstant();
-    const url = `/tasks/task/${taskId}`;
+    const url = `/tasks/tasks/${taskId}`;
 
     let data;
     if (checkbox.checked) {

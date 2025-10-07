@@ -4,7 +4,7 @@
 {# Form Modals - Specific Ones #}
 
 {% macro metric_entry_modal(id='metric-entry-dashboard', title='Add Metric') %}
-  {% call ui.modal('/metrics/', id, title) %}
+  {% call ui.modal('metrics', 'entries', id, title) %}
       <div class="tab-group">
         <button type="button" role="tab" data-tab="steps" class="tab">{{ ui.steps_svg() }} Steps</button>
         <button type="button" role="tab" data-tab="weight" class="tab">{{ ui.scale_svg() }} Weight</button>
@@ -45,7 +45,7 @@
 
 
 {% macro time_entry_modal(id='time-entry-dashboard', title='Add Time Entry') %}
-  {% call ui.modal('/time_tracking/', id, title) %}
+  {% call ui.modal('time_tracking', 'entries', id, title) %}
     <div class="form-group">
         <label for="category">Category:</label>
         <input type="text" id="category" name="category" required>
@@ -66,7 +66,7 @@
 {% endmacro %}
 
 {% macro task_entry_modal(id='task-entry-dashboard', title='Add Task') %}
-  {% call ui.modal('/tasks/', id, title) %}
+  {% call ui.modal('tasks', 'tasks', id, title) %}
     <div class="form-group">
       <label for="name">Task:</label>
       <input type="text" id="name" name="name" required>
@@ -89,7 +89,7 @@
 {% endmacro %}
 
 {% macro habit_entry_modal(id='habit-entry-dashboard', title='Add Habit') %}
-    {% call ui.modal('/habits/', id, title) %}
+    {% call ui.modal('habits', 'habits', id, title) %}
         <div class="form-group">
             <label for="name">Habit:</label>
             <input type="text" id="name" name="name" required>
@@ -102,7 +102,7 @@
 {% endmacro %}
 
 {% macro leetcode_entry_modal(id='leetcode-entry-homepage', title='Add LeetCode record') %}
-    {% call ui.modal('/habits/leetcode_record', id, title) %}
+    {% call ui.modal('habits', 'leetcode_records', id, title) %}
         <div class="form-group">
             <label for="leetcode_id">LeetCode Problem ID:</label>
             <input type="number" id="leetcode_id" name="leetcode_id" min="1" step="1" required>

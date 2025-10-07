@@ -1,7 +1,7 @@
 """
 Service layer for Groceries module.
 """
-from app.modules.api.responses import service_response
+from app.api.responses import service_response
 from app.modules.groceries.repository import GroceriesRepository
 from app.shared.datetime.helpers import today_range_utc
 

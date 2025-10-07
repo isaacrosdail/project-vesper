@@ -17,7 +17,7 @@ export function init() {
         const container = e.target.closest('.qty-controls'); // parent to subsequently grab span for qty to edit text
         const qtySpan = container?.querySelector('.item-qty'); // then grab span for editing qty after fetches
 
-        const url = `/groceries/shopping_list_item/${itemId}`;
+        const url = `/groceries/shopping_list_items/${itemId}`;
 
         switch(action) {
             case "increment":

@@ -30,10 +30,7 @@ modals.forEach(modal => {
     const button = document.querySelector(`#${baseId}-btn`);
 
     if (button) {
-        // set up this modal
-        const buttonId = button.id;
-        const endpoint = window.location.origin + modal.dataset.endpoint; // dialog's data-endpoint
-        setupModal(fullId, buttonId, endpoint);
+        setupModal(modal, button);
     }
 
     // Set up tabbed modal handling based on naming conventions
@@ -42,12 +39,13 @@ modals.forEach(modal => {
     }
 });
 
-function setupModal(modalId, buttonId, endpoint) {
-    const modal = document.querySelector(`#${modalId}`);
-    if (!modal) return;
+function setupModal(modal, button) {
+    // const modal = document.querySelector(`#${modalId}`);
+    // if (!modal) return;
+    const modalId = modal.id;
 
     document.addEventListener('click', (e) => {
-        if (e.target.matches(`#${buttonId}`)) {
+        if (e.target === button) {
             modal.showModal();
         }
         else if (e.target.matches(`#${modalId}-close-btn`)) {
@@ -62,15 +60,13 @@ function setupModal(modalId, buttonId, endpoint) {
 
     modal.addEventListener('submit', async (e) => {
         const form = e.target;
-
-        // Skip interception if the form opts out
         if (form.hasAttribute('data-noajax')) {
-            return;
+            return;  // Skip interception if the form opts out
         }
 
         e.preventDefault();
-
         const formData = new FormData(form);
+        const endpoint = modal.dataset.endpoint; // embedded dynamically in all form modals
         
         // PATCH
         if (modal.dataset.mode === 'edit') {
