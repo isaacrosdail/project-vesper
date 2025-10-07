@@ -15,6 +15,12 @@
         </form>
         <a href="{{ url_for('auth.login') }}" class="btn btn-secondary tooltip" data-tip="Go to the login page">Log in / Sign up</a>
     </div>
+
+    {% if config.APP_ENV == 'dev' %}
+        <form action="{{ url_for('auth.init_owner')}}" method="POST">
+            <button type="submit" class="btn btn-primary">OWNER INIT</button>
+        </form>
+    {% endif %}
 </div>
 {% endblock %}
 

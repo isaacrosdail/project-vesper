@@ -8,6 +8,7 @@ from app.modules.tasks.models import Tag, Task
 # Seed appropriate datasets for user type
 def seed_data_for(session, user):
     session.flush() # make sure we have user.id
+    session.refresh(user)
     if user.is_owner or user.is_admin:
         seed_rich_data(session, user.id)
     else:
