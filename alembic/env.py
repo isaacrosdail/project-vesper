@@ -22,7 +22,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from app.modules.api.models import *
+from app.api.models import *
 from app.modules.auth.models import *
 from app.modules.groceries.models import *
 from app.modules.habits.models import *

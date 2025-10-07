@@ -8,10 +8,9 @@ from flask import Blueprint, current_app, jsonify
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
-from app.modules.api.responses import api_response
-from app.modules.api.service import release_slot, reserve_slot
-
-api_bp = Blueprint('api', __name__, url_prefix='/api', template_folder='templates')
+from app.api import api_bp
+from app.api.responses import api_response
+from app.api.service import release_slot, reserve_slot
 
 
 """Internal API endpoints to feed JS frontend / facilitate PATCH/DELETEs."""
@@ -23,16 +22,6 @@ def get_my_profile():
         'timezone': current_user.timezone
     })
 
-# TODO: Draft API endpoint for D3-based visualizations.
-@api_bp.route('/my-graph')
-@login_required
-def my_graph_data():
-    data = [
-        {"day": "Mon", "value": 11 },
-        {"day": "Tue", "value": 13 },
-        {"day": "Wed", "value": 7 }
-    ]
-    return data
 
 """External API endpoints to call or return data to third-party services. For fetching weather data as well as for our health check."""
 @api_bp.route('/weather/<city>/<country>/<units>')

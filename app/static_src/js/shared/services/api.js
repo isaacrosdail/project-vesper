@@ -1,8 +1,9 @@
 // For commonly-reused API-related functions, fetch for now
 
-export async function apiRequest(method, url, onSuccess, data = null) {
+export async function apiRequest(method, endpoint, onSuccess, data = null) {
     try {
         const isFormData = data instanceof FormData; // formData objs needs to not have a Content-Type header AND not be stringified
+        const url = `/api${endpoint}`; // prepend endpoints with /api
 
         const response = await fetch(url, {
             method,

@@ -1,7 +1,7 @@
 
 from datetime import timedelta
 
-from app.modules.api.responses import service_response
+from app.api.responses import service_response
 from app.modules.time_tracking.repository import TimeTrackingRepository
 from app.shared.datetime.helpers import now_in_timezone, parse_time_to_datetime
 

@@ -1,10 +1,9 @@
-from flask import Blueprint, jsonify, redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request
 from flask import session as fsession
 from flask import url_for
 from flask_login import current_user, login_required
 
 from app._infra.database import database_connection, with_db_session
-from app.modules.api.responses import api_response
 from app.modules.groceries.pricing import get_price_per_100g
 from app.modules.groceries.repository import GroceriesRepository
 from app.modules.groceries.service import GroceriesService
@@ -77,7 +76,6 @@ def products():
                 set_toast(result["message"], 'success')
                 return redirect(url_for("groceries.dashboard"))
 
-
     return render_template("groceries/add_product.html")
 
 
@@ -128,7 +126,6 @@ def transactions(session):
     # GET
     # Need to now grab products to populate dropdown
     products = groceries_repo.get_all_products()
-
     saved_form_data = fsession.pop('form_data', {})
     return render_template(
         "groceries/add_transaction.html",
@@ -137,23 +134,3 @@ def transactions(session):
     )
 
 
-@groceries_bp.route("/shopping-list/items", methods=["POST"])
-@login_required
-@with_db_session
-def add_shoppinglist_item(session):
-    groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
-    groceries_service = GroceriesService(groceries_repo)
-
-    data = request.get_json()
-    product_id = data.get("product_id")
-
-    item, _ = groceries_service.add_item_to_shoppinglist(product_id)
-
-    return api_response(
-        True,
-        "Added item to shopping list",
-        data={
-            "item_id": item.id,
-            "product_id": item.product_id
-        }
-    ), 201
