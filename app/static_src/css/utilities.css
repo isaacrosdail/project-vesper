@@ -14,11 +14,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
-/* Applied to SVG icon for table rows */
-/* Using important here only to ensure this rule always wins */
-._hidden {
-    display: none !important;
-}
 ._inline-flex-sm {
     display: flex;
     align-items: center;
