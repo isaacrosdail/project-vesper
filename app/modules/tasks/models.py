@@ -10,6 +10,8 @@ from sqlalchemy.orm import relationship
 from app._infra.db_base import Base, CustomBaseTaskMixin
 from app.modules.tasks.constants import TASK_NAME_MAX_LENGTH
 from app.shared.models import Tag, task_tags
+from app.shared.serialization import APISerializable
+
 
 class PriorityEnum(enum.Enum):
     LOW = "LOW"
@@ -17,7 +19,9 @@ class PriorityEnum(enum.Enum):
     HIGH = "HIGH"
 
 
-class Task(Base, CustomBaseTaskMixin):
+class Task(Base, CustomBaseTaskMixin, APISerializable):
+
+    __api_exclude__ = []
 
     __table_args__ = (
         CheckConstraint(
@@ -52,12 +56,3 @@ class Task(Base, CustomBaseTaskMixin):
     
     def __repr__(self):
         return f"<Task id={self.id} name='{self.name}'>"
-    
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "priority": self.priority.value if self.priority else None,
-            "due_date": self.due_date if self.due_date else None,
-            "is_frog": self.is_frog
-        }
