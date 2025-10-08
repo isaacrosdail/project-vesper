@@ -87,3 +87,7 @@ a {
   text-decoration: none;
   color: inherit;
 }
+/* Making hidden actually mean hidden */
+[hidden] {
+    display: none !important;
+}
