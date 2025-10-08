@@ -3,7 +3,7 @@ from typing import Any
 
 from app.modules.habits.constants import *
 from app.modules.habits.models import (DifficultyEnum, LanguageEnum,
-                                       LCStatusEnum)
+                                       LCStatusEnum, StatusEnum)
 from app.shared.validators import validate_enum
 
 
@@ -34,6 +34,11 @@ def validate_habit(data: dict) -> tuple[dict, dict[str, list[str]]]:
             errors[field] = field_errors
         elif typed_value is not None:
             typed_data[field] = typed_value
+
+    # Apply app-defined values if habit is marked promotable (transient flag, not persisted)
+    if data.get("is_promotable"):
+        typed_data["status"] = StatusEnum.EXPERIMENTAL
+        typed_data["promotion_threshold"] = PROMOTION_THRESHOLD_DEFAULT
 
     return (typed_data, errors)
 
