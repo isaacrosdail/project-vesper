@@ -6,6 +6,8 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import relationship
 
 from app._infra.db_base import Base
+from app.shared.serialization import APISerializable
+
 
 from app.modules.groceries.constants import (
        PRODUCT_NAME_MAX_LENGTH, BARCODE_MAX_LENGTH, 
@@ -43,7 +45,7 @@ class ProductCategoryEnum(enum.Enum):
     SUPPLEMENTS = "SUPPLEMENTS"
 	
 
-class Product(Base):
+class Product(Base, APISerializable):
     """Acts as a catalog of 'known' products and includes the more 'static' data about the product."""
 
     __table_args__ = (
@@ -92,7 +94,7 @@ class Product(Base):
         return f"<Product id={self.id} name='{self.name}' barcode='{self.barcode}'>"
 
 
-class Transaction(Base):
+class Transaction(Base, APISerializable):
     """Acts as 'instance of buying a given item'."""
 
     __table_args__ = (
@@ -124,7 +126,7 @@ class Transaction(Base):
         return f"<Transaction id={self.id} product_id={self.product_id}>"
 
 
-class ShoppingList(Base):
+class ShoppingList(Base, APISerializable):
     """Provides entrypoint for working with shoppinglistitems for a given list."""
 
     name = Column(
@@ -135,7 +137,7 @@ class ShoppingList(Base):
     items = relationship("ShoppingListItem", back_populates="shopping_list")
 
 
-class ShoppingListItem(Base):
+class ShoppingListItem(Base, APISerializable):
     """Items in the list. Effectively acts as a pointer to the actual product item itself."""
 
     __table_args__ = (

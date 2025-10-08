@@ -9,6 +9,8 @@ from sqlalchemy.orm import relationship
 
 from app._infra.db_base import Base
 from app.shared.models import Tag, habit_tags
+from app.shared.serialization import APISerializable
+
 
 from app.modules.habits.constants import (
     HABIT_NAME_MAX_LENGTH,
@@ -39,7 +41,9 @@ class LanguageEnum(enum.Enum):
     CPP = "CPP"
     C = "C"
 
-class Habit(Base):
+class Habit(Base, APISerializable):
+
+    __api_exclude__ = ['promotion_threshold']
 
     __table_args__ = (
         CheckConstraint(
@@ -75,7 +79,7 @@ class Habit(Base):
         return f"<Habit id={self.id} name='{self.name}'>"
 
 
-class HabitCompletion(Base):
+class HabitCompletion(Base, APISerializable):
     """Stores each completion as a new entry, enabling better analytics."""
 
     habit_id = Column(Integer, ForeignKey('habits.id'), nullable=False)
@@ -86,7 +90,7 @@ class HabitCompletion(Base):
         return f"<HabitCompletion id={self.id} habit_id={self.habit_id}>"
 
 # NOTE: Unsure about this placement
-class LeetCodeRecord(Base):
+class LeetCodeRecord(Base, APISerializable):
 
     leetcode_id = Column(Integer, nullable=False)
     

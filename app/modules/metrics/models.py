@@ -3,6 +3,7 @@ from sqlalchemy import Column, Numeric, Integer, DateTime
 from sqlalchemy import CheckConstraint
 
 from app._infra.db_base import Base
+from app.shared.serialization import APISerializable
 
 from app.modules.metrics.constants import (
     WEIGHT_PRECISION,
@@ -13,7 +14,7 @@ from app.modules.metrics.constants import (
 )
 
 
-class DailyEntry(Base):
+class DailyEntry(Base, APISerializable):
     """Stores everything in "master" units (kg, count, kcal), will convert based on user preferences."""
 
     __table_args__ = (
@@ -37,7 +38,7 @@ class DailyEntry(Base):
 
     def __repr__(self):
         return f"<DailyEntry id={self.id} created_at={self.created_at}>"
-    
+
     @property
     def populated_metrics(self):
         """Returns list of metrics which have entries."""
