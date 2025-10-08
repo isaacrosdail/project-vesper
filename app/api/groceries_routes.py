@@ -25,8 +25,5 @@ def add_shoppinglist_item(session):
     return api_response(
         True,
         "Added item to shopping list",
-        data={
-            "item_id": item.id,
-            "product_id": item.product_id
-        }
+        data = item.to_api_dict()
     ), 201

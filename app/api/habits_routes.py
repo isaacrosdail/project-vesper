@@ -16,7 +16,8 @@ from app.shared.datetime.helpers import (day_range_utc, parse_js_instant,
 from app.shared.parsers import parse_habit_form_data, parse_leetcode_form_data
 
 
-@api_bp.route("/habits/habits", methods=["GET", "POST"])
+@api_bp.route("/habits/habits", methods=["POST"])
+@api_bp.route("/habits/habits/<int:habit_id>", methods=["PUT"])
 @login_required
 @with_db_session
 def habits(session):
@@ -40,10 +41,7 @@ def habits(session):
         return api_response(
             True,
             result["message"],
-            data = {
-                "id": habit.id,
-                "name": habit.name
-            }
+            data = habit.to_api_dict()
         ), 201
     
 
@@ -60,11 +58,11 @@ def completions(session, habit_id):
 
     if request.method == "POST":
         completed_at = parse_js_instant(request.get_json()["completed_at"])
-        habit_completion = habits_repo.create_habit_completion(habit_id, completed_at)
+        completion = habits_repo.create_habit_completion(habit_id, completed_at)
         return api_response(
             True, 
             "Habit marked complete",
-            data={"completion_id": habit_completion.id}
+            data= completion.to_api_dict()
         ), 201
 
     elif request.method == "DELETE":
@@ -76,14 +74,13 @@ def completions(session, habit_id):
             start_utc, end_utc = day_range_utc(parsed_date, current_user.timezone)
 
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
-        habit_completion = habits_repo.get_habit_completion_in_window(habit_id, start_utc, end_utc)
+        completion = habits_repo.get_habit_completion_in_window(habit_id, start_utc, end_utc)
         
-        if habit_completion:
-            habits_repo.delete(habit_completion)
+        if completion:
+            habits_repo.delete(completion)
             return api_response(True, "Habit unmarked as complete"), 200
         else:
             return api_response(False, "No completion found"), 404
-
 
 
 @api_bp.route("/habits/leetcode_records", methods=["POST"])
@@ -108,12 +105,5 @@ def leetcode_records(session):
     return api_response(
         True,
         "LeetCode record added",
-        data = {
-            "id": record.id,
-            "leetcode_id": record.leetcode_id,
-            "title": record.title,
-            "difficulty": record.difficulty.value,
-            "language": record.language.value,
-            "lcstatus": record.status.value
-        }
+        data = record.to_api_dict()
     ), 201

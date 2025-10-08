@@ -11,10 +11,11 @@ from app.modules.metrics.validators import validate_daily_entry
 from app.shared.parsers import parse_daily_entry_form_data
 
 
-@api_bp.route("/metrics/entries", methods=["POST"])
+@api_bp.route("/metrics/daily_entries", methods=["POST"])
+@api_bp.route("/metrics/daily_entries/<int:entry_id>", methods=["PUT"])
 @login_required
 @with_db_session
-def metrics(session):
+def daily_entries(session, entry_id=None):
 
     parsed_data = parse_daily_entry_form_data(request.form.to_dict())
     typed_data, errors = validate_daily_entry(parsed_data)
@@ -29,8 +30,9 @@ def metrics(session):
     if not result["success"]:
         return api_response(False, result["message"], errors=result["errors"])
 
+    entry = result["data"]["entry"]
     return api_response(
         True,
         result["message"],
-        data = result["data"] # pass through the data dict
+        data = entry.to_api_dict()
     ), 201

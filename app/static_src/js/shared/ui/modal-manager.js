@@ -68,10 +68,10 @@ function setupModal(modal, button) {
         const formData = new FormData(form);
         const endpoint = modal.dataset.endpoint; // embedded dynamically in all form modals
         
-        // PATCH
+        // PUT
         if (modal.dataset.mode === 'edit') {
             const url = `${endpoint}/${modal.dataset.itemId}`;
-            apiRequest('PATCH', url, (responseData) => {
+            apiRequest('PUT', url, (responseData) => {
                 makeToast(responseData.message, 'success');
             }, formData);
         }

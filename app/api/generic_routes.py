@@ -1,5 +1,5 @@
 ## Generalized CRUD handling routes for ANY module/model_class
-
+import sys
 from flask import abort, current_app, request
 from flask_login import current_user, login_required
 
@@ -29,10 +29,10 @@ MODEL_CLASSES = {
     ("groceries", "shopping_list_items"): ShoppingListItem,
     ("tasks", "tasks"): Task,
     ("habits", "habits"): Habit,
-    ("habits", "completions"): HabitCompletion,
-    ("habits", "leetcode_records"): LeetCodeRecord,
-    ("metrics", "entries"): DailyEntry,
-    ("time_tracking", "entries"): TimeEntry,
+    ("habits", "habit_completions"): HabitCompletion,
+    ("habits", "leet_code_records"): LeetCodeRecord,
+    ("metrics", "daily_entries"): DailyEntry,
+    ("time_tracking", "time_entries"): TimeEntry,
 }
 
 def get_model_class(module, subtype: str):
@@ -56,13 +56,9 @@ def item(session, module, subtype, item_id):
     check_item_ownership(item, current_user.id)
     
     if request.method == 'GET':
-        item_dict = item.to_dict()
-
-        # Convert dt fields to user's timezone first
-        if item_dict.get("due_date"):
-            item_dict["due_date"] = convert_to_timezone(item_dict["due_date"], current_user.timezone).isoformat()
-
-        return api_response(True, "Item retrieved", data=item_dict), 200
+        # print(item.to_api_dict(), file=sys.stderr)
+        # print(dir(item), file=sys.stderr)
+        return api_response(True, f"Retrieved {item.__tablename__}", data=item.to_api_dict()), 200
 
     if request.method == 'PATCH':
         data = request.get_json()

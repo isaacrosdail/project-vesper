@@ -27,6 +27,8 @@ class TimeTrackingRepository(BaseRepository):
     def get_all_time_entries(self):
         return self.get_all()
 
+    def get_time_entry_by_id(self, entry_id: int):
+        return self.get_by_id(entry_id)
 
     def get_all_time_entries_in_window(self, start_utc: datetime, end_utc: datetime):
         return self._user_query(TimeEntry).filter(
