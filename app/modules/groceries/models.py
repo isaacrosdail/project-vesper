@@ -101,7 +101,7 @@ class Transaction(Base):
     )
 
     product_id = Column(
-        Integer, ForeignKey("product.id"),
+        Integer, ForeignKey("products.id"),
         nullable=False
     )
 
@@ -149,13 +149,13 @@ class ShoppingListItem(Base):
 
     shopping_list_id = Column(
         Integer,
-        ForeignKey('shoppinglist.id'),
+        ForeignKey('shopping_lists.id'),
         nullable=False
     )
 
     product_id = Column(
         Integer,
-        ForeignKey('product.id'),
+        ForeignKey('products.id'),
         nullable=False
     )
 
