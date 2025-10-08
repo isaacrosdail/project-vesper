@@ -1,5 +1,6 @@
 import { makeToast } from './toast.js';
 import { apiRequest } from '../services/api.js';
+import { isoToTimeInput, isoToDateInput } from '../datetime.js';
 
 const menuItems = ['Edit', 'Delete'];
 const menuItemsGroceries = ['Add to shopping list'];
@@ -165,11 +166,16 @@ document.addEventListener('click', async (e) => {
                     if (currentInput.type === 'checkbox') {
                         currentInput.checked = fieldValue;
                     } else if (currentInput.type === 'date') {
-                        currentInput.value = fieldValue.slice(0, 10);
+                        currentInput.value = isoToDateInput(fieldValue);
                     } else if (currentInput.type === 'select-one') {
                         currentInput.value = fieldValue.toLowerCase();
-                    } else {
-                        currentInput.value = fieldValue;
+                    } else if (currentInput.type === 'time') {
+                        console.log(fieldValue);
+                        currentInput.value = isoToTimeInput(fieldValue);
+                        console.log(fieldValue);
+                    }
+                    else {
+                        currentInput.value = String(fieldValue);
                     }
                 }
             });

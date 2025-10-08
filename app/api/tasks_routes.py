@@ -11,11 +11,11 @@ from app.shared.parsers import parse_task_form_data
 
 
 @api_bp.route("/tasks/tasks", methods=["POST"])
-@api_bp.route("/tasks/tasks/<int:task_id>", methods=["PATCH"])
+@api_bp.route("/tasks/tasks/<int:task_id>", methods=["PUT"])
 @login_required
 @with_db_session
 def tasks(session, task_id=None):
-    """Create or update a task (POST for new, PATCH for edit)."""
+    """Create or update a task (POST for new, PUT for edit)."""
     parsed_data = parse_task_form_data(request.form.to_dict())
     typed_data, errors = validate_task(parsed_data)
     if errors:
@@ -24,7 +24,7 @@ def tasks(session, task_id=None):
     tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
     tasks_service = TasksService(tasks_repo, current_user.timezone)
 
-    result = tasks_service.save_task(typed_data, task_id) # None -> POST, else -> PATCH
+    result = tasks_service.save_task(typed_data, task_id) # None -> POST, else -> PUT
 
     if not result["success"]:
         return api_response(False, result["message"], errors=result["errors"])
@@ -33,13 +33,5 @@ def tasks(session, task_id=None):
     return api_response(
         True,
         result["message"],
-        data = {
-            "id": task.id,
-            "name": task.name,
-            "is_done": task.is_done,
-            "priority": task.priority.value,
-            "is_frog": task.is_frog,
-            "due_date": task.due_date.isoformat() if task.due_date else None,
-            "subtype": "tasks"
-        }
+        data = task.to_api_dict()
     ), 201
