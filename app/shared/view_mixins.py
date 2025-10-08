@@ -17,7 +17,8 @@ class TimestampedViewMixin:
         
         today = datetime.now(ZoneInfo(self._tz)).date()
         # Stored at exclusive EOD (ie 00:00 next day), so timedelta -1 second to adjust
-        due = (self.due_date - timedelta(seconds=1)).date()
+        due_local = convert_to_timezone(self._tz, self.due_date)
+        due = (due_local - timedelta(seconds=1)).date()
         delta_days = (due - today).days
 
         rules = {
@@ -35,7 +36,7 @@ class TimestampedViewMixin:
 
     def format_created_at_label(self):
         today = datetime.now(ZoneInfo(self._tz)).date()
-        created = self.created_at.date()
+        created = (convert_to_timezone(self._tz, self.created_at)).date()
         delta_days = (created - today).days
 
         rules = {
