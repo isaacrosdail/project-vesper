@@ -13,7 +13,9 @@ class DailyMetricsRepository(BaseRepository):
 
     def get_all_daily_metrics(self):
         return self.get_all()
-
+    
+    def get_daily_metric_by_id(self, entry_id: int):
+        return self.get_by_id(entry_id)
 
     # TODO
     def get_metrics_by_type_in_window(self, metric_type: str, start_utc: datetime, end_utc: datetime):

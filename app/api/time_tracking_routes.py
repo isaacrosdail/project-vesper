@@ -12,9 +12,10 @@ from app.shared.parsers import parse_time_entry_form_data
 
 
 @api_bp.route('/time_tracking/entries', methods=["POST"])
+@api_bp.route('/time_tracking/entries/<int:entry_id>', methods=["PUT"])
 @login_required
 @with_db_session
-def time_entries(session):
+def time_entries(session, entry_id=None):
         parsed_data = parse_time_entry_form_data(request.form.to_dict())
 
         typed_data, errors = validate_time_entry(parsed_data)
@@ -32,11 +33,5 @@ def time_entries(session):
         return api_response(
             True,
             result["message"],
-            data = {
-                "id": entry.id,
-                "category": entry.category,
-                "duration": entry.duration_minutes,
-                "started_at": entry.started_at.isoformat(),
-                "description": entry.description
-            }
+            data = entry.to_api_dict()
         ), 201
