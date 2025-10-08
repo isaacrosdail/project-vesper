@@ -2,10 +2,11 @@
 from sqlalchemy import Column, DateTime, Integer, String, CheckConstraint
 
 from app._infra.db_base import Base
+from app.shared.serialization import APISerializable
 from app.modules.time_tracking.constants import CATEGORY_MAX_LENGTH, DESCRIPTION_MAX_LENGTH
 
 
-class TimeEntry(Base):
+class TimeEntry(Base, APISerializable):
     """Individual time entries for our time_tracking module (activity log)."""
 
     __table_args__ = (
