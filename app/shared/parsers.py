@@ -68,7 +68,7 @@ def parse_time_entry_form_data(form_data: dict) -> dict:
         "description": (form_data.get("description") or "").strip(),
         "started_at": form_data.get("started_at") or None,
         "ended_at": form_data.get("ended_at") or None,
-        "duration_minutes": form_data.get("duration") or None
+        "duration_minutes": form_data.get("duration_minutes") or None
     }
 
 def parse_habit_form_data(form_data: dict) -> dict:
