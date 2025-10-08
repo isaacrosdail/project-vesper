@@ -9,16 +9,16 @@ from app.modules.tasks.constants import TAG_NAME_MAX_LENGTH, TAG_SCOPE_MAX_LENGT
 task_tags = Table(
     "task_tags",
     Base.metadata,
-    Column("task_id", ForeignKey("task.id"), primary_key=True),
-    Column("tag_id", ForeignKey("tag.id"), primary_key=True),
+    Column("task_id", ForeignKey("tasks.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
 )
 
 # Habits association table
 habit_tags = Table(
     "habit_tags",
     Base.metadata,
-    Column("habit_id", ForeignKey("habit.id"), primary_key=True),
-    Column("tag_id", ForeignKey("tag.id"), primary_key=True),
+    Column("habit_id", ForeignKey("habits.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
 )
 
 class Tag(Base):

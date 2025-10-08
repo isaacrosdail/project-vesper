@@ -78,7 +78,7 @@ class Habit(Base):
 class HabitCompletion(Base):
     """Stores each completion as a new entry, enabling better analytics."""
 
-    habit_id = Column(Integer, ForeignKey('habit.id'), nullable=False)
+    habit_id = Column(Integer, ForeignKey('habits.id'), nullable=False)
     
     habit = relationship("Habit", back_populates="habit_completions")
 

@@ -1,6 +1,8 @@
 """
 Defines our core Mixins as well as our BaseModel & declarative Base.
 """
+import regex
+
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -40,16 +42,21 @@ class TimestampMixin:
 class BaseModel(TimestampMixin):
     id = Column(Integer, primary_key=True)
 
-    # Autogenerate table names (singular) from class names
+    # Autogenerate pluralized, snake_case table names from class names
     @declared_attr
     def __tablename__(cls):
-        return cls.__name__.lower()
+        name = regex.sub('([a-z0-9])([A-Z])', r'\1_\2', cls.__name__).lower() # CamelCase -> snake_case first
+        # Pluralize
+        if name.endswith('y') and name[-2] not in 'aeiou':
+            return name[:-1] + 'ies'
+        else:
+            return name + 's'
     
     # Automatically add user_id FKey to all models except User & ApiCallRecord (latter is global for internal use)
     @declared_attr
     def user_id(cls):
         if cls.__name__ not in ['User', 'ApiCallRecord']:
-            return Column(Integer, ForeignKey('user.id'), nullable=False)
+            return Column(Integer, ForeignKey('users.id'), nullable=False)
 
 # SQLAlchemy declarative base with automatic timestamps & user association
 Base = declarative_base(cls=BaseModel, metadata=metadata)
