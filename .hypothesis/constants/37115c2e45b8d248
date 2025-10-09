@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/api/generic_routes.py
+# hypothesis_version: 6.140.2
+
+[200, 404, 'DELETE', 'GET', 'PATCH', 'daily_entries', 'groceries', 'habit_completions', 'habits', 'leet_code_records', 'metrics', 'products', 'shopping_list_items', 'shopping_lists', 'tasks', 'time_entries', 'time_tracking', 'transactions']

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/api/habits_routes.py
+# hypothesis_version: 6.140.2
+
+[200, 201, 400, 404, '/habits/habits', 'DELETE', 'Habit not found', 'No completion found', 'POST', 'PUT', 'completed_at', 'data', 'date', 'difficulty', 'errors', 'habit', 'language', 'leetcode_id', 'message', 'status', 'success', 'title', 'today']
