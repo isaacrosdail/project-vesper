@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/api/tasks_routes.py
+# hypothesis_version: 6.140.2
+
+[201, 400, '/tasks/tasks', 'POST', 'PUT', 'data', 'errors', 'message', 'success', 'task']

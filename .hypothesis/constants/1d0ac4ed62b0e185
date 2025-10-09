@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/tasks/models.py
+# hypothesis_version: 6.140.2
+
+['HIGH', 'LOW', 'MEDIUM', 'Tag', 'name', 'priority_enum', 'tasks', 'uq_user_task_name', 'user_id']

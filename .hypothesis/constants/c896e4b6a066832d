@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/auth/routes.py
+# hypothesis_version: 6.140.2
+
+['/admin/reset-db', '/admin/reset-dev', '/admin/reset-users', '/init-demo', '/init-owner', '/login', '/logout', '/register', '/user_dashboard', 'DB reset!', 'DEV: DB reset!', 'GET', 'Logout successful', 'POST', 'Users reset!', 'Welcome to the demo!', 'auth', 'auth.login', 'auth.register', 'auth/login.html', 'auth/register.html', 'demo', 'error', 'main.home', 'message', 'name', 'owner', 'password', 'remember_user', 'success', 'templates', 'user_dashboard.html', 'username']

@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/habits/routes.py
+# hypothesis_version: 6.140.2
+
+['/dashboard', '/habits', 'GET', 'habits', 'headers', 'templates']

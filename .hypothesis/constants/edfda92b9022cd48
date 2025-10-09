@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/service.py
+# hypothesis_version: 6.140.2
+
+['Product created', 'Product not found', 'Product updated', 'Transaction added', 'Transaction updated', 'barcode', 'calories_per_100g', 'category', 'name', 'net_weight', 'price_at_scan', 'product', 'quantity', 'transaction', 'unit_type']

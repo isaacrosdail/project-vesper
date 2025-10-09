@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/api/routes.py
+# hypothesis_version: 6.140.2
+
+[200, 429, 502, 504, 700, '/profile/me', 'OPENWEATHER_API_KEY', 'openweathermap', 'timezone', 'uk', 'upstream_failed', 'upstream_timeout']
