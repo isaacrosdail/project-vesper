@@ -9,7 +9,7 @@
 <section id="activity-log-card" class="card-dashboard">
     <div class="card-title">
         <h2>Time Entries</h2>
-        {{ ui.plus_btn('time-entry-dashboard-btn') }}
+        {{ ui.plus_btn('time_entries-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Time Entries', entry_headers, entries, 'time_tracking', 'time_entries') %}
     <td class="{{ headers[0].priority }}">{{ item.category }}</td>

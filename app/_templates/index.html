@@ -9,10 +9,10 @@
 {% block content %}
 
 {# Modals #}
-{{ forms.task_entry_modal('task-entry-homepage', 'Add Task') }}
-{{ forms.habit_entry_modal('habit-entry-homepage', 'Add Habit') }}
-{{ forms.metric_entry_modal('metric-entry-homepage', 'Add Metric Entry') }}
-{{ forms.time_entry_modal('time-entry-homepage', 'Add Time Entry') }}
+{{ forms.task_entry_modal('tasks-entry-homepage', 'Add Task') }}
+{{ forms.habit_entry_modal('habits-entry-homepage', 'Add Habit') }}
+{{ forms.metric_entry_modal('daily_entries-entry-homepage', 'Add Metric Entry') }}
+{{ forms.time_entry_modal('time_entries-entry-homepage', 'Add Time Entry') }}
 {{ forms.leetcode_entry_modal() }}
 
 {# Greeting & Time/Date Card #}
@@ -41,13 +41,13 @@
 <section id="my-day-card" class="card-dashboard _grid-2col">
     <div class="card-title">
         <h2>My Day</h2>
-        {{ ui.plus_btn('task-entry-homepage-btn', 'Add Task') }}
+        {{ ui.plus_btn('tasks-entry-homepage-btn', 'Add Task') }}
         <div class="dropdown">
             <button class="dropdown-toggle">Quick Add <span class="dropdown-toggle-chevron">{{ ui.chevron_svg() }}</span></button>
             <div class="dropdown-menu">
-                <button id="time-entry-homepage-btn">Time Entry</button>
-                <button id="metric-entry-homepage-btn">Metric Entry</button>
-                <button id="leetcode-entry-homepage-btn">LeetCode Record</button>
+                <button id="time_entries-entry-homepage-btn">Time Entry</button>
+                <button id="daily_entries-entry-homepage-btn">Metric Entry</button>
+                <button id="leet_code_records-entry-homepage-btn">LeetCode Record</button>
             </div>
         </div>
     </div>
@@ -80,7 +80,7 @@
 <section id="daily-habits-card" class="card-dashboard _grid-2col">
     <div class="card-title">
         <h2>Daily Habits</h2>
-        {{ ui.plus_btn('habit-entry-homepage-btn', 'Add Habit') }}
+        {{ ui.plus_btn('habits-entry-homepage-btn', 'Add Habit') }}
     </div>
     <div>
         <ul class="item-list">

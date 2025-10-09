@@ -9,7 +9,7 @@
 <div class="card-dashboard">
     <div class="card-title">
         <h2>Habits</h2>
-        {{ ui.plus_btn('habit-entry-dashboard-btn') }}
+        {{ ui.plus_btn('habits-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Habits', headers, habits, 'habits', 'habits') %}
         <td class="{{ headers[0].priority}} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="habits" data-subtype="habits" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>

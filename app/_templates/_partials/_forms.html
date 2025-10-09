@@ -3,7 +3,7 @@
 
 {# Form Modals - Specific Ones #}
 
-{% macro metric_entry_modal(id='metric-entry-dashboard', title='Add Metric') %}
+{% macro metric_entry_modal(id='daily_entries-entry-dashboard', title='Add Metric') %}
   {% call ui.modal('metrics', 'daily_entries', id, title) %}
       <div class="tab-group">
         <button type="button" role="tab" data-tab="steps" class="tab">{{ ui.steps_svg() }} Steps</button>
@@ -44,7 +44,7 @@
 {% endmacro %}
 
 
-{% macro time_entry_modal(id='time-entry-dashboard', title='Add Time Entry') %}
+{% macro time_entry_modal(id='time_entries-entry-dashboard', title='Add Time Entry') %}
   {% call ui.modal('time_tracking', 'time_entries', id, title) %}
     <div class="form-group">
         <label for="category">Category:</label>
@@ -65,7 +65,7 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro task_entry_modal(id='task-entry-dashboard', title='Add Task') %}
+{% macro task_entry_modal(id='tasks-entry-dashboard', title='Add Task') %}
   {% call ui.modal('tasks', 'tasks', id, title) %}
     <div class="form-group">
       <label for="name">Task:</label>
@@ -89,7 +89,7 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro habit_entry_modal(id='habit-entry-dashboard', title='Add Habit') %}
+{% macro habit_entry_modal(id='habits-entry-dashboard', title='Add Habit') %}
     {% call ui.modal('habits', 'habits', id, title) %}
         <div class="form-group">
             <label for="name">Habit:</label>
@@ -102,7 +102,7 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro leetcode_entry_modal(id='leetcode-entry-homepage', title='Add LeetCode record') %}
+{% macro leetcode_entry_modal(id='leet_code_records-entry-homepage', title='Add LeetCode record') %}
     {% call ui.modal('habits', 'leetcode_records', id, title) %}
         <div class="form-group">
             <label for="leetcode_id">LeetCode Problem ID:</label>
@@ -150,7 +150,7 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro product_entry_modal(id='product-entry-dashboard', title='Add Product') %}
+{% macro product_entry_modal(id='products-entry-dashboard', title='Add Product') %}
     {% call ui.modal('groceries', 'products', id, title) %}
         <div>
             <label for="name">Product Name:</label>
@@ -208,7 +208,7 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro transaction_entry_modal(products, id='transaction-entry-dashboard', title='Add Transaction') %}
+{% macro transaction_entry_modal(products, id='transactions-entry-dashboard', title='Add Transaction') %}
     {% call ui.modal('groceries', 'transactions', id, title) %}
         <div>
             <label for="product_id">Select Product: </label>
