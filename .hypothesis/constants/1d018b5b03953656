@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/api/groceries_routes.py
+# hypothesis_version: 6.140.2
+
+[201, 400, '/groceries/products', 'POST', 'PUT', '__new__', 'data', 'errors', 'message', 'product', 'product_id', 'quantity_wanted', 'success', 'transaction']

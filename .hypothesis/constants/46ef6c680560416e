@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/serialization.py
+# hypothesis_version: 6.140.2
+
+['__api_exclude__', 'subtype', 'updated_at', 'user_id']

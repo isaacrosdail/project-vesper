@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/groceries/viewmodels.py
+# hypothesis_version: 6.140.2
+
+['--', 'Bakery', 'Barcode', 'Beverages', 'Cals (100g)', 'Category', 'Condiments & Sauces', 'Created', 'Dairy & Eggs', 'Date', 'Fats/Oils', 'Fruits', 'Grains', 'ID', 'Legumes', 'Meats', 'Net Weight', 'Price (100g)', 'Price (qty)', 'Product Name', 'Qty', 'Seafood', 'Snacks', 'Supplements', 'Sweets', 'Unit', 'Vegetables', 'barcode', 'calories_per_100g', 'category', 'created_at', 'desktop-only', 'ea.', 'essential', 'fl oz', 'g', 'id', 'kg', 'l', 'label', 'lb', 'ml', 'name', 'net_weight_display', 'oz', 'price_at_scan', 'price_per_100g', 'priority', 'product_name', 'quantity', 'unit_type']
