@@ -1,7 +1,7 @@
 {# _macros.html - Style macros for consistent styling across templates #}
 {# <!--
 REMEMBER:
-If we're defining reusable batch styles → style.css (.input-standard, .form-group)
+If we're defining reusable batch styles → style.css (.input-standard)
 If we're defining reusable COMPONENTS (with structure/behavior/logic) → here ({{ form_input() }}, {{ card() }})
   - Components = HTML structure + behavior + logic
   - Styles = just CSS classes
@@ -50,16 +50,11 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 {# === MODALS === #}
 
-{# Entry form modal #}
-
-{# caller() segment here lets us put whatever 'insides' we want in our modals #}
-{# by sandwiching them between 'call ourmacro(ourparameters,..)' and 'endcall' #}
-{# TODO: NOTES: {% call %} doesn't work with a template that doesn't use caller() #}
-
-{# Since our API is getting standardized, we can build endpoints directly from module+subtype consistently.
-    This means for a module like Tasks, we have module tasks + subtype tasks => endpoint /tasks/tasks #}
-
-{% macro modal(module, subtype, id, title) %}
+{#
+    Entry form modal
+    Endpoint built from module + subtype (eg, /tasks/tasks)
+#}
+{% macro modal(module, subtype, id, title, form_class='form-column') %}
 <dialog 
     id="{{ id }}-modal"
     data-module="{{ module }}"
@@ -70,9 +65,11 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
         <button type="button" class="btn-icon btn-round btn-lg modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>
     </div>
     <div class="modal-body">
-        <form class="form-column">
+        <form class="{{ form_class if form_class else '' }}">
             {{ caller() }}
-            <button type="submit" class="btn btn-primary">Save</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
         </form>
     </div>
 </dialog>

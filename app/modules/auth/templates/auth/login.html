@@ -5,36 +5,39 @@
 
 {% block content %}
 
-<div class="card-dashboard">
-    <form action="{{ url_for('auth.login') }}" method="POST">
-        <fieldset>
-            <legend>Login:</legend>
-            <div class="form-group">
+<div class="card-dashboard card--narrower">
+    <form action="{{ url_for('auth.login') }}" method="post">
+        <div class="form-column">
+            <h3>Login:</h3>
+            <div class="faded-field">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username"
-                        required minlength="3" maxlength="50" 
-                        placeholder="Enter your username">
+                        required minlength="3" maxlength="30" 
+                        placeholder="johndoe">
             </div>
-            <div class="form-group">
+            <div class="faded-field">
                 <label for="password">Password:</label>
                 <div class="password-input-group">
                     <input type="password" id="password" name="password" 
                             required minlength="8" maxlength="50"
-                            placeholder="Enter your password">
+                            placeholder="••••••••">
                     <button type="button" data-password-toggle="password" class="btn-icon password-toggle">{{ ui.eye_slash_svg() }}</button>
                 </div>
             </div>
-            <div>
+            <label for="remember_user">
                 <input type="checkbox" id="remember_user" name="remember_user">
-                <label for="remember_user">Remember me</label>
-            </div>
+                Remember for 30 days
+            </label>
             <div class="form-actions">
-                <button class="btn btn-primary" type="submit" name="action" value="save">Log in</button>
-                <a href="{{ url_for('main.home') }}" class="btn btn-secondary">Cancel / Return</a>
+                <button class="btn btn-primary" type="submit">Log in</button>
+                <a href="{{ url_for('main.home') }}" class="btn btn-secondary">Back</a>
             </div>
-        </fieldset>
+        </div>
     </form>
 
-    <a href="{{ url_for('auth.register') }}">Don't have an account? Sign up</a>
+    <p>
+        Don't have an account?
+        <a href="{{ url_for('auth.register') }}" class="link-action">Sign up</a>
+    </p>
 </div>
 {% endblock %}

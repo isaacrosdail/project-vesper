@@ -209,11 +209,17 @@ form input:not([type="checkbox"]):not([type="radio"]):user-invalid {
     outline: 2px solid var(--clr-error);
 }
 
-/* TODO: Should we replace form-group's with stack-md utility? */
-.form-group {
+/* Applied to form elements themselves - for spacing between label+input groupings */
+.form-column {
     display: flex;
     flex-direction: column;
-    margin-bottom: var(--space-md);
+    gap: var(--gap-sm);
+}
+/* Target divs at any depth which themselves directly contain a label 
+    For label+input groupings */
+.form-column div:has(> label) {
+    display: flex;
+    flex-direction: column;
 }
 /* For consistent spacing/styling for "CTA + secondary buttons that might be anchor elements" pattern */
 .form-actions {
