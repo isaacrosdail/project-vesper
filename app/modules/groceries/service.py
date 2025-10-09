@@ -11,34 +11,60 @@ class GroceriesService:
     def __init__(self, repository: GroceriesRepository):
         self.repo = repository
 
-    def create_product(self, typed_data: dict):
-        # NOTE: Simple for now, but plan to expand. Therefore keeping this in service.
-        product = self.repo.create_product(
-            barcode=typed_data.get("barcode"),
-            name=typed_data["name"],
-            category=typed_data["category"],
-            net_weight=typed_data["net_weight"],
-            unit_type=typed_data["unit_type"],
-            calories_per_100g=typed_data.get("calories_per_100g"),
-        )
-        self.repo.session.flush() # might need ID for transaction downstream
+    def save_product(self, typed_data: dict, product_id: int | None):
 
-        return service_response(True, "Product created", data={"product": product})
+        if product_id:
+            product = self.repo.get_product_by_id(product_id)
+            if not product:
+                return service_response(False, "Product not found")
+            
+            # Update fields
+            for field, value in typed_data.items():
+                setattr(product, field, value)
 
+            return service_response(True, "Product updated", data={"product": product})
 
-    def create_transaction(self, product_id: int, typed_transaction_data: dict):
-        """Process transaction form submission."""
-        product = self.repo.get_product_by_id(product_id)
-
-        start_utc, end_utc = today_range_utc(self.repo.user_tz)
-        existing = self.repo.get_transaction_in_window(product.id, start_utc, end_utc)
-
-        if existing and (existing.price_at_scan == typed_transaction_data["price_at_scan"]):
-            existing.quantity += typed_transaction_data["quantity"]
         else:
-            self.repo.create_transaction(product, **typed_transaction_data)
+            # CREATE
+            product = self.repo.create_product(
+                barcode=typed_data.get("barcode"),
+                name=typed_data["name"],
+                category=typed_data["category"],
+                net_weight=typed_data["net_weight"],
+                unit_type=typed_data["unit_type"],
+                calories_per_100g=typed_data.get("calories_per_100g"),
+            )
+            self.repo.session.flush() # TODO: Needed? original note: might need ID for transaction downstream
 
-        return service_response(True, "Transaction added")
+            return service_response(True, "Product created", data={"product": product})
+
+
+    def save_transaction(self, product_id: int, typed_data: dict, transaction_id: int | None = None):
+        """Process transaction form submission."""
+
+        ### UPDATE
+        if transaction_id:
+            transaction = self.repo.get_transaction_by_id(transaction_id)
+            if not transaction:
+                return service_response(False, "Transaction not found")
+            
+            for field, value in typed_data.items():
+                setattr(transaction, field, value)
+
+            return service_response(True, "Transaction updated", data={"transaction": transaction})
+        
+        # CREATE / INCREMENT
+        product = self.repo.get_product_by_id(product_id)
+        start_utc, end_utc = today_range_utc(self.repo.user_tz)
+        existing_transaction = self.repo.get_transaction_in_window(product.id, start_utc, end_utc)
+
+        if existing_transaction and (existing_transaction.price_at_scan == typed_data["price_at_scan"]):
+            existing_transaction.quantity += typed_data["quantity"]
+            transaction = existing_transaction
+        else:
+            transaction = self.repo.create_transaction(product, **typed_data)
+
+        return service_response(True, "Transaction added", data={"transaction": transaction})
 
 
     def add_item_to_shoppinglist(self, product_id):
