@@ -25,7 +25,7 @@ def daily_entries(session, entry_id=None):
     
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
     service = DailyMetricsService(repo, current_user.timezone)
-    result = service.process_daily_metrics(typed_data)
+    result = service.save_daily_entry(typed_data, entry_id)
 
     if not result["success"]:
         return api_response(False, result["message"], errors=result["errors"])

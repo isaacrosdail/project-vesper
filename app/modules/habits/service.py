@@ -16,19 +16,27 @@ class HabitsService:
         self.repo = repository
         self.user_tz = user_tz
 
-    def create_habit(self, typed_data: dict):
-        
-        # Promotion-based habits
-        if typed_data.get("is_promotable"):
-            typed_data["status"] = StatusEnum.EXPERIMENTAL
-            typed_data["promotion_threshold"] = PROMOTION_THRESHOLD_DEFAULT
+    def save_habit(self, typed_data: dict, habit_id: int | None):
 
-        habit = self.repo.create_habit(
-            name=typed_data["name"],
-            status=typed_data.get("status"),
-            promotion_threshold=typed_data.get("promotion_threshold")
-        )
-        return service_response(True, "Habit added", data={"habit": habit})
+        ### UPDATE
+        if habit_id:
+            habit = self.repo.get_habit_by_id(habit_id)
+            if not habit:
+                return service_response(False, "Habit not found")
+            
+            # Update fields
+            for field, value in typed_data.items():
+                setattr(habit, field, value)
+
+            return service_response(True, "Habit updated", data={"habit": habit})
+
+        else:
+            habit = self.repo.create_habit(
+                name=typed_data["name"],
+                status=typed_data.get("status"),
+                promotion_threshold=typed_data.get("promotion_threshold")
+            )
+            return service_response(True, "Habit added", data={"habit": habit})
 
 
     ### TODO: Performance - N+1 query issue for dashboard, batch/cache?

@@ -11,8 +11,8 @@ from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.parsers import parse_time_entry_form_data
 
 
-@api_bp.route('/time_tracking/entries', methods=["POST"])
-@api_bp.route('/time_tracking/entries/<int:entry_id>', methods=["PUT"])
+@api_bp.route('/time_tracking/time_entries', methods=["POST"])
+@api_bp.route('/time_tracking/time_entries/<int:entry_id>', methods=["PUT"])
 @login_required
 @with_db_session
 def time_entries(session, entry_id=None):
@@ -24,7 +24,7 @@ def time_entries(session, entry_id=None):
 
         repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
         service = TimeTrackingService(repo, current_user.timezone)
-        result = service.create_entry_from_form(typed_data)
+        result = service.save_time_entry(typed_data, entry_id)
 
         if not result["success"]:
             return api_response(False, result["message"], errors=result["errors"])
