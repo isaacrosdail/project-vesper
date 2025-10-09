@@ -39,6 +39,10 @@ def validate_habit(data: dict) -> tuple[dict, dict[str, list[str]]]:
     if data.get("is_promotable"):
         typed_data["status"] = StatusEnum.EXPERIMENTAL
         typed_data["promotion_threshold"] = PROMOTION_THRESHOLD_DEFAULT
+    # And clear them upon updates where is_promotable is unchecked
+    else:
+        typed_data["status"] = None
+        typed_data["promotion_threshold"] = None
 
     return (typed_data, errors)
 
