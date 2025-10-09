@@ -1,81 +1,3 @@
-// Currently for dynamically ommitting "nonsensical" units in add_product & add_transaction forms
-
-
-function filterUnitOptions() {
-    const categoryElement = document.querySelector('#category');
-    const unitSelect = document.querySelector('#unit_type');
-    if (!categoryElement || !unitSelect) return;
-
-    const categorySelection = categoryElement.value;
-    const unitTypes = unitSelect.querySelectorAll('option');
-    
-    // JS Object, use keys for types of groups, values are list of units allowed for that group
-    const unitGroups = {
-        weight: ['g', 'kg', 'oz', 'lb'],
-        volume: ['ml', 'l', 'fl_oz']
-    }
-    // Map categories to groups: keys are categories, values are groups (in turn, keys for above dict)
-    const unitOptionsMap = {
-        beverages: "volume",
-        condiments_sauces: "volume",
-        fats_oils: ["weight", "volume"],
-
-        fruits: "weight",
-        vegetables: "weight", 
-        legumes: "weight",
-        grains: "weight",
-        bakery: "weight",
-        dairy_eggs: ["weight", "volume"],
-        meats: "weight",
-        seafood: "weight",
-        snacks: "weight",
-        sweets: "weight",
-        processed_convenience: ["weight", "volume"],
-        supplements: ["weight", "volume"]
-    }
-
-    // Use 2-step lookup with dict keys to store the appropriate list of allowed units for the given selection in allowedUnits
-    const allowedUnits = unitGroups[unitOptionsMap[categorySelection]];
-
-    // Then loop through each unit option and hide it if it's NOT n the allowed units list
-    unitTypes.forEach(option => {
-        option.hidden = !allowedUnits.includes(option.value);
-    });
-}
-
-export function initProductForms() {
-    if (!document.querySelector('.grocery-form')) return;
-
-    document.addEventListener('change', (e) => {
-        if (e.target.matches('#category')) {
-            filterUnitOptions();
-        }
-    });
-}
-
-export function initTransactionForm() {
-    if (document.documentElement.dataset.page !== 'groceries.transactions') return;
-
-    const productSelect = document.querySelector('#product_id');
-
-    productSelect?.addEventListener('change', (e) => {
-        const productFields = document.querySelectorAll('.product-field input, .product-field select');
-
-        if (e.target.value == '__new__') {
-            console.log(productFields);
-            for (const field of productFields) {
-                field.parentElement.classList.remove('_hidden');
-                field.disabled = false;
-            }
-        } else {
-            // Re-hide & disable
-            for (const field of productFields) {
-                field.parentElement.classList.add('_hidden');
-                field.disabled = true;
-            }
-        }
-    });
-}
 
 /**
  * Initialize "click eye icon for password/text toggle".
@@ -110,6 +32,4 @@ export function initPasswordToggles() {
     })
 }
 
-initProductForms();
-initTransactionForm();
 initPasswordToggles();
