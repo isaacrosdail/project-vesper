@@ -43,7 +43,16 @@ class LanguageEnum(enum.Enum):
 
 class Habit(Base, APISerializable):
 
-    __api_exclude__ = ['promotion_threshold']
+    __api_exclude__ = []
+
+    # Use super() to "append to" our serializer's result dict to add derived keys
+    def to_api_dict(self):
+        result = super().to_api_dict()
+        result["is_promotable"] = (
+            self.status is not None
+            and self.promotion_threshold is not None
+        )
+        return result
 
     __table_args__ = (
         CheckConstraint(
