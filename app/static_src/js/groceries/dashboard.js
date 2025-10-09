@@ -126,7 +126,8 @@ import { apiRequest } from '../shared/services/api.js';
 
 
 export function init() {
-    const transactionModal = document.querySelector('#transaction-entry-dashboard-modal');
+    const transactionModal = document.querySelector('#transactions-entry-dashboard-modal');
+    const priceField = transactionModal.querySelector('[name="price_at_scan"]');
 
     document.addEventListener('click', handleListActionClick);
 
