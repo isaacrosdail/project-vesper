@@ -44,6 +44,11 @@ class GroceriesRepository(BaseRepository):
         return self._user_query(Transaction).options(
             joinedload(Transaction.product)
         ).all()
+    
+    def get_transaction_by_id(self, transaction_id: int):
+        return self._user_query(Transaction).filter(
+            Transaction.id == transaction_id
+        ).first()
 
     def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime):
         """Get a transaction within a certain datetime window (UTC)."""

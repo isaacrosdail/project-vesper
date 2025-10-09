@@ -120,7 +120,8 @@ class Transaction(Base, APISerializable):
     product = relationship("Product")
 
     def __str__(self):
-        return f"Transaction:{self.id}: {self.quantity}x {self.product.name} @ {self.price_at_scan}"
+        product_name = self.product.name if self.product else f"Product #{self.product_id}"
+        return f"Transaction:{self.id}: {self.quantity}x {product_name} @ {self.price_at_scan}"
 
     def __repr__(self):
         return f"<Transaction id={self.id} product_id={self.product_id}>"
