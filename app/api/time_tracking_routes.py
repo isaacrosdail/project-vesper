@@ -11,8 +11,8 @@ from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.parsers import parse_time_entry_form_data
 
 
-@api_bp.route('/time_tracking/entries', methods=["POST"])
-@api_bp.route('/time_tracking/entries/<int:entry_id>', methods=["PUT"])
+@api_bp.route('/time_tracking/time_entries', methods=["POST"])
+@api_bp.route('/time_tracking/time_entries/<int:entry_id>', methods=["PUT"])
 @login_required
 @with_db_session
 def time_entries(session, entry_id=None):
