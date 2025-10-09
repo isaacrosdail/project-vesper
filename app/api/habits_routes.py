@@ -20,9 +20,7 @@ from app.shared.parsers import parse_habit_form_data, parse_leetcode_form_data
 @api_bp.route("/habits/habits/<int:habit_id>", methods=["PUT"])
 @login_required
 @with_db_session
-def habits(session):
-    if request.method == "POST":
-
+def habits(session, habit_id=None):
         parsed_data = parse_habit_form_data(request.form.to_dict())
         typed_data, errors = validate_habit(parsed_data)
 
@@ -31,7 +29,7 @@ def habits(session):
 
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
         habits_service = HabitsService(habits_repo, current_user.timezone)
-        result = habits_service.create_habit(typed_data)
+        result = habits_service.save_habit(typed_data, habit_id)
 
         if not result["success"]:
             return api_response(False, result["message"], errors=result["errors"])
