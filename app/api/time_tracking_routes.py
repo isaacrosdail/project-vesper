@@ -24,7 +24,7 @@ def time_entries(session, entry_id=None):
 
         repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
         service = TimeTrackingService(repo, current_user.timezone)
-        result = service.create_entry_from_form(typed_data)
+        result = service.save_time_entry(typed_data, entry_id)
 
         if not result["success"]:
             return api_response(False, result["message"], errors=result["errors"])
