@@ -13,29 +13,23 @@
       </div>
 
       <div role="tabpanel" class="tab-content" id="tab-steps">
-        <div class="form-group">
           <label for="steps">Steps:</label>
           <input type="number" id="steps" name="steps" min="0" max="40000" step="1">
-        </div>
       </div>
       <div role="tabpanel" class="tab-content" id="tab-weight" hidden>
-        <div class="form-group">
           <label for="weight">Weight:</label>
           <input type="number" id="weight" name="weight" min="0" max="500" step="0.1">
-        </div>
       </div>
       <div role="tabpanel" class="tab-content" id="tab-calories" hidden>
-        <div class="form-group">
           <label for="calories">Calories:</label>
           <input type="number" id="calories" name="calories" min="0" max="10000" step="1">
-        </div>
       </div>
       <div role="tabpanel" class="tab-content" id="tab-sleep" hidden>
-        <div class="form-group">
+        <div>
           <label for="wake_time">Wake Time:</label>
           <input type="time" id="wake_time" name="wake_time">
         </div>
-        <div class="form-group">
+        <div>
           <label for="sleep_time">Sleep Time:</label>
           <input type="time" id="sleep_time" name="sleep_time">
         </div>
@@ -46,19 +40,19 @@
 
 {% macro time_entry_modal(id='time_entries-entry-dashboard', title='Add Time Entry') %}
   {% call ui.modal('time_tracking', 'time_entries', id, title) %}
-    <div class="form-group">
+    <div>
         <label for="category">Category:</label>
         <input type="text" id="category" name="category" required>
     </div>
-    <div class="form-group">
+    <div>
         <label for="duration_minutes">Duration (minutes):</label>
         <input type="number" id="duration_minutes" name="duration_minutes" min="0" required>
     </div>
-    <div class="form-group">
+    <div>
         <label for="started_at">Started At:</label>
         <input type="time" id="started_at" name="started_at" required>
     </div>
-    <div class="form-group">
+    <div>
         <label for="description">Description (Optional):</label>
         <input type="text" id="description" name="description">
     </div>
@@ -67,11 +61,11 @@
 
 {% macro task_entry_modal(id='tasks-entry-dashboard', title='Add Task') %}
   {% call ui.modal('tasks', 'tasks', id, title) %}
-    <div class="form-group">
+    <div>
       <label for="name">Task:</label>
       <input type="text" id="name" name="name" required>
     </div>
-    <div class="form-group">
+    <div>
       <label for="priority">Priority</label>
       <select name="priority" id="priority">
         <option value="">--</option>
@@ -82,7 +76,7 @@
     </div>
       <input type="checkbox" id="is_frog" name="is_frog">
       <label for="is_frog">"Daily Frog" Task?</label>
-    <div class="form-group">
+    <div>
       <label for="due_date">Due:</label>
       <input type="date" id="due_date" name="due_date">
     </div>
@@ -91,11 +85,11 @@
 
 {% macro habit_entry_modal(id='habits-entry-dashboard', title='Add Habit') %}
     {% call ui.modal('habits', 'habits', id, title) %}
-        <div class="form-group">
+        <div>
             <label for="name">Habit:</label>
             <input type="text" id="name" name="name" required>
         </div>
-        <div class="form-group">
+        <div>
             <label for="is_promotable">Promotion-based?</label>
             <input type="checkbox" id="is_promotable" name="is_promotable">
         </div>
@@ -104,11 +98,11 @@
 
 {% macro leetcode_entry_modal(id='leet_code_records-entry-homepage', title='Add LeetCode record') %}
     {% call ui.modal('habits', 'leetcode_records', id, title) %}
-        <div class="form-group">
+        <div>
             <label for="leetcode_id">LeetCode Problem ID:</label>
             <input type="number" id="leetcode_id" name="leetcode_id" min="1" step="1" required>
         </div>
-        <fieldset class="radio-row form-group">
+        <fieldset class="radio-row">
             <legend>Difficulty:</legend>
             <div>
                 <input type="radio" id="easy" name="difficulty" value="easy" checked>
@@ -123,7 +117,7 @@
                 <label for="hard">Hard</label>
             </div>
         </fieldset>
-        <div class="form-group">
+        <div>
             <label for="language">Language Used:</label>
             <select name="language" id="language">
                 <option value="Python">Python</option>
@@ -132,7 +126,7 @@
                 <option value="C++">C++</option>
             </select>
         </div>
-        <fieldset class="radio-row form-group">
+        <fieldset class="radio-row">
             <legend>Status:</legend>
             <div>
                 <input type="radio" id="solved" name="lcstatus" value="solved" checked>

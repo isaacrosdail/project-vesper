@@ -6,16 +6,16 @@
 {% block content %}
 
 <div class="card-dashboard">
-    <form action="{{ url_for('auth.register') }}" method="POST">
+    <form class="form-column" action="{{ url_for('auth.register') }}" method="POST">
         <fieldset>
             <legend>Register:</legend>
-            <div class="form-group">
+            <div>
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" 
                         required minlength="3" maxlength="50"
                         placeholder="Enter desired username">
             </div>
-            <div class="form-group">
+            <div>
                 <label for="password">Password:</label>
                 <div class="password-input-group">
                     <input type="password" id="password" name="password" 
@@ -24,7 +24,7 @@
                     <button type="button" data-password-toggle="password" class="btn-icon password-toggle">{{ ui.eye_slash_svg() }}</button>
                 </div>
             </div>
-            <div class="form-group">
+            <div>
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" placeholder="John">
             </div>
