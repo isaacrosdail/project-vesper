@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/shared/models.py
+# hypothesis_version: 6.140.2
+
+['Habit', 'Task', 'habit_id', 'habit_tags', 'habits.id', 'name', 'tag_id', 'tags', 'tags.id', 'task_id', 'task_tags', 'tasks.id', 'universal', 'uq_user_tag_name', 'user_id']

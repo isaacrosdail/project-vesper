@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/time_tracking/viewmodels.py
+# hypothesis_version: 6.140.2
+
+['%I:%M%p (%d.%m.%y)', '--', 'Category', 'Description', 'Duration (mins.)', 'ID', 'Started At', 'category', 'description', 'desktop-only', 'duration', 'essential', 'id', 'label', 'priority', 'started_at']

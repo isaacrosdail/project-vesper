@@ -1,0 +1,4 @@
+# file: /home/user/projects/project-vesper/app/modules/metrics/models.py
+# hypothesis_version: 6.140.2
+
+['calories', 'ck_weight_positive', 'sleep_time', 'steps', 'wake_time', 'weight']
