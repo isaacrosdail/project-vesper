@@ -63,7 +63,7 @@ def validate_user(data: dict) -> tuple[dict, dict[str, list[str]]]:
         typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
-        elif typed_value is not None:
+        else:
             typed_data[field] = typed_value
 
     return (typed_data, errors)
