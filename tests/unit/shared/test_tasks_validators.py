@@ -30,19 +30,19 @@ def test_validate_task_priority(priority, expected_value, expected_errors):
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     pytest.param(
         {"name": "Walk dog", "priority": "MEDIUM"},
-        {"name": "Walk dog", "priority": PriorityEnum.MEDIUM},
+        {"name": "Walk dog", "priority": PriorityEnum.MEDIUM, "due_date": None},
         {},
         id="valid-non-frog-task"
     ),
     pytest.param(
         {"name": "Eat", "is_frog": True, "due_date": "2025-10-04"},
-        {"name": "Eat", "is_frog": True, "due_date": datetime.date(2025, 10, 4)},
+        {"name": "Eat", "is_frog": True, "due_date": datetime.date(2025, 10, 4), "priority": None},
         {},
         id="valid-frog-task"
     ),
     pytest.param(
         {"name": "Dust shelves"},
-        {"name": "Dust shelves"},
+        {"name": "Dust shelves", "due_date": None, "priority": None}, # priority comes out as None, but we still fail. Weird, but correct
         {
             "priority": [PRIORITY_REQUIRED_NON_FROG]
         },
@@ -50,7 +50,7 @@ def test_validate_task_priority(priority, expected_value, expected_errors):
     ),
     pytest.param(
         {"name": "Make bed", "is_frog": True, "priority": None},
-        {"name": "Make bed", "is_frog": True},
+        {"name": "Make bed", "is_frog": True, "due_date": None, "priority": None},
         {
             "due_date": [FROG_REQUIRES_DUE_DATE]
         },
@@ -95,13 +95,13 @@ def test_validate_tag_scope(tag_scope, expected_value, expected_errors):
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     pytest.param(
         {"name": "work"},
-        {"name": "work"},
+        {"name": "work","scope": None},
         {},
         id="valid-name"
     ),
     pytest.param(
         {"name": "a" * 51},
-        {},
+        {"scope": None},
         {"name": [TAG_NAME_LENGTH]},
         id="name-too-long"
     ),
@@ -113,7 +113,7 @@ def test_validate_tag_scope(tag_scope, expected_value, expected_errors):
     ),
     pytest.param(
         {},
-        {},
+        {"scope": None},
         {"name": [TAG_NAME_REQUIRED]},
         id="missing-name"
     ),

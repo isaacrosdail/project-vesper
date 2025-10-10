@@ -55,7 +55,7 @@ def validate_task(data: dict) -> tuple[dict, dict[str, list[str]]]:
         typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
-        elif typed_value is not None:
+        else:
             typed_data[field] = typed_value
 
     is_frog = typed_data.get("is_frog")
@@ -115,7 +115,7 @@ def validate_tag(data: dict) -> tuple[dict, dict[str, list[str]]]:
         typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
-        elif typed_value is not None:
+        else:
             typed_data[field] = typed_value
 
     return (typed_data, errors)

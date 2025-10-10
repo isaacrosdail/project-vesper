@@ -39,6 +39,6 @@ def test_format_due_label(days_offset, expected_label):
     due_date = today + timedelta(days=days_offset)
 
     task = Dummy(due_date, tz)
-    label = task.format_due_label(tz)
+    label = task.format_due_label()
 
     assert label == expected_label
