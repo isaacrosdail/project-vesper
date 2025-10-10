@@ -13,6 +13,11 @@ class BaseRepository:
             self.model_cls.user_id == self.user_id
         ).all()
     
+    def get_count_all(self):
+        return self.session.query(self.model_cls).filter(
+            self.model_cls.user_id == self.user_id
+        ).count()
+    
     def get_by_id(self, item_id):
         return self.session.query(self.model_cls).filter(
             self.model_cls.user_id == self.user_id,

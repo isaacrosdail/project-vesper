@@ -1,14 +1,14 @@
 """
 Habit service layer, to evaluate streaks & completions.
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.api.responses import service_response
 from app.modules.habits.constants import PROMOTION_THRESHOLD_DEFAULT
 from app.modules.habits.models import StatusEnum
 from app.modules.habits.repository import HabitsRepository
-from app.shared.datetime.helpers import today_range_utc
+from app.shared.datetime.helpers import today_range_utc, last_n_days_range
 
 
 class HabitsService:
@@ -73,3 +73,27 @@ class HabitsService:
         completion = self.repo.get_habit_completion_in_window(habit_id, start_utc, end_utc)
         return completion is not None
 
+    # TODO: "Percent completion habits this week" - Mon to Sun
+    def calculate_all_habits_percentage_this_week(self):
+        # NOTE: Hardcoding 'goal amount' for now, should be a field?
+        goal = 7
+
+        # 1. Determine where we are in the week first
+        today = datetime.now(ZoneInfo(self.user_tz))
+        # Days since start of week
+        days_elapsed = today.weekday() + 1 # offset since last_n_days_range incl today as day # 1
+
+        # start_of_week = today - timedelta(days=today.weekday())
+        start_wk_utc, eod_today_utc = last_n_days_range(days_elapsed, self.user_tz)
+
+        # 2. Get number of completions thus far in total
+        num_completions = len(self.repo.get_all_completions_in_window(start_wk_utc, eod_today_utc))
+
+        # 3. Calc expected/"max" rate thus far into week
+        habits_count = self.repo.get_count_all_habits()
+        expected = (habits_count * days_elapsed)
+
+        # 4. Percent completed thus far
+        percent_completed = round((num_completions / expected) * 100, 2) if expected > 0 else 0
+
+        return start_wk_utc, eod_today_utc, num_completions, percent_completed, habits_count
