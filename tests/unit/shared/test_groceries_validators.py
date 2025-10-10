@@ -84,12 +84,12 @@ def test_validate_calories(calories, expected_value, expected_errors):
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
         {"name": "Apples", "barcode": "123456789012", "net_weight": "100.0", "unit_type": "G", "category": "FRUITS"},
-        {"name": "Apples", "barcode": "123456789012", "net_weight": 100.0, "unit_type": UnitEnum.G, "category": ProductCategoryEnum.FRUITS},
+        {"name": "Apples", "barcode": "123456789012", "net_weight": 100.0, "unit_type": UnitEnum.G, "category": ProductCategoryEnum.FRUITS, "calories_per_100g": None},
         {}
     ),
     (
         {"name": "", "barcode": "invalid", "net_weight": "isNaN", "unit_type": "not_valid", "category": "misc"},
-        {},
+        {"calories_per_100g": None},
         {
             "name": [PRODUCT_NAME_REQUIRED],
             "barcode": [BARCODE_INVALID],

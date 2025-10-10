@@ -94,7 +94,7 @@ def validate_product(data: dict) -> tuple[dict, dict[str, list[str]]]:
         typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
-        elif typed_value is not None:
+        else:
             typed_data[field] = typed_value
 
     return (typed_data, errors)
@@ -147,7 +147,7 @@ def validate_transaction(data: dict) -> tuple[dict, dict[str, list[str]]]:
         typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
-        elif typed_value is not None:
+        else:
             typed_data[field] = typed_value
 
     return (typed_data, errors)
@@ -211,7 +211,7 @@ def validate_shopping_list_item(data: dict) -> tuple[dict, dict[str, list[str]]]
         typed_value, field_errors = func(value)
         if field_errors:
             errors[field] = field_errors
-        elif typed_value is not None:
+        else:
             typed_data[field] = typed_value
 
     return (typed_data, errors)
