@@ -164,6 +164,17 @@ h3 {
     font-weight: var(--font-weight-semibold);
 }
 
+.progress-bar {
+    background-color: red;
+    height: 20px;
+    width: 200px;
+}
+.progress-bar-fill {
+    background-color: green;
+    height: 20px;
+    width: 1px;
+}
+
 /* ===================================
     PAGE-SPECIFIC: Login / Register Pages
    ===================================*/

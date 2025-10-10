@@ -49,6 +49,7 @@ def habits(session, habit_id=None):
 @with_db_session
 def completions(session, habit_id):
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
+    habits_service = HabitsService(habits_repo, current_user.timezone)
     habit = habits_repo.get_habit_by_id(habit_id)
     
     if not habit:
@@ -57,10 +58,12 @@ def completions(session, habit_id):
     if request.method == "POST":
         completed_at = parse_js_instant(request.get_json()["completed_at"])
         completion = habits_repo.create_habit_completion(habit_id, completed_at)
+        habits_repo.session.flush()
+        progress = habits_service.calculate_all_habits_percentage_this_week()
         return api_response(
             True, 
             "Habit marked complete",
-            data= completion.to_api_dict()
+            data= completion.to_api_dict() | {"progress": progress} # | merge operator to tack onto dict
         ), 201
 
     elif request.method == "DELETE":
@@ -68,7 +71,7 @@ def completions(session, habit_id):
         if date_received == 'today':
             start_utc, end_utc = today_range_utc(current_user.timezone)
         else:
-            parsed_date = date.fromisoformat(date_received)
+            parsed_date = date.fromisoformat(date_received) # NOTE: add method to notes
             start_utc, end_utc = day_range_utc(parsed_date, current_user.timezone)
 
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
@@ -76,7 +79,8 @@ def completions(session, habit_id):
         
         if completion:
             habits_repo.delete(completion)
-            return api_response(True, "Habit unmarked as complete"), 200
+            progress = habits_service.calculate_all_habits_percentage_this_week()
+            return api_response(True, "Habit unmarked as complete", data={"progress": progress}), 200
         else:
             return api_response(False, "No completion found"), 404
 
