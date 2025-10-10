@@ -56,7 +56,7 @@ def item(session, module, subtype, item_id):
     check_item_ownership(item, current_user.id)
     
     if request.method == 'GET':
-        # print(item.to_api_dict(), file=sys.stderr)
+        print(item.to_api_dict(), file=sys.stderr)
         # print(dir(item), file=sys.stderr)
         return api_response(True, f"Retrieved {item.__tablename__}", data=item.to_api_dict()), 200
 

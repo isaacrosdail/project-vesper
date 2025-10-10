@@ -55,8 +55,14 @@ def home():
                 'streak_count': habits_service.calculate_habit_streak(habit.id)
             }
 
+        ###### WIP - For habit completion this week 'feature'
+        days_in = habits_service.calculate_all_habits_percentage_this_week()
+
+        ######
+
         ### Each key becomes its own top-level var in template (No 'ctx.' prefix required)
         ctx = {
+            'days_in': days_in,
             "tasks": tasks,
             "habits": habits,
             "today_frog": today_frog,

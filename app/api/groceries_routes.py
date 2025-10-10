@@ -1,4 +1,4 @@
-
+import sys
 from flask import request
 from flask_login import current_user, login_required
 
@@ -81,6 +81,7 @@ def transactions(session, transaction_id=None):
     result = groceries_service.save_transaction(product_id, typed_transaction_data, transaction_id) # None -> POST, else PUT
     
     transaction = result["data"]["transaction"]
+    print(f"Transaction object: {transaction}", file=sys.stderr)
     return api_response(
         True,
         result["message"],

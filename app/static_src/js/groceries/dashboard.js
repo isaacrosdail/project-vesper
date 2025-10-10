@@ -128,8 +128,9 @@ import { apiRequest } from '../shared/services/api.js';
 export function init() {
     const transactionModal = document.querySelector('#transactions-entry-dashboard-modal');
     const priceField = transactionModal.querySelector('[name="price_at_scan"]');
+    const shoppingList = document.querySelector('.shopping-list');
 
-    document.addEventListener('click', handleListActionClick);
+    shoppingList.addEventListener('click', handleListActionClick);
 
     document.addEventListener('change', (e) => {
         if (e.target.matches('[name="category"]')) {
@@ -146,5 +147,38 @@ export function init() {
             field.parentElement.hidden = true;
             field.disabled = true;
         })
+    })
+
+    priceField.addEventListener('keydown', (e) => {
+        // Regex: "is the key pressed a digit 0-9?"
+        const isDigit = /^\d$/.test(e.key);
+
+        if (isDigit) {
+            e.preventDefault();
+
+            const num = Math.round(Number(priceField.value) * 100);
+            const combined = String(num) + e.key;
+            const nextValue = (Number(combined) / 100);
+
+            priceField.value = nextValue.toFixed(2);
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+
+            const currentDigit = Math.round(Number(priceField.value) * 100);
+            const thing = Math.floor(currentDigit / 10);
+            const nextValue = thing === 0 ? 0 : thing / 100;
+
+            priceField.value = nextValue.toFixed(2);
+        }
+    })
+
+    priceField.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = e.clipboardData.getData('text');
+        const currentCents = Math.round(Number(priceField.value) * 100);
+        const nextCentsString = String(currentCents) + pasted;
+        const nextValue = Number(nextCentsString) / 100;
+
+        priceField.value = nextValue.toFixed(2);
     })
 }

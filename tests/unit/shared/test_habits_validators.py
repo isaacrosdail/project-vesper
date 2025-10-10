@@ -18,12 +18,7 @@ def test_validate_habit_name(habit_name, expected_value, expected_errors):
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
         {"name": "Clean dishes"},
-        {"name": "Clean dishes"},
-        {}
-    ),
-    (
-        {"name": "Clean dishes"},
-        {"name": "Clean dishes"},
+        {"name": "Clean dishes", "status": None, "promotion_threshold": None},
         {}
     ),
 ])

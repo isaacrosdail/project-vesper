@@ -74,7 +74,7 @@ def test_validate_lang(lang, expected_value, expected_errors):
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
         {"username": "steve123", "password": "god12@"},
-        {"username": "steve123"},
+        {"username": "steve123", "name": None},
         {
             "password": [PASSWORD_INVALID]
         }

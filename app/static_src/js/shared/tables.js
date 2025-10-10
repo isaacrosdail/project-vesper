@@ -28,8 +28,8 @@ export function makeTableRow(item, subtype) {
  * @returns 
  */
 async function deleteTableItem(module, itemId, subtype) {
-    const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
-    if (!confirmed) return;
+    // const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
+    // if (!confirmed) return;
 
     const url = `/${module}/${subtype}/${itemId}`;
 

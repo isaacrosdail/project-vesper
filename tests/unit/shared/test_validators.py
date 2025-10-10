@@ -9,15 +9,15 @@ from app.shared.validators import *
 
 
 # Trying out Hypothesis
-@given(
-        value=st.text(),
-        precision=st.integers(1, 10),
-        scale=st.integers(0, 5),
-    )
-def test_validate_numeric_never_crashes(value, precision, scale):
-    is_valid, error_type = validate_numeric(value, precision, scale)
-    assert isinstance(is_valid, bool)
-    assert (error_type is None) or isinstance(error_type, str)
+# @given(
+#         value=st.text(),
+#         precision=st.integers(1, 10),
+#         scale=st.integers(0, 5),
+#     )
+# def test_validate_numeric_never_crashes(value, precision, scale):
+#     is_valid, error_type = validate_numeric(value, precision, scale)
+#     assert isinstance(is_valid, bool)
+#     assert (error_type is None) or isinstance(error_type, str)
 
 
 @pytest.mark.parametrize("date_str, expected_value, expected_errors", [

@@ -99,7 +99,16 @@
         </ul>
     </div>
     <div class="d3-container">
-        <!-- TODO: Add -->
+        <div class="progress-bar">
+            <div class="progress-bar-fill" data-progress="{{days_in[3]}}"></div>
+        </div>
+        <p>
+            start_wk_utc = {{ days_in[0] }}<br>
+            eod_today_utc = {{ days_in[1] }}<br>
+            num_completions = {{ days_in[2] }}<br>
+            %_completed = {{ days_in[3] }}%<br>
+            habits_count = {{ days_in[4] }}<br>
+        </p>
     </div>
 </section>
 
