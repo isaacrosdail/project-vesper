@@ -31,7 +31,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
           {{ caller(item, headers) }}
           <td class="table-cell delete-cell">
             <button class="row-actions dots-btn btn-icon btn-square" data-item-id="{{ item.id }}">
-                ooo
+                {{ options_ellipsis() }}
             </button>
           </td>
         </tr>
@@ -218,4 +218,10 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     <path class="slash" stroke-linecap="round" stroke-linejoin="round"
           d="M3 3l18 18" />
   </svg>
+{% endmacro %}
+
+{% macro options_ellipsis() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path d="M7 12a3 3 0 10-6 0 3 3 0 106 0m8 0a3 3 0 10-6 0 3 3 0 106 0m8 0a3 3 0 10-6 0 3 3 0 106 0" />
+</svg>
 {% endmacro %}

@@ -44,6 +44,7 @@ Weather data provided by [OpenWeatherMap](https://openweathermap.org/), licensed
   - chevron-down
   - eye
   - eye-slash
+  - ellipsis-horizontal-circle
 
 - SVG Repo (MIT / CC0) [LICENSE.svgrepo](app/static_src/img/icons/originals/LICENSE.svgrepo)
   Used icons (some modified for sizing/positioning):
