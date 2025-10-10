@@ -11,6 +11,14 @@ let currentCanvasState = null;
 let resizeTimeout = null;
 let renderer;
 
+
+function updateProgressBarHabits(newProgressPercentage){
+    const progressBarFill = document.querySelector('.progress-bar-fill');
+    const progressBarFillPercentage = newProgressPercentage ? newProgressPercentage : progressBarFill.dataset.progress;
+    console.log(`Percentage now: ${progressBarFillPercentage}`)
+    progressBarFill.style.width = progressBarFillPercentage + 'px';
+}
+
 /**
  * Marks a habit as complete/incomplete & updates the UI accordingly.
  * @async
@@ -22,33 +30,29 @@ async function markHabitComplete(checkbox, habitId) {
     try {
         // Mark complete => POST HabitCompletion
         const completedAtUTC = getJSInstant();  // Get instant user clicks "done"
+
+        const row = checkbox.closest('.item-row'); // scope query to right <label> row
+        const emojiSpan = row.querySelector('.habit-streak');
+        const listItem = row.closest('.item'); // grab <li>
+        let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
+
         if (checkbox.checked) {
             const url = `/habits/${habitId}/completions`;
             const data = { completed_at: completedAtUTC };
 
-            apiRequest('POST', url, () => {
-                const row = checkbox.closest('.item-row'); // scope query to right <label> row
-                const emojiSpan = row.querySelector('.habit-streak');
-                const listItem = row.closest('.item'); // grab <li>
-
-                let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
+            apiRequest('POST', url, (responseData) => {
                 streakCount += 1;
                 emojiSpan.dataset.streakCount = streakCount;
 
                 listItem?.classList.toggle('completed');
                 emojiSpan.textContent = `🔥${streakCount}`;
+                updateProgressBarHabits(responseData.data.progress[3])
             }, data);
         } else {
             const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
             const url = `/habits/${habitId}/completions?date=${todayDateOnly}`;
 
-            apiRequest('DELETE', url, () => {
-                // un-apply effect/styling (update DOM)
-                const row = checkbox.closest('.item-row');
-                const emojiSpan = row.querySelector('.habit-streak');
-                const listItem = row.closest('.item');
-
-                let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
+            apiRequest('DELETE', url, (responseData) => {
                 streakCount -= 1;
                 emojiSpan.dataset.streakCount = streakCount;
 
@@ -58,6 +62,7 @@ async function markHabitComplete(checkbox, habitId) {
                 } else {
                     emojiSpan.textContent = "";
                 }
+                updateProgressBarHabits(responseData.data.progress[3])
             });
         }
     } catch (error) {
@@ -167,6 +172,8 @@ export function init() {
             markTaskComplete(e.target, e.target.dataset.taskId);
         }
     });
+
+    updateProgressBarHabits();
 
     // Weather setup
     if (hasWeatherSection) {
