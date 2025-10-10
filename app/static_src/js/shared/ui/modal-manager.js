@@ -42,30 +42,32 @@ modals.forEach(modal => {
 });
 
 function setupModal(modal, button) {
+    const form = modal.querySelector('form');
     const modalId = modal.id;
 
-    document.addEventListener('click', (e) => {
-        if (e.target === button) {
-            modal.showModal();
-        }
-        else if (e.target.matches(`#${modalId}-close-btn`)) {
-            modal.querySelector('form').reset();
+    button.addEventListener('click', () => {
+        modal.showModal();
+    })
+
+    modal.addEventListener('click', (e) => {
+        if (e.target.matches(`#${modalId}-close-btn`)) {
+            form?.reset();
             modal.close();
         }
-    });
+    })
 
     modal.addEventListener('cancel', () => {
-        modal.querySelector('form')?.reset();
+        form?.reset();
     });
 
     modal.addEventListener('submit', async (e) => {
-        const form = e.target;
-        if (form.hasAttribute('data-noajax')) {
+        const submittedForm = e.target;
+        if (submittedForm.hasAttribute('data-noajax')) {
             return;  // Skip interception if the form opts out
         }
 
         e.preventDefault();
-        const formData = new FormData(form);
+        const formData = new FormData(submittedForm);
         const endpoint = modal.dataset.endpoint; // embedded dynamically in all form modals
         
         // PUT
@@ -73,16 +75,18 @@ function setupModal(modal, button) {
             const url = `${endpoint}/${modal.dataset.itemId}`;
             apiRequest('PUT', url, (responseData) => {
                 makeToast(responseData.message, 'success');
+                // Clean up edit state
+                delete modal.dataset.mode;
+                delete modal.dataset.itemId;
             }, formData);
         }
         // POST
         else {
             apiRequest('POST', endpoint, (responseData) => { // get server response inside success callback
-                makeTableRow(responseData.data);
                 makeToast(responseData.message, 'success');
             }, formData);
         }
-        form.reset();
+        submittedForm.reset();
         modal.close();
     });
 }
