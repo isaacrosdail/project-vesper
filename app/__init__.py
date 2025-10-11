@@ -24,6 +24,7 @@ from app.modules.tasks.routes import tasks_bp
 from app.modules.time_tracking.routes import time_tracking_bp
 from app.routes import main_bp
 from app.shared.debug import setup_request_debugging
+from app.shared import jinja_filters
 
 
 def has_dev_tools() -> bool:
@@ -53,6 +54,8 @@ def create_app(config_name: str = None):
     _setup_request_hooks(app)
     _setup_database(app)
     _register_blueprints(app)
+
+    jinja_filters.register_filters(app)
 
     return app
 
