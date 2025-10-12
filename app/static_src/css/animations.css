@@ -1,4 +1,35 @@
 
+/* Confetti effect for progress bar. followPath for arc, tumble for individual pieces */
+@keyframes followPath {
+    to { offset-distance: 100%; }
+}
+
+/* Note: --scale custom property is set via JS to slightly randomize confetti piece size */
+@keyframes tumble {
+    0% {
+        transform: translate(-50%, -50%) scale(var(--scale)) rotateX(0deg) rotateY(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(var(--scale)) rotateX(720deg) rotateY(540deg);
+    }
+}
+
+/* "Close to completion" effect for progress bar. */
+@keyframes pulse {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.2);
+    }
+}
+
+@keyframes surge {
+    0% { left: 0; }
+    100% { left: 100%; }
+}
+
+/* Construction sign on 404 page */
 @keyframes wiggle {
     0%, 100% { transform: rotate(0deg); }
     25% { transform: rotate(-3deg); }
@@ -7,23 +38,4 @@
 
 .animate-wiggle {
     animation: wiggle 0.4s ease-in-out 1;
-}
-
-@keyframes arc {
-    0% { transform: translate(0px); }
-    50% { transform: translate(40px, -150px); } /* apex */
-    100% { transform: translate(80px, -120px); }
-}
-
-.arc {
-    animation: arc 0.5s ease 2 forwards;
-}
-
-@keyframes followPath {
-    to { offset-distance: 100%; }
-}
-
-@keyframes tumble {
-  0%   { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(720deg) rotateY(540deg); }
 }
