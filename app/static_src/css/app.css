@@ -28,6 +28,7 @@
 
 :root {
     --min-navbar-height: 4rem;
+    --confetti-size-base: 0.375rem;
 }
 ::selection {
     background-color: var(--bg-selection);
@@ -67,6 +68,15 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
     .nav-desktop { transition: none; }
     .icon-wiggle { animation: none; transition: none; }
+
+    /* Disable both surging effect & gradient itself */
+    .progress-bar-fill.surging,
+    .progress-bar-fill.surging::after {
+        animation: none !important;
+    }
+    .progress-bar-fill.surging::after {
+        background: none !important;
+    }
 }
 
 
@@ -166,64 +176,64 @@ h3 {
 
 .progress-bar,
 .progress-bar-fill {
-    height: 20px;
-}
-html[data-theme="light"] .progress-bar {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(80% 0.12 145),
-        oklch(79% 0.13 145),
-        oklch(78% 0.19 150)
-    );
-}
-html[data-theme="dark"] .progress-bar {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(88% 0.11 145),
-        oklch(82% 0.12 145),
-        oklch(78% 0.19 150)
-    );
+    height: 1.25rem;
 }
 .progress-bar {
+    background-color: oklch(85% 0 0);
     border-radius: var(--border-radius);
     border: var(--border-default);
     overflow: hidden; /* make rounded edges clean on lower percentages, effectively 'clips' overlap */
-    width: 100%;
+    width: 80%;
+    max-width: 300px;
 }
 .progress-bar-fill {
-    background-color: oklch(85% 0 0);
-
+    position: relative; /* positioning context for progress-bar-fill::after */
+    background: var(--progress-bar-fill);
     transform: scaleX(0); /* JS can set scaleX using our percent progress directly this way */
-    transform-origin: right; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
+    transform-origin: left; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
     transition: transform 0.2s ease-in-out;
+    overflow: hidden; /* clips our ::after's pulsing effect cleanly */
+}
+.progress-bar-fill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;
+}
+.progress-bar-fill.surging {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+.progress-bar-fill.surging::after {
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255,255,255, 0.4),
+        transparent
+    );
+    animation: surge 1.5s ease-in-out infinite;
 }
 
-.progress-bar-wrapper {
-    position: relative; /* positioning context for emitter div */
-    width: clamp(150px, 40vw, 400px);
-    perspective: 800px;
-    perspective-origin: center;
-    overflow: visible;
-}
-.emitter {
-    position: absolute;
+#confetti-layer {
+    position: fixed;
+    pointer-events: none;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
     z-index: 50;
-    background: lime;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    overflow: visible;
 }
 .dot {
     position: absolute;
-    transform-style: preserve-3d;
+    pointer-events: none;
     top: 50%;
     left: 50%;
-    height: 6px;
-    width: 6px;
+    height: var(--confetti-size-base);
+    width: var(--confetti-size-base);
     transform: translate(-50%, -50%);
-    /* offset-path: path('M 0 0 Q 40 -150 80 -120'); Quad Bezier */
     offset-rotate: 0deg;
-    /* animation: followPath 1s ease-out forwards; */
+    /* offset-path: path('M 0 0 Q 40 -150 80 -120'); Quad Bezier */
 }
 /* Sprucing our confetti up with some shapes */
 .star {

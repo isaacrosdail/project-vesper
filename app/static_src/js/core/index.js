@@ -21,7 +21,6 @@ function updateProgressBar(module, percent = null, completed = null, total = nul
     const progressText = section.querySelector('.progress-text');
 
     const fillPercentage = (percent !== null) ? percent : fill.dataset.progress;
-    const remainingPercentage = 100 - fillPercentage;
 
     // Update dataset
     fill.dataset.progress = fillPercentage;
@@ -32,12 +31,12 @@ function updateProgressBar(module, percent = null, completed = null, total = nul
     // Prevent transition effect for initial page load
     if (isInitialRender) {
         fill.style.transition = 'none';
-        fill.style.transform = `scaleX(${remainingPercentage / 100})`;
+        fill.style.transform = `scaleX(${fillPercentage / 100})`;
         isInitialRender = false;
         // re-enable transitions next tick
         requestAnimationFrame(() => fill.style.transition = '');
     } else {
-        fill.style.transform = `scaleX(${remainingPercentage / 100})`;
+        fill.style.transform = `scaleX(${fillPercentage / 100})`;
     }
 
     // Update text display
@@ -45,9 +44,18 @@ function updateProgressBar(module, percent = null, completed = null, total = nul
     const textTotal = (total !== null) ? total : fill.dataset.total;
     progressText.textContent = `${textCompleted} of ${textTotal}`;
 
+    // Cast to prevent JS weirdness
+    const numCompleted = Number(textCompleted)
+    const numTotal = Number(textTotal)
+
+    // Trigger surging + pulsing effects at either 90% completion OR 1 task/habit remaining
+    if (fillPercentage >= 90 || (numTotal - numCompleted) === 1) {
+        fill.classList.add('surging')
+    } else {
+        fill.classList.remove('surging');
+    }
+
     // Trigger confetti at 100%
-    const numCompleted = Number(completed)
-    const numTotal = Number(total)
     if (numTotal > 0 && numCompleted === numTotal && percent !== null) {
         triggerConfetti(section);
     }
@@ -199,53 +207,62 @@ function redrawCanvas() {
     }
 }
 
-function triggerConfetti(progressBar) {
-    const emitter = progressBar.querySelector('.emitter');
-    if (!emitter) {
-        console.log(`No emitter found for: ${progressBar}`);
+function triggerConfetti(sectionEl) {
+    const progressBar = sectionEl.querySelector('.progress-bar');
+    if (!progressBar) {
+        console.warn(`No progressBar found for: ${sectionEl}`);
         return;
     }
-    // 1. Random number of dots
-    const numDots = randInt(8, 12)
-    // 2. Append to emitter
-
-    const shapeClasses = ['star', 'circle', 'diamond', 'parallelogram', 'triangle'];
-    // 3. Create and append random number of 'dot' divs
-    for (let i = 0; i < numDots; i++) {
-        const dot = document.createElement('div');
-        dot.classList.add('dot');
-        emitter.appendChild(dot);
-
-        // 4. First randomly generate values for Bezier curve arcs
-        const endX = randInt(-150, 150); // horizontal spread
-        const endY = randInt(-120, -200); // how high or low it ends
-        const fallY = randInt(200, 250);
-        const controlX = randInt((endX * 0.4), (endX * 0.6));
-        const controlY = randInt((endY - 30), (endY + 30));
-        /* 
-            M x y -> move to (x,y)
-            Q cx cy x y -> Quad Bezier: control point (cx,cy) and endpoint (x,y)
-            C c1x c1y c2x c2y x y -> Cubic Bezier (two control points, one end)
-        */
-        const path = `M 0 0 Q ${controlX} ${controlY} ${endX} ${endY} T ${endX} ${fallY}`;
-        const animationTime = randFloat(1.5, 3)
-        const animationDelay = randFloat(0.9, 1)
-        const shape = shapeClasses[i % shapeClasses.length];
-        console.log(`Shape:${shape}, i: ${i}`)
-        dot.classList.add(shape);
-
-        dot.style.width = `${randInt(3, 7)}px`;
-        dot.style.height = `${randInt(3, 7)}px`;
-        dot.style.offsetPath = `path('${path}')`;
-        dot.style.animation = `followPath ${animationTime}s cubic-bezier(0.25, 0.7, 0.9, 0.3) ${animationDelay} forwards`;
-        dot.style.animation += `, tumble ${randFloat(0.6, 1.5)}s linear infinite`;
-
-        // Clean up after
-        dot.addEventListener('animationend', () => {
-            dot.remove();
-        });
+    // Skip generation if reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+        return;
     }
 
+    const progressBarBox = progressBar.getBoundingClientRect();
+    const confettiLayer = document.querySelector('#confetti-layer');
+
+    // SETTINGS
+    const shapeClasses = ['star', 'circle', 'diamond', 'parallelogram', 'triangle'];
+    const numDots = randInt(15, 40)
+    const baseSize = parseFloat(getComputedStyle(document.documentElement)
+        .getPropertyValue('--confetti-size-base'));
+
+    // Generate each confetti dot
+    for (let i = 0; i < numDots; i++) {
+        const dot = document.createElement('div');
+        dot.classList.add('dot', shapeClasses[i % shapeClasses.length]); // TODO: Note, cyclic shape assignment
+
+        // Position dot at right edge of progress-bar
+        dot.style.position = 'absolute';
+        dot.style.left = `${progressBarBox.right}px`;
+        dot.style.top = `${progressBarBox.top + progressBarBox.height / 2}px`;
+
+        // Generate Bezier path (curved + falling)
+        const endX = randInt(-150, 150);    // horizontal arc/spread
+        const endY = randInt(-120, -250);   // apex
+        const fallY = randInt(200, 250);    // fall distance
+        const controlX = randInt(endX * 0.4, endX * 0.6);
+        const controlY = randInt(endY - 30, endY + 30);
+        const path = `M 0 0 Q ${controlX} ${controlY} ${endX} ${endY} T ${endX} ${fallY}`;
+
+        // Animation Timings
+        const animationTime = randFloat(1.5, 3);
+        const animationDelay = randFloat(0.9, 1);
+        const tumbleSpeed = randFloat(0.6, 1.5);
+        const scale = baseSize * randFloat(4, 5);    // size scaling (semi-responsive)
+
+        // Assign styles & animations
+        dot.style.setProperty('--scale', scale);
+        dot.style.offsetPath = `path('${path}')`;
+        dot.style.animation = 
+            `followPath ${animationTime}s cubic-bezier(0.25, 0.7, 0.9, 0.3) ${animationDelay} forwards, ` +
+            `tumble ${tumbleSpeed}s linear infinite`;
+        
+        // Insert into confetti layer & tidy up when done
+        confettiLayer.appendChild(dot);
+        dot.addEventListener('animationend', () => dot.remove());
+    }
 }
 
 export function init() {
