@@ -89,6 +89,12 @@
     --light-clr-success: oklch(45% 0.10 145);
     --light-clr-error: oklch(55% 0.22 25); /* OR: oklch(60% 0.2 25); */
 
+    --light-progress-bar-fill: linear-gradient(
+        to right in oklch,
+        oklch(80% 0.12 145),
+        oklch(79% 0.13 145),
+        oklch(78% 0.19 150)
+    );
 
     /* =============== DARK THEME DEFINITIONS =============== */
 
@@ -117,6 +123,13 @@
 
     --dark-clr-success: oklch(45% 0.10 145);
     --dark-clr-error: oklch(55% 0.22 25);  /* OR: oklch(60% 0.2 25); */
+
+    --dark-progress-bar-fill: linear-gradient(
+        to right in oklch,
+        oklch(88% 0.11 145),
+        oklch(82% 0.12 145),
+        oklch(78% 0.19 150)
+    );
 
     /* === ACTIVE THEME MAPPINGS === */
 
@@ -151,6 +164,8 @@
 
     --clr-success: var(--light-clr-success);
     --clr-error: var(--light-clr-error);
+
+    --progress-bar-fill: var(--light-progress-bar-fill);
     
     /* Dark Theme */
     @media (prefers-color-scheme: dark) {
@@ -186,6 +201,8 @@
 
         --clr-success: var(--dark-clr-success);
         --clr-error: var(--dark-clr-error);
+
+        --progress-bar-fill: var(--dark-progress-bar-fill);
     }
 }
 
@@ -218,6 +235,8 @@
 
     --clr-success: var(--light-clr-success);
     --clr-error: var(--light-clr-error);
+
+    --progress-bar-fill: var(--light-progress-bar-fill);
 }
 
 :root:has([value="moon"]:checked),
@@ -248,4 +267,6 @@
 
         --clr-success: var(--dark-clr-success);
         --clr-error: var(--dark-clr-error);
+
+        --progress-bar-fill: var(--dark-progress-bar-fill);
 }
