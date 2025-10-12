@@ -1,5 +1,7 @@
 ## Generalized CRUD handling routes for ANY module/model_class
 import sys
+from datetime import datetime
+
 from flask import abort, current_app, request
 from flask_login import current_user, login_required
 
@@ -14,6 +16,7 @@ from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
 from app.shared.database.helpers import safe_delete
 from app.shared.datetime.helpers import convert_to_timezone
+from app.shared.hooks import PATCH_HOOKS
 
 
 # Generalized PATCH, DELETE, GET which support:
@@ -56,16 +59,35 @@ def item(session, module, subtype, item_id):
     check_item_ownership(item, current_user.id)
     
     if request.method == 'GET':
-        # print(item.to_api_dict(), file=sys.stderr)
+        print(item.to_api_dict(), file=sys.stderr)
         # print(dir(item), file=sys.stderr)
         return api_response(True, f"Retrieved {item.__tablename__}", data=item.to_api_dict()), 200
 
     if request.method == 'PATCH':
         data = request.get_json()
         for field, value in data.items():
+            if isinstance(value, str):
+                try:
+                    value = datetime.fromisoformat(value)
+                except ValueError:
+                    pass    # leave as is if not a datetime string
+
             setattr(item, field, value)
-        return api_response(True, f"Successfully updated {model_class.__name__}"), 200
+        session.flush()
+
+        response_data = item.to_api_dict()
+
+        hook = PATCH_HOOKS.get(subtype)
+        if hook:
+            extra_data = hook(item, data, session, current_user)
+            response_data |= extra_data
+
+        return api_response(
+            True,
+            f"Successfully updated {model_class.__name__}",
+            data=response_data
+        ), 200
     
     elif request.method == 'DELETE':
         safe_delete(session, item)
-        return api_response(True, f"{model_class.__name__} deleted"), 200
+        return api_response(True, f"{model_class.__name__} deleted", data=item.to_api_dict()), 200

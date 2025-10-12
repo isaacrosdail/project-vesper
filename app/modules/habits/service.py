@@ -75,25 +75,24 @@ class HabitsService:
 
     # TODO: "Percent completion habits this week" - Mon to Sun
     def calculate_all_habits_percentage_this_week(self):
-        # NOTE: Hardcoding 'goal amount' for now, should be a field?
+        # NOTE: Hardcoding 'goal amount' for now, should be a field
         goal = 7
 
-        # 1. Determine where we are in the week first
+        # Determine current day in the week
         today = datetime.now(ZoneInfo(self.user_tz))
-        # Days since start of week
-        days_elapsed = today.weekday() + 1 # offset since last_n_days_range incl today as day # 1
+        days_into_week = today.weekday() + 1 # offset: incl today as day # 1
 
         # start_of_week = today - timedelta(days=today.weekday())
-        start_wk_utc, eod_today_utc = last_n_days_range(days_elapsed, self.user_tz)
+        start_of_week_utc, end_of_today_utc = last_n_days_range(days_into_week, self.user_tz)
 
-        # 2. Get number of completions thus far in total
-        num_completions = len(self.repo.get_all_completions_in_window(start_wk_utc, eod_today_utc))
+        # Fetch completions in that time range
+        total_completions = len(self.repo.get_all_completions_in_window(start_of_week_utc, end_of_today_utc))
 
-        # 3. Calc expected/"max" rate thus far into week
-        habits_count = self.repo.get_count_all_habits()
-        expected = (habits_count * days_elapsed)
+        # Expected completions = # of habits * days so far this week
+        total_habits = self.repo.get_count_all_habits()
+        expected_completions = (total_habits * days_into_week)
 
-        # 4. Percent completed thus far
-        percent_completed = round((num_completions / expected) * 100, 2) if expected > 0 else 0
+        # Calculate completion percentage
+        percent_completed = round((total_completions / expected_completions) * 100, 2) if expected_completions > 0 else 0
 
-        return start_wk_utc, eod_today_utc, num_completions, percent_completed, habits_count
+        return start_of_week_utc, end_of_today_utc, total_completions, expected_completions, percent_completed
