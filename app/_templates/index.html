@@ -15,6 +15,8 @@
 {{ forms.time_entry_modal('time_entries-entry-homepage', 'Add Time Entry') }}
 {{ forms.leetcode_entry_modal() }}
 
+<div id="confetti-layer"></div>
+
 {# Greeting & Time/Date Card #}
 <section id="greeting-card" class="card-dashboard _grid-2col">
     <div class="time-section">
@@ -71,16 +73,12 @@
     </div>
 
     <div class="tasks-progress">
-        <div class="progress-bar-wrapper">
-            <div class="progress-bar">
-                <div class="progress-bar-fill"
-                data-completed="{{ tasks_progress[2]}}"
-                data-total="{{ tasks_progress[3]}}"
-                data-progress="{{ tasks_progress[4]}}"
-                >
-                </div>
-                <div class="emitter">
-                </div>
+        <div class="progress-bar">
+            <div class="progress-bar-fill"
+            data-completed="{{ tasks_progress[2]}}"
+            data-total="{{ tasks_progress[3]}}"
+            data-progress="{{ tasks_progress[4]}}"
+            >
             </div>
         </div>
         <p>Today:
@@ -113,16 +111,13 @@
         </ul>
     </div>
     <div class="habits-progress">
-        <div class="progress-bar-wrapper">
-            <div class="progress-bar">
-                <div class="progress-bar-fill"
-                data-completed="{{ habits_progress[2]}}"
-                data-total="{{ habits_progress[3]}}"
-                data-progress="{{habits_progress[4]}}"
-                >
-                </div>
-            <div class="emitter"></div>
-        </div>
+        <div class="progress-bar">
+            <div class="progress-bar-fill"
+            data-completed="{{ habits_progress[2]}}"
+            data-total="{{ habits_progress[3]}}"
+            data-progress="{{habits_progress[4]}}"
+            >
+            </div>
         </div>
         <p>This week:
             <span class="progress-text">{{ habits_progress[2] }} of {{ habits_progress[3] }}</span>
