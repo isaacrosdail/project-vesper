@@ -1,3 +1,4 @@
+import sys
 from flask import request
 from flask_login import current_user, login_required
 
@@ -29,9 +30,12 @@ def tasks(session, task_id=None):
     if not result["success"]:
         return api_response(False, result["message"], errors=result["errors"])
     
+    tasks_repo.session.flush()
+    progress = tasks_service.calculate_tasks_progress_today()
+    print(f"Dict response: {progress}", file=sys.stderr)
     task = result["data"]["task"]
     return api_response(
         True,
         result["message"],
-        data = task.to_api_dict()
+        data = task.to_api_dict() | {"progress": progress}
     ), 201
