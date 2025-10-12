@@ -8,3 +8,22 @@
 .animate-wiggle {
     animation: wiggle 0.4s ease-in-out 1;
 }
+
+@keyframes arc {
+    0% { transform: translate(0px); }
+    50% { transform: translate(40px, -150px); } /* apex */
+    100% { transform: translate(80px, -120px); }
+}
+
+.arc {
+    animation: arc 0.5s ease 2 forwards;
+}
+
+@keyframes followPath {
+    to { offset-distance: 100%; }
+}
+
+@keyframes tumble {
+  0%   { transform: rotateX(0deg) rotateY(0deg); }
+  100% { transform: rotateX(720deg) rotateY(540deg); }
+}
