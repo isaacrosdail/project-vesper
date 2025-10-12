@@ -29,6 +29,17 @@
         </div>
     </div>
 
+    {# === Progress Bar Gradients === #}
+    <div class="demo-grid-container">
+            <div class="progbar one">Uno</div>
+            <div class="progbar two">Dos</div>
+            <div class="progbar three">Tres</div>
+            <div class="progbar four">Quatro</div>
+            <div class="progbar five">Sinco</div>
+            <div class="progbar six">Sies</div>
+            <div class="progbar seven">Siete</div>
+    </div>
+
     {# === Text Variants === #}
     <div class="demo-grid-container">
         <div class="tile" style="background: var(--bg); color: var(--text)">text</div>
@@ -118,15 +129,15 @@
         {# Static visual reference #}
         <div>
             <span>Static styling example:</span>
-            <div class="tooltip-popup" id="no-after">
+            <div class="tooltip" id="no-after">
             Tooltip visual styling
             </div>
         </div>
 
-        {# Interactive triggers - using your actual .tooltip class and data-tip attr #}
-        <button class="btn btn-secondary tooltip" data-tip="This tooltip should position normally">Normal Button</button>
-        <button class="btn btn-secondary tooltip" data-tip="Edge case positioning test">Edge Button</button>
-        <button class="btn btn-secondary tooltip" data-tip="Another positioning test">Right Side</button>
+        {# Interactive triggers #}
+        <button class="btn btn-secondary" data-tip="This tooltip should position normally">Normal Button</button>
+        <button class="btn btn-secondary" data-tip="Edge case positioning test">Edge Button</button>
+        <button class="btn btn-secondary" data-tip="Another positioning test">Right Side</button>
     </div>
 
     {# Context Menu Demo #}
