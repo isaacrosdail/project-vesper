@@ -75,3 +75,10 @@ def parse_time_to_datetime(time_str: str, date: datetime.date, tz_str: str) -> d
     h, m = map(int, time_str.split(":"))
     tz = ZoneInfo(tz_str)
     return datetime(date.year, date.month, date.day, h, m, tzinfo=tz)
+
+
+def is_same_local_date(dt: datetime, tz_str: str) -> bool:
+    """Return True if given datetime occurs on the same calendar date as 'now' in user's timezone."""
+    local_dt = dt.astimezone(ZoneInfo(tz_str))
+    today_local = now_utc().astimezone(ZoneInfo(tz_str)).date()
+    return local_dt.date() == today_local

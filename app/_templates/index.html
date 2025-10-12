@@ -58,7 +58,7 @@
             {{ today_frog.name if today_frog else "" }}
         </span>
         <ul class="item-list">
-        {% for task in tasks %}
+        {% for task in filtered_tasks %}
             <li class="item {% if task.is_done %}completed{% endif %}">
                 <label class="item-row">
                     <input  type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}"
@@ -70,8 +70,22 @@
         </ul>
     </div>
 
-    <div>
-
+    <div class="tasks-progress">
+        <div class="progress-bar-wrapper">
+            <div class="progress-bar">
+                <div class="progress-bar-fill"
+                data-completed="{{ tasks_progress[2]}}"
+                data-total="{{ tasks_progress[3]}}"
+                data-progress="{{ tasks_progress[4]}}"
+                >
+                </div>
+                <div class="emitter">
+                </div>
+            </div>
+        </div>
+        <p>Today:
+            <span class="progress-text">{{ tasks_progress[2] }} of {{ tasks_progress[3] }}</span>
+        </p>
     </div>
 
 </section>
@@ -98,16 +112,20 @@
         {% endfor %}
         </ul>
     </div>
-    <div class="d3-container">
-        <div class="progress-bar">
-            <div class="progress-bar-fill" data-progress="{{days_in[3]}}"></div>
+    <div class="habits-progress">
+        <div class="progress-bar-wrapper">
+            <div class="progress-bar">
+                <div class="progress-bar-fill"
+                data-completed="{{ habits_progress[2]}}"
+                data-total="{{ habits_progress[3]}}"
+                data-progress="{{habits_progress[4]}}"
+                >
+                </div>
+            <div class="emitter"></div>
         </div>
-        <p>
-            start_wk_utc = {{ days_in[0] }}<br>
-            eod_today_utc = {{ days_in[1] }}<br>
-            num_completions = {{ days_in[2] }}<br>
-            %_completed = {{ days_in[3] }}%<br>
-            habits_count = {{ days_in[4] }}<br>
+        </div>
+        <p>This week:
+            <span class="progress-text">{{ habits_progress[2] }} of {{ habits_progress[3] }}</span>
         </p>
     </div>
 </section>

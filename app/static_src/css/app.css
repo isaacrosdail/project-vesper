@@ -164,15 +164,98 @@ h3 {
     font-weight: var(--font-weight-semibold);
 }
 
-.progress-bar {
-    background-color: red;
+.progress-bar,
+.progress-bar-fill {
     height: 20px;
-    width: 200px;
+}
+html[data-theme="light"] .progress-bar {
+    background: linear-gradient(
+        to right in oklch,
+        oklch(80% 0.12 145),
+        oklch(79% 0.13 145),
+        oklch(78% 0.19 150)
+    );
+}
+html[data-theme="dark"] .progress-bar {
+    background: linear-gradient(
+        to right in oklch,
+        oklch(88% 0.11 145),
+        oklch(82% 0.12 145),
+        oklch(78% 0.19 150)
+    );
+}
+.progress-bar {
+    border-radius: var(--border-radius);
+    border: var(--border-default);
+    overflow: hidden; /* make rounded edges clean on lower percentages, effectively 'clips' overlap */
+    width: 100%;
 }
 .progress-bar-fill {
-    background-color: green;
-    height: 20px;
-    width: 1px;
+    background-color: oklch(85% 0 0);
+
+    transform: scaleX(0); /* JS can set scaleX using our percent progress directly this way */
+    transform-origin: right; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
+    transition: transform 0.2s ease-in-out;
+}
+
+.progress-bar-wrapper {
+    position: relative; /* positioning context for emitter div */
+    width: clamp(150px, 40vw, 400px);
+    perspective: 800px;
+    perspective-origin: center;
+    overflow: visible;
+}
+.emitter {
+    position: absolute;
+    z-index: 50;
+    background: lime;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.dot {
+    position: absolute;
+    transform-style: preserve-3d;
+    top: 50%;
+    left: 50%;
+    height: 6px;
+    width: 6px;
+    transform: translate(-50%, -50%);
+    /* offset-path: path('M 0 0 Q 40 -150 80 -120'); Quad Bezier */
+    offset-rotate: 0deg;
+    /* animation: followPath 1s ease-out forwards; */
+}
+/* Sprucing our confetti up with some shapes */
+.star {
+    background: gold;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    )
+}
+.circle {
+    background: green;
+    border-radius: 50%;
+}
+.diamond {
+    background: purple;
+    clip-path: polygon(50% 0%, 84% 46%, 50% 100%, 15% 47%);
+}
+.parallelogram {
+    background: orange;
+    clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+}
+.triangle {
+    background: blue;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
 
 /* ===================================
@@ -309,7 +392,7 @@ html[data-page="devtools.style_reference"] .btn-icon {
 /* Stepped gradient backgrounds */
 .stepped-bg {
     background: linear-gradient(
-        to right,
+        to right in oklch,
         var(--bg-dark)   0%, var(--bg-dark)  25%,
         var(--bg)       25%, var(--bg)       50%,
         var(--bg-light) 50%, var(--bg-light) 75%,

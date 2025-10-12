@@ -10,7 +10,8 @@ from app._infra.database import database_connection
 from app.modules.habits.repository import HabitsRepository
 from app.modules.habits.service import HabitsService
 from app.modules.tasks.repository import TasksRepository
-from app.shared.datetime.helpers import convert_to_timezone, today_range_utc, day_range_utc, now_in_timezone
+from app.modules.tasks.service import TasksService
+from app.shared.datetime.helpers import convert_to_timezone, today_range_utc, day_range_utc, now_in_timezone, is_same_local_date
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
@@ -42,7 +43,11 @@ def home():
         habits = habits_repo.get_all_habits()
         today_frog = tasks_repo.get_frog_task_in_window(start_utc, end_utc)
         tasks = tasks_repo.get_all_regular_tasks()
-
+        filtered_tasks =[
+            t
+            for t in tasks
+            if (t.due_date is None) or is_same_local_date(t.due_date, current_user.timezone)
+        ]
         # Get today's leetcode records
         start_utc, end_utc = today_range_utc(current_user.timezone)
         leetcode_records = habits_repo.get_all_leetcoderecords_in_window(start_utc, end_utc)
@@ -56,14 +61,18 @@ def home():
             }
 
         ###### WIP - For habit completion this week 'feature'
-        days_in = habits_service.calculate_all_habits_percentage_this_week()
+        habits_progress = habits_service.calculate_all_habits_percentage_this_week()
 
+        ## FOR TASKS progress bar/count
+        tasks_svc = TasksService(tasks_repo, current_user.timezone)
+        tasks_progress = tasks_svc.calculate_tasks_progress_today()
         ######
 
         ### Each key becomes its own top-level var in template (No 'ctx.' prefix required)
         ctx = {
-            'days_in': days_in,
-            "tasks": tasks,
+            'tasks_progress': tasks_progress,
+            'habits_progress': habits_progress,
+            "filtered_tasks": filtered_tasks,
             "habits": habits,
             "today_frog": today_frog,
             "habit_info": habit_info,
