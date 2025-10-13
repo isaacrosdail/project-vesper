@@ -11,9 +11,12 @@ from app._infra.db_base import Base
 from app.modules.groceries.models import Product, ShoppingListItem
 
 NEVER_DELETE = {
-    "apicallrecord",
+    "api_call_records",
     "alembic_version",
-    "habit_tags", # Association tables for these two, which use composite keys & do not receive auto-inc IDs or *_id_seq
+}
+# Skip sequence reset for association tables of course
+NO_SEQ = {
+    "habit_tags",
     "task_tags"
 }
 
@@ -40,10 +43,10 @@ def delete_all_db_data(session, include_users=False, reset_sequences=False):
         f"delete_all_db_data: include_users={include_users}, reset_sequences={reset_sequences}"
     )
 
-    # sorted_tables gives us tables in dependency order (ie, respecting FKeys)
+    # Reversing .sorted_tables gives us tables in dependency order (ie, respecting FKeys)
     # Also build filtered, dependency-ordered list once for resetting sequences hereafter
     filtered_names = []
-    for table in Base.metadata.sorted_tables:
+    for table in reversed(Base.metadata.sorted_tables):
         name = table.name.lower()
 
         # skip deny-listed tables:
@@ -59,10 +62,11 @@ def delete_all_db_data(session, include_users=False, reset_sequences=False):
 
     if reset_sequences:
         for name in filtered_names:
-            seq_name = _get_sequence_name(session, name)
-            if seq_name:
-                session.execute(text(f'ALTER SEQUENCE "{seq_name}" RESTART WITH 1'))
-                current_app.logger.info(f"Resetting sequence: {seq_name}")
+            if name not in NO_SEQ:
+                seq_name = _get_sequence_name(session, name)
+                if seq_name:
+                    session.execute(text(f'ALTER SEQUENCE "{seq_name}" RESTART WITH 1'))
+                    current_app.logger.info(f"Resetting sequence: {seq_name}")
 
 def delete_user_data(session, user_id, table):
     """User-facing delete: Delete data for a specific user from a single table."""
