@@ -72,22 +72,9 @@ services:
         max-size: "10m"
         max-file: "3"
     volumes:
-      - ./app/static_src/img/favicons/favicon.png:/app/static/img/favicons/favicon.png:ro
+      # - ./app/static_src/img/favicons:/app/static/img/favicons
+      - ./app/static:/app/static:ro
 
-  nginx:
-    build:
-      context: .
-      target: static-server
-    # Listen on port 80 inside container (nginx.conf => listen 80;)
-    ports:
-      - "80:80"    # host port 8080, container port 80
-      - "443:443"   # host port 8443, container port 443
-    depends_on:
-      - flask
-    user: "0:0" # run nginx service as root so it can read certs
-    volumes:
-      - /etc/letsencrypt/archive/vesper.isaacrosdail.com/fullchain1.pem:/etc/nginx/certs/fullchain.pem:ro
-      - /etc/letsencrypt/archive/vesper.isaacrosdail.com/privkey1.pem:/etc/nginx/certs/privkey.pem:ro
 volumes:
   pgdata-prod:
     name: vesper-pgdata-prod

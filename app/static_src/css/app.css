@@ -165,9 +165,35 @@ h3 {
 /* ===================================
     PAGE-SPECIFIC: Homepage
    ===================================*/
-#sky-canvas {
-    width: 100%;
+
+#greeting-card {
+    position: relative;
     height: clamp(150px, 15vh, 300px);
+}
+#sky-canvas {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+}
+.greeting-content {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1;
+}
+.weather-info {
+    display: flex;
+    flex-direction: column;
+    place-items: right;
+}
+.weather-info {
+    position: relative;
+    display: flex;
+    justify-content: right;
+    z-index: 1;
 }
 /* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
 .highlight-label { 
