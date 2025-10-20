@@ -22,9 +22,13 @@ jobs:
         script: |
           cd ${{ secrets.PROJECT_PATH }}
           git fetch origin main && git reset --hard origin/main
+
+          # Build static assets on host
+          sudo npm run build
           
           # Restart Docker containers
           docker compose -f docker-compose.prod.yml down
-          docker compose -f docker-compose.prod.yml up --build -d  # Added --build flag to force rebuild for changes
+          docker compose -f docker-compose.prod.yml build --no-cache
+          docker compose -f docker-compose.prod.yml up -d
 
           echo "Deployment completed at $(date)"

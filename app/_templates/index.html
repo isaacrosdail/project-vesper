@@ -18,25 +18,26 @@
 <div id="confetti-layer"></div>
 
 {# Greeting & Time/Date Card #}
-<section id="greeting-card" class="card-dashboard _grid-2col">
-    <div class="time-section">
-        <div class="card-title">
-            <h2>
-                {% if current_user.is_authenticated %}
-                    {{ greeting }}, {{ current_user.name if current_user.name else "Guest" }}!
-                {% else %}
-                    {{ greeting }}
-                {% endif %}
-            </h2>
-        </div>
-        <p><span id="time-display">{{ now_time }}</span> | {{ now_date }}</p>
-    </div>
-    <div class="weather-section">
-        <div id="weather-temp"></div>
-        <div id="weather-sunset"></div>
-        <canvas id="sky-canvas"></canvas>
+<section id="greeting-card" class="card-dashboard">
+    <div class="card-title">
+        <h2>
+            {% if current_user.is_authenticated %}
+                {{ greeting }}, {{ current_user.name if current_user.name else "Guest" }}!
+            {% else %}
+                {{ greeting }}
+            {% endif %}
+        </h2>
     </div>
 
+    <canvas id="sky-canvas"></canvas>
+
+    <div class="greeting-content">
+        <p><span id="time-display">{{ now_time }}</span> | {{ now_date }}</p>
+        <div class="weather-info">
+            <div id="weather-temp"></div>
+            <div id="weather-sunset"></div>
+        </div>
+    </div>
 </section>
 
 {# "My Day" Card #}
