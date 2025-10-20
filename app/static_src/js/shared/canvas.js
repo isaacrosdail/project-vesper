@@ -8,6 +8,9 @@ export function setupCanvas() {
     canvas.height = rect.height;
 }
 
+const MARGIN_X = 0.1; // 10% margin left/right
+const MARGIN_Y = 0.15; // 15% margin top/bottom
+
 class CelestialRenderer {
     constructor(canvasId) {
         this.canvas = document.querySelector(canvasId);
@@ -15,9 +18,10 @@ class CelestialRenderer {
     }
     draw(x, y, type) {
         const config = CELESTIAL_CONFIGS[type];
+
         // Convert normalized coordinates to canvas pixels
-        const canvasX = x * this.canvas.width;
-        const canvasY = y * this.canvas.height;
+        const canvasX = (MARGIN_X + x * (1 - 2 * MARGIN_X)) * this.canvas.width;
+        const canvasY = (MARGIN_Y + y * (1 - 2 * MARGIN_Y)) * this.canvas.height;
         
         // Set up coordinate system with bottom-left origin
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
