@@ -266,7 +266,7 @@ function triggerConfetti(sectionEl) {
 }
 
 export function init() {
-    const hasWeatherSection = document.querySelector('.weather-section');
+    const hasWeatherSection = document.querySelector('.weather-info');
     const hasHabits = document.querySelector('.habit-checkbox');
     if (!hasWeatherSection && !hasHabits) return;
 
