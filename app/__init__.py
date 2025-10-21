@@ -130,31 +130,31 @@ def _setup_request_hooks(app):
             UserRole=UserRoleEnum   # Make our UserRoleEnum available for role checks in templates directly
         )
     
-    # Apply CSP headers
-    @app.after_request
-    def apply_csp(response):
-        if os.environ.get('APP_ENV') == 'dev':
-            # Much simpler dev CSP - no nonces, no HTTPS
-            response.headers['Content-Security-Policy'] = (
-                "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline'; "
-                "style-src 'self' 'unsafe-inline'; "
-                "img-src 'self' data:; "
-                "object-src 'none'; "
-                "base-uri 'self';"
-            )
-            print("DEV CSP applied (permissive)", file=sys.stderr)
-            return response
-        # Get current domain
-        current_host = request.host
-        nonce = getattr(g, 'nonce', '')
+    # # Apply CSP headers
+    # @app.after_request
+    # def apply_csp(response):
+    #     if os.environ.get('APP_ENV') == 'dev':
+    #         # Much simpler dev CSP - no nonces, no HTTPS
+    #         response.headers['Content-Security-Policy'] = (
+    #             "default-src 'self'; "
+    #             "script-src 'self' 'unsafe-inline'; "
+    #             "style-src 'self' 'unsafe-inline'; "
+    #             "img-src 'self' data:; "
+    #             "object-src 'none'; "
+    #             "base-uri 'self';"
+    #         )
+    #         print("DEV CSP applied (permissive)", file=sys.stderr)
+    #         return response
+    #     # Get current domain
+    #     current_host = request.host
+    #     nonce = getattr(g, 'nonce', '')
 
-        response.headers['Content-Security-Policy'] = (
-            f"default-src 'self'; "
-            f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
-            f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
-            f"img-src 'self' data:;"
-            f"object-src 'none'; "
-            f"base-uri 'self';"
-        )
-        return response
+    #     response.headers['Content-Security-Policy'] = (
+    #         f"default-src 'self'; "
+    #         f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
+    #         f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
+    #         f"img-src 'self' data:;"
+    #         f"object-src 'none'; "
+    #         f"base-uri 'self';"
+    #     )
+    #     return response
