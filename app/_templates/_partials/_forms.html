@@ -38,11 +38,15 @@
 {% endmacro %}
 
 
-{% macro time_entry_modal(id='time_entries-entry-dashboard', title='Add Time Entry') %}
+{% macro time_entry_modal(id='time_entries-entry-dashboard', title='Add Time Entry', current_date=None) %}
   {% call ui.modal('time_tracking', 'time_entries', id, title) %}
     <div>
         <label for="category">Category:</label>
         <input type="text" id="category" name="category" required>
+    </div>
+    <div>
+        <label for="entry_date">Date: </label>
+        <input type="date" id="entry_date" name="entry_date" value="{{ current_date }}" required>
     </div>
     <div>
         <label for="duration_minutes">Duration (minutes):</label>
