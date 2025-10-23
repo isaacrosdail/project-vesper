@@ -15,8 +15,8 @@ class TimeTrackingService:
     def save_time_entry(self, typed_data: dict, entry_id: int | None) -> dict:
 
         # Derived field values
-        today = now_in_timezone(self.user_tz)
-        typed_data["started_at"] = parse_time_to_datetime(typed_data["started_at"], today, self.user_tz)
+        entry_date = typed_data["entry_date"] #or now_in_timezone(self.user_tz)
+        typed_data["started_at"] = parse_time_to_datetime(typed_data["started_at"], entry_date, self.user_tz)
         typed_data["ended_at"] = typed_data["started_at"] + timedelta(minutes=typed_data["duration_minutes"])
 
         # TODO: Check overlapping time entries

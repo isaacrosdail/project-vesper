@@ -1,5 +1,5 @@
 
-from flask import request
+from flask import request, current_app
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
@@ -20,6 +20,7 @@ def time_entries(session, entry_id=None):
 
         typed_data, errors = validate_time_entry(parsed_data)
         if errors:
+            current_app.logger.info(f"Validation errors: {errors}")
             return validation_failed(errors), 400
 
         repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)

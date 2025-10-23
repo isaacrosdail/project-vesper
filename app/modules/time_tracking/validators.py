@@ -3,7 +3,7 @@ import regex
 from datetime import datetime
 
 from app.modules.time_tracking.constants import *
-from app.shared.validators import validate_time_hhmm
+from app.shared.validators import validate_time_hhmm, validate_date_iso
 
 
 def validate_category(category: str) -> tuple[str | None, list[str]]:
@@ -44,6 +44,7 @@ def validate_duration_minutes(duration_minutes: str) -> tuple[int | None, list[s
 VALIDATION_FUNCS = {
     "category": validate_category,
     "description": validate_description,
+    "entry_date": validate_date_iso,
     "started_at": validate_time_hhmm,
     "duration_minutes": validate_duration_minutes,
 }
