@@ -86,10 +86,22 @@ function populateModalFields(modal, data) {
                 break;
             default:
                 if (input.type === 'number') {
-                    input.value = formatDecimal(fieldValue, 2);
+                    const step = parseFloat(input.step) || 1;
+                    if (step === 1) {
+                        input.value = Math.round(fieldValue);
+                    } else {
+                        input.value = formatDecimal(fieldValue, 2);
+                    }
                 } else {
                     input.value = String(fieldValue);
                 }
+        }
+        // For time entries, derive entry_date from started_at
+        if (data.started_at) {
+            const entryDateInput = modal.querySelector('#entry_date');
+            if (entryDateInput) {
+                entryDateInput.value = isoToDateInput(data.started_at);
+            }
         }
     });
 }
