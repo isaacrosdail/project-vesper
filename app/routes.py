@@ -35,6 +35,7 @@ def home():
             greeting = "Good evening"
 
         today = now_in_timezone(current_user.timezone).date() # user's today
+        current_date = today.isoformat() # for time_tracking entry modal's date field
         start_utc, end_utc = day_range_utc(today, current_user.timezone) # UTC bounds
 
         # Fetch tasks, habits
@@ -80,7 +81,8 @@ def home():
             "now_date": now_date,
             "now_time": now_time,
             "greeting": greeting,
-            "leetcode_records": leetcode_records
+            "leetcode_records": leetcode_records,
+            "current_date": current_date,
         }
         return render_template("index.html", **ctx)
 
