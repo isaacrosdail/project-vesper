@@ -2,6 +2,13 @@
 from app.modules.metrics.constants import *
 from app.shared.validators import *
 
+def validate_entry_date(entry_date_str: str) -> tuple[str | None, list[str]]:
+    """Required. Date string in YYYY-MM-DD format."""
+    if not entry_date_str:
+        return (None, ["Entry date is required"])
+    
+    return validate_date_iso(entry_date_str)
+
 
 def validate_weight(weight: str) -> tuple[float | None, list[str]]:
     """Positive Numeric(5, 2)"""
@@ -69,6 +76,7 @@ def validate_time_hhmm_format(time_str: str) -> tuple[str | None, list[str]]:
 
 
 VALIDATION_FUNCS = {
+    "entry_date": validate_entry_date,
     "weight": validate_weight,
     "steps": validate_steps,
     "wake_time": validate_time_hhmm_format,

@@ -1,6 +1,6 @@
 
 from sqlalchemy import Column, Numeric, Integer, DateTime
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, Index
 
 from app._infra.db_base import Base
 from app.shared.serialization import APISerializable
@@ -21,7 +21,10 @@ class DailyEntry(Base, APISerializable):
         CheckConstraint(f'weight > {WEIGHT_MINIMUM}', name='ck_weight_positive'),
         CheckConstraint(f'steps >= {STEPS_MINIMUM}', name='ck_steps_non_negative'),
         CheckConstraint(f'calories >= {CALORIES_MINIMUM}', name='ck_calories_non_negative'),
+        Index('ix_user_entry_datetime', 'user_id', 'entry_datetime'),
     )
+
+    entry_datetime = Column(DateTime(timezone=True), nullable=False)
 
     weight = Column(
         Numeric(WEIGHT_PRECISION, WEIGHT_SCALE),
@@ -35,6 +38,7 @@ class DailyEntry(Base, APISerializable):
 
     sleep_time = Column(DateTime(timezone=True))
 
+    sleep_duration_minutes = Column(Integer)
 
     def __repr__(self):
         return f"<DailyEntry id={self.id} created_at={self.created_at}>"

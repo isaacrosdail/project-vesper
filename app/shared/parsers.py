@@ -80,6 +80,7 @@ def parse_habit_form_data(form_data: dict) -> dict:
 
 def parse_daily_entry_form_data(form_data: dict) -> dict:
     return {
+        "entry_date": form_data.get("entry_datetime") or None,
         "steps": (form_data.get("steps") or "").strip(),
         "weight": (form_data.get("weight") or "").strip(),
         "calories": (form_data.get("calories") or "").strip(),
