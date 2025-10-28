@@ -17,6 +17,26 @@
 - Whitelisted all local IPs for access from laptop/etc
 
 
+## [Fri 24.10.25]
+**Goal:**
+1. Add a pie chart using D3 for time_tracking per day
+**Log:**
+1. 
+
+## [Thurs 23.10.25]
+**Goals:**
+1. Improve time_tracking entry form/service to take dates+times
+
+**Log:**
+1. Improve time_tracking entry form/service to take dates+times
+	1A. Added 'date' field to time_tracking form (id="entry_date")
+	1B. Add current_date parameter to form macro, with routes for home & dashboard now passing that in based on user's timezone, as an ISO .date()
+	1C. Add entry_date to time_entry_form_data parser, add validation using generic validate_date_iso() so it gets into typed_data dict as desired
+	1D. Adjust service.py to use entry_date instead of 'today'
+	1E. Adjust populateModalFields:
+		1. If input.type is number, round if the field's 'step' value is 1/none, otherwise use Decimal format
+		2. Special handling so entry_date field's date is extracted from started_at for edits
+
 ## [Fri 10.10.25]
 **Log:**
 0. Add proper SVG icon for dots option button on side of tables
