@@ -13,13 +13,29 @@ class DailyMetricsService:
         self.user_tz = user_tz
 
     def save_daily_entry(self, typed_data: dict, entry_id: int | None) -> dict:
+        # typed_data["entry_date"] is already a datetime.date obj from validators
+        entry_date = typed_data.pop("entry_date")
+
+        entry_datetime = datetime(
+            entry_date.year, entry_date.month, entry_date.day,
+            0, 0, 0,
+            tzinfo=ZoneInfo(self.user_tz)
+        )
+        typed_data["entry_datetime"] = entry_datetime
+
+        # Convert wake/sleep times to full datetimes
+        # NOTE: Currently assuming wake_time belongs to entry date, and sleep_time to the night prior
+        if "wake_time" in typed_data:
+            day_of = typed_data["entry_datetime"].date()
+            typed_data["wake_time"] = parse_time_to_datetime(typed_data["wake_time"], day_of, self.user_tz)
+        if "sleep_time" in typed_data:
+            prev_day = (typed_data["entry_datetime"] - timedelta(days=1)).date()
+            typed_data["sleep_time"] = parse_time_to_datetime(typed_data["sleep_time"], prev_day, self.user_tz)
 
         # Check wake/sleep times are sensible
         if "wake_time" in typed_data and "sleep_time" in typed_data:
-            wake_dt = self._convert_time_to_datetime("wake_time", typed_data["wake_time"])
-            sleep_dt = self._convert_time_to_datetime("sleep_time", typed_data["sleep_time"])
 
-            if wake_dt <= sleep_dt:
+            if typed_data["wake_time"] <= typed_data["sleep_time"]:
                 return service_response(
                     False,
                     "Wake/Sleep time check failed",
@@ -28,37 +44,45 @@ class DailyMetricsService:
                         "sleep_time": [WAKE_MUST_BE_AFTER_SLEEP]
                     }
                 )
+            
+            ## Calc sleep_duration_minutes
+            duration = typed_data["wake_time"] - typed_data["sleep_time"]
+            typed_data["sleep_duration_minutes"] = int(duration.total_seconds() / 60)
 
+        ## Check for existing entry
         # UPDATE
         if entry_id is not None:
             entry = self.repo.get_daily_metric_by_id(entry_id)
             if not entry:
                 return service_response(False, "Daily entry not found")
             
+            # Also fail if an entry for that date already exists.
+            entry_datetime_utc = typed_data["entry_datetime"].astimezone(ZoneInfo("UTC"))
+            start_utc, end_utc = entry_datetime_utc, (entry_datetime_utc + timedelta(days=1))
+
+            existing_entry = self.repo.get_daily_metric_in_window(start_utc, end_utc)
+            if existing_entry and existing_entry.id != entry_id:
+                return service_response(
+                    False,
+                    "Error: An entry already exists for this date",
+                )
+            
             for field, value in typed_data.items():
-                if field in ("wake_time", "sleep_time"):
-                    value = self._convert_time_to_datetime(field, value)
                 setattr(entry, field, value)
     
             return service_response(True, "Daily entry updated", data={"entry": entry})
     
         # CREATE/UPSERT (for today)
-        for field, value in typed_data.items():
-            if field in ("wake_time", "sleep_time"):
-                value = self._convert_time_to_datetime(field, value)
-            
-            start_utc, end_utc = today_range_utc(self.user_tz)
-            entry, was_created = self.repo.create_or_update_daily_metric(
-                field, value, start_utc, end_utc
-            )
+        # If an entry for that date exists already, update/overwrite it
+        entry_datetime_utc = typed_data["entry_datetime"].astimezone(ZoneInfo("UTC"))
+        start_utc, end_utc = entry_datetime_utc, (entry_datetime_utc + timedelta(days=1))
+
+        existing_entry = self.repo.get_daily_metric_in_window(start_utc, end_utc)
+        if existing_entry:
+            for field, value in typed_data.items():
+                setattr(existing_entry, field, value)
+            entry = existing_entry
+        else:
+            entry = self.repo.create_daily_metric(**typed_data)
 
         return service_response(True, "Daily entry saved", data = {"entry": entry})
-
-
-    def _convert_time_to_datetime(self, field: str, value: str) -> datetime:
-        if field == "wake_time":
-            today = datetime.now(ZoneInfo(self.user_tz)).date()
-            return parse_time_to_datetime(value, today, self.user_tz)
-        else:
-            yesterday = (datetime.now(ZoneInfo(self.user_tz)) - timedelta(days=1)).date()
-            return parse_time_to_datetime(value, yesterday, self.user_tz)
