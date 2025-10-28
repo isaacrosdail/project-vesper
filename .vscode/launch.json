@@ -6,6 +6,7 @@
             "name": "Python Debugger: Flask",
             "type": "debugpy",
             "request": "launch",
+            "python": "${workspaceFolder}/.venv/bin/python",
             "module": "flask",
             "env": {
                 "FLASK_APP": "flask_app.py",
