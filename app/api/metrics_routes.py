@@ -1,5 +1,6 @@
-
-from flask import request
+import sys
+from zoneinfo import ZoneInfo
+from flask import request, current_app
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
@@ -9,6 +10,7 @@ from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.service import DailyMetricsService
 from app.modules.metrics.validators import validate_daily_entry
 from app.shared.parsers import parse_daily_entry_form_data
+from app.shared.datetime.helpers import last_n_days_range
 
 
 @api_bp.route("/metrics/daily_entries", methods=["POST"])
@@ -36,3 +38,28 @@ def daily_entries(session, entry_id=None):
         result["message"],
         data = entry.to_api_dict()
     ), 201
+
+@api_bp.get("/metrics/daily_entries/linechart")
+@login_required
+@with_db_session
+def linechart(session):
+    # 1. get arg for type to return list of
+    type = request.args.get("type")
+    lastNDays = int(request.args.get("lastNDays"))
+    print(f"Type: {type}, Last {lastNDays} days", file=sys.stderr)
+
+    # 2. set up / ping repo to grab said list
+    repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+    start_utc, end_utc = last_n_days_range(lastNDays, repo.user_tz)
+    current_app.logger.info(f"Searching for entries between {start_utc} and {end_utc}")
+    results = repo.get_metrics_by_type_in_window(type, start_utc, end_utc)
+
+    current_app.logger.info(f"result: {results}")
+    return api_response(
+        True,
+        "Great success",
+        data = [
+            {"date": dt.astimezone(ZoneInfo(current_user.timezone)).isoformat(), "value": value}
+            for dt, value in results
+        ]
+    )

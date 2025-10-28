@@ -3,11 +3,11 @@ from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class DailyMetricPresenter(BasePresenter):
     VISIBLE_COLUMNS = [
-        "created_at", "weight", "steps", "wake_time", "sleep_time", "calories"
+        "entry_datetime", "weight", "steps", "wake_time", "sleep_time", "calories"
     ]
     
     COLUMN_CONFIG = {
-        "created_at": {"label": "Created", "priority": "essential"},
+        "entry_datetime": {"label": "Date", "priority": "essential"},
         "updated_at": {"label": "Last Updated", "priority": "desktop-only"},
         "weight": {"label": "Weight", "priority": "essential"},
         "steps": {"label": "Steps", "priority": "essential"},
@@ -20,7 +20,7 @@ class DailyMetricPresenter(BasePresenter):
 class DailyMetricViewModel(TimestampedViewMixin):
     def __init__(self, metric, tz):
         self.id = metric.id
-        self.created_at = metric.created_at
+        self.created_at = metric.entry_datetime
         self.weight = metric.weight
         self.steps = metric.steps
         self.wake_time = metric.wake_time
@@ -30,7 +30,7 @@ class DailyMetricViewModel(TimestampedViewMixin):
 
 
     @property
-    def created_at_label(self):
+    def entry_datetime_label(self):
         return self.format_created_at_label()
     
     @property
