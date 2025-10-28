@@ -7,6 +7,7 @@ from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.service import DailyMetricsService
 from app.modules.metrics.viewmodels import (DailyMetricPresenter,
                                             DailyMetricViewModel)
+from app.shared.datetime.helpers import now_in_timezone
 
 
 metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_prefix='/metrics')
@@ -17,13 +18,16 @@ metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_pre
 @with_db_session
 def dashboard(session):
 
-    # Instantiate repository class
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
     metric_entries = repo.get_all_daily_metrics()
+
+    today = now_in_timezone(current_user.timezone).date()
+    current_date = today.isoformat()
 
     viewmodels = [DailyMetricViewModel(e, current_user.timezone) for e in metric_entries]
     ctx = {
         "metrics": viewmodels,
-        "metric_headers": DailyMetricPresenter.build_columns()
+        "metric_headers": DailyMetricPresenter.build_columns(),
+        "current_date": current_date
     }
     return render_template("metrics/dashboard.html", **ctx)
