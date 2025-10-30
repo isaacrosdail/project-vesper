@@ -92,7 +92,6 @@ class CelestialRenderer {
  * @description
  * - X represents progress through the day (0 = sunrise, 1 = sunset)
  * - Y uses sine curve to create natural arc (0 at horizon, peak at noon)
- * - Want to extend for moon calculation using night hours later
  */
 export function calcCelestialBodyPos(start, end, now) {
     const xVal = (now - start) / (end - start);

@@ -1,4 +1,4 @@
-
+import sys
 from flask import request, current_app
 from flask_login import current_user, login_required
 
@@ -9,6 +9,7 @@ from app.modules.time_tracking.repository import TimeTrackingRepository
 from app.modules.time_tracking.service import TimeTrackingService
 from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.parsers import parse_time_entry_form_data
+from app.shared.datetime.helpers import last_n_days_range
 
 
 @api_bp.route('/time_tracking/time_entries', methods=["POST"])
@@ -17,7 +18,6 @@ from app.shared.parsers import parse_time_entry_form_data
 @with_db_session
 def time_entries(session, entry_id=None):
         parsed_data = parse_time_entry_form_data(request.form.to_dict())
-
         typed_data, errors = validate_time_entry(parsed_data)
         if errors:
             current_app.logger.info(f"Validation errors: {errors}")
@@ -36,3 +36,22 @@ def time_entries(session, entry_id=None):
             result["message"],
             data = entry.to_api_dict()
         ), 201
+
+@api_bp.get('/time_tracking/time_entries/summary/pie')
+@login_required
+@with_db_session
+def pie_data(session):
+
+    lastNDays = int(request.args.get("lastNDays"))
+    print(f"lastNDays: {lastNDays}", file=sys.stderr)
+
+    repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
+    start_utc, end_utc = last_n_days_range(lastNDays, current_user.timezone)
+    aggregate_data = repo.get_all_time_entries_in_window(start_utc, end_utc)
+    print(f"aggregate_data: {aggregate_data}", file=sys.stderr)
+
+    return api_response(
+        True,
+        f"Here you go",
+        data=[entry.to_api_dict() for entry in aggregate_data]
+    ), 200

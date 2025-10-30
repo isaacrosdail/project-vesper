@@ -9,7 +9,7 @@ def api_response(
         {
             "success": success,
             "message": message,
-            "data": data or {},
+            "data": data,
             "errors": errors or {},
         }
     )

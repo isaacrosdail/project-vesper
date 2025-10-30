@@ -18,11 +18,11 @@ from app.shared.datetime.helpers import last_n_days_range
 @login_required
 @with_db_session
 def daily_entries(session, entry_id=None):
-
     parsed_data = parse_daily_entry_form_data(request.form.to_dict())
+    current_app.logger.info(f"Parsed form data: {parsed_data}\n\n\n")
     typed_data, errors = validate_daily_entry(parsed_data)
-
     if errors:
+        current_app.logger.info(f"Validation errors: {errors}")
         return validation_failed(errors), 400
     
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)

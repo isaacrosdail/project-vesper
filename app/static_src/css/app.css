@@ -132,6 +132,43 @@ h3 {
     border-radius: 50%;
 }
 
+/* ===================================
+    PAGE-SPECIFIC: Metrics Dashboard
+   ===================================*/
+
+#line-chart {
+    border: 1px solid red;
+}
+
+
+/* ===================================
+    PAGE-SPECIFIC: Time Tracking Dashboard
+   ===================================*/
+
+#time-chart {
+    border: 1px solid red;
+}
+#time-chart [class^="pie-label-"] {
+    pointer-events: none;
+}
+/* SVG <text> for charts */
+text {
+    pointer-events: none;
+}
+.pie:hover,
+.bar:hover,
+.line:hover {
+    transition: opacity 0.1s ease;
+}
+.pie:hover,
+.bar:hover,
+.line:hover {
+    opacity: 0.7;
+}
+svg {
+    border: 1px solid lime;
+    overflow: visible;
+}
 
 /* ===================================
     APP LAYOUT / PAGE SHELL

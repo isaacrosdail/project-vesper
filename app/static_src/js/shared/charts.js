@@ -29,13 +29,13 @@ import * as d3 from 'd3';
 // console.log('Got temps: ', tempMin, tempMax);
 
 // Create the svg
-const svg = d3.select('#chart-container')
+const barSvg = d3.select('#chart-container')
     .append("svg")
     .attr("width", 500)
     .attr("height", 300);
 
 function drawChart (data) {    // Apply attributes & fill chart with rect's
-    const rects =  d3.select("svg")
+    const rects =  d3.select("barSvg")
         .selectAll("rect") // pre-emptively select the rects we're making
         .data(data)     // pass data into chart?
 
