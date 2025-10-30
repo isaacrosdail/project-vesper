@@ -54,16 +54,8 @@ class AuthService:
                       lang: UserLangEnum = UserLangEnum.EN):
         """Create user account. Must be pre-validated."""
 
-        user = User(
-            username=username,
-            name=name,
-            role=role.value,
-            lang=lang.value
-        )
-        user.hash_password(password)
-
         try:
-            self.repo.add_user(user)
+            user = self.repo.create_user(username, password, name, role, lang)
             return {"success": True, "user": user}
         except IntegrityError:
             return {"success": False, "message": "Username already exists"}

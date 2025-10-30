@@ -20,7 +20,7 @@ class HabitsService:
 
         ### UPDATE
         if habit_id:
-            habit = self.repo.get_habit_by_id(habit_id)
+            habit = self.repo.get_by_id(habit_id)
             if not habit:
                 return service_response(False, "Habit not found")
             
@@ -42,7 +42,7 @@ class HabitsService:
     ### TODO: Performance - N+1 query issue for dashboard, batch/cache?
     def calculate_habit_streak(self, habit_id: int) -> int:
         """Calculate current streak for given habit."""
-        habit_completions = self.repo.get_all_habit_completions_descending(habit_id)
+        habit_completions = self.repo.get_all_habit_completions(habit_id, order_desc=True)
 
         if not habit_completions:
             return 0
@@ -89,7 +89,7 @@ class HabitsService:
         total_completions = len(self.repo.get_all_completions_in_window(start_of_week_utc, end_of_today_utc))
 
         # Expected completions = # of habits * days so far this week
-        total_habits = self.repo.get_count_all_habits()
+        total_habits = self.repo.get_count_all()
         expected_completions = (total_habits * days_into_week)
 
         # Calculate completion percentage
