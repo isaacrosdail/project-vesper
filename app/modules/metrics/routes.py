@@ -18,8 +18,8 @@ metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_pre
 @with_db_session
 def dashboard(session):
 
-    repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
-    metric_entries = repo.get_all_daily_metrics()
+    daily_metrics_repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+    metric_entries = daily_metrics_repo.get_all()
 
     today = now_in_timezone(current_user.timezone).date()
     current_date = today.isoformat()

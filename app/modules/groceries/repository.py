@@ -16,49 +16,6 @@ class GroceriesRepository(BaseRepository):
         super().__init__(session, user_id, user_tz, model_cls=Product)
 
 
-    def get_product_by_barcode(self, barcode: str):
-        return self._user_query(Product).filter(
-            Product.barcode == barcode,
-            Product.deleted_at.is_(None)
-        ).first()
-    
-    def get_product_by_name(self, name: str):
-        return self._user_query(Product).filter(
-            Product.name == name,
-            Product.deleted_at.is_(None)
-        )
-
-    def get_product_by_id(self, product_id: int):
-        return self.get_by_id(product_id)
-
-    def get_all_products(self):
-        return self._user_query(Product).filter(
-            Product.deleted_at.is_(None)
-        ).all()
-
-
-    # TODO: NOTES: Eager load 'product' relationship using joinedload so we can safely access transaction.product.* fields in templates
-    # after session is closed (avoids DetachedInstanceError)
-    def get_all_transactions(self):
-        """Get all transaction for current user with eager-loaded products."""
-        return self._user_query(Transaction).options(
-            joinedload(Transaction.product)
-        ).all()
-    
-    def get_transaction_by_id(self, transaction_id: int):
-        return self._user_query(Transaction).filter(
-            Transaction.id == transaction_id
-        ).first()
-
-    def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime):
-        """Get a transaction within a certain datetime window (UTC)."""
-        return self._user_query(Transaction).filter(
-            Transaction.product_id == product_id,
-            Transaction.created_at >= start_utc,
-            Transaction.created_at < end_utc,
-        ).first()
-
-
     def create_product(self, name: str, category: ProductCategoryEnum,
                        net_weight: Decimal, unit_type: UnitEnum,
                        barcode: str | None,
@@ -74,7 +31,30 @@ class GroceriesRepository(BaseRepository):
         )
         return self.add(product)
 
-        
+    def get_all_products(self):
+        stmt = self._user_select(Product).where(
+            Product.deleted_at.is_(None)
+        )
+        return self.session.execute(stmt).scalars().all()
+
+    def get_product_by_id(self, product_id: int):
+        return self.get_by_id(product_id)
+
+    def get_product_by_barcode(self, barcode: str):
+        stmt = self._user_select(Product).where(
+            Product.barcode == barcode,
+            Product.deleted_at.is_(None)
+        )
+        return self.session.execute(stmt).scalars().first()
+
+    def get_product_by_name(self, name: str):
+        stmt = self._user_select(Product).where(
+            Product.name == name,
+            Product.deleted_at.is_(None)
+        )
+        return self.session.execute(stmt).scalars().first()
+
+
     def create_transaction(self, product: Product, price_at_scan: Decimal,
                            quantity: int) -> Transaction:
         transaction = Transaction(
@@ -85,7 +65,28 @@ class GroceriesRepository(BaseRepository):
         )
         return self.add(transaction)
 
-        
+    def get_all_transactions(self):
+        """Get all transaction for current user with eager-loaded products."""
+        stmt = self._user_select(Transaction).options(
+            joinedload(Transaction.product)
+        )
+        return self.session.execute(stmt).scalars().all()
+
+    def get_transaction_by_id(self, transaction_id: int):
+        stmt = self._user_select(Transaction).where(
+            Transaction.id == transaction_id
+        )
+        return self.session.execute(stmt).scalars().first()
+
+    def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime):
+        """Get a transaction within a certain datetime window (UTC)."""
+        stmt = self._user_select(Transaction).where(
+            Transaction.product_id == product_id,
+            Transaction.created_at >= start_utc,
+            Transaction.created_at < end_utc,
+        )
+        return self.session.execute(stmt).scalars().first()
+
     def create_shoppinglist(self, name: str = "DefaultListName"):
         shopping_list = ShoppingList(
             user_id=self.user_id,
@@ -95,13 +96,8 @@ class GroceriesRepository(BaseRepository):
 
     # One list per user, for now
     def get_shopping_list(self):
-        return self._user_query(ShoppingList).first()
-    
-    def get_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem:
-        return self._user_query(ShoppingListItem).filter(
-            ShoppingListItem.shopping_list_id == shopping_list_id,
-            ShoppingListItem.product_id == product_id
-        ).first()
+        stmt = self._user_select(ShoppingList)
+        return self.session.execute(stmt).scalars().first()
 
     def create_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem:
         shopping_list_item = ShoppingListItem(
@@ -110,3 +106,10 @@ class GroceriesRepository(BaseRepository):
             product_id=product_id
         )
         return self.add(shopping_list_item)
+
+    def get_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem:
+        stmt = self._user_select(ShoppingListItem).where(
+            ShoppingListItem.shopping_list_id == shopping_list_id,
+            ShoppingListItem.product_id == product_id
+        )
+        return self.session.execute(stmt).scalars().first()

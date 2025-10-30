@@ -15,7 +15,7 @@ tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix=
 def dashboard(session):
 
     tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
-    tasks = tasks_repo.get_all_tasks()
+    tasks = tasks_repo.get_all()
     
     viewmodel = [TaskViewModel(t, current_user.timezone) for t in tasks]
 

@@ -23,39 +23,26 @@ class TimeTrackingRepository(BaseRepository):
         )
         return self.add(time_entry)
 
-
-    def get_all_time_entries(self):
-        return self.get_all()
-
-    def get_time_entry_by_id(self, entry_id: int):
-        return self.get_by_id(entry_id)
-
     def get_all_time_entries_in_window(self, start_utc: datetime, end_utc: datetime):
-        return self._user_query(TimeEntry).filter(
+        stmt = self._user_select(TimeEntry).where(
             TimeEntry.started_at >= start_utc,
             TimeEntry.ended_at < end_utc,
-        ).all()
-
-    
-    def get_entries_by_category_in_window(self, category: str, start_utc: datetime, end_utc: datetime):
+        )
+        return self.session.execute(stmt).scalars().all()
+ 
+    def get_entries_by_category_in_window(
+            self,
+            category: str,
+            start_utc: datetime,
+            end_utc: datetime,
+            order_desc: bool = True,
+        ):
         """Get all entries of a given category within a certain datetime window."""
-        return self._user_query(TimeEntry).filter(
+        stmt = self._user_select(TimeEntry).where(
             TimeEntry.category == category,
             TimeEntry.started_at >= start_utc,
             TimeEntry.started_at < end_utc
-        ).all()
-
-    
-    def get_entries_by_category_last_n_days(self, category: str, days_ago: int):
-        """
-        Get time entries of given category within last N calendar days, ordered by date.
-        Inclusive of today so far.
-        Uses started_at
-        """
-        start_utc, end_utc = last_n_days_range(days_ago, self.user_tz)
-        return self._user_query(TimeEntry).filter(
-            TimeEntry.started_at >= start_utc,
-            TimeEntry.started_at < end_utc,
-        ).order_by(
-            TimeEntry.started_at.desc()
-        ).all()
+        )
+        if order_desc:
+            stmt = stmt.order_by(TimeEntry.started_at.desc())
+        return self.session.execute(stmt).scalars().all()

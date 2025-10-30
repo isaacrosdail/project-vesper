@@ -50,7 +50,7 @@ def habits(session, habit_id=None):
 def completions(session, habit_id):
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
     habits_service = HabitsService(habits_repo, current_user.timezone)
-    habit = habits_repo.get_habit_by_id(habit_id)
+    habit = habits_repo.get_by_id(habit_id)
     
     if not habit:
         return api_response(False, "Habit not found"), 404
