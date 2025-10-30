@@ -20,11 +20,11 @@ def dashboard(session):
     repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
     start_utc, end_utc = today_range_utc(current_user.timezone)
     #entries = repo.get_all_time_entries_in_window(start_utc, end_utc)
-    entries = repo.get_all_time_entries()
-    bubble_sort(entries, 'started_at', reverse=True)
+    time_entries = repo.get_all()
+    bubble_sort(time_entries, 'started_at', reverse=True)
     current_date = now_in_timezone(current_user.timezone).date().isoformat()
 
-    viewmodels = [TimeEntryViewModel(e, current_user.timezone) for e in entries]
+    viewmodels = [TimeEntryViewModel(e, current_user.timezone) for e in time_entries]
     ctx = {
         "entries": viewmodels,
         "entry_headers": TimeEntryPresenter.build_columns(),

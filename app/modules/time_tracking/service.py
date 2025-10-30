@@ -29,11 +29,10 @@ class TimeTrackingService:
 
         #  UPDATE/PUT
         if entry_id:
-            entry = self.repo.get_time_entry_by_id(entry_id)
+            entry = self.repo.get_by_id(entry_id)
             if not entry:
                 return service_response(False, "Entry not found")
-            
-            # Update fields
+
             for field, value in typed_data.items():
                 setattr(entry, field, value)
 
@@ -41,7 +40,6 @@ class TimeTrackingService:
 
         # CREATE
         else:
-            # Persist
             entry = self.repo.create_time_entry(
                 category=typed_data["category"],
                 description=typed_data.get("description"),

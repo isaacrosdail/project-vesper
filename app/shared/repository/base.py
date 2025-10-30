@@ -1,4 +1,5 @@
 
+from sqlalchemy import select, func
 
 class BaseRepository:
     """Constructor for base class."""
@@ -8,22 +9,7 @@ class BaseRepository:
         self.user_tz = user_tz
         self.model_cls = model_cls
 
-    def get_all(self):
-        return self.session.query(self.model_cls).filter(
-            self.model_cls.user_id == self.user_id
-        ).all()
-    
-    def get_count_all(self):
-        return self.session.query(self.model_cls).filter(
-            self.model_cls.user_id == self.user_id
-        ).count()
-    
-    def get_by_id(self, item_id):
-        return self.session.query(self.model_cls).filter(
-            self.model_cls.user_id == self.user_id,
-            self.model_cls.id == item_id
-        ).first()
-    
+
     def add(self, item):
         self.session.add(item)
         return item
@@ -31,9 +17,30 @@ class BaseRepository:
     def delete(self, item):
         self.session.delete(item)
         return item
-    
-    # Leaving the end blank (no .first()/.all(), etc) lets caller decide what to use there
-    def _user_query(self, model_cls):
-        return self.session.query(model_cls).filter(
-            model_cls.user_id == self.user_id,
+
+    # Returns -> Select[Tuple[model_cls]] statement
+    def _user_select(self, model_cls):
+        return select(model_cls).where(
+            model_cls.user_id == self.user_id
         )
+    # Returns -> list[self.model_cls]
+    def get_all(self):
+        stmt = select(self.model_cls).where(
+            self.model_cls.user_id == self.user_id
+        )
+        return self.session.execute(stmt).scalars().all()
+
+    # .scalar() returns count OR None if 0, so we'll return 0 in that case
+    def get_count_all(self) -> int:
+        stmt = select(func.count(self.model_cls.id)).where(
+            self.model_cls.user_id == self.user_id
+        )
+        return self.session.execute(stmt).scalar() or 0
+
+
+    def get_by_id(self, item_id):
+        stmt = select(self.model_cls).where(
+            self.model_cls.user_id == self.user_id,
+            self.model_cls.id == item_id
+        )
+        return self.session.execute(stmt).scalars().first()
