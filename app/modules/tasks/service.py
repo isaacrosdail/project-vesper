@@ -69,7 +69,7 @@ class TasksService:
         start_utc, end_utc = today_range_utc(self.user_tz)
 
         # Fetch all tasks
-        all_tasks = self.repo.get_all_tasks()
+        all_tasks = self.repo.get_all()
         count_today = len(all_tasks)
 
         # Count completed vs expected for today

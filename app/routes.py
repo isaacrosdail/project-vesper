@@ -41,7 +41,7 @@ def home():
         # Fetch tasks, habits
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
         tasks_repo = TasksRepository(session, current_user.id, current_user.timezone)
-        habits = habits_repo.get_all_habits()
+        habits = habits_repo.get_all()
         today_frog = tasks_repo.get_frog_task_in_window(start_utc, end_utc)
         tasks = tasks_repo.get_all_regular_tasks()
         filtered_tasks =[

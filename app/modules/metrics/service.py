@@ -52,7 +52,7 @@ class DailyMetricsService:
         ## Check for existing entry
         # UPDATE
         if entry_id is not None:
-            entry = self.repo.get_daily_metric_by_id(entry_id)
+            entry = self.repo.get_by_id(entry_id)
             if not entry:
                 return service_response(False, "Daily entry not found")
             
