@@ -45,7 +45,9 @@ class BaseModel(TimestampMixin):
     # Autogenerate pluralized, snake_case table names from class names
     @declared_attr
     def __tablename__(cls):
-        name = regex.sub('([a-z0-9])([A-Z])', r'\1_\2', cls.__name__).lower() # CamelCase -> snake_case first
+        # First regex pass handles 'ABTest' -> 'ab_test'
+        name = regex.sub('([A-Z]+)([A-Z][a-z])', r'\1_\2', cls.__name__)
+        name = regex.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower() # camelCase -> snake_case first
         # Pluralize
         if name.endswith('y') and name[-2] not in 'aeiou':
             return name[:-1] + 'ies'
