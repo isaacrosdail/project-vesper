@@ -27,27 +27,13 @@ def validate_description(description: str) -> tuple[str | None, list[str]]:
     return (description, [])
 
 
-def validate_duration_minutes(duration_minutes: str) -> tuple[int | None, list[str]]:
-    """Required. Positive integer."""
-    if not duration_minutes:
-        return (None, [DURATION_REQUIRED])
-
-    try:
-        duration_minutes_int = int(duration_minutes)
-        if duration_minutes_int <= 0:
-            return (None, [DURATION_POSITIVE])
-    except (ValueError, TypeError):
-        return (None, [DURATION_INVALID])
-    
-    return (duration_minutes_int, [])
-
 
 VALIDATION_FUNCS = {
     "category": validate_category,
     "description": validate_description,
     "entry_date": validate_date_iso,
     "started_at": validate_time_hhmm,
-    "duration_minutes": validate_duration_minutes,
+    "ended_at": validate_time_hhmm,
 }
 @log_validator
 def validate_time_entry(data: dict) -> tuple[dict, dict[str, list[str]]]:
