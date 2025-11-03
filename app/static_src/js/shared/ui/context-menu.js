@@ -2,6 +2,8 @@ import { makeToast } from './toast.js';
 import { apiRequest } from '../services/api.js';
 import { isoToTimeInput, isoToDateInput } from '../datetime.js';
 import { formatDecimal } from '../numbers.js';
+import { removeTableRow } from '../tables.js';
+import { confirmationManager } from '../ui/modal-manager.js';
 
 
 const MENU_CONFIG = {
@@ -121,19 +123,16 @@ function handleEdit(menuContext) {
     })
 }
 
-function handleDelete(menuContext) {
+async function handleDelete(menuContext) {
+    const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
+    if (!confirmed) return;
+
     const { itemId, module, subtype } = menuContext;
     const url = `/${module}/${subtype}/${itemId}`;
 
     apiRequest('DELETE', url, (responseData) => {
         console.log(responseData.data);
-        if (responseData.data.name) {
-            console.log(`Deleted item: ${responseData.data.name}`);
-        } else {
-            console.log(`Deleted item: ${responseData.data.subtype}`)
-        }
-
-        // menuContext.row.remove();
+        removeTableRow(itemId);
     });
 }
 

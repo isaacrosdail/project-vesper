@@ -1,6 +1,4 @@
 // Bundler: Auto-runner => wires tables on DOMContentLoaded
-// Functions for our tables, such as editTableField or deleteTableItem?
-import { confirmationManager } from './ui/modal-manager.js';
 import { makeToast } from './ui/toast.js';
 import { apiRequest } from './services/api.js';
 
@@ -20,41 +18,31 @@ export function makeTableRow(item, subtype) {
 
 
 /**
- * Deletes item from DB when clicking delete button
- * @async
- * @param {string} module 
- * @param {number} itemId 
- * @param {string} subtype 
- * @returns 
+ * Remove table row
+ * @param {number} itemId - Item ID by which to query for row
+ * @returns {void}
  */
-async function deleteTableItem(module, itemId, subtype) {
-    const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
-    if (!confirmed) return;
+export function removeTableRow(itemId) {
+    const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
+    if (!itemRow) return;
 
-    const url = `/${module}/${subtype}/${itemId}`;
+    const tableBody = itemRow.closest('tbody');
+    itemRow.remove();
 
-    apiRequest('DELETE', url, () => {
-        const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
-        const tableBody = itemRow.closest('tbody');
-
-        if (itemRow) itemRow.remove();
-
-        // Insert "No items yet" placeholder text for table if we just removed last itemRow
-        // TODO: This is functional for now, need to extract/streamline
-        if (tableBody.children.length === 0) {
-            const emptyRow = document.createElement('tr');
-            const emptyCell = document.createElement('td');
-            emptyCell.colSpan = 99;
-            emptyCell.classList.add('table-empty');
-            emptyCell.textContent = "No entries yet.";
-            emptyRow.appendChild(emptyCell);
-            tableBody.appendChild(emptyRow);
-        }
-    });
+    // Insert "No items yet" placeholder text for table if removing last itemRow
+    if (tableBody.children.length === 0) {
+        const emptyRow = document.createElement('tr');
+        const emptyCell = document.createElement('td');
+        emptyCell.colSpan = 99;
+        emptyCell.classList.add('table-empty');
+        emptyCell.textContent = "No entries yet.";
+        emptyRow.appendChild(emptyCell);
+        tableBody.appendChild(emptyRow);
+    }
 }
 
 /** 
- * Enables inline editing of a DOM element's text content via a temporary input field.
+ * Enables inline editing of a DOM element's text content via temporary input field.
  * On blur or Enter key, input it replaced with text content.
  * Returns the new value if it was changed, or null if unchanged.
  * 
@@ -71,13 +59,11 @@ export async function inlineEditElement(element) {
     input.value = originalText;
     input.size = originalText.length + 2;
 
-    // Clear element & append input
     element.textContent = '';
     element.appendChild(input);
     input.focus();
 
     // Trigger save on blur or Enter key
-    // Note: Pressing Enter triggers a blur, so the change logic is centralized in handleFinish
     return new Promise((resolve) => {
         input.addEventListener('blur', handleFinish);
         input.addEventListener('keydown', (e) => {
@@ -94,45 +80,18 @@ export async function inlineEditElement(element) {
     });
 }
 
-// 1. Get the value from the input field (represents our edited title)
-// 2. Send it to the backend to update the task in the db
-// 3. Once updated, replace the input with the new title and hide the input field
-/** 
- * Updates item's corresponding field with new table cell's value.
- * @param {string} module - API module name 
- * @param {string} field - Field name being updated
- * @param {string|number} itemId - ID of item to update
- * @param {string} newValue - New field value
- * @param {HTMLElement} td - Table cell element to update
- */
-async function saveUpdatedField(module, field, itemId, newValue, td, subtype) {
-    // Construct URL & request body
-    const url = `/${module}/${subtype}/${itemId}`;
-    const data = {}
-    data[field] = newValue;
+document.addEventListener('dblclick', async (e) => {
 
-    apiRequest('PATCH', url, () => {
-        makeToast(responseData.message, 'success');
-    }, data);
-}
+    if (e.target.classList.contains('editable-cell')) {
+        const td = e.target;
+        const newValue = await inlineEditElement(td);
+        if (newValue) {
+            const { module, field, itemId, subtype } = td.dataset;
+            const url = `/${module}/${subtype}/${itemId}`;
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.addEventListener('click', (e) => {
-        // Handle clicks on delete button or its contents (SVG)
-        if (e.target.matches('.delete-btn') || e.target.closest('.delete-btn')) {
-            const row = e.target.closest('tr');
-            if (!row) return;
-            deleteTableItem(row.dataset.module, row.dataset.itemId, row.dataset.subtype)
+            apiRequest('PATCH', url, (responseData) => {
+                makeToast(responseData.message, 'success');
+            }, { [field]: newValue });
         }
-    });
-    document.addEventListener('dblclick', async (e) => {
-        // Handle double-click to edit table cell
-        if (e.target.classList.contains('editable-cell')) {
-            const td = e.target;
-            const newValue = await inlineEditElement(td);
-            if (newValue) {
-                await saveUpdatedField(td.dataset.module, td.dataset.field, td.dataset.itemId, newValue, td, td.dataset.subtype);
-            }
-        }
-    });
+    }
 });
