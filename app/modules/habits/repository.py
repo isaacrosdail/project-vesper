@@ -4,7 +4,7 @@ Repository layer for Habits module.
 
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord, StatusEnum, DifficultyEnum, LanguageEnum, LCStatusEnum
@@ -87,6 +87,21 @@ class HabitsRepository(BaseRepository):
             )
         )
         return self.session.execute(stmt).scalars().all()
+    
+    def get_completion_counts_by_habit_in_window(self, start_utc: datetime, end_utc: datetime):
+        """Returns a list of (habit_name, count) tuples for completions in datetime range."""
+        stmt = (
+            select(Habit.name, func.count(HabitCompletion.id))
+            .select_from(HabitCompletion)
+            .join(Habit)
+            .where(
+                Habit.user_id == self.user_id,
+                HabitCompletion.created_at >= start_utc,
+                HabitCompletion.created_at < end_utc
+            )
+            .group_by(Habit.name)
+        )
+        return self.session.execute(stmt).all()
 
     def create_leetcoderecord(self, leetcode_id: int, difficulty: DifficultyEnum,
                               language: LanguageEnum, status: LCStatusEnum,
