@@ -55,7 +55,7 @@ def today_range_utc(tz_str: str) -> tuple[datetime, datetime]:
     return day_range_utc(datetime.now(ZoneInfo(tz_str)).date(), tz_str)
 
 
-def last_n_days_range(days_ago: int, tz_str: str = "UTC") -> tuple[datetime, datetime]:
+def last_n_days_range(days_ago: int, tz_str: str) -> tuple[datetime, datetime]:
     """
     Return (start_utc, end_utc) for last N days including today in user's timezone.
 
