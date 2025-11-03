@@ -463,6 +463,10 @@ footer {
     gap: var(--gap-sm);
     cursor: pointer;
 }
+.dropdown-toggle-chevron,
+.dropdown-toggle-label {
+    pointer-events: none;
+}
 .dropdown-toggle-chevron svg {
     width: 1em;
     height: 1em;
@@ -476,20 +480,18 @@ footer {
     border: var(--border-default);
     border-radius: var(--border-radius);
 }
-/* TODO: After prototyping, these will become applied on click, not hover */
-.dropdown:hover svg {
+.dropdown.is-open svg {
     transform: rotate(180deg);
 }
-.dropdown:hover .dropdown-menu {
+.dropdown.is-open .dropdown-menu {
     display: flex;
 }
+
 .dropdown-menu {
     background-color: var(--bg-light);
     border: var(--border-default);
     border-radius: var(--border-radius);
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    position: fixed;  /* important since it takes it out of the DOM flow? */
-    max-width: 50%;
     z-index: 200;
 }
 .dropdown-menu > button {

@@ -13,6 +13,7 @@ import './shared/charts.js';
 import './shared/ui/modal-manager.js';
 import './shared/ui/context-menu.js';
 import './shared/forms.js';
+import './shared/ui/dropdown.js';
 
 // Import page-specific modules
 import { init as initCore } from './core/index.js';
