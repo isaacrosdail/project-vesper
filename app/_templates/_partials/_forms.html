@@ -293,3 +293,61 @@
         </div>
     {% endcall %}
 {% endmacro %}
+
+{% macro abtest_entry_modal(id='ab_tests-entry-dashboard', title='Add ABTest') %}
+    {% call ui.modal('metrics', 'ab_tests', id, title) %}
+        <div>
+            <label for="title">Test Title:</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+        <div>
+            <label for="hypothesis">Hypothesis:</label>
+            <input type="text" id="hypothesis" name="hypothesis" required>
+        </div>
+        <div>
+            <label for="variant_a_label">Variant A:</label>
+            <input type="text" id="variant_a_label" name="variant_a_label" required>
+        </div>
+        <div>
+            <label for="variant_b_label">Variant B:</label>
+            <input type="text" id="variant_b_label" name="variant_b_label" required>
+        </div>
+        <div>
+            <label for="success_condition">Success Condition:</label>
+            <input type="text" id="success_condition" name="success_condition" required>
+        </div>
+    {% endcall %}
+{% endmacro %}
+
+{% macro abtrial_entry_modal(tests, id='ab_trials-entry-dashboard', title='Add ABTrial') %}
+    {% call ui.modal('metrics', 'ab_trials', id, title) %}
+        <div>
+            <label for="abtest_id">Test:</label>
+            <select id="abtest_id" name="abtest_id" required>
+                {% for test in tests %}
+                    <option value="{{ test.id }}">{{ test.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <fieldset class="radio-row">
+            <legend>Variant:</legend>
+            <div>
+                <input type="radio" id="variant_a" name="variant" value="variant_a" checked>
+                <label for="variant_a">A</label>
+            </div>
+            <div>
+                <input type="radio" id="variant_b" name="variant" value="variant_b">
+                <label for="variant_b">B</label>
+            </div>
+        </fieldset>
+        <div>
+            <label for="is_success">Success?:</label>
+            <input type="checkbox" id="is_success" name="is_success" required>
+        </div>
+
+        <div>
+            <label for="notes">Notes (optional):</label>
+            <input type="text" id="notes" name="notes" required>
+        </div>
+    {% endcall %}
+{% endmacro %}
