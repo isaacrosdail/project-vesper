@@ -75,7 +75,6 @@ def parse_time_entry_form_data(form_data: dict) -> dict:
         "entry_date": form_data.get("entry_date") or None,
         "started_at": form_data.get("started_at") or None,
         "ended_at": form_data.get("ended_at") or None,
-        "duration_minutes": form_data.get("duration_minutes") or None
     }
 
 @log_parser
