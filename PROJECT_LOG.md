@@ -17,16 +17,44 @@
 - Whitelisted all local IPs for access from laptop/etc
 
 
-## [Fri 24.10.25]
-**Goal:**
-1. Add a pie chart using D3 for time_tracking per day
+## [Sun 2.11.25]
 **Log:**
-1. 
+1. Drafting ABTesting functionality
+	- Add ABTest, ABVariant models (to Metrics for now)
+		- ABTest will serve as the test model itself, while ABVariant serves as the record for each individual trial
+	- For each, add: form modal, POST route, parser
+2. Added some basic logging
+
+-----
+
+## [Wed 29.10.25]
+**Log:**
+1. Fixed detached tooltip carrot: just made the tooltip-popup itself positioned centered to targetEl
+2. Hooked up habits barchart to actual data, made backend route, tweaked repo funcs
+	- TODO: Make it show ALL habits on chart even those for which there are no completions
+
+## [Tues 28.10.25]
+**Log:**
+1. Metrics Chart
+	- Add calories option to dropdown (7d), as well as a BMR line
+
+## [Mon 27.10.25]
+**Log:**
+1. D3 Charting - add line chart to metrics
+2. Metrics service - update/fix service stuff, include sleep duration & entry_datetime changes, also changed repo stuff a bit
+
+## [Sun 26.10.25]
+**Log:**
+1. D3 Charting
+	- Added pie chart w/ legend + dropdown draft for time_tracking dashboard
+2. Metrics Model Changes
+	- Adding entry_datetime since using created_at is sloppy now that we can choose/edit dates an entry "applies to" (ie, inputting my step count for Dec 12 on Dec 15 means created_at = Dec 15 -> NOT the date it applies to)
+	- While I'm at it, also finally adding sleep_duration_minutes (int)
+	- Also, since we'll often be querying daily_entries by user_id + entry_datetime, adding a composite Index for user_id + entry_datetime
 
 ## [Thurs 23.10.25]
 **Goals:**
 1. Improve time_tracking entry form/service to take dates+times
-
 **Log:**
 1. Improve time_tracking entry form/service to take dates+times
 	1A. Added 'date' field to time_tracking form (id="entry_date")
@@ -36,6 +64,36 @@
 	1E. Adjust populateModalFields:
 		1. If input.type is number, round if the field's 'step' value is 1/none, otherwise use Decimal format
 		2. Special handling so entry_date field's date is extracted from started_at for edits
+
+## [Sun 19.10.25]
+**Log:**
+1. Misc:
+	- Tweaked canvas JS to include "margins" - feels more natural/sensible now that canvas is "baked into" greeting-card
+	- Tweaked markup/css too to condense the greeting-card into one thing instead of two grid cells/columns
+
+## [Sat 11.10.25]
+**Log:**
+1. Make similar Task progress bar for current day
+2. Expand habit progress logic to per-habit as well
+
+To do #2, we need to address an issue: generic PATCH doesn't know to run calculate_tasks_percentage.
+To fix this we can use a post-PATCH hook that runs the calculate_tasks_percentage function intelligently
+
+3. Consists of 3 overall pieces:
+	1. Central registry & decorator in app/shared/hooks.py
+		- Global dict PATCH_HOOKS = {} mapping subtype -> hook function
+		- Simple decorator @register_patch_hook('tasks') that auto-registers functions into the dict
+	2. Module Service - Actual hook logic
+		@register_patch_hook('tasks')
+		def tasks_patch_hook(item, data, session, current_user):
+		...service to calculate_tasks_percentage...
+		return {"progress": progress}
+	3. Generic Patch Route - Dispatch to Hook if exists
+		- In generic_routes.py, we modify the PATCH handler to have:
+		hook = PATCH_HOOKS.get(subtype)
+		if hook:
+			extra_data = hook(item, data, session, current_user)
+			response_data |= extra_data   # merge onto normal dict
 
 ## [Fri 10.10.25]
 **Log:**
