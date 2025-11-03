@@ -9,13 +9,11 @@
 
 <div id="line-chart"></div>
 
-<button class="api-test">API test</button>
-
 {% call ui.dropdown('Select Type') %}
-    <button class="type-selection" data-type="1">Weight 1</button>
-    <button class="type-selection" data-type="2">Weight 2</button>
-    <button class="type-selection" data-type="real2">Real weight data (7 days)</button>
-    <button class="type-selection" data-type="steps7">Steps (7d)</button>
+    <button class="type-selection" data-type="weight">Weight (7d)</button>
+    <button class="type-selection" data-type="steps">Steps (7d)</button>
+    <button class="type-selection" data-type="calories">Calories (7d)</button>
+    <button class="type-selection" data-type="sleep_duration_minutes">Sleep Duration (7d)</button>
 {% endcall %}
 
 <section id="metrics-dashboard-table" class="card-dashboard">
