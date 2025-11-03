@@ -8,7 +8,10 @@
 
 <div class="chart-container"></div>
 
-<button class="press">press me</button>
+{% call ui.dropdown('Select Window') %}
+    <button class="timeframe-selection" data-range="1">Today</button>
+    <button class="timeframe-selection" data-range="7">7 Days</button>
+{% endcall %}
 
 <div class="card-dashboard">
     <div class="card-title">
