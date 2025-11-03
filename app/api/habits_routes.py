@@ -84,22 +84,23 @@ def completions(session, habit_id):
         else:
             return api_response(False, "No completion found"), 404
 
-@api_bp.get("/habits/completions/hbarchart")
+@api_bp.get("/habits/completions/summary")
 @login_required
 @with_db_session
 def horizontal_barchart(session):
-    lastNDays = int(request.args.get("lastNDays"))
+    last_n_days = int(request.args.get("lastNDays"))
     repo = HabitsRepository(session, current_user.id, current_user.timezone)
-    start_utc, end_utc = last_n_days_range(lastNDays, current_user.timezone)
+    start_utc, end_utc = last_n_days_range(last_n_days, current_user.timezone)
     aggregate_data = repo.get_completion_counts_by_habit_in_window(start_utc, end_utc)
 
     chart_data = [
         {"name": name, "count": count}
         for name, count in aggregate_data
     ]
+
     return api_response(
         True,
-        "here you go",
+        f"Retrieved completion counts for {len(chart_data)} habits",
         data=chart_data
     ), 200
 
