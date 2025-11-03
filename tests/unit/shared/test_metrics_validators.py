@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 
 from app.modules.metrics.validators import *
@@ -64,8 +66,8 @@ def test_validate_time_hhmm_format(time_str, expected_value, expected_errors):
 
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
-        {"weight": "75.0", "steps": "9000", "calories": "1800"},
-        {"weight": 75.0, "steps": 9000, "calories": 1800},
+        {"entry_date": "2025-10-23", "weight": "75.0", "steps": "9000", "calories": "1800"},
+        {"entry_date": date(2025, 10, 23), "weight": 75.0, "steps": 9000, "calories": 1800},
         {}
     )
 ])
@@ -77,8 +79,8 @@ def test_validate_daily_entry_valid(data, expected_typed_data, expected_errors):
 
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
-        {"weight": "0", "steps": "-10", "calories": "not_number"},
-        {}, # typed_data returned empty when there are errors
+        {"entry_date": "2025-10-23", "weight": "0", "steps": "-10", "calories": "not_number"},
+        {"entry_date": date(2025, 10, 23)}, # typed_data returned empty when there are errors
         {
             "weight": [WEIGHT_POSITIVE],
             "steps": [STEPS_NEGATIVE],
