@@ -1,6 +1,9 @@
+import enum
 
-from sqlalchemy import Column, Numeric, Integer, DateTime
+from sqlalchemy import Column, Numeric, Integer, DateTime, String, ForeignKey, Boolean
 from sqlalchemy import CheckConstraint, Index
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.orm import relationship
 
 from app._infra.db_base import Base
 from app.shared.serialization import APISerializable
@@ -13,6 +16,9 @@ from app.modules.metrics.constants import (
     CALORIES_MINIMUM,
 )
 
+class ABVariantEnum(enum.Enum):
+    A = "A"
+    B = "B"
 
 class DailyEntry(Base, APISerializable):
     """Stores everything in "master" units (kg, count, kcal), will convert based on user preferences."""
@@ -57,3 +63,30 @@ class DailyEntry(Base, APISerializable):
     def has_sleep_data(self):
         """True if both sleep & wake times are stored."""
         return self.sleep_time is not None and self.wake_time is not None
+
+
+class ABTest(Base, APISerializable):
+
+    title = Column(String(100), nullable=False)
+
+    hypothesis = Column(String(100), nullable=False)
+
+    variant_a_label = Column(String(50), nullable=False)
+
+    variant_b_label = Column(String(50), nullable=False)
+
+    success_condition = Column(String(50), nullable=False)
+
+    trials = relationship("ABTrial", back_populates="ab_test", cascade="all, delete-orphan")
+
+class ABTrial(Base, APISerializable):
+
+    abtest_id = Column(Integer, ForeignKey("ab_tests.id"), nullable=False)
+
+    variant = Column(SAEnum(ABVariantEnum), nullable=False)
+
+    is_success = Column(Boolean(), nullable=True)
+
+    notes = Column(String(200), nullable=True)
+
+    ab_test = relationship("ABTest", back_populates="trials")
