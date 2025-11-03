@@ -132,6 +132,22 @@ h3 {
     border-radius: 50%;
 }
 
+/* ===================================
+    D3 Charts: Habits, Metrics, Time Tracking
+   ===================================*/
+.pie,
+.bar,
+.line {
+    transition: opacity 0.1s ease;
+}
+.pie:hover,
+.bar:hover,
+.line:hover {
+    opacity: 0.7;
+}
+svg {
+    overflow: visible; /* for hovering pie chart slices */
+}
 
 /* ===================================
     APP LAYOUT / PAGE SHELL
