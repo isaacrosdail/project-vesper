@@ -46,12 +46,6 @@ function updatePieChart(data) {
                     .each(function(d) { this._current = d; }) // store start?
                     .attr("d", arc);
 
-                g.append("text")
-                    .attr("text-anchor", "middle")
-                    .attr("alignment-baseline", "middle")
-                    .text(d => `${d.data.category} (${d.data.value})`)
-                    .attr("transform", d => `translate(${arc.centroid(d)})`);
-
                 return g;
             },
             update => {
@@ -63,12 +57,6 @@ function updatePieChart(data) {
                         this._current = i(1);
                         return t => arc(i(t));
                     });
-
-                // update labels
-                update.select("text")
-                    .transition().duration(500)
-                    .text(d => `${d.data.category} (${d.data.value})`)
-                    .attr("transform", d => `translate(${arc.centroid(d)})`);
 
                 return update;
             },
@@ -82,7 +70,7 @@ function updatePieChart(data) {
                 const g = enter.append("g").attr("class", "legend");
 
                 // Position each below the last
-                g.attr("transform", (d, i) => {
+                g.attr("transform", (_d, i) => {
                     return `translate(170, ${-130 + (i * 22)})`
                 })
                 // legend circle
@@ -103,16 +91,16 @@ function updatePieChart(data) {
             },
             update => {
                 // Update transform to update positions
-                update.attr("transform", (d, i) => {
-                    return `translate(200, ${i * 20})`
-                })
+                update.attr("transform", (_d, i) => {
+                    return `translate(170, ${-130 + (i * 22)})`;
+                });
                 return update;
             },
             exit => exit.remove()
         )
 
     // Enable tooltip on hover to see data
-    groups.on('mouseenter', function(event, d) {
+    groups.on('mouseenter', function(_event, d) {
         if (disableHoverEffects) return;
 
         showToolTip(this, `${d.data.category}: ${d.data.value}`);
@@ -121,9 +109,8 @@ function updatePieChart(data) {
         const rawMidpoint = (d.startAngle + d.endAngle) / 2;
         const midpoint = rawMidpoint - (Math.PI / 2);
         const dist = radius / 10;
-        console.log(midpoint);
 
-        // Calc x, y for transform
+        // Calc x, y offsets for transform
         const x = Math.cos(midpoint) * dist;
         const y = Math.sin(midpoint) * dist;
 
@@ -132,82 +119,14 @@ function updatePieChart(data) {
             .transition().duration(200)
             .attr("transform", `translate(${x}, ${y})`);
     });
-    groups.on('mouseleave', function(event, d) {
+    groups.on('mouseleave', function() {
         if (disableHoverEffects) return;
 
         hideToolTip();
-
         d3.select(this)
             .transition().duration(200)
             .attr("transform", "translate(0, 0)");
     });
-}
-
-function renderBarGraph(height, width, data) {
-    // Bar chart
-    const svg2 = d3.select('#time-chart')
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g") // <g> -> SVG group element. Container that lets you group other SVG elements (<rect>, <text>, etc)
-
-    // scaleBand() is for categorical spacing (x-axis, bars)
-    const x = d3.scaleBand()
-        .domain(data.map(d => d.category)) // ["Programming", "Meetings", "Break"]
-        .range([0, width])                 // From 0px to 300px
-        // .range([50, width-50]) // Changing x.range() just changes _where_ in the SVG the data is drawn, NOT the SVG (width) itself. Therefore this would just leave gaps on either side
-        .padding(0.2);                     // 10% gap between bars
-
-    // scaleLinear() is for numeric (y-axis, bars)
-    const y = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.value)]) // makes the "y-cap" of chart equal the largest y-val in dataset
-        // .domain([0, 100]) // this would just make the max y-val of chart be 100, regardless of whether that fits our data our not
-        .range([height, 0]);
-
-    svg2.selectAll("rect") // grab placeholders for our bars (dont exist yet)
-        .data(data) // bind dataset to data
-        .enter() // enter the datajoin phase (create new DOM for each datum)
-        .append("rect") // actually create a <rect>
-        .attr("class", "bar")
-        .attr("x", d => x(d.category))  // x-position of bar
-        .attr("y", d => y(d.value))     // y-position of top of bar
-        .attr("width", x.bandwidth())   // width of bar using bandwidth() found earlier in the 'const x = ...' part
-        .attr("height", d => height - y(d.value))  // height of bar (y inverted cause graphics)
-        .attr("fill", "var(--accent-strong)");
-}
-
-function renderLineChart(height, width, lineData) {
-    // Line chart
-    const svgLine = d3.select('#time-chart')
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-
-    // Times here are discrete labels, not numeric time values. We can use scalePoint() for this: evenly spacing labels (strings) across a range
-    // NOTE: Upgrade to scaleTime() (requires real Date objects)
-    const xScale = d3.scalePoint()
-        .domain(lineData.map(d => d.time))
-        .range([0, width])
-        .padding(0.5);
-
-    // Since temps here are numeric in nature, we use scaleLinear()
-    const yScale = d3.scaleLinear()
-        .domain([55, 80])
-        .range([height, 0]);
-
-    // For line charts, we'll need to use D3's lineGenerator using .line() first as an intermediary step before drawing
-    const lineGenerator = d3.line()
-        .x(d => xScale(d.time))
-        .y(d => yScale(d.temp));
-
-    // Then we draw the line using the path element
-    svgLine.append("path")
-        .datum(lineData) // notice we use .datum(lineData) not .data(lineData) because we're passing the whole array, not mapping one path per data point
-        .attr("d", lineGenerator) // generates the line path
-        .attr("fill", "none")
-        .attr("stroke", "var(--accent-strong)")
-        .attr("stroke-width", 2);
 }
 
 export async function init() {
@@ -218,7 +137,6 @@ export async function init() {
 
     document.addEventListener('click', async (e) => {
         if (e.target.matches('.timeframe-selection')) {
-            console.log("test")
             const range = parseInt(e.target.dataset.range, 10);
             const data = await getData(range);
             updatePieChart(data);
@@ -228,7 +146,7 @@ export async function init() {
 
 function getData(lastNDays) {
     return new Promise((resolve, reject) => {
-        const url = `/time_tracking/time_entries/summary/pie?lastNDays=${lastNDays}`;
+        const url = `/time_tracking/time_entries/summary?lastNDays=${lastNDays}`;
         apiRequest('GET', url, (responseData) => {
             const entries = responseData.data;
             
@@ -242,7 +160,6 @@ function getData(lastNDays) {
                 d => d.category
             );
             const arr = [...rollupMap].map(([k, v]) => ({category: k, value: v}));
-            console.log(arr);
             resolve(arr);
         }, reject);
     });
