@@ -6,6 +6,7 @@ import regex
 from app.modules.auth.constants import *
 from app.modules.auth.models import UserLangEnum, UserRoleEnum
 from app.shared.validators import validate_enum
+from app.shared.logging_decorators import log_validator
 
 
 def validate_username(username: str) -> tuple[str | None, list[str]]:
@@ -53,7 +54,7 @@ VALIDATION_FUNCS = {
     "password": validate_password,
     "name": validate_name,
 }
-
+@log_validator
 def validate_user(data: dict) -> tuple[dict, dict[str, list[str]]]:
     typed_data = {}
     errors = {}
