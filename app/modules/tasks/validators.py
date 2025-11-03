@@ -4,6 +4,7 @@ from typing import Any
 from app.modules.tasks.constants import *
 from app.modules.tasks.models import PriorityEnum
 from app.shared.validators import validate_enum, validate_date_iso
+from app.shared.logging_decorators import log_validator
 
 
 def validate_task_name(name: str) -> tuple[str | None, list[str]]:
@@ -40,7 +41,7 @@ TASK_VALIDATION_FUNCS = {
     "due_date": validate_due_date,
 }
 
-
+@log_validator
 def validate_task(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate task data. Returns (typed_data, errors)."""
     typed_data = {}
@@ -105,6 +106,7 @@ TAG_VALIDATION_FUNCS = {
 }
 
 # TODO: Move elsewhere now that this is in shared/models.py?
+@log_validator
 def validate_tag(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate tag data. Returns (typed_data, errors)."""
     typed_data = {}
