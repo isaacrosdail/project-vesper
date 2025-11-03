@@ -11,6 +11,17 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     Notes for custom modals: Keyboard nav, aria-label param,
 #}
 
+{# Dropdown #}
+{% macro dropdown(text, replaceable=True) %}
+<div class="dropdown">
+    <button class="dropdown-toggle"{% if replaceable %}data-replaceable{% endif %}>
+        <span class="dropdown-toggle-label">{{ text }}</span>
+        <span class="dropdown-toggle-chevron">{{ chevron_svg() }}</span></button>
+    <div class="dropdown-menu">
+        {{ caller() }}
+    </div>
+</div>
+{% endmacro %}
 
 {# Responsive Tables #}
 
