@@ -9,8 +9,8 @@ def api_response(
         {
             "success": success,
             "message": message,
-            "data": data or {},
-            "errors": errors or {},
+            "data": data,
+            "errors": errors,
         }
     )
 
@@ -21,8 +21,8 @@ def service_response(
     return {
         "success": success,
         "message": message,
-        "data": data or {},
-        "errors": errors or {},
+        "data": data,
+        "errors": errors,
     }
 
 
