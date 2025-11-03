@@ -4,6 +4,7 @@ from datetime import datetime
 
 from app.modules.time_tracking.constants import *
 from app.shared.validators import validate_time_hhmm, validate_date_iso
+from app.shared.logging_decorators import log_validator
 
 
 def validate_category(category: str) -> tuple[str | None, list[str]]:
@@ -48,7 +49,7 @@ VALIDATION_FUNCS = {
     "started_at": validate_time_hhmm,
     "duration_minutes": validate_duration_minutes,
 }
-
+@log_validator
 def validate_time_entry(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate time entry data. Returns (typed_data, errors)."""
     typed_data = {}

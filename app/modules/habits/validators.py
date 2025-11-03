@@ -5,6 +5,7 @@ from app.modules.habits.constants import *
 from app.modules.habits.models import (DifficultyEnum, LanguageEnum,
                                        LCStatusEnum, StatusEnum)
 from app.shared.validators import validate_enum
+from app.shared.logging_decorators import log_validator
 
 
 def validate_habit_name(name: str) -> tuple[str | None, list[str]]:
@@ -21,7 +22,7 @@ def validate_habit_name(name: str) -> tuple[str | None, list[str]]:
 HABIT_VALIDATION_FUNCS = {
     "name": validate_habit_name,
 }
-
+@log_validator
 def validate_habit(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate habit data. Returns (typed_data, errors)."""
     typed_data = {}
@@ -48,7 +49,7 @@ def validate_habit(data: dict) -> tuple[dict, dict[str, list[str]]]:
 
 
 
-
+@log_validator
 def validate_habit_completion(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate habit completion. Returns (typed_data, errors)."""
     typed_data = {}
@@ -113,7 +114,7 @@ LC_VALIDATION_FUNCS = {
     "language": validate_language,
     "status": validate_leetcode_status,
 }
-
+@log_validator
 def validate_leetcode_record(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate LeetCode record. Returns (typed_data, errors)."""
     typed_data = {}

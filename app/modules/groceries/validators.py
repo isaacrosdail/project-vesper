@@ -5,6 +5,7 @@ import regex
 from app.modules.groceries.constants import *
 from app.modules.groceries.models import ProductCategoryEnum, UnitEnum
 from app.shared.validators import *
+from app.shared.logging_decorators import log_validator
 
 
 def validate_product_name(product_name: str) -> tuple[str | None, list[str]]:
@@ -83,7 +84,7 @@ PRODUCT_VALIDATION_FUNCS = {
     "unit_type": validate_unit_type,
     "calories_per_100g": validate_calories,
 }
-
+@log_validator
 def validate_product(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate product data. Returns (typed_data, errors)."""
     typed_data = {}
@@ -136,7 +137,7 @@ TRANSACTION_VALIDATION_FUNCS = {
     "price_at_scan": validate_price,
     "quantity": validate_quantity,
 }
-
+@log_validator
 def validate_transaction(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate transaction data. Returns (typed_data, errors)."""
     typed_data = {}
@@ -153,7 +154,7 @@ def validate_transaction(data: dict) -> tuple[dict, dict[str, list[str]]]:
     return (typed_data, errors)
 
 
-
+@log_validator
 def validate_shopping_list(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate shopping list data. Returns (typed_data, errors)."""
     typed_data = {}
@@ -200,7 +201,7 @@ SHOPPING_LIST_ITEM_VALIDATION_FUNCS = {
     "shopping_list_id": validate_shopping_list_id,
     "product_id": validate_product_id
 }
-
+@log_validator
 def validate_shopping_list_item(data: dict) -> tuple[dict, dict[str, list[str]]]:
     """Validate shopping list item. Returns (typed_data, errors)."""
     typed_data = {}

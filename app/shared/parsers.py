@@ -8,6 +8,7 @@ Normalize raw HTTP form inputs into clean dicts.
 - Numbers/dates -> value or None
 - Checkboxes -> .get(..) is not None (to normalize to bools)
 """
+from app.shared.logging_decorators import log_parser
 
 
 def _upper_or_none(val: str | None) -> str | None:
@@ -21,7 +22,7 @@ def parse_checkbox(val: str | None) -> bool:
     """Resolve HTML checkbox states (on, None) to (True, False)"""
     return val is not None
 
-
+@log_parser
 def parse_product_data(form_data: dict) -> dict:
     return {
         "barcode": (form_data.get("barcode") or "").strip(),
@@ -32,12 +33,14 @@ def parse_product_data(form_data: dict) -> dict:
         "calories_per_100g": form_data.get("calories_per_100g", "").strip(),
     }
 
+@log_parser
 def parse_transaction_data(form_data: dict) -> dict:
     return {
         "price_at_scan": form_data.get("price_at_scan", "").strip(),
         "quantity": form_data.get("quantity", "").strip()
     }
 
+@log_parser
 def parse_user_form_data(form_data: dict) -> dict:
     return {
         "username": (form_data.get("username") or "").strip(),
@@ -45,6 +48,7 @@ def parse_user_form_data(form_data: dict) -> dict:
         "name": (form_data.get("name") or "").strip(),
     }
 
+@log_parser
 def parse_task_form_data(form_data: dict) -> dict:
     return {
         "name": (form_data.get("name") or "").strip(),
@@ -53,6 +57,7 @@ def parse_task_form_data(form_data: dict) -> dict:
         "is_frog": parse_checkbox(form_data.get("is_frog"))
     }
 
+@log_parser
 def parse_leetcode_form_data(form_data: dict) -> dict:
     return {
         "leetcode_id": form_data.get("leetcode_id", "").strip(),
@@ -62,6 +67,7 @@ def parse_leetcode_form_data(form_data: dict) -> dict:
         "status": _upper_or_none(form_data.get("lcstatus"))
     }
 
+@log_parser
 def parse_time_entry_form_data(form_data: dict) -> dict:
     return {
         "category": (form_data.get("category") or "").strip(),
@@ -72,12 +78,14 @@ def parse_time_entry_form_data(form_data: dict) -> dict:
         "duration_minutes": form_data.get("duration_minutes") or None
     }
 
+@log_parser
 def parse_habit_form_data(form_data: dict) -> dict:
     return {
         "name": (form_data.get("name") or "").strip(),
         "is_promotable": parse_checkbox(form_data.get("is_promotable")),
     }
 
+@log_parser
 def parse_daily_entry_form_data(form_data: dict) -> dict:
     return {
         "entry_date": form_data.get("entry_datetime") or None,

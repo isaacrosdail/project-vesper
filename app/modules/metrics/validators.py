@@ -1,6 +1,8 @@
 
 from app.modules.metrics.constants import *
 from app.shared.validators import *
+from app.shared.logging_decorators import log_validator
+
 
 def validate_entry_date(entry_date_str: str) -> tuple[str | None, list[str]]:
     """Required. Date string in YYYY-MM-DD format."""
@@ -83,7 +85,7 @@ VALIDATION_FUNCS = {
     "sleep_time": validate_time_hhmm_format,
     "calories": validate_calories,
 }
-
+@log_validator
 def validate_daily_entry(data: dict) -> tuple[dict, dict[str, list[str]]]:
     typed_data = {}
     errors = {}
