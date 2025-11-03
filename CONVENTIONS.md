@@ -44,3 +44,16 @@ Composite validators:
 - Aggregates individual field validation results
 - `typed_data` only includes successfully validated fields (omits keys with errors or optional empty fields rather than storing `None` values)
 - Pattern: loop through field validators, add to `typed_data` only if `typed_value` is not None
+
+
+## CSS Property Order (Trying to get better about this for sanity's sake)
+1. Positioning: Placement & stacking context first.
+    - position, top, right, bottom, left, z-index
+2. Box Model: Defines element size and layout before cosmetics.
+    - display, flex/grid props, float, clear, width, height, min/max, margin, padding, overflow, box-sizing
+3. Typography: Anything affecting text or inline content.
+    - font, text-align, line-height, white-space, color, etc.
+4. Visual
+    - Backgrounds, borders, shadows, etc.background, border, box-shadow, outline, etc.
+5. Misc/Effects
+    - Animations, transitions, transforms, cursor, appearance.
