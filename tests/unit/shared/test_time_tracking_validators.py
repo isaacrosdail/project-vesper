@@ -1,6 +1,9 @@
+from datetime import date
+import sys
 import pytest
 
 from app.modules.time_tracking.validators import *
+from app.shared.validators import DATE_REQUIRED
 
 
 @pytest.mark.parametrize("category, expected_value, expected_errors", [
@@ -26,35 +29,19 @@ def test_validate_description(description, expected_value, expected_errors):
     assert errors == expected_errors
 
 
-@pytest.mark.parametrize("duration_minutes, expected_value, expected_errors", [
-    ("60", 60, []),
-    ("0.5", None, [DURATION_INVALID]),
-    ("-5", None, [DURATION_POSITIVE]),
-    ("0", None, [DURATION_POSITIVE]),
-    ("not_a_number", None, [DURATION_INVALID]),
-    ("", None, [DURATION_REQUIRED]),
-    (None, None, [DURATION_REQUIRED]),
-])
-def test_validate_duration_minutes(duration_minutes, expected_value, expected_errors):
-    typed_value, errors = validate_duration_minutes(duration_minutes)
-    assert typed_value == expected_value
-    assert errors == expected_errors
-
-
-
 @pytest.mark.parametrize("data, expected_typed_data, expected_errors", [
     (
-        {"category": "Study", "description": "Algorithms", "started_at": "12:00", "duration_minutes": "45"},
-        {"category": "Study", "description": "Algorithms", "started_at": "12:00", "duration_minutes": 45},
+        {"entry_date": "2025-10-23","category": "Study", "description": "Algorithms", "started_at": "12:00", "ended_at": "13:40"},
+        {"entry_date": date(2025, 10, 23), "category": "Study", "description": "Algorithms", "started_at": "12:00", "ended_at": "13:40"},
         {}
     ),
     (
-        {"category": "", "description": "a" * 201, "started_at": "12:00", "duration_minutes": "-5"},
-        {"started_at": "12:00"},
+        {"category": "", "description": "a" * 201, "started_at": "12:00", "ended_at": "13:20"},
+        {"started_at": "12:00", "ended_at": "13:20"},
         {
             "category": [CATEGORY_REQUIRED],
             "description": [DESCRIPTION_LENGTH],
-            "duration_minutes": [DURATION_POSITIVE]
+            "entry_date": [DATE_REQUIRED]
         }
     )
 ])
