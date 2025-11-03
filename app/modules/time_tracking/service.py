@@ -15,9 +15,21 @@ class TimeTrackingService:
     def save_time_entry(self, typed_data: dict, entry_id: int | None) -> dict:
 
         # Derived field values
-        entry_date = typed_data["entry_date"] #or now_in_timezone(self.user_tz)
-        typed_data["started_at"] = parse_time_to_datetime(typed_data["started_at"], entry_date, self.user_tz)
-        typed_data["ended_at"] = typed_data["started_at"] + timedelta(minutes=typed_data["duration_minutes"])
+        entry_date = typed_data["entry_date"]
+        started_at = parse_time_to_datetime(typed_data["started_at"], entry_date, self.user_tz)
+        ended_at = parse_time_to_datetime(typed_data["ended_at"], entry_date, self.user_tz)
+
+        if ended_at < started_at:
+            return service_response(
+                False,
+                "Error: ended_at cannot be earlier than started_at"
+            )
+        typed_data["started_at"] = started_at
+        typed_data["ended_at"] = ended_at
+
+        # Compute duration
+        duration = (ended_at - started_at).total_seconds() / 60
+        typed_data["duration_minutes"] = int(duration)
 
         # TODO: Check overlapping time entries
         if False:

@@ -5,15 +5,15 @@ from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class TimeEntryPresenter(BasePresenter):
     VISIBLE_COLUMNS = [
-        "category", "duration", "started_at", "description"
+        "date", "category", "time_window", "description"
     ]
 
     COLUMN_CONFIG = {
         "id": {"label": "ID", "priority": "desktop-only"},
         "category": {"label": "Category", "priority": "essential"},
         "description": {"label": "Description", "priority": "essential"},
-        "started_at": {"label": "Started At", "priority": "essential"},
-        "duration": {"label": "Duration (mins.)", "priority": "essential"}
+        "time_window": {"label": "Time Window (Duration)", "priority": "essential"},
+        "date": {"label": "Date", "priority": "essential"}
     }
 
 
@@ -28,10 +28,17 @@ class TimeEntryViewModel(TimestampedViewMixin):
         self._tz = tz
 
     @property
-    def duration_label(self):
+    def date_label(self):
+        return self.format_dt(self.started_at, fmt="%m/%d")
+    
+    @property
+    def time_window_label(self):
         mins = self.duration
         h, m = divmod(mins, 60)
-        return f"{h}h {m:02d}m" if h else f"{m}m"
+        duration = f"{h}h{m:02d}m" if h else f"{m}m"
+        start = self.format_dt(self.started_at, fmt="%I:%M%p")
+        end = self.format_dt(self.ended_at, fmt="%I:%M%p")
+        return f"{start}-{end} ({duration})"
 
     @property
     def started_at_label(self):
