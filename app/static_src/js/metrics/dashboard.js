@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 
+import { showToolTip, hideToolTip } from '../shared/ui/tooltip';
 import { apiRequest } from '../shared/services/api';
 
 // OVERALL FLOW FOR A LINE CHART:
@@ -7,79 +8,31 @@ import { apiRequest } from '../shared/services/api';
 // 2. Create the axes generators
 // 3. Call them on groups inside gRoot
 
+// Hardcoding BMR for calories, target duration for sleep
+const bmrValue = 2000;
+const targetSleepDuration = 7 * 60; // 7hrs in minutes
 
-// Dimensions
+// Dimensions & margins
 const height = 300;
 const width = 500;
 const margin = { top: 20, right: 20, bottom: 30, left: 40 };
-
 const innerWidth = width - margin.left - margin.right;
 const innerHeight = height - margin.top - margin.bottom;
 
-// Dummy dataset
-const dataDate = [
-    { date: new Date(2025, 9, 22), value: 200 },
-    { date: new Date(2025, 9, 23), value: 205 },
-    { date: new Date(2025, 9, 24), value: 196 },
-    { date: new Date(2025, 9, 27), value: 220 },
-];
-const data = [
-    { day: 1, weight: 200 },
-    { day: 2, weight: 205 },
-    { day: 3, weight: 196 },
-    { day: 4, weight: 220 },
-];
-const data2 = [
-    { day: 1, weight: 200 },
-    { day: 2, weight: 205 },
-    { day: 3, weight: 196 },
-    { day: 4, weight: 220 },
-    { day: 5, weight: 234 },
-    { day: 6, weight: 220 },
-    { day: 7, weight: 213 },
-];
-// Create the SVG itself
+// Graph formatting
+const ticks = 7;
+
+// Create second line chart (using dates now)
 const svg = d3.select('#line-chart')
     .append("svg")
     .attr("width", width)
     .attr("height", height);
 
-// Create the <g> that acts as the inner drawing area
-// Inside this, we later put stuff like g.axis-x, g.axis-y, g.legend, etc?
 const gRoot = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-// Groups inside svg
-const gXAxis = gRoot.append("g").attr("class", "axis-x");
-const gYAxis = gRoot.append("g").attr("class", "axis-y");
-const gChart = gRoot.append("g").attr("class", "chart");
-
-// Create scales
-const xScale = d3.scaleLinear()
-    .domain(d3.extent(data, d => d.day))
-    .range([0, innerWidth])
-
-const yScale = d3.scaleLinear()
-    .domain(d3.extent(data, d => d.weight))
-    .range([innerHeight, 0]) // Remember: pixel space flipped vertically
-
-// Line generator
-const line = d3.line()
-    .x(d => xScale(d.day))
-    .y(d => yScale(d.weight));
-
-
-// Create second line chart (using dates now)
-const svg2 = d3.select('#line-chart')
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-const gRoot2 = svg2.append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
 // Title for line2Chart
-const title = svg2.append("text")
+const title = svg.append("text")
     .attr("id", "line-chart-title")
     .attr("x", width/2)
     .attr("y", margin.top/2)
@@ -89,39 +42,83 @@ const title = svg2.append("text")
     .text("Initial Title");
 
 // Groups inside svg
-const g2XAxis = gRoot2.append("g").attr("class", "axis-x");
-const g2YAxis = gRoot2.append("g").attr("class", "axis-y");
-const g2Chart = gRoot2.append("g").attr("class", "chart");
+const gXAxis = gRoot.append("g")
+    .attr("transform", `translate(0, ${innerHeight})`)
+    .attr("class", "axis-x");
+const gYAxis = gRoot.append("g")
+    .attr("class", "axis-y");
+const gChart = gRoot.append("g")
+    .attr("class", "chart");
 
 // Create scales
-const x2Scale = d3.scaleTime()
-    .domain(d3.extent(dataDate, d => d.date))
-    .range([0, innerWidth])
+// Define only range/pixel values since data is dynamic
+const xScale = d3.scaleTime().range([0, innerWidth]);
+const yScale = d3.scaleLinear().range([innerHeight, 0]);
 
-const y2Scale = d3.scaleLinear()
-    .domain(d3.extent(dataDate, d => d.value))
-    .range([innerHeight, 0])
-
-// Line generator
+// Line generator: Turns [ {date,value}...] into a smooth path string
 const line2 = d3.line()
-    .x(d => x2Scale(d.date))
-    .y(d => y2Scale(d.value))
+    .x(d => xScale(d.date))
+    .y(d => yScale(d.value))
 
-function updateLine2Chart(dataDate, metricType) {
+const STATIC_LINE_CONFIG = {
+    'calories': {
+        class: "bmr-line tooltip",
+        label: d => `BMR: ${d}`,
+        color: "red",
+        data: () => [bmrValue]
+    },
+    'sleep_duration_minutes': {
+        class: "sleep-line tooltip",
+        label: d => `Target: ${d}`,
+        color: "red",
+        data: () => [targetSleepDuration]
+    }
+}
 
-    x2Scale.domain(d3.extent(dataDate, d => d.date))
-    y2Scale.domain(d3.extent(dataDate, d => d.value))
+function drawStaticLines(metricType) {
+    const config = STATIC_LINE_CONFIG[metricType];
+    if (!config) return;
 
-    g2XAxis.attr("transform", `translate(0, ${innerHeight})`)
-           .call(d3.axisBottom(x2Scale));
-    g2YAxis.call(d3.axisLeft(y2Scale));
+    const line = gChart.selectAll(`rect.${config.class.split(" ")[0]}`)
+        .data(config.data())
+        .join(
+            enter => enter.append("rect")
+                .attr("class", config.class)
+                .attr("x", 0)
+                .attr("y", d => yScale(d) - 1)
+                .attr("width", innerWidth)
+                .attr("height", 2)
+                .attr("fill", config.color)
+                .attr("opacity", 0.6),
+            update => update
+                .transition()
+                .duration(200)
+                .attr("y1", d => yScale(d))
+                .attr("y2", d => yScale(d)),
+            exit => exit.remove()
+        );
+    line.on('mouseenter', function(event, d) {
+        showToolTip(this, config.label(d));
+    }).on('mouseleave', hideToolTip);
+}
 
-    const thing = g2Chart.selectAll("path.line")
-        // .data([dataDate])
+function updateLine2Chart(data, metricType) {
+
+    // Clear static lines
+    gChart.selectAll(".bmr-line, .sleep-line").remove();
+
+    xScale.domain(d3.extent(data, d => d.date))
+    yScale.domain(d3.extent(data, d => d.value))
+
+    gXAxis.call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%m/%d")));
+    gYAxis.call(d3.axisLeft(yScale).ticks(ticks));
+
+    const thing = gChart.selectAll("path.line")
+        // .data([data])
         // This makes each metric a datum
         .data([{
             id: metricType,
-            values: dataDate
+            values: data
         }], d => d.id) // use stable ID key
         .join(
             enter => {
@@ -139,22 +136,21 @@ function updateLine2Chart(dataDate, metricType) {
             exit => exit.remove()
         );
 
-
-    const circles = g2Chart.selectAll("circle")
-        .data(dataDate, d => d.date)
+    const circles = gChart.selectAll("circle")
+        .data(data, d => d.date)
         .join(
             enter => {
                 return enter.append("circle")
                 // Instead of this:
                     // .attr("r", 4)
                     // .attr("fill", "steelblue")
-                    // .attr("cx", d => x2Scale(d.date))
-                    // .attr("cy", d => y2Scale(d.value));
+                    // .attr("cx", d => xScale(d.date))
+                    // .attr("cy", d => yScale(d.value));
                 // We can have r start at 0 and add a transition in the enter to make them animate in
                     .attr("r", 0)
                     .attr("fill", "steelblue")
-                    .attr("cx", d => x2Scale(d.date))
-                    .attr("cy", d => y2Scale(d.value))
+                    .attr("cx", d => xScale(d.date))
+                    .attr("cy", d => yScale(d.value))
                     .transition()
                     .duration(200)
                     .attr("r", 4);
@@ -162,10 +158,17 @@ function updateLine2Chart(dataDate, metricType) {
             update => update
                 .transition()
                 .duration(200)
-                .attr("cx", d => x2Scale(d.date))
-                .attr("cy", d => y2Scale(d.value)),
+                .attr("cx", d => xScale(d.date))
+                .attr("cy", d => yScale(d.value)),
             exit => exit.remove()
         );
+
+    circles.on('mouseenter', function(event, d) {
+        showToolTip(this, `${metricType}: ${d.value}`)
+    });
+    circles.on('mouseleave', () => {
+        hideToolTip();
+    })
 
     // update title text
     d3.select("#line-chart-title")
@@ -173,49 +176,25 @@ function updateLine2Chart(dataDate, metricType) {
 
 }
 
-function updateLineChart(data) {
-    // 1. Update scales
-    xScale.domain(d3.extent(data, d => d.day));
-    yScale.domain(d3.extent(data, d => d.weight));
-
-    // 2. Draw/update axes
-    gXAxis.attr("transform", `translate(0, ${innerHeight})`)
-          .call(d3.axisBottom(xScale));
-    gYAxis.call(d3.axisLeft(yScale));
-
-    // 3. Draw/update the line
-    gChart.selectAll("path.line")
-    // Since we want one line per data SET, not data point, we either use .data([data]) to pass an array containing our dataset as one item OR use .datum(data)
-    // Note if we want enter/update behavior, we need to use .data([data])
-        .data([data]) // one path per dataset
-        .join("path")
-        .attr("class", "line")
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 2)
-        .attr("d", line);
+const TYPE_LABELS = {
+    weight: "Weight",
+    steps: "Steps",
+    calories: "Calories",
+    sleep_duration_minutes: "Sleep Duration (mins)"
 }
 
-export function init() {
+export async function init() {
 
-    updateLineChart(data);
-    updateLine2Chart(dataDate, 'Dummy Data');
+    // updateLineChart(data);
+    const initialData = await getMetricData('weight', 7);
+    updateLine2Chart(initialData, 'Dummy Data');
 
     document.addEventListener('click', async (e) => {
         if (e.target.matches('.type-selection')) {
             const type = e.target.dataset.type;
-            if (type === '1') {
-                updateLineChart(data);
-            } else if (type === '2') {
-                console.log(data2);
-                updateLineChart(data2);
-            } else if (type === 'real2') {
-                const realData2 = await getMetricData('weight', 7);
-                updateLine2Chart(realData2, 'weight');
-            } else if (type === 'steps7') {
-                const realData3 = await getMetricData('steps', 7);
-                updateLine2Chart(realData3, 'steps');
-            }
+            const data = await getMetricData(type, 7);
+            updateLine2Chart(data, TYPE_LABELS[type]);
+            drawStaticLines(type);
         }
     });
 }

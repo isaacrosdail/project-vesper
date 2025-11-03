@@ -6,6 +6,13 @@
 
 {{ forms.time_entry_modal(current_date=current_date) }}
 
+<div id="time-chart"></div>
+
+{% call ui.dropdown('Select Window') %}
+    <button class="timeframe-selection" data-range="1">Today</button>
+    <button class="timeframe-selection" data-range="7">7 days</button>
+{% endcall %}
+
 <section id="activity-log-card" class="card-dashboard">
     <div class="card-title">
         <h2>Time Entries</h2>
