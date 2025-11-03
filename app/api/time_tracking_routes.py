@@ -38,17 +38,17 @@ def time_entries(session, entry_id=None):
             data = entry.to_api_dict()
         ), 201
 
-@api_bp.get("/time_tracking/time_entries/summary/pie")
+@api_bp.get("/time_tracking/time_entries/summary")
 @login_required
 @with_db_session
-def pie_summary(session):
-    lastNDays = int(request.args.get("lastNDays"))
+def time_entries_summary(session):
+    last_n_days = int(request.args.get("lastNDays"))
     repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
-    start_utc, end_utc = last_n_days_range(lastNDays, repo.user_tz)
+    start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)
     results = repo.get_all_time_entries_in_window(start_utc, end_utc)
 
     return api_response(
         True,
-        "nice",
+        f"Retrieved {len(results)} time entries",
         data = [entry.to_api_dict() for entry in results]
     )
