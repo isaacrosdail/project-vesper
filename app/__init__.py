@@ -10,22 +10,13 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from app._infra.database import db_session, init_db
-from app.api import api_bp
+
 from app.config import config_map
-from app.devtools.routes import devtools_bp
-from app.errors import errors_bp
 from app.extensions import _setup_extensions
 from app.modules.auth.models import UserRoleEnum
-from app.modules.auth.routes import auth_bp
-from app.modules.groceries.routes import groceries_bp
-from app.modules.habits.routes import habits_bp
-from app.modules.metrics.routes import metrics_bp
-from app.modules.tasks.routes import tasks_bp
-from app.modules.time_tracking.routes import time_tracking_bp
-from app.routes import main_bp
-from app.shared.debug import setup_request_debugging
+from app.shared.debug import setup_request_debugging, setup_logging
 from app.shared import jinja_filters
-
+import logging
 
 def has_dev_tools() -> bool:
     # Before login: current_user.is_authenticated is False, re-evals upon login?
@@ -53,8 +44,11 @@ def create_app(config_name: str = None):
     _setup_extensions(app)
     _setup_request_hooks(app)
     _setup_database(app)
+    print(f"[AFTER _setup_database] Root: {logging.getLogger().level}", file=sys.stderr)
+    setup_logging(app) # after Alembic borks it, before Blueprints so level applies there
     _register_blueprints(app)
-
+    print(f"[AFTER _register_blueprints] Root: {logging.getLogger().level}", file=sys.stderr)
+    
     jinja_filters.register_filters(app)
 
     return app
@@ -67,18 +61,34 @@ def _setup_database(app) -> None:
         init_db(app.config)
         if app.config["AUTO_MIGRATE"]:
             # Run Alembic migration(s) on startup
-            alembic_cfg = AlembicConfig("alembic.ini")     # "Hey Alembic, here's your config file"
+            alembic_cfg = AlembicConfig("alembic.ini")
             alembic_cfg.set_main_option("sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"]) # Make Alembic use the same db URL our Flask app is using instead of whatever APP_ENV/alembic.ini/'alembic/env.py' might try to guess.
             command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
 
+        # Set logging level back after Alembic borks it
+        logging.getLogger().setLevel(app.config['LOGGING_LEVEL'])
     # Hook db_session.remove() into teardown
     # Prevents sessions leaking between requests
     @app.teardown_appcontext
     def remove_session(exception=None):
         db_session.remove()
 
+    print(f"[AFTER _setup_database] Root: {logging.getLogger().level}", file=sys.stderr)
+
 
 def _register_blueprints(app) -> None:
+    # Import blueprints here so setup_logging() runs BEFORE these imports
+    # That way we can have logger = logging.getLogger(__name__) declared top-level in files since it resolves after our logger is set up
+    from app.api import api_bp
+    from app.devtools.routes import devtools_bp
+    from app.errors import errors_bp
+    from app.modules.auth.routes import auth_bp
+    from app.modules.groceries.routes import groceries_bp
+    from app.modules.habits.routes import habits_bp
+    from app.modules.metrics.routes import metrics_bp
+    from app.modules.tasks.routes import tasks_bp
+    from app.modules.time_tracking.routes import time_tracking_bp
+    from app.routes import main_bp
     blueprints = [
         main_bp, auth_bp, api_bp, groceries_bp, tasks_bp, habits_bp, 
         metrics_bp, time_tracking_bp, devtools_bp, errors_bp

@@ -2,7 +2,7 @@
 Configuration classes for different environments.
 Manages database URIs, debug settings, and environment-specific settings.
 """
-import os
+import os, logging
 from datetime import timedelta
 from dotenv import load_dotenv
 from flask.config import Config  # hijack Flask's config obj
@@ -12,6 +12,7 @@ if os.getenv("APP_ENV", "dev") != "prod":
     load_dotenv(override=False) # real env (Docker) wins if already set, so we pull our env vars from our container instead of 
 
 class BaseConfig:
+    LOGGING_LEVEL = logging.INFO
     DEFAULT_TZ = "Europe/London" # default TZ to be used for some stuff
     APP_ENV = "base"
     AUTO_MIGRATE = True     # Default to run migrations on startup
@@ -21,6 +22,7 @@ class BaseConfig:
     REMEMBER_COOKIE_DURATION = timedelta(days=30) # Flask automatically picks this up
 
 class DevConfig(BaseConfig):
+    LOGGING_LEVEL = logging.DEBUG
     APP_ENV = "dev"
     DEBUG = True            # Enables debug mode, reloader, detailed error pages
     SQLALCHEMY_DATABASE_URI = os.environ.get(
@@ -30,6 +32,7 @@ class DevConfig(BaseConfig):
     SQLALCHEMY_ECHO = False # flip to True to see SQL sent by SQLAlchemy
 
 class ProdConfig(BaseConfig):
+    LOGGING_LEVEL = logging.WARNING
     APP_ENV = "prod"
     AUTO_MIGRATE = True
     USE_PROXY_FIX = True   # For playing nice with our CSP/nginx headers
