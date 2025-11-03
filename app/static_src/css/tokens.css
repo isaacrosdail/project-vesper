@@ -15,7 +15,7 @@
 * Note: For inverted text, map to the opposite theme's values in mappings.
 */
 :root {
-    --font-family-primary: 'Manrope', sans-serif;
+    --font-family-primary: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     --font-weight-default: 400;
     --font-weight-semibold: 600;
 
@@ -86,7 +86,7 @@
     --light-bg-selection: oklch(68% 0.15 48);                  /* Selection background */
     --light-text-selection: oklch(30% 0.15 250);                /* Selection text color */
 
-    --light-clr-success: oklch(45% 0.10 145);
+    --light-clr-success: oklch(55% 0.15 150);
     --light-clr-error: oklch(55% 0.22 25); /* OR: oklch(60% 0.2 25); */
 
     --light-progress-bar-fill: linear-gradient(
