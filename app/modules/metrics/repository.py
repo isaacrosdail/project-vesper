@@ -5,7 +5,7 @@ from decimal import Decimal
 from sqlalchemy import select
 
 from app.shared.repository.base import BaseRepository
-from app.modules.metrics.models import DailyEntry
+from app.modules.metrics.models import DailyEntry, ABTest, ABTrial
 
 
 class DailyMetricsRepository(BaseRepository):
@@ -56,3 +56,46 @@ class DailyMetricsRepository(BaseRepository):
 
         # Note: We don't need .scalars() here since we're intentionally selecting multiple fields
         return self.session.execute(stmt).all()
+    
+
+class ABTestRepository(BaseRepository):
+    def __init__(self, session, user_id, user_tz):
+        super().__init__(session, user_id, user_tz, model_cls=ABTest)
+
+    def create_abtest(
+            self,
+            title: str,
+            hypothesis: str,
+            variant_a_label: str,
+            variant_b_label: str,
+            success_condition: str
+    ) -> ABTest:
+        abtest = ABTest(
+            user_id=self.user_id,
+            title=title,
+            hypothesis=hypothesis,
+            variant_a_label=variant_a_label,
+            variant_b_label=variant_b_label,
+            success_condition=success_condition
+        )
+        return self.add(abtest)
+    
+class ABTrialRepository(BaseRepository):
+    def __init__(self, session, user_id, user_tz):
+        super().__init__(session, user_id, user_tz, model_cls=ABTrial)
+    
+    def create_abtrial(
+            self,
+            abtest_id,
+            variant,
+            is_success,
+            notes
+    ) -> ABTrial:
+        abtrial = ABTrial(
+            user_id=self.user_id,
+            abtest_id=abtest_id,
+            variant=variant,
+            is_success=is_success,
+            notes=notes
+        )
+        return self.add(abtrial)
