@@ -45,14 +45,11 @@
     <div class="card-title">
         <h2>My Day</h2>
         {{ ui.plus_btn('tasks-entry-homepage-btn', 'Add Task') }}
-        <div class="dropdown">
-            <button class="dropdown-toggle">Quick Add <span class="dropdown-toggle-chevron">{{ ui.chevron_svg() }}</span></button>
-            <div class="dropdown-menu">
-                <button id="time_entries-entry-homepage-btn">Time Entry</button>
-                <button id="daily_entries-entry-homepage-btn">Metric Entry</button>
-                <button id="leet_code_records-entry-homepage-btn">LeetCode Record</button>
-            </div>
-        </div>
+        {% call ui.dropdown('Quick Add', replaceable=False) %}
+            <button id="time_entries-entry-homepage-btn">Time Entry</button>
+            <button id="daily_entries-entry-homepage-btn">Metric Entry</button>
+            <button id="leet_code_records-entry-homepage-btn">LeetCode Record</button>
+        {% endcall %}
     </div>
 
     <div>
