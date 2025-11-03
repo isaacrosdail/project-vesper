@@ -12,7 +12,7 @@ from app.modules.habits.service import HabitsService
 from app.modules.habits.validators import (validate_habit,
                                            validate_leetcode_record)
 from app.shared.datetime.helpers import (day_range_utc, parse_js_instant,
-                                         today_range_utc)
+                                         today_range_utc, last_n_days_range)
 from app.shared.parsers import parse_habit_form_data, parse_leetcode_form_data
 
 
@@ -84,6 +84,24 @@ def completions(session, habit_id):
         else:
             return api_response(False, "No completion found"), 404
 
+@api_bp.get("/habits/completions/hbarchart")
+@login_required
+@with_db_session
+def horizontal_barchart(session):
+    lastNDays = int(request.args.get("lastNDays"))
+    repo = HabitsRepository(session, current_user.id, current_user.timezone)
+    start_utc, end_utc = last_n_days_range(lastNDays, current_user.timezone)
+    aggregate_data = repo.get_completion_counts_by_habit_in_window(start_utc, end_utc)
+
+    chart_data = [
+        {"name": name, "count": count}
+        for name, count in aggregate_data
+    ]
+    return api_response(
+        True,
+        "here you go",
+        data=chart_data
+    ), 200
 
 @api_bp.route("/habits/leetcode_records", methods=["POST"])
 @login_required
