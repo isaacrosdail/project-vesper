@@ -72,23 +72,26 @@ def ab_trials(session):
         data=result.to_api_dict()
     ), 201
 
-@api_bp.get("/metrics/daily_entries/linechart")
+@api_bp.get("/metrics/daily_entries/timeseries")
 @login_required
 @with_db_session
-def linechart(session):
-    type = request.args.get("type")
-    lastNDays = int(request.args.get("lastNDays"))
+def daily_entries_timeseries(session):
+    metric_type = request.args.get("metric_type")
+    last_n_days = int(request.args.get("lastNDays"))
 
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
-    start_utc, end_utc = last_n_days_range(lastNDays, repo.user_tz)
-    results = repo.get_metrics_by_type_in_window(type, start_utc, end_utc)
+    start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)
+    results = repo.get_metrics_by_type_in_window(metric_type, start_utc, end_utc)
 
     logger.debug(f"result: {results}")
     return api_response(
         True,
-        "Great success",
+        f"Retrieved {len(results)} {metric_type} entries",
         data = [
-            {"date": dt.astimezone(ZoneInfo(current_user.timezone)).isoformat(), "value": value}
+            {
+                "date": dt.astimezone(ZoneInfo(current_user.timezone)).isoformat(),
+                "value": value
+            }
             for dt, value in results
         ]
     )
