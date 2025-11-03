@@ -1,27 +1,12 @@
 import * as d3 from 'd3';
 
 import { apiRequest } from '../shared/services/api';
-
-// Arr of objs, each w/ date & count
-const dummyData = [
-    {date: new Date(2025, 9, 10), count: 3},
-    {date: new Date(2025, 9, 10), count: 2},
-    {date: new Date(2025, 9, 10), count: 4},
-    {date: new Date(2025, 9, 10), count: 2},
-    {date: new Date(2025, 9, 10), count: 5},
-    {date: new Date(2025, 9, 10), count: 3},
-]
-const hbarData = [
-    { category: "A", count: 6},
-    { category: "B", count: 12},
-    { category: "C", count: 3},
-    { category: "D", count: 8},
-]
+import { showToolTip, hideToolTip } from '../shared/ui/tooltip';
 
 // Dimensions
 const margin = { top: 20, right: 30, bottom: 40, left: 90 };
-const width = 400 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 350 - margin.left - margin.right;
+const height = 350 - margin.top - margin.bottom;
 
 // Set up chart svg as a whole
 const svg = d3.select(".chart-container")
@@ -34,8 +19,8 @@ const svg = d3.select(".chart-container")
 const title = svg.append("text")
     .attr("x", (width/2))
     .attr("y", -margin.top/2)
-    .attr("font-size", "var(--font-size-xl)")
-    .text("hey")
+    .attr("font-size", "var(--font-size-l)")
+    .text("Completions by Habit")
 
 const gXAxis = svg.append("g")
     .attr("class", "axis-x")
@@ -51,26 +36,26 @@ function updateBarChart(data) {
     xScale.domain([0, d3.max(data, d => d.count)])
     yScale.domain(data.map(d => d.name))
 
-    gXAxis.call(d3.axisBottom(xScale))
-        // Then rotates the text for x-axis info to fit slightly better
-        .selectAll("text")
-            .attr("transform", "translate(-10,0)rotate(-45)")
-            .attr("text-anchor", "end");
+    gXAxis.call(
+        d3.axisBottom(xScale)
+            .tickValues(d3.range(0, d3.max(data, d => d.count) + 1, 1))
+        )
     gYAxis.call(d3.axisLeft(yScale));
 
-    const graph = svg.selectAll("rect")
+    const bars = svg.selectAll("rect")
     .data(data)
     .join(
         enter => {
             return enter.append("rect")
-                .attr("x", 0) // start at same horizontal point
-                .attr("y", d => yScale(d.name)) // 
+                .attr("x", 0)
+                .attr("y", d => yScale(d.name))
                 .attr("width", 0)
                 .attr("height", yScale.bandwidth())
                 .attr("fill", "var(--accent-strong)")
+                .attr("class", "line")
                 .transition()
                 .duration(500)
-                .attr("width", d => xScale(d.count)) // Start at 0 width above & transition to full
+                .attr("width", d => xScale(d.count))
         },
         update => update
             .transition()
@@ -78,19 +63,33 @@ function updateBarChart(data) {
             .attr("width", d => xScale(d.count)),
         exit => exit.remove()
     );
+
+    bars.on('mouseenter', function(event, d) {
+        showToolTip(this, `${d.name}: ${d.count}`);
+    })
+    .on('mouseleave', function() {
+        hideToolTip();
+    });
 }
 
 export async function init() {
-    const data = await getHabitsData(5);
+    const data = await getHabitsData(1);
     updateBarChart(data);
+
+    document.addEventListener('click', async (e) => {
+        if (e.target.matches('.timeframe-selection')) {
+            const range = parseInt(e.target.dataset.range, 10);
+            const newData = await getHabitsData(range);
+            updateBarChart(newData);
+        }
+    });
 }
 
 function getHabitsData(lastNDays) {
     return new Promise((resolve, reject) => {
-        const url = `/habits/completions/hbarchart?lastNDays=${lastNDays}`;
+        const url = `/habits/completions/summary?lastNDays=${lastNDays}`;
         apiRequest('GET', url, (responseData) => {
             const entries = responseData.data;
-            console.log(entries)
             resolve(entries);
         }, reject);
     });
