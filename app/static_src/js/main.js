@@ -21,6 +21,9 @@ import { init as initStyleRef } from './style-reference.js';
 import { init as initGroceries } from './groceries/dashboard.js';
 import { init as initHabits } from './habits/dashboard.js';
 import { init as initTasks } from './tasks/dashboard.js';
+import { init as initTimeTracking } from './time_tracking/dashboard.js';
+import { init as initMetrics } from './metrics/dashboard.js';
+
 
 const initRegistry = {
     "main.home": () => initCore(),
@@ -28,6 +31,8 @@ const initRegistry = {
     "groceries.dashboard": () => initGroceries(),
     "habits.dashboard": () => initHabits(),
     "tasks.dashboard": () => initTasks(),
+    "time_tracking.dashboard": () => initTimeTracking(),
+    "metrics.dashboard": () => initMetrics(),
 };
 
 export async function initMain() {
