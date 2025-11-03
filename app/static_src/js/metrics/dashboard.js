@@ -31,7 +31,7 @@ const svg = d3.select('#line-chart')
 const gRoot = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-// Title for line2Chart
+// Title for lineChart
 const title = svg.append("text")
     .attr("id", "line-chart-title")
     .attr("x", width/2)
@@ -102,7 +102,7 @@ function drawStaticLines(metricType) {
     }).on('mouseleave', hideToolTip);
 }
 
-function updateLine2Chart(data, metricType) {
+function updateLineChart(data, metricType) {
 
     // Clear static lines
     gChart.selectAll(".bmr-line, .sleep-line").remove();
@@ -141,14 +141,9 @@ function updateLine2Chart(data, metricType) {
         .join(
             enter => {
                 return enter.append("circle")
-                // Instead of this:
-                    // .attr("r", 4)
-                    // .attr("fill", "steelblue")
-                    // .attr("cx", d => xScale(d.date))
-                    // .attr("cy", d => yScale(d.value));
                 // We can have r start at 0 and add a transition in the enter to make them animate in
                     .attr("r", 0)
-                    .attr("fill", "steelblue")
+                    .attr("fill", "var(--accent-strong")
                     .attr("cx", d => xScale(d.date))
                     .attr("cy", d => yScale(d.value))
                     .transition()
@@ -163,7 +158,7 @@ function updateLine2Chart(data, metricType) {
             exit => exit.remove()
         );
 
-    circles.on('mouseenter', function(event, d) {
+    circles.on('mouseenter', function(_event, d) {
         showToolTip(this, `${metricType}: ${d.value}`)
     });
     circles.on('mouseleave', () => {
@@ -184,24 +179,22 @@ const TYPE_LABELS = {
 }
 
 export async function init() {
-
-    // updateLineChart(data);
     const initialData = await getMetricData('weight', 7);
-    updateLine2Chart(initialData, 'Dummy Data');
+    updateLineChart(initialData, 'Weight');
 
     document.addEventListener('click', async (e) => {
         if (e.target.matches('.type-selection')) {
-            const type = e.target.dataset.type;
-            const data = await getMetricData(type, 7);
-            updateLine2Chart(data, TYPE_LABELS[type]);
-            drawStaticLines(type);
+            const metric_type = e.target.dataset.type;
+            const data = await getMetricData(metric_type, 7);
+            updateLineChart(data, TYPE_LABELS[metric_type]);
+            drawStaticLines(metric_type);
         }
     });
 }
 
-function getMetricData(type, lastNDays) {
+function getMetricData(metric_type, lastNDays) {
     return new Promise((resolve, reject) => {
-        const url = `/metrics/daily_entries/linechart?type=${type}&lastNDays=${lastNDays}`;
+        const url = `/metrics/daily_entries/timeseries?metric_type=${metric_type}&lastNDays=${lastNDays}`;
         apiRequest('GET', url, (responseData) => {
             const entries = responseData.data;
             console.log(entries);
