@@ -1,6 +1,10 @@
 # Project Vesper
 A personal productivity platform currently in development.
 
+## Highlight Features:
+- Polished interactive UI components (progress bars, animations) with attention to accessibility and motion preferences.
+
+
 ## Current Status
 This is an active development project focused on creating a solid foundation before expanding features. 
 The core architecture and infrastructure are in place, with individual modules at various stages of completion.
