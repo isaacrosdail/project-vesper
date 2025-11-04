@@ -1,12 +1,19 @@
 
+// Define the type alias
+type ToastType = 'info' | 'success' | 'error' | 'warning';
+
 class Toast {
-    constructor(message, type = 'info') {
+    message: string;
+    type: ToastType;
+    element: HTMLElement | null;
+
+    constructor(message: string, type: ToastType = 'info') {
         this.message = message;
         this.type = type;
         this.element = null;
     }
 
-    createElement() {
+    createElement(): HTMLElement {
         this.element = document.createElement('div');
         this.element.classList.add('toast', `toast-${this.type}`);
         this.element.textContent = this.message;
@@ -14,18 +21,21 @@ class Toast {
     }
 
     // Create + add to DOM
-    show() {
+    show(): Toast {
         if (!this.element) {
             this.createElement();
         }
 
         const container = document.querySelector('#toast-container');
-        container.appendChild(this.element);
+        if (!container) {
+            throw new Error('Toast container not found in DOM');
+        }
+        container.appendChild(this.element!);
         return this; // for chaining?
     }
 
     // Handle hiding/tidying up
-    hide() {
+    hide(): Toast {
         if (this.element) {
             this.element.remove();
             this.element = null;
@@ -35,11 +45,7 @@ class Toast {
 }
 
 /**
- * 
- * @param {string} message - The text to display inside the toast.
- * @param {string} type - Visual style variant of toast.
- * @param {number} duration - Time (in ms) before auto-hide.
- * @returns {Toast} - The Toast instance
+ * Creates and displays a toast notification with auto-hide.
  * 
  * @example
  * makeToast("Saved successfully", "success", 2000);
@@ -48,10 +54,8 @@ class Toast {
  * const toast = makeToast("Working..", "info", 0);
  * setTimeout(() => toast.hide(), 5000);
  */
-export function makeToast(message, type = 'info', duration = 1000) {
+export function makeToast(message: string, type: ToastType = 'info', duration: number = 1000): Toast {
     const toast = new Toast(message, type).show();
-
     setTimeout(() => toast.hide(), duration); // auto-hide/fade
-
     return toast; // so the caller can do something with it if desired
 }
