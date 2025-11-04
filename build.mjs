@@ -5,7 +5,7 @@ const isProd = process.argv.includes('--prod');
 
 // Build JS/TS
 const jsOptions = {
-  entryPoints: ['app/static_src/js/app.js'],
+  entryPoints: ['app/static_src/js/app.ts'],
   outfile: 'app/static/js/bundle.js',
   bundle: true,
   sourcemap: !isProd,
