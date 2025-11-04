@@ -1,6 +1,14 @@
 import { makeToast } from '../ui/toast.js';
 
-export async function fetchWeatherData() {
+export type WeatherResult = {
+    temp: number | string;
+    emoji: string;
+    sunsetFormatted: string;
+    sunrise: number | null;
+    sunset: number | null;
+}
+
+export async function fetchWeatherData(): Promise<WeatherResult> {
     
     try {
         // TODO: Make flexible, based on userStore?
@@ -17,11 +25,11 @@ export async function fetchWeatherData() {
 
         // Process weatherData
         const temp = Math.round(weatherData.main.temp);
-        const desc = weatherData.weather[0].description.toLowerCase();
+        const desc = weatherData.weather?.[0]?.description?.toLowerCase() ?? "";
         const sunrise = weatherData.sys.sunrise;
         const sunset = weatherData.sys.sunset;
 
-        const weatherConditions = {
+        const weatherConditions: Record<string, string> = {
             thunder: '⛈️',
             drizzle: '🌦️',
             rain: '🌧️',

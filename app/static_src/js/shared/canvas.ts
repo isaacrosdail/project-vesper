@@ -1,22 +1,36 @@
 
-export function setupCanvas() {
-    const canvas = document.querySelector('#sky-canvas');
-    const rect = canvas.getBoundingClientRect();
-
-    // Set internal resolution to display size
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-}
+type CelestialType = 'sun' | 'moon';
 
 const MARGIN_X = 0.1; // 10% margin left/right
 const MARGIN_Y = 0.15; // 15% margin top/bottom
 
-class CelestialRenderer {
-    constructor(canvasId) {
-        this.canvas = document.querySelector(canvasId);
-        this.ctx = this.canvas.getContext('2d');
+// Cosmic body drawing constants
+const CELESTIAL_CONFIGS = {
+    sun: {
+        RADIUS: 15,
+        RAY_COUNT: 8,
+        RAY_LENGTH: 10,
+        RAY_OFFSET: 5, // gap between sun & its rays
+        COLOR: 'orange'
+    },
+    moon: {
+        RADIUS: 15,
+        RAY_COUNT: 0,
+        RAY_LENGTH: 0,
+        RAY_OFFSET: 0,
+        COLOR: 'grey'
     }
-    draw(x, y, type) {
+};
+
+export class CelestialRenderer {
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+
+    constructor(canvasId: string) {
+        this.canvas = document.querySelector<HTMLCanvasElement>(canvasId)!;
+        this.ctx = this.canvas.getContext('2d')!;
+    }
+    draw(x: number, y: number, type: CelestialType) {
         const config = CELESTIAL_CONFIGS[type];
 
         // Convert normalized coordinates to canvas pixels
@@ -82,46 +96,32 @@ class CelestialRenderer {
     }
 }
 
+export function setupCanvas(): void {
+    const canvas = document.querySelector<HTMLCanvasElement>('#sky-canvas');
+    if (!canvas) {
+        console.warn('Weather canvas element not found, skipping sky rendering');
+        return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    // Set internal resolution to display size
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+}
 
 /**
- * Calculates normalized sun position along arc for the current time
- * @param {number} start - Sunrise time in ms (Unix)
- * @param {number} end - Sunset time in ms (Unix)
- * @param {number} now - Current time in ms (Unix)
- * @returns {{x: number, y: number}} Normalized coordinates (0-1) for sun position
- * @description
+ * Calculates normalized sun position along arc for the current time. Parameters are all in Unix time (ms).
  * - X represents progress through the day (0 = sunrise, 1 = sunset)
  * - Y uses sine curve to create natural arc (0 at horizon, peak at noon)
- * - Want to extend for moon calculation using night hours later
+
  */
-export function calcCelestialBodyPos(start, end, now) {
+export function calcCelestialBodyPos(start: number, end: number, now: number) {
     const xVal = (now - start) / (end - start);
     const yVal = (Math.sin(xVal * Math.PI));
 
     return { x: xVal, y: yVal };
 }
 
-// Sun drawing constants
-const CELESTIAL_CONFIGS = {
-    sun: {
-        RADIUS: 15,
-        RAY_COUNT: 8,
-        RAY_LENGTH: 10,
-        RAY_OFFSET: 5, // gap between sun & its rays
-        COLOR: 'orange'
-    },
-    moon: {
-        RADIUS: 15,
-        RAY_COUNT: 0,
-        RAY_LENGTH: 0,
-        RAY_OFFSET: 0,
-        COLOR: 'grey'
-    }
-};
-
 // Setup on load & resize
 if (document.querySelector('canvas')) {
     setupCanvas();
 }
-
-export { CelestialRenderer };

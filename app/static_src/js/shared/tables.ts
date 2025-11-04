@@ -2,27 +2,13 @@
 import { makeToast } from './ui/toast.js';
 import { apiRequest } from './services/api.js';
 
-/**
- * Creates table row for given item data for realtime modal entries
- * @param {Object} item - Return data from backend for new item
- */
-// TODO: Implement!
-export function makeTableRow(item, subtype) {
-    // const row = document.createElement("tr");
-    // console.log("makeTableRow hit")
-    // // Build cells
-    // const template = document.querySelector(`#template-${subtype}`);
-    // const clone = template.content.firstElementChild.cloneNode(true);
-    // clone.dataset.itemId = item.id;
-}
-
 
 /**
  * Remove table row
  * @param {number} itemId - Item ID by which to query for row
  * @returns {void}
  */
-export function removeTableRow(itemId) {
+export function removeTableRow(itemId: number) {
     const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
     if (!itemRow) return;
 
@@ -30,7 +16,7 @@ export function removeTableRow(itemId) {
     itemRow.remove();
 
     // Insert "No items yet" placeholder text for table if removing last itemRow
-    if (tableBody.children.length === 0) {
+    if (tableBody && tableBody.children.length === 0) {
         const emptyRow = document.createElement('tr');
         const emptyCell = document.createElement('td');
         emptyCell.colSpan = 99;
@@ -49,8 +35,8 @@ export function removeTableRow(itemId) {
  * @param {HTMLElement} element - Target element to enable inline editing for.
  * @returns {Promise<string|null>} Resolves with the updated value, or null if unchanged.
  */
-export async function inlineEditElement(element) {
-    const originalText = element.textContent.trim();
+export async function inlineEditElement(element: HTMLElement): Promise<string|null> {
+    const originalText = element.textContent?.trim() ?? ''; // Fallback to '' using nullish coalescing to avoid undefined
 
     // Create input element with similar size to current text
     const input = document.createElement('input');
@@ -81,15 +67,17 @@ export async function inlineEditElement(element) {
 }
 
 document.addEventListener('dblclick', async (e) => {
+    if (!(e.target instanceof HTMLElement)) return;
 
     if (e.target.classList.contains('editable-cell')) {
         const td = e.target;
         const newValue = await inlineEditElement(td);
         if (newValue) {
             const { module, field, itemId, subtype } = td.dataset;
+            if (!module || !field || !itemId || !subtype) return;
             const url = `/${module}/${subtype}/${itemId}`;
 
-            apiRequest('PATCH', url, (responseData) => {
+            apiRequest('PATCH', url, (responseData: { message: string }) => {
                 makeToast(responseData.message, 'success');
             }, { [field]: newValue });
         }
