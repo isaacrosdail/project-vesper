@@ -2,28 +2,32 @@
 import { confirmationManager } from '../shared/ui/modal-manager.js';
 import { apiRequest } from '../shared/services/api.js';
 
-    const unitGroups = {
+    type UnitGroupKey = 'weight' | 'volume';
+    type Unit = 'g' | 'kg' | 'oz' | 'lb' | 'ml' | 'l' | 'fl_oz';
+
+    const unitGroups: Record<UnitGroupKey, Unit[]> = {
         weight: ['g', 'kg', 'oz', 'lb'],
         volume: ['ml', 'l', 'fl_oz']
     }
-    // Map categories to groups: keys are categories, values are groups (in turn, keys for above dict)
-    const unitOptionsMap = {
-        beverages: "volume",
-        condiments_sauces: "volume",
-        fats_oils: ["weight", "volume"],
 
-        fruits: "weight",
-        vegetables: "weight", 
-        legumes: "weight",
-        grains: "weight",
-        bakery: "weight",
-        dairy_eggs: ["weight", "volume"],
-        meats: "weight",
-        seafood: "weight",
-        snacks: "weight",
-        sweets: "weight",
+    type UnitOptionsMap = Record<string, UnitGroupKey[]>;
+    // Map categories to groups: keys are categories, values are groups (in turn, keys for above dict)
+    const unitOptionsMap: UnitOptionsMap = {
+        beverages: ["volume"],
+        condiments_sauces: ["volume"],
+        fruits: ["weight"],
+        vegetables: ["weight"], 
+        legumes: ["weight"],
+        grains: ["weight"],
+        bakery: ["weight"],
+        meats: ["weight"],
+        seafood: ["weight"],
+        snacks: ["weight"],
+        sweets: ["weight"],
         processed_convenience: ["weight", "volume"],
-        supplements: ["weight", "volume"]
+        supplements: ["weight", "volume"],
+        dairy_eggs: ["weight", "volume"],
+        fats_oils: ["weight", "volume"],
     }
 
     /**
@@ -32,39 +36,44 @@ import { apiRequest } from '../shared/services/api.js';
      * @param {*} e - Click event from listener
      * @returns 
      */
-    async function handleListActionClick(e) {
-        const action = e.target.dataset.action;
+    async function handleListActionClick(e: Event): Promise<void> {
+        if (!(e.target instanceof HTMLButtonElement)) return;
+        const action = e.target.dataset['action'];
         if (!action) return;
 
-        const item = e.target.closest('.shoppinglist-item');
-        const itemId = item?.dataset.itemId;
-        const currentQuantity = parseInt(item?.dataset.quantityWanted, 10);
-        const container = e.target.closest('.qty-controls'); // parent to subsequently grab span for qty to edit text
-        const qtySpan = container?.querySelector('.item-qty'); // then grab span for editing qty after fetches
+        const item = e.target.closest('.shoppinglist-item') as HTMLElement;
+        const itemId = item.dataset['itemId'];
+        const currentQuantity = parseInt(item.dataset['quantityWanted'] ?? '0', 10);
+        const container = e.target.closest('.qty-controls') as HTMLElement; // parent to subsequently grab span for qty to edit text
+        const qtySpan = container?.querySelector('.item-qty') as HTMLElement; // then grab span for editing qty after fetches
+
+        if (!item || !itemId || !container || !qtySpan || isNaN(currentQuantity)) return;
+
         const url = `/groceries/shopping_list_items/${itemId}`;
 
 
         switch(action) {
             case "increment": {
-                const newQty = currentQuantity + 1;
+                const newQty = String(currentQuantity + 1);
                 const incrementBtn = e.target;
                 incrementBtn.disabled = true;
                 apiRequest('PATCH', url, () => {
                     qtySpan.textContent = newQty;
-                    item.dataset.quantityWanted = newQty;
+                    item.dataset['quantityWanted'] = newQty;
                     incrementBtn.disabled = false;
                 }, { quantity_wanted: newQty });
                 break;
             }
 
             case "decrement": {
-                const newQty = currentQuantity - 1;
-                e.target.disabled = true;
+                const newQty = String(currentQuantity - 1);
+                const decrementBtn = e.target;
+                decrementBtn.disabled = true;
 
-                if (newQty === 0) {
+                if (newQty === "0") {
                     const confirmed = await confirmationManager.show("Are you sure? This will delete the item from your shopping list.");
                     if (!confirmed) {
-                        e.target.disabled = false;
+                        decrementBtn.disabled = false;
                         return;
                     };
                     apiRequest('DELETE', url, () => item.remove());
@@ -72,8 +81,8 @@ import { apiRequest } from '../shared/services/api.js';
                     apiRequest('PATCH', url, () => {
                         // update DOM qty display
                         qtySpan.textContent = newQty;
-                        item.dataset.quantityWanted = newQty;
-                        e.target.disabled = false;
+                        item.dataset['quantityWanted'] = newQty;
+                        decrementBtn.disabled = false;
                     }, { quantity_wanted: newQty });
                 }
                 break;
@@ -91,48 +100,62 @@ import { apiRequest } from '../shared/services/api.js';
     /**
      * Filters available unit options in product/transaction form modals
      * based on selected category (eg, hides ml/l for "Bakery")
-     * @param {*} e Change event from a category <select>
-     * @returns 
+     * @param {Event} e Change event from a category <select>
      */
-    function handleUnitFiltering(e) {
-        const form = e.target.closest('form');
+    function handleUnitFiltering(e: Event): void {
+        if (!(e.target instanceof HTMLSelectElement)) return;
+        const form = e.target.closest('form') as HTMLFormElement;
         if (!form) return;
 
-        const categoryElement = form.querySelector('[name="category"]');
-        const unitSelect = form.querySelector('[name="unit_type"]');
+        const categoryElement = form.querySelector('[name="category"]') as HTMLSelectElement;
+        const unitSelect = form.querySelector('[name="unit_type"]') as HTMLSelectElement;
         if (!categoryElement || !unitSelect) return;
 
         const categorySelection = categoryElement.value;
         const unitTypes = unitSelect.querySelectorAll('option');
 
         // 2-step lookup with dict keys to store appropriate list of allowed units for given selection in allowedUnits
-        const allowedUnits = unitGroups[unitOptionsMap[categorySelection]];
+        // const allowedUnits = unitGroups[unitOptionsMap[categorySelection]];
+        const groupKeys = unitOptionsMap[categorySelection];
+        if (!groupKeys) return;
+
+        const allowedUnits = groupKeys.flatMap(key => unitGroups[key]);
 
         unitTypes.forEach(option => {
-            option.hidden = !allowedUnits.includes(option.value);
+            option.hidden = !allowedUnits.includes(option.value as Unit);
         });
     }
 
-    function toggleProductFields(e) {
-        const form = e.target.closest('form');
+    function toggleProductFields(e: Event): void {
+        if (!(e.target instanceof HTMLSelectElement)) return;
+
+        const form = e.target.closest('form')!;
         const productFields = form.querySelectorAll('.product-field input, .product-field select');
         const isNew = (e.target.value === '__new__');
 
         productFields.forEach(field => {
-            field.parentElement.hidden = !isNew;
-            field.disabled = !isNew;
+            const htmlField = field as HTMLInputElement | HTMLSelectElement;
+            htmlField.parentElement!.hidden = !isNew;
+            htmlField.disabled = !isNew;
+
+            if (!isNew) {
+                htmlField.value = '';
+            }
         })
     }
 
 
 export function init() {
     const transactionModal = document.querySelector('#transactions-entry-dashboard-modal');
-    const priceField = transactionModal.querySelector('[name="price_at_scan"]');
+    const priceField = transactionModal?.querySelector('[name="price_at_scan"]') as HTMLInputElement;
     const shoppingList = document.querySelector('.shopping-list');
+    if (!transactionModal || !priceField || !shoppingList) return;
 
     shoppingList.addEventListener('click', handleListActionClick);
 
     document.addEventListener('change', (e) => {
+        if (!(e.target instanceof HTMLElement)) return;
+
         if (e.target.matches('[name="category"]')) {
             handleUnitFiltering(e);
         }
@@ -144,12 +167,15 @@ export function init() {
     transactionModal.addEventListener('close', () => {
         const productFields = transactionModal.querySelectorAll('.product-field input, .product-field select');
         productFields.forEach(field => {
-            field.parentElement.hidden = true;
-            field.disabled = true;
+            const htmlField = field as HTMLInputElement | HTMLSelectElement;
+            htmlField.parentElement!.hidden = true;
+            htmlField.disabled = true;
         })
     })
 
-    priceField.addEventListener('keydown', (e) => {
+    priceField.addEventListener('keydown', (e: Event) => {
+        if (!(e instanceof KeyboardEvent)) return;
+
         // Regex: "is the key pressed a digit 0-9?"
         const isDigit = /^\d$/.test(e.key);
 
@@ -174,7 +200,7 @@ export function init() {
 
     priceField.addEventListener('paste', (e) => {
         e.preventDefault();
-        const pasted = e.clipboardData.getData('text');
+        const pasted = e.clipboardData?.getData('text') ?? "";
         const currentCents = Math.round(Number(priceField.value) * 100);
         const nextCentsString = String(currentCents) + pasted;
         const nextValue = Number(nextCentsString) / 100;

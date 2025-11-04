@@ -1,6 +1,6 @@
 // Auto-runner, attaches DOM listeners on DOMContentLoaded at top level
 
-function toggleMobileNav(mobileNav, hamburgerBtn) {
+function toggleMobileNav(mobileNav: HTMLElement, hamburgerBtn: HTMLElement): void {
     mobileNav?.classList.toggle('is-open');
     let isOpen = mobileNav?.classList.contains('is-open'); // set proper bool for is-open state
     hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value
@@ -14,14 +14,16 @@ function toggleMobileNav(mobileNav, hamburgerBtn) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    const mobileNav = document.querySelector('#nav-mobile-container');
-    const modal = document.querySelector('.profile-modal');
+    const mobileNav = document.querySelector<HTMLElement>('#nav-mobile-container');
+    const modal = document.querySelector<HTMLDialogElement>('.profile-modal');
     const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
-    const hamburgerBtn = document.querySelector('.hamburger-btn');
+    const hamburgerBtn = document.querySelector<HTMLButtonElement>('.hamburger-btn');
+    if (!mobileNav || !modal || !hamburgerBtn) return;
 
     document.addEventListener('click', (e) => {
         let isOpen = mobileNav?.classList.contains('is-open');
-        
+        if (!(e.target instanceof HTMLElement)) return;
+
         // Toggle mobile nav
         if (e.target.matches('.hamburger-btn')) {
             toggleMobileNav(mobileNav, hamburgerBtn);

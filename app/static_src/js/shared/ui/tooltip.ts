@@ -35,7 +35,7 @@ export function showToolTip(targetEl: HTMLElement, tooltipText?: string): void {
 
     const tooltipRect = tooltip.getBoundingClientRect();
     tooltip.style.left = `${targetElCenterX - (tooltipRect.width / 2)}px`;
-    let arrowX = (tooltipRect.width / 2); // calc carrot position inside tooltip
+    const arrowX = (tooltipRect.width / 2); // calc carrot position inside tooltip
     tooltip.style.setProperty('--carrot-pos', `${arrowX}px`);
 }
 
