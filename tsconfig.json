@@ -1,13 +1,34 @@
 {
     "compilerOptions": {
+        "target": "es2024",                 // Use modern JS syntax/features (eg, Map?)
+        "lib": ["dom", "es2024"],           // Include browser & latest JS stdlib defs (eg, DOM, Array, Promise)
+        "module": "esnext",                 // Let bundler handle imports/exports?
+        "moduleResolution": "node",         // Resolve node_modules-style imports (eg, import ... from 'd3')
         "outDir": "./app/static/js",        // compiled JS destination
         "rootDir": "./app/static_src/js",   // TS source files location
         "strict": true,                     // enables all the strict type checks: null checks, implicit any, etc.?
         "esModuleInterop": true,            // lets us import CommonJS modules ('require') with ES-style import?
         "noUnusedLocals": false,            // True = compiler errors on unused local variables (leaving as False while learning)
         "skipLibCheck": true,               // Don't type-check .d.ts files from libraries
-        "noUnusedParameters": true          // True = errors when function params aren't used
+        "noUnusedParameters": true,          // True = errors when function params aren't used
+        "alwaysStrict": true,
+        "useUnknownInCatchVariables": true,
+        "strictFunctionTypes": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        // Linter Checks
+        "noImplicitReturns": true,
+        "noImplicitOverride": true,
+        "forceConsistentCasingInFileNames": true,
+        // https://eslint.org/docs/rules/consistent-return ?
+        "noFallthroughCasesInSwitch": true,
+        // https://eslint.org/docs/rules/no-fallthrough
+        "allowUnreachableCode": false,
+        // https://eslint.org/docs/rules/no-unreachable ?
+        "allowUnusedLabels": false,
+        // https://eslint.org/docs/rules/no-unused-labels
     },
     "include": ["app/static_src/js/**/*.ts"],
-    "exclude": ["node_modules"]
+    "exclude": ["dist", "build", "**/*.test.ts"]
 }
