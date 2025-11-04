@@ -1,6 +1,6 @@
 import { makeToast } from './toast.js';
-import { makeTableRow} from '../tables.js';
 import { apiRequest } from '../services/api.js';
+import { FormDialog } from '../../types';
 
 /**
  * Modal Manager - Auto-discovers standardized modals
@@ -24,12 +24,14 @@ import { apiRequest } from '../services/api.js';
 
 
 // Scan for modals following our naming pattern
-const modals = document.querySelectorAll('[id$="-modal"]'); // $= means "ends with"
+const modals = document.querySelectorAll('[id$="-modal"]');
 
 modals.forEach(modal => {
+    if (!(modal instanceof HTMLDialogElement)) return;
+
     const fullId = modal.id; // "habit-entry-dashboard-modal"
     const baseId = fullId.replace('-modal', ''); // "habit-entry-dashboard"
-    const button = document.querySelector(`#${baseId}-btn`);
+    const button = document.querySelector(`#${baseId}-btn`) as HTMLButtonElement;
 
     if (button) {
         setupModal(modal, button);
@@ -41,34 +43,42 @@ modals.forEach(modal => {
     }
 });
 
-function setupModal(modal, button) {
+function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
     const form = modal.querySelector('form');
     const modalId = modal.id;
+    if (!form) {
+        console.warn(`Modal ${modalId} has no form element`)
+        return;
+    }
 
     button.addEventListener('click', () => {
         modal.showModal();
     })
 
     modal.addEventListener('click', (e) => {
-        if (e.target.matches(`#${modalId}-close-btn`)) {
-            form?.reset();
+        const target = e.target as HTMLButtonElement;
+        if (target.matches(`#${modalId}-close-btn`)) {
+            form.reset();
             modal.close();
         }
     })
 
     modal.addEventListener('cancel', () => {
-        form?.reset();
+        form.reset();
     });
 
     modal.addEventListener('submit', async (e) => {
-        const submittedForm = e.target;
+        const submittedForm = e.target as HTMLFormElement;
         if (submittedForm.hasAttribute('data-noajax')) {
             return;  // Skip interception if the form opts out
         }
-
         e.preventDefault();
+        
         const formData = new FormData(submittedForm);
         const endpoint = modal.dataset.endpoint; // embedded dynamically in all form modals
+        if (!endpoint) {
+            throw new Error('FormDialog modal missing data-endpoint attribute');
+        }
         
         // PUT
         if (modal.dataset.mode === 'edit') {
@@ -91,15 +101,15 @@ function setupModal(modal, button) {
     });
 }
 
-function setupTabbedModal(modal) {
-    modal.querySelectorAll('.tab-group button').forEach(btn => {
+function setupTabbedModal(modal: FormDialog): void {
+    modal.querySelectorAll<HTMLButtonElement>('.tab-group button').forEach(btn => {
         btn.addEventListener('click', () => {
             // hide all panels & remove active
-            modal.querySelectorAll('.tab-group button').forEach(b => b.classList.remove('active'));
-            modal.querySelectorAll('.tab-content').forEach(p => p.hidden = true);
+            modal.querySelectorAll<HTMLButtonElement>('.tab-group button').forEach(b => b.classList.remove('active'));
+            modal.querySelectorAll<HTMLElement>('.tab-content').forEach(p => p.hidden = true);
             // show selected
-            const tabId = 'tab-' + btn.dataset.tab;
-            const panel = modal.querySelector(`#${tabId}`);
+            const tabId = 'tab-' + btn.dataset['tab'];
+            const panel = modal.querySelector(`#${tabId}`) as HTMLElement;
             if (panel) {
                 btn.classList.add('active');
                 panel.hidden = false;
@@ -108,41 +118,51 @@ function setupTabbedModal(modal) {
     });
 
     // Auto-activate first tab
-    const firstTab = modal.querySelector('.tab-group button');
+    const firstTab = modal.querySelector<HTMLButtonElement>('.tab-group button');
     firstTab?.click();
 }
 
 // Trying out a confirmation manager singleton for dynamically handling confirmation popups
-// TODO: Practice/study further
-export const confirmationManager = {
+export const confirmationManager: {
+    currentResolve: ((value: boolean) => void) | null;
+    modal: HTMLDialogElement | null;
+    modalMsg: HTMLElement | null;
+    init(): void;
+    show(message: string): Promise<boolean>;
+} = {
     currentResolve: null, // store active resolve function
+    modal: null,
+    modalMsg: null,
 
     init() {
         // one-time setup for confirmation modals
-        const modal = document.querySelector('#confirmation-modal');
-        modal?.addEventListener('click', (e) => {
-            if (e.target.matches('#confirm-ok') && this.currentResolve) {
+        const modal = document.querySelector('#confirmation-modal') as HTMLDialogElement;
+        const modalMsg = document.querySelector('.confirmation-message') as HTMLElement;
+        if (!modal || !modalMsg) {
+            throw new Error('Confirmation modal / message element not found');
+        }
+        this.modal = modal;
+        this.modalMsg = modalMsg;
+        
+        this.modal.addEventListener('click', (e) => {
+            const target = e.target as HTMLElement;
+            if (target.matches('#confirm-ok') && this.currentResolve) {
                 this.currentResolve(true); // lets our await receive its answer
-                modal.close();
+                this.modal!.close();
                 this.currentResolve = null; // then clean it up quickly prior to subsequent calls
             }
-            else if (e.target.matches('#confirm-cancel') && this.currentResolve) {
+            else if (target.matches('#confirm-cancel') && this.currentResolve) {
                 this.currentResolve(false);
-                modal.close();
+                this.modal!.close();
                 this.currentResolve = null;
             }
         })
     },
 
-    show(message) {
+    show(message: string): Promise<boolean> {
         return new Promise((resolve) => {
-            // 1. update modal text (cls: confirmation-message) with message
-            const confirmationMsg = document.querySelector('.confirmation-message');
-            confirmationMsg.textContent = message;
-
-            // 2. Show the modal
-            const modal = document.querySelector('#confirmation-modal');
-            modal?.showModal();
+            this.modalMsg!.textContent = message;
+            this.modal!.showModal();
 
             this.currentResolve = resolve; // store THIS promise's resolve
         });

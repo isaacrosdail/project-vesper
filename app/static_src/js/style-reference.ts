@@ -6,13 +6,14 @@ export function init() {
     initPasswordToggles();
 
     document.addEventListener('click', (e) => {
-        if (e.target.matches('#default')) {
+        const target = e.target as HTMLElement;
+        if (target.matches('#default')) {
             confirmationManager.show("Are you sure?");
         }
-        else if (e.target.matches('#toast-success')) {
+        else if (target.matches('#toast-success')) {
             makeToast('SUCCESS', 'success');
         }
-        else if (e.target.matches('#toast-error')) {
+        else if (target.matches('#toast-error')) {
             makeToast('ERROR', 'error')
         }
     });

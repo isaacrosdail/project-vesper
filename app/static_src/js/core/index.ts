@@ -1,32 +1,47 @@
 import { formatTimeString } from '../shared/datetime.js';
 import { getJSInstant } from '../shared/datetime.js';
 import { fetchWeatherData } from '../shared/services/weather-service.js';
-import { calcCelestialBodyPos, CelestialRenderer, setupCanvas } from '../shared/canvas.js';
-import { makeToast } from '../shared/ui/toast.js';
+import { calcCelestialBodyPos, CelestialRenderer, CelestialType, setupCanvas } from '../shared/canvas.js';
 import { apiRequest } from '../shared/services/api.js';
 import { randInt, randFloat } from '../shared/numbers.js';
+import { WeatherResult } from '../types.js';
+import { userStore } from '../shared/services/userStore.js';
 
 
 // Global caches
-let weatherInfo = null;
-let currentCanvasState = null;
-let resizeTimeout = null;
-let renderer;
+let weatherInfo: WeatherResult | null = null;
+let currentCanvasState: { bodyType: CelestialType; x: number; y: number; } | null = null;
+let resizeTimeout: ReturnType<typeof setTimeout> | undefined;
+let renderer: CelestialRenderer | null = null;
 
 let isInitialRender = true;
 
-function updateProgressBar(module, percent = null, completed = null, total = null){
-    const section = document.querySelector(`.${module}-progress`);
-    const fill = section.querySelector('.progress-bar-fill');
-    const progressText = section.querySelector('.progress-text');
+type ProgressBarModule = 'tasks' | 'habits';
 
-    const fillPercentage = (percent !== null) ? percent : fill.dataset.progress;
+type UpdateProgressBarOptions = {
+    percent?: number;
+    completed?: number;
+    total?: number;
+};
+
+function updateProgressBar(module: ProgressBarModule, options: UpdateProgressBarOptions = {}){
+    const section = document.querySelector<HTMLDivElement>(`.${module}-progress`);
+    const fill = section?.querySelector<HTMLDivElement>('.progress-bar-fill');
+    const progressText = section?.querySelector<HTMLDivElement>('.progress-text');
+    if(!fill || !section || !progressText) {
+        console.error('Missing section/fill/progressText div(s)');
+        return;
+    }
+
+    const { percent = null, completed = null, total = null } = options;
+
+    const fillPercentage: number = (percent !== null) ? percent : Number(fill.dataset['percent']);
 
     // Update dataset
-    fill.dataset.progress = fillPercentage;
+    fill.dataset['percent'] = String(fillPercentage);
     if (completed !== null && total !== null) {
-        fill.dataset.completed = completed;
-        fill.dataset.total = total;
+        fill.dataset['completed'] = String(completed);
+        fill.dataset['total'] = String(total);
     }
     // Prevent transition effect for initial page load
     if (isInitialRender) {
@@ -40,13 +55,10 @@ function updateProgressBar(module, percent = null, completed = null, total = nul
     }
 
     // Update text display
-    const textCompleted = (completed !== null) ? completed : fill.dataset.completed;
-    const textTotal = (total !== null) ? total : fill.dataset.total;
-    progressText.textContent = `${textCompleted} of ${textTotal}`;
+    const numCompleted = (completed !== null) ? completed : Number(fill.dataset['completed']);
+    const numTotal = (total !== null) ? total : Number(fill.dataset['total']);
+    progressText.textContent = `${numCompleted} of ${numTotal}`;
 
-    // Cast to prevent JS weirdness
-    const numCompleted = Number(textCompleted)
-    const numTotal = Number(textTotal)
 
     // Trigger surging + pulsing effects at either 90% completion OR 1 task/habit remaining
     if (fillPercentage >= 90 || (numTotal - numCompleted) === 1) {
@@ -64,19 +76,21 @@ function updateProgressBar(module, percent = null, completed = null, total = nul
 /**
  * Marks a habit as complete/incomplete & updates the UI accordingly.
  * @async
- * @param {HTMLInputElement} checkbox - The checkbox that was clicked 
- * @param {number} habitId - The ID of the habit to update
- * @returns {Promise<void>} 
  */
-async function markHabitComplete(checkbox, habitId) {
+async function markHabitComplete(checkbox: HTMLInputElement, habitId: string): Promise<void> {
     try {
         // Mark complete => POST HabitCompletion
         const completedAtUTC = getJSInstant();  // Get instant user clicks "done"
 
         const row = checkbox.closest('.item-row'); // scope query to right <label> row
-        const emojiSpan = row.querySelector('.habit-streak');
-        const listItem = row.closest('.item'); // grab <li>
-        let streakCount = parseInt(emojiSpan.dataset.streakCount, 10);
+        const emojiSpan = row?.querySelector<HTMLSpanElement>('.habit-streak');
+        const listItem = row?.closest<HTMLLIElement>('.item');
+        if (!row || !emojiSpan || !listItem) {
+            console.error('.item-row parent for checkbox not found')
+            return;
+        }
+        const streakValue = emojiSpan.dataset['streakCount'];
+        let streakCount = (streakValue && streakValue !== '') ? parseInt(streakValue, 10) : 0;
 
         if (checkbox.checked) {
             const url = `/habits/${habitId}/completions`;
@@ -84,13 +98,11 @@ async function markHabitComplete(checkbox, habitId) {
 
             apiRequest('POST', url, (responseData) => {
                 streakCount += 1;
-                emojiSpan.dataset.streakCount = streakCount;
+                emojiSpan.dataset['streakCount'] = String(streakCount);
 
                 listItem?.classList.toggle('completed');
                 emojiSpan.textContent = `🔥${streakCount}`;
-                const prog = responseData.data.progress;
-                console.log(prog)
-                updateProgressBar('habits', prog[4], prog[2], prog[3])
+                updateProgressBar('habits', responseData.data.progress)
             }, data);
         } else {
             const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
@@ -98,7 +110,7 @@ async function markHabitComplete(checkbox, habitId) {
 
             apiRequest('DELETE', url, (responseData) => {
                 streakCount -= 1;
-                emojiSpan.dataset.streakCount = streakCount;
+                emojiSpan.dataset['streakCount'] = String(streakCount);
 
                 listItem?.classList.toggle('completed');
                 if (streakCount > 0) {
@@ -106,15 +118,14 @@ async function markHabitComplete(checkbox, habitId) {
                 } else {
                     emojiSpan.textContent = "";
                 }
-                const prog = responseData.data.progress;
-                updateProgressBar('habits', prog[4], prog[2], prog[3])
+                updateProgressBar('habits', responseData.data.progress)
             });
         }
     } catch (error) {
         console.error('Error during habit completion request:', error);
     }
 }
-async function markTaskComplete(checkbox, taskId) {
+async function markTaskComplete(checkbox: HTMLInputElement, taskId: string) {
     const completedAtUTC = getJSInstant();
     const url = `/tasks/tasks/${taskId}`;
 
@@ -133,16 +144,9 @@ async function markTaskComplete(checkbox, taskId) {
     apiRequest('PATCH', url, (responseData) => {
         const listItem = checkbox.closest('.item');
         listItem?.classList.toggle('completed');
-        const prog = responseData.data.progress;
-        console.log(prog)
-        updateProgressBar('tasks', prog[4], prog[2], prog[3],)
+        updateProgressBar('tasks', responseData.data.progress)
     }, data);
 
-}
-
-function updateClock() {
-    const timeDisplay = document.querySelector('#time-display');
-    timeDisplay.textContent = formatTimeString();
 }
 
 // Get weather info via API, orchestrates our sun movement
@@ -150,11 +154,20 @@ function updateClock() {
 async function getWeatherInfo() {
     const tempDisplay = document.querySelector('#weather-temp');
     const sunsetDisplay = document.querySelector('#weather-sunset');
-    const city = "London";
-    const units = "metric";
+    if (!tempDisplay || !sunsetDisplay) {
+        console.warn('Display elements not found in DOM. Skipping weather widget');
+        return;
+    }
+    // const city = "London";
+    // const units = "metric";
+    if (!userStore.data) {
+        console.error('User data not loaded/available');
+        return;
+    }
+    const { city, country, units } = userStore.data;
 
     tempDisplay.textContent = "Loading weather info...";
-    weatherInfo = await fetchWeatherData();
+    weatherInfo = await fetchWeatherData(city, country, units);
 
     // Display temp with units & formatted sunset time
     // Destructure what we need
@@ -165,11 +178,15 @@ async function getWeatherInfo() {
 
 function updateCelestialBodyPos() {
     if (!weatherInfo) return;
+    const { sunrise, sunset } = weatherInfo;
+    if (!sunrise || !sunset) {
+        console.debug('Sunrise/sunset data null, skipping position update');
+        return;
+    }
 
     const now = Math.floor(Date.now() / 1000); // convert to seconds to compare to what API gave
-    const { sunrise, sunset } = weatherInfo;
     let position;
-    let bodyType = 'moon';
+    let bodyType: CelestialType = 'moon';
 
     if (now >= sunrise && now <= sunset) {
         // Daytime
@@ -198,7 +215,7 @@ function updateCelestialBodyPos() {
  */
 function redrawCanvas() {
     setupCanvas();
-    if (currentCanvasState) {
+    if (currentCanvasState && renderer) {
         renderer.draw(
             currentCanvasState.x, 
             currentCanvasState.y, 
@@ -207,7 +224,7 @@ function redrawCanvas() {
     }
 }
 
-function triggerConfetti(sectionEl) {
+function triggerConfetti(sectionEl: HTMLElement) {
     const progressBar = sectionEl.querySelector('.progress-bar');
     if (!progressBar) {
         console.warn(`No progressBar found for: ${sectionEl}`);
@@ -221,6 +238,10 @@ function triggerConfetti(sectionEl) {
 
     const progressBarBox = progressBar.getBoundingClientRect();
     const confettiLayer = document.querySelector('#confetti-layer');
+    if (!confettiLayer) {
+        console.error('Confetti emitter div not found');
+        return;
+    }
 
     // SETTINGS
     const shapeClasses = ['star', 'circle', 'diamond', 'parallelogram', 'triangle'];
@@ -231,7 +252,7 @@ function triggerConfetti(sectionEl) {
     // Generate each confetti dot
     for (let i = 0; i < numDots; i++) {
         const dot = document.createElement('div');
-        dot.classList.add('dot', shapeClasses[i % shapeClasses.length]); // TODO: Note, cyclic shape assignment
+        dot.classList.add('dot', shapeClasses[i % shapeClasses.length]!); // TODO: Note, cyclic shape assignment
 
         // Position dot at right edge of progress-bar
         dot.style.position = 'absolute';
@@ -253,7 +274,7 @@ function triggerConfetti(sectionEl) {
         const scale = baseSize * randFloat(4, 5);    // size scaling (semi-responsive)
 
         // Assign styles & animations
-        dot.style.setProperty('--scale', scale);
+        dot.style.setProperty('--scale', String(scale));
         dot.style.offsetPath = `path('${path}')`;
         dot.style.animation = 
             `followPath ${animationTime}s cubic-bezier(0.25, 0.7, 0.9, 0.3) ${animationDelay} forwards, ` +
@@ -271,11 +292,18 @@ export function init() {
     if (!hasWeatherSection && !hasHabits) return;
 
     document.addEventListener('change', (e) => {
-        if (e.target.matches('.habit-checkbox')) {
-            markHabitComplete(e.target, e.target.dataset.habitId);
+        const target = e.target as HTMLInputElement;
+        if (target.matches('.habit-checkbox')) {
+            const habitId = target.dataset['habitId'];
+            if (habitId){
+                markHabitComplete(target, habitId);
+            }
         }
-        if (e.target.matches('.task-checkbox')) {
-            markTaskComplete(e.target, e.target.dataset.taskId);
+        if (target.matches('.task-checkbox')) {
+            const taskId = target.dataset['taskId'];
+            if (taskId) {
+                markTaskComplete(target, taskId);
+            }
         }
     });
 
@@ -295,8 +323,11 @@ export function init() {
         });
     }
     // Clock setup
-    if (document.querySelector('#time-display')) {
-        setInterval(updateClock, 30 * 1000);
-        updateClock();
+    const timeDisplay = document.querySelector('#time-display');
+    if (timeDisplay) {
+        timeDisplay.textContent = formatTimeString(new Date());
+        setInterval(() => {
+            timeDisplay.textContent = formatTimeString(new Date());
+        }, 30 * 1000);
     }
 }
