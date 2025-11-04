@@ -19,7 +19,7 @@
         {{ ui.plus_btn('habits-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Habits', headers, habits, 'habits', 'habits') %}
-        <td class="{{ headers[0].priority}} editable-cell tooltip" data-item-id="{{ item.id }}" data-module="habits" data-subtype="habits" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
+        <td class="{{ headers[0].priority}} editable-cell" data-item-id="{{ item.id }}" data-module="habits" data-subtype="habits" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
         <td class="{{ headers[1].priority}}">{{ item.status_label }}</td>
         <td class="{{ headers[2].priority}}">{{ item.created_at_label }}</td>
     {% endcall %}
