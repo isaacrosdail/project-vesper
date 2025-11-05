@@ -11,7 +11,9 @@ type UserState = 'not-loaded' | 'loading' | 'loaded' | 'error';
 
 type UserData = {
     timezone: string;
-    // other fields from profile/me
+    units: string;
+    city: string;
+    country: string;
 };
 
 type UserStore = {

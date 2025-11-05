@@ -1,21 +1,9 @@
 import { makeToast } from '../ui/toast.js';
+import { WeatherResult } from '../../types.js';
 
-export type WeatherResult = {
-    temp: number | string;
-    emoji: string;
-    sunsetFormatted: string;
-    sunrise: number | null;
-    sunset: number | null;
-}
-
-export async function fetchWeatherData(): Promise<WeatherResult> {
+export async function fetchWeatherData(city: string, country: string, units: string): Promise<WeatherResult> {
     
     try {
-        // TODO: Make flexible, based on userStore?
-        const city = "Chicago";
-        const country = "US";
-        const units = "metric";
-
         const response = await fetch(`/api/weather/${city}/${country}/${units}`);
         const weatherData = await response.json();
 
