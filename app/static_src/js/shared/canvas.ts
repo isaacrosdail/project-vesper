@@ -1,5 +1,5 @@
 
-type CelestialType = 'sun' | 'moon';
+export type CelestialType = 'sun' | 'moon';
 
 const MARGIN_X = 0.1; // 10% margin left/right
 const MARGIN_Y = 0.15; // 15% margin top/bottom

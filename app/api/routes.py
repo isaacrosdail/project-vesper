@@ -13,13 +13,15 @@ from app.api.responses import api_response
 from app.api.service import release_slot, reserve_slot
 
 
-"""Internal API endpoints to feed JS frontend / facilitate PATCH/DELETEs."""
 @api_bp.route('/profile/me')
 @login_required
 def get_my_profile():
     """Internal API for fetching profile information used in JS."""
     return jsonify({
-        'timezone': current_user.timezone
+        'timezone': current_user.timezone,
+        'units': current_user.units.value,
+        'city': current_user.city,
+        'country': current_user.country
     })
 
 
