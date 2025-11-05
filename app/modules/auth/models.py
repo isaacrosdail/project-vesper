@@ -21,6 +21,9 @@ class UserLangEnum(enum.Enum):
     EN = "en"
     DE = "de"
 
+class UnitSystemEnum(enum.Enum):
+    METRIC = "metric"
+    IMPERIAL = "imperial"
 
 class User(Base, UserMixin):
     username = Column(
@@ -56,6 +59,19 @@ class User(Base, UserMixin):
         SAEnum(UserLangEnum, name="user_lang_enum", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
         default=UserLangEnum.EN
+    )
+
+    city = Column(String(100), nullable=False, server_default='Chicago')
+    
+    country = Column(String(3), nullable=False, server_default='US')
+
+    units = Column(
+        SAEnum(UnitSystemEnum,
+               name="unit_system_enum",
+               values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=UnitSystemEnum.IMPERIAL,
+        server_default='imperial'
     )
 
     def __repr__(self):
