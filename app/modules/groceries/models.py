@@ -1,9 +1,10 @@
 # Handles DB models for grocery module
 import enum
+from decimal import Decimal
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app._infra.db_base import Base
 from app.shared.serialization import APISerializable
@@ -107,7 +108,7 @@ class Transaction(Base, APISerializable):
         nullable=False
     )
 
-    price_at_scan = Column(
+    price_at_scan: Mapped[Decimal] = mapped_column(
         Numeric(PRICE_PRECISION, PRICE_SCALE),
         nullable=False
     )
@@ -118,6 +119,11 @@ class Transaction(Base, APISerializable):
     )
 
     product = relationship("Product")
+
+    @property
+    def price_per_100g(self) -> Decimal:
+        weight_decimal = Decimal(str(self.product.net_weight))
+        return (self.price_at_scan / weight_decimal) * 100
 
     def __str__(self):
         product_name = self.product.name if self.product else f"Product #{self.product_id}"
