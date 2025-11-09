@@ -170,6 +170,7 @@ dialog::backdrop {
     padding: 4px 4px;
     margin-top: 8px;
     max-width: 28ch;
+    pointer-events: none;
 }
 .tooltip:not(#no-after)::after {
     content: "";
