@@ -73,9 +73,9 @@
     <div class="tasks-progress">
         <div class="progress-bar">
             <div class="progress-bar-fill"
-            data-completed="{{ tasks_progress[2]}}"
-            data-total="{{ tasks_progress[3]}}"
-            data-progress="{{ tasks_progress[4]}}"
+            data-completed="{{ tasks_progress.completed }}"
+            data-total="{{ tasks_progress.total }}"
+            data-percent="{{ tasks_progress.percent }}"
             >
             </div>
         </div>
@@ -111,9 +111,9 @@
     <div class="habits-progress">
         <div class="progress-bar">
             <div class="progress-bar-fill"
-            data-completed="{{ habits_progress[2]}}"
-            data-total="{{ habits_progress[3]}}"
-            data-progress="{{habits_progress[4]}}"
+            data-completed="{{ habits_progress.completed }}"
+            data-total="{{ habits_progress.total }}"
+            data-percent="{{habits_progress.percent }}"
             >
             </div>
         </div>
