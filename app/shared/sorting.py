@@ -16,7 +16,7 @@ any real-world scenario.
 from typing import Any, List
 
 # Stable
-def bubble_sort_simple(myList):
+def bubble_sort_simple(myList: list[Any]) -> None:
     # Outer loop decides whether to continue
     for i in range(len(myList)-1):
         no_swaps = True

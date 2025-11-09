@@ -1,21 +1,25 @@
-import sys
-from flask import request
-from flask_login import current_user, login_required
 
-from app._infra.database import with_db_session
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+from flask import request
+from flask_login import current_user
+
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
 from app.modules.tasks.repository import TasksRepository
 from app.modules.tasks.service import TasksService
 from app.modules.tasks.validators import validate_task
 from app.shared.parsers import parse_task_form_data
+from app.shared.decorators import login_plus_session
 
 
 @api_bp.route("/tasks/tasks", methods=["POST"])
 @api_bp.route("/tasks/tasks/<int:task_id>", methods=["PUT"])
-@login_required
-@with_db_session
-def tasks(session, task_id=None):
+@login_plus_session
+def tasks(session: 'Session', task_id: int | None = None) -> Any:
     """Create or update a task (POST for new, PUT for edit)."""
     parsed_data = parse_task_form_data(request.form.to_dict())
     typed_data, errors = validate_task(parsed_data)

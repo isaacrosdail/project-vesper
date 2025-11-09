@@ -1,4 +1,6 @@
-import sys
+
+from typing import Any
+
 from sqlalchemy import inspect
 
 from enum import Enum
@@ -29,7 +31,7 @@ class APISerializable:
         {'id': 1, 'name': 'My Task', 'priority': 'HIGH', ...}
     """
 
-    def to_api_dict(self):
+    def to_api_dict(self) -> dict[str, Any]:
         """Convert model to JSON-safe dict"""
 
         # Mapper is a Mapper object - SQLAlchemy's internal representation of how our Python class Task maps to a DB table
@@ -46,7 +48,7 @@ class APISerializable:
         result = {}
         # 'col' here is the Column definition (the blueprint)
         # Its type is a Column object from SQLAlchemy
-        for col in mapper.columns:
+        for col in mapper.columns: # type: ignore
             # 'col.name' would be the name of the field/column, like 'priority', 'due_date', etc
             # print(f"Column {col.name}, Value: {getattr(self, col.name)}", file=sys.stderr)
 
@@ -68,5 +70,5 @@ class APISerializable:
         # print(result, file=sys.stderr)
 
         # Append subtype to each as well, for frontend's sake
-        result["subtype"] = self.__tablename__
+        result["subtype"] = self.__tablename__ # type: ignore
         return result

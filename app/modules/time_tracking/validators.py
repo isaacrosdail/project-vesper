@@ -1,13 +1,13 @@
-import regex
 
-from datetime import datetime
+
+from typing import Any
 
 from app.modules.time_tracking.constants import *
-from app.shared.validators import validate_time_hhmm, validate_date_iso
-from app.shared.logging_decorators import log_validator
+from app.shared.decorators import log_validator
+from app.shared.validators import validate_date_iso, validate_time_hhmm
 
 
-def validate_category(category: str) -> tuple[str | None, list[str]]:
+def validate_category(category: str | None) -> tuple[str | None, list[str]]:
     """Required. String, max 50 chars."""
     if not category:
         return (None, [CATEGORY_REQUIRED])
@@ -17,7 +17,7 @@ def validate_category(category: str) -> tuple[str | None, list[str]]:
     return (category, [])
 
 
-def validate_description(description: str) -> tuple[str | None, list[str]]:
+def validate_description(description: str | None) -> tuple[str | None, list[str]]:
     """Optional. String, max 200 chars."""
     if not description:
         return (None, [])
@@ -36,7 +36,7 @@ VALIDATION_FUNCS = {
     "ended_at": validate_time_hhmm,
 }
 @log_validator
-def validate_time_entry(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_time_entry(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate time entry data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}

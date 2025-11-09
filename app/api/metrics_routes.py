@@ -1,9 +1,14 @@
-import sys
-from zoneinfo import ZoneInfo
-from flask import request, current_app
-from flask_login import current_user, login_required
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
 
-from app._infra.database import with_db_session
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+from zoneinfo import ZoneInfo
+
+from flask import request
+from flask_login import current_user
+
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
 from app.modules.metrics.repository import DailyMetricsRepository, ABTestRepository, ABTrialRepository
@@ -11,17 +16,18 @@ from app.modules.metrics.service import DailyMetricsService
 from app.modules.metrics.validators import validate_daily_entry
 from app.shared.parsers import parse_daily_entry_form_data, parse_abtest_form_data, parse_abtrial_form_data
 from app.shared.datetime.helpers import last_n_days_range
+from app.shared.decorators import login_plus_session
 
+
+import logging
+logger = logging.getLogger(__name__)
 
 @api_bp.route("/metrics/daily_entries", methods=["POST"])
 @api_bp.route("/metrics/daily_entries/<int:entry_id>", methods=["PUT"])
-@login_required
-@with_db_session
-def daily_entries(session, entry_id=None):
-
+@login_plus_session
+def daily_entries(session: 'Session', entry_id: int | None = None) -> Any:
     parsed_data = parse_daily_entry_form_data(request.form.to_dict())
     typed_data, errors = validate_daily_entry(parsed_data)
-
     if errors:
         return validation_failed(errors), 400
     
@@ -40,9 +46,8 @@ def daily_entries(session, entry_id=None):
     ), 201
 
 @api_bp.route("/metrics/ab_tests", methods=["POST"])
-@login_required
-@with_db_session
-def ab_tests(session):
+@login_plus_session
+def ab_tests(session: 'Session') -> Any:
     parsed_data = parse_abtest_form_data(request.form.to_dict())
     # logger.debug(f"[ABTests] Parsed form data: {parsed_data}")
     # current_app.logger.info(f"Parsed form data: {parsed_data}\n")
@@ -57,9 +62,8 @@ def ab_tests(session):
     ), 201
 
 @api_bp.route("/metrics/ab_trials", methods=["POST"])
-@login_required
-@with_db_session
-def ab_trials(session):
+@login_plus_session
+def ab_trials(session: 'Session') -> Any:
     parsed_data = parse_abtrial_form_data(request.form.to_dict())
     # logger.info(f"Parsed form data: {parsed_data}\n")
     # skip validation
@@ -73,11 +77,10 @@ def ab_trials(session):
     ), 201
 
 @api_bp.get("/metrics/daily_entries/timeseries")
-@login_required
-@with_db_session
-def daily_entries_timeseries(session):
-    metric_type = request.args.get("metric_type")
-    last_n_days = int(request.args.get("lastNDays"))
+@login_plus_session
+def daily_entries_timeseries(session: 'Session') -> Any:
+    metric_type = request.args["metric_type"]
+    last_n_days = int(request.args["lastNDays"])
 
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
     start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)

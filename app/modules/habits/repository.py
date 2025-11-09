@@ -2,20 +2,32 @@
 Repository layer for Habits module.
 """
 
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
 from datetime import datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord, StatusEnum, DifficultyEnum, LanguageEnum, LCStatusEnum
+from app.modules.habits.models import (DifficultyEnum, Habit, HabitCompletion,
+                                       LanguageEnum, LCStatusEnum,
+                                       LeetCodeRecord, StatusEnum)
 from app.shared.repository.base import BaseRepository
 
 
-class HabitsRepository(BaseRepository):
-    def __init__(self, session, user_id: int, user_tz: str = "UTC"):
+class HabitsRepository(BaseRepository[Habit]):
+    def __init__(self, session: 'Session', user_id: int, user_tz: str):
         super().__init__(session, user_id, user_tz, model_cls=Habit)
 
-    def create_habit(self, name: str, status: StatusEnum | None, promotion_threshold: float | None):
+    def create_habit(
+            self,
+            name: str,
+            status: StatusEnum | None,
+            promotion_threshold: float | None
+    ) -> Habit:
         habit = Habit(
             user_id=self.user_id,
             name=name,
@@ -24,14 +36,14 @@ class HabitsRepository(BaseRepository):
         )
         return self.add(habit)
 
-    def get_all_habits_and_tags(self):
+    def get_all_habits_and_tags(self) -> list[Habit]:
         """Return all habits, eager-loading their tags, too."""
         stmt = self._user_select(Habit).options(
             selectinload(Habit.tags)
         )
-        return self.session.execute(stmt).scalars().all()
+        return list(self.session.execute(stmt).scalars().all())
 
-    def create_habit_completion(self, habit_id: int, created_at: datetime):
+    def create_habit_completion(self, habit_id: int, created_at: datetime) -> HabitCompletion:
         habit_completion = HabitCompletion(
             user_id=self.user_id,
             habit_id=habit_id,
@@ -39,15 +51,15 @@ class HabitsRepository(BaseRepository):
         )
         return self.add(habit_completion)
 
-    def get_all_habit_completions(self, habit_id: int, order_desc: bool = False):
+    def get_all_habit_completions(self, habit_id: int, order_desc: bool = False) -> list[HabitCompletion]:
         stmt = self._user_select(HabitCompletion).where(
             HabitCompletion.habit_id == habit_id
         )
         if order_desc:
             stmt = stmt.order_by(HabitCompletion.created_at.desc())
-        return self.session.execute(stmt).scalars().all()
+        return list(self.session.execute(stmt).scalars().all())
 
-    def get_habit_completion_in_window(self, habit_id: int, start_utc: datetime, end_utc: datetime):
+    def get_habit_completion_in_window(self, habit_id: int, start_utc: datetime, end_utc: datetime) -> HabitCompletion | None:
         """Return HabitCompletion for a given habit on a given day, scoped to current user."""
         stmt = (
             select(HabitCompletion)
@@ -62,7 +74,7 @@ class HabitsRepository(BaseRepository):
         return self.session.execute(stmt).scalars().first()
 
     ## All for a given habit
-    def get_all_single_habit_completions_in_window(self, habit_id: int, start_utc: datetime, end_utc: datetime):
+    def get_all_single_habit_completions_in_window(self, habit_id: int, start_utc: datetime, end_utc: datetime) -> list[HabitCompletion]:
         stmt = (
             select(HabitCompletion)
             .join(Habit, Habit.id == HabitCompletion.habit_id)
@@ -73,10 +85,10 @@ class HabitsRepository(BaseRepository):
                 HabitCompletion.created_at < end_utc
             )
         )
-        return self.session.execute(stmt).scalars().all()
+        return list(self.session.execute(stmt).scalars().all())
 
     ## ALL habits in general
-    def get_all_completions_in_window(self, start_utc: datetime, end_utc: datetime):
+    def get_all_completions_in_window(self, start_utc: datetime, end_utc: datetime) -> list[HabitCompletion]:
         stmt = (
             select(HabitCompletion)
             .join(Habit, Habit.id == HabitCompletion.habit_id)
@@ -86,9 +98,9 @@ class HabitsRepository(BaseRepository):
                 HabitCompletion.created_at < end_utc
             )
         )
-        return self.session.execute(stmt).scalars().all()
+        return list(self.session.execute(stmt).scalars().all())
     
-    def get_completion_counts_by_habit_in_window(self, start_utc: datetime, end_utc: datetime):
+    def get_completion_counts_by_habit_in_window(self, start_utc: datetime, end_utc: datetime) -> Any:
         """Returns a list of (habit_name, count) tuples for completions in datetime range."""
         stmt = (
             select(Habit.name, func.count(HabitCompletion.id))
@@ -103,9 +115,14 @@ class HabitsRepository(BaseRepository):
         )
         return self.session.execute(stmt).all()
 
-    def create_leetcoderecord(self, leetcode_id: int, difficulty: DifficultyEnum,
-                              language: LanguageEnum, status: LCStatusEnum,
-                              title: str | None) -> LeetCodeRecord:
+    def create_leetcoderecord(
+            self,
+            leetcode_id: int,
+            difficulty: DifficultyEnum,
+            language: LanguageEnum,
+            status: LCStatusEnum,
+            title: str | None
+    ) -> LeetCodeRecord:
         new_record = LeetCodeRecord(
             user_id=self.user_id,
             leetcode_id=leetcode_id,
@@ -121,4 +138,4 @@ class HabitsRepository(BaseRepository):
             LeetCodeRecord.created_at >= start_utc,
             LeetCodeRecord.created_at < end_utc
         )
-        return self.session.execute(stmt).scalars().all()
+        return list(self.session.execute(stmt).scalars().all())

@@ -1,24 +1,27 @@
 
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
 from flask import request
-from flask_login import current_user, login_required
+from flask_login import current_user
 
 from app.api import api_bp
-from app._infra.database import with_db_session
+from app.api.responses import api_response, validation_failed
 from app.modules.groceries.repository import GroceriesRepository
 from app.modules.groceries.service import GroceriesService
-from app.api.responses import api_response, validation_failed
-from app.modules.groceries.validators import (validate_barcode,
-                                              validate_product,
+from app.modules.groceries.validators import (validate_product,
                                               validate_transaction)
-from app.shared.parsers import (parse_barcode, parse_product_data,
-                                parse_transaction_data)
+from app.shared.decorators import login_plus_session
+from app.shared.parsers import parse_product_data, parse_transaction_data
 
 
 @api_bp.route("/groceries/products", methods=["POST"])
 @api_bp.route("/groceries/products/<int:product_id>", methods=["PUT"])
-@login_required
-@with_db_session
-def products(session, product_id=None):
+@login_plus_session
+def products(session: 'Session', product_id: int | None = None) -> Any:
 
     parsed_data = parse_product_data(request.form.to_dict())
     typed_data, errors = validate_product(parsed_data)
@@ -43,13 +46,12 @@ def products(session, product_id=None):
 
 @api_bp.route("/groceries/transactions", methods=["POST"])
 @api_bp.route("/groceries/transactions/<int:transaction_id>", methods=["PUT"])
-@login_required
-@with_db_session
-def transactions(session, transaction_id=None):
+@login_plus_session
+def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
     groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
     groceries_service = GroceriesService(groceries_repo)
     form_data = request.form.to_dict()
-    product_id_input = form_data.get("product_id") # NOTE: string
+    product_id_input = form_data["product_id"] # NOTE: string
 
     # Case A: Create new product first
     if product_id_input == '__new__':
@@ -90,9 +92,8 @@ def transactions(session, transaction_id=None):
 
 
 @api_bp.route("/groceries/shopping-lists/items", methods=["POST"])
-@login_required
-@with_db_session
-def add_shoppinglist_item(session):
+@login_plus_session
+def add_shoppinglist_item(session: 'Session') -> Any:
     groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
     groceries_service = GroceriesService(groceries_repo)
 
@@ -100,7 +101,7 @@ def add_shoppinglist_item(session):
     product_id = data.get("product_id")
     quantity_wanted = data.get("quantity_wanted")
 
-    item, _ = groceries_service.add_item_to_shoppinglist(product_id)
+    item, _ = groceries_service.add_item_to_shoppinglist(product_id, quantity_wanted)
 
     return api_response(
         True,

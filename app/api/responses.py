@@ -1,10 +1,16 @@
-from flask import jsonify
+
+from typing import Any
+
+from flask import jsonify, Response
 
 ## Response wrappers
 
 def api_response(
-    success: bool, message: str, data: dict = None, errors: dict = None
-) -> dict:
+    success: bool,
+    message: str,
+    data: dict[str, Any] | list[dict[str, Any]] | None = None,
+    errors: dict[str, Any] | None = None
+) -> Response:
     return jsonify(
         {
             "success": success,
@@ -16,8 +22,8 @@ def api_response(
 
 
 def service_response(
-    success: bool, message: str, data: dict = None, errors: dict = None
-) -> dict:
+    success: bool, message: str, data: dict[str, Any] | None = None, errors: dict[str, Any] | None = None
+) -> dict[str, Any]:
     return {
         "success": success,
         "message": message,
@@ -26,5 +32,5 @@ def service_response(
     }
 
 
-def validation_failed(errors: dict) -> dict:
+def validation_failed(errors: dict[str, Any]) -> Response:
     return api_response(False, "Validation failed", errors=errors)

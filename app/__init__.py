@@ -1,8 +1,10 @@
+import logging
 import os
 import secrets
 import sys
+from typing import Any
 
-from flask import Flask, g, request
+from flask import Flask, g
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -10,13 +12,12 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from app._infra.database import db_session, init_db
-
 from app.config import config_map
 from app.extensions import _setup_extensions
 from app.modules.auth.models import UserRoleEnum
-from app.shared.debug import setup_request_debugging, setup_logging
 from app.shared import jinja_filters
-import logging
+from app.shared.debug import setup_logging, setup_request_debugging
+
 
 def has_dev_tools() -> bool:
     # Before login: current_user.is_authenticated is False, re-evals upon login?
@@ -30,7 +31,7 @@ cache = Cache()
 
 # Central app factory => Loads configs, inits extensions, runs DB migrations, registers blueprints, & sets global helpers, too
 # Using our APP_ENV over Flask's built-ins
-def create_app(config_name: str = None):
+def create_app(config_name: str | None = None) -> Flask:
     # Determine which config to load, if not passed => read the APP_ENV var, default to dev
     config_name = config_name or os.environ.get('APP_ENV', 'dev')
 
@@ -54,7 +55,7 @@ def create_app(config_name: str = None):
     return app
 
 
-def _setup_database(app) -> None:
+def _setup_database(app: Flask) -> None:
     # Initialize DB
     # TODO: Move auto-migration here into CI instead, disable on prod
     with app.app_context():
@@ -70,13 +71,13 @@ def _setup_database(app) -> None:
     # Hook db_session.remove() into teardown
     # Prevents sessions leaking between requests
     @app.teardown_appcontext
-    def remove_session(exception=None):
+    def remove_session(exception=None): # type: ignore
         db_session.remove()
 
     print(f"[AFTER _setup_database] Root: {logging.getLogger().level}", file=sys.stderr)
 
 
-def _register_blueprints(app) -> None:
+def _register_blueprints(app: Flask) -> None:
     # Import blueprints here so setup_logging() runs BEFORE these imports
     # That way we can have logger = logging.getLogger(__name__) declared top-level in files since it resolves after our logger is set up
     from app.api import api_bp
@@ -97,7 +98,7 @@ def _register_blueprints(app) -> None:
         app.register_blueprint(bp)
 
 
-def _apply_config(app, config_name) -> None:
+def _apply_config(app: Flask, config_name: str) -> None:
     # Takes config class (DevConfig, ProdConfig, etc) from config_map & copy all class attrs into app.config
     app.config.from_object(config_map[config_name])
     
@@ -109,10 +110,10 @@ def _apply_config(app, config_name) -> None:
 
     # For Flask to play nice with CSP headers
     if app.config.get('USE_PROXY_FIX', False):
-        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1) # type: ignore
 
 
-def _setup_debug(app, config_name) -> None:
+def _setup_debug(app: Flask, config_name: str) -> None:
     # Debug what's being loaded
     from .shared.debug import debug_config, print_env_info
     debug_config(config_name, config_map[config_name])
@@ -123,17 +124,17 @@ def _setup_debug(app, config_name) -> None:
         setup_request_debugging(app)
 
 
-def _setup_request_hooks(app):
+def _setup_request_hooks(app: Flask) -> None:
     # Before each request: Evaluate has_dev_tools, generate nonce (allows our inline theme JS to execute)
     @app.before_request
-    def generate_nonce():
+    def generate_nonce() -> None:
         g.nonce = secrets.token_urlsafe(16)
         g.has_dev_tools = has_dev_tools()
 
     # Context processor runs before every template render
     # Injects helpful globals (can reference globally as regular vars)
     @app.context_processor
-    def inject_globals():
+    def inject_globals() -> dict[str, Any]:
         return dict(
             has_dev_tools=has_dev_tools, # Prefer config over raw os.environ now that we pick config class from env
             nonce=getattr(g, 'nonce', ''), # inject our nonce here as well,

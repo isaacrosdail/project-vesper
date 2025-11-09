@@ -1,13 +1,15 @@
 
 from typing import Any
 
+from datetime import date
+
 from app.modules.tasks.constants import *
 from app.modules.tasks.models import PriorityEnum
 from app.shared.validators import validate_enum, validate_date_iso
-from app.shared.logging_decorators import log_validator
+from app.shared.decorators import log_validator
 
 
-def validate_task_name(name: str) -> tuple[str | None, list[str]]:
+def validate_task_name(name: str | None) -> tuple[str | None, list[str]]:
     """Required. String, max 150 chars."""
     if not name:
         return (None, [TASK_NAME_REQUIRED])
@@ -17,7 +19,7 @@ def validate_task_name(name: str) -> tuple[str | None, list[str]]:
     return (name, [])
 
 
-def validate_task_priority(priority: str) -> tuple[Any, list[str]]:
+def validate_task_priority(priority: str | None) -> tuple[Any, list[str]]:
     """
     Optional*. Valid PriorityEnum value.
     *Required if task is not a frog; must be None if it is.
@@ -27,7 +29,7 @@ def validate_task_priority(priority: str) -> tuple[Any, list[str]]:
     return validate_enum(priority, PriorityEnum, PRIORITY_REQUIRED, PRIORITY_INVALID)
 
 
-def validate_due_date(due_date: str) -> tuple[str | None, list[str]]:
+def validate_due_date(due_date: str | None) -> tuple[date | None, list[str]]:
     """Optional. Datetime string (validation pending)."""
     if not due_date:
         return (None, [])
@@ -42,7 +44,7 @@ TASK_VALIDATION_FUNCS = {
 }
 
 @log_validator
-def validate_task(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate task data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
@@ -80,7 +82,7 @@ def validate_task(data: dict) -> tuple[dict, dict[str, list[str]]]:
 
 
 
-def validate_tag_name(name: str) -> tuple[str | None, list[str]]:
+def validate_tag_name(name: str | None) -> tuple[str | None, list[str]]:
     """Required. String, max 50 chars."""
     if not name:
         return (None, [TAG_NAME_REQUIRED])
@@ -90,7 +92,7 @@ def validate_tag_name(name: str) -> tuple[str | None, list[str]]:
     return (name, [])
 
 
-def validate_tag_scope(scope: str) -> tuple[str | None, list[str]]:
+def validate_tag_scope(scope: str | None) -> tuple[str | None, list[str]]:
     """Optional. String, max 20 chars."""
     if not scope:
         return (None, [])
@@ -107,7 +109,7 @@ TAG_VALIDATION_FUNCS = {
 
 # TODO: Move elsewhere now that this is in shared/models.py?
 @log_validator
-def validate_tag(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_tag(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate tag data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}

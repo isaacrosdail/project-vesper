@@ -1,8 +1,13 @@
 
-from flask import request, current_app
-from flask_login import current_user, login_required
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
 
-from app._infra.database import with_db_session
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+from flask import request, current_app
+from flask_login import current_user
+
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
 from app.modules.time_tracking.repository import TimeTrackingRepository
@@ -10,13 +15,13 @@ from app.modules.time_tracking.service import TimeTrackingService
 from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.parsers import parse_time_entry_form_data
 from app.shared.datetime.helpers import last_n_days_range
+from app.shared.decorators import login_plus_session
 
 
 @api_bp.route('/time_tracking/time_entries', methods=["POST"])
 @api_bp.route('/time_tracking/time_entries/<int:entry_id>', methods=["PUT"])
-@login_required
-@with_db_session
-def time_entries(session, entry_id=None):
+@login_plus_session
+def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
         parsed_data = parse_time_entry_form_data(request.form.to_dict())
 
         typed_data, errors = validate_time_entry(parsed_data)
@@ -39,10 +44,9 @@ def time_entries(session, entry_id=None):
         ), 201
 
 @api_bp.get("/time_tracking/time_entries/summary")
-@login_required
-@with_db_session
-def time_entries_summary(session):
-    last_n_days = int(request.args.get("lastNDays"))
+@login_plus_session
+def time_entries_summary(session: 'Session') -> Any:
+    last_n_days = int(request.args["lastNDays"])
     repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
     start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)
     results = repo.get_all_time_entries_in_window(start_utc, end_utc)

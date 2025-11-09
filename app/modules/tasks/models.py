@@ -1,11 +1,12 @@
 """
 Database models for the Tasks module.
 """
+from datetime import datetime
 import enum
 
 from sqlalchemy import Boolean, Column, DateTime, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app._infra.db_base import Base, CustomBaseTaskMixin
 from app.modules.tasks.constants import TASK_NAME_MAX_LENGTH
@@ -21,7 +22,7 @@ class PriorityEnum(enum.Enum):
 
 class Task(Base, CustomBaseTaskMixin, APISerializable):
 
-    __api_exclude__ = []
+    __api_exclude__: list[str] = []
 
     __table_args__ = (
         CheckConstraint(
@@ -35,24 +36,24 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
         UniqueConstraint('user_id', 'name', name='uq_user_task_name'),
     )
 
-    name = Column(
+    name: Mapped[str] = mapped_column(
         String(TASK_NAME_MAX_LENGTH),
         nullable=False
     )
 
-    priority = Column(
+    priority: Mapped[PriorityEnum] = mapped_column(
         SAEnum(PriorityEnum, name="priority_enum"),
         nullable=True
     )
 
-    is_frog = Column(Boolean, default=False)
-    is_done = Column(Boolean, default=False)
-    due_date = Column(DateTime(timezone=True), nullable=True)
+    is_frog: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_done: Mapped[bool] = mapped_column(Boolean, default=False)
+    due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:
+        return str(self.name)
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Task id={self.id} name='{self.name}'>"

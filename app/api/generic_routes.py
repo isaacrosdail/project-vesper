@@ -1,21 +1,27 @@
 ## Generalized CRUD handling routes for ANY module/model_class
-import sys
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, Type
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+import logging
 from datetime import datetime
 
-from flask import abort, current_app, request
-from flask_login import current_user, login_required
+from flask import abort, request
+from flask_login import current_user
 
 from app.api import api_bp
-from app._infra.database import with_db_session
 from app.api.responses import api_response
 from app.modules.auth.service import check_item_ownership
-from app.modules.groceries.models import Product, Transaction, ShoppingList, ShoppingListItem
+from app.modules.groceries.models import (Product, ShoppingList,
+                                          ShoppingListItem, Transaction)
 from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
 from app.modules.metrics.models import DailyEntry
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
 from app.shared.database.helpers import safe_delete
-from app.shared.datetime.helpers import convert_to_timezone
+from app.shared.decorators import login_plus_session
 from app.shared.hooks import PATCH_HOOKS
 
 
@@ -25,7 +31,7 @@ from app.shared.hooks import PATCH_HOOKS
 
 # Map to correct model based on module passed in
 # This uses module + subtype to resolve to the specific model
-MODEL_CLASSES = {
+MODEL_CLASSES: dict[tuple[str, str], Type[Any]] = {
     ("groceries", "products"): Product,
     ("groceries", "transactions"): Transaction,
     ("groceries", "shopping_lists"): ShoppingList,
@@ -38,13 +44,12 @@ MODEL_CLASSES = {
     ("time_tracking", "time_entries"): TimeEntry,
 }
 
-def get_model_class(module, subtype: str):
+def get_model_class(module: str, subtype: str) -> Type[Any] | None:
     return MODEL_CLASSES.get((module, subtype))
 
 @api_bp.route("/<module>/<subtype>/<int:item_id>", methods=["GET", "PATCH", "DELETE"])
-@login_required
-@with_db_session
-def item(session, module, subtype, item_id):
+@login_plus_session
+def item(session: 'Session', module: str, subtype: str, item_id: int) -> Any:
 
     model_class = get_model_class(module, subtype) # so 'tasks', 'task' returns Task class
     if model_class is None:
@@ -88,6 +93,6 @@ def item(session, module, subtype, item_id):
             data=response_data
         ), 200
     
-    elif request.method == 'DELETE':
+    else:
         safe_delete(session, item)
         return api_response(True, f"{model_class.__name__} deleted", data=item.to_api_dict()), 200

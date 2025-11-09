@@ -5,11 +5,11 @@ import regex
 
 from app.modules.auth.constants import *
 from app.modules.auth.models import UserLangEnum, UserRoleEnum
+from app.shared.decorators import log_validator
 from app.shared.validators import validate_enum
-from app.shared.logging_decorators import log_validator
 
 
-def validate_username(username: str) -> tuple[str | None, list[str]]:
+def validate_username(username: str | None) -> tuple[str | None, list[str]]:
     """Required. String, 3-30 chars, Unicode letters/numbers/underscores."""
     if not username:
         return (None, [USERNAME_REQUIRED])
@@ -19,7 +19,7 @@ def validate_username(username: str) -> tuple[str | None, list[str]]:
     return (username, [])
 
 
-def validate_password(password: str) -> tuple[str | None, list[str]]:
+def validate_password(password: str | None) -> tuple[str | None, list[str]]:
     """Required. String, 8-50 chars."""
     if not password:
         return (None, [PASSWORD_REQUIRED])
@@ -29,7 +29,7 @@ def validate_password(password: str) -> tuple[str | None, list[str]]:
     return (password, [])
 
 
-def validate_name(name: str) -> tuple[str | None, list[str]]:
+def validate_name(name: str | None) -> tuple[str | None, list[str]]:
     """Optional. String, 1-50 chars, Unicode letters/spaces/apostrophes/hyphens."""
     if not name:
         return (None, [])
@@ -55,7 +55,7 @@ VALIDATION_FUNCS = {
     "name": validate_name,
 }
 @log_validator
-def validate_user(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_user(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     typed_data = {}
     errors = {}
 

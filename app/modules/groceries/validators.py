@@ -5,10 +5,10 @@ import regex
 from app.modules.groceries.constants import *
 from app.modules.groceries.models import ProductCategoryEnum, UnitEnum
 from app.shared.validators import *
-from app.shared.logging_decorators import log_validator
+from app.shared.decorators import log_validator
 
 
-def validate_product_name(product_name: str) -> tuple[str | None, list[str]]:
+def validate_product_name(product_name: str | None) -> tuple[str | None, list[str]]:
     """Required. String, max 50 chars."""
     if not product_name:
         return (None, [PRODUCT_NAME_REQUIRED])
@@ -18,12 +18,14 @@ def validate_product_name(product_name: str) -> tuple[str | None, list[str]]:
     return (product_name, [])
 
 
-def validate_category(category: str) -> tuple[Any, list[str]]:
+def validate_category(category: str | None) -> tuple[Any, list[str]]:
+    if not category:
+        return (None, [CATEGORY_REQUIRED])
     """Required. Valid ProductCategoryEnum value."""
     return validate_enum(category, ProductCategoryEnum, CATEGORY_REQUIRED, CATEGORY_INVALID)
 
 
-def validate_barcode(barcode: str) -> tuple[str | None, list[str]]:
+def validate_barcode(barcode: str | None) -> tuple[str | None, list[str]]:
     """Optional. Alphanumeric string."""
     if not barcode:
         return (None, [])
@@ -33,7 +35,7 @@ def validate_barcode(barcode: str) -> tuple[str | None, list[str]]:
     return (barcode, [])
 
 
-def validate_net_weight(net_weight: str) -> tuple[float | None, list[str]]:
+def validate_net_weight(net_weight: str | None) -> tuple[float | None, list[str]]:
     """Required. Numeric(7,3), positive."""
     if not net_weight:
         return (None, [NET_WEIGHT_REQUIRED])
@@ -52,12 +54,14 @@ def validate_net_weight(net_weight: str) -> tuple[float | None, list[str]]:
     return (net_weight_float, [])
 
 
-def validate_unit_type(unit_type: str) -> tuple[Any, list[str]]:
+def validate_unit_type(unit_type: str | None) -> tuple[Any, list[str]]:
+    if not unit_type:
+        return (None, [UNIT_TYPE_REQUIRED])
     """Required. Valid UnitEnum value."""
     return validate_enum(unit_type, UnitEnum, UNIT_TYPE_REQUIRED, UNIT_TYPE_INVALID)
 
 
-def validate_calories(calories: str) -> tuple[float | None, list[str]]:
+def validate_calories(calories: str | None) -> tuple[float | None, list[str]]:
     """Optional. Numeric(5,2), non-negative."""
     if calories:
         is_valid, error_type = validate_numeric(calories,
@@ -85,7 +89,7 @@ PRODUCT_VALIDATION_FUNCS = {
     "calories_per_100g": validate_calories,
 }
 @log_validator
-def validate_product(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_product(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate product data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
@@ -103,7 +107,7 @@ def validate_product(data: dict) -> tuple[dict, dict[str, list[str]]]:
 
 
 
-def validate_price(price: str) -> tuple[float | None, list[str]]:
+def validate_price(price: str | None) -> tuple[float | None, list[str]]:
     """Required. Numeric(7,2), non-negative."""
     if not price:
         return (None, [PRICE_REQUIRED])
@@ -118,7 +122,7 @@ def validate_price(price: str) -> tuple[float | None, list[str]]:
     return (price_float, [])
 
 
-def validate_quantity(quantity: str) -> tuple[int | None, list[str]]:
+def validate_quantity(quantity: str | None) -> tuple[int | None, list[str]]:
     """Required. Positive integer."""
     if not quantity:
         return (None, [QUANTITY_REQUIRED])
@@ -138,7 +142,7 @@ TRANSACTION_VALIDATION_FUNCS = {
     "quantity": validate_quantity,
 }
 @log_validator
-def validate_transaction(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_transaction(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate transaction data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
@@ -155,7 +159,7 @@ def validate_transaction(data: dict) -> tuple[dict, dict[str, list[str]]]:
 
 
 @log_validator
-def validate_shopping_list(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_shopping_list(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate shopping list data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
@@ -171,7 +175,7 @@ def validate_shopping_list(data: dict) -> tuple[dict, dict[str, list[str]]]:
 
 
 
-def validate_quantity_wanted(quantity_wanted: str) -> tuple[int | None, list[str]]:
+def validate_quantity_wanted(quantity_wanted: str | None) -> tuple[int | None, list[str]]:
     """Required. Positive integer."""
     if not quantity_wanted:
         return (None, [QUANTITY_WANTED_REQUIRED])
@@ -186,12 +190,16 @@ def validate_quantity_wanted(quantity_wanted: str) -> tuple[int | None, list[str
     return (quantity_wanted_int, [])
 
 
-def validate_shopping_list_id(shopping_list_id: str) -> tuple[int | None, list[str]]:
+def validate_shopping_list_id(shopping_list_id: str | None) -> tuple[int | None, list[str]]:
+    if not shopping_list_id:
+        return (None, [SHOPPING_LIST_ID_REQUIRED])
     """Required. Valid integer ID."""
     return validate_id_field(shopping_list_id, SHOPPING_LIST_ID_REQUIRED, SHOPPING_LIST_ID_INVALID)
 
 
-def validate_product_id(product_id: str) -> tuple[int | None, list[str]]:
+def validate_product_id(product_id: str | None) -> tuple[int | None, list[str]]:
+    if not product_id:
+        return (None, [PRODUCT_ID_REQUIRED])
     """Required. Valid integer ID."""
     return validate_id_field(product_id, PRODUCT_ID_REQUIRED, PRODUCT_ID_INVALID)
 
@@ -202,7 +210,7 @@ SHOPPING_LIST_ITEM_VALIDATION_FUNCS = {
     "product_id": validate_product_id
 }
 @log_validator
-def validate_shopping_list_item(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_shopping_list_item(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate shopping list item. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
