@@ -49,8 +49,6 @@ def daily_entries(session: 'Session', entry_id: int | None = None) -> Any:
 @login_plus_session
 def ab_tests(session: 'Session') -> Any:
     parsed_data = parse_abtest_form_data(request.form.to_dict())
-    # logger.debug(f"[ABTests] Parsed form data: {parsed_data}")
-    # current_app.logger.info(f"Parsed form data: {parsed_data}\n")
     # skip validation for now
     repo = ABTestRepository(session, current_user.id, current_user.timezone)
     result = repo.create_abtest(**parsed_data)
@@ -65,8 +63,7 @@ def ab_tests(session: 'Session') -> Any:
 @login_plus_session
 def ab_trials(session: 'Session') -> Any:
     parsed_data = parse_abtrial_form_data(request.form.to_dict())
-    # logger.info(f"Parsed form data: {parsed_data}\n")
-    # skip validation
+    # skip validation for now
     repo = ABTrialRepository(session, current_user.id, current_user.timezone)
     result = repo.create_abtrial(**parsed_data)
 

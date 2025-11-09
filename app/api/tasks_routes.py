@@ -36,7 +36,7 @@ def tasks(session: 'Session', task_id: int | None = None) -> Any:
     
     tasks_repo.session.flush()
     progress = tasks_service.calculate_tasks_progress_today()
-    print(f"Dict response: {progress}", file=sys.stderr)
+
     task = result["data"]["task"]
     return api_response(
         True,
