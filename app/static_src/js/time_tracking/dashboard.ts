@@ -3,6 +3,20 @@ import * as d3 from 'd3';
 import { hideToolTip, showToolTip } from '../shared/ui/tooltip';
 import { apiRequest } from '../shared/services/api';
 
+type PieDatum = {
+    category: string;
+    value: number;
+};
+
+type ApiPieData = {
+    category: string;
+    duration_minutes: number;
+};
+
+interface ArcPathElement extends SVGPathElement {
+    _current?: d3.PieArcDatum<PieDatum>;
+}
+
 // Set up dimensions
 const width = 300;
 const height = 300;
@@ -17,14 +31,16 @@ const svg = d3.select('#time-chart')
     .attr("transform", `translate(${width/2}, ${height/2})`);
 
 // d3.pie() takes our array data and calculates angles
-const pie = d3.pie().value(d => d.value);
+const pie = d3.pie<PieDatum>().value(d => d.value);
 // d3.arc() draws the curved slice shapes based on those angles
-const arc = d3.arc().innerRadius(0).outerRadius(radius);
+const arc = d3.arc<d3.PieArcDatum<PieDatum>>()
+    .innerRadius(0)
+    .outerRadius(radius);
 // Color Scale maps indexes to colors
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 
-function updatePieChart(data) {
+function updatePieChart(data: PieDatum[]) {
     let disableHoverEffects = data.length === 0 || data.length === 1;
 
     if (data.length === 0) {
@@ -32,7 +48,7 @@ function updatePieChart(data) {
     }
     const pieData = pie(data);
 
-    const groups = svg.selectAll("g.slice")
+    const groups = svg.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
         // .data(data, keyFn)
         .data(pieData, d => d.data.category) // key function = stable matching?
         .join(
@@ -43,7 +59,10 @@ function updatePieChart(data) {
                 g.append('path')
                     .attr("class", "pie")
                     .attr("fill", d => color(d.data.category))
-                    .each(function(d) { this._current = d; }) // store start?
+                    .each(
+                        function(this: ArcPathElement, d) {
+                            this._current = d; // store start?
+                        })
                     .attr("d", arc);
 
                 return g;
@@ -53,9 +72,10 @@ function updatePieChart(data) {
                 update.select("path")
                     .transition().duration(500)
                     .attrTween("d", function(d) {
-                        const i = d3.interpolate(this._current, d);
-                        this._current = i(1);
-                        return t => arc(i(t));
+                        const el = this as ArcPathElement;
+                        const i = d3.interpolate(el._current, d);
+                        el._current = i(1);
+                        return t => arc(i(t)) ?? ""; // ?? "" here since arc can return null, which TS doesn't like
                     });
 
                 return update;
@@ -63,7 +83,7 @@ function updatePieChart(data) {
             exit => exit.remove()
         );
 
-    const legend = svg.selectAll("g.legend")
+    const legend = svg.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend")
         .data(pieData, d => d.data.category)
         .join(
             enter => {
@@ -85,6 +105,7 @@ function updatePieChart(data) {
                 g.append('text')
                     .attr("x", 18)
                     .attr("y", 14)
+                    .attr("class", "chart-legend-text")
                     .text(d => `${d.data.category} - ${d.data.value} min`)
 
                 return g;
@@ -136,19 +157,20 @@ export async function init() {
 
 
     document.addEventListener('click', async (e) => {
-        if (e.target.matches('.timeframe-selection')) {
-            const range = parseInt(e.target.dataset.range, 10);
+        const target = e.target as HTMLElement;
+        if (target.matches('.timeframe-selection')) {
+            const range = parseInt(target.dataset['range']!, 10);
             const data = await getData(range);
             updatePieChart(data);
         }
     });
 }
 
-function getData(lastNDays) {
+function getData(lastNDays: number): Promise<PieDatum[]> {
     return new Promise((resolve, reject) => {
         const url = `/time_tracking/time_entries/summary?lastNDays=${lastNDays}`;
         apiRequest('GET', url, (responseData) => {
-            const entries = responseData.data;
+            const entries: ApiPieData[] = responseData.data;
             
             if(Array.isArray(entries) && entries.length === 0) {
                 return resolve([]);
@@ -159,7 +181,7 @@ function getData(lastNDays) {
                 v => d3.sum(v, d => d.duration_minutes),
                 d => d.category
             );
-            const arr = [...rollupMap].map(([k, v]) => ({category: k, value: v}));
+            const arr: PieDatum[] = [...rollupMap].map(([k, v]) => ({category: k, value: v}));
             resolve(arr);
         }, reject);
     });

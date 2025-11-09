@@ -8,6 +8,24 @@ import { apiRequest } from '../shared/services/api';
 // 2. Create the axes generators
 // 3. Call them on groups inside gRoot
 
+type MetricType = 'steps' | 'weight' | 'calories' | 'sleep_duration_minutes';
+type StaticLineMetric = 'calories' | 'sleep_duration_minutes';
+
+type ApiMetricData = {
+    date: string;
+    value: string;
+}
+
+type LineDataPoint = {
+    date: Date;
+    value: number;
+}
+
+type LineData = {
+    id: MetricType;
+    values: LineDataPoint[];
+}
+
 // Hardcoding BMR for calories, target duration for sleep
 const bmrValue = 2000;
 const targetSleepDuration = 7 * 60; // 7hrs in minutes
@@ -34,6 +52,7 @@ const gRoot = svg.append("g")
 // Title for lineChart
 const title = svg.append("text")
     .attr("id", "line-chart-title")
+    .attr("class", "chart-title")
     .attr("x", width/2)
     .attr("y", margin.top/2)
     .attr("text-anchor", "middle")
@@ -56,36 +75,36 @@ const xScale = d3.scaleTime().range([0, innerWidth]);
 const yScale = d3.scaleLinear().range([innerHeight, 0]);
 
 // Line generator: Turns [ {date,value}...] into a smooth path string
-const line2 = d3.line()
+const line = d3.line<LineDataPoint>()
     .x(d => xScale(d.date))
     .y(d => yScale(d.value))
 
 const STATIC_LINE_CONFIG = {
     'calories': {
         class: "bmr-line",
-        label: d => `BMR: ${d}`,
+        label: (d: number) => `BMR: ${d}`,
         color: "red",
         data: () => [bmrValue]
     },
     'sleep_duration_minutes': {
         class: "sleep-line",
-        label: d => `Target: ${d}`,
+        label: (d: number) => `Target: ${d}`,
         color: "red",
         data: () => [targetSleepDuration]
     }
 }
 
-function drawStaticLines(metricType) {
-    const config = STATIC_LINE_CONFIG[metricType];
+function drawStaticLines(metricType: MetricType) {
+    const config = STATIC_LINE_CONFIG[metricType as StaticLineMetric];
     if (!config) return;
 
-    const line = gChart.selectAll(`rect.${config.class.split(" ")[0]}`)
+    const staticLine = gChart.selectAll(`rect.${config.class.split(" ")[0]}`)
         .data(config.data())
         .join(
             enter => enter.append("rect")
                 .attr("class", config.class)
                 .attr("x", 0)
-                .attr("y", d => yScale(d) - 1)
+                .attr("y", (d: number) => yScale(d) - 1)
                 .attr("width", innerWidth)
                 .attr("height", 2)
                 .attr("fill", config.color)
@@ -93,27 +112,30 @@ function drawStaticLines(metricType) {
             update => update
                 .transition()
                 .duration(200)
-                .attr("y1", d => yScale(d))
-                .attr("y2", d => yScale(d)),
-            exit => exit.remove()
+                .attr("y1", (d: number) => yScale(d))
+                .attr("y2", (d: number) => yScale(d)),
+
         );
-    line.on('mouseenter', function(event, d) {
-        showToolTip(this, config.label(d));
+    staticLine.on('mouseenter', function(this: d3.BaseType, _event: any, d: number) {
+        const el = this as SVGRectElement;
+        showToolTip(el, config.label(d));
     }).on('mouseleave', hideToolTip);
 }
 
-function updateLineChart(data, metricType) {
-
+function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
+    if (data.length === 0){ // if dataset is empty, bail so we can safely coalesce for .domains below
+        return;
+    }
     // Clear static lines
     gChart.selectAll(".bmr-line, .sleep-line").remove();
 
-    xScale.domain(d3.extent(data, d => d.date))
-    yScale.domain(d3.extent(data, d => d.value))
+    xScale.domain(d3.extent(data, d => d.date) as [Date, Date]);
+    yScale.domain(d3.extent(data, d => d.value) as [number, number]);
 
-    gXAxis.call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%m/%d")));
+    gXAxis.call(d3.axisBottom(xScale).tickFormat((d) => d3.timeFormat("%m/%d")(d as Date)));
     gYAxis.call(d3.axisLeft(yScale).ticks(ticks));
 
-    const thing = gChart.selectAll("path.line")
+    const metricLine = gChart.selectAll<SVGPathElement, LineData>("path.line")
         // .data([data])
         // This makes each metric a datum
         .data([{
@@ -127,17 +149,17 @@ function updateLineChart(data, metricType) {
                     .attr("fill", "none")
                     .attr("stroke", "steelblue")
                     .attr("stroke-width", 2)
-                    .attr("d", d => line2(d.values));
+                    .attr("d", (d: any) => line(d.values));
             },
             update => update
                 .transition()
                 .duration(200)
-                .attr("d", d => line2(d.values)), // re-draw on update
+                .attr("d", (d: any) => line(d.values)), // re-draw on update
             exit => exit.remove()
         );
 
-    const circles = gChart.selectAll("circle")
-        .data(data, d => d.date)
+    const circles = gChart.selectAll<SVGCircleElement, LineDataPoint>("circle")
+        .data(data, d => d.date.getTime()) // using .getTime(): more stable than raw Date objs?
         .join(
             enter => {
                 return enter.append("circle")
@@ -158,8 +180,9 @@ function updateLineChart(data, metricType) {
             exit => exit.remove()
         );
 
-    circles.on('mouseenter', function(_event, d) {
-        showToolTip(this, `${metricType}: ${d.value}`)
+    circles.on('mouseenter', function(this: d3.BaseType, _event: any, d: LineDataPoint) {
+        const el = this as SVGRectElement;
+        showToolTip(el, `${metricType}: ${d.value}`)
     });
     circles.on('mouseleave', () => {
         hideToolTip();
@@ -167,11 +190,11 @@ function updateLineChart(data, metricType) {
 
     // update title text
     d3.select("#line-chart-title")
-        .text(metricType.charAt(0).toUpperCase() + metricType.slice(1));
+        .text(TYPE_LABELS[metricType]);
 
 }
 
-const TYPE_LABELS = {
+const TYPE_LABELS: Record<MetricType, string> = {
     weight: "Weight",
     steps: "Steps",
     calories: "Calories",
@@ -180,27 +203,25 @@ const TYPE_LABELS = {
 
 export async function init() {
     const initialData = await getMetricData('weight', 7);
-    updateLineChart(initialData, 'Weight');
+    updateLineChart(initialData, 'weight');
 
     document.addEventListener('click', async (e) => {
-        if (e.target.matches('.type-selection')) {
-            const metric_type = e.target.dataset.type;
-            const data = await getMetricData(metric_type, 7);
-            updateLineChart(data, TYPE_LABELS[metric_type]);
-            drawStaticLines(metric_type);
+        const target = e.target as HTMLElement;
+        if (target.matches('.type-selection')) {
+            const metricType = target.dataset['type']! as MetricType;
+            const data = await getMetricData(metricType, 7);
+            updateLineChart(data, metricType);
+            drawStaticLines(metricType);
         }
     });
 }
 
-function getMetricData(metric_type, lastNDays) {
+function getMetricData(metric_type: MetricType, lastNDays: number): Promise<LineDataPoint[]> {
     return new Promise((resolve, reject) => {
         const url = `/metrics/daily_entries/timeseries?metric_type=${metric_type}&lastNDays=${lastNDays}`;
         apiRequest('GET', url, (responseData) => {
-            const entries = responseData.data;
-            console.log(entries);
-
             // Coerce date strings to Date objects
-            const chartData = responseData.data.map(d => ({
+            const chartData = responseData.data.map((d: ApiMetricData) => ({
                 date: new Date(d.date),
                 value: parseFloat(d.value),
             }));
