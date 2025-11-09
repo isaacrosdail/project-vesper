@@ -24,6 +24,7 @@ from app.shared.database.helpers import safe_delete
 from app.shared.decorators import login_plus_session
 from app.shared.hooks import PATCH_HOOKS
 
+logger = logging.getLogger(__name__)
 
 # Generalized PATCH, DELETE, GET which support:
 # 1. Any number of modules (eg, groceries, tasks, etc.)
@@ -53,7 +54,7 @@ def item(session: 'Session', module: str, subtype: str, item_id: int) -> Any:
 
     model_class = get_model_class(module, subtype) # so 'tasks', 'task' returns Task class
     if model_class is None:
-        current_app.logger.warning(f"Unknown model for {module}, {subtype}")
+        logger.warning(f"Unknown model for {module}, {subtype}")
         abort(404)
 
     item = session.get(model_class, item_id)
@@ -64,8 +65,6 @@ def item(session: 'Session', module: str, subtype: str, item_id: int) -> Any:
     check_item_ownership(item, current_user.id)
     
     if request.method == 'GET':
-        print(item.to_api_dict(), file=sys.stderr)
-        # print(dir(item), file=sys.stderr)
         return api_response(True, f"Retrieved {item.__tablename__}", data=item.to_api_dict()), 200
 
     if request.method == 'PATCH':
