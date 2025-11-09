@@ -5,10 +5,10 @@ import { apiRequest } from './services/api.js';
 
 /**
  * Remove table row
- * @param {number} itemId - Item ID by which to query for row
+ * @param {string} itemId - Item ID by which to query for row
  * @returns {void}
  */
-export function removeTableRow(itemId: number) {
+export function removeTableRow(itemId: string) {
     const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
     if (!itemRow) return;
 

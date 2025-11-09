@@ -39,29 +39,29 @@ export async function initMain() {
     await initUserStore();
     showToastsFromFlask();
 
-    const page = document.documentElement.dataset.page;
-    if (initRegistry[page]) {
-        initRegistry[page]();
+    const page = document.documentElement.dataset['page'];
+    if (page && page in initRegistry) {
+        initRegistry[page as keyof typeof initRegistry]();
     }
 }
 
 async function initUserStore() {
     try {
         await userStore.fetch();
-        // console.log('User timezone loaded:', userStore.data.timezone);
-    } catch (error) {
-        if (!userStore.data) {
-            userStore.data = {};
+        if (!userStore.data?.timezone) {
+            throw new Error('User store loaded without timezone. Invalid state');
         }
-        // Fall back to browser timezone
-        userStore.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        // console.log(`Fallback to browser timezone: `, userStore.data.timezone);
+    } catch (error) {
+        console.error('Failed to load userStore:', error);
+        throw new Error('Failure: could not load userStore.');
     }
 }
 
-function showToastsFromFlask() {
-    // Pop toasts from Flask's session to present, if any
-    const toastRaw = document.body.dataset.toast;
+/**
+ * Pop toasts from Flask's session to be presented, if any
+ */
+function showToastsFromFlask(): void {
+    const toastRaw = document.body.dataset['toast'];
     if (toastRaw && toastRaw !== 'null') {
         const toast = JSON.parse(toastRaw);
         makeToast(toast.message, toast.type, 3000);
