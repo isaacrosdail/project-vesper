@@ -1,20 +1,24 @@
 
-from flask import Blueprint, render_template
-from flask_login import current_user, login_required
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
 
-from app._infra.database import with_db_session
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+from flask import Blueprint, render_template
+from flask_login import current_user
+
 from app.modules.habits.repository import HabitsRepository
-from app.modules.habits.service import HabitsService
 from app.modules.habits.viewmodels import HabitPresenter, HabitViewModel
+from app.shared.decorators import login_plus_session
 
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
 
 @habits_bp.route("/dashboard", methods=["GET"])
-@login_required
-@with_db_session
-def dashboard(session):
+@login_plus_session
+def dashboard(session: 'Session') -> Any:
     
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
     habits = habits_repo.get_all_habits_and_tags()

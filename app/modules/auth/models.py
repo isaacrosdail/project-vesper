@@ -3,6 +3,7 @@ import enum
 from flask_login import UserMixin
 from sqlalchemy import Column, String
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy.orm import Mapped, mapped_column
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app._infra.db_base import Base
@@ -25,47 +26,47 @@ class UnitSystemEnum(enum.Enum):
     METRIC = "metric"
     IMPERIAL = "imperial"
 
-class User(Base, UserMixin):
-    username = Column(
+class User(Base, UserMixin): # type: ignore[misc]
+    username: Mapped[str] = mapped_column(
         String(USERNAME_MAX_LENGTH),
         nullable=False,
         unique=True
     )
 
-    name = Column(
+    name: Mapped[str] = mapped_column(
         String(NAME_MAX_LENGTH),
         nullable=True
     )
     
     # Werkzeug's default uses pbkdf2:sha256 = ~95 chars
-    password_hash = Column(
+    password_hash: Mapped[str] = mapped_column(
         String(PASSWORD_HASH_MAX_LENGTH),
         nullable=False
     ) 
 
-    role = Column(
+    role: Mapped[UserRoleEnum] = mapped_column(
         SAEnum(UserRoleEnum, name="user_role_enum"), 
         nullable=False,
         default=UserRoleEnum.USER
     )
 
-    timezone = Column(
+    timezone: Mapped[str] = mapped_column(
         String(TIMEZONE_MAX_LENGTH),
         nullable=False, 
         server_default="America/Chicago"
     )
 
-    lang = Column(
+    lang: Mapped[UserLangEnum] = mapped_column(
         SAEnum(UserLangEnum, name="user_lang_enum", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
         default=UserLangEnum.EN
     )
 
-    city = Column(String(100), nullable=False, server_default='Chicago')
+    city: Mapped[str] = mapped_column(String(100), nullable=False, server_default='Chicago')
     
-    country = Column(String(3), nullable=False, server_default='US')
+    country: Mapped[str] = mapped_column(String(3), nullable=False, server_default='US')
 
-    units = Column(
+    units: Mapped[UnitSystemEnum] = mapped_column(
         SAEnum(UnitSystemEnum,
                name="unit_system_enum",
                values_callable=lambda x: [e.value for e in x]),
@@ -74,7 +75,7 @@ class User(Base, UserMixin):
         server_default='imperial'
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<User id={self.id} username: {self.username} role={self.role}>"
 
     # Instance methods
@@ -90,11 +91,11 @@ class User(Base, UserMixin):
         return check_password_hash(self.password_hash, provided_password)
     
     @property
-    def is_owner(self):
+    def is_owner(self) -> bool:
         return self.role == UserRoleEnum.OWNER
     
     @property
-    def is_admin(self):
+    def is_admin(self) -> bool:
         return self.role == UserRoleEnum.ADMIN
     
     # Helpful instance method to check role

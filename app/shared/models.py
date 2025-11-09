@@ -1,6 +1,8 @@
 
+from typing import cast
+
 from sqlalchemy import ForeignKey, Table, Column, String, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app._infra.db_base import Base
 from app.modules.tasks.constants import TAG_NAME_MAX_LENGTH, TAG_SCOPE_MAX_LENGTH
@@ -27,15 +29,15 @@ class Tag(Base):
         UniqueConstraint('user_id', 'name', name='uq_user_tag_name'),
     )
 
-    name = Column(String(TAG_NAME_MAX_LENGTH), nullable=False)
-    scope = Column(String(TAG_SCOPE_MAX_LENGTH), default="universal")
+    name: Mapped[str] = mapped_column(String(TAG_NAME_MAX_LENGTH), nullable=False)
+    scope: Mapped[str] = mapped_column(String(TAG_SCOPE_MAX_LENGTH), default="universal")
 
     # Reciprocal relationships for many-to-many
     tasks = relationship("Task", secondary="task_tags", back_populates="tags")
     habits = relationship("Habit", secondary="habit_tags", back_populates="tags")
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:
+        return cast(str, self.name)
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Tag id={self.id} name='{self.name}'>"

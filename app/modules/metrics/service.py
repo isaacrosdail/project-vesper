@@ -1,9 +1,12 @@
+
+from typing import Any
+
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.constants import WAKE_MUST_BE_AFTER_SLEEP
-from app.shared.datetime.helpers import today_range_utc, parse_time_to_datetime
+from app.shared.datetime.helpers import parse_time_to_datetime
 from app.api.responses import service_response
 
 
@@ -12,7 +15,7 @@ class DailyMetricsService:
         self.repo = repository
         self.user_tz = user_tz
 
-    def save_daily_entry(self, typed_data: dict, entry_id: int | None) -> dict:
+    def save_daily_entry(self, typed_data: dict[str, Any], entry_id: int | None) -> dict[str, Any]:
         # typed_data["entry_date"] is already a datetime.date obj from validators
         entry_date = typed_data.pop("entry_date")
 

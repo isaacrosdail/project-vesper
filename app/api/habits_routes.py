@@ -1,26 +1,31 @@
 
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
 from datetime import date
 
 from flask import request
-from flask_login import current_user, login_required
+from flask_login import current_user
 
-from app._infra.database import with_db_session
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
 from app.modules.habits.repository import HabitsRepository
 from app.modules.habits.service import HabitsService
 from app.modules.habits.validators import (validate_habit,
                                            validate_leetcode_record)
-from app.shared.datetime.helpers import (day_range_utc, parse_js_instant,
-                                         today_range_utc, last_n_days_range)
+from app.shared.datetime.helpers import (day_range_utc, last_n_days_range,
+                                         parse_js_instant, today_range_utc)
+from app.shared.decorators import login_plus_session
 from app.shared.parsers import parse_habit_form_data, parse_leetcode_form_data
 
 
 @api_bp.route("/habits/habits", methods=["POST"])
 @api_bp.route("/habits/habits/<int:habit_id>", methods=["PUT"])
-@login_required
-@with_db_session
-def habits(session, habit_id=None):
+@login_plus_session
+def habits(session: 'Session', habit_id: int | None = None) -> Any:
         parsed_data = parse_habit_form_data(request.form.to_dict())
         typed_data, errors = validate_habit(parsed_data)
 
@@ -45,9 +50,8 @@ def habits(session, habit_id=None):
 
 
 @api_bp.route("/habits/<int:habit_id>/completions", methods=["POST", "DELETE"])
-@login_required
-@with_db_session
-def completions(session, habit_id):
+@login_plus_session
+def completions(session: 'Session', habit_id: int) -> Any:
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
     habits_service = HabitsService(habits_repo, current_user.timezone)
     habit = habits_repo.get_by_id(habit_id)
@@ -75,20 +79,19 @@ def completions(session, habit_id):
             start_utc, end_utc = day_range_utc(parsed_date, current_user.timezone)
 
         habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
-        completion = habits_repo.get_habit_completion_in_window(habit_id, start_utc, end_utc)
+        habit_completion = habits_repo.get_habit_completion_in_window(habit_id, start_utc, end_utc)
         
-        if completion:
-            habits_repo.delete(completion)
+        if habit_completion:
+            habits_repo.delete(habit_completion)
             progress = habits_service.calculate_all_habits_percentage_this_week()
             return api_response(True, "Habit unmarked as complete", data={"progress": progress}), 200
         else:
             return api_response(False, "No completion found"), 404
 
 @api_bp.get("/habits/completions/summary")
-@login_required
-@with_db_session
-def horizontal_barchart(session):
-    last_n_days = int(request.args.get("lastNDays"))
+@login_plus_session
+def horizontal_barchart(session: 'Session') -> Any:
+    last_n_days = int(request.args["lastNDays"])
     repo = HabitsRepository(session, current_user.id, current_user.timezone)
     start_utc, end_utc = last_n_days_range(last_n_days, current_user.timezone)
     aggregate_data = repo.get_completion_counts_by_habit_in_window(start_utc, end_utc)
@@ -105,9 +108,8 @@ def horizontal_barchart(session):
     ), 200
 
 @api_bp.route("/habits/leetcode_records", methods=["POST"])
-@login_required
-@with_db_session
-def leetcode_records(session):
+@login_plus_session
+def leetcode_records(session: 'Session') -> Any:
     parsed_data = parse_leetcode_form_data(request.form.to_dict())
     typed_data, errors = validate_leetcode_record(parsed_data)
     if errors:

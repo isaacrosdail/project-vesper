@@ -1,4 +1,10 @@
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.modules.metrics.models import DailyEntry
+
+
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class DailyMetricPresenter(BasePresenter):
@@ -18,7 +24,7 @@ class DailyMetricPresenter(BasePresenter):
 
 
 class DailyMetricViewModel(TimestampedViewMixin):
-    def __init__(self, metric, tz):
+    def __init__(self, metric: 'DailyEntry', tz: str):
         self.id = metric.id
         self.created_at = metric.entry_datetime
         self.weight = metric.weight
@@ -30,25 +36,28 @@ class DailyMetricViewModel(TimestampedViewMixin):
 
 
     @property
-    def entry_datetime_label(self):
+    def entry_datetime_label(self) -> str:
         return self.format_created_at_label()
     
     @property
-    def weight_label(self):
+    def weight_label(self) -> str:
         return f"{self.weight:.2f}" if self.weight else "--"
     
     @property
-    def steps_label(self):
-        return self.steps if self.steps is not None else "--"
+    def steps_label(self) -> str:
+        return str(self.steps) if self.steps is not None else "--"
     
     @property
-    def wake_time_label(self):
+    def wake_time_label(self) -> str:
         return self.format_dt(self.wake_time, "%H:%M") if self.wake_time is not None else "--"
     
     @property
-    def sleep_time_label(self):
+    def sleep_time_label(self) -> str:
         return self.format_dt(self.sleep_time, "%H:%M") if self.sleep_time is not None else "--"
     
     @property
-    def calories_label(self):
-        return int(round(self.calories)) if self.calories is not None else "--"
+    def calories_label(self) -> str:
+        if self.calories is None:
+            return "--"
+        calories_int = int(round(self.calories))
+        return str(calories_int)

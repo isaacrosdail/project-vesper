@@ -1,23 +1,24 @@
 """
 - /health : JSON health check endpoint (for monitoring)
 """
+from typing import Any
 
 from flask import Blueprint, render_template, jsonify
 from flask_login import current_user
 
-from app.shared.constants import DEFAULT_HEALTH_TIMEZONE
+
 from app._infra.database import database_connection
 from app.modules.habits.repository import HabitsRepository
 from app.modules.habits.service import HabitsService
 from app.modules.tasks.repository import TasksRepository
 from app.modules.tasks.service import TasksService
-from app.shared.datetime.helpers import convert_to_timezone, today_range_utc, day_range_utc, now_in_timezone, is_same_local_date
+from app.shared.datetime.helpers import today_range_utc, day_range_utc, now_in_timezone, is_same_local_date
 
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
 
 @main_bp.route("/", methods=["GET"])
-def home():
+def home() -> Any:
 
     if not current_user.is_authenticated:
         return render_template('landing_page.html')
@@ -87,10 +88,10 @@ def home():
         return render_template("index.html", **ctx)
 
 @main_bp.route('/health')
-def health_check():
+def health_check() -> Any:
     """Basic health check for monitoring."""
     status = {
         'status': 'healthy',
-        'timestamp': now_in_timezone(DEFAULT_HEALTH_TIMEZONE)
+        'timestamp': now_in_timezone("America/Chicago")
     }
     return jsonify(status)

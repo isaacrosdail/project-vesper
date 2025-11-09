@@ -1,10 +1,16 @@
 # Currently just for OpenWeatherMap API calls
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 import os
+
 from datetime import datetime, timezone
 
 import requests
-from flask import Blueprint, current_app, jsonify
+from flask import current_app, jsonify
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
@@ -14,8 +20,8 @@ from app.api.service import release_slot, reserve_slot
 
 
 @api_bp.route('/profile/me')
-@login_required
-def get_my_profile():
+@login_required # type: ignore
+def get_my_profile() -> Any:
     """Internal API for fetching profile information used in JS."""
     return jsonify({
         'timezone': current_user.timezone,
@@ -28,7 +34,7 @@ def get_my_profile():
 """External API endpoints to call or return data to third-party services. For fetching weather data as well as for our health check."""
 @api_bp.route('/weather/<city>/<country>/<units>')
 @with_db_session
-def get_weather(session, city, country, units):
+def get_weather(session: 'Session', city: str, country: str, units: str) -> Any:
     """External API call-limiting function to ensure we exceed limits."""
     today = datetime.now(timezone.utc).date()
     api_name = "openweathermap"
@@ -52,7 +58,7 @@ def get_weather(session, city, country, units):
         response.raise_for_status() # raises on 4xx/5xx
     except requests.Timeout:
         current_app.logger.exception("Upstream weather API timeout.")
-        release_slot(api_name, today)
+        release_slot(session, api_name, today)
         return api_response(False, "upstream_timeout"), 504
     except requests.RequestException:
         current_app.logger.exception("Upstream weather API failed.")
