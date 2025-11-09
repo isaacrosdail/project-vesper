@@ -8,7 +8,7 @@
  * Add 'data-tip' attr with desired tooltip text
  */
 
-export function showToolTip(targetEl: HTMLElement, tooltipText?: string): void {
+export function showToolTip(targetEl: HTMLElement | SVGElement, tooltipText?: string): void {
     const text = tooltipText || targetEl.getAttribute('data-tip');
     if (!text) {
         console.warn('No tooltip text provided');
