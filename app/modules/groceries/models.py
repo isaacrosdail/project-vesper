@@ -1,8 +1,9 @@
 # Handles DB models for grocery module
 import enum
 from decimal import Decimal
+from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
@@ -55,43 +56,43 @@ class Product(Base, APISerializable):
         UniqueConstraint('user_id', 'barcode', name='uq_user_product_barcode'),
     )
 
-    name = Column(
+    name: Mapped[str] = mapped_column(
         String(PRODUCT_NAME_MAX_LENGTH),
         nullable=False
     )
 
-    category = Column(
+    category: Mapped[ProductCategoryEnum] = mapped_column(
         SAEnum(ProductCategoryEnum, name="product_category_enum"),
         nullable=False
     )
 
-    barcode = Column(
+    barcode: Mapped[str] = mapped_column(
         String(BARCODE_MAX_LENGTH),
         nullable=True
     )
 
-    net_weight = Column(
+    net_weight: Mapped[Decimal] = mapped_column(
         Numeric(NET_WEIGHT_PRECISION, NET_WEIGHT_SCALE),
         nullable=False
     )
 
-    unit_type = Column(
+    unit_type: Mapped[UnitEnum] = mapped_column(
         SAEnum(UnitEnum, name="unit_enum", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
         default=UnitEnum.G
     )
 
-    calories_per_100g = Column(
+    calories_per_100g: Mapped[Decimal] = mapped_column(
         Numeric(CALORIES_PRECISION, CALORIES_SCALE),
         nullable=True
     )
 
-    deleted_at = Column(DateTime(timezone=True), nullable=True)
+    deleted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.barcode})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Product id={self.id} name='{self.name}' barcode='{self.barcode}'>"
 
 
@@ -103,7 +104,7 @@ class Transaction(Base, APISerializable):
         CheckConstraint('quantity > 0', name='ck_transaction_quantity_positive'),
     )
 
-    product_id = Column(
+    product_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("products.id"),
         nullable=False
     )
@@ -113,7 +114,7 @@ class Transaction(Base, APISerializable):
         nullable=False
     )
 
-    quantity = Column(
+    quantity: Mapped[int] = mapped_column(
         Integer,
         nullable=False
     )
@@ -125,18 +126,18 @@ class Transaction(Base, APISerializable):
         weight_decimal = Decimal(str(self.product.net_weight))
         return (self.price_at_scan / weight_decimal) * 100
 
-    def __str__(self):
+    def __str__(self) -> str:
         product_name = self.product.name if self.product else f"Product #{self.product_id}"
         return f"Transaction:{self.id}: {self.quantity}x {product_name} @ {self.price_at_scan}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Transaction id={self.id} product_id={self.product_id}>"
 
 
 class ShoppingList(Base, APISerializable):
     """Provides entrypoint for working with shoppinglistitems for a given list."""
 
-    name = Column(
+    name: Mapped[str] = mapped_column(
         String(SHOPPING_LIST_NAME_MAX_LENGTH),
         default="Current List"
     )
@@ -151,18 +152,18 @@ class ShoppingListItem(Base, APISerializable):
         CheckConstraint('quantity_wanted > 0', name='ck_shopping_quantity_wanted_positive'),
     )
 
-    quantity_wanted = Column(
+    quantity_wanted: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
     )
 
-    shopping_list_id = Column(
+    shopping_list_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey('shopping_lists.id'),
         nullable=False
     )
 
-    product_id = Column(
+    product_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey('products.id'),
         nullable=False

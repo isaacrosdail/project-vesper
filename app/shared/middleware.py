@@ -1,4 +1,4 @@
 from flask import session
 
-def set_toast(message, type = "info"):
+def set_toast(message: str, type: str = "info") -> None:
     session['toast'] = {"message": message, "type": type}

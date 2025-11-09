@@ -2,6 +2,11 @@
 Database utility functions. 
 Provides helpers for low-level database operations that don't belong to any single model/repository/service.
 """
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 from datetime import datetime, timezone
 
@@ -20,7 +25,7 @@ NO_SEQ = {
     "task_tags"
 }
 
-def _delete_rows(session, table, where=None, params=None):
+def _delete_rows(session: 'Session', table: str, where: str | None = None, params: dict[str, Any] | None = None) -> None:
     """
     Notes:
         - Uses parameter binding (:param style) to avoid SQL injection.
@@ -36,7 +41,7 @@ def _delete_rows(session, table, where=None, params=None):
     session.execute(text(sql), params or {})
 
 
-def delete_all_db_data(session, include_users=False, reset_sequences=False):
+def delete_all_db_data(session: 'Session', include_users: bool = False, reset_sequences: bool = False) -> None:
     """Delete all database data. Optionally delete users, sequences."""
 
     current_app.logger.info(
@@ -68,13 +73,13 @@ def delete_all_db_data(session, include_users=False, reset_sequences=False):
                     session.execute(text(f'ALTER SEQUENCE "{seq_name}" RESTART WITH 1'))
                     current_app.logger.info(f"Resetting sequence: {seq_name}")
 
-def delete_user_data(session, user_id, table):
+def delete_user_data(session: 'Session', user_id: int, table: str) -> None:
     """User-facing delete: Delete data for a specific user from a single table."""
     current_app.logger.info(f"Deleting user {user_id} data from: {table}")
     _delete_rows(session, table, "user_id = :user_id", {"user_id": user_id}) # parametrized -> avoids SQL injection risk
 
 
-def safe_delete(session, item):
+def safe_delete(session: 'Session', item: Any) -> Any:
     """
     Soft-delete if `deleted_at` column exists, else hard-delete. Returns the item.
     """
@@ -90,12 +95,12 @@ def safe_delete(session, item):
     session.delete(item)
     return item
 
-def _get_sequence_name(session, table_name):
+def _get_sequence_name(session: 'Session', table_name: str) -> str | None:
     """Get actual sequence name for a table's id column."""
     result = session.execute(text("""
         SELECT pg_get_serial_sequence(:table_name, 'id')
 """), {'table_name': table_name}).scalar()
     
     if result:
-        return result.split('.')[-1] # get just sequence name
+        return str(result).split('.')[-1] # get just sequence name
     return None

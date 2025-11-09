@@ -1,4 +1,10 @@
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.modules.habits.models import Habit
+
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class HabitPresenter(BasePresenter):
@@ -17,7 +23,7 @@ class HabitPresenter(BasePresenter):
 
     
 class HabitViewModel(TimestampedViewMixin):
-    def __init__(self, habit, tz):
+    def __init__(self, habit: 'Habit', tz: str):
         self.id = habit.id
         self.name = habit.name
         self.status = habit.status
@@ -27,9 +33,9 @@ class HabitViewModel(TimestampedViewMixin):
         self._tz = tz
     
     @property
-    def status_label(self):
+    def status_label(self) -> str:
         return f"{self.status.value.title()}"
     
     @property
-    def created_at_label(self):
+    def created_at_label(self) -> str:
         return self.format_created_at_label()

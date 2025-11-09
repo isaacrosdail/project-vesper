@@ -1,6 +1,6 @@
 # Grabbing certain times / formatting datetimes
 
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone, date
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
@@ -40,7 +40,7 @@ def convert_to_timezone(tz_str: str, dt: datetime) -> datetime:
     return dt.astimezone(tz)
 
 
-def day_range_utc(date: datetime.date, tz_str: str) -> tuple[datetime, datetime]:
+def day_range_utc(date: date, tz_str: str) -> tuple[datetime, datetime]:
     """Return (start, end) UTC bounds of the given *calendar day* in the specified timezone. Interval is [start, end)"""
     tz = ZoneInfo(tz_str)
     # Extract date, make midnight in target timezone
@@ -70,7 +70,7 @@ def last_n_days_range(days_ago: int, tz_str: str) -> tuple[datetime, datetime]:
     return new_start_utc, end_utc
 
 
-def parse_time_to_datetime(time_str: str, date: datetime.date, tz_str: str) -> datetime:
+def parse_time_to_datetime(time_str: str, date: date, tz_str: str) -> datetime:
     """Parse HH:MM and attach to specific date in given timezone."""
     h, m = map(int, time_str.split(":"))
     tz = ZoneInfo(tz_str)

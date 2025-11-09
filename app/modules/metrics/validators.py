@@ -1,10 +1,13 @@
 
+from datetime import date
+from typing import Any
+
 from app.modules.metrics.constants import *
+from app.shared.decorators import log_validator
 from app.shared.validators import *
-from app.shared.logging_decorators import log_validator
 
 
-def validate_entry_date(entry_date_str: str) -> tuple[str | None, list[str]]:
+def validate_entry_date(entry_date_str: str | None) -> tuple[date | None, list[str]]:
     """Required. Date string in YYYY-MM-DD format."""
     if not entry_date_str:
         return (None, ["Entry date is required"])
@@ -12,7 +15,7 @@ def validate_entry_date(entry_date_str: str) -> tuple[str | None, list[str]]:
     return validate_date_iso(entry_date_str)
 
 
-def validate_weight(weight: str) -> tuple[float | None, list[str]]:
+def validate_weight(weight: str | None) -> tuple[float | None, list[str]]:
     """Positive Numeric(5, 2)"""
 
     if not weight:
@@ -31,7 +34,7 @@ def validate_weight(weight: str) -> tuple[float | None, list[str]]:
     return (typed_weight, [])
 
 
-def validate_steps(steps:str) -> tuple[int | None, list[str]]:
+def validate_steps(steps: str | None) -> tuple[int | None, list[str]]:
     """Non-negative int"""
 
     if not steps:
@@ -50,7 +53,7 @@ def validate_steps(steps:str) -> tuple[int | None, list[str]]:
     return (steps_int, [])
 
 
-def validate_calories(calories:str) -> tuple[int | None, list[str]]:
+def validate_calories(calories:str | None) -> tuple[int | None, list[str]]:
     """Non-negative int"""
 
     if not calories:
@@ -69,7 +72,7 @@ def validate_calories(calories:str) -> tuple[int | None, list[str]]:
     return (calories_int, [])
 
 
-def validate_time_hhmm_format(time_str: str) -> tuple[str | None, list[str]]:
+def validate_time_hhmm_format(time_str: str | None) -> tuple[str | None, list[str]]:
     """Optional. Time string in HH:MM format."""
     if not time_str:
         return (None, [])
@@ -86,7 +89,7 @@ VALIDATION_FUNCS = {
     "calories": validate_calories,
 }
 @log_validator
-def validate_daily_entry(data: dict) -> tuple[dict, dict[str, list[str]]]:
+def validate_daily_entry(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     typed_data = {}
     errors = {}
 

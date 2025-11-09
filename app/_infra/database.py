@@ -5,17 +5,26 @@ Uses one global engine + scoped sessions for consistent, thread-safe DB access.
 
 Note to self: First two imports are for 1) making custom context manager and 2) making it a decorator
 """
+
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+
 from contextlib import contextmanager
 from functools import wraps
+from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker, Session
 
 # Global _engine (singleton across app)
 _engine = None # Global connection cache
 
 # Ensures all sessions/metadata bind to the same underlying connection
-def get_engine(config):
+def get_engine(config: dict[str, Any]) -> 'Engine':
     """
     Return global SQLAlchemy engine (singleton).
     Creates on first call, reuses afterward.
@@ -24,6 +33,9 @@ def get_engine(config):
     global _engine
     if _engine is None:
         db_uri = config.get("SQLALCHEMY_DATABASE_URI")
+        if db_uri is None:
+            raise ValueError("SQLALCHEMY_DATABASE_URI not configured")
+
         _engine = create_engine(db_uri, pool_pre_ping=True)
     return _engine
 
@@ -31,7 +43,7 @@ def get_engine(config):
 # textbook: thread-local; new session per request, call remove() on schema change (stale sessions)
 db_session = scoped_session(sessionmaker())
 
-def init_db(config):
+def init_db(config: dict[str, Any]) -> None:
     """
     Bind global session (db_session) to the app engine.
     Schema creation handled externally (Alembic).
@@ -44,7 +56,7 @@ def init_db(config):
 
 
 @contextmanager
-def database_connection():
+def database_connection() -> Generator[Session, None, None]:
     """
     Provides a short-lived SQLAlchemy session with auto commit/rollback/close.
 
@@ -78,7 +90,7 @@ def database_connection():
 # 'f' is a reference to our original function
 # Decorator creates a wrapper that calls our original function
 # with extra stuff (the session)
-def with_db_session(f):
+def with_db_session(f: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator that injects a database session as the first parameter.
     
@@ -91,7 +103,7 @@ def with_db_session(f):
             # Use session here
     """
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated_function(*args: Any, **kwargs: Any) -> Any:
         with database_connection() as session:
             return f(session, *args, **kwargs)
     return decorated_function

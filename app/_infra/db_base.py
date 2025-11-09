@@ -1,14 +1,16 @@
 """
 Defines our core Mixins as well as our BaseModel & declarative Base.
 """
-import regex
-
 from datetime import datetime, timezone
+from typing import Any
 from zoneinfo import ZoneInfo
 
+import regex
 from flask import current_app
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData
-from sqlalchemy.orm import declarative_base, declared_attr
+from flask_login import current_user
+from sqlalchemy import DateTime, ForeignKey, Integer, MetaData
+from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
+                            mapped_column)
 
 # Auto-assigns constraint names when we don't explicitly name them
 metadata = MetaData(
@@ -23,28 +25,45 @@ metadata = MetaData(
 
 # Core mixins
 class TimestampMixin:
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    """Adds created_at and updated_at timestamps to models."""
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
     
-    
-    # Provides timezone-localized timestamp properties for template use
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )
+
     @property
-    def created_at_local(self):
-        tzname = current_app.config.get("DEFAULT_TZ", "Europe/London")
+    def created_at_local(self) -> datetime:
+        """Returns created_at in user's local timezone."""
+        tzname = current_app.config.get(current_user.timezone, "America/Chicago")
         return self.created_at.astimezone(ZoneInfo(tzname))
     
     @property
-    def updated_at_local(self):
-        tzname = current_app.config.get("DEFAULT_TZ", "Europe/London")
+    def updated_at_local(self) -> datetime | None:
+        """Returns updated_at in user's local timezone (or None)."""
+        tzname = current_app.config.get(current_user.timezone, "America/Chicago")
         return self.updated_at.astimezone(ZoneInfo(tzname)) if self.updated_at else None
 
-# Base Model (inherits timestamp info)
-class BaseModel(TimestampMixin):
-    id = Column(Integer, primary_key=True)
+
+class CustomBaseTaskMixin:
+    """Adds completed_at timestamp to task-like models. (unsure about this one)"""
+    completed_at: Mapped[datetime] =  mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Base(TimestampMixin, DeclarativeBase):
+    """Base class for all models. Auto-timestamps, user association, table naming."""
+    metadata = metadata
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     # Autogenerate pluralized, snake_case table names from class names
-    @declared_attr
-    def __tablename__(cls):
+    # @declared_attr that returns something other than a col/relationship descriptor -> use .directive
+    @declared_attr.directive
+    def __tablename__(cls) -> str:
         # First regex pass handles 'ABTest' -> 'ab_test'
         name = regex.sub('([A-Z]+)([A-Z][a-z])', r'\1_\2', cls.__name__)
         name = regex.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower() # camelCase -> snake_case first
@@ -55,14 +74,8 @@ class BaseModel(TimestampMixin):
             return name + 's'
     
     # Automatically add user_id FKey to all models except User & ApiCallRecord (latter is global for internal use)
-    @declared_attr
-    def user_id(cls):
+    @declared_attr.directive
+    def user_id(cls) -> Mapped[Any]:
         if cls.__name__ not in ['User', 'ApiCallRecord']:
-            return Column(Integer, ForeignKey('users.id'), nullable=False)
-
-# SQLAlchemy declarative base with automatic timestamps & user association
-Base = declarative_base(cls=BaseModel, metadata=metadata)
-
-# Mixin for models that track completion status (unsure about this one)
-class CustomBaseTaskMixin:
-    completed_at =  Column(DateTime(timezone=True), nullable=True)
+            return mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+        return None

@@ -1,9 +1,12 @@
+
+from datetime import datetime
+from decimal import Decimal
 import enum
 
 from sqlalchemy import Column, Numeric, Integer, DateTime, String, ForeignKey, Boolean
 from sqlalchemy import CheckConstraint, Index
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app._infra.db_base import Base
 from app.shared.serialization import APISerializable
@@ -30,27 +33,27 @@ class DailyEntry(Base, APISerializable):
         Index('ix_user_entry_datetime', 'user_id', 'entry_datetime'),
     )
 
-    entry_datetime = Column(DateTime(timezone=True), nullable=False)
+    entry_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    weight = Column(
+    weight: Mapped[Decimal] = mapped_column(
         Numeric(WEIGHT_PRECISION, WEIGHT_SCALE),
     )
 
-    steps = Column(Integer)
+    steps: Mapped[int] = mapped_column(Integer)
 
-    calories = Column(Integer)
+    calories: Mapped[int] = mapped_column(Integer)
 
-    wake_time = Column(DateTime(timezone=True))
+    wake_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
-    sleep_time = Column(DateTime(timezone=True))
+    sleep_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
-    sleep_duration_minutes = Column(Integer)
+    sleep_duration_minutes: Mapped[int] = mapped_column(Integer)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<DailyEntry id={self.id} created_at={self.created_at}>"
 
     @property
-    def populated_metrics(self):
+    def populated_metrics(self) -> list[str]:
         """Returns list of metrics which have entries."""
         metrics = []
         metric_types = ["weight", "steps", "wake_time", "sleep_time", "calories"]
@@ -60,22 +63,22 @@ class DailyEntry(Base, APISerializable):
         return metrics
     
     @property
-    def has_sleep_data(self):
+    def has_sleep_data(self) -> bool:
         """True if both sleep & wake times are stored."""
         return self.sleep_time is not None and self.wake_time is not None
 
 
 class ABTest(Base, APISerializable):
 
-    title = Column(String(100), nullable=False)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    hypothesis = Column(String(100), nullable=False)
+    hypothesis: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    variant_a_label = Column(String(50), nullable=False)
+    variant_a_label: Mapped[str] = mapped_column(String(50), nullable=False)
 
-    variant_b_label = Column(String(50), nullable=False)
+    variant_b_label: Mapped[str] = mapped_column(String(50), nullable=False)
 
-    success_condition = Column(String(50), nullable=False)
+    success_condition: Mapped[str] = mapped_column(String(50), nullable=False)
 
     trials = relationship("ABTrial", back_populates="ab_test", cascade="all, delete-orphan")
 
@@ -83,10 +86,10 @@ class ABTrial(Base, APISerializable):
 
     abtest_id = Column(Integer, ForeignKey("ab_tests.id"), nullable=False)
 
-    variant = Column(SAEnum(ABVariantEnum), nullable=False)
+    variant: Mapped[ABVariantEnum] = mapped_column(SAEnum(ABVariantEnum), nullable=False)
 
-    is_success = Column(Boolean(), nullable=True)
+    is_success: Mapped[bool] = mapped_column(Boolean(), nullable=True)
 
-    notes = Column(String(200), nullable=True)
+    notes: Mapped[str] = mapped_column(String(200), nullable=True)
 
     ab_test = relationship("ABTest", back_populates="trials")

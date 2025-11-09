@@ -1,6 +1,12 @@
 """
 Presentation layer: Wraps models to provide display-friendly fields. Think: formatting, show in local timezone, etc.
 """
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from app.modules.time_tracking.models import TimeEntry
+
+
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class TimeEntryPresenter(BasePresenter):
@@ -18,7 +24,7 @@ class TimeEntryPresenter(BasePresenter):
 
 
 class TimeEntryViewModel(TimestampedViewMixin):
-    def __init__(self, entry, tz):
+    def __init__(self, entry: 'TimeEntry', tz: str):
         self.id = entry.id
         self.category = entry.category
         self.duration = entry.duration_minutes
@@ -28,11 +34,11 @@ class TimeEntryViewModel(TimestampedViewMixin):
         self._tz = tz
 
     @property
-    def date_label(self):
+    def date_label(self) -> str:
         return self.format_dt(self.started_at, fmt="%m/%d")
     
     @property
-    def time_window_label(self):
+    def time_window_label(self) -> str:
         mins = self.duration
         h, m = divmod(mins, 60)
         duration = f"{h}h{m:02d}m" if h else f"{m}m"
@@ -41,9 +47,9 @@ class TimeEntryViewModel(TimestampedViewMixin):
         return f"{start}-{end} ({duration})"
 
     @property
-    def started_at_label(self):
+    def started_at_label(self) -> str:
         return self.format_dt(self.started_at, fmt="%I:%M%p (%d.%m.%y)")
     
     @property
-    def desc_label(self):
+    def desc_label(self) -> str:
         return self.description if self.description else "--"
