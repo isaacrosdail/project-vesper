@@ -1,5 +1,9 @@
 {
     "compilerOptions": {
+        "target": "es2024",                 // Use modern JS syntax/features (eg, Map?)
+        "lib": ["dom", "es2024"],           // Include browser & latest JS stdlib defs (eg, DOM, Array, Promise)
+        "module": "esnext",                 // Let bundler handle imports/exports?
+        "moduleResolution": "node",         // Resolve node_modules-style imports (eg, import ... from 'd3')
         "outDir": "./app/static/js",        // compiled JS destination
         "rootDir": "./app/static_src/js",   // TS source files location
         "strict": true,                     // enables all the strict type checks: null checks, implicit any, etc.?
@@ -26,5 +30,5 @@
         // https://eslint.org/docs/rules/no-unused-labels
     },
     "include": ["app/static_src/js/**/*.ts"],
-    "exclude": ["node_modules"]
+    "exclude": ["dist", "build", "**/*.test.ts"]
 }
