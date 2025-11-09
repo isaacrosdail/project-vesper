@@ -1,9 +1,14 @@
-import sys
+
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
 from datetime import datetime, time, timedelta, date
 from zoneinfo import ZoneInfo
 
 from app.modules.tasks.repository import TasksRepository
-from app.shared.datetime.helpers import day_range_utc, today_range_utc, now_utc, is_same_local_date
+from app.shared.datetime.helpers import day_range_utc, today_range_utc, is_same_local_date
 from app.api.responses import service_response
 from app.shared.hooks import register_patch_hook
 
@@ -14,7 +19,7 @@ class TasksService:
         self.user_tz = user_tz
 
 
-    def save_task(self, typed_data: dict, task_id: int | None):
+    def save_task(self, typed_data: dict[str, Any], task_id: int | None) -> dict[str, Any]:
 
         # Attach due_date datetime
         typed_data["due_date"] = self.to_eod_datetime(typed_data.get("due_date"), self.user_tz)
@@ -33,7 +38,7 @@ class TasksService:
 
         ### UPDATE
         if task_id:
-            task = self.repo.get_task_by_id(task_id)
+            task = self.repo.get_by_id(task_id)
             if not task:
                 return service_response(False, "Task not found")
             
@@ -63,7 +68,7 @@ class TasksService:
         eod_midnight = start_of_day + timedelta(days=1)
         return eod_midnight - timedelta(seconds=1)
     
-    def calculate_tasks_progress_today(self):
+    def calculate_tasks_progress_today(self) -> dict[str, Any]:
 
         # Get today's window
         start_utc, end_utc = today_range_utc(self.user_tz)
@@ -93,12 +98,16 @@ class TasksService:
         # Completion percentage
         percent_complete = (num_completed / num_expected * 100) if num_expected > 0 else 0
 
-        return start_utc, end_utc, num_completed, num_expected, percent_complete
+        return {
+            "completed": num_completed,
+            "total": num_expected,
+            "percent": percent_complete
+        }
 
 
 # Gets invoked by generalized PATCH route 
 @register_patch_hook('tasks')
-def tasks_patch_hook(item, data, session, current_user):
+def tasks_patch_hook(item: Any, data: Any, session: 'Session', current_user: Any) -> dict[str, Any]:
     repo = TasksRepository(session, current_user.id, current_user.timezone)
     service = TasksService(repo, current_user.timezone)
     progress = service.calculate_tasks_progress_today()

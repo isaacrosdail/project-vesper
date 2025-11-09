@@ -1,7 +1,12 @@
 # Basic script to seed our db with dummy data for demo purposes
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.modules.auth.models import User
+    from sqlalchemy.orm import Session
 
 from datetime import datetime, timedelta
-from app._infra.database import with_db_session
 from app.modules.habits.models import Habit, HabitCompletion
 from app.modules.tasks.models import Task, PriorityEnum
 from app.modules.metrics.models import DailyEntry
@@ -10,7 +15,7 @@ from app.shared.models import Tag
 
 
 # Seed appropriate datasets for user type
-def seed_data_for(session, user):
+def seed_data_for(session: Session, user: User) -> None:
     session.flush() # make sure we have user.id
     session.refresh(user)
     if user.is_owner or user.is_admin:
@@ -20,7 +25,7 @@ def seed_data_for(session, user):
 
 
 # Minimal dataset for demo users
-def seed_demo_data(session, user_id):
+def seed_demo_data(session: Session, user_id: int) -> None:
     now = datetime.now()
     
     # Create a couple tags for variety
@@ -141,5 +146,5 @@ def seed_demo_data(session, user_id):
     ])
 
 # Comprehensive dataset for development
-def seed_rich_data(session, user_id):
+def seed_rich_data(session: Session, user_id: int) -> None:
     pass

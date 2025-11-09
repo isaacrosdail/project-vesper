@@ -8,13 +8,15 @@ Normalize raw HTTP form inputs into clean dicts.
 - Numbers/dates -> value or None
 - Checkboxes -> .get(..) is not None (to normalize to bools)
 """
-from app.shared.logging_decorators import log_parser
+from typing import Any
+
+from app.shared.decorators import log_parser
 
 
 def _upper_or_none(val: str | None) -> str | None:
     return val.upper() if val else None
 
-def parse_barcode(val: str) -> dict:
+def parse_barcode(val: str) -> str | None:
     """Parse barcode. Strip whitespace, return None if empty."""
     return val.strip() if val else None
 
@@ -23,7 +25,7 @@ def parse_checkbox(val: str | None) -> bool:
     return val is not None
 
 @log_parser
-def parse_product_data(form_data: dict) -> dict:
+def parse_product_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "barcode": (form_data.get("barcode") or "").strip(),
         "name": (form_data.get("name") or "").strip(),
@@ -34,14 +36,14 @@ def parse_product_data(form_data: dict) -> dict:
     }
 
 @log_parser
-def parse_transaction_data(form_data: dict) -> dict:
+def parse_transaction_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "price_at_scan": form_data.get("price_at_scan", "").strip(),
         "quantity": form_data.get("quantity", "").strip()
     }
 
 @log_parser
-def parse_user_form_data(form_data: dict) -> dict:
+def parse_user_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "username": (form_data.get("username") or "").strip(),
         "password": (form_data.get("password") or ""),
@@ -49,7 +51,7 @@ def parse_user_form_data(form_data: dict) -> dict:
     }
 
 @log_parser
-def parse_task_form_data(form_data: dict) -> dict:
+def parse_task_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "name": (form_data.get("name") or "").strip(),
         "priority": _upper_or_none(form_data.get("priority")),
@@ -58,7 +60,7 @@ def parse_task_form_data(form_data: dict) -> dict:
     }
 
 @log_parser
-def parse_leetcode_form_data(form_data: dict) -> dict:
+def parse_leetcode_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "leetcode_id": form_data.get("leetcode_id", "").strip(),
         "title": (form_data.get("title") or "").strip(),
@@ -68,7 +70,7 @@ def parse_leetcode_form_data(form_data: dict) -> dict:
     }
 
 @log_parser
-def parse_time_entry_form_data(form_data: dict) -> dict:
+def parse_time_entry_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "category": (form_data.get("category") or "").strip(),
         "description": (form_data.get("description") or "").strip(),
@@ -78,38 +80,38 @@ def parse_time_entry_form_data(form_data: dict) -> dict:
     }
 
 @log_parser
-def parse_habit_form_data(form_data: dict) -> dict:
+def parse_habit_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "name": (form_data.get("name") or "").strip(),
         "is_promotable": parse_checkbox(form_data.get("is_promotable")),
     }
 
 @log_parser
-def parse_daily_entry_form_data(form_data: dict) -> dict:
+def parse_daily_entry_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "entry_date": form_data.get("entry_datetime") or None,
         "steps": (form_data.get("steps") or "").strip(),
         "weight": (form_data.get("weight") or "").strip(),
         "calories": (form_data.get("calories") or "").strip(),
-        "wake_time": (form_data.get("wake_time" or "")).strip(),
-        "sleep_time": (form_data.get("sleep_time" or "")).strip(),
+        "wake_time": (form_data.get("wake_time") or "").strip(),
+        "sleep_time": (form_data.get("sleep_time") or "").strip(),
     }
 
 @log_parser
-def parse_abtest_form_data(form_data: dict) -> dict:
+def parse_abtest_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
-        "title": (form_data.get("title" or "")).strip(),
-        "hypothesis": (form_data.get("hypothesis" or "")).strip(),
-        "variant_a_label": (form_data.get("variant_a_label" or "")).strip(),
-        "variant_b_label": (form_data.get("variant_b_label" or "")).strip(),
-        "success_condition": (form_data.get("success_condition" or "")).strip()
+        "title": (form_data.get("title") or "").strip(),
+        "hypothesis": (form_data.get("hypothesis") or "").strip(),
+        "variant_a_label": (form_data.get("variant_a_label") or "").strip(),
+        "variant_b_label": (form_data.get("variant_b_label")or "").strip(),
+        "success_condition": (form_data.get("success_condition")or "").strip()
     }
 
 @log_parser
-def parse_abtrial_form_data(form_data: dict) -> dict:
+def parse_abtrial_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
-        "abtest_id": form_data.get("abtest_id").strip(),
+        "abtest_id": (form_data.get("abtest_id") or "").strip(),
         "variant": form_data.get("variant"),
         "is_success": parse_checkbox(form_data.get("is_success")),
-        "notes": form_data.get("notes").strip()
+        "notes": (form_data.get("notes") or "").strip()
     }

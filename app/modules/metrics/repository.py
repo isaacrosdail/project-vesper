@@ -1,15 +1,21 @@
+from __future__ import annotations
 
-from datetime import datetime, timedelta
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import select
 
+from app.modules.metrics.models import ABTest, ABTrial, DailyEntry
 from app.shared.repository.base import BaseRepository
-from app.modules.metrics.models import DailyEntry, ABTest, ABTrial
 
 
-class DailyMetricsRepository(BaseRepository):
-    def __init__(self, session, user_id, user_tz):
+class DailyMetricsRepository(BaseRepository[DailyEntry]):
+    def __init__(self, session: 'Session', user_id: int, user_tz: str):
         super().__init__(session, user_id, user_tz, model_cls=DailyEntry)
 
     def create_daily_metric(
@@ -35,15 +41,16 @@ class DailyMetricsRepository(BaseRepository):
         )
         return self.add(entry)
 
-    def get_daily_metric_in_window(self, start_utc: datetime, end_utc: datetime):
+    def get_daily_metric_in_window(self, start_utc: datetime, end_utc: datetime) -> DailyEntry | None:
         """Returns the first DailyEntry in a UTC datetime range."""
         stmt = self._user_select(DailyEntry).where(
             DailyEntry.entry_datetime >= start_utc,
             DailyEntry.entry_datetime < end_utc
         )
-        return self.session.execute(stmt).scalars().first()
+        result = self.session.execute(stmt).scalars().first()
+        return cast(DailyEntry | None, result)
 
-    def get_metrics_by_type_in_window(self, metric_type: str, start_utc: datetime, end_utc: datetime):
+    def get_metrics_by_type_in_window(self, metric_type: str, start_utc: datetime, end_utc: datetime) -> list[Any]:
         """Returns list of (entry_datetime, <metric_value>) tuples for a given metric type."""
         column_obj = getattr(DailyEntry, metric_type)
         
@@ -55,11 +62,11 @@ class DailyMetricsRepository(BaseRepository):
         ).order_by(DailyEntry.entry_datetime)
 
         # Note: We don't need .scalars() here since we're intentionally selecting multiple fields
-        return self.session.execute(stmt).all()
+        return list(self.session.execute(stmt).all())
     
 
-class ABTestRepository(BaseRepository):
-    def __init__(self, session, user_id, user_tz):
+class ABTestRepository(BaseRepository[ABTest]):
+    def __init__(self, session: 'Session', user_id: int, user_tz: str):
         super().__init__(session, user_id, user_tz, model_cls=ABTest)
 
     def create_abtest(
@@ -80,16 +87,16 @@ class ABTestRepository(BaseRepository):
         )
         return self.add(abtest)
     
-class ABTrialRepository(BaseRepository):
-    def __init__(self, session, user_id, user_tz):
+class ABTrialRepository(BaseRepository[ABTrial]):
+    def __init__(self, session: 'Session', user_id: int, user_tz: str):
         super().__init__(session, user_id, user_tz, model_cls=ABTrial)
-    
+
     def create_abtrial(
             self,
-            abtest_id,
-            variant,
-            is_success,
-            notes
+            abtest_id: int,
+            variant: str,
+            is_success: bool,
+            notes: str
     ) -> ABTrial:
         abtrial = ABTrial(
             user_id=self.user_id,

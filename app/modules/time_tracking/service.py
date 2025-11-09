@@ -1,9 +1,9 @@
 
-from datetime import timedelta
+from typing import Any
 
 from app.api.responses import service_response
 from app.modules.time_tracking.repository import TimeTrackingRepository
-from app.shared.datetime.helpers import now_in_timezone, parse_time_to_datetime
+from app.shared.datetime.helpers import parse_time_to_datetime
 
 
 class TimeTrackingService:
@@ -12,7 +12,7 @@ class TimeTrackingService:
         self.repo = repository
         self.user_tz = user_tz
 
-    def save_time_entry(self, typed_data: dict, entry_id: int | None) -> dict:
+    def save_time_entry(self, typed_data: dict[str, Any], entry_id: int | None) -> dict[str, Any]:
 
         # Derived field values
         entry_date = typed_data["entry_date"]

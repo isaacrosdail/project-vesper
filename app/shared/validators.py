@@ -1,6 +1,6 @@
 import regex
 
-from typing import Any
+from typing import Type, Any
 from datetime import datetime, date
 from decimal import Decimal, InvalidOperation
 
@@ -18,7 +18,7 @@ TIME_HHMM_INVALID_RANGE = "Invalid time range (must be in 00:00 - 23:59)"
 TIME_HHMM_REQUIRED = "Time value is required"
 
 
-def validate_numeric(value, precision, scale, minimum=None, strict_min=False) -> tuple[bool, str | None]:
+def validate_numeric(value: str, precision: int, scale: int, minimum: int | None = None, strict_min: bool = False) -> tuple[bool, str | None]:
     """Validate numeric string against precision/scale/minimum constraints.
     
     Returns (is_valid, error_type). Error types: FORMAT_ERROR, CONSTRAINT_VIOLATION, 
@@ -26,7 +26,7 @@ def validate_numeric(value, precision, scale, minimum=None, strict_min=False) ->
     """
     
     ok, dec = parse_decimal(value)
-    if not ok:
+    if not ok or dec is None:
         return False, FORMAT_ERROR
     
     # Cases:
@@ -42,7 +42,7 @@ def validate_numeric(value, precision, scale, minimum=None, strict_min=False) ->
     
     # Check precision/scale
     digits = dec.as_tuple().digits
-    exponent = dec.as_tuple().exponent
+    exponent = int(dec.as_tuple().exponent)
     fractional_digits = abs(exponent) if exponent < 0 else 0
     integer_digits = (len(digits) - fractional_digits)
 
@@ -54,7 +54,7 @@ def validate_numeric(value, precision, scale, minimum=None, strict_min=False) ->
     return True, None
 
 
-def validate_date_iso(date_str: str) -> tuple[date | None, list[str]]:
+def validate_date_iso(date_str: str | None) -> tuple[date | None, list[str]]:
     """Validate date string in YYYY-MM-DD format."""
     if not date_str:
         return (None, [DATE_REQUIRED])
@@ -65,7 +65,7 @@ def validate_date_iso(date_str: str) -> tuple[date | None, list[str]]:
         return (None, [DATE_INVALID])
 
 
-def validate_time_hhmm(time_str: str) -> tuple[str | None, list[str]]:
+def validate_time_hhmm(time_str: str | None) -> tuple[str | None, list[str]]:
     """Validate time string in HH:MM format (00:00 - 23:59)."""
     
     if not time_str:
@@ -90,8 +90,8 @@ def validate_time_hhmm(time_str: str) -> tuple[str | None, list[str]]:
 
 def validate_id_field(id_value: str, required_error: str, invalid_error: str) -> tuple[int | None, list[str]]:
     # TODO: Could probably streamline/just use these outright in other validators. Need to do a condensing pass.
-    if not id_value:
-        return (None, [required_error])
+    # if not id_value:
+    #     return (None, [required_error])
 
     try:
         id_int = int(id_value)
@@ -100,10 +100,10 @@ def validate_id_field(id_value: str, required_error: str, invalid_error: str) ->
         return (None, [invalid_error])
 
 
-def validate_enum(enum_str: str, enum_cls, required_error: str, invalid_error: str) -> tuple[Any, list[str]]:
+def validate_enum(enum_str: str, enum_cls: Type[Any], required_error: str, invalid_error: str) -> tuple[Any, list[str]]:
     # TODO: Could probably streamline/just use these outright in other validators. Need to do a condensing pass.
-    if not enum_str:
-        return (None, [required_error])
+    # if not enum_str:
+    #     return (None, [required_error])
     
     try:
         enum_member = enum_cls[enum_str]
@@ -112,7 +112,7 @@ def validate_enum(enum_str: str, enum_cls, required_error: str, invalid_error: s
         return (None, [invalid_error])
 
 
-def parse_decimal(value):
+def parse_decimal(value: float | str) -> tuple[bool, Decimal | None]:
     """Parse value to Decimal, rejecting inf/nan. Returns (ok, decimal_value)."""
     try:
         dec = Decimal(str(value)) # str() avoids float artifacts & ensures proper parsing?

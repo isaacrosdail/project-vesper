@@ -1,18 +1,25 @@
 """
 Repository layer for groceries module.
 """
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy.orm import joinedload
 
-from app.modules.groceries.models import Product, Transaction, UnitEnum, ShoppingList, ShoppingListItem, ProductCategoryEnum
+from app.modules.groceries.models import (
+    Product, Transaction, ShoppingList, ShoppingListItem,
+    ProductCategoryEnum, UnitEnum
+    )
 from app.shared.repository.base import BaseRepository
 
 
-class GroceriesRepository(BaseRepository):
-    def __init__(self, session, user_id, user_tz):
+class GroceriesRepository(BaseRepository[Product]):
+    def __init__(self, session: 'Session', user_id: int, user_tz: str):
         super().__init__(session, user_id, user_tz, model_cls=Product)
 
 
@@ -31,28 +38,30 @@ class GroceriesRepository(BaseRepository):
         )
         return self.add(product)
 
-    def get_all_products(self):
+    def get_all_products(self) -> list[Product]:
         stmt = self._user_select(Product).where(
             Product.deleted_at.is_(None)
         )
-        return self.session.execute(stmt).scalars().all()
+        return list(self.session.execute(stmt).scalars().all())
 
-    def get_product_by_id(self, product_id: int):
+    def get_product_by_id(self, product_id: int) -> Product | None:
         return self.get_by_id(product_id)
 
-    def get_product_by_barcode(self, barcode: str):
+    def get_product_by_barcode(self, barcode: str) -> Product | None:
         stmt = self._user_select(Product).where(
             Product.barcode == barcode,
             Product.deleted_at.is_(None)
         )
-        return self.session.execute(stmt).scalars().first()
+        result = self.session.execute(stmt).scalars().first()
+        return cast(Product | None, result)
 
-    def get_product_by_name(self, name: str):
+    def get_product_by_name(self, name: str) -> Product | None:
         stmt = self._user_select(Product).where(
             Product.name == name,
             Product.deleted_at.is_(None)
         )
-        return self.session.execute(stmt).scalars().first()
+        result = self.session.execute(stmt).scalars().first()
+        return cast(Product | None, result)
 
 
     def create_transaction(self, product: Product, price_at_scan: Decimal,
@@ -65,29 +74,31 @@ class GroceriesRepository(BaseRepository):
         )
         return self.add(transaction)
 
-    def get_all_transactions(self):
+    def get_all_transactions(self) -> list[Transaction]:
         """Get all transaction for current user with eager-loaded products."""
         stmt = self._user_select(Transaction).options(
             joinedload(Transaction.product)
         )
-        return self.session.execute(stmt).scalars().all()
+        return list(self.session.execute(stmt).scalars().all())
 
-    def get_transaction_by_id(self, transaction_id: int):
+    def get_transaction_by_id(self, transaction_id: int) -> Transaction | None:
         stmt = self._user_select(Transaction).where(
             Transaction.id == transaction_id
         )
-        return self.session.execute(stmt).scalars().first()
+        result = self.session.execute(stmt).scalars().first()
+        return cast(Transaction | None, result)
 
-    def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime):
+    def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime) -> Transaction | None:
         """Get a transaction within a certain datetime window (UTC)."""
         stmt = self._user_select(Transaction).where(
             Transaction.product_id == product_id,
             Transaction.created_at >= start_utc,
             Transaction.created_at < end_utc,
         )
-        return self.session.execute(stmt).scalars().first()
+        result = self.session.execute(stmt).scalars().first()
+        return cast(Transaction | None, result)
 
-    def create_shoppinglist(self, name: str = "DefaultListName"):
+    def create_shoppinglist(self, name: str = "DefaultListName") -> ShoppingList:
         shopping_list = ShoppingList(
             user_id=self.user_id,
             name=name
@@ -95,21 +106,24 @@ class GroceriesRepository(BaseRepository):
         return self.add(shopping_list)
 
     # One list per user, for now
-    def get_shopping_list(self):
+    def get_shopping_list(self) -> ShoppingList | None:
         stmt = self._user_select(ShoppingList)
-        return self.session.execute(stmt).scalars().first()
+        result = self.session.execute(stmt).scalars().first()
+        return cast(ShoppingList | None, result)
 
-    def create_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem:
+    def create_shopping_list_item(self, shopping_list_id: int, product_id: int, quantity_wanted: int) -> ShoppingListItem:
         shopping_list_item = ShoppingListItem(
             user_id=self.user_id,
             shopping_list_id=shopping_list_id,
-            product_id=product_id
+            product_id=product_id,
+            quantity_wanted=quantity_wanted
         )
         return self.add(shopping_list_item)
 
-    def get_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem:
+    def get_shopping_list_item(self, shopping_list_id: int, product_id: int) -> ShoppingListItem | None:
         stmt = self._user_select(ShoppingListItem).where(
             ShoppingListItem.shopping_list_id == shopping_list_id,
             ShoppingListItem.product_id == product_id
         )
-        return self.session.execute(stmt).scalars().first()
+        result = self.session.execute(stmt).scalars().first()
+        return cast(ShoppingListItem | None, result)

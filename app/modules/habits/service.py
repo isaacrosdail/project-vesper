@@ -1,11 +1,12 @@
 """
 Habit service layer, to evaluate streaks & completions.
 """
-from datetime import datetime, timedelta
+from typing import Any
+
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from app.api.responses import service_response
-from app.modules.habits.constants import PROMOTION_THRESHOLD_DEFAULT
 from app.modules.habits.models import StatusEnum
 from app.modules.habits.repository import HabitsRepository
 from app.shared.datetime.helpers import today_range_utc, last_n_days_range
@@ -16,7 +17,7 @@ class HabitsService:
         self.repo = repository
         self.user_tz = user_tz
 
-    def save_habit(self, typed_data: dict, habit_id: int | None):
+    def save_habit(self, typed_data: dict[str, Any], habit_id: int | None) -> Any:
 
         ### UPDATE
         if habit_id:
@@ -74,7 +75,7 @@ class HabitsService:
         return completion is not None
 
     # TODO: "Percent completion habits this week" - Mon to Sun
-    def calculate_all_habits_percentage_this_week(self):
+    def calculate_all_habits_percentage_this_week(self) -> dict[str, Any]:
         # NOTE: Hardcoding 'goal amount' for now, should be a field
         goal = 7
 

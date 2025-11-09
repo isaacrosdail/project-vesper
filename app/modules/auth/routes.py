@@ -1,4 +1,9 @@
 
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
 
@@ -11,26 +16,25 @@ from app.shared.database.helpers import delete_all_db_data
 from app.shared.middleware import set_toast
 from app.shared.parsers import parse_user_form_data
 
-
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
 
 # TODO: Implement
 @auth_bp.route("/user_dashboard", methods=["GET"])
-def user_dashboard():
+def user_dashboard() -> Any:
     return render_template('user_dashboard.html')
 
 
 @auth_bp.route('/logout', methods=["GET", "POST"])
-@login_required
-def logout():
+@login_required # type: ignore[misc]
+def logout() -> Any:
     set_toast('Logout successful', 'success')
     logout_user()
     return redirect(url_for("main.home"))
 
 
 @auth_bp.route('/login', methods=["GET", "POST"])
-def login():
+def login() -> Any:
     if request.method == "POST":
         parsed_data = parse_user_form_data(request.form.to_dict())
 
@@ -50,7 +54,7 @@ def login():
 
 
 @auth_bp.route('/register', methods=["GET", "POST"])
-def register():
+def register() -> Any:
     if request.method == "POST":
         form_data = request.form.to_dict()
         parsed_data = parse_user_form_data(form_data)
@@ -86,7 +90,7 @@ def register():
 
 # Create & Seed only
 @auth_bp.route('/init-demo', methods=["POST"])
-def init_demo():
+def init_demo() -> Any:
     logout_user() # boot logged in users just in case
 
     with database_connection() as session:
@@ -101,7 +105,7 @@ def init_demo():
 
 # Create & Seed only
 @auth_bp.route('/init-owner', methods=["POST"])
-def init_owner():
+def init_owner() -> Any:
     logout_user() # boot logged in users just in case
 
     with database_connection() as session:
@@ -117,7 +121,7 @@ def init_owner():
 @auth_bp.route('/admin/reset-users', methods=["POST"])
 @requires_owner
 @with_db_session
-def reset_users(session):
+def reset_users(session: 'Session') -> Any:
     logout_user()
 
     delete_all_db_data(session, include_users=True, reset_sequences=True)
@@ -133,7 +137,7 @@ def reset_users(session):
 @auth_bp.route('/admin/reset-db', methods=["POST"])
 @requires_owner
 @with_db_session
-def reset_database(session):
+def reset_database(session: 'Session') -> Any:
 
     delete_all_db_data(session, include_users=False, reset_sequences=True)
 
@@ -144,7 +148,7 @@ def reset_database(session):
 @auth_bp.route('/admin/reset-dev', methods=["POST"])
 @requires_owner
 @with_db_session
-def reset_dev(session):
+def reset_dev(session: 'Session') -> Any:
 
     logout_user()
 
