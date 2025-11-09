@@ -96,4 +96,8 @@ class HabitsService:
         # Calculate completion percentage
         percent_completed = round((total_completions / expected_completions) * 100, 2) if expected_completions > 0 else 0
 
-        return start_of_week_utc, end_of_today_utc, total_completions, expected_completions, percent_completed
+        return {
+            "completed": total_completions,
+            "total": expected_completions,
+            "percent": percent_completed
+        }
