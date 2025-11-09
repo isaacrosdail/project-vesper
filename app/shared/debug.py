@@ -42,6 +42,9 @@ def setup_logging(app: 'Flask') -> None:
     
     logging.config.dictConfig(config=config)
     
+    # Silence some 3rd party
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
+    
     print(f"[AFTER setup_logging] Root level name: {logging.getLevelName(logging.getLogger().level)}", file=sys.stderr)
 
 
