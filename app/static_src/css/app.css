@@ -135,6 +135,12 @@ h3 {
 /* ===================================
     D3 Charts: Habits, Metrics, Time Tracking
    ===================================*/
+
+.chart-title,
+.chart-legend-text {
+    fill: var(--text);
+}
+
 .pie,
 .bar,
 .line {
