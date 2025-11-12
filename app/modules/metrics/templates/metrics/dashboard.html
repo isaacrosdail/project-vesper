@@ -6,6 +6,8 @@
 {% block content %}
 
 {{ forms.metric_entry_modal(entry_date=current_date) }}
+{{ forms.abtest_entry_modal() }}
+{{ forms.abtrial_entry_modal(ab_tests) }}
 
 <div id="line-chart"></div>
 
@@ -29,6 +31,23 @@
     <td class="{{ headers[4].priority}}">{{ item.sleep_time_label }}</td>
     <td class="{{ headers[5].priority}}">{{ item.calories_label }}</td>
     {% endcall %}
+</section>
+
+<section class="card-dashboard">
+    <div class="card-title">
+        <h2>Experiments</h2>
+        {{ ui.plus_btn('ab_tests-entry-dashboard-btn') }}
+    </div>
+    <button id="ab_trials-entry-dashboard-btn" class="btn btn-primary">Add ABTrial</button>
+    {% for test in ab_tests %}
+        <p>
+            Title: {{ test.title }}<br>
+            Hypothesis: {{ test.title }}<br>
+            Variant A: {{ test.title }}<br>
+            Variant B: {{ test.title }}<br>
+            Success Condition: {{ test.success_condition }}
+        </p>
+    {% endfor %}
 </section>
 {% endblock %}
 
