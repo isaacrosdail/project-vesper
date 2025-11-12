@@ -95,3 +95,19 @@ def daily_entries_timeseries(session: 'Session') -> Any:
             for dt, value in results
         ]
     )
+
+@api_bp.get("/metrics/daily_entries")
+@login_plus_session
+def daily_entries_list(session: 'Session') -> Any:
+    last_n_days = int(request.args["lastNDays"])
+
+    repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
+    start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)
+    result = repo.get_all_metrics_in_window(start_utc, end_utc)
+
+    logger.debug(f"result: {result}")
+    return api_response(
+        True,
+        f"Retrieved {len(result)} entries",
+        data = [entry.to_api_dict() for entry in result]
+    ), 201
