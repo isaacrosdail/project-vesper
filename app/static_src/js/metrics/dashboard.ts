@@ -26,6 +26,11 @@ type LineData = {
     values: LineDataPoint[];
 }
 
+const chartState = {
+    metricType: 'weight' as MetricType,
+    range: 7,
+}
+
 // Hardcoding BMR for calories, target duration for sleep
 const bmrValue = 2000;
 const targetSleepDuration = 7 * 60; // 7hrs in minutes
@@ -122,12 +127,22 @@ function drawStaticLines(metricType: MetricType) {
     }).on('mouseleave', hideToolTip);
 }
 
-function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
-    if (data.length === 0){ // if dataset is empty, bail so we can safely coalesce for .domains below
+async function refreshLineChart() {
+    const data = await getMetricData(chartState.metricType, chartState.range);
+
+    if (data.length === 0) {
+        showEmptyChart(chartState.metricType);
         return;
     }
+
+    updateLineChart(data, chartState.metricType);
+    drawStaticLines(chartState.metricType);
+}
+
+function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
     // Clear static lines
     gChart.selectAll(".bmr-line, .sleep-line").remove();
+    gChart.selectAll(".empty-message").remove();
 
     xScale.domain(d3.extent(data, d => d.date) as [Date, Date]);
     yScale.domain(d3.extent(data, d => d.value) as [number, number]);
@@ -165,7 +180,7 @@ function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
                 return enter.append("circle")
                 // We can have r start at 0 and add a transition in the enter to make them animate in
                     .attr("r", 0)
-                    .attr("fill", "var(--accent-strong")
+                    .attr("fill", "var(--accent-strong)")
                     .attr("cx", d => xScale(d.date))
                     .attr("cy", d => yScale(d.value))
                     .transition()
@@ -194,6 +209,25 @@ function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
 
 }
 
+function showEmptyChart(metricType: MetricType) {
+    gChart.selectAll("path.line").remove();
+    gChart.selectAll("circle").remove();
+    gChart.selectAll(".bmr-line, .sleep-line").remove();
+
+    const emptyMessage = gChart.selectAll("text.empty-message")
+        .data([metricType])
+        .join("text")
+        .attr("class", "empty-message")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight / 2)
+        .attr("text-anchor", "middle")
+        .attr("fill", "grey")
+        .text(`No ${TYPE_LABELS[metricType]} data for this period.`)
+
+    d3.select("#line-chart-title")
+        .text(TYPE_LABELS[metricType])
+}
+
 const TYPE_LABELS: Record<MetricType, string> = {
     weight: "Weight",
     steps: "Steps",
@@ -202,16 +236,22 @@ const TYPE_LABELS: Record<MetricType, string> = {
 }
 
 export async function init() {
-    const initialData = await getMetricData('weight', 7);
-    updateLineChart(initialData, 'weight');
+    const initialData = await getMetricData(chartState.metricType, chartState.range);
+    updateLineChart(initialData, chartState.metricType);
 
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
-        if (target.matches('.type-selection')) {
-            const metricType = target.dataset['type']! as MetricType;
-            const data = await getMetricData(metricType, 7);
-            updateLineChart(data, metricType);
-            drawStaticLines(metricType);
+        if (target.matches('.chart-type')) {
+            chartState.metricType = target.dataset['type']! as MetricType;
+            await refreshLineChart();
+        }
+        else if (target.matches('.chart-range')) {
+            chartState.range = parseInt(target.dataset['range']!);
+            await refreshLineChart();
+        }
+        else if (target.matches('.table-range')) {
+            const range = parseInt(target.dataset['range']!);
+            window.location.href = `/metrics/dashboard?range=${range}`;
         }
     });
 }
