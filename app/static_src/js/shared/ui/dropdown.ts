@@ -6,7 +6,13 @@ document.addEventListener('click', (e) => {
 
     if (target.matches('.dropdown-toggle')) {
         const dropdown = target.closest<HTMLDivElement>('.dropdown')!;
-        dropdown.classList.toggle('is-open');
+        const wasOpen = dropdown.classList.contains('is-open');
+
+        dropdowns.forEach(el => el.classList.remove('is-open'));
+
+        if (!wasOpen) {
+            dropdown.classList.add('is-open')
+        }
 
     } else if (target.closest('.dropdown-menu button')) {
         const dropdown = target.closest<HTMLDivElement>('.dropdown')!;
