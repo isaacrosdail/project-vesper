@@ -11,12 +11,20 @@
 
 <div id="line-chart"></div>
 
-{% call ui.dropdown('Select Type') %}
-    <button class="type-selection" data-type="weight">Weight (7d)</button>
-    <button class="type-selection" data-type="steps">Steps (7d)</button>
-    <button class="type-selection" data-type="calories">Calories (7d)</button>
-    <button class="type-selection" data-type="sleep_duration_minutes">Sleep Duration (7d)</button>
-{% endcall %}
+<div class="_inline-flex-md">
+    {% call ui.dropdown('Select Type') %}
+        <button class="chart-type" data-type="weight">Weight</button>
+        <button class="chart-type" data-type="steps">Steps</button>
+        <button class="chart-type" data-type="calories">Calories</button>
+        <button class="chart-type" data-type="sleep_duration_minutes">Sleep Duration</button>
+    {% endcall %}
+
+    {% call ui.dropdown('Select Timeframe') %}
+        <button class="chart-range" data-range="1">Today</button>
+        <button class="chart-range" data-range="7">7d</button>
+        <button class="chart-range" data-range="30">30d</button>
+    {% endcall %}
+</div>
 
 <section id="metrics-dashboard-table" class="card-dashboard">
     <div class="card-title">
