@@ -49,6 +49,15 @@ class DailyMetricsRepository(BaseRepository[DailyEntry]):
         )
         result = self.session.execute(stmt).scalars().first()
         return cast(DailyEntry | None, result)
+    
+    def get_all_metrics_in_window(self, start_utc: datetime, end_utc: datetime) -> list[DailyEntry]:
+        """Returns the first DailyEntry in a UTC datetime range."""
+        stmt = self._user_select(DailyEntry).where(
+            DailyEntry.entry_datetime >= start_utc,
+            DailyEntry.entry_datetime < end_utc
+        )
+        result = self.session.execute(stmt).scalars().all()
+        return list(result)
 
     def get_metrics_by_type_in_window(self, metric_type: str, start_utc: datetime, end_utc: datetime) -> list[Any]:
         """Returns list of (entry_datetime, <metric_value>) tuples for a given metric type."""

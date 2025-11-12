@@ -20,9 +20,16 @@
 
 <section id="metrics-dashboard-table" class="card-dashboard">
     <div class="card-title">
-        <h2>Daily Metric Entries</h2>
+        <h2>Daily Metric Entries (showing last {{selected_range}} days)</h2>
         {{ ui.plus_btn('daily_entries-entry-dashboard-btn') }}
     </div>
+
+    {% call ui.dropdown('Select Timeframe') %}
+        <button class="table-range" data-range="1">Today</button>
+        <button class="table-range" data-range="7">7d</button>
+        <button class="table-range" data-range="30">30d</button>
+    {% endcall %}
+
     {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'metrics', 'daily_entries') %}
     <td class="{{ headers[0].priority}}">{{ item.entry_datetime_label }}</td>
     <td class="{{ headers[1].priority}}">{{ item.weight_label }}</td>
