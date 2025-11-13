@@ -35,7 +35,8 @@ class HabitsService:
             habit = self.repo.create_habit(
                 name=typed_data["name"],
                 status=typed_data.get("status"),
-                promotion_threshold=typed_data.get("promotion_threshold")
+                promotion_threshold=typed_data.get("promotion_threshold"),
+                target_frequency=typed_data["target_frequency"]
             )
             return service_response(True, "Habit added", data={"habit": habit})
 
@@ -76,9 +77,6 @@ class HabitsService:
 
     # TODO: "Percent completion habits this week" - Mon to Sun
     def calculate_all_habits_percentage_this_week(self) -> dict[str, Any]:
-        # NOTE: Hardcoding 'goal amount' for now, should be a field
-        goal = 7
-
         # Determine current day in the week
         today = datetime.now(ZoneInfo(self.user_tz))
         days_into_week = today.weekday() + 1 # offset: incl today as day # 1
@@ -89,9 +87,9 @@ class HabitsService:
         # Fetch completions in that time range
         total_completions = len(self.repo.get_all_completions_in_window(start_of_week_utc, end_of_today_utc))
 
-        # Expected completions = # of habits * days so far this week
-        total_habits = self.repo.get_count_all()
-        expected_completions = (total_habits * days_into_week)
+        # Expected_completions is sum of target_frequency for all
+        habits = self.repo.get_all_habits_and_tags()
+        expected_completions = sum(h.target_frequency or 0 for h in habits)
 
         # Calculate completion percentage
         percent_completed = round((total_completions / expected_completions) * 100, 2) if expected_completions > 0 else 0
