@@ -18,9 +18,24 @@ def validate_habit_name(name: str | None) -> tuple[str | None, list[str]]:
 
     return (name, [])
 
+def validate_target_frequency(target_frequency: int | str | None) -> tuple[int | None, list[str]]:
+    """Required."""
+    if target_frequency is None or target_frequency == "":
+        return (None, ["target_frequency required"])
+    
+    try:
+        freq = int(target_frequency)
+    except (ValueError, TypeError):
+        return (None, ["target_frequency must be an integer"])
+
+    if not (1 <= freq <= 7):
+        return (None, ["target_frequency must be between 1 and 7"])
+    
+    return (freq, [])
 
 HABIT_VALIDATION_FUNCS = {
     "name": validate_habit_name,
+    "target_frequency": validate_target_frequency,
 }
 @log_validator
 def validate_habit(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
