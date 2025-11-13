@@ -17,18 +17,33 @@ interface ArcPathElement extends SVGPathElement {
     _current?: d3.PieArcDatum<PieDatum>;
 }
 
+const chartState = {
+    range: 7,
+}
+
 // Set up dimensions
 const width = 300;
 const height = 300;
 const radius = Math.min(width, height) / 2;
+const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
 
 // Pie chart
-const svg = d3.select('#time-chart')
+const svg = d3.select('#time_tracking-chart-container')
     .append("svg")
     .attr("width", width)
     .attr("height", height)
-    .append("g")
-    .attr("transform", `translate(${width/2}, ${height/2})`);
+
+const gRoot = svg.append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+const gChart = gRoot.append("g")
+    .attr("transform", `translate(${innerWidth/2}, ${innerHeight/2})`);
+
+const gLegend = gRoot.append("g")
+    .attr("class", "legend")
+    .attr("transform", `translate(300, 0)`);
 
 // d3.pie() takes our array data and calculates angles
 const pie = d3.pie<PieDatum>().value(d => d.value);
@@ -39,16 +54,41 @@ const arc = d3.arc<d3.PieArcDatum<PieDatum>>()
 // Color Scale maps indexes to colors
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-
-function updatePieChart(data: PieDatum[]) {
-    let disableHoverEffects = data.length === 0 || data.length === 1;
+async function refreshPieChart() {
+    const data = await getData(chartState.range);
+    console.log(data)
 
     if (data.length === 0) {
-        data = [{ category: 'No data', value: 1}];
+        showEmptyChart();
+        return;
     }
+
+    updatePieChart(data);
+}
+
+function showEmptyChart() {
+    gLegend.selectAll('g.legend-item').remove();
+    gLegend.selectAll('.debug').remove();
+    gChart.selectAll('g.slice').remove();
+
+    const emptyMessage = gChart.selectAll('text.empty-message')
+        .data([1])
+        .join("text")
+        .attr("class", "empty-message")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("text-anchor", "middle")
+        .attr("fill", "grey")
+        .text(`No time entry data for this period.`)
+}
+
+function updatePieChart(data: PieDatum[]) {
+
+    gRoot.selectAll('.empty-message').remove();
+
     const pieData = pie(data);
 
-    const groups = svg.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
+    const groups = gChart.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
         // .data(data, keyFn)
         .data(pieData, d => d.data.category) // key function = stable matching?
         .join(
@@ -68,7 +108,6 @@ function updatePieChart(data: PieDatum[]) {
                 return g;
             },
             update => {
-                // update paths
                 update.select("path")
                     .transition().duration(500)
                     .attrTween("d", function(d) {
@@ -83,16 +122,14 @@ function updatePieChart(data: PieDatum[]) {
             exit => exit.remove()
         );
 
-    const legend = svg.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend")
+    const legendItems = gLegend.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend-item")
         .data(pieData, d => d.data.category)
         .join(
             enter => {
-                const g = enter.append("g").attr("class", "legend");
+                const g = enter.append("g")
+                    .attr("class", "legend-item")
+                    .attr("transform", (_d, i) => `translate(0, ${i * 22})`);
 
-                // Position each below the last
-                g.attr("transform", (_d, i) => {
-                    return `translate(170, ${-130 + (i * 22)})`
-                })
                 // legend circle
                 g.append('circle')
                     .attr("cx", 10)
@@ -113,7 +150,7 @@ function updatePieChart(data: PieDatum[]) {
             update => {
                 // Update transform to update positions
                 update.attr("transform", (_d, i) => {
-                    return `translate(170, ${-130 + (i * 22)})`;
+                    return `translate(0, ${i * 22})`;
                 });
                 return update;
             },
@@ -122,8 +159,6 @@ function updatePieChart(data: PieDatum[]) {
 
     // Enable tooltip on hover to see data
     groups.on('mouseenter', function(_event, d) {
-        if (disableHoverEffects) return;
-
         showToolTip(this, `${d.data.category}: ${d.data.value}`);
 
         // Calc midpoint (angle)
@@ -141,8 +176,6 @@ function updatePieChart(data: PieDatum[]) {
             .attr("transform", `translate(${x}, ${y})`);
     });
     groups.on('mouseleave', function() {
-        if (disableHoverEffects) return;
-
         hideToolTip();
         d3.select(this)
             .transition().duration(200)
@@ -151,17 +184,17 @@ function updatePieChart(data: PieDatum[]) {
 }
 
 export async function init() {
-    // Render initial pie chart
-    const data = await getData(7);
-    updatePieChart(data);
-
+    await refreshPieChart();
 
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
-        if (target.matches('.timeframe-selection')) {
-            const range = parseInt(target.dataset['range']!, 10);
-            const data = await getData(range);
-            updatePieChart(data);
+        if (target.matches('.chart-range')) {
+            chartState.range = parseInt(target.dataset['range']!, 10);
+            await refreshPieChart();
+        }
+        else if (target.matches('.table-range')) {
+            const range = parseInt(target.dataset['range']!);
+            window.location.href = `/time_tracking/dashboard?range=${range}`;
         }
     });
 }
