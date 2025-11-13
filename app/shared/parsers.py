@@ -83,6 +83,7 @@ def parse_time_entry_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
 def parse_habit_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
     return {
         "name": (form_data.get("name") or "").strip(),
+        "target_frequency": (form_data.get("target_frequency") or "").strip(),
         "is_promotable": parse_checkbox(form_data.get("is_promotable")),
     }
 

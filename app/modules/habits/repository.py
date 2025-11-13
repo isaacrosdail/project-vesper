@@ -26,13 +26,15 @@ class HabitsRepository(BaseRepository[Habit]):
             self,
             name: str,
             status: StatusEnum | None,
-            promotion_threshold: float | None
+            promotion_threshold: float | None,
+            target_frequency: int
     ) -> Habit:
         habit = Habit(
             user_id=self.user_id,
             name=name,
             status=status,
-            promotion_threshold=promotion_threshold
+            promotion_threshold=promotion_threshold,
+            target_frequency=target_frequency
         )
         return self.add(habit)
 
