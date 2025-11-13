@@ -5,6 +5,9 @@
 - Subtypes: snake_case, singular
 - Models: PascalCase, singular -> Table names are derived therefrom
 
+Subtype names will be used even in markup/etc, ex: `class="metric_entries-modal"` to enable some nice stuff facilitated by this parity.
+    `types.ts` & `MODEL_CLASSES` (in generic_routes.py) are our de facto master lists, so let's remember to keep those synced.
+
 ## HTML Attributes Ordering
 1. Identity: id, class
 2. State & data: type, name, value, `data-*`, `aria-*`
@@ -12,9 +15,8 @@
 4. Presentation: alt, title, placeholder, disabled, checked, selected, loading, async
 5. Boolean attrs & others: hidden, open, required, etc.
 
-Note: Will begin defaulting to classes over IDs for everything except: form inputs and auto-discovery modal-related stuff
+Default to classes over IDs for everything except form inputs and auto-discovery modal-related stuff
 
-Utility classes will be prefixed with `_` to distinguish themselves from other styling classes
 
 ## API Response Standardization
 
@@ -46,14 +48,11 @@ Composite validators:
 - Pattern: loop through field validators, add to `typed_data` only if `typed_value` is not None
 
 
-## CSS Property Order (Trying to get better about this for sanity's sake)
-1. Positioning: Placement & stacking context first.
-    - position, top, right, bottom, left, z-index
-2. Box Model: Defines element size and layout before cosmetics.
-    - display, flex/grid props, float, clear, width, height, min/max, margin, padding, overflow, box-sizing
-3. Typography: Anything affecting text or inline content.
-    - font, text-align, line-height, white-space, color, etc.
-4. Visual
-    - Backgrounds, borders, shadows, etc.background, border, box-shadow, outline, etc.
-5. Misc/Effects
-    - Animations, transitions, transforms, cursor, appearance.
+## CSS Properties in recess order (enforced by stylelint)
+
+## Jinja Naming Convention for Types (Hungarian-style a la Charles Simonyi)
+- `l_` = list/array
+- `d_` = dict
+- `o_` = object/model
+- `s_` = string
+- `b_` = bool
