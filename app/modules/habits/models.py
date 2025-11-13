@@ -75,6 +75,8 @@ class Habit(Base, APISerializable):
         Float,
         nullable=True
     )
+    # Represents target completion rate per week
+    target_frequency: Mapped[int] = mapped_column(Integer, nullable=False)
     
     tags = relationship("Tag", secondary=habit_tags, back_populates="habits")
     habit_completions = relationship("HabitCompletion", back_populates="habit", cascade="all, delete-orphan")
