@@ -27,6 +27,7 @@
         "nginx/**": true,
         "PROJECT_LOG_ARCHIVE/**": true,
         ".hypothesis/**": true,
+        ".mypy_cache/": true,
     },
     "search.exclude": {
         "node_modules/": true,
