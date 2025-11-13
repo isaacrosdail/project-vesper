@@ -42,6 +42,15 @@ class HabitsRepository(BaseRepository[Habit]):
             selectinload(Habit.tags)
         )
         return list(self.session.execute(stmt).scalars().all())
+    
+    def get_all_habits_and_tags_in_window(self, start_utc: datetime, end_utc: datetime) -> list[Habit]:
+        stmt = self._user_select(Habit).where(
+            Habit.created_at >= start_utc,
+            Habit.created_at < end_utc,
+        ).options(
+            selectinload(Habit.tags)
+        )
+        return list(self.session.execute(stmt).scalars().all())
 
     def create_habit_completion(self, habit_id: int, created_at: datetime) -> HabitCompletion:
         habit_completion = HabitCompletion(

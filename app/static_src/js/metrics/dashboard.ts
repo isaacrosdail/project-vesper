@@ -45,8 +45,8 @@ const innerHeight = height - margin.top - margin.bottom;
 // Graph formatting
 const ticks = 7;
 
-// Create second line chart (using dates now)
-const svg = d3.select('#line-chart')
+// Create line chart (using dates now)
+const svg = d3.select('#metrics-chart-container')
     .append("svg")
     .attr("width", width)
     .attr("height", height);

@@ -6,18 +6,26 @@
 
 {{ forms.time_entry_modal(current_date=current_date) }}
 
-<div id="time-chart"></div>
+<div id="time_tracking-chart-container"></div>
 
 {% call ui.dropdown('Select Window') %}
-    <button class="timeframe-selection" data-range="1">Today</button>
-    <button class="timeframe-selection" data-range="7">7 days</button>
+    <button class="chart-range" data-range="1">Today</button>
+    <button class="chart-range" data-range="7">7d</button>
+    <button class="chart-range" data-range="30">30d</button>
 {% endcall %}
 
 <section id="activity-log-card" class="card-dashboard">
     <div class="card-title">
-        <h2>Time Entries</h2>
+        <h2>Time Entries (showing last {{selected_range}} days)</h2>
         {{ ui.plus_btn('time_entries-entry-dashboard-btn') }}
     </div>
+
+    {% call ui.dropdown('Select Timeframe') %}
+        <button class="table-range" data-range="1">Today</button>
+        <button class="table-range" data-range="7">7d</button>
+        <button class="table-range" data-range="30">30d</button>
+    {% endcall %}
+
     {% call(item, headers) ui.responsive_table('Time Entries', entry_headers, entries, 'time_tracking', 'time_entries') %}
     <td class="{{ headers[0].priority }}">{{ item.date_label }}</td>
     <td class="{{ headers[1].priority }}">{{ item.category }}</td>
