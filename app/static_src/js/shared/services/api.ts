@@ -29,7 +29,7 @@ export async function apiRequest(
         } else {
             console.error('Server error: ', responseData.message);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(`Error with ${method}:`, error);
     }
 }
