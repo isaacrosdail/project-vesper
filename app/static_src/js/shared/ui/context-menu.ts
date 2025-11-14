@@ -29,7 +29,7 @@ const MENU_CONFIG: Record<'default' | 'products' | 'transactions', MenuItem[]> =
 type ContextObject = {
     context: {
         itemId: string;
-        name: string;
+        name: string | null;
         module: string;
         subtype: MenuOptionTypes;
     }
@@ -48,7 +48,6 @@ type TriggerInfo = ContextMenuTrigger | DotsMenuTrigger;
 
 /**
  * 
- * @param {string} type - Type of menu to open. Determines which actions array to use, how to position (cursor vs rect)
  * @param {object} triggerInfo - Object containing relevant positioning + data context needed, bound to menu itself before finishing
  * @returns 
  */
@@ -98,7 +97,7 @@ function openMenu(triggerInfo: TriggerInfo) {
 function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>) {
     Object.entries(data).forEach(([fieldName, fieldValue]) => {
         const input = modal.querySelector<HTMLInputElement>(`#${fieldName}`);
-        if (!input || fieldValue == null) return;
+        if (!input || fieldValue === null) return;
 
         switch (input.type) {
             case 'checkbox':
@@ -175,9 +174,12 @@ async function handleDelete(menuContext: ContextObject['context']) {
 function handleAddToShoppingList(menuContext: ContextObject['context']) {
     const { itemId, name: productName } = menuContext;
     const quantityWanted = 1;
-    // menu?.remove();
 
-    // Actually send to backend:
+    if (!productName) {
+        console.error('Product name required for shopping list');
+        return;
+    }
+
     const url = '/groceries/shopping-lists/items';
     const data = { product_id: itemId, quantity_wanted: quantityWanted };
 
@@ -201,9 +203,9 @@ document.addEventListener('contextmenu', (e) => {
             return;
         }
         const { itemId, module, subtype } = row.dataset;
-        const name = row?.querySelector('td:nth-child(2)')?.textContent;
+        const name = row?.querySelector('td:nth-child(2)')?.textContent ?? null;
 
-        if (!name || !itemId || !module || !subtype) {
+        if (!itemId || !module || !subtype) {
             console.error('Missing required dataset attributes');
             return;
         }
