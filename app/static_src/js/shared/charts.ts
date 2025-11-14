@@ -35,13 +35,13 @@ const width = 500;
 const height = 500;
 
 // Create the svg
-const barSvg = d3.select('#chart-container')
+const barSvg = d3.select('#asdfasdf')
     .append("svg")
     .attr("width", width)
     .attr("height", height);
 
 function drawChart (data: BarValue[]) {    // Apply attributes & fill chart with rect's
-    const rects =  barSvg.selectAll<SVGRectElement, BarValue>("rect")
+    const _rects =  barSvg.selectAll<SVGRectElement, BarValue>("rect")
         .data(data)     // pass data into chart?
         .join(
             enter => enter
@@ -64,8 +64,8 @@ function drawChart (data: BarValue[]) {    // Apply attributes & fill chart with
 drawChart([50, 40, 42, 20, 15]);
 
 
-function renderLineChart(height: number, width: number, lineData: LineDatum[]) {
-    const svgLine = d3.select('#time-chart')
+function _renderLineChart(height: number, width: number, lineData: LineDatum[]) {
+    const svgLine = d3.select('#chart-container')
         .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -97,7 +97,7 @@ function renderLineChart(height: number, width: number, lineData: LineDatum[]) {
 }
 
 
-function renderBarGraph(
+function _renderBarGraph(
     height: number,
     width: number,
     data: BarDatum[]

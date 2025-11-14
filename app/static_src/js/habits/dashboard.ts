@@ -28,7 +28,7 @@ const svg = d3.select("#habits-chart-container")
 const gRoot = svg.append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`)
 
-const title = svg.append("text")
+const _title = svg.append("text")
     .attr("x", innerWidth/2)
     .attr("y", margin.top/2)
     .attr("font-size", "var(--font-size-l)")
@@ -85,7 +85,7 @@ function updateBarChart(data: BarData[]) {
         exit => exit.remove()
     );
 
-    bars.on('mouseenter', function(this: d3.BaseType, _event: any, d: BarData) {
+    bars.on('mouseenter', function(this: d3.BaseType, _event: Event, d: BarData) {
         showToolTip(this as SVGRectElement, `${d.name}: ${d.count}`);
     }).on('mouseleave', hideToolTip);
 }
@@ -93,7 +93,7 @@ function updateBarChart(data: BarData[]) {
 function showEmptyChart() {
     gChart.selectAll('rect.bar').remove();
 
-    const emptyMessage = gChart.selectAll('text.empty-message')
+    const _emptyMessage = gChart.selectAll('text.empty-message')
         .data([1])
         .join("text")
         .attr("class", "empty-message")

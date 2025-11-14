@@ -7,6 +7,14 @@ type ApiResponse = {
     errors?: any;
 };
 
+/**
+ * Makes an API request & handles the response.
+ * Automatically prepends '/api' to endpoints.
+ * @param method HTTP method
+ * @param endpoint API endpoint path (ex: '/groceries/products/123')
+ * @param onSuccess Callback invoked when response.success
+ * @param data Optional request body (plain obj for JSON or FormData)
+ */
 export async function apiRequest(
     method: string,
     endpoint: string,
@@ -14,8 +22,8 @@ export async function apiRequest(
     data: Record<string, any> | FormData | null = null
 ) {
     try {
-        const isFormData = data instanceof FormData; // formData objs needs to not have a Content-Type header AND not be stringified
-        const url = `/api${endpoint}`; // prepend endpoints with /api
+        const isFormData = data instanceof FormData; // formData objs need to not have a Content-Type header AND not be stringified
+        const url = `/api${endpoint}`;
 
         const response = await fetch(url, {
             method,
@@ -29,7 +37,7 @@ export async function apiRequest(
         } else {
             console.error('Server error: ', responseData.message);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(`Error with ${method}:`, error);
     }
 }
