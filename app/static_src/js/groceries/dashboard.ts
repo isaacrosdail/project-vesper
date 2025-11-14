@@ -43,11 +43,15 @@ import { apiRequest } from '../shared/services/api.js';
 
         const item = e.target.closest('.shoppinglist-item') as HTMLElement;
         const itemId = item.dataset['itemId'];
+        if (!item || !itemId) return;
+
         const currentQuantity = parseInt(item.dataset['quantityWanted'] ?? '0', 10);
         const container = e.target.closest('.qty-controls') as HTMLElement; // parent to subsequently grab span for qty to edit text
         const qtySpan = container?.querySelector('.item-qty') as HTMLElement; // then grab span for editing qty after fetches
 
-        if (!item || !itemId || !container || !qtySpan || isNaN(currentQuantity)) return;
+        if (action === 'increment' || action === 'decrement') {
+            if (!container || !qtySpan || isNaN(currentQuantity)) return;
+        }
 
         const url = `/groceries/shopping_list_items/${itemId}`;
 
