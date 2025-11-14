@@ -55,7 +55,7 @@ const gRoot = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Title for lineChart
-const title = svg.append("text")
+const _title = svg.append("text")
     .attr("id", "line-chart-title")
     .attr("class", "chart-title")
     .attr("x", width/2)
@@ -121,7 +121,7 @@ function drawStaticLines(metricType: MetricType) {
                 .attr("y2", (d: number) => yScale(d)),
 
         );
-    staticLine.on('mouseenter', function(this: d3.BaseType, _event: any, d: number) {
+    staticLine.on('mouseenter', function(this: d3.BaseType, _event: Event, d: number) {
         const el = this as SVGRectElement;
         showToolTip(el, config.label(d));
     }).on('mouseleave', hideToolTip);
@@ -150,7 +150,7 @@ function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
     gXAxis.call(d3.axisBottom(xScale).tickFormat((d) => d3.timeFormat("%m/%d")(d as Date)));
     gYAxis.call(d3.axisLeft(yScale).ticks(ticks));
 
-    const metricLine = gChart.selectAll<SVGPathElement, LineData>("path.line")
+    const _metricLine = gChart.selectAll<SVGPathElement, LineData>("path.line")
         // .data([data])
         // This makes each metric a datum
         .data([{
@@ -164,12 +164,12 @@ function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
                     .attr("fill", "none")
                     .attr("stroke", "steelblue")
                     .attr("stroke-width", 2)
-                    .attr("d", (d: any) => line(d.values));
+                    .attr("d", (d: LineData) => line(d.values));
             },
             update => update
                 .transition()
                 .duration(200)
-                .attr("d", (d: any) => line(d.values)), // re-draw on update
+                .attr("d", (d: LineData) => line(d.values)), // re-draw on update
             exit => exit.remove()
         );
 
@@ -195,7 +195,7 @@ function updateLineChart(data: LineDataPoint[], metricType: MetricType) {
             exit => exit.remove()
         );
 
-    circles.on('mouseenter', function(this: d3.BaseType, _event: any, d: LineDataPoint) {
+    circles.on('mouseenter', function(this: d3.BaseType, _event: Event, d: LineDataPoint) {
         const el = this as SVGRectElement;
         showToolTip(el, `${metricType}: ${d.value}`)
     });
@@ -214,7 +214,7 @@ function showEmptyChart(metricType: MetricType) {
     gChart.selectAll("circle").remove();
     gChart.selectAll(".bmr-line, .sleep-line").remove();
 
-    const emptyMessage = gChart.selectAll("text.empty-message")
+    const _emptyMessage = gChart.selectAll("text.empty-message")
         .data([metricType])
         .join("text")
         .attr("class", "empty-message")
