@@ -473,74 +473,7 @@ html[data-page="devtools.style_reference"] .btn-icon {
     grid-column: 1 / -1;
     border: var(--border-default);
     align-items: center;
-    height: 80px;
-}
-.progbar.one {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(85% 0.09 145),
-        oklch(80% 0.15 145)
-    );
-    border-radius: var(--border-radius);
-}
-.progbar.two {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(88% 0.04 145),
-        oklch(75% 0.14 145)
-    );
-    border-radius: var(--border-radius);
-}
-
-.progbar.three {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(90% 0.18 135),
-        oklch(65% 0.20 150)
-    );
-    border-radius: var(--border-radius);
-}
-.progbar.four {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(80% 0.10 80),
-        oklch(75% 0.14 145),
-        oklch(70% 0.18 145)
-    );
-    border-radius: var(--border-radius);
-}
-.progbar.five {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(85% 0.08 180),
-        oklch(70% 0.14 145)
-    );
-    border-radius: var(--border-radius);
-}
-.progbar.six {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(88% 0.09 145),
-        oklch(82% 0.12 145),
-        oklch(78% 0.19 150)
-    );
-    border-radius: var(--border-radius);
-}
-.progbar.seven {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(85% 0.10 80),
-        oklch(78% 0.12 135),
-        oklch(72% 0.14 145)
-    );
-    border-radius: var(--border-radius);
-}
-.progbar.seven {
-    background: linear-gradient(
-        to right in oklch,
-        oklch(82% 0.09 130),
-        /* Uptime Robot green anchor */
-        oklch(77% 0.19 150.37)
-    );
+    height: 60px;
+    background: var(--progress-bar-fill);
     border-radius: var(--border-radius);
 }
