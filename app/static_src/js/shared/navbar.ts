@@ -2,7 +2,7 @@
 
 function toggleMobileNav(mobileNav: HTMLElement, hamburgerBtn: HTMLElement): void {
     mobileNav?.classList.toggle('is-open');
-    let isOpen = mobileNav?.classList.contains('is-open'); // set proper bool for is-open state
+    const isOpen = mobileNav?.classList.contains('is-open'); // set proper bool for is-open state
     hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value
     hamburgerBtn.classList.toggle('is-open', isOpen);
     if (isOpen) {
@@ -21,7 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!mobileNav || !modal || !hamburgerBtn) return;
 
     document.addEventListener('click', (e) => {
-        let isOpen = mobileNav?.classList.contains('is-open');
+        const isOpen = mobileNav?.classList.contains('is-open');
         if (!(e.target instanceof HTMLElement)) return;
 
         // Toggle mobile nav

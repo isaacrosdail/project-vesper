@@ -71,7 +71,7 @@ function showEmptyChart() {
     gLegend.selectAll('.debug').remove();
     gChart.selectAll('g.slice').remove();
 
-    const emptyMessage = gChart.selectAll('text.empty-message')
+    const _emptyMessage = gChart.selectAll('text.empty-message')
         .data([1])
         .join("text")
         .attr("class", "empty-message")
@@ -122,7 +122,7 @@ function updatePieChart(data: PieDatum[]) {
             exit => exit.remove()
         );
 
-    const legendItems = gLegend.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend-item")
+    const _legendItems = gLegend.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend-item")
         .data(pieData, d => d.data.category)
         .join(
             enter => {
