@@ -152,6 +152,10 @@ function updatePieChart(data: PieDatum[]) {
                 update.attr("transform", (_d, i) => {
                     return `translate(0, ${i * 22})`;
                 });
+                update.select('circle')
+                    .attr("fill", d => color(d.data.category))
+                update.select('text')
+                    .text(d => `${d.data.category} - ${d.data.value} min`)
                 return update;
             },
             exit => exit.remove()
