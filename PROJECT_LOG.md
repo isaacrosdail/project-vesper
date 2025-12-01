@@ -29,6 +29,17 @@
         - Update 'this' type annotation: use d3.BaseType then cast as SVGRectElement
 MISC. Fix: Dropdown bug where multiple could stay open when clicking a new one
 
+## [Thurs 13.11.25]
+**Log:**
+1. Refine some D3 charts / brought them in line more
+2. Habits: adding target_frequency to model + progress calcs
+	- Required, represents target completion rate per week
+	
+	
+## [Fri 14.11.25]
+**Log:**
+1. Fix linter warnings
+2. Bug fix: Fix remove button on shopping list display not working
 
 ## [Wed 5.11.25]
 **Log:**
