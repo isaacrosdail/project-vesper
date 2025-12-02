@@ -111,11 +111,15 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro leetcode_entry_modal(id='leet_code_records-entry-homepage', title='Add LeetCode record') %}
+{% macro leetcode_entry_modal(id='leet_code_records-entry-dashboard', title='Add LeetCode record') %}
     {% call ui.modal('habits', 'leetcode_records', id, title) %}
         <div>
             <label for="leetcode_id">LeetCode Problem ID:</label>
             <input type="number" id="leetcode_id" name="leetcode_id" min="1" step="1" required>
+        </div>
+        <div>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title">
         </div>
         <fieldset class="radio-row">
             <legend>Difficulty:</legend>
