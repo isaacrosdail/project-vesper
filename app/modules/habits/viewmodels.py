@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.modules.habits.models import Habit
+    from app.modules.habits.models import Habit, LeetCodeRecord
 
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
@@ -39,3 +39,44 @@ class HabitViewModel(TimestampedViewMixin):
     @property
     def created_at_label(self) -> str:
         return self.format_created_at_label()
+    
+
+class LCRecordPresenter(BasePresenter):
+    VISIBLE_COLUMNS = [
+        "leetcode_id", "title", "difficulty", "language", "status"
+    ]
+
+    COLUMN_CONFIG = {
+        "id": {"label": "ID", "priority": "essential"},
+        "leetcode_id": {"label": "Leetcode ID", "priority": "essential"},
+        "title": {"label": "Title", "priority": "essential"},
+        "difficulty": {"label": "Difficulty", "priority": "essential"},
+        "language": {"label": "Language", "priority": "essential"},
+        "status": {"label": "Status", "priority": "essential"},
+    }
+
+class LCRecordViewModel(TimestampedViewMixin):
+    def __init__(self, record: 'LeetCodeRecord', tz: str):
+        self.id = record.id
+        self.leetcode_id = record.leetcode_id
+        self.title = record.title
+        self.difficulty = record.difficulty
+        self.language = record.language
+        self.status = record.status
+        self._tz = tz
+
+    @property
+    def title_label(self) -> str:
+        return f"{self.title}" if self.title else "--"
+
+    @property
+    def difficulty_label(self) -> str:
+        return f"{self.difficulty.value.title()}"
+    
+    @property
+    def language_label(self) -> str:
+        return f"{self.language.value.title()}"
+
+    @property
+    def status_label(self) -> str:
+        return f"{self.status.value.title()}"

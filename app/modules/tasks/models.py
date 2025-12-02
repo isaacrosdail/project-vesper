@@ -2,7 +2,6 @@
 Database models for the Tasks module.
 """
 from datetime import datetime
-import enum
 
 from sqlalchemy import Boolean, Column, DateTime, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
@@ -12,13 +11,16 @@ from app._infra.db_base import Base, CustomBaseTaskMixin
 from app.modules.tasks.constants import TASK_NAME_MAX_LENGTH
 from app.shared.models import Tag, task_tags
 from app.shared.serialization import APISerializable
+from app.shared.types import OrderedEnum
 
 
-class PriorityEnum(enum.Enum):
+class PriorityEnum(OrderedEnum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
 
+# NOTE: Hacky, but lets us inherit OrderedEnum and define custom sort order
+PriorityEnum.sort_order = ["HIGH", "MEDIUM", "LOW"] # type: ignore[attr-defined]
 
 class Task(Base, CustomBaseTaskMixin, APISerializable):
 

@@ -2,6 +2,7 @@
 import enum
 from decimal import Decimal
 from datetime import datetime
+from typing import Self
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
@@ -9,7 +10,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app._infra.db_base import Base
 from app.shared.serialization import APISerializable
-
+from app.shared.types import OrderedEnum
 
 from app.modules.groceries.constants import (
        PRODUCT_NAME_MAX_LENGTH, BARCODE_MAX_LENGTH, 
@@ -46,6 +47,9 @@ class ProductCategoryEnum(enum.Enum):
     PROCESSED_CONVENIENCE = "PROCESSED_CONVENIENCE"
     SUPPLEMENTS = "SUPPLEMENTS"
 	
+    def __lt__(self, other: Self) -> bool:
+        return self.value < other.value
+
 
 class Product(Base, APISerializable):
     """Acts as a catalog of 'known' products and includes the more 'static' data about the product."""
@@ -120,6 +124,10 @@ class Transaction(Base, APISerializable):
     )
 
     product = relationship("Product")
+
+    @property
+    def product_name(self) -> str | None:
+        return self.product.name if self.product else None
 
     @property
     def price_per_100g(self) -> Decimal:

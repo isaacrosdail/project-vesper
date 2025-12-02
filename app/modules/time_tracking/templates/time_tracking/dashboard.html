@@ -26,7 +26,7 @@
         <button class="table-range" data-range="30">30d</button>
     {% endcall %}
 
-    {% call(item, headers) ui.responsive_table('Time Entries', entry_headers, entries, 'time_tracking', 'time_entries') %}
+    {% call(item, headers) ui.responsive_table('Time Entries', entry_headers, entries, 'time_tracking', 'time_entries', time_entries_sort, time_entries_order) %}
     <td class="{{ headers[0].priority }}">{{ item.date_label }}</td>
     <td class="{{ headers[1].priority }}">{{ item.category }}</td>
     <td class="{{ headers[2].priority }} _text-right">{{ item.time_window_label }}</td>

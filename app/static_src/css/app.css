@@ -79,6 +79,13 @@ h3 {
     }
 }
 
+/* TABLE HEADER SORTING CHEVRONS */
+th[data-order="asc"] svg {
+    transform: rotate(0deg);
+}
+th[data-order="asc"] svg {
+    transform: rotate(180deg);
+}
 
 /* ===================================
     PAGE-SPECIFIC: Groceries Dashboard
