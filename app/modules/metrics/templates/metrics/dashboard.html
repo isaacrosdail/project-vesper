@@ -38,7 +38,7 @@
         <button class="table-range" data-range="30">30d</button>
     {% endcall %}
 
-    {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'metrics', 'daily_entries') %}
+    {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'metrics', 'daily_entries', daily_entries_sort, daily_entries_order) %}
     <td class="{{ headers[0].priority}}">{{ item.entry_datetime_label }}</td>
     <td class="{{ headers[1].priority}}">{{ item.weight_label }}</td>
     <td class="{{ headers[2].priority}}">{{ item.steps_label }}</td>

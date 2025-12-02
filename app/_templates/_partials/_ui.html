@@ -25,13 +25,38 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 {# Responsive Tables #}
 
-{% macro responsive_table(caption, headers, items, module_name, subtype) %}
-<table id="{{ subtype }}-table" class="table-standard">
+{# Breadcrumbs on sortable headers
+    - Added sort_field key to COLUMN_CONFIG dicts in viewmodels
+    - For composite/"complex" columns (eg, time_window), we can specify sort_field since the col.key wouldn't work (time_window isn't a field in model obviously)
+    - sort_field and sort_order params: come from route's query params, passed to template, then back to this macro
+    - data-column: tells frontend what field name to send back in URL params when sorting
+    - data-order: tracks current sort direction for this column (asc/desc/""), used to toggle & style chevron
+    #}
+
+{% macro responsive_table(caption, headers, items, module_name, subtype, sort_field, sort_order) %}
+<table 
+    id="{{ subtype }}-table"
+    data-module="{{ module_name }}"
+    data-subtype="{{ subtype }}"
+    class="table-standard">
   <caption class="_sr-only">{{ caption }}</caption>
   <thead class="table-header">
     <tr>
       {% for col in headers %}
-        <th class="{{ col.priority }}">{{ col.label }}</th>
+        <th class="{{ col.priority }}"
+        {# Will use explicit sort_field if defined, otherwise fall back to col.key #}
+            data-column="{{ col.sort_field or col.key }}"
+            {% if sort_field == (col.sort_field or col.key) %}
+                data-order="{{ sort_order }}"
+            {% else %}
+                data-order=""
+            {% endif %}
+        >
+        <div class="_inline-flex-md">
+            {{ col.label }}
+            <button class="sort-header btn btn-icon">{{ chevron_svg() }}</button>
+        </div>
+        </th>
       {% endfor %}
     </tr>
   </thead>

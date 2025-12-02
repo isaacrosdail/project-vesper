@@ -85,7 +85,8 @@ class BasePresenter:
         """
         return [
             {
-                "key": col, 
+                "key": col,
+                "sort_field": cls.COLUMN_CONFIG[col].get("sort_field"), #NOTE: Optional, fall back to key in macro if sort_field isn't specified
                 "label": cls.COLUMN_CONFIG[col]["label"],
                 "priority": cls.COLUMN_CONFIG[col]["priority"]
             }
