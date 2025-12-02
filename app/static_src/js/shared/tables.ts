@@ -66,6 +66,25 @@ export async function inlineEditElement(element: HTMLElement): Promise<string|nu
     });
 }
 
+document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+
+    if (target.matches('.sort-header')) {
+        const table = target.closest('table');
+        const subtype = table?.dataset['subtype'];
+        const th = target.closest('th')!;
+        const field = th.dataset['column'];
+        const oldSortOrder = th.dataset['order'];
+
+        const sortOrder = (oldSortOrder === 'asc') ? 'desc' : 'asc';
+
+        const url = new URL(window.location.href);
+        url.searchParams.set(`${subtype}_sort`, `${field}`);
+        url.searchParams.set(`${subtype}_order`, sortOrder);
+        window.location.href = url.toString();
+    }
+});
+
 document.addEventListener('dblclick', async (e) => {
     if (!(e.target instanceof HTMLElement)) return;
 

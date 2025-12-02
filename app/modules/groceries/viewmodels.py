@@ -60,7 +60,7 @@ class ProductPresenter(BasePresenter):
         "name": {"label": "Product Name", "priority": "essential"},
         "category": {"label": "Category", "priority": "desktop-only"},
         "barcode": {"label": "Barcode", "priority": "desktop-only"},
-        "net_weight_display": {"label": "Net Weight", "priority": "desktop-only"},
+        "net_weight_display": {"label": "Net Weight", "priority": "desktop-only", "sort_field": "net_weight"},
         "unit_type": {"label": "Unit", "priority": "desktop-only"},
         "calories_per_100g": {"label": "Cals (100g)", "priority": "essential"},
         "created_at": {"label": "Created", "priority": "desktop-only"}
