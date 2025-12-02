@@ -18,8 +18,8 @@ class TimeEntryPresenter(BasePresenter):
         "id": {"label": "ID", "priority": "desktop-only"},
         "category": {"label": "Category", "priority": "essential"},
         "description": {"label": "Description", "priority": "essential"},
-        "time_window": {"label": "Time Window (Duration)", "priority": "essential"},
-        "date": {"label": "Date", "priority": "essential"}
+        "time_window": {"label": "Time Window (Duration)", "priority": "essential", "sort_field": "started_at"},
+        "date": {"label": "Date", "priority": "essential", "sort_field": "started_at"}
     }
 
 

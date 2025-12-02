@@ -3,7 +3,7 @@ Model definitions for Habits module.
 """
 import enum
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 
 from sqlalchemy import CheckConstraint, DateTime
 from sqlalchemy import Enum as SAEnum
@@ -17,27 +17,38 @@ from app.modules.habits.constants import (HABIT_NAME_MAX_LENGTH,
                                           PROMOTION_THRESHOLD_MIN)
 from app.shared.models import Tag, habit_tags
 from app.shared.serialization import APISerializable
+from app.shared.types import OrderedEnum
 
 
-class StatusEnum(enum.Enum):
+class StatusEnum(OrderedEnum):
     EXPERIMENTAL = "EXPERIMENTAL"
     ESTABLISHED = "ESTABLISHED"
 
-class LCStatusEnum(enum.Enum):
+StatusEnum.sort_order = ["ESTABLISHED", "EXPERIMENTAL"] # type: ignore[attr-defined]
+
+class LCStatusEnum(OrderedEnum):
     SOLVED = "SOLVED"
     ATTEMPTED = "ATTEMPTED"
     REVIEWED = "REVIEWED"
 
-class DifficultyEnum(enum.Enum):
+LCStatusEnum.sort_order = ["SOLVED", "ATTEMPTED", "REVIEWED"] # type: ignore[attr-defined]
+
+class DifficultyEnum(OrderedEnum):
     EASY = "EASY"
     MEDIUM = "MEDIUM"
     HARD = "HARD"
+
+DifficultyEnum.sort_order = ["HARD", "MEDIUM", "EASY"] # type: ignore[attr-defined]
 
 class LanguageEnum(enum.Enum):
     PYTHON = "PYTHON"
     JS = "JS"
     CPP = "CPP"
     C = "C"
+
+    def __lt__(self, other: Self) -> bool:
+        return self.value < other.value
+
 
 class Habit(Base, APISerializable):
 
