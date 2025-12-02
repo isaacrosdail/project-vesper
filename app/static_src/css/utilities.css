@@ -15,12 +15,12 @@
     grid-template-columns: 1fr 1fr;
 }
 ._inline-flex-sm {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: var(--gap-sm);
 }
 ._inline-flex-md {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: var(--gap-md);
 }
