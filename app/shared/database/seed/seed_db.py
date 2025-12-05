@@ -33,7 +33,7 @@ def seed_demo_data(session: Session, user_id: int) -> None:
     health_tag = Tag(name="health", user_id=user_id)
     work_tag = Tag(name="work", user_id=user_id)
     
-    # Tasks - show different statuses and priorities
+    # Tasks, show different statuses and priorities
     task1 = Task(
         name="Review job applications",
         priority=PriorityEnum.HIGH,
@@ -59,26 +59,28 @@ def seed_demo_data(session: Session, user_id: int) -> None:
     )
     task3.tags.append(health_tag)
     
-    # Habits - create a few with some completion history
+    # Habits, with varying completion history
     habit1 = Habit(
         name="Daily coding practice",
-        user_id=user_id
+        user_id=user_id,
+        target_frequency=4,
     )
     habit1.tags.append(work_tag)
     
     habit2 = Habit(
         name="Exercise",
-        user_id=user_id
+        user_id=user_id,
+        target_frequency=4,
     )
     habit2.tags.append(health_tag)
     
     habit3 = Habit(
         name="Read documentation",
-        user_id=user_id
+        user_id=user_id,
+        target_frequency=4,
     )
     habit3.tags.append(demo_tag)
-    
-    # Add some completions for the habits (last few days)
+
     for i in range(3):
         completion = HabitCompletion(
             habit=habit1,
@@ -86,8 +88,9 @@ def seed_demo_data(session: Session, user_id: int) -> None:
             created_at=now - timedelta(days=i)
         )
         session.add(completion)
-    
-    # Time tracking entries - show variety of activities
+
+
+    # Time entries
     time1 = TimeEntry(
         category="Coding",
         description="Built new feature for task module",
@@ -115,8 +118,9 @@ def seed_demo_data(session: Session, user_id: int) -> None:
         user_id=user_id
     )
     
-    # Metrics - a couple recent entries
+    # Metrics
     metric1 = DailyEntry(
+        entry_datetime=datetime(2025, 11, 23),
         weight=70.5,
         steps=8500,
         calories=2100,
@@ -127,6 +131,7 @@ def seed_demo_data(session: Session, user_id: int) -> None:
     )
     
     metric2 = DailyEntry(
+        entry_datetime=datetime(2025, 11, 23),
         weight=70.3,
         steps=10200,
         calories=2050,
