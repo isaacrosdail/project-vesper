@@ -93,13 +93,11 @@
         <button class="btn btn-destructive" type="submit">Log out</button>
     </form>
 
-    {% if has_dev_tools %}
+    {% if g.has_dev_tools %}
     <h3>Dev Tools</h3>
     <div class="_stack-md">
-        {% if config.APP_ENV == 'dev' %}
-            <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
-            <a class="btn btn-secondary" href="{{ url_for('devtools.show_routes')}}">Show Routes</a>
-        {% endif %}
+        <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
+        <a class="btn btn-secondary" href="{{ url_for('devtools.show_routes')}}">Show Routes</a>
         <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
         <form action="{{ url_for('auth.reset_dev') }}" method="POST" data-noajax>
             <button class="btn btn-destructive" type="submit">Reset Dev</button>
