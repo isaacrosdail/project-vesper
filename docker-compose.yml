@@ -1,18 +1,17 @@
-# Just Postgres for local dev
+# PostgreSQL only, for local dev
+
 services:
   db:
     image: postgres:17.4
     container_name: vesper-db-dev
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
     volumes:
       # Separate dev data
       - pgdata-dev:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 10s
@@ -27,4 +26,4 @@ services:
 
 volumes:
   pgdata-dev:
-    name: vesper-pgdata-dev # Separate from prod/pi data
+    name: vesper-pgdata-dev
