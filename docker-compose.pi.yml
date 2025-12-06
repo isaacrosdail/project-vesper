@@ -1,26 +1,19 @@
 # Docker Compose for Pi deployment
 services:
+  # Postgres container
   db:
-    build:
-      context: . # why the period here?
-      dockerfile: Dockerfile.postgres
+    image: postgres:17.4
     container_name: vesper-db-pi
-    # Keep DB internal => don't publish 5432 to host
     expose:
       - "5432"
     env_file:
       - pi.env
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
     volumes:
-      # Change volume endings for clarity
       - pgdata-pi:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro # :ro is read-only, which is good practice for init scripts
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h 127.0.0.1"]
-      interval: 45s  # Pi is slower, give time to spin up
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1"]
+      interval: 15s
       timeout: 8s
       retries: 4
     restart: always
@@ -30,29 +23,19 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Service for Flask app
-  web:
+  # Flask app
+  flask:
     build:
-      context: . # Use repo root as build context
-      dockerfile: Dockerfile.pi # Separate Dockerfile to avoid user add for dev deploy
-    container_name: vesper-web-pi
+      context: .
+      dockerfile: Dockerfile.pi # Separate Dockerfile to avoid adding user like in dev deployment
+    container_name: vesper-flask-pi
     depends_on:
       - db
     env_file:
       - pi.env
-    environment:
-      APP_ENV: dev
-      DATABASE_URI: ${DATABASE_URI}
-      SECRET_KEY: ${SECRET_KEY}
-      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
     ports:
-      # 5000:5000 binds to 0.0.0.0 by default
-      - "5000:5000" # accessible from network
-    
-    # Bind mounting a file from the host filesystem into the container
-    # Not COPY: Here, file lives on host, but direct conn is created to appear in container
-    volumes:
-      - ${SEED_PATH}:/app/app/seed_dev_db.py
+      - "5000:5000" # binds to 0.0.0.0 by default, accessible from LAN
+
     healthcheck:
       test: ["CMD", "curl", "-fsS", "-m", "2", "http://localhost:5000/health"]
       interval: 30s
