@@ -4,7 +4,7 @@ import secrets
 import sys
 from typing import Any
 
-from flask import Flask, g
+from flask import Flask, g, current_app
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -20,10 +20,13 @@ from app.shared.debug import setup_logging, setup_request_debugging
 
 
 def has_dev_tools() -> bool:
-    # Before login: current_user.is_authenticated is False, re-evals upon login?
+    """Dev tools visible to anyone in dev, owner-only in prod."""
+    if current_app.config['APP_ENV'] == 'dev':
+        return True
+
     return bool(
-        getattr(current_user, "is_authenticated", False)
-        and getattr(current_user, "is_owner", False)
+        current_user.is_authenticated
+        and current_user.is_owner
     )
 
 # Global cache instance? Docs unclear
