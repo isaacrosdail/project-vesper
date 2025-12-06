@@ -63,7 +63,7 @@ class AuthService:
 
 
     def get_or_create_template_user(self, user_type: str, seed_data: bool = True) -> Any:
-        """Find existing user template or create one."""
+        """Find existing user template or create one, then seed data accordingly."""
         user_configs: dict[str, Any] = {
             "demo": {
                 "username": "guest",

@@ -1,4 +1,4 @@
-# Remember: This isn't just Python - it's Debian Linux with Python pre-installed
+
 FROM python:3.12-slim
 WORKDIR /app
 
@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y curl && \
     apt-get install -y nodejs
 
 
-# Install Python dependencies
+# Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy everything from the current dir to /app in the container
-# Install Node dependencies and build CSS
+# Node dependencies & run esbuild
 COPY package*.json ./
 RUN npm install
 COPY . .
