@@ -10,38 +10,19 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: Pi1
-            port: 2222
-            username: isaac_1
-            key: PI5_SSH_KEY
-          - name: Pi2
-            port: 2223
-            username: isaac_2
-            key: PI_SSH_KEY
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Deploy to Pi
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.PI_HOST }}
+        port: ${{ secrets.PI_PORT }}
+        username: ${{ secrets.PI_USERNAME }}
+        key: ${{ secrets.PI_KEY }}
 
-      - name: Deploy to ${{ matrix.name }}
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PI_HOST }}
-          port: ${{ matrix.port }}
-          username: ${{ matrix.username }}
-          key: ${{ secrets[matrix.key] }}
-          script: |
-            cd ~/project-vesper
+        script: |
+          cd ~/project-vesper
 
-            # Set the dynamic seed path based on current user
-            # This way, we can mount the same local-only file from either Pi!
-            export SEED_PATH="/home/${{ matrix.username }}/private-seeds/seed_dev_db.py"
-
-            echo "SEED_PATH is set to: $SEED_PATH"
-            ls -la "$SEED_PATH" # check if file exists
-            
-            git pull origin dev
-            docker compose -f docker-compose.pi.yml down
-            docker compose -f docker-compose.pi.yml up -d --build
+          git pull origin dev
+          docker compose -f docker-compose.pi.yml down
+          docker compose -f docker-compose.pi.yml up -d --build
