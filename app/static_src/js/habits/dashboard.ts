@@ -32,6 +32,7 @@ const _title = svg.append("text")
     .attr("x", innerWidth/2)
     .attr("y", margin.top/2)
     .attr("font-size", "var(--font-size-l)")
+    .attr("fill", "var(--text)")
     .text("Completions by Habit")
 
 const gXAxis = gRoot.append("g")
