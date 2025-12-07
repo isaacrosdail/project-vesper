@@ -56,7 +56,7 @@ const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 async function refreshPieChart() {
     const data = await getData(chartState.range);
-    console.log(data)
+    console.table(data)
 
     if (data.length === 0) {
         showEmptyChart();

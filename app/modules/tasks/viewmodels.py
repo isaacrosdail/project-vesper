@@ -9,7 +9,7 @@ from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class TaskPresenter(BasePresenter):
     VISIBLE_COLUMNS = [
-        "name", "is_done", "priority", "due_date"
+        "name", "priority", "due_date"
     ]
     COLUMN_CONFIG = {
         "id": {"label": "Task ID", "priority": "desktop-only"},
@@ -41,9 +41,3 @@ class TaskViewModel(TimestampedViewMixin):
     @property
     def due_label(self) -> str:
         return self.format_due_label()
-    
-    @property
-    def completed_label(self) -> str:
-        if not self.is_done:
-            return "Not completed"
-        return f"Completed {self.format_dt(self.completed_at, '%b %d, %I:%M %p')}"

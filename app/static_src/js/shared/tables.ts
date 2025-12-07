@@ -4,18 +4,18 @@ import { apiRequest } from './services/api.js';
 
 
 /**
- * Remove table row
- * @param {string} itemId - Item ID by which to query for row
- * @returns {void}
+ * Remove a table row from the DOM and insert placeholder text if table becomes empty.
+ * 
+ * @param itemId - Item ID used to query for the row via [data-item-id] attribute
  */
-export function removeTableRow(itemId: string) {
+export function removeTableRow(itemId: string): void {
     const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
     if (!itemRow) return;
 
     const tableBody = itemRow.closest('tbody');
     itemRow.remove();
 
-    // Insert "No items yet" placeholder text for table if removing last itemRow
+    // Insert "No items yet" placeholder if removing last itemRow
     if (tableBody && tableBody.children.length === 0) {
         const emptyRow = document.createElement('tr');
         const emptyCell = document.createElement('td');
@@ -28,17 +28,15 @@ export function removeTableRow(itemId: string) {
 }
 
 /** 
- * Enables inline editing of a DOM element's text content via temporary input field.
- * On blur or Enter key, input it replaced with text content.
- * Returns the new value if it was changed, or null if unchanged.
+ * Convert a text element into an inline-editable input field temporarily.
+ * User can edit & save via Enter key or blur event.
  * 
- * @param {HTMLElement} element - Target element to enable inline editing for.
- * @returns {Promise<string|null>} Resolves with the updated value, or null if unchanged.
+ * @param element - Target element containing text to edit (eg, <td>, <span>)
+ * @returns Promise resolving to new value if changed, null if unchanged or undefined
  */
 export async function inlineEditElement(element: HTMLElement): Promise<string|null> {
-    const originalText = element.textContent?.trim() ?? ''; // Fallback to '' using nullish coalescing to avoid undefined
+    const originalText = element.textContent?.trim() ?? '';
 
-    // Create input element with similar size to current text
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'input-inline';
@@ -66,6 +64,10 @@ export async function inlineEditElement(element: HTMLElement): Promise<string|nu
     });
 }
 
+/**
+ * Handle table header clicks for column sorting.
+ * Updates URL parameters & reloads page with new sort order.
+ */
 document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
 
@@ -85,20 +87,44 @@ document.addEventListener('click', (e) => {
     }
 });
 
+/**
+ * Handle double-click on elements with .editable-cell class
+ * 
+ * Requires data attributes on parent <td>:
+ * - data-module: Resource module (eg, groceries)
+ * - data-subtype: Resource type (eg, products, transactions, etc)
+ * - data-item-id: Item/resource identifier
+ * - data-field: Field name to update
+ */
 document.addEventListener('dblclick', async (e) => {
     if (!(e.target instanceof HTMLElement)) return;
 
     if (e.target.classList.contains('editable-cell')) {
-        const td = e.target;
-        const newValue = await inlineEditElement(td);
-        if (newValue) {
-            const { module, field, itemId, subtype } = td.dataset;
-            if (!module || !field || !itemId || !subtype) return;
-            const url = `/${module}/${subtype}/${itemId}`;
-
-            apiRequest('PATCH', url, (responseData: { message: string }) => {
-                makeToast(responseData.message, 'success');
-            }, { [field]: newValue });
+        let td: HTMLTableCellElement;
+        if (e.target instanceof HTMLTableCellElement) {
+            td = e.target;
+        } else { //(e.target instanceof HTMLSpanElement)
+            const foundTd = e.target.closest('td');
+            if (!foundTd) {
+                console.error('editable-cell must be a <td> or inside a <td>');
+                return;
+            }
+            td = foundTd as HTMLTableCellElement;
         }
+
+        const newValue = await inlineEditElement(e.target);
+        if (!newValue) return;
+
+        const { module, field, itemId, subtype } = td.dataset;
+        if (!module || !field || !itemId || !subtype) {
+            console.error('Missing data attribute');
+            return;
+        }
+        const url = `/${module}/${subtype}/${itemId}`;
+
+        apiRequest('PATCH', url, (responseData: { message: string }) => {
+            makeToast(responseData.message, 'success');
+        }, { [field]: newValue });
+    
     }
 });
