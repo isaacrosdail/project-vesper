@@ -5,24 +5,26 @@ import { formatDecimal } from '../numbers.js';
 import { removeTableRow } from '../tables.js';
 import { confirmationManager } from './modal-manager.js';
 import { FormDialog } from '../../types';
+import { getJSInstant } from '../datetime.js';
 
 
-type MenuOptionTypes = 'products' | 'transactions';
+type MenuOptionTypes = 'products' | 'transactions' | 'tasks';
 
 type MenuItem = {
     text: string;
     action: string;
 }
 
-type ActionType = 'edit' | 'delete' | 'addToShoppingList';
+type ActionType = 'edit' | 'delete' | 'addToShoppingList' | 'toggleTaskComplete';
 
-const MENU_CONFIG: Record<'default' | 'products' | 'transactions', MenuItem[]> = {
+const MENU_CONFIG: Record<'default' | 'products' | 'transactions' | 'tasks', MenuItem[]> = {
     default: [
         {text: 'Edit', action: 'edit'},
         {text: 'Delete', action: 'delete'}
     ],
     products: [{text: 'Add to shopping list', action: 'addToShoppingList'}],
-    transactions: [{text: 'Add to shopping list', action: 'addToShoppingList'}]
+    transactions: [{text: 'Add to shopping list', action: 'addToShoppingList'}],
+    tasks: [{text: 'Toggle complete', action: 'toggleTaskComplete'}]
 }
 
 // Disciminated union for triggerInfo object:
@@ -32,6 +34,7 @@ type ContextObject = {
         name: string | null;
         module: string;
         subtype: MenuOptionTypes;
+        isDone?: boolean;
     }
 }
 type ContextMenuTrigger = ContextObject & {
@@ -141,7 +144,7 @@ function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>
 function handleEdit(menuContext: ContextObject['context']) {
     const { itemId, module, subtype } = menuContext;
 
-    const modal = document.querySelector<FormDialog>(`#${subtype}-entry-dashboard-modal`); // NOTE: Consider expanding macro naming usage further
+    const modal = document.querySelector<FormDialog>(`#${subtype}-entry-dashboard-modal`);
     if (!modal) {
         throw new Error(`Modal not found: ${subtype}-entry-dashboard-modal`);
     }
@@ -194,6 +197,32 @@ function handleAddToShoppingList(menuContext: ContextObject['context']) {
     }, data);
 }
 
+function toggleTaskComplete(menuContext: ContextObject['context']) {
+    const newIsDone = !menuContext.isDone;
+    const completedAtUTC = getJSInstant();
+
+    const data = {
+        is_done: newIsDone,
+        completed_at: completedAtUTC
+    }
+    const url = `/tasks/tasks/${menuContext.itemId}`;
+
+    apiRequest('PATCH', url, () => {
+        const row = document.querySelector<HTMLElement>(`[data-item-id="${menuContext.itemId}"]`);
+        if (!row) return;
+        const statusSpan = row.querySelector('.status-span');
+
+        if (newIsDone) {
+            row.dataset['isDone'] = 'True';
+        } else {
+            delete row.dataset['isDone'];
+        }
+        if (statusSpan) {
+            statusSpan.classList.toggle('is-done');
+        }
+    }, data);
+}
+
 document.addEventListener('contextmenu', (e) => {
     if (e.ctrlKey) {
         const target = e.target as HTMLElement;
@@ -204,6 +233,7 @@ document.addEventListener('contextmenu', (e) => {
         }
         const { itemId, module, subtype } = row.dataset;
         const name = row?.querySelector('td:nth-child(2)')?.textContent ?? null;
+        const is_done = row?.dataset['isDone'];
 
         if (!itemId || !module || !subtype) {
             console.error('Missing required dataset attributes');
@@ -220,7 +250,8 @@ document.addEventListener('contextmenu', (e) => {
                 itemId,
                 name,
                 module,
-                subtype: subtype as MenuOptionTypes
+                subtype: subtype as MenuOptionTypes,
+                isDone: row?.dataset['isDone'] === 'True'
             }
         };
 
@@ -245,11 +276,12 @@ document.addEventListener('click', async (e) => {
 
     const action = target.dataset['action'] as ActionType | undefined;
 
-    // This is just an object where keys are strings (duh), and values are function references (not calling them, just storing them)
+    // This is just an object where keys are strings and values are function references (not calling them, just storing them)
     const actionHandlers: Record<ActionType, (context: ContextObject['context']) => void> = {
         'edit': handleEdit,
         'delete': handleDelete,
-        'addToShoppingList': handleAddToShoppingList
+        'addToShoppingList': handleAddToShoppingList,
+        'toggleTaskComplete': toggleTaskComplete
     }
 
     // With guard, call appropriate action & pass in menu.context
@@ -261,7 +293,6 @@ document.addEventListener('click', async (e) => {
 
     // TODO: Refine/rename
     if (target.matches('.dots-btn')) {
-        // const target = e.target as HTMLButtonElement;
         const button = target.closest('.row-actions')!; // non-assert for now!
         const row = target.closest<HTMLElement>('.table-row')!; // non-assert for now!
         const { itemId, module, subtype } = row.dataset;
@@ -280,7 +311,8 @@ document.addEventListener('click', async (e) => {
                 itemId,
                 name,
                 module,
-                subtype: subtype as MenuOptionTypes
+                subtype: subtype as MenuOptionTypes,
+                isDone: row?.dataset['isDone'] === 'True'
             }
         };
 
