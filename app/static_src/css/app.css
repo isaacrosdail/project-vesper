@@ -88,6 +88,17 @@ th[data-order="asc"] svg {
 }
 
 /* ===================================
+    PAGE-SPECIFIC: Tasks Dashboard
+   ===================================*/
+.status-span > svg {
+    display: none;
+}
+.status-span.is-done > svg {
+    display: block;
+    stroke: var(--clr-success);
+}
+
+/* ===================================
     PAGE-SPECIFIC: Groceries Dashboard
    ===================================*/
 /* Position our "x" button "outside"/"to the side of" the inline content */

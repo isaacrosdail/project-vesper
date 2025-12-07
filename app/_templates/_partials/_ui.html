@@ -63,7 +63,8 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
   <tbody>
     {% if items %}
       {% for item in items %}
-        <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ subtype }}">
+        <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ subtype }}"
+            {% if item.is_done %}data-is-done="{{ item.is_done }}"{% endif %}>
           {{ caller(item, headers) }}
           <td class="table-cell delete-cell">
             <button class="row-actions dots-btn btn-icon btn-square" data-item-id="{{ item.id }}">
@@ -259,5 +260,11 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {% macro options_ellipsis() %}
 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
   <path d="M7 12a3 3 0 10-6 0 3 3 0 106 0m8 0a3 3 0 10-6 0 3 3 0 106 0m8 0a3 3 0 10-6 0 3 3 0 106 0" />
+</svg>
+{% endmacro %}
+
+{% macro checkmark_svg() %}
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
 </svg>
 {% endmacro %}
