@@ -24,6 +24,7 @@
  * 300-399 - Modals, backdrop overlays
  * 400-499 - Toasts, system-level UI (spinners?)
  * 500+    - Debug layer, devtools, etc.
+ * 999     - Confetti / joyous celebration effects
 */
 
 :root {
@@ -285,13 +286,16 @@ svg {
     animation: surge 1.5s ease-in-out infinite;
 }
 
+/* NOTE: confetti-layer is a z-index/overflow container only.
+ * Particle positions are calculated via JS getBoundingClientRect(), not relative to this element's position.
+ */
 #confetti-layer {
     position: fixed;
     pointer-events: none;
     top: 0; left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 50;
+    z-index: 999;
     overflow: visible;
 }
 .dot {
@@ -303,7 +307,6 @@ svg {
     width: var(--confetti-size-base);
     transform: translate(-50%, -50%);
     offset-rotate: 0deg;
-    /* offset-path: path('M 0 0 Q 40 -150 80 -120'); Quad Bezier */
 }
 /* Sprucing our confetti up with some shapes */
 .star {
