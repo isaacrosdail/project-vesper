@@ -70,6 +70,7 @@ class GroceriesService:
             transaction = existing_transaction
         else:
             transaction = self.repo.create_transaction(product, **typed_data)
+            self.repo.session.flush()
 
         return service_response(True, "Transaction added", data={"transaction": transaction})
 

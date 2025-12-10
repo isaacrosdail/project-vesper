@@ -31,7 +31,6 @@ const MENU_CONFIG: Record<'default' | 'products' | 'transactions' | 'tasks', Men
 type ContextObject = {
     context: {
         itemId: string;
-        name: string | null;
         module: string;
         subtype: MenuOptionTypes;
         isDone?: boolean;
@@ -50,12 +49,15 @@ type DotsMenuTrigger = ContextObject & {
 type TriggerInfo = ContextMenuTrigger | DotsMenuTrigger;
 
 /**
+ * Creates & displays a context menu at the specified position.
+ * Removes any existing menu first to ensure clean slate.
+ * Menu items are built from MENU_CONFIG based on the subtype
+ * Note: Removes .context-menu's at start
  * 
- * @param {object} triggerInfo - Object containing relevant positioning + data context needed, bound to menu itself before finishing
- * @returns 
+ * @param {object} triggerInfo Contains positioning (x/y OR rect) and context data (itemId, module, subtype)
  */
 function openMenu(triggerInfo: TriggerInfo) {
-    document.querySelector('.context-menu')?.remove(); // Always remove any menus before opening a new one to ensure clean slate
+    document.querySelector('.context-menu')?.remove();
 
     const menu = document.createElement('ul');
     menu.classList.add(`context-menu`);
@@ -93,10 +95,15 @@ function openMenu(triggerInfo: TriggerInfo) {
 
     document.body.appendChild(menu);
 }
-// Use Object.entries(..) to take the responseData object and make it iterable
-// Then forEach to loop through each entry, using [fieldName, fieldValue] here to
-// destructure each entry into its key-value parts
-// Inside the loop body (predicate?) we can select the current input since the IDs align with the to_dict key names
+
+/**
+ * Populates form modal fields with data from API response.
+ * Matches field names to input element IDs and handles type-specific formatting
+ * (dates, times, checkboxes, selects, etc)
+ * 
+ * @remarks
+ * Relies on backend field names aligning with frontend input IDs.
+ */
 function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>) {
     Object.entries(data).forEach(([fieldName, fieldValue]) => {
         const input = modal.querySelector<HTMLInputElement>(`#${fieldName}`);
@@ -141,6 +148,12 @@ function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>
     });
 }
 
+/**
+ * Opens form modal dialog and populates fields with data fetched from API.
+ * Sets dialog's `data-mode="edit"` which directs form submission to PATCH.
+ * 
+ * @param menuContext Expects itemId, module, & subtype to construct API URL
+ */
 function handleEdit(menuContext: ContextObject['context']) {
     const { itemId, module, subtype } = menuContext;
 
@@ -161,6 +174,10 @@ function handleEdit(menuContext: ContextObject['context']) {
     })
 }
 
+/**
+ * Prompts for confirmation, then deletes the item via API.
+ * Removes the table row from DOM on success.
+ */
 async function handleDelete(menuContext: ContextObject['context']) {
     const confirmed = await confirmationManager.show("Are you sure you want to delete this item?");
     if (!confirmed) return;
@@ -168,21 +185,18 @@ async function handleDelete(menuContext: ContextObject['context']) {
     const { itemId, module, subtype } = menuContext;
     const url = `/${module}/${subtype}/${itemId}`;
 
-    apiRequest('DELETE', url, (responseData) => {
-        console.log(responseData.data);
+    apiRequest('DELETE', url, () => {
+        makeToast('Item deleted', 'success');
         removeTableRow(itemId);
     });
 }
 
+/**
+ * Adds product to shopping list or increments quantity if already present.
+ */
 function handleAddToShoppingList(menuContext: ContextObject['context']) {
-    const { itemId, name: productName } = menuContext;
+    const { itemId } = menuContext;
     const quantityWanted = 1;
-
-    if (!productName) {
-        console.error('Product name required for shopping list');
-        return;
-    }
-
     const url = '/groceries/shopping-lists/items';
     const data = { product_id: itemId, quantity_wanted: quantityWanted };
 
@@ -190,10 +204,12 @@ function handleAddToShoppingList(menuContext: ContextObject['context']) {
         const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${itemId}"]`);
         if (existingLi) {
             const newQty = updateQty(existingLi);
-            makeToast(`Updated ${productName} quantity to ${newQty}`, 'success');
+            makeToast(`Updated ${responseData.data.product_name} quantity to ${newQty}`, 'success');
             return;
         }
-        addShoppingListItemToDOM(responseData.data.item_id, responseData.data.product_id, productName);
+
+        makeToast(`Added ${responseData.data.product_name} to shopping list`, 'success')
+        addShoppingListItemToDOM(responseData.data.item_id, responseData.data.product_id, responseData.data.product_name);
     }, data);
 }
 
@@ -220,6 +236,7 @@ function toggleTaskComplete(menuContext: ContextObject['context']) {
         if (statusSpan) {
             statusSpan.classList.toggle('is-done');
         }
+        makeToast('Task status updated', 'success')
     }, data);
 }
 
@@ -232,8 +249,6 @@ document.addEventListener('contextmenu', (e) => {
             return;
         }
         const { itemId, module, subtype } = row.dataset;
-        const name = row?.querySelector('td:nth-child(2)')?.textContent ?? null;
-        const is_done = row?.dataset['isDone'];
 
         if (!itemId || !module || !subtype) {
             console.error('Missing required dataset attributes');
@@ -248,7 +263,6 @@ document.addEventListener('contextmenu', (e) => {
             y: e.clientY,
             context: {
                 itemId,
-                name,
                 module,
                 subtype: subtype as MenuOptionTypes,
                 isDone: row?.dataset['isDone'] === 'True'
@@ -296,9 +310,9 @@ document.addEventListener('click', async (e) => {
         const button = target.closest('.row-actions')!; // non-assert for now!
         const row = target.closest<HTMLElement>('.table-row')!; // non-assert for now!
         const { itemId, module, subtype } = row.dataset;
-        const name = row.querySelector('td:nth-child(2)')?.textContent;
 
-        if (!itemId || !module || !subtype || !name) {
+        console.log(`itemId: ${itemId}, module: ${module}, subtype: ${subtype}`)
+        if (!itemId || !module || !subtype) {
             console.error('Missing required data on row');
             return;
         }
@@ -309,7 +323,6 @@ document.addEventListener('click', async (e) => {
             rect: button.getBoundingClientRect(),
             context: {
                 itemId,
-                name,
                 module,
                 subtype: subtype as MenuOptionTypes,
                 isDone: row?.dataset['isDone'] === 'True'
