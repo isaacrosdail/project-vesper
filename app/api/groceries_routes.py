@@ -79,7 +79,6 @@ def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
     if transaction_errors:
         return validation_failed(transaction_errors), 400
 
-    # 2. Call service to create transaction
     result = groceries_service.save_transaction(product_id, typed_transaction_data, transaction_id) # None -> POST, else PUT
     
     transaction = result["data"]["transaction"]
@@ -105,6 +104,6 @@ def add_shoppinglist_item(session: 'Session') -> Any:
 
     return api_response(
         True,
-        "Added item to shopping list",
+        f"Updated shopping list",
         data = item.to_api_dict()
     ), 201

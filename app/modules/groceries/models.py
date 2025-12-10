@@ -2,7 +2,7 @@
 import enum
 from decimal import Decimal
 from datetime import datetime
-from typing import Self
+from typing import Self, Any
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
@@ -103,6 +103,13 @@ class Product(Base, APISerializable):
 class Transaction(Base, APISerializable):
     """Acts as 'instance of buying a given item'."""
 
+    __api_exclude__: list[str] = []
+
+    def to_api_dict(self) -> Any:
+        result = super().to_api_dict()
+        result["product_name"] = self.product.name
+        return result
+
     __table_args__ = (
         CheckConstraint('price_at_scan >= 0', name='ck_transaction_price_non_negative'),
         CheckConstraint('quantity > 0', name='ck_transaction_quantity_positive'),
@@ -152,9 +159,19 @@ class ShoppingList(Base, APISerializable):
 
     items = relationship("ShoppingListItem", back_populates="shopping_list")
 
+    def __repr__(self) -> str:
+        return f"<ShoppingList id={self.id} name={self.name} items_count={len(self.items)}>"
+
 
 class ShoppingListItem(Base, APISerializable):
     """Items in the list. Effectively acts as a pointer to the actual product item itself."""
+
+    __api_exclude__: list[str] = []
+
+    def to_api_dict(self) -> Any:
+        result = super().to_api_dict()
+        result["product_name"] = self.product.name
+        return result
 
     __table_args__ = (
         CheckConstraint('quantity_wanted > 0', name='ck_shopping_quantity_wanted_positive'),
@@ -179,3 +196,6 @@ class ShoppingListItem(Base, APISerializable):
 
     shopping_list = relationship("ShoppingList", back_populates="items")
     product = relationship("Product")
+
+    def __repr__(self) -> str:
+        return f"<ShoppingListItem id={self.id} product={self.product.name!r} qty={self.quantity_wanted}>"
