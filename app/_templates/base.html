@@ -19,6 +19,8 @@
                 document.documentElement.setAttribute('data-theme', 'light');
             } else if (cookie.includes('theme=dark')) {
                 document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'system');
             }
         })();
     </script>

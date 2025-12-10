@@ -1,5 +1,11 @@
-// Runs on DOMContentLoaded, syncs cookie + <select>, applies theme
-import { between } from '../strings.js';
+/**
+ * Theme toggle handling.
+ * 
+ * Setup:
+ * - Inline script in base.html sets initial data-theme from cookie (prevents flash)
+ * - This file syncs the <select> dropdown to cookie on load
+ * - Change listener handles user interactions (updates cookie & data-theme)
+ */
 
 const themeMap = {
     sun: 'light',
@@ -12,39 +18,49 @@ const reverseThemeMap = {
     system: 'laptop'
 }
 
-function getCookie() {
-    const themeSelect = document.querySelector('#theme') as HTMLSelectElement;
-    if (!themeSelect) return;
+/**
+ * Returns value of a cookie by key name.
+ * 
+ * @param name - Cookie name to search for
+ * @returns Cookie value or null if not found
+ */
+function getCookie(name: string): string | null {
+    const cookies = document.cookie.split('; ');
+    const targetCookie = cookies.find(x => x.startsWith(`${name}=`));
+    if (!targetCookie) return null;
 
-    const cookie = document.cookie;
-    // const themeValue = between(cookie, "=", ";") as 'light' | 'dark' | 'system';
-
-    // themeSelect.value = reverseThemeMap[themeValue] ?? "laptop";
-    // vs.
-    const themeValue = between(cookie, "=", ";");
-
-    // 'as keyof typeof reverseThemeMap' part tells TypeScript "this string is definitely one of those three keys."
-    themeSelect.value = reverseThemeMap[themeValue as keyof typeof reverseThemeMap] ?? "laptop";
+    const [key, value] = targetCookie.split('=');
+    return value
 }
 
-
-function setCookie() {
-    const themeSelect = document.querySelector('#theme') as HTMLSelectElement;
-    if (!themeSelect) return;
-
-    const themeSetting = themeSelect.value;
-    const cookieVal = themeMap[themeSetting as keyof typeof themeMap] ?? "system";
-
-    document.cookie = `theme=${cookieVal}; path=/; max-age=31536000`;
+/**
+ * Writes a cookie with configurable expiration.
+ * @param name - Cookie name
+ * @param value - Value to store
+ * @param maxAge - Expiration in seconds (default: 1 year)
+ * @example setCookie('theme', 'dark')
+ */
+function setCookie(name: string, value: string, maxAge: number = 31536000): void {
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`;
 }
 
-function applyThemeFromCookie() {
-    document.querySelector('#theme')!.dispatchEvent(new Event('change'));
-}
-
-// Might need to make this more defensive (if element doesn't exist?)
+/**
+ * Initializes theme system on page load.
+ * 
+ * Attaches change listener to sync cookie + apply theme
+ * Syncs dropdown to saved cookie value (falls back to 'system')
+ * Triggers change to ensure cookie is written on first visit.
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    getCookie();            // Sync UI to the cookie
-    applyThemeFromCookie(); // Apply the theme based on the value
-    document.querySelector('#theme')!.addEventListener('change', setCookie); // runs every time user picks new theme option
+    const themeSelect = document.querySelector<HTMLSelectElement>('#theme')!;
+
+    themeSelect.addEventListener('change', () => {
+        const cookieValue = themeMap[themeSelect.value];
+        setCookie('theme', cookieValue);
+        document.documentElement.dataset['theme'] = cookieValue;
+    });
+
+    const savedTheme = getCookie('theme') ?? 'system';
+    themeSelect.value = reverseThemeMap[savedTheme as keyof typeof reverseThemeMap];
+    themeSelect.dispatchEvent(new Event('change'));
 });
