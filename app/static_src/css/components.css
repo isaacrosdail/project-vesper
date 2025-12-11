@@ -44,7 +44,6 @@
 .btn-icon[aria-disabled="true"] {
     opacity: 0.6;
     cursor: not-allowed;
-    pointer-events: none;
 }
 /* Pressed effect (only for text buttons & tabbed modal tabs) */
 .btn:active {
