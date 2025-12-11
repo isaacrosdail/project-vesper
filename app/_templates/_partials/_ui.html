@@ -64,7 +64,9 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     {% if items %}
       {% for item in items %}
         <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ subtype }}"
-            {% if item.is_done %}data-is-done="{{ item.is_done }}"{% endif %}>
+            {% if item.is_done %}data-is-done="{{ item.is_done }}"{% endif %}
+            {% if subtype == 'transactions' %}data-product-id="{{ item.product_id }}"{% endif %}
+            >
           {{ caller(item, headers) }}
           <td class="table-cell delete-cell">
             <button class="row-actions dots-btn btn-icon btn-square" data-item-id="{{ item.id }}">
