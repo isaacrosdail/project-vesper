@@ -34,6 +34,7 @@ type ContextObject = {
         module: string;
         subtype: MenuOptionTypes;
         isDone?: boolean;
+        productId?: string | undefined;
     }
 }
 type ContextMenuTrigger = ContextObject & {
@@ -195,21 +196,24 @@ async function handleDelete(menuContext: ContextObject['context']) {
  * Adds product to shopping list or increments quantity if already present.
  */
 function handleAddToShoppingList(menuContext: ContextObject['context']) {
-    const { itemId } = menuContext;
+    const productId = (menuContext.subtype === 'transactions')
+        ? menuContext.productId
+        : menuContext.itemId;
     const quantityWanted = 1;
     const url = '/groceries/shopping-lists/items';
-    const data = { product_id: itemId, quantity_wanted: quantityWanted };
+    const data = { product_id: productId, quantity_wanted: quantityWanted };
 
     apiRequest('POST', url, (responseData) => {
-        const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${itemId}"]`);
+        const { id, product_id, product_name } = responseData.data;
+        const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${productId}"]`);
         if (existingLi) {
             const newQty = updateQty(existingLi);
-            makeToast(`Updated ${responseData.data.product_name} quantity to ${newQty}`, 'success');
+            makeToast(`Updated ${product_name} quantity to ${newQty}`, 'success');
             return;
         }
 
-        makeToast(`Added ${responseData.data.product_name} to shopping list`, 'success')
-        addShoppingListItemToDOM(responseData.data.item_id, responseData.data.product_id, responseData.data.product_name);
+        makeToast(`Added ${product_name} to shopping list`, 'success')
+        addShoppingListItemToDOM(id, product_id, product_name);
     }, data);
 }
 
@@ -265,7 +269,8 @@ document.addEventListener('contextmenu', (e) => {
                 itemId,
                 module,
                 subtype: subtype as MenuOptionTypes,
-                isDone: row?.dataset['isDone'] === 'True'
+                isDone: row?.dataset['isDone'] === 'True',
+                productId: row?.dataset['productId']
             }
         };
 
@@ -311,7 +316,6 @@ document.addEventListener('click', async (e) => {
         const row = target.closest<HTMLElement>('.table-row')!; // non-assert for now!
         const { itemId, module, subtype } = row.dataset;
 
-        console.log(`itemId: ${itemId}, module: ${module}, subtype: ${subtype}`)
         if (!itemId || !module || !subtype) {
             console.error('Missing required data on row');
             return;
@@ -325,7 +329,8 @@ document.addEventListener('click', async (e) => {
                 itemId,
                 module,
                 subtype: subtype as MenuOptionTypes,
-                isDone: row?.dataset['isDone'] === 'True'
+                isDone: row?.dataset['isDone'] === 'True',
+                productId: row?.dataset['productId']
             }
         };
 
@@ -352,8 +357,8 @@ function addShoppingListItemToDOM(itemId: string, productId: string, productName
     if (!ul) {
         throw new Error('Shopping list <ul> not found')
     }
-    const emptyText = document.querySelector('#list-empty');
-    emptyText?.remove();
+    // Remove placeholder text
+    document.querySelector('#list-empty')?.remove();
 
     // Clone the contents of our template for the new li
     const template = document.querySelector('#shoppinglist-item-template');
