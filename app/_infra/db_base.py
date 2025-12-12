@@ -77,5 +77,9 @@ class Base(TimestampMixin, DeclarativeBase):
     @declared_attr.directive
     def user_id(cls) -> Mapped[Any]:
         if cls.__name__ not in ['User', 'ApiCallRecord']:
-            return mapped_column(Integer, ForeignKey('users.id'), nullable=False)
+            return mapped_column(
+                Integer,
+                ForeignKey('users.id', ondelete='CASCADE'), # so that deleting a user will auto-delete their tasks/etc?
+                nullable=False
+            )
         return None
