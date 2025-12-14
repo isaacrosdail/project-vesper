@@ -5,7 +5,6 @@
 
 {% block content %}
 
-{# Modals #}
 {{ forms.product_entry_modal() }}
 {{ forms.transaction_entry_modal(txn_form_products_list) }}
 
@@ -58,8 +57,15 @@
     <div class="card-title">
         <h2>Grocery - Recent Transactions</h2>
         {{ ui.plus_btn('transactions-entry-dashboard-btn') }}
+        Last
+        {% call ui.dropdown(transactions_params['range']) %}
+            <button class="table-range" data-range="1" data-table="transactions">Today</button>
+            <button class="table-range" data-range="7" data-table="transactions">7d</button>
+            <button class="table-range" data-range="30" data-table="transactions">30d</button>
+        {% endcall %}
+        days
     </div>
-    {% call(item, headers) ui.responsive_table('Recent Transactions', transaction_headers, transactions, 'groceries', 'transactions', transactions_sort, transactions_order) %}
+    {% call(item, headers) ui.responsive_table('Recent Transactions', transaction_headers, transactions, 'groceries', 'transactions', transactions_params, sortable=True) %}
     <td class="{{ headers[0].priority }}">{{ item.product_name }}</td>
     <td class="{{ headers[1].priority }} _text-right">{{ item.price_label }}</td>
     <td class="{{ headers[2].priority }} _text-right">{{ item.price_per_100g_label }}</td>
@@ -71,8 +77,15 @@
     <div class="card-title">
         <h2>Product Catalog</h2>
         {{ ui.plus_btn('products-entry-dashboard-btn') }}
+        Last
+        {% call ui.dropdown(products_params['range']) %}
+            <button class="table-range" data-range="1" data-table="products">Today</button>
+            <button class="table-range" data-range="7" data-table="products">7d</button>
+            <button class="table-range" data-range="30" data-table="products">30d</button>
+        {% endcall %}
+        days
     </div>
-    {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products, 'groceries', 'products', products_sort, products_order) %}
+    {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products, 'groceries', 'products', products_params, sortable=True) %}
         <td class="{{ headers[0].priority }}">{{ item.barcode_label }}</td>
         <td class="{{ headers[1].priority }}">{{ item.name }}</td>
         <td class="{{ headers[2].priority }} _text-right">{{ item.category_label }}</td>

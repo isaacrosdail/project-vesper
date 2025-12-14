@@ -134,7 +134,11 @@ export async function init() {
         }
         else if (target.matches('.table-range')) {
             const range = target.dataset['range']!;
-            window.location.href = `/habits/dashboard?range=${range}`;
+            const table = target.dataset['table']!;
+            
+            const url = new URL(window.location.href);
+            url.searchParams.set(`${table}_range`, range);
+            window.location.href = url.toString();
         }
     });
 }

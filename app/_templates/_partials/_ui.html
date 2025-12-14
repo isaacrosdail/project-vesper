@@ -26,14 +26,16 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {# Responsive Tables #}
 
 {# Breadcrumbs on sortable headers
-    - Added sort_field key to COLUMN_CONFIG dicts in viewmodels
-    - For composite/"complex" columns (eg, time_window), we can specify sort_field since the col.key wouldn't work (time_window isn't a field in model obviously)
-    - sort_field and sort_order params: come from route's query params, passed to template, then back to this macro
-    - data-column: tells frontend what field name to send back in URL params when sorting
-    - data-order: tracks current sort direction for this column (asc/desc/""), used to toggle & style chevron
+    - sort_field key: Added to COLUMN_CONFIG dicts in viewmodels for sortable columns
+    - sort_field is used for composite columns (eg, time_window) to specify the actual model field to sort by since
+    col.key isn't a real database field.
+    - params dict: Contains sort_by, order, and range from query params (via get_table_params())
+    - data-column: Tells frontend which field name to use in URL params when user clicks to sort
+    - data-order: Tracks current sort direction (asc/desc/"") to toggle chevron & maintain state
+    - sortable flag: Controls whether sorting UI (chevrons, data attrs) is rendered
     #}
 
-{% macro responsive_table(caption, headers, items, module_name, subtype, sort_field, sort_order) %}
+{% macro responsive_table(caption, headers, items, module_name, subtype, params={}, sortable=False) %}
 <table 
     id="{{ subtype }}-table"
     data-module="{{ module_name }}"
@@ -44,17 +46,21 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     <tr>
       {% for col in headers %}
         <th class="{{ col.priority }}"
+        {% if (sortable and params) %}
         {# Will use explicit sort_field if defined, otherwise fall back to col.key #}
             data-column="{{ col.sort_field or col.key }}"
-            {% if sort_field == (col.sort_field or col.key) %}
-                data-order="{{ sort_order }}"
+            {% if params.sort_by == (col.sort_field or col.key) %}
+                data-order="{{ params.order }}"
             {% else %}
                 data-order=""
             {% endif %}
+        {% endif %}
         >
         <div class="_inline-flex-md">
             {{ col.label }}
-            <button class="sort-header btn btn-icon">{{ chevron_svg() }}</button>
+            {% if sortable %}
+                <button class="sort-header btn btn-icon">{{ chevron_svg() }}</button>
+            {% endif %}
         </div>
         </th>
       {% endfor %}
