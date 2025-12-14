@@ -94,6 +94,13 @@ function updateBarChart(data: BarData[]) {
 function showEmptyChart() {
     gChart.selectAll('rect.bar').remove();
 
+    // Clear axes
+    yScale.domain([]); // empty domain = no tick labels
+    gYAxis.call(d3.axisLeft(yScale));
+
+    xScale.domain([]);
+    gXAxis.call(d3.axisBottom(xScale));
+
     const _emptyMessage = gChart.selectAll('text.empty-message')
         .data([1])
         .join("text")
@@ -102,7 +109,7 @@ function showEmptyChart() {
         .attr("y", innerHeight/2)
         .attr("text-anchor", "middle")
         .attr("fill", "grey")
-        .text("No habit completion data for this period.")
+        .text("No completion data for this period.")
 }
 
 async function refreshBarChart() {
