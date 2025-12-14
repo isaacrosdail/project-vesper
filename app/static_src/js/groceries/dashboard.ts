@@ -157,6 +157,19 @@ export function init() {
 
     shoppingList.addEventListener('click', handleListActionClick);
 
+    document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        
+        if (target.matches('.table-range')) {
+            const range = target.dataset['range']!;
+            const table = target.dataset['table']!;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set(`${table}_range`, range);
+            window.location.href = url.toString();
+        }
+    });
+
     document.addEventListener('change', (e) => {
         if (!(e.target instanceof HTMLElement)) return;
 
