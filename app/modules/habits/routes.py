@@ -26,15 +26,12 @@ def dashboard(session: 'Session') -> Any:
 
     records_sort = request.args.get("leet_code_records_sort", "title")
     records_order = request.args.get("leet_code_records_order", "desc")
-    habits_sort = request.args.get("habits_sort", "name")
-    habits_order = request.args.get("habits_order", "desc")
 
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
     start_utc, end_utc = last_n_days_range(selected_range, current_user.timezone)
-    habits = habits_repo.get_all_habits_and_tags_in_window(start_utc, end_utc)
+    habits = habits_repo.get_all_habits_and_tags()
     records = habits_repo.get_all_leetcoderecords_in_window(start_utc, end_utc)
 
-    habits = sort_by_field(habits, habits_sort, habits_order)
     records = sort_by_field(records, records_sort, records_order)
 
     habits_viewmodels = [HabitViewModel(h, current_user.timezone) for h in habits]
@@ -45,8 +42,6 @@ def dashboard(session: 'Session') -> Any:
         "lcrecords_headers": LCRecordPresenter.build_columns(),
         "habits": habits_viewmodels,
         "lcrecords": lcrecords_viewmodels,
-        "habits_sort": habits_sort,
-        "habits_order": habits_order,
         "records_sort": records_sort,
         "records_order": records_order,
     }
