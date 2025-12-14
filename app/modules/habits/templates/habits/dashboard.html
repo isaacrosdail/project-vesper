@@ -21,7 +21,7 @@
         {{ ui.plus_btn('habits-entry-dashboard-btn') }}
     </div>
     
-    {% call(item, headers) ui.responsive_table('Habits', habits_headers, habits, 'habits', 'habits', habits_sort, habits_order) %}
+    {% call(item, headers) ui.responsive_table('Habits', habits_headers, habits, 'habits', 'habits') %}
         <td class="{{ headers[0].priority}} editable-cell" data-item-id="{{ item.id }}" data-module="habits" data-subtype="habits" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
         <td class="{{ headers[1].priority}}">{{ item.status_label }}</td>
         <td class="{{ headers[2].priority}}">{{ item.created_at_label }}</td>
@@ -33,16 +33,15 @@
         <h2>LeetCode Records</h2>
         {{ ui.plus_btn('leet_code_records-entry-dashboard-btn') }}
         Last 
-        {% call ui.dropdown(selected_range or 'Select Timeframe') %}
-            <button class="table-range" data-range="1">Today</button>
-            <button class="table-range" data-range="7">7d</button>
-            <button class="table-range" data-range="30">30d</button>
+        {% call ui.dropdown(records_params['range']) %}
+            <button class="table-range" data-range="1" data-table="leet_code_records">Today</button>
+            <button class="table-range" data-range="7" data-table="leet_code_records">7d</button>
+            <button class="table-range" data-range="30" data-table="leet_code_records">30d</button>
         {% endcall %}
         days
     </div>
 
-    {{ sort_order }}
-    {% call(item, headers) ui.responsive_table('LC Records', lcrecords_headers, lcrecords, 'habits', 'leet_code_records', records_sort, records_order) %}
+    {% call(item, headers) ui.responsive_table('LC Records', lcrecords_headers, lcrecords, 'habits', 'leet_code_records', records_params, sortable=True) %}
         <td class="{{ headers[0].priority }}">{{ item.leetcode_id }}</td>
         <td class="{{ headers[1].priority }}">{{ item.title_label }}</td>
         <td class="{{ headers[2].priority }}">{{ item.difficulty_label }}</td>

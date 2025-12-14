@@ -43,6 +43,13 @@ class GroceriesRepository(BaseRepository[Product]):
             Product.deleted_at.is_(None)
         )
         return list(self.session.execute(stmt).scalars().all())
+    
+    def get_all_products_in_window(self, start_utc: datetime, end_utc: datetime) -> list[Product]:
+        stmt = self._user_select(Product).where(
+            Product.created_at >= start_utc,
+            Product.created_at < end_utc,
+        )
+        return list(self.session.execute(stmt).scalars().all())
 
     def get_product_by_id(self, product_id: int) -> Product | None:
         return self.get_by_id(product_id)
@@ -78,6 +85,14 @@ class GroceriesRepository(BaseRepository[Product]):
         """Get all transaction for current user with eager-loaded products."""
         stmt = self._user_select(Transaction).options(
             joinedload(Transaction.product)
+        )
+        return list(self.session.execute(stmt).scalars().all())
+    
+    def get_all_transactions_in_window(self, start_utc: datetime, end_utc: datetime) -> list[Transaction]:
+        """"""
+        stmt = self._user_select(Transaction).where(
+            Transaction.created_at >= start_utc,
+            Transaction.created_at < end_utc,
         )
         return list(self.session.execute(stmt).scalars().all())
 
