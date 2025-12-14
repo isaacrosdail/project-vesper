@@ -13,6 +13,7 @@ from app.modules.habits.viewmodels import HabitPresenter, HabitViewModel, LCReco
 from app.shared.decorators import login_plus_session
 from app.shared.datetime.helpers import last_n_days_range
 from app.shared.collections import sort_by_field
+from app.shared.parsers import get_table_params
 
 
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
@@ -21,28 +22,23 @@ habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefi
 @habits_bp.route("/dashboard", methods=["GET"])
 @login_plus_session
 def dashboard(session: 'Session') -> Any:
-    
-    selected_range = request.args.get("range", 7, type=int)
 
-    records_sort = request.args.get("leet_code_records_sort", "title")
-    records_order = request.args.get("leet_code_records_order", "desc")
+    records_params = get_table_params('leet_code_records', 'created_at')
 
     habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
-    start_utc, end_utc = last_n_days_range(selected_range, current_user.timezone)
+    start_utc, end_utc = last_n_days_range(records_params['range'], current_user.timezone)
     habits = habits_repo.get_all_habits_and_tags()
     records = habits_repo.get_all_leetcoderecords_in_window(start_utc, end_utc)
 
-    records = sort_by_field(records, records_sort, records_order)
+    records = sort_by_field(records, records_params['sort_by'], records_params['order'])
 
     habits_viewmodels = [HabitViewModel(h, current_user.timezone) for h in habits]
     lcrecords_viewmodels = [LCRecordViewModel(r, current_user.timezone) for r in records]
     ctx = {
-        "selected_range": selected_range,
+        "records_params": records_params,
         "habits_headers": HabitPresenter.build_columns(),
         "lcrecords_headers": LCRecordPresenter.build_columns(),
         "habits": habits_viewmodels,
         "lcrecords": lcrecords_viewmodels,
-        "records_sort": records_sort,
-        "records_order": records_order,
     }
     return render_template("habits/dashboard.html", **ctx)

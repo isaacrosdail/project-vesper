@@ -1,14 +1,17 @@
 """
-Parses form_data into new, cleaned dictionaries.
+Parses raw HTTP form and request data into cleaned dictionaries.
 
-Normalize raw HTTP form inputs into clean dicts.
+Normalizes incoming values:
+- Strings -> stripped strings ("" if missing)
+- Enums   -> uppercased, except unit_type & UserLang (lowercase by convention)
+- Numbers/dates -> parsed values or None
+- Checkboxes -> booleans
 
-- Strings -> (value or "").strip()
-- Enums   -> .upper(), except unit_type & UserLang (lowercase by standard)
-- Numbers/dates -> value or None
-- Checkboxes -> .get(..) is not None (to normalize to bools)
+Includes small helpers for parsing request args used by API routes.
 """
 from typing import Any
+
+from flask import request
 
 from app.shared.decorators import log_parser
 
@@ -115,4 +118,22 @@ def parse_abtrial_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
         "variant": form_data.get("variant"),
         "is_success": parse_checkbox(form_data.get("is_success")),
         "notes": (form_data.get("notes") or "").strip()
+    }
+
+
+def get_table_params(prefix: str, default_sort: str) -> dict[str, Any]:
+    """
+    Extracts table state parameters from request query parameters and returns them as a dict.
+
+    Args:
+        subtype: The table/entity type (eg., 'habits', 'time_entries')
+        default_sort: The default field to sort by if not specified in query params
+
+    Returns:
+        Dict with 'range' (days to query), 'sort_by' (field to be used as key), and 'order' (asc/desc)
+    """
+    return {
+        'range': request.args.get(f"{prefix}_range", 7, type=int),
+        'sort_by': request.args.get(f"{prefix}_sort", default_sort),
+        'order': request.args.get(f"{prefix}_order", "desc")
     }

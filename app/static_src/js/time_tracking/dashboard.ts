@@ -197,8 +197,12 @@ export async function init() {
             await refreshPieChart();
         }
         else if (target.matches('.table-range')) {
-            const range = parseInt(target.dataset['range']!);
-            window.location.href = `/time_tracking/dashboard?range=${range}`;
+            const range = target.dataset['range']!;
+            const table = target.dataset['table']!;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set(`${table}_range`, range);
+            window.location.href = url.toString();
         }
     });
 }
