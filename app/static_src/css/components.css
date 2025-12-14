@@ -182,7 +182,7 @@ dialog::backdrop {
 
 /* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
 .card-dashboard {
-    padding: 1.5rem;
+    padding: var(--space-xl) var(--space-lg) var(--space-lg);
     align-self: stretch;
     border-radius: var(--border-radius);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -470,7 +470,7 @@ footer {
     display: inline-flex;
     align-items: center;
     gap: var(--gap-sm);
-    padding: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
     background-color: var(--bg-light);
     border: var(--border-default);
     border-radius: var(--border-radius);
