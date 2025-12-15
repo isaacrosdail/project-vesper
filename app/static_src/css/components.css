@@ -239,6 +239,11 @@ input, select, textarea {
     padding: 0.5rem 0.75rem;
     accent-color: var(--accent-subtle);
 }
+input[disabled]:hover,
+select[disabled]:hover,
+textarea[disabled]:hover {
+    cursor: not-allowed;
+}
 :where(input, select, textarea):focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-offset);

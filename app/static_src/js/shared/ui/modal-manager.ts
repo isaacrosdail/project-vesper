@@ -1,6 +1,7 @@
 import { makeToast } from './toast.js';
 import { apiRequest } from '../services/api.js';
 import { FormDialog } from '../../types';
+import { getSubtypeLabel } from '../../types.js';
 
 /**
  * Modal Manager - Auto-discovers standardized modals
@@ -58,13 +59,44 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
     modal.addEventListener('click', (e) => {
         const target = e.target as HTMLButtonElement;
         if (target.matches(`#${modalId}-close-btn`)) {
-            form.reset();
             modal.close();
         }
-    })
+    });
 
-    modal.addEventListener('cancel', () => {
+    /**
+     * Restores modal state so it can be re-invoked:
+     * - Resets form values
+     * - Clears edit-mode dataset attributes
+     * - Reverts `disabled` state of any fields marked with `data-initial-disabled`
+     */
+    modal.addEventListener('close', () => {
         form.reset();
+        delete modal.dataset.mode;
+        delete modal.dataset.itemId;
+
+        // Clear disabled on fields which overrode it
+        const initialDisabled = modal.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-initial-disabled]');
+        initialDisabled.forEach((el) => {
+            el.disabled = (el.dataset['initialDisabled'] === 'true');
+            el.removeAttribute('data-initial-disabled');
+        });
+
+        const legend = modal.querySelector('legend');
+        if (legend && legend.dataset['originalText']) {
+            legend.textContent = legend.dataset['originalText'];
+            delete legend.dataset['originalText'];
+        }
+
+        const productHidden = modal.querySelector<HTMLInputElement>('#product_id_hidden');
+        if (productHidden) {
+            productHidden.value = "";
+        }
+        // Restore product_id product list for Transaction form modal
+        const productSelect = modal.querySelector<HTMLSelectElement>('#product_id');
+        if (productSelect?.dataset['originalInnerHTML']) {
+            productSelect.innerHTML = productSelect.dataset['originalInnerHTML'];
+            delete productSelect.dataset['originalInnerHTML'];
+        }
     });
 
     modal.addEventListener('submit', async (e) => {
@@ -85,14 +117,11 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
             const url = `${endpoint}/${modal.dataset.itemId}`;
             apiRequest('PUT', url, (responseData) => {
                 makeToast(responseData.message, 'success');
-                // Clean up edit state
-                delete modal.dataset.mode;
-                delete modal.dataset.itemId;
             }, formData);
         }
         // POST
         else {
-            apiRequest('POST', endpoint, (responseData) => { // get server response inside success callback
+            apiRequest('POST', endpoint, (responseData) => {
                 makeToast(responseData.message, 'success');
             }, formData);
         }
