@@ -6,7 +6,7 @@ import { removeTableRow } from '../tables.js';
 import { confirmationManager } from './modal-manager.js';
 import { FormDialog } from '../../types';
 import { getJSInstant } from '../datetime.js';
-
+import { getSubtypeLabel } from '../../types.js';
 
 type MenuOptionTypes = 'products' | 'transactions' | 'tasks';
 
@@ -139,21 +139,28 @@ function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>
                     input.value = String(fieldValue);
                 }
         }
-        // For time entries, derive entry_date from started_at
-        if (data['started_at']) {
-            const entryDateInput = modal.querySelector<HTMLInputElement>('#entry_date');
-            if (entryDateInput) {
-                entryDateInput.value = isoToDateInput(data['started_at']);
-            }
-        }
     });
+    // For time entries, derive entry_date from started_at
+    if ('started_at' in data) {
+        const entryDateInput = modal.querySelector<HTMLInputElement>('#entry_date');
+        if (entryDateInput) {
+            entryDateInput.value = isoToDateInput(data['started_at']);
+        }
+    }
 }
 
 /**
  * Opens form modal dialog and populates fields with data fetched from API.
- * Sets dialog's `data-mode="edit"` which directs form submission to PATCH.
  * 
- * @param menuContext Expects itemId, module, & subtype to construct API URL
+ * Side Effects:
+ * - Sets dialog `data-mode="edit"` to re-route submission to PATCH.
+ * - Populates form inputs based on API response.
+ * - For `transactions`, disables the `#product_id` select and 
+ *   mirrors its value into `#product_id_hidden` to preserve submission.
+ *   The disabled field is tagged with `data-disabled-overriden` and 
+ *   must be reverted upon modal close.
+ * 
+ * @param menuContext Context containing itemId, module, & subtype
  */
 function handleEdit(menuContext: ContextObject['context']) {
     const { itemId, module, subtype } = menuContext;
@@ -172,7 +179,28 @@ function handleEdit(menuContext: ContextObject['context']) {
 
         modal.showModal();
         populateModalFields(modal, responseData.data);
-    })
+
+        // Set text
+        const legend = modal.querySelector('legend');
+        if (!legend?.textContent) {
+            throw new Error('Modal legend missing or empty');
+        }
+        legend.dataset['originalText'] = legend.textContent;
+        legend.textContent = `Edit ${getSubtypeLabel(subtype)}`;
+
+        if (subtype === 'transactions') {
+            const productSelectInput = modal.querySelector<HTMLSelectElement>('#product_id');
+            const productInputHidden = modal.querySelector<HTMLInputElement>('#product_id_hidden');
+            if (productSelectInput && productInputHidden) {
+                productSelectInput.dataset['originalInnerHTML'] = productSelectInput.innerHTML;
+                productSelectInput.innerHTML = `<option selected>${responseData.data.product_name}</option>`;
+                
+                productSelectInput.dataset['initialDisabled'] = String(productSelectInput.disabled);
+                productSelectInput.disabled = true;
+                productInputHidden.value = responseData.data.product_id;
+            }
+        }
+    });
 }
 
 /**
@@ -187,7 +215,7 @@ async function handleDelete(menuContext: ContextObject['context']) {
     const url = `/${module}/${subtype}/${itemId}`;
 
     apiRequest('DELETE', url, () => {
-        makeToast('Item deleted', 'success');
+        makeToast(`${getSubtypeLabel(subtype)} deleted`, 'success');
         removeTableRow(itemId);
     });
 }
@@ -212,8 +240,8 @@ function handleAddToShoppingList(menuContext: ContextObject['context']) {
             return;
         }
 
-        makeToast(`Added ${product_name} to shopping list`, 'success')
         addShoppingListItemToDOM(id, product_id, product_name);
+        makeToast(`Added ${product_name} to shopping list`, 'success');
     }, data);
 }
 
