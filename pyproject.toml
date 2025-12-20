@@ -1,0 +1,19 @@
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+exclude = "^(_playground|tests|alembic)/"
+
+[tool.pytest.ini_options]
+env = [
+    "APP_ENV=testing",
+]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+select = ["ALL"]
+ignore = [
+    "COM812"
+]
+
+[tool.djlint]
