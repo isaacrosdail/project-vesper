@@ -1,1 +1,22 @@
+# .husky/pre-commit
+#!/bin/sh
+
+echo "Running pre-commit checks..."
 npm run lint && npm run type-check && npm audit --audit-level=high
+
+echo "Checking TypeScript..."
+npx tsc --noEmit || exit 1
+
+echo "Checking Python types..."
+mypy . || exit 1
+
+echo "Linting Python..."
+ruff check . || exit 1
+
+echo "Linting CSS..."
+npx stylelint "**.*css" || exit 1
+
+echo "Checking templates..."
+djlint . --check || exit 1
+
+echo "All checks passed!"

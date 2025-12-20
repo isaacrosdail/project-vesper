@@ -4,6 +4,7 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.34.0",
+    "@happy-dom/global-registrator": "^20.0.11",
     "@types/d3": "^7.4.3",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
@@ -15,6 +16,9 @@
     "eslint": "^9.34.0",
     "globals": "^16.3.0",
     "husky": "^9.1.7",
+    "stylelint": "^16.26.1",
+    "stylelint-config-recess-order": "^7.4.0",
+    "stylelint-config-standard": "^39.0.1",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0",
     "wait-on": "^8.0.4"
@@ -25,11 +29,18 @@
     "dev": "concurrently -k -p \"[{name}]\" -n esbuild,flask,sync \"npm:build:watch\" \"npm:flask:dev\" \"npm:sync\"",
     "flask:dev": "flask run --debug",
     "sync": "wait-on tcp:127.0.0.1:5000 --timeout 5000 && browser-sync start --proxy http://127.0.0.1:5000 --port 5001 --files \"app/_templates/**/*.html, app/static_src/**/*\" --no-ui --open local",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint app/static_src/js",
-    "lint:fix": "npm run ts:check && eslint app/static_src/js app/**/*.ts app/**/*.js --fix",
+    "lint:ts": "eslint app/static_src/js",
+    "lint:python": "ruff check .",
+    "lint:css": "stylelint '**/*.css'",
+    "lint:templates": "djlint . --check",
+    "type-check": "tsc --noEmit",
+    "type-check:python": "mypy .",
+    "check": "npm run lint && npm run type-check && npm run lint:python && npm run type-check:python && npm run lint:css && npm run lint:templates",
+    "audit": "npm audit --audit-level=high",
     "prepare": "husky",
-    "test": "jest"
+    "test": "bun test && pytest",
+    "test:ts": "bun test",
+    "test:python": "pytest"
   },
   "dependencies": {
     "d3": "^7.9.0"

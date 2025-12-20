@@ -40,6 +40,7 @@ class ProdConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
 
 class TestConfig(BaseConfig):
+    LOGGING_LEVEL = logging.WARNING
     APP_ENV = "testing"
     TESTING = True          # Enables testing behaviors in Flask (eg, suppress error catching)
     SQLALCHEMY_DATABASE_URI = os.environ.get(
