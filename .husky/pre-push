@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "Running tests..."
+bun test || exit 1
+
+echo "Running Python tests..."
+pytest || exit 1
+
+echo "Security audit..."
+npm audit --audit-level=high || exit 1
+
+echo "Safe to push!"
