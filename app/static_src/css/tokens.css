@@ -1,7 +1,6 @@
-/* ==== DESIGN TOKENS ==== */
-/* Variables for color, spacing, typography */
-
-/* TODO: Add --focus-ring custom property */
+/* ==== Design Tokens ====
+    Custom properties for color, spacing, typography
+*/
 
 /*
 * Architecture:
@@ -14,8 +13,10 @@
 * 
 * Note: For inverted text, map to the opposite theme's values in mappings.
 */
+
+/* stylelint-disable custom-property-empty-line-before */
 :root {
-    --font-family-primary: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --font-family-primary: system-ui, "Segoe UI", roboto, helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     --font-weight-default: 400;
     --font-weight-semibold: 600;
 
@@ -51,7 +52,7 @@
     --hamburger-scale: 1.27;
 
     --focus-ring: 2px solid var(--accent-subtle);
-    --focus-offset: 2px;
+    --focus-offset: 0px; /* TODO */
 
     --btn-size-sm: 1rem;
     --btn-size-md: 2rem;
@@ -64,71 +65,71 @@
     color-scheme: light;
 
     /* Background Hierarchy */
-    --light-bg-dark: oklch(85% 0 0);             /* Darkest: Main page/canvas background */
-    --light-bg: oklch(90% 0 0);                  /* Moderate: Cards, modals, main content areas */
-    --light-bg-light: oklch(95% 0 0);            /* Input fields, secondary button backgrounds, table rows  */
-    --light-bg-hover: oklch(100% 0 0);           /* Neutral counterpart to our accent-hover */
+    --light-bg-dark: oklch(85% 0 0deg);             /* Darkest: Main page/canvas background */
+    --light-bg: oklch(90% 0 0deg);                  /* Moderate: Cards, modals, main content areas */
+    --light-bg-light: oklch(95% 0 0deg);            /* Input fields, secondary button backgrounds, table rows  */
+    --light-bg-hover: oklch(100% 0 0deg);           /* Neutral counterpart to our accent-hover */
 
     /* Text Hierarchy */
-    --light-text: oklch(15% 0 0);                  /* Headers, high contrast text */
-    --light-text-muted: oklch(45% 0 0);           /* Body text, labels */ /* TODO: Make this more distinct */
+    --light-text: oklch(15% 0 0deg);                  /* Headers, high contrast text */
+    --light-text-muted: oklch(45% 0 0deg);           /* Body text, labels */ /* TODO: Make this more distinct */
     --light-text-destructive: var(--light-clr-error);  /* Error states, delete buttons */
 
     /* Borders */
-    --light-border-color: oklch(45% 0 0);         /* General borders */
+    --light-border-color: oklch(45% 0 0deg);         /* General borders */
 
     /* Accent Colors */
-    --light-accent-strong: oklch(55% 0.12 250);  /* Navigation, table headers (AND primary buttons?) */
-    --light-accent-subtle: oklch(70% 0.10 250);  /* CTAs, highlights, subtler visual notes throughout app */
-    --light-accent-hover: oklch(85% 0.09 250);
+    --light-accent-strong: oklch(55% 0.12 250deg);  /* Navigation, table headers (AND primary buttons?) */
+    --light-accent-subtle: oklch(70% 0.10 250deg);  /* CTAs, highlights, subtler visual notes throughout app */
+    --light-accent-hover: oklch(85% 0.09 250deg);
 
     /* Selection TODO: Needs work obv / consider scrapping since we declare in base.css? OR actually scrap in base.css, keep here */
-    --light-bg-selection: oklch(68% 0.15 48);                  /* Selection background */
-    --light-text-selection: oklch(30% 0.15 250);                /* Selection text color */
+    --light-bg-selection: oklch(68% 0.15 48deg);                  /* Selection background */
+    --light-text-selection: oklch(30% 0.15 250deg);                /* Selection text color */
 
-    --light-clr-success: oklch(55% 0.15 150);
-    --light-clr-error: oklch(55% 0.22 25); /* OR: oklch(60% 0.2 25); */
+    --light-clr-success: oklch(55% 0.15 150deg);
+    --light-clr-error: oklch(55% 0.22 25deg); /* OR: oklch(60% 0.2 25); */
 
     --light-progress-bar-fill: linear-gradient(
         to right in oklch,
-        oklch(80% 0.12 145),
-        oklch(79% 0.13 145),
-        oklch(78% 0.19 150)
+        oklch(80% 0.12 145deg),
+        oklch(79% 0.13 145deg),
+        oklch(78% 0.19 150deg)
     );
 
     /* =============== DARK THEME DEFINITIONS =============== */
 
     /* Background Hierarchy */
-    --dark-bg-dark: oklch(22% 0 0);
-    --dark-bg: oklch(26% 0 0);
-    --dark-bg-light: oklch(33% 0 0);
-    --dark-bg-hover: oklch(40% 0 0);
+    --dark-bg-dark: oklch(22% 0 0deg);
+    --dark-bg: oklch(26% 0 0deg);
+    --dark-bg-light: oklch(33% 0 0deg);
+    --dark-bg-hover: oklch(40% 0 0deg);
 
     /* Text Hierarchy */
-    --dark-text: oklch(95% 0 0);
-    --dark-text-muted: oklch(75% 0 0);
+    --dark-text: oklch(95% 0 0deg);
+    --dark-text-muted: oklch(75% 0 0deg);
     --dark-text-destructive: var(--dark-clr-error);
 
     /* Borders */
-    --dark-border-color: oklch(55% 0 0);
+    --dark-border-color: oklch(55% 0 0deg);
 
     /* Accent Colors */
-    --dark-accent-strong: oklch(40% 0.13 250);
-    --dark-accent-subtle: oklch(50% 0.12 250);
-    --dark-accent-hover: oklch(65% 0.10 250);
+    --dark-accent-strong: oklch(40% 0.13 250deg);
+    --dark-accent-subtle: oklch(50% 0.12 250deg);
+    --dark-accent-hover: oklch(65% 0.10 250deg);
 
     /* Selection */
-    --dark-bg-selection: oklch(68% 0.15 48);
-    --dark-text-selection: oklch(30% 0.15 250);
+    --dark-bg-selection: oklch(68% 0.15 48deg);
+    --dark-text-selection: oklch(30% 0.15 250deg);
 
-    --dark-clr-success: oklch(45% 0.10 145);
-    --dark-clr-error: oklch(55% 0.22 25);  /* OR: oklch(60% 0.2 25); */
+    --dark-clr-success: oklch(45% 0.10 145deg);
+    --dark-clr-error: oklch(55% 0.22 25deg);  /* OR: oklch(60% 0.2 25); */
 
     --dark-progress-bar-fill: linear-gradient(
         to right in oklch,
-        oklch(88% 0.11 145),
-        oklch(82% 0.12 145),
-        oklch(78% 0.19 150)
+        oklch(88% 0.11 145deg),
+        oklch(82% 0.12 145deg),
+        oklch(78% 0.19 150deg)
     );
 
     /* === ACTIVE THEME MAPPINGS === */
