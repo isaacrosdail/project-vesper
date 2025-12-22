@@ -4,7 +4,7 @@
 @layer base, components, utilities, animations, app;
 
 /* Design tokens live OUTSIDE layers so everything can read vars */
-@import './tokens.css';
+@import url('./tokens.css');
 @import url('./base.css') layer(base);
 @import url('./components.css') layer(components);
 @import url('./navigation.css') layer(components);
@@ -35,12 +35,46 @@
     background-color: var(--bg-selection);
 }
 
+fieldset {
+    background: var(--bg-light);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+}
 legend {
+    margin-bottom: var(--gap-sm);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+}
+input {
+    accent-color: var(--accent-subtle);
+}
+
+h2 {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
 }
 h3 {
     font-size: var(--font-size-lg);
+}
+label {
+    font-weight: var(--font-weight-semibold);
+}
+textarea {
+    resize: none;
+}
+footer {
+    padding: 8px;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    text-align: center;
+}
+
+@media (width <= 600px) {
+    /* TODO: Overriding utility class used for form modals mostly */
+    .field-pair,
+    .field-pair--weighted {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ==== MEDIA QUERIES ==== */
@@ -48,11 +82,13 @@ h3 {
     .nav-desktop {
         display: none;
     }
+
     /* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
-       Let's us easily "condense" our tables to provide a better mobile experience */
+       Let's us easily "condense" our tables for mobile */
     .desktop-only {
         display: none;
     }
+
     /* Suppress underline effect on mobile nav, use bg again */
     .nav-link::after {
         display: none;
@@ -65,10 +101,14 @@ h3 {
     .hamburger-btn { display: none; }
     .nav-mobile-container { display: none; }
 }
+
 /* TODO: Tune this later as we add some basic animations/transitions */
 @media (prefers-reduced-motion: reduce) {
     .nav-desktop { transition: none; }
-    .icon-wiggle { animation: none; transition: none; }
+    .icon-wiggle {
+        transition: none;
+        animation: none;
+    }
 
     /* Disable both surging effect & gradient itself */
     .progress-bar-fill.surging,
@@ -80,34 +120,28 @@ h3 {
     }
 }
 
-/* TABLE HEADER SORTING CHEVRONS */
-th[data-order="asc"] svg {
-    transform: rotate(0deg);
-}
-th[data-order="asc"] svg {
-    transform: rotate(180deg);
-}
-
 /* ===================================
     PAGE-SPECIFIC: Tasks Dashboard
-   ===================================*/
-.status-span > svg {
+   =================================== */
+td .status-span > svg {
     display: none;
 }
-.status-span.is-done > svg {
+td .status-span.is-done > svg {
     display: block;
     stroke: var(--clr-success);
 }
 
 /* ===================================
     PAGE-SPECIFIC: Groceries Dashboard
-   ===================================*/
+   =================================== */
+#list-empty {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
 /* Position our "x" button "outside"/"to the side of" the inline content */
 .shoppinglist-item {
     position: relative; /* positioning context for inline-delete */
-}
-.shoppinglist-item button {
-    cursor: pointer;
 }
 .shoppinglist-item svg {
     width: 100%;
@@ -115,17 +149,32 @@ th[data-order="asc"] svg {
     pointer-events: none;
 }
 .inline-delete {
+    position: absolute;
+    top: 50%; /* position button's top edge at middle of container */
+    left: -1.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    left: -1.4rem;
-    top: 50%; /* position button's top edge at middle of container */
-    transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
     width: 20px;
     height: 20px;
     border: 1px solid var(--clr-error);
-    /* border-radius: 50%; */
+    opacity: 0;
+    transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
+    transition: opacity var(--transition-fade);
+}
+
+.qty-controls {
+    display: flex;
+    gap: var(--gap-sm);
+    align-items: center;
+}
+.qty-controls button {
+    width: 20px;
+    height: 20px;
+    color: var(--accent-subtle);
+    background: transparent;
+    border: 1px solid var(--accent-subtle);
+    border-radius: 50%;
     opacity: 0;
     transition: opacity var(--transition-fade);
 }
@@ -135,26 +184,12 @@ th[data-order="asc"] svg {
 .shoppinglist-item:hover .qty-controls button {
     opacity: 1;
 }
-.qty-controls {
-    display: flex;
-    gap: var(--gap-sm);
-    align-items: center;
-}
-.qty-controls button {
-    opacity: 0;
-    transition: opacity var(--transition-fade);
-    color: var(--accent-subtle);
-    width: 20px;
-    height: 20px;
-    background: transparent;
-    border: 1px solid var(--accent-subtle);
-    border-radius: 50%;
-}
 
 /* ===================================
     D3 Charts: Habits, Metrics, Time Tracking
-   ===================================*/
+   =================================== */
 
+/* TODO: Refine / refactor */
 .chart-title,
 .chart-legend-text {
     fill: var(--text);
@@ -173,43 +208,70 @@ th[data-order="asc"] svg {
 svg {
     overflow: visible; /* for hovering pie chart slices */
 }
-
 [id$="chart-container"] {
     align-self: center;
 }
 
 /* ===================================
     APP LAYOUT / PAGE SHELL
-   ===================================*/
+   =================================== */
 
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
+
 /* Flex container for header/content/footer */
 .wrapper {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     gap: calc(1.5 * var(--gap-lg));
+    min-height: 100vh;
     background-color: var(--bg-dark);
 }
+
 /* Main content area: fills remaining viewport space below navbar */
 .content {
-    flex: 1 0 auto;                        /* only grow vertically */
-    width: 100%;                           /* take full width by default */
-    max-width: clamp(35rem, 90vw, 90rem);  /* cap width responsively */
-    margin-inline: auto;                   /* center horizontally */
-    padding-inline: clamp(1rem, 4vw, 2rem);
     display: flex;
+    flex: 1 0 auto;                        /* only grow vertically */
     flex-direction: column;
     gap: var(--gap-lg);
+    width: 100%;                           /* take full width by default */
+    max-width: clamp(35rem, 90vw, 90rem);  /* cap width responsively */
+    padding-inline: clamp(1rem, 4vw, 2rem);
+    margin-inline: auto;                   /* center horizontally */
 }
+
 /* For pages using our content_mod Jinja block to provide narrower styling for content */
 .content--narrow {
     max-width: clamp(35rem, 90vw, 50rem);
 }
+.card--narrower {
+    align-self: center;
+    width: clamp(15rem, 90vw, 25rem);
+}
+
+
+.faded-field {
+    opacity: 0.7;
+}
+.faded-field:focus-within {
+    opacity: 1;
+}
+
+/* Don't fade when invalid
+    TODO: Update this when we use our own validation
+*/
+.faded-field:has(:user-invalid) {
+    opacity: 1;
+}
+
+/* For drafting the frontend validation stuff for username on register */
+[class^="error-inline"] {
+    background: rgb(219 149 149);
+}
+
 
 /* ===================================
     PAGE-SPECIFIC: Homepage
-   ===================================*/
+   =================================== */
 
 #greeting-card {
     position: relative;
@@ -218,28 +280,26 @@ svg {
 #sky-canvas {
     position: absolute;
     inset: 0;
-    height: 100%;
-    width: 100%;
     z-index: 0;
+    width: 100%;
+    height: 100%;
 }
 .greeting-content {
     position: relative;
-    width: 100%;
+    z-index: 1;
     display: flex;
     justify-content: space-between;
-    z-index: 1;
-}
-.weather-info {
-    display: flex;
-    flex-direction: column;
-    place-items: right;
+    width: 100%;
 }
 .weather-info {
     position: relative;
-    display: flex;
-    justify-content: right;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    place-items: end;
+    justify-content: right;
 }
+
 /* Styling for text of today's frog / LeetCode to distinguish them as 'special' but similar to their corresponding sections */
 .highlight-label { 
     font-weight: var(--font-weight-semibold);
@@ -250,28 +310,28 @@ svg {
     height: 1.25rem;
 }
 .progress-bar {
-    background-color: oklch(85% 0 0);
-    border-radius: var(--border-radius);
-    border: var(--border-default);
-    overflow: hidden; /* make rounded edges clean on lower percentages, effectively 'clips' overlap */
     width: 80%;
     max-width: 300px;
+    overflow: hidden; /* make rounded edges clean on lower percentages, effectively 'clips' overlap */
+    background-color: oklch(85% 0 0deg);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
 }
 .progress-bar-fill {
     position: relative; /* positioning context for progress-bar-fill::after */
+    overflow: hidden; /* clips our ::after's pulsing effect cleanly */
     background: var(--progress-bar-fill);
     transform: scaleX(0); /* JS can set scaleX using our percent progress directly this way */
     transform-origin: left; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
     transition: transform 0.2s ease-in-out;
-    overflow: hidden; /* clips our ::after's pulsing effect cleanly */
 }
 .progress-bar-fill::after {
-    content: "";
     position: absolute;
     top: 0;
     left: 0;
-    height: 100%;
     width: 50%;
+    height: 100%;
+    content: "";
 }
 .progress-bar-fill.surging {
     animation: pulse 1.5s ease-in-out infinite;
@@ -280,7 +340,7 @@ svg {
     background: linear-gradient(
         to right,
         transparent,
-        rgba(255,255,255, 0.4),
+        rgb(255 255 255 / 40%),
         transparent
     );
     animation: surge 1.5s ease-in-out infinite;
@@ -291,23 +351,24 @@ svg {
  */
 #confetti-layer {
     position: fixed;
-    pointer-events: none;
     top: 0; left: 0;
+    z-index: 999;
     width: 100vw;
     height: 100vh;
-    z-index: 999;
     overflow: visible;
+    pointer-events: none;
 }
 .dot {
     position: absolute;
-    pointer-events: none;
     top: 50%;
     left: 50%;
-    height: var(--confetti-size-base);
     width: var(--confetti-size-base);
+    height: var(--confetti-size-base);
+    pointer-events: none;
     transform: translate(-50%, -50%);
     offset-rotate: 0deg;
 }
+
 /* Sprucing our confetti up with some shapes */
 .star {
     background: gold;
@@ -343,19 +404,45 @@ svg {
 
 /* ===================================
     PAGE-SPECIFIC: Login / Register Pages
-   ===================================*/
+   =================================== */
+
+/* For "Log in" and "Sign up" anchor tags */
+.link-action {
+    font-weight: var(--font-weight-semibold);
+    color: var(--accent-subtle);
+}
+.link-action:hover {
+    text-decoration: underline;
+}
+label[for="remember_user"] {
+    display: inline-flex;
+    gap: var(--gap-sm);
+    align-items: center;
+}
+
+
 .password-input-group {
     position: relative;
 }
 .password-input-group input {
     width: 100%;
-    padding-right: 2rem;
+    padding-right: var(--space-lg);
 }
+
 .password-input-group > button {
     position: absolute;
     top: 50%;                    /* puts top edge at the middle */
+    right: var(--space-sm);
     transform: translateY(-50%); /* move down by half its height */
-    right: 0.5rem;
+}
+.password-toggle {
+    color: var(--accent-strong);
+    opacity: 1;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+.password-toggle[aria-pressed="true"] {
+    color: var(--text-muted);
+    opacity: 0.8;
 }
 .password-toggle .slash {
     stroke-dasharray: 26;  /* total length of slash line */
@@ -368,57 +455,69 @@ svg {
 
 /* ===================================
     PAGE-SPECIFIC: Landing Page
-   ===================================*/
+   =================================== */
 
 /* Container for landing page content */
 .landing-content {
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
     align-items: center;
     padding: var(--space-xl) var(--space-md);
+    overflow: hidden; /* ?? */
 }
+
 /* Cap the paragraph for legibility */
 .landing-content p {
     max-width: 60ch;
     color: var(--text-muted);
+    text-align: center;
 }
 .landing-content h1 {
     font-size: var(--font-size-xxl);
     font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--space-sm);
 }
 .landing-content a {
     text-align: center;
 }
+.landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-sm);
+}
 
 /* ===================================
     PAGE-SPECIFIC: Error Page(s)
-   ===================================*/
+   =================================== */
+
 /* 404 + 500 error pages */
 .error-page {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
-    text-align: center;
     align-items: center;
+    text-align: center;
 }
 .error-page > h1 {
     font-size: var(--font-size-xxl);
 }
-/* TODO: Rename*/
+
+/* TODO: Rename */
 .icon-wiggle {
+    display: block;
     width: clamp(12rem, 30vw, 20rem);
     height: auto;
-    display: block;
 }
 
 /* ===================================
     PAGE-SPECIFIC: Style-reference Page
-   ===================================*/
+   =================================== */
 
 /* Override stylng to position dummy context menu */
 .context-menu-positioning {
     position: relative;
 }
+
 /* Override btn-icon styling to show borders for debug/tuning */
 html[data-page="devtools.style_reference"] .btn-icon {
     border: 1px solid red;
@@ -431,20 +530,24 @@ html[data-page="devtools.style_reference"] .btn-icon {
     display: grid;
     gap: var(--gap-md);
 }
+
 /* Overall section-level grids */
 .demo-section {
     grid-template-rows: auto 1fr; /* Headers + "rest" */
 }
+
 /* Subsections within said section grids (per component) */
 .demo-subsection {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
+
 /* Grid defaults for token tiles */
 .demo-grid-container { 
     /* Creates as many columns as will fit, each a min of 40px but grows evenly to fill space */
     grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
     align-items: center; /* controls vertical alignment of content inside each grid cell */
 }
+
 /* To make border-color clearly visible for tuning */
 .token-container {
     border: 4px solid var(--border-color);
@@ -455,23 +558,26 @@ html[data-page="devtools.style_reference"] .btn-icon {
     border: var(--border-default);
     border-radius: var(--border-radius);
 }
+
 /* Design token tiles - smaller */
 .tile {
-    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     max-width: 100px;
+    aspect-ratio: 1;
 }
+
 /* Stepped gradient tiles for bg/accents */
 .stepped-bg,
 .stepped-accents {
-    grid-column: 1 / -1; /* span the whole row */
     display: flex;
-    justify-content: space-evenly; /* distribute labels evenly across */
+    grid-column: 1 / -1; /* span the whole row */
     align-items: center;
+    justify-content: space-evenly; /* distribute labels evenly across */
     height: 80px;
 }
+
 /* Stepped gradient backgrounds */
 .stepped-bg {
     background: linear-gradient(
@@ -492,9 +598,9 @@ html[data-page="devtools.style_reference"] .btn-icon {
 }
 .progbar {
     grid-column: 1 / -1;
-    border: var(--border-default);
     align-items: center;
     height: 60px;
     background: var(--progress-bar-fill);
+    border: var(--border-default);
     border-radius: var(--border-radius);
 }

@@ -1,17 +1,14 @@
 
-/* NAVLINKS */
-/* Base navlinks styling (desktop-first) */
-/* ==== NAVIGATION ==== */
+/* ==== Navigation ====
+    Base navlinks/navbar styling (desktop-first
+*/
 
 
-/* Hamburger button -> X effect */
+/* Hamburger button -> X animation */
 .hamburger-btn .line1,
 .hamburger-btn .line2,
 .hamburger-btn .line3 {
-    /* By default, browsers sometimes use the whole SVG's viewBox as the transform reference */
-    /* fill-box forces it to use the _bounding box of the actual shape(s)_ inside .line1, etc */
-    /* This way, each group behaves more like a div wrapping content so we can rotate _that group's box_, thus making transform-origin below use left center _of THIS current line_ not the viewbox as a whole */
-    /* With fill-box, the origin resolves to the line's own bounding box, so rotations are local and predictable */
+    /* Use fill-box so each line rotates around its own bounding box, not the SVG ViewBox */
     transform-box: fill-box;
     transition: transform 0.2s ease-out;
 }
@@ -19,12 +16,12 @@
     transition: opacity var(--transition-fade, 0.2s ease-out);
 }
 .hamburger-btn.is-open .line1 {
-    transform-origin: left center;
     transform: rotate(var(--hamburger-angle)) scaleX(var(--hamburger-scale));
+    transform-origin: left center;
 }
 .hamburger-btn.is-open .line3 {
-    transform-origin: left bottom;
     transform: rotate(calc(-1 * var(--hamburger-angle))) scaleX(var(--hamburger-scale));
+    transform-origin: left bottom;
 }
 .hamburger-btn.is-open .line2 {
     opacity: 0;
@@ -35,20 +32,18 @@
     gap: var(--gap-lg);
 }
 .nav-link {
-    border-radius: calc(0.6 * var(--border-radius)); /* to stay proportionate */
-    padding: var(--space-sm);
-    flex-shrink: 1;
-    white-space: nowrap;
     position: relative;
+    flex-shrink: 1;
+    padding: var(--space-sm);
+    white-space: nowrap;
 }
 .nav-link::after {
-    content: "";
     position: absolute;
+    bottom: 0;
+    left: 0;
     width: 0;
     height: 3px;
-    left: 0; /* "pin left edge of rectangle to pos 0 (far left of parent)" */
-    /* note that here if we wanted to make the underline start at right and expand to left, we could replace left 0 with right 0 instead! */
-    bottom: 0;
+    content: "";
     background: var(--accent-subtle);
     transition: width 0.1s ease;
 }
@@ -61,50 +56,50 @@
     outline-offset: var(--focus-offset);
 }
 
-/* NAV COMPONENT STYLINGS */
+
 nav {
+    position: relative; /* positioning context for z-index, force nav to participate in stacking context */
+    z-index: 250;       /* above mobile nav */
     min-height: var(--min-navbar-height);
-    background-color: var(--accent-strong);
     padding: var(--space-md);
-    position: relative; /* forces nav to participate in stacking context so z-index actually applies */
-    z-index: 250; /* to be above mobilenav */
+    background-color: var(--accent-strong);
 }
 .nav-anchor {
-    position: relative; /* positioning context for mobilenav slidedown */
+    position: relative; /* positioning context for mobile nav slidedown */
 }
-/* 2nd descendant of nav */
+
 .navbar-content {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* content starts left now for everything */
+    justify-content: flex-start;
     max-width: 80rem;
     margin: 0 auto;
 }
-/* Direct descendant of nav */
+
 .nav-left, .nav-right {
     display: flex;
-    align-items: center;
     gap: clamp(var(--gap-sm), 1.5vw, var(--gap-md));
+    align-items: center;
 }
 .nav-right {
-    margin-left: auto; /* ...but retain the "push some stuff to the right side" effect */
+    margin-left: auto; /* push to right */
 }
 .branding {
+    margin-right: var(--space-lg);
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
-    margin-right: var(--space-lg);
 }
+
 /* Container: visibility, positioning, stacking */
 .nav-mobile-container {
     position: absolute;
-    inset: 100% 0 auto 0; /* top right bottom left */
+    inset: 100% 0 auto;
     z-index: 201;
-    background-color: var(--accent-strong);
     padding: var(--space-xs);
-
-    opacity: 0;
     pointer-events: none;
-    transform: translateY(-300px) scaleY(0.95); /* "out of place" & squished to start, so transition can apply to something */
+    background-color: var(--accent-strong);
+    opacity: 0;
+    transform: translateY(-300px) scaleY(0.95); /* start above viewport & slightly compressed */
     transform-origin: top center;
     transition: 
         transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -113,22 +108,21 @@ nav {
     display: flex;
     flex-direction: column;
     gap: var(--gap-lg);
-
-    opacity: 1;
     pointer-events: auto;
-    transform: translateY(0) scaleY(1); /* drops in & stretches to full */
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
 }
-/* Content: layout of links themselves */
+
 .nav-mobile {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 100%; /* stretch column */
     gap: var(--gap-lg);
+    align-items: center;
+    width: 100%;
 }
 .nav-mobile a {
     display: block; /* each line fills parent's width */
     width: 100%;
+    padding: var(--space-md) var(--space-md);
     text-align: center;
-    padding: var(--space-md) var(--space-md); /* for easier touch targets */
 }
