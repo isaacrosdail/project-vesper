@@ -1,6 +1,6 @@
 
-/* Confetti effect for progress bar. followPath for arc, tumble for individual pieces */
-@keyframes followPath {
+/* Confetti effect for progress bar. follow-path for arc, tumble for individual pieces */
+@keyframes follow-path {
     to { offset-distance: 100%; }
 }
 
