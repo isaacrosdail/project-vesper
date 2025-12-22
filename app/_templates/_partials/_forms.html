@@ -31,7 +31,7 @@
           <label for="calories">Calories:</label>
           <input type="number" id="calories" name="calories" min="0" max="10000" step="1">
       </div>
-      <div role="tabpanel" class="tab-content" id="tab-sleep" hidden>
+      <div role="tabpanel" class="tab-content field-pair" id="tab-sleep" hidden>
         <div>
           <label for="wake_time">Wake Time:</label>
           <input type="time" id="wake_time" name="wake_time">
@@ -51,21 +51,27 @@
         <label for="entry_date">Date:</label>
         <input type="date" id="entry_date" name="entry_date" value="{{ current_date }}" required>
     </div>
-    <div>
-        <label for="started_at">Start:</label>
-        <input type="time" id="started_at" name="started_at" required>
+
+    <div class="field-pair">
+        <div>
+            <label for="started_at">Start:</label>
+            <input type="time" id="started_at" name="started_at" required>
+        </div>
+        <div>
+            <label for="ended_at">End:</label>
+            <input type="time" id="ended_at" name="ended_at" required>
+        </div>
     </div>
-    <div>
-        <label for="ended_at">End:</label>
-        <input type="time" id="ended_at" name="ended_at" required>
-    </div>
+
     <div>
         <label for="category">Category:</label>
-        <input type="text" id="category" name="category" required>
+        <input type="text" id="category" name="category" required placeholder="Project Work">
     </div>
     <div>
         <label for="description">Description (Optional):</label>
-        <input type="text" id="description" name="description">
+         <textarea id="description" name="description" rows="5" cols="5"
+                    placeholder="Added styling, added name to Github repo"
+                    ></textarea>
     </div>
   {% endcall %}
 {% endmacro %}
@@ -78,17 +84,19 @@
     </div>
     <div>
       <label for="priority">Priority</label>
-      <select name="priority" id="priority">
+      <select name="priority" id="priority" required>
         <option value="">--</option>
         <option value="low">Low</option>
         <option value="medium">Medium</option>
         <option value="high">High</option>
       </select>
     </div>
+    <div>
       <input type="checkbox" id="is_frog" name="is_frog">
       <label for="is_frog">"Daily Frog" Task?</label>
+    </div>
     <div>
-      <label for="due_date">Due:</label>
+      <label for="due_date">Due Date:</label>
       <input type="date" id="due_date" name="due_date">
     </div>
   {% endcall %}
@@ -113,31 +121,20 @@
 
 {% macro leetcode_entry_modal(id='leet_code_records-entry-dashboard', title='Add LeetCode record') %}
     {% call ui.modal('habits', 'leetcode_records', id, title) %}
-        <div>
-            <label for="leetcode_id">LeetCode Problem ID:</label>
-            <input type="number" id="leetcode_id" name="leetcode_id" min="1" step="1" required>
-        </div>
+    <div class="field-pair field-pair--weighted">
         <div>
             <label for="title">Title:</label>
             <input type="text" id="title" name="title">
         </div>
-        <fieldset class="radio-row">
-            <legend>Difficulty:</legend>
-            <div>
-                <input type="radio" id="easy" name="difficulty" value="easy" checked>
-                <label for="easy">Easy</label>
-            </div>
-            <div>
-                <input type="radio" id="medium" name="difficulty" value="medium">
-                <label for="medium">Medium</label>
-            </div>
-            <div>
-                <input type="radio" id="hard" name="difficulty" value="hard">
-                <label for="hard">Hard</label>
-            </div>
-        </fieldset>
         <div>
-            <label for="language">Language Used:</label>
+            <label for="leetcode_id">Problem ID:</label>
+            <input type="number" id="leetcode_id" name="leetcode_id" min="1" step="1" required>
+        </div>
+    </div>
+
+    <div class="field-pair field-pair--weighted">
+        <div>
+            <label for="language">Language:</label>
             <select name="language" id="language">
                 <option value="Python">Python</option>
                 <option value="JavaScript">JavaScript</option>
@@ -145,7 +142,7 @@
                 <option value="C++">C++</option>
             </select>
         </div>
-        <fieldset class="radio-row">
+        <fieldset class="radio-fieldset">
             <legend>Status:</legend>
             <div>
                 <input type="radio" id="solved" name="lcstatus" value="solved" checked>
@@ -160,10 +157,26 @@
                 <label for="reviewed">Reviewed</label>
             </div>
         </fieldset>
+    </div>
+    <fieldset class="radio-fieldset">
+        <legend>Difficulty:</legend>
+        <div>
+            <input type="radio" id="easy" name="difficulty" value="easy" checked>
+            <label for="easy">Easy</label>
+        </div>
+        <div>
+            <input type="radio" id="medium" name="difficulty" value="medium">
+            <label for="medium">Medium</label>
+        </div>
+        <div>
+            <input type="radio" id="hard" name="difficulty" value="hard">
+            <label for="hard">Hard</label>
+        </div>
+    </fieldset>
     {% endcall %}
 {% endmacro %}
 
-{% macro product_entry_modal(id='products-entry-dashboard', title='Add Product') %}
+{% macro product_entry_modal(id='products-entry-dashboard', title='Add Product', list=category_options) %}
     {% call ui.modal('groceries', 'products', id, title) %}
         <div>
             <label for="name">Product Name:</label>
@@ -179,49 +192,39 @@
         <div>
             <label for="category">Category</label>
             <select name="category" id="category" required>
-                <option value="" disabled selected>-- Category --</option>
-                <option value="fruits">Fruits</option>
-                <option value="vegetables">Vegetables</option>
-                <option value="legumes">Legumes</option>
-                <option value="grains">Grains</option>
-                <option value="bakery">Bakery</option>
-                <option value="dairy_eggs">Dairy & Eggs</option>
-                <option value="meats">Meats</option>
-                <option value="seafood">Seafood</option>
-                <option value="fats_oils">Fats & Oils</option>
-                <option value="snacks">Snacks</option>
-                <option value="sweets">Sweets</option>
-                <option value="beverages">Beverages</option>
-                <option value="condiments_sauces">Condiments & Sauces</option>
-                <option value="processed_convenience">Processed/Convenience</option>
-                <option value="supplements">Supplements</option>
+                <option value="" disabled selected hidden>--</option>
+                {% for category in list %}
+                    <option value="{{ category.value }}">{{ category.text.title() }}</option>
+                {% endfor %}
             </select>
         </div>
         <div>
-            <label for="net_weight">Net Weight:</label>
-            <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" required>
-        </div>
-        <div>
-            <label for="unit_type">Units:</label>
-            <select name="unit_type" id="unit_type" required>
-                <option value="" disabled selected>-- Units --</option>
-                <option value="g">g (grams)</option>
-                <option value="kg">kg (kilograms)</option>
-                <option value="oz">oz (ounces)</option>
-                <option value="lb">lb (pounds)</option>
-                <option value="ml">ml (milliliters)</option>
-                <option value="l">l (liters)</option>
-                <option value="fl_oz">fl oz (fluid ounces)</option>
-            </select>
-        </div>
-        <div>
-            <label for="calories_per_100g">Cals per 100g:</label>
+            <label for="calories_per_100g">Calories (per 100g):</label>
             <input type="number" step="0.01" min="0" max="900" id="calories_per_100g" name="calories_per_100g">
+        </div>
+        <div class="field-pair field-pair--weighted">
+            <div>
+                <label for="net_weight">Net Weight:</label>
+                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" required>
+            </div>
+            <div>
+                <label for="unit_type">Units:</label>
+                <select name="unit_type" id="unit_type" required>
+                    <option value="" disabled selected>--</option>
+                    <option value="g">g (grams)</option>
+                    <option value="kg">kg (kilograms)</option>
+                    <option value="oz">oz (ounces)</option>
+                    <option value="lb">lb (pounds)</option>
+                    <option value="ml">ml (milliliters)</option>
+                    <option value="l">l (liters)</option>
+                    <option value="fl_oz">fl oz (fluid ounces)</option>
+                </select>
+            </div>
         </div>
     {% endcall %}
 {% endmacro %}
 
-{% macro transaction_entry_modal(products, id='transactions-entry-dashboard', title='Add Transaction') %}
+{% macro transaction_entry_modal(products, id='transactions-entry-dashboard', title='Add Transaction', list=category_options) %}
     {% call ui.modal('groceries', 'transactions', id, title) %}
         <div>
             <label for="product_id">Select Product: </label>
@@ -235,70 +238,63 @@
             <input type="hidden" name="product_id" id="product_id_hidden" value=""> {# update via JS when we open in edit mode #}
         </div>
 
-        <div>
-            <label for="price_at_scan">Price (each):</label>
-            <input type="number" step="0.01" min="0" id="price_at_scan" name="price_at_scan"
-                value="{{ transaction_data.price_at_scan if transaction_data else '' }}"
-                required>
+        <div class=" field-pair field-pair--weighted">
+            <div>
+                <label for="price_at_scan">Price (each):</label>
+                <input type="number" step="0.01" min="0" id="price_at_scan" name="price_at_scan"
+                    value="{{ transaction_data.price_at_scan if transaction_data else '' }}"
+                    required>
+            </div>
+            <div>
+                <label for="quantity">Quantity:</label>
+                <input type="number" step="1" min="1" id="quantity" name="quantity"
+                    value="{{ transaction_data.quantity if transaction_data else '' }}"
+                    required>
+            </div>
         </div>
-        <div>
-            <label for="quantity">Quantity:</label>
-            <input type="number" step="1" min="1" id="quantity" name="quantity"
-                value="{{ transaction_data.quantity if transaction_data else '' }}"
-                required>
-        </div>
+
         <div class="product-field" hidden>
             <label for="name">Product Name</label>
-            <input type="text" id="name" name="name" disabled>
+            <input type="text" id="name" name="name" disabled required>
         </div>
         <div class="product-field" hidden>
             <label for="barcode">Barcode:</label>
             <input type="text" id="barcode" name="barcode"
                 value="{{ transaction_data.barcode if transaction_data else ''}}"
                 minlength="8" maxlength="14"
-                placeholder="Scan or enter barcode">
+                placeholder="01234567">
         </div>
         <div class="product-field" hidden>
             <label for="category">Category</label>
-            <select name="category" id="category" disabled>
-                <option value="" disabled selected>-- Category --</option>
-                <option value="fruits">Fruits</option>
-                <option value="vegetables">Vegetables</option>
-                <option value="legumes">Legumes</option>
-                <option value="grains">Grains</option>
-                <option value="bakery">Bakery</option>
-                <option value="dairy_eggs">Dairy & Eggs</option>
-                <option value="meats">Meats</option>
-                <option value="seafood">Seafood</option>
-                <option value="fats_oils">Fats & Oils</option>
-                <option value="snacks">Snacks</option>
-                <option value="sweets">Sweets</option>
-                <option value="beverages">Beverages</option>
-                <option value="condiments_sauces">Condiments & Sauces</option>
-                <option value="processed_convenience">Processed/Convenience</option>
-                <option value="supplements">Supplements</option>
+            <select name="category" id="category" disabled required>
+                <option value="" disabled selected hidden>--</option>
+                {% for category in list %}
+                    <option value="{{ category.value }}">{{ category.text.title() }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="product-field" hidden>
-            <label for="net_weight">Net Weight:</label>
-            <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" disabled>
+            <label for="calories_per_100g">Calories (per 100g):</label>
+            <input type="number" step="0.01" min="0" max="900" id="calories_per_100g" name="calories_per_100g" disabled required>
         </div>
-        <div class="product-field" hidden>
-            <label for="unit_type">Units:</label>
-            <select name="unit_type" id="unit_type" disabled>
-                <option value="" disabled selected>-- Units --</option>
-                <option value="g">g (grams)</option>
-                <option value="kg">kg (kilograms)</option>
-                <option value="oz">oz (ounces)</option>
-                <option value="lb">lb (pounds)</option>
-                <option value="ml">ml (milliliters)</option>
-                <option value="l">l (liters)</option>
-                <option value="fl_oz">fl oz (fluid ounces)</option>
-            </select>
-        </div>
-        <div class="product-field" hidden>
-            <label for="calories_per_100g">Cals per 100g:</label>
-            <input type="number" step="0.01" min="0" max="900" id="calories_per_100g" name="calories_per_100g" disabled>
+        <div class="field-pair field-pair--weighted">
+            <div class="product-field" hidden>
+                <label for="net_weight">Net Weight:</label>
+                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" disabled required>
+            </div>
+            <div class="product-field" hidden>
+                <label for="unit_type">Units:</label>
+                <select name="unit_type" id="unit_type" disabled required>
+                    <option value="" disabled selected>-- Units --</option>
+                    <option value="g">g (grams)</option>
+                    <option value="kg">kg (kilograms)</option>
+                    <option value="oz">oz (ounces)</option>
+                    <option value="lb">lb (pounds)</option>
+                    <option value="ml">ml (milliliters)</option>
+                    <option value="l">l (liters)</option>
+                    <option value="fl_oz">fl oz (fluid ounces)</option>
+                </select>
+            </div>
         </div>
     {% endcall %}
 {% endmacro %}

@@ -1,42 +1,55 @@
 /* Utilities: Tiny helpers, atomic styles */
 
-._stack-md {
+.stack-md {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
 }
-._stack-lg {
+
+.stack-lg {
     display: flex;
     flex-direction: column;
     gap: var(--gap-lg);
 }
-._grid-2col {
+
+.grid-2col-7030 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-._inline-flex-sm {
-    display: inline-flex;
-    align-items: center;
+    grid-template-columns: 7fr 3fr;
     gap: var(--gap-sm);
 }
-._inline-flex-md {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--gap-md);
+
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-sm);
 }
-._sr-only {
+
+.inline-flex-sm {
+    display: inline-flex;
+    gap: var(--gap-sm);
+    align-items: center;
+}
+
+.inline-flex-md {
+    display: inline-flex;
+    gap: var(--gap-md);
+    align-items: center;
+}
+
+.sr-only {
     position: absolute;
     width: 1px;
     height: 1px;
     padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    clip-path: inset(50%);
     white-space: nowrap;
     border: 0;
+    /* stylelint-disable-next-line property-no-deprecated */
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
 }
 
-._text-right {
+.text-right {
     text-align: right;
 }
