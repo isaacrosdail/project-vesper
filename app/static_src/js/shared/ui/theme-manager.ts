@@ -24,13 +24,13 @@ const reverseThemeMap = {
  * @param name - Cookie name to search for
  * @returns Cookie value or null if not found
  */
-function getCookie(name: string): string | null {
+export function getCookie(name: string): string | null {
     const cookies = document.cookie.split('; ');
     const targetCookie = cookies.find(x => x.startsWith(`${name}=`));
     if (!targetCookie) return null;
 
-    const [key, value] = targetCookie.split('=');
-    return value
+    const [_key, value] = targetCookie.split('=');
+    return value ?? null;
 }
 
 /**
