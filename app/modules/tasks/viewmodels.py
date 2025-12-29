@@ -9,7 +9,7 @@ from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 class TaskPresenter(BasePresenter):
     VISIBLE_COLUMNS = [
-        "name", "priority", "due_date"
+        "name", "priority", "is_frog", "due_date"
     ]
     COLUMN_CONFIG = {
         "id": {"label": "Task ID", "priority": "desktop-only"},
@@ -37,6 +37,10 @@ class TaskViewModel(TimestampedViewMixin):
     @property
     def priority_label(self) -> str:
         return f"{self.priority.value.title()}"
+
+    @property
+    def frog_label(self) -> str:
+        return "Yes" if self.is_frog else ''
 
     @property
     def due_label(self) -> str:
