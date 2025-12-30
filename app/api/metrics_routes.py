@@ -22,8 +22,8 @@ from app.shared.decorators import login_plus_session
 import logging
 logger = logging.getLogger(__name__)
 
-@api_bp.route("/metrics/daily_entries", methods=["POST"])
-@api_bp.route("/metrics/daily_entries/<int:entry_id>", methods=["PUT"])
+@api_bp.post("/metrics/daily_entries")
+@api_bp.put("/metrics/daily_entries/<int:entry_id>")
 @login_plus_session
 def daily_entries(session: 'Session', entry_id: int | None = None) -> Any:
     parsed_data = parse_daily_entry_form_data(request.form.to_dict())
@@ -45,7 +45,7 @@ def daily_entries(session: 'Session', entry_id: int | None = None) -> Any:
         data = entry.to_api_dict()
     ), 201
 
-@api_bp.route("/metrics/ab_tests", methods=["POST"])
+@api_bp.post("/metrics/ab_tests")
 @login_plus_session
 def ab_tests(session: 'Session') -> Any:
     parsed_data = parse_abtest_form_data(request.form.to_dict())
@@ -59,7 +59,7 @@ def ab_tests(session: 'Session') -> Any:
         data=result.to_api_dict()
     ), 201
 
-@api_bp.route("/metrics/ab_trials", methods=["POST"])
+@api_bp.post("/metrics/ab_trials")
 @login_plus_session
 def ab_trials(session: 'Session') -> Any:
     parsed_data = parse_abtrial_form_data(request.form.to_dict())

@@ -16,7 +16,7 @@ from app.shared.parsers import get_table_params
 
 tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix="/tasks")
 
-@tasks_bp.route("/dashboard", methods=["GET"])
+@tasks_bp.get("/dashboard")
 @login_plus_session
 def dashboard(session: 'Session') -> Any:
 

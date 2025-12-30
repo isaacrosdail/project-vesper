@@ -22,7 +22,7 @@ metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_pre
 
 DEFAULT_METRICS_TABLE_RANGE = 7
 
-@metrics_bp.route('/dashboard', methods=["GET"])
+@metrics_bp.get('/dashboard')
 @login_plus_session
 def dashboard(session: 'Session') -> Any:
 

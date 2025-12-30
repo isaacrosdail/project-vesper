@@ -17,7 +17,7 @@ from app.shared.datetime.helpers import today_range_utc, day_range_utc, now_in_t
 main_bp = Blueprint('main', __name__, template_folder="templates")
 
 
-@main_bp.route("/", methods=["GET"])
+@main_bp.get("/")
 def home() -> Any:
 
     if not current_user.is_authenticated:
@@ -87,7 +87,8 @@ def home() -> Any:
         }
         return render_template("index.html", **ctx)
 
-@main_bp.route('/health')
+
+@main_bp.get("/health")
 def health_check() -> Any:
     """Basic health check for monitoring."""
     status = {

@@ -22,8 +22,8 @@ from app.shared.decorators import login_plus_session
 from app.shared.parsers import parse_habit_form_data, parse_leetcode_form_data
 
 
-@api_bp.route("/habits/habits", methods=["POST"])
-@api_bp.route("/habits/habits/<int:habit_id>", methods=["PUT"])
+@api_bp.post("/habits/habits")
+@api_bp.put("/habits/habits/<int:habit_id>")
 @login_plus_session
 def habits(session: 'Session', habit_id: int | None = None) -> Any:
         parsed_data = parse_habit_form_data(request.form.to_dict())
@@ -107,7 +107,7 @@ def horizontal_barchart(session: 'Session') -> Any:
         data=chart_data
     ), 200
 
-@api_bp.route("/habits/leetcode_records", methods=["POST"])
+@api_bp.post("/habits/leetcode_records")
 @login_plus_session
 def leetcode_records(session: 'Session') -> Any:
     parsed_data = parse_leetcode_form_data(request.form.to_dict())

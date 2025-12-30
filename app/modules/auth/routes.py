@@ -19,13 +19,7 @@ from app.shared.parsers import parse_user_form_data
 auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
 
-# TODO: Implement
-@auth_bp.route("/user_dashboard", methods=["GET"])
-def user_dashboard() -> Any:
-    return render_template('user_dashboard.html')
-
-
-@auth_bp.route('/logout', methods=["GET", "POST"])
+@auth_bp.post('/logout')
 @login_required # type: ignore[misc]
 def logout() -> Any:
     set_toast('Logout successful', 'success')
@@ -89,7 +83,7 @@ def register() -> Any:
 
 
 # Create & Seed only
-@auth_bp.route('/init-demo', methods=["POST"])
+@auth_bp.post('/init-demo')
 def init_demo() -> Any:
     logout_user() # boot logged in users just in case
 
@@ -104,7 +98,7 @@ def init_demo() -> Any:
 
 
 # Create & Seed only
-@auth_bp.route('/init-owner', methods=["POST"])
+@auth_bp.post('/init-owner')
 def init_owner() -> Any:
     logout_user() # boot logged in users just in case
 
@@ -118,7 +112,7 @@ def init_owner() -> Any:
     return redirect(url_for('main.home'))
 
 
-@auth_bp.route('/admin/reset-users', methods=["POST"])
+@auth_bp.post('/admin/reset-users')
 @requires_owner
 @with_db_session
 def reset_users(session: 'Session') -> Any:
@@ -134,7 +128,7 @@ def reset_users(session: 'Session') -> Any:
     return redirect(url_for('auth.login'))
 
 # Wipe app data only; reset IDs for more predictable seeding
-@auth_bp.route('/admin/reset-db', methods=["POST"])
+@auth_bp.post('/admin/reset-db')
 @requires_owner
 @with_db_session
 def reset_database(session: 'Session') -> Any:
@@ -145,7 +139,7 @@ def reset_database(session: 'Session') -> Any:
     return redirect(url_for('main.home'))
 
 
-@auth_bp.route('/admin/reset-dev', methods=["POST"])
+@auth_bp.post('/admin/reset-dev')
 @requires_owner
 @with_db_session
 def reset_dev(session: 'Session') -> Any:
