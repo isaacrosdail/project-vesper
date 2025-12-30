@@ -15,6 +15,9 @@ from sqlalchemy import text
 from app._infra.db_base import Base
 from app.modules.groceries.models import Product, ShoppingListItem
 
+import logging
+logger = logging.getLogger(__name__)
+
 NEVER_DELETE = {
     "api_call_records",
     "alembic_version",
@@ -31,7 +34,7 @@ def _delete_rows(session: 'Session', table: str, where: str | None = None, param
         - Uses parameter binding (:param style) to avoid SQL injection.
         - params (dict, optional): bound parameters for the WHERE clause
     """
-    current_app.logger.info(f"Deleting from {table} {where if where else 'all rows'}")
+    logger.info(f"Deleting from {table} {where if where else 'all rows'}")
 
     sql = f'DELETE FROM "{table}"'  #  "" -> Postgres treats as identifier, not a keyword (for our 'user' table)
     if where:
@@ -44,7 +47,7 @@ def _delete_rows(session: 'Session', table: str, where: str | None = None, param
 def delete_all_db_data(session: 'Session', include_users: bool = False, reset_sequences: bool = False) -> None:
     """Delete all database data. Optionally delete users, sequences."""
 
-    current_app.logger.info(
+    logger.info(
         f"delete_all_db_data: include_users={include_users}, reset_sequences={reset_sequences}"
     )
 
@@ -71,11 +74,11 @@ def delete_all_db_data(session: 'Session', include_users: bool = False, reset_se
                 seq_name = _get_sequence_name(session, name)
                 if seq_name:
                     session.execute(text(f'ALTER SEQUENCE "{seq_name}" RESTART WITH 1'))
-                    current_app.logger.info(f"Resetting sequence: {seq_name}")
+                    logger.debug(f"Resetting sequence: {seq_name}")
 
 def delete_user_data(session: 'Session', user_id: int, table: str) -> None:
     """User-facing delete: Delete data for a specific user from a single table."""
-    current_app.logger.info(f"Deleting user {user_id} data from: {table}")
+    logger.debug(f"Deleting user {user_id} data from: {table}")
     _delete_rows(session, table, "user_id = :user_id", {"user_id": user_id}) # parametrized -> avoids SQL injection risk
 
 
