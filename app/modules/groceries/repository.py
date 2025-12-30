@@ -38,17 +38,19 @@ class GroceriesRepository(BaseRepository[Product]):
         )
         return self.add(product)
 
-    def get_all_products(self) -> list[Product]:
-        stmt = self._user_select(Product).where(
-            Product.deleted_at.is_(None)
-        )
+    def get_all_products(self, include_soft_deleted: bool = False) -> list[Product]:
+        stmt = self._user_select(Product)
+        if not include_soft_deleted:
+            stmt = stmt.where(Product.deleted_at.is_(None))
         return list(self.session.execute(stmt).scalars().all())
     
-    def get_all_products_in_window(self, start_utc: datetime, end_utc: datetime) -> list[Product]:
+    def get_all_products_in_window(self, start_utc: datetime, end_utc: datetime, include_soft_deleted: bool = False) -> list[Product]:
         stmt = self._user_select(Product).where(
             Product.created_at >= start_utc,
             Product.created_at < end_utc,
         )
+        if not include_soft_deleted:
+            stmt = stmt.where(Product.deleted_at.is_(None))
         return list(self.session.execute(stmt).scalars().all())
 
     def get_product_by_id(self, product_id: int) -> Product | None:
