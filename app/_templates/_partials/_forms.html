@@ -231,7 +231,7 @@
             <select name="product_id" id="product_id" required>
                 <option value="">--</option>
                 {% for product in products %}
-                    <option value="{{ product.id }}">{{ product.name }}</option>
+                    <option value="{{ product.id }}">{{ product.name }}{% if product.deleted_at %} (deleted){% endif %}</option>
                 {% endfor %}
                 <option value="__new__">+ Create New Product</option>
             </select>
