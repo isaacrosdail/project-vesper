@@ -50,8 +50,7 @@ def login() -> Any:
 @auth_bp.route('/register', methods=["GET", "POST"])
 def register() -> Any:
     if request.method == "POST":
-        form_data = request.form.to_dict()
-        parsed_data = parse_user_form_data(form_data)
+        parsed_data = parse_user_form_data(request.form.to_dict())
         typed_data, errors = validate_user(parsed_data)
 
         if errors:
@@ -68,8 +67,6 @@ def register() -> Any:
                 username=typed_data["username"],
                 password=typed_data["password"],
                 name=typed_data.get("name"),
-                role=UserRoleEnum.USER,
-                lang=UserLangEnum.EN
             )
 
         if not result["success"]:
