@@ -335,7 +335,7 @@ function triggerConfetti(el: HTMLElement) {
         dot.style.setProperty('--scale', String(scale));
         dot.style.offsetPath = `path('${path}')`;
         dot.style.animation = 
-            `followPath ${animationTime}s cubic-bezier(0.25, 0.7, 0.9, 0.3) ${animationDelay} forwards, ` +
+            `follow-path ${animationTime}s cubic-bezier(0.25, 0.7, 0.9, 0.3) ${animationDelay} forwards, ` +
             `tumble ${tumbleSpeed}s linear infinite`;
         
         // Insert into confetti layer & tidy up when done
