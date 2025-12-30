@@ -18,8 +18,8 @@ from app.shared.datetime.helpers import last_n_days_range
 from app.shared.decorators import login_plus_session
 
 
-@api_bp.route('/time_tracking/time_entries', methods=["POST"])
-@api_bp.route('/time_tracking/time_entries/<int:entry_id>', methods=["PUT"])
+@api_bp.post('/time_tracking/time_entries')
+@api_bp.put('/time_tracking/time_entries/<int:entry_id>')
 @login_plus_session
 def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
         parsed_data = parse_time_entry_form_data(request.form.to_dict())

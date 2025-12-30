@@ -22,7 +22,7 @@ from app.shared.parsers import get_table_params
 groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url_prefix="/groceries")
 
 
-@groceries_bp.route("/dashboard", methods=["GET"])
+@groceries_bp.get("/dashboard")
 @login_plus_session
 def dashboard(session: 'Session') -> Any:
 
