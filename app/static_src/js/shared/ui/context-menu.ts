@@ -58,7 +58,7 @@ type TriggerInfo = ContextMenuTrigger | DotsMenuTrigger;
  * @param {object} triggerInfo Contains positioning (x/y OR rect) and context data (itemId, module, subtype)
  */
 function openMenu(triggerInfo: TriggerInfo) {
-    document.querySelector('.context-menu')?.remove();
+    closeMenu();
 
     const menu = document.createElement('ul');
     menu.classList.add(`context-menu`);
@@ -95,6 +95,13 @@ function openMenu(triggerInfo: TriggerInfo) {
     (menu as any).context = triggerInfo.context; // bind context info to menu itself
 
     document.body.appendChild(menu);
+}
+
+function closeMenu() {
+    const menu = document.querySelector('.context-menu');
+    if (!menu) return;
+
+    menu.remove();
 }
 
 /**
@@ -308,9 +315,15 @@ document.addEventListener('contextmenu', (e) => {
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        document.querySelector('.context-menu')?.remove();
+        closeMenu();
     }
 });
+
+
+
+// window.addEventListener('blur', () => {
+//     closeMenu();
+// });
 
 document.addEventListener('click', async (e) => {
     const menu = document.querySelector('.context-menu');
