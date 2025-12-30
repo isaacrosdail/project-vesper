@@ -41,7 +41,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     data-module="{{ module_name }}"
     data-subtype="{{ subtype }}"
     class="table-standard">
-  <caption class="_sr-only">{{ caption }}</caption>
+  <caption class="sr-only">{{ caption }}</caption>
   <thead class="table-header">
     <tr>
       {% for col in headers %}
@@ -56,7 +56,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
             {% endif %}
         {% endif %}
         >
-        <div class="_inline-flex-md">
+        <div class="inline-flex-md">
             {{ col.label }}
             {% if sortable %}
                 <button class="sort-header btn btn-icon">{{ chevron_svg() }}</button>
