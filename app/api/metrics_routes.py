@@ -77,7 +77,7 @@ def ab_trials(session: 'Session') -> Any:
 @login_plus_session
 def daily_entries_timeseries(session: 'Session') -> Any:
     metric_type = request.args["metric_type"]
-    last_n_days = int(request.args["lastNDays"])
+    last_n_days = request.args.get("lastNDays", 7, type=int)
 
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
     start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)
@@ -99,7 +99,7 @@ def daily_entries_timeseries(session: 'Session') -> Any:
 @api_bp.get("/metrics/daily_entries")
 @login_plus_session
 def daily_entries_list(session: 'Session') -> Any:
-    last_n_days = int(request.args["lastNDays"])
+    last_n_days = request.args.get("lastNDays", 7, type=int)
 
     repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
     start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)
