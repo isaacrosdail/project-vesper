@@ -19,7 +19,7 @@ from app.api.responses import api_response
 from app.api.service import release_slot, reserve_slot
 
 
-@api_bp.route('/profile/me')
+@api_bp.get('/profile/me')
 @login_required # type: ignore
 def get_my_profile() -> Any:
     """Internal API for fetching profile information used in JS."""
@@ -32,7 +32,7 @@ def get_my_profile() -> Any:
 
 
 """External API endpoints to call or return data to third-party services. For fetching weather data as well as for our health check."""
-@api_bp.route('/weather/<city>/<country>/<units>')
+@api_bp.get('/weather/<city>/<country>/<units>')
 @with_db_session
 def get_weather(session: 'Session', city: str, country: str, units: str) -> Any:
     """External API call-limiting function to ensure we exceed limits."""

@@ -20,7 +20,7 @@ from app.shared.parsers import get_table_params
 time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templates', url_prefix='/time_tracking')
 
 
-@time_tracking_bp.route('/dashboard', methods=["GET"])
+@time_tracking_bp.get('/dashboard')
 @login_plus_session
 def dashboard(session: 'Session') -> Any:
 
