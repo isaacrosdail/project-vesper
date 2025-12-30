@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 
-import { hideToolTip, showToolTip } from '../shared/ui/tooltip';
+import { hideTooltip, showTooltip } from '../shared/ui/tooltip';
 import { apiRequest } from '../shared/services/api';
+import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
 
 type PieDatum = {
     category: string;
@@ -19,192 +20,6 @@ interface ArcPathElement extends SVGPathElement {
 
 const chartState = {
     range: 7,
-}
-
-// Set up dimensions
-const width = 300;
-const height = 300;
-const radius = Math.min(width, height) / 2;
-const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-const innerWidth = width - margin.left - margin.right;
-const innerHeight = height - margin.top - margin.bottom;
-
-// Pie chart
-const svg = d3.select('#time_tracking-chart-container')
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-
-const gRoot = svg.append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-const gChart = gRoot.append("g")
-    .attr("transform", `translate(${innerWidth/2}, ${innerHeight/2})`);
-
-const gLegend = gRoot.append("g")
-    .attr("class", "legend")
-    .attr("transform", `translate(300, 0)`);
-
-// d3.pie() takes our array data and calculates angles
-const pie = d3.pie<PieDatum>().value(d => d.value);
-// d3.arc() draws the curved slice shapes based on those angles
-const arc = d3.arc<d3.PieArcDatum<PieDatum>>()
-    .innerRadius(0)
-    .outerRadius(radius);
-// Color Scale maps indexes to colors
-const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-async function refreshPieChart() {
-    const data = await getData(chartState.range);
-    console.table(data)
-
-    if (data.length === 0) {
-        showEmptyChart();
-        return;
-    }
-
-    updatePieChart(data);
-}
-
-function showEmptyChart() {
-    gLegend.selectAll('g.legend-item').remove();
-    gLegend.selectAll('.debug').remove();
-    gChart.selectAll('g.slice').remove();
-
-    const _emptyMessage = gChart.selectAll('text.empty-message')
-        .data([1])
-        .join("text")
-        .attr("class", "empty-message")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("text-anchor", "middle")
-        .attr("fill", "grey")
-        .text(`No time entry data for this period.`)
-}
-
-function updatePieChart(data: PieDatum[]) {
-
-    gRoot.selectAll('.empty-message').remove();
-
-    const pieData = pie(data);
-
-    const groups = gChart.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
-        // .data(data, keyFn)
-        .data(pieData, d => d.data.category) // key function = stable matching?
-        .join(
-            enter => {
-                const g = enter.append("g").attr("class", "slice");
-
-                // path (slice)
-                g.append('path')
-                    .attr("class", "pie")
-                    .attr("fill", d => color(d.data.category))
-                    .each(
-                        function(this: ArcPathElement, d) {
-                            this._current = d; // store start?
-                        })
-                    .attr("d", arc);
-
-                return g;
-            },
-            update => {
-                update.select("path")
-                    .transition().duration(500)
-                    .attrTween("d", function(d) {
-                        const el = this as ArcPathElement;
-                        const i = d3.interpolate(el._current, d);
-                        el._current = i(1);
-                        return t => arc(i(t)) ?? ""; // ?? "" here since arc can return null, which TS doesn't like
-                    });
-
-                return update;
-            },
-            exit => exit.remove()
-        );
-
-    const _legendItems = gLegend.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend-item")
-        .data(pieData, d => d.data.category)
-        .join(
-            enter => {
-                const g = enter.append("g")
-                    .attr("class", "legend-item")
-                    .attr("transform", (_d, i) => `translate(0, ${i * 22})`);
-
-                // legend circle
-                g.append('circle')
-                    .attr("cx", 10)
-                    .attr("cy", 10)
-                    .attr("r", 6)
-                    .attr("class", "pie legend-dot")
-                    .attr("fill", d => color(d.data.category));
-
-                // text alongside
-                g.append('text')
-                    .attr("x", 18)
-                    .attr("y", 14)
-                    .attr("class", "chart-legend-text")
-                    .text(d => `${d.data.category} - ${d.data.value} min`)
-
-                return g;
-            },
-            update => {
-                // Update transform to update positions
-                update.attr("transform", (_d, i) => {
-                    return `translate(0, ${i * 22})`;
-                });
-                update.select('circle')
-                    .attr("fill", d => color(d.data.category))
-                update.select('text')
-                    .text(d => `${d.data.category} - ${d.data.value} min`)
-                return update;
-            },
-            exit => exit.remove()
-        )
-
-    // Enable tooltip on hover to see data
-    groups.on('mouseenter', function(_event, d) {
-        showToolTip(this, `${d.data.category}: ${d.data.value}`);
-
-        // Calc midpoint (angle)
-        const rawMidpoint = (d.startAngle + d.endAngle) / 2;
-        const midpoint = rawMidpoint - (Math.PI / 2);
-        const dist = radius / 10;
-
-        // Calc x, y offsets for transform
-        const x = Math.cos(midpoint) * dist;
-        const y = Math.sin(midpoint) * dist;
-
-        // Transform
-        d3.select(this)
-            .transition().duration(200)
-            .attr("transform", `translate(${x}, ${y})`);
-    });
-    groups.on('mouseleave', function() {
-        hideToolTip();
-        d3.select(this)
-            .transition().duration(200)
-            .attr("transform", "translate(0, 0)");
-    });
-}
-
-export async function init() {
-    await refreshPieChart();
-
-    document.addEventListener('click', async (e) => {
-        const target = e.target as HTMLElement;
-        if (target.matches('.chart-range')) {
-            chartState.range = parseInt(target.dataset['range']!, 10);
-            await refreshPieChart();
-        }
-        else if (target.matches('.table-range')) {
-            const range = target.dataset['range']!;
-            const table = target.dataset['table']!;
-
-            const url = new URL(window.location.href);
-            url.searchParams.set(`${table}_range`, range);
-            window.location.href = url.toString();
-        }
-    });
 }
 
 function getData(lastNDays: number): Promise<PieDatum[]> {
@@ -227,3 +42,204 @@ function getData(lastNDays: number): Promise<PieDatum[]> {
         }, reject);
     });
 }
+
+class TimeEntriesChart {
+    private dims;
+    private pie;
+    private arc;
+    private color;
+    private radius;
+    private gLegend;
+    private gChart;
+    private gRoot;
+
+    constructor(containerSelector: string) {
+        this.dims = getChartDimensions(containerSelector);
+
+        this.radius = Math.min(this.dims.innerWidth, this.dims.innerHeight) / 2;
+
+        const svg = d3.select(containerSelector)
+            .append("svg")
+            .attr("width", this.dims.width)
+            .attr("height", this.dims.height);
+
+        this.gRoot = svg.append("g")
+            .attr("transform", `translate(${this.dims.margin.left}, ${this.dims.margin.top})`);
+
+        this.gChart = this.gRoot.append("g")
+        .attr("transform", `translate(${this.dims.innerWidth/2}, ${this.dims.innerHeight/2})`);
+
+        const pad = 20;
+        const legendXOffset = (this.dims.innerWidth / 2) + this.radius + pad;
+        this.gLegend = this.gRoot.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${legendXOffset}, 0)`);
+
+        // d3.pie() takes our array data and calculates angles
+        this.pie = d3.pie<PieDatum>().value(d => d.value);
+        // d3.arc() draws the curved slice shapes based on those angles
+        this.arc = d3.arc<d3.PieArcDatum<PieDatum>>()
+            .innerRadius(0)
+            .outerRadius(this.radius);
+        this.color = d3.scaleOrdinal(d3.schemeCategory10);
+    }
+
+    showEmptyChart() {
+        this.gLegend.selectAll('g.legend-item').remove();
+        this.gLegend.selectAll('.debug').remove();
+        this.gChart.selectAll('g.slice').remove();
+
+        const _emptyMessage = this.gChart.selectAll('text.empty-message')
+            .data([1])
+            .join("text")
+            .attr("class", "empty-message")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("text-anchor", "middle")
+            .attr("fill", "grey")
+            .text(`No time entry data for this period.`)
+    }
+
+    async refreshPieChart() {
+        const data = await getData(chartState.range);
+        if (data.length === 0) {
+            this.showEmptyChart();
+            return;
+        }
+        this.updatePieChart(data);
+    }
+
+    updatePieChart(data: PieDatum[]) {
+        this.gRoot.selectAll('.empty-message').remove();
+
+        const pieData = this.pie(data);
+
+        const groups = this.gChart.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
+            // .data(data, keyFn)
+            .data(pieData, d => d.data.category)
+            .join(
+                enter => {
+                    const g = enter.append("g").attr("class", "slice");
+
+                    // path (slice)
+                    g.append('path')
+                        .attr("class", "pie")
+                        .attr("fill", d => this.color(d.data.category))
+                        .each(
+                            function(this: ArcPathElement, d) {
+                                this._current = d;
+                            })
+                        .attr("d", this.arc);
+
+                    return g;
+                },
+                update => {
+                    const arc = this.arc; // Capture TimeEntriesChart's arc before .attrTween hijacks 'this'
+
+                    update.select("path")
+                        .transition().duration(500)
+                        .attrTween("d", function(d) {
+                            const el = this as ArcPathElement;        // 'this' = DOM element
+                            const i = d3.interpolate(el._current, d);
+                            el._current = i(1);
+                            return t => arc(i(t)) ?? "";
+                        });
+
+                    return update;
+                },
+                exit => exit.remove()
+            );
+
+        const _legendItems = this.gLegend.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend-item")
+            .data(pieData, d => d.data.category)
+            .join(
+                enter => {
+                    const g = enter.append("g")
+                        .attr("class", "legend-item")
+                        .attr("transform", (_d, i) => `translate(0, ${i * 22})`);
+
+                    // legend circle
+                    g.append('circle')
+                        .attr("cx", 10)
+                        .attr("cy", 10)
+                        .attr("r", 6)
+                        .attr("class", "pie legend-dot")
+                        .attr("fill", d => this.color(d.data.category));
+
+                    // text alongside
+                    g.append('text')
+                        .attr("x", 18)
+                        .attr("y", 14)
+                        .attr("class", "chart-legend-text")
+                        .text(d => `${d.data.category} - ${d.data.value} min`)
+
+                    return g;
+                },
+                update => {
+                    update.attr("transform", (_d, i) => {
+                        return `translate(0, ${i * 22})`;
+                    });
+                    update.select('circle')
+                        .attr("fill", d => this.color(d.data.category))
+                    update.select('text')
+                        .text(d => `${d.data.category} - ${d.data.value} min`)
+
+                    return update;
+                },
+                exit => exit.remove()
+            )
+
+        // Enable tooltip on hover to see data
+        const radius = this.radius; // Capture outside callback
+        groups.on('mouseenter', function(_event, d) {
+            showTooltip(this, `${d.data.category}: ${d.data.value}`);
+
+            // Don't trigger hover effect if slice is > 75% of circle (since 2pi is full circle, so here we do 1.5pi)
+            const sliceAngle = (d.endAngle - d.startAngle);
+            if (sliceAngle > Math.PI * 1.5) {
+                return;
+            }
+            // Calc midpoint (angle)
+            const rawMidpoint = (d.startAngle + d.endAngle) / 2;
+            const midpoint = rawMidpoint - (Math.PI / 2);
+            const dist = radius / 10;
+
+            // Calc x, y offsets for transform
+            const x = Math.cos(midpoint) * dist;
+            const y = Math.sin(midpoint) * dist;
+
+            // Transform slice
+            d3.select(this)
+                .transition().duration(D3_TRANSITION_DURATION_MS)
+                .attr("transform", `translate(${x}, ${y})`);
+        });
+        groups.on('mouseleave', function() {
+            hideTooltip();
+            d3.select(this)
+                .transition().duration(D3_TRANSITION_DURATION_MS)
+                .attr("transform", "translate(0, 0)");
+        });
+    }
+}
+
+export async function init() {
+    const time_entriesChart = new TimeEntriesChart('#time_tracking-chart-container');
+    await time_entriesChart.refreshPieChart();
+
+    document.addEventListener('click', async (e) => {
+        const target = e.target as HTMLElement;
+        if (target.matches('.chart-range')) {
+            chartState.range = parseInt(target.dataset['range']!, 10);
+            time_entriesChart.refreshPieChart();
+        }
+        else if (target.matches('.table-range')) {
+            const range = target.dataset['range']!;
+            const table = target.dataset['table']!;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set(`${table}_range`, range);
+            window.location.href = url.toString();
+        }
+    });
+}
+
