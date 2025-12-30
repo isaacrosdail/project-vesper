@@ -18,6 +18,9 @@ from app.api import api_bp
 from app.api.responses import api_response
 from app.api.service import release_slot, reserve_slot
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @api_bp.get('/profile/me')
 @login_required # type: ignore
@@ -44,7 +47,7 @@ def get_weather(session: 'Session', city: str, country: str, units: str) -> Any:
 
     # Reserve a slot atomically
     reserved_count = reserve_slot(session, api_name, today, DAILY_CALL_LIMIT)
-    current_app.logger.info(f"Reserved count after upsert: {reserved_count}")
+    logger.info(f"Reserved count after upsert: {reserved_count}")
     if reserved_count is None:
         return api_response(False, "Error: Conservative usage limit reached"), 429 # Too many requests/rate limiting
     
@@ -57,11 +60,11 @@ def get_weather(session: 'Session', city: str, country: str, units: str) -> Any:
         response = requests.get(url, timeout=10)
         response.raise_for_status() # raises on 4xx/5xx
     except requests.Timeout:
-        current_app.logger.exception("Upstream weather API timeout.")
+        logger.exception("Upstream weather API timeout.")
         release_slot(session, api_name, today)
         return api_response(False, "upstream_timeout"), 504
     except requests.RequestException:
-        current_app.logger.exception("Upstream weather API failed.")
+        logger.exception("Upstream weather API failed.")
         release_slot(session, api_name, today)
         return api_response(False, "upstream_failed"), 502
     else:
