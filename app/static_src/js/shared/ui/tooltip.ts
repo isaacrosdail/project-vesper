@@ -3,12 +3,11 @@
 
 /**
  * To use for a given element:
- * .tooltip for styling, data-tip for behavior
- * Uses passed text if provided, otherwise falls back to data-tip
- * Add 'data-tip' attr with desired tooltip text
+ * - `.tooltip` for styling, `data-tip` for behavior
+ * - Uses passed text if provided, otherwise falls back to `data-tip`
+ * - Add 'data-tip' attr with desired tooltip text
  */
-
-export function showToolTip(targetEl: HTMLElement | SVGElement, tooltipText?: string): void {
+export function showTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: string): void {
     const text = tooltipText || targetEl.getAttribute('data-tip');
     if (!text) {
         console.warn('No tooltip text provided');
@@ -39,7 +38,7 @@ export function showToolTip(targetEl: HTMLElement | SVGElement, tooltipText?: st
     tooltip.style.setProperty('--carrot-pos', `${arrowX}px`);
 }
 
-export function hideToolTip() {
+export function hideTooltip() {
     document.querySelector<HTMLElement>('#tooltip')?.remove();
 }
 
@@ -54,10 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn('Tooltip element missing data-tip attribute: ', element);
                 return;
             }
-            showToolTip(element, tooltipText);
+            showTooltip(element, tooltipText);
         });
         element.addEventListener('mouseleave', () => {
-            hideToolTip();
+            hideTooltip();
         });
     });
 });
