@@ -10,8 +10,8 @@
     <title>{% block title %}Vesper{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/app.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/favicon.png') }}">
-    {# Sets data-theme value so CSS can apply proper theme from cookie BEFORE the page is fully loaded #}
-    {# Prevents the "flash" of the incorrect theme on page load #}
+    {# Set data-theme value so CSS can apply theme from cookie #}
+    {# Waiting on JS elsewhere results in "flash" of incorrect theme on page load #}
     <script nonce="{{ nonce }}">
         (function () {
             const cookie = document.cookie;
@@ -25,7 +25,7 @@
         })();
     </script>
 </head>
-{# Ditching flash() entirely, now we can just make redir routes push needed toast info to session & pull from that #}
+{# Backend set_toast() pushes messsage + type here, which JS reads on page load #}
 <body data-toast='{{ session.pop("toast", None) | tojson | safe }}'>
     <div class="wrapper">
         <header>
