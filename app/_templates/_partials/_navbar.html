@@ -22,9 +22,7 @@
     {% endif %}
 {% endmacro %}
 
-{# TODO: Note: nav-desktop is the desktop name, need to rename after switching over logic/styling #}
-{% macro navigation_links(type='nav-desktop') %}
-<div id="{{ type }}" class="{{ type }}">
+{% macro nav_links_list() %}
     {% if current_user.is_authenticated %}
         {{ nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
         {{ nav_link('Habits', 'habits.dashboard', request.endpoint) }}
@@ -35,8 +33,8 @@
     
     {% if current_user.is_anonymous %}
         {{ nav_link('Log in', 'auth.login', request.endpoint) }}
+        {{ nav_link('Register', 'auth.register', request.endpoint) }}
     {% endif %}
-</div>
 {% endmacro %}
 
 <div class="nav-anchor">
@@ -50,15 +48,16 @@
                         aria-controls="nav-mobile-container" 
                         aria-expanded="false" 
                         aria-label="Toggle navigation menu">
-                    {{ ui.split_hamburger_svg() }}
+                    {{ ui.hamburger_svg() }}
                 </button>
                 
-                {{ navigation_links() }}
+                <div class="nav-desktop">
+                    {{ nav_links_list() }}
+                </div>
             </div>
 
-            {# Settings modal, theme select, etc. #}
+            {# Right: Profile settings modal & theme select #}
             <div class="nav-right">
-
                 {% if current_user.is_authenticated %}
                     {{ profile_btn() }}
                 {% endif %}
@@ -80,7 +79,9 @@
     </nav>
 
     <div id="nav-mobile-container" class="nav-mobile-container" inert>
-        {{ navigation_links('nav-mobile') }}
+        <div class="nav-mobile">
+            {{ nav_links_list() }}
+        </div>
     </div>
 </div>
 
@@ -88,20 +89,22 @@
     <h3>User Account Settings</h3>
     <button id="close-profile-modal-btn" class="btn-icon btn-round modal-close" type="button">&times;</button>
 
-    <form action="{{ url_for('auth.logout') }}" method="POST" data-noajax>
+    <form action="{{ url_for('auth.logout') }}" method="post" data-noajax>
         {# TODO: Add CSRF token here #}
         <button class="btn btn-destructive" type="submit">Log out</button>
     </form>
 
     {% if g.has_dev_tools %}
-    <h3>Dev Tools</h3>
-    <div class="_stack-md">
-        <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
-        <a class="btn btn-secondary" href="{{ url_for('devtools.show_routes')}}">Show Routes</a>
-        <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
-        <form action="{{ url_for('auth.reset_dev') }}" method="POST" data-noajax>
-            <button class="btn btn-destructive" type="submit">Reset Dev</button>
-        </form>
-    </div>
+        <h3>Dev Tools</h3>
+        <div class="stack-md">
+            <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
+            <a class="btn btn-secondary" href="{{ url_for('devtools.show_routes')}}">Show Routes</a>
+            <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
+            <form action="{{ url_for('auth.reset_dev') }}" method="post" data-noajax>
+                <button class="btn btn-destructive" type="submit">
+                    Reset Dev
+                </button>
+            </form>
+        </div>
     {% endif %}
 </dialog>
