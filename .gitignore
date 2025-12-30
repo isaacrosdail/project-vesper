@@ -37,7 +37,8 @@ htmlcov/
 # Node / front-end artifacts
 # ==========================
 node_modules/
-app/static/**
+app/static/css/**
+app/static/js/**
 
 # ==========================
 # Docker scripts
