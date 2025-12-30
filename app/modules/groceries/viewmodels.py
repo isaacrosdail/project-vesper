@@ -58,11 +58,11 @@ class ProductPresenter(BasePresenter):
     COLUMN_CONFIG = {
         "id": {"label": "ID", "priority": "desktop-only"},
         "name": {"label": "Product Name", "priority": "essential"},
-        "category": {"label": "Category", "priority": "desktop-only"},
+        "category": {"label": "Category", "priority": "essential"},
         "barcode": {"label": "Barcode", "priority": "desktop-only"},
         "net_weight_display": {"label": "Net Weight", "priority": "desktop-only", "sort_field": "net_weight"},
         "unit_type": {"label": "Unit", "priority": "desktop-only"},
-        "calories_per_100g": {"label": "Cals (100g)", "priority": "essential"},
+        "calories_per_100g": {"label": "Calories (per 100g)", "priority": "essential"},
         "created_at": {"label": "Created", "priority": "desktop-only"}
     }
 
