@@ -16,8 +16,8 @@ from app.shared.parsers import parse_task_form_data
 from app.shared.decorators import login_plus_session
 
 
-@api_bp.route("/tasks/tasks", methods=["POST"])
-@api_bp.route("/tasks/tasks/<int:task_id>", methods=["PUT"])
+@api_bp.post("/tasks/tasks")
+@api_bp.put("/tasks/tasks/<int:task_id>")
 @login_plus_session
 def tasks(session: 'Session', task_id: int | None = None) -> Any:
     """Create or update a task (POST for new, PUT for edit)."""

@@ -19,7 +19,7 @@ from app.shared.parsers import get_table_params
 habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefix="/habits")
 
 
-@habits_bp.route("/dashboard", methods=["GET"])
+@habits_bp.get("/dashboard")
 @login_plus_session
 def dashboard(session: 'Session') -> Any:
 

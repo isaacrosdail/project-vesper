@@ -19,12 +19,12 @@ devtools_bp = Blueprint('devtools', __name__, url_prefix='/devtools', template_f
 
 # Only register style_reference in development
 if os.environ.get('APP_ENV') == 'dev':
-    @devtools_bp.route('/style_reference')
+    @devtools_bp.get('/style_reference')
     @login_required # type: ignore
     def style_reference() -> Any:
         return render_template('style-reference.html')
     
-@devtools_bp.route('/routes')
+@devtools_bp.get('/routes')
 @requires_owner
 def show_routes() -> Any:
     routes = []

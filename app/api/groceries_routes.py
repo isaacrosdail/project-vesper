@@ -18,8 +18,8 @@ from app.shared.decorators import login_plus_session
 from app.shared.parsers import parse_product_data, parse_transaction_data
 
 
-@api_bp.route("/groceries/products", methods=["POST"])
-@api_bp.route("/groceries/products/<int:product_id>", methods=["PUT"])
+@api_bp.post("/groceries/products")
+@api_bp.put("/groceries/products/<int:product_id>")
 @login_plus_session
 def products(session: 'Session', product_id: int | None = None) -> Any:
 
@@ -44,8 +44,8 @@ def products(session: 'Session', product_id: int | None = None) -> Any:
 
 
 
-@api_bp.route("/groceries/transactions", methods=["POST"])
-@api_bp.route("/groceries/transactions/<int:transaction_id>", methods=["PUT"])
+@api_bp.post("/groceries/transactions")
+@api_bp.put("/groceries/transactions/<int:transaction_id>")
 @login_plus_session
 def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
     groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
@@ -90,7 +90,7 @@ def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
 
 
 
-@api_bp.route("/groceries/shopping-lists/items", methods=["POST"])
+@api_bp.post("/groceries/shopping-lists/items")
 @login_plus_session
 def add_shoppinglist_item(session: 'Session') -> Any:
     groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
