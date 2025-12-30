@@ -3,7 +3,11 @@
 {% import '_partials/_ui.html' as ui %}
 {% import '_partials/_forms.html' as forms %}
 <!DOCTYPE html>
-<html lang="{{ default_lang or 'en' }}" data-page="{{ request.endpoint }}">
+<html
+    lang="{{ default_lang or 'en' }}"
+    data-page="{{ request.endpoint }}"
+    data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
+    >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,7 +43,7 @@
             {% block content %}{% endblock %}
         </main>
 
-        <footer class="bg-muted">
+        <footer>
             &copy; 2025
         </footer>
     </div>

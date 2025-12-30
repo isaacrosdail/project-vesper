@@ -46,6 +46,7 @@ export async function initMain() {
 }
 
 async function initUserStore() {
+    if (document.documentElement.dataset['authenticated'] !== 'true') return;
     try {
         await userStore.fetch();
         if (!userStore.data?.timezone) {
