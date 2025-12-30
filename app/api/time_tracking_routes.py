@@ -17,6 +17,8 @@ from app.shared.parsers import parse_time_entry_form_data
 from app.shared.datetime.helpers import last_n_days_range
 from app.shared.decorators import login_plus_session
 
+import logging
+logger = logging.getLogger(__name__)
 
 @api_bp.post('/time_tracking/time_entries')
 @api_bp.put('/time_tracking/time_entries/<int:entry_id>')
@@ -26,7 +28,7 @@ def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
 
         typed_data, errors = validate_time_entry(parsed_data)
         if errors:
-            current_app.logger.info(f"Validation errors: {errors}")
+            logger.info(f"Validation errors: {errors}")
             return validation_failed(errors), 400
 
         repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
