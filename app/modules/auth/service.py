@@ -2,8 +2,9 @@
 from typing import Any, Callable
 
 from functools import wraps
+import os
 
-from flask import abort
+from flask import abort, current_app
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 
@@ -53,7 +54,7 @@ class AuthService:
     def register_user(self, *, username: str, password: str, name: str | None = None,
                       role: UserRoleEnum = UserRoleEnum.USER,
                       lang: UserLangEnum = UserLangEnum.EN) -> dict[str, Any]:
-        """Create user account. Must be pre-validated."""
+        """Create user account. Must be pre-validated. Sets default userRole and userLang to USER, EN, respectively."""
 
         try:
             user = self.repo.create_user(username, password, name, role, lang)
@@ -74,13 +75,15 @@ class AuthService:
             },
             "owner": {
                 "username": "owner",
-                "password": "owner123",
+                "password": os.environ.get("OWNER_PASSWORD"),
                 "name": "Owner",
                 "role": UserRoleEnum.OWNER,
                 "lang": UserLangEnum.EN
             }
         }
         config = user_configs[user_type]
+        if user_type == "owner" and not config.get("password"):
+            raise RuntimeError("Missing OWNER_PASSWORD env var for owner template user")
         user = self.repo.get_user_by_username(config["username"])
 
         if not user:
