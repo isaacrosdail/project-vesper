@@ -30,6 +30,10 @@
 :root {
     --min-navbar-height: 4rem;
     --confetti-size-base: 0.375rem;
+
+    /* D3 charts starting dimensions */
+    --chart-width: 400px;
+    --chart-height: 300px;
 }
 ::selection {
     background-color: var(--bg-selection);
@@ -208,7 +212,10 @@ td .status-span.is-done > svg {
 svg {
     overflow: visible; /* for hovering pie chart slices */
 }
+/* Gonna centrally size our D3 charts here as well to prevent pop-in/down on render */
 [id$="chart-container"] {
+    height: var(--chart-height);
+    width: var(--chart-width);
     align-self: center;
 }
 
