@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.modules.metrics.repository import DailyMetricsRepository
-from app.modules.metrics.constants import WAKE_MUST_BE_AFTER_SLEEP
 from app.shared.datetime.helpers import parse_time_to_datetime
 from app.api.responses import service_response
 
@@ -16,8 +15,14 @@ class DailyMetricsService:
         self.user_tz = user_tz
 
     def save_daily_entry(self, typed_data: dict[str, Any], entry_id: int | None) -> dict[str, Any]:
-        # typed_data["entry_date"] is already a datetime.date obj from validators
-        entry_date = typed_data.pop("entry_date")
+        """
+        Save or update daily metrics entry with sleep/wake time handling.
+
+        Handles datetime conversion for sleep/wake times, automatically adjusting sleep_time to previous day when
+        it would otherwise occur after wake_time (eg, sleep at 22:00, wake at 08:00). Calculates sleep_duration_minutes from
+        the adjusted timestamps.
+        """
+        entry_date: datetime = typed_data.pop("entry_date")
 
         entry_datetime = datetime(
             entry_date.year, entry_date.month, entry_date.day,
@@ -26,28 +31,17 @@ class DailyMetricsService:
         )
         typed_data["entry_datetime"] = entry_datetime
 
-        # Convert wake/sleep times to full datetimes
-        # NOTE: Currently assuming wake_time belongs to entry date, and sleep_time to the night prior
+        day_of = typed_data["entry_datetime"].date()
         if "wake_time" in typed_data:
-            day_of = typed_data["entry_datetime"].date()
             typed_data["wake_time"] = parse_time_to_datetime(typed_data["wake_time"], day_of, self.user_tz)
         if "sleep_time" in typed_data:
-            prev_day = (typed_data["entry_datetime"] - timedelta(days=1)).date()
-            typed_data["sleep_time"] = parse_time_to_datetime(typed_data["sleep_time"], prev_day, self.user_tz)
+            typed_data["sleep_time"] = parse_time_to_datetime(typed_data["sleep_time"], day_of, self.user_tz)
 
-        # Check wake/sleep times are sensible
+        # Assign sleep_time dt to yesterday for cases where sleep_time >= wake_time
         if "wake_time" in typed_data and "sleep_time" in typed_data:
+            if typed_data["sleep_time"] >= typed_data["wake_time"]:
+                typed_data["sleep_time"] -= timedelta(days=1)
 
-            if typed_data["wake_time"] <= typed_data["sleep_time"]:
-                return service_response(
-                    False,
-                    "Wake/Sleep time check failed",
-                    errors={
-                        "wake_time": [WAKE_MUST_BE_AFTER_SLEEP],
-                        "sleep_time": [WAKE_MUST_BE_AFTER_SLEEP]
-                    }
-                )
-            
             ## Calc sleep_duration_minutes
             duration = typed_data["wake_time"] - typed_data["sleep_time"]
             typed_data["sleep_duration_minutes"] = int(duration.total_seconds() / 60)
