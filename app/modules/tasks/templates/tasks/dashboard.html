@@ -12,9 +12,9 @@
         {{ ui.plus_btn('tasks-entry-dashboard-btn') }}
     </div>
     {% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'tasks', tasks_params, sortable=True) %}
-        <td class="{{ headers[0].priority }}" data-item-id="{{ item.id }}" data-module="tasks" data-subtype="tasks" data-field="name">
-            <span class="name-span editable-cell"
-                data-tip="Double-click to edit task name.">
+        <td class="{{ headers[0].priority }}" data-item-id="{{ item.id }}" data-module="tasks" data-subtype="tasks" data-field="name"
+            data-tip="Double-click to edit task name.">
+            <span class="name-span editable-cell">
                 {{ item.name }}
             </span>
             <span class="btn-lg status-span {% if item.is_done %}is-done{% endif %}">
