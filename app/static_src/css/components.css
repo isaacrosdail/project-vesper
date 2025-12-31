@@ -186,7 +186,7 @@ dialog::backdrop {
 .tooltip:not(#no-after)::after {
     position: absolute;
     top: -0.4rem;
-    left: var(--carrot-pos, 50%); /* --carrot-pos calculated via JS */
+    left: var(--caret-pos, 50%); /* --caret-pos calculated via JS */
     content: "";
     border: 0.4rem solid transparent; /* forms our triangle "arrow" */
     border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
