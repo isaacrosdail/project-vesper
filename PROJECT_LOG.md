@@ -18,6 +18,30 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+
+
+
+########## 29TH: LEFT OFF: Mid-rebasing, need to figure out all the "SQUASH into `<commit_hash>`" things. I forgot rebasing gives all subsequently-changed commits new hashes, sooo....fun. :(
+
+## [Wed 31.12.25]
+1. Wrap up tooltip.ts fixing
+    - Fixed bug. Cause: getBoundingClientRect needed to be re-invoked in the else clause AFTER we did style.top and style.left. I think this is because we needed a fresh layout calculation since it seemed the bug was it not updating the width of the tooltip box AFTER we add text. Meaning a tooltip with text of 'h' and another with text of 'Hey there this is a long msg omg hahahahaha' would both be equal, which is of course wrong.
+2. 
+
+## [Tues 30.12.25]
+**Log:**
+1. Fix: Sleep/wake time calculation in metrics service
+    - Previously assumed sleep_time was always from previous day, which...doesn't quite work (eg, sleep 14:00 -> wake 15:00 = 25 hours of sleep!)
+    - We now auto-adjust sleep_time to previous day only when sleep_time >= wake_time
+    - Added tooltip to sleep_time form group explaining the auto-adjustment behavior
+2. Fix: Tooltip positioning in dialog modals
+    - Problem: Dialogs create their own stacking context, causing our tooltips to render beneath them
+    - We now detect parent dialog via `.closest('dialog')` & append tooltip as ITS child (with absolute positioning)
+    - Non-dialog tooltips still append to document body (with fixed positioning)
+    - Also: cleaned up JSDocs, fixed typos and learned a new word (carrot -> caret)
+3. In hell: tooltip is being a NIGHTMARE. LEFT OFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF========================================32423423=================================
+
+
 ## [Sun 28.12.25]
 **Log:**
 1. Cleanup:
