@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-import { showTooltip, hideTooltip } from '../shared/ui/tooltip';
+import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
 import { apiRequest } from '../shared/services/api';
 import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
 
@@ -144,8 +144,8 @@ class MetricsChart {
             );
         staticLine.on('mouseenter', function(this: d3.BaseType, _event: Event, d: number) {
             const el = this as SVGRectElement;
-            showTooltip(el, config.label(d));
-        }).on('mouseleave', hideTooltip);
+            createTooltip(el, config.label(d));
+        }).on('mouseleave', removeTooltip);
     }
 
     updateLineChart(data: LineDataPoint[], metricType: MetricType) {
@@ -218,10 +218,10 @@ class MetricsChart {
 
         circles.on('mouseenter', function(this: d3.BaseType, _event: Event, d: LineDataPoint) {
             const el = this as SVGRectElement;
-            showTooltip(el, `${metricType}: ${d.value}`)
+            createTooltip(el, `${metricType}: ${d.value}`)
         });
         circles.on('mouseleave', () => {
-            hideTooltip();
+            removeTooltip();
         })
     }
 
