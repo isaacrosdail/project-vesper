@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-import { hideTooltip, showTooltip } from '../shared/ui/tooltip';
+import { removeTooltip, createTooltip } from '../shared/ui/tooltip';
 import { apiRequest } from '../shared/services/api';
 import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
 
@@ -192,7 +192,7 @@ class TimeEntriesChart {
         // Enable tooltip on hover to see data
         const radius = this.radius; // Capture outside callback
         groups.on('mouseenter', function(_event, d) {
-            showTooltip(this, `${d.data.category}: ${d.data.value}`);
+            createTooltip(this, `${d.data.category}: ${d.data.value}`);
 
             // Don't trigger hover effect if slice is > 75% of circle (since 2pi is full circle, so here we do 1.5pi)
             const sliceAngle = (d.endAngle - d.startAngle);
@@ -214,7 +214,7 @@ class TimeEntriesChart {
                 .attr("transform", `translate(${x}, ${y})`);
         });
         groups.on('mouseleave', function() {
-            hideTooltip();
+            removeTooltip();
             d3.select(this)
                 .transition().duration(D3_TRANSITION_DURATION_MS)
                 .attr("transform", "translate(0, 0)");
