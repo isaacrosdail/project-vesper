@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 import { apiRequest } from '../shared/services/api';
-import { showTooltip, hideTooltip } from '../shared/ui/tooltip';
+import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
 import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
 
 type BarData = {
@@ -101,8 +101,8 @@ class HabitsChart {
         );
 
         bars.on('mouseenter', function(this: d3.BaseType, _event: Event, d: BarData) {
-            showTooltip(this as SVGRectElement, `${d.name}: ${d.count}`);
-        }).on('mouseleave', hideTooltip);
+            createTooltip(this as SVGRectElement, `${d.name}: ${d.count}`);
+        }).on('mouseleave', removeTooltip);
     }
 
     showEmptyChart() {
