@@ -52,11 +52,13 @@
         {% endcall %}
     </div>
 
-    <div>
-        <span class="highlight-label">Today's Frog: </span>
-        <span>
-            {{ today_frog.name if today_frog else "" }}
-        </span>
+    <div class="tasks-section">
+        <div class="highlight-item">
+            <span >Today's Frog: </span>
+            <span class="highlight-label">
+                {{ today_frog.name if today_frog else "" }}
+            </span>
+        </div>
         <ul class="item-list">
         {% for task in filtered_tasks %}
             <li class="item {% if task.is_done %}completed{% endif %}">
