@@ -4,14 +4,11 @@ import { apiRequest } from './services/api.js';
 
 
 /**
- * Remove a table row from the DOM and insert placeholder text if table becomes empty.
+ * Remove a table row from the DOM and insert placeholder text if table is now empty.
  * 
  * @param itemId - Item ID used to query for the row via [data-item-id] attribute
  */
-export function removeTableRow(itemId: string): void {
-    const itemRow = document.querySelector(`[data-item-id="${itemId}"]`);
-    if (!itemRow) return;
-
+export function removeTableRow(itemRow: HTMLElement): void {
     const tableBody = itemRow.closest('tbody');
     itemRow.remove();
 
