@@ -5,7 +5,11 @@
 <!DOCTYPE html>
 <html
     lang="{{ default_lang or 'en' }}"
-    data-page="{{ request.endpoint }}"
+    {% set data_page = request.endpoint %}
+    {% if request.endpoint == 'main.home' and not current_user.is_authenticated %}
+        {% set data_page = "main.landing_page" %}
+    {% endif %}
+    data-page="{{ data_page }}"
     data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
     >
 <head>
