@@ -97,11 +97,11 @@ function openMenu(triggerInfo: TriggerInfo) {
     document.body.appendChild(menu);
 }
 
-function closeMenu() {
-    const menu = document.querySelector('.context-menu');
-    if (!menu) return;
-
-    menu.remove();
+/**
+ * Queries for `.context-menu` and removes it.
+ */
+export function closeMenu() {
+    document.querySelector('.context-menu')?.remove();
 }
 
 /**
@@ -223,7 +223,12 @@ async function handleDelete(menuContext: ContextObject['context']) {
 
     apiRequest('DELETE', url, () => {
         makeToast(`${getSubtypeLabel(subtype)} deleted`, 'success');
-        removeTableRow(itemId);
+        const itemRow = document.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
+        if (!itemRow) {
+            console.warn('Error: could not find corresponding table row for removal.');
+            return;
+        }
+        removeTableRow(itemRow);
     });
 }
 
@@ -272,9 +277,8 @@ function toggleTaskComplete(menuContext: ContextObject['context']) {
         } else {
             delete row.dataset['isDone'];
         }
-        if (statusSpan) {
-            statusSpan.classList.toggle('is-done');
-        }
+        statusSpan?.classList.toggle('is-done');
+
         makeToast('Task status updated', 'success')
     }, data);
 }
@@ -318,12 +322,6 @@ document.addEventListener('keydown', (e) => {
         closeMenu();
     }
 });
-
-
-
-// window.addEventListener('blur', () => {
-//     closeMenu();
-// });
 
 document.addEventListener('click', async (e) => {
     const menu = document.querySelector('.context-menu');
@@ -398,24 +396,24 @@ function addShoppingListItemToDOM(itemId: string, productId: string, productName
     if (!ul) {
         throw new Error('Shopping list <ul> not found')
     }
-    // Remove placeholder text
-    document.querySelector('#list-empty')?.remove();
+
+    document.querySelector('#list-empty')?.remove(); // placeholder text
 
     // Clone the contents of our template for the new li
-    const template = document.querySelector('#shoppinglist-item-template');
-    const li = (template as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment;
+    const template = document.querySelector<HTMLTemplateElement>('#shoppinglist-item-template');
+    const fragment = template?.content.cloneNode(true) as DocumentFragment;
 
-    const liEl = li.querySelector('li');
-    if (!liEl) throw new Error('li not found in template');
+    const li = fragment.querySelector('li');
+    if (!li) throw new Error('li not found in template');
 
-    const itemText = liEl.querySelector('.item-text');
-    const itemQty = liEl.querySelector('.item-qty');
+    const itemText = li.querySelector('.item-text');
+    const itemQty = li.querySelector('.item-qty');
     if (!itemText || !itemQty) throw new Error('Template structure invalid');
 
     itemText.textContent = productName;
     itemQty.textContent = String(quantity);
-    liEl.dataset['itemId'] = itemId;
-    liEl.dataset['productId'] = productId;
-    liEl.dataset['quantityWanted'] = String(quantity);
-    ul.appendChild(liEl);
+    li.dataset['itemId'] = itemId;
+    li.dataset['productId'] = productId;
+    li.dataset['quantityWanted'] = String(quantity);
+    ul.appendChild(li);
 }
