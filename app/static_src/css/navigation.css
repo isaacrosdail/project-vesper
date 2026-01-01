@@ -47,10 +47,6 @@
     background: var(--accent-subtle);
     transition: width 0.1s ease;
 }
-.nav-link:hover::after,
-.nav-link.active::after {
-    width: 100%;
-}
 .nav-link:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-offset);
