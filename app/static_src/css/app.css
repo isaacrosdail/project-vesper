@@ -97,13 +97,25 @@ footer {
     .nav-link::after {
         display: none;
     }
+    .nav-link:hover,
+    .nav-link[aria-current="page"] {
+        border-radius: var(--border-radius);
+    }
     .nav-link:hover {
         background-color: var(--accent-subtle);
+    }
+    .nav-link[aria-current="page"] {
+        background-color: color-mix(in oklch, var(--accent-subtle) 85%, grey);
     }
 }
 @media (width > 768px) {
     .hamburger-btn { display: none; }
     .nav-mobile-container { display: none; }
+
+    .nav-link:hover::after,
+    .nav-link[aria-current="page"]::after {
+        width: 100%;
+    }
 }
 
 /* TODO: Tune this later as we add some basic animations/transitions */

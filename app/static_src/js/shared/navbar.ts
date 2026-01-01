@@ -1,52 +1,60 @@
 // Auto-runner, attaches DOM listeners on DOMContentLoaded at top level
 
-function toggleMobileNav(mobileNav: HTMLElement, hamburgerBtn: HTMLElement): void {
-    mobileNav?.classList.toggle('is-open');
-    const isOpen = mobileNav?.classList.contains('is-open'); // set proper bool for is-open state
-    hamburgerBtn.setAttribute('aria-expanded', String(isOpen)); // toggle aria-expanded value
-    hamburgerBtn.classList.toggle('is-open', isOpen);
-    if (isOpen) {
-        mobileNav.removeAttribute('inert');
-        mobileNav.querySelector('a')?.focus(); // focus on first anchor el in nav
+function setMobileNavOpen(shouldBeOpen: boolean, navMobileContainer: HTMLElement, hamburgerBtn: HTMLElement): void {
+    navMobileContainer.classList.toggle('is-open', shouldBeOpen);
+    hamburgerBtn.classList.toggle('is-open', shouldBeOpen);
+    hamburgerBtn.setAttribute('aria-expanded', String(shouldBeOpen)); // toggle aria-expanded value
+
+    if (shouldBeOpen) {
+        navMobileContainer.removeAttribute('inert');
+        navMobileContainer.querySelector('a')?.focus();
     } else {
-        mobileNav.setAttribute('inert', '');
+        navMobileContainer.setAttribute('inert', '');
     }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    const mobileNav = document.querySelector<HTMLElement>('#nav-mobile-container');
-    const modal = document.querySelector<HTMLDialogElement>('.profile-modal');
-    const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
+    const navMobileContainer = document.querySelector<HTMLElement>('#nav-mobile-container');
     const hamburgerBtn = document.querySelector<HTMLButtonElement>('.hamburger-btn');
-    if (!mobileNav || !modal || !hamburgerBtn) return;
+    const profileModal = document.querySelector<HTMLDialogElement>('.profile-modal');
+    const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
 
     document.addEventListener('click', (e) => {
-        const isOpen = mobileNav?.classList.contains('is-open');
         if (!(e.target instanceof HTMLElement)) return;
 
-        // Toggle mobile nav
-        if (e.target.matches('.hamburger-btn')) {
-            toggleMobileNav(mobileNav, hamburgerBtn);
+        // Profile button
+        if (profileModal) {
+            if (e.target.matches('.profile-btn')) profileModal.showModal();
+            if (e.target.matches('#close-profile-modal-btn')) profileModal.close();
         }
 
-        // TODO: Auto-close mobile-nav upon click elsewhere
-        // mobile nav is open + click wasnt in navbar
-        if (isOpen && !e.target.closest('#mobilenav') && !e.target.matches('.hamburger-btn')) {
-            toggleMobileNav(mobileNav, hamburgerBtn);
+        // Mobile nav
+        if (!navMobileContainer || !hamburgerBtn) return;
+        const isOpen = navMobileContainer.classList.contains('is-open');
+
+        if (e.target.matches('.hamburger-btn')) {
+            setMobileNavOpen(!isOpen, navMobileContainer, hamburgerBtn);
+            return;
         }
-        if (e.target.matches('.profile-btn')) {
-            modal?.showModal();
+        if (isOpen && !e.target.closest('.nav-mobile')) {
+            setMobileNavOpen(false, navMobileContainer, hamburgerBtn);
+            return;
         }
-        if (e.target.matches('#close-profile-modal-btn')) {
-            modal?.close();
+
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            profileModal?.close();
         }
     });
 
     // Reset nav state when switching to desktop
     mq.addEventListener('change', (e) => {
+        if (!navMobileContainer || !hamburgerBtn) return;
         // True when window <= 768px
-        if (mobileNav?.classList.contains('is-open') && !e.matches) {
-            toggleMobileNav(mobileNav, hamburgerBtn);
+        if (!e.matches && navMobileContainer.classList.contains('is-open')) {
+            setMobileNavOpen(false, navMobileContainer, hamburgerBtn);
         }
     });
 });
