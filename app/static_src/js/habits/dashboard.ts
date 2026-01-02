@@ -13,14 +13,10 @@ const chartState = {
     range: 7,
 }
 
-function getHabitsData(lastNDays: number): Promise<BarData[]> {
-    return new Promise((resolve, reject) => {
-        const url = `/habits/completions/summary?lastNDays=${lastNDays}`;
-        apiRequest('GET', url, (responseData) => {
-            const entries = responseData.data;
-            resolve(entries);
-        }, reject);
-    });
+async function getHabitsData(lastNDays: number): Promise<BarData[]> {
+    const url = `/habits/completions/summary?lastNDays=${lastNDays}`;
+    const response = await apiRequest('GET', url, null);
+    return response.data;
 }
 
 class HabitsChart {

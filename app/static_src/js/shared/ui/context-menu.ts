@@ -179,32 +179,34 @@ function handleEdit(menuContext: ContextObject['context']) {
 
     const url = `/${module}/${subtype}/${itemId}`;
 
-    apiRequest('GET', url, (responseData) => {
-        modal.dataset.mode = 'edit'; // to direct submits to PATCH instead of POST
-        modal.dataset.itemId = responseData.data.id;
-        modal.dataset.subtype = subtype;
+    apiRequest('GET', url, null, {
+        onSuccess: (responseData) => {
+            modal.dataset.mode = 'edit'; // to direct submits to PATCH instead of POST
+            modal.dataset.itemId = responseData.data.id;
+            modal.dataset.subtype = subtype;
 
-        modal.showModal();
-        populateModalFields(modal, responseData.data);
+            modal.showModal();
+            populateModalFields(modal, responseData.data);
 
-        // Set text
-        const legend = modal.querySelector('legend');
-        if (!legend?.textContent) {
-            throw new Error('Modal legend missing or empty');
-        }
-        legend.dataset['originalText'] = legend.textContent;
-        legend.textContent = `Edit ${getSubtypeLabel(subtype)}`;
+            // Set text
+            const legend = modal.querySelector('legend');
+            if (!legend?.textContent) {
+                throw new Error('Modal legend missing or empty');
+            }
+            legend.dataset['originalText'] = legend.textContent;
+            legend.textContent = `Edit ${getSubtypeLabel(subtype)}`;
 
-        if (subtype === 'transactions') {
-            const productSelectInput = modal.querySelector<HTMLSelectElement>('#product_id');
-            const productInputHidden = modal.querySelector<HTMLInputElement>('#product_id_hidden');
-            if (productSelectInput && productInputHidden) {
-                productSelectInput.dataset['originalInnerHTML'] = productSelectInput.innerHTML;
-                productSelectInput.innerHTML = `<option selected>${responseData.data.product_name}</option>`;
-                
-                productSelectInput.dataset['initialDisabled'] = String(productSelectInput.disabled);
-                productSelectInput.disabled = true;
-                productInputHidden.value = responseData.data.product_id;
+            if (subtype === 'transactions') {
+                const productSelectInput = modal.querySelector<HTMLSelectElement>('#product_id');
+                const productInputHidden = modal.querySelector<HTMLInputElement>('#product_id_hidden');
+                if (productSelectInput && productInputHidden) {
+                    productSelectInput.dataset['originalInnerHTML'] = productSelectInput.innerHTML;
+                    productSelectInput.innerHTML = `<option selected>${responseData.data.product_name}</option>`;
+                    
+                    productSelectInput.dataset['initialDisabled'] = String(productSelectInput.disabled);
+                    productSelectInput.disabled = true;
+                    productInputHidden.value = responseData.data.product_id;
+                }
             }
         }
     });
@@ -221,14 +223,16 @@ async function handleDelete(menuContext: ContextObject['context']) {
     const { itemId, module, subtype } = menuContext;
     const url = `/${module}/${subtype}/${itemId}`;
 
-    apiRequest('DELETE', url, () => {
-        makeToast(`${getSubtypeLabel(subtype)} deleted`, 'success');
-        const itemRow = document.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
-        if (!itemRow) {
-            console.warn('Error: could not find corresponding table row for removal.');
-            return;
+    apiRequest('DELETE', url, null, {
+        onSuccess: () => {
+            makeToast(`${getSubtypeLabel(subtype)} deleted`, 'success');
+            const itemRow = document.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
+            if (!itemRow) {
+                console.warn('Error: could not find corresponding table row for removal.');
+                return;
+            }
+            removeTableRow(itemRow);
         }
-        removeTableRow(itemRow);
     });
 }
 
@@ -243,18 +247,20 @@ function handleAddToShoppingList(menuContext: ContextObject['context']) {
     const url = '/groceries/shopping-lists/items';
     const data = { product_id: productId, quantity_wanted: quantityWanted };
 
-    apiRequest('POST', url, (responseData) => {
-        const { id, product_id, product_name } = responseData.data;
-        const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${productId}"]`);
-        if (existingLi) {
-            const newQty = updateQty(existingLi);
-            makeToast(`Updated ${product_name} quantity to ${newQty}`, 'success');
-            return;
-        }
+    apiRequest('POST', url, data, {
+        onSuccess: (responseData) => {
+            const { id, product_id, product_name } = responseData.data;
+            const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${productId}"]`);
+            if (existingLi) {
+                const newQty = updateQty(existingLi);
+                makeToast(`Updated ${product_name} quantity to ${newQty}`, 'success');
+                return;
+            }
 
-        addShoppingListItemToDOM(id, product_id, product_name);
-        makeToast(`Added ${product_name} to shopping list`, 'success');
-    }, data);
+            addShoppingListItemToDOM(id, product_id, product_name);
+            makeToast(`Added ${product_name} to shopping list`, 'success');
+        }
+    });
 }
 
 function toggleTaskComplete(menuContext: ContextObject['context']) {
@@ -267,20 +273,22 @@ function toggleTaskComplete(menuContext: ContextObject['context']) {
     }
     const url = `/tasks/tasks/${menuContext.itemId}`;
 
-    apiRequest('PATCH', url, () => {
-        const row = document.querySelector<HTMLElement>(`[data-item-id="${menuContext.itemId}"]`);
-        if (!row) return;
-        const statusSpan = row.querySelector('.status-span');
+    apiRequest('PATCH', url, data, {
+        onSuccess: () => {
+            const row = document.querySelector<HTMLElement>(`[data-item-id="${menuContext.itemId}"]`);
+            if (!row) return;
+            const statusSpan = row.querySelector('.status-span');
 
-        if (newIsDone) {
-            row.dataset['isDone'] = 'True';
-        } else {
-            delete row.dataset['isDone'];
+            if (newIsDone) {
+                row.dataset['isDone'] = 'True';
+            } else {
+                delete row.dataset['isDone'];
+            }
+            statusSpan?.classList.toggle('is-done');
+
+            makeToast('Task status updated', 'success')
         }
-        statusSpan?.classList.toggle('is-done');
-
-        makeToast('Task status updated', 'success')
-    }, data);
+    });
 }
 
 document.addEventListener('contextmenu', (e) => {
