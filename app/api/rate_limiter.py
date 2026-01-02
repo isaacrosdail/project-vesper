@@ -1,5 +1,5 @@
 """
-Service layer for API module. Currently housing our API call limiting helpers.
+Basic API call limiting helpers.
 """
 
 from __future__ import annotations
@@ -12,14 +12,11 @@ if TYPE_CHECKING:
 from sqlalchemy import text
 
 
-# Atomically increment count if < limit
-# Returns new count (if reserved) or None (if limit reached)
 def reserve_slot(session: 'Session', api_name: str, call_date: date, daily_limit: int) -> Any | None:
     """
     Automatically reserve one API call slot for (api_name, date).
     Returns the reserved_count if reserved, or None if the limit was already reached.
     """
-    # Postgres-specific, but one time won't hurt
     result = session.execute(
         text("""
             INSERT INTO api_call_records (api_called, date, call_count)
@@ -35,7 +32,10 @@ def reserve_slot(session: 'Session', api_name: str, call_date: date, daily_limit
 
 
 def release_slot(session: 'Session', api_name: str, call_date: date) -> None:
-    """Return a previously reserved slot after a failed upstream call."""
+    """
+    Decrements the daily API call count for a given (api_name, call_date) tuple, for undoing
+    a reservation after upstream failure.
+    """
     session.execute(
         text("""
             UPDATE api_call_records
