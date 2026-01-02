@@ -5,7 +5,6 @@ Manages database URIs, debug settings, and environment-specific settings.
 import os, logging
 from datetime import timedelta
 from dotenv import load_dotenv
-from flask.config import Config  # hijack Flask's config obj
 
 # Only load .env in non-prod
 if os.getenv("APP_ENV", "dev") != "prod":
@@ -13,7 +12,10 @@ if os.getenv("APP_ENV", "dev") != "prod":
 
 class BaseConfig:
     LOGGING_LEVEL = logging.INFO
-    DEFAULT_TZ = "Europe/London" # default TZ to be used for some stuff
+    DEFAULT_TZ = "America/Chicago"
+    OPENWEATHER_DAILY_LIMIT = 700  # Daily rate limit per external API.
+    # NOTE: This value will apply to *each* API individually (e.g., OpenWeather, ADifferentAPI, etc),
+    # since rate limits are tracked per `api_name`. May need to adjust if we add more APIs.
     APP_ENV = "base"
     AUTO_MIGRATE = True     # Default to run migrations on startup
     USE_PROXY_FIX = False
