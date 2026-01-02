@@ -3,18 +3,26 @@
 
 /**
  * To use for a given element:
- * Add class 'tooltip' for styling
+ * .tooltip for styling, data-tip for behavior
+ * Uses passed text if provided, otherwise falls back to data-tip
  * Add 'data-tip' attr with desired tooltip text
  */
 
-export function showToolTip(targetEl, textContent) {
+export function showToolTip(targetEl: HTMLElement, tooltipText?: string): void {
+    const text = tooltipText || targetEl.getAttribute('data-tip');
+    if (!text) {
+        console.warn('No tooltip text provided');
+        return;
+    }
+
     const tooltip = document.createElement('div');
     tooltip.id = 'tooltip';
-    tooltip.className = 'tooltip-popup';
+    tooltip.className = 'tooltip';
     tooltip.setAttribute('role', 'tooltip'); // For a11y
     tooltip.setAttribute('aria-hidden', 'false');
     targetEl.setAttribute('aria-describedby', tooltip.id); // Needs to be on trigger, not tooltip itself
-    tooltip.textContent = textContent;
+
+    tooltip.textContent = text;
 
     const targetElRect = targetEl.getBoundingClientRect(); // gives us position info for triggers
     const isTall = targetElRect.height > 80;
@@ -32,16 +40,20 @@ export function showToolTip(targetEl, textContent) {
 }
 
 export function hideToolTip() {
-    document.querySelector('#tooltip')?.remove();
+    document.querySelector<HTMLElement>('#tooltip')?.remove();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const tooltipTriggers = document.querySelectorAll('.tooltip');
+    const tooltipTriggers = document.querySelectorAll<HTMLElement>('[data-tip]');
 
     // Add listener to each tooltip
     tooltipTriggers.forEach(element => {
-        element.addEventListener('mouseenter', (e) => {
+        element.addEventListener('mouseenter', () => {
             const tooltipText = element.getAttribute('data-tip');
+            if (!tooltipText) {
+                console.warn('Tooltip element missing data-tip attribute: ', element);
+                return;
+            }
             showToolTip(element, tooltipText);
         });
         element.addEventListener('mouseleave', () => {
