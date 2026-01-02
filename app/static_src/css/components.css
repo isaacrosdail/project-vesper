@@ -160,7 +160,7 @@ dialog::backdrop {
     color: var(--text-destructive);
 }
 /* TODO: Add some delay on hover & refine styles setup */
-.tooltip-popup { 
+.tooltip { 
     position: relative; /* also makes it act as anchor for ::after ? */
     border: var(--border-default);
     border-radius: var(--border-radius);
@@ -171,7 +171,7 @@ dialog::backdrop {
     margin-top: 8px;
     max-width: 28ch;
 }
-.tooltip-popup:not(#no-after)::after {
+.tooltip:not(#no-after)::after {
     content: "";
     position: absolute;
     left: var(--carrot-pos, 50%); /* --carrot-pos calculated via JS */
