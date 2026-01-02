@@ -3,7 +3,7 @@ from typing import Any
 
 from app.api.responses import service_response
 from app.modules.time_tracking.repository import TimeTrackingRepository
-from app.shared.datetime.helpers import parse_time_to_datetime
+from app.shared.datetime.helpers import parse_time_to_datetime, day_range_utc
 
 
 class TimeTrackingService:
@@ -27,17 +27,16 @@ class TimeTrackingService:
         typed_data["started_at"] = started_at
         typed_data["ended_at"] = ended_at
 
-        # Compute duration
         duration = (ended_at - started_at).total_seconds() / 60
         typed_data["duration_minutes"] = int(duration)
 
-        # TODO: Check overlapping time entries
-        if False:
-            return service_response(
-                False,
-                "Time entry overlaps with existing entry",
-                errors={"started_at": ["Overlaps with existing time entry"]}
-            )
+        # Reject overlapping time entries
+        start_utc, end_utc = day_range_utc(entry_date, self.user_tz)
+        existing_entries = self.repo.get_all_time_entries_in_window(start_utc, end_utc)
+        for entry in existing_entries:
+            # Allow entries that touch at endpoints (eg, 11:00-12:00 then 12:00-13:00)
+            if (typed_data["started_at"] < entry.ended_at and typed_data["ended_at"] > entry.started_at):
+                return service_response(False, "Time entry overlap detected")
 
         #  UPDATE/PUT
         if entry_id:
