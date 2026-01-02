@@ -7,22 +7,31 @@ type ApiResponse = {
     errors?: any;
 };
 
+// Exclude functions/callbacks from data
+type RequestData = 
+    | { [key: string]: string | number | boolean | null | undefined }
+    | FormData;
+
 /**
  * Makes an API request & handles the response.
  * Automatically prepends '/api' to endpoints.
  * @param method HTTP method
  * @param endpoint API endpoint path (ex: '/groceries/products/123')
- * @param onSuccess Callback invoked when response.success
  * @param data Optional request body (plain obj for JSON or FormData)
+ * @param onSuccess - Optional callback when request succeeds
+ * @param onFailure - Optional callback when request fails
  */
 export async function apiRequest(
     method: string,
     endpoint: string,
-    onSuccess: (responseData: ApiResponse) => void,
-    data: Record<string, any> | FormData | null = null
-) {
+    data: RequestData | null = null,
+    { onSuccess, onFailure }: {
+        onSuccess?: (responseData: ApiResponse) => void,
+        onFailure?: (responseData: ApiResponse) => void
+    } = {}
+): Promise<ApiResponse> {
     try {
-        const isFormData = data instanceof FormData; // formData objs need to not have a Content-Type header AND not be stringified
+        const isFormData = data instanceof FormData; // formData objs: must lack a Content-Type header AND not be stringified
         const url = `/api${endpoint}`;
 
         const response = await fetch(url, {
@@ -33,11 +42,18 @@ export async function apiRequest(
         const responseData: ApiResponse = await response.json();
 
         if (responseData.success) {
-            onSuccess(responseData);
+            onSuccess?.(responseData);
+            return responseData;
         } else {
-            console.error('Server error: ', responseData.message);
+            onFailure?.(responseData);
+
+            if (!onFailure) {
+                console.error('Server error: ', responseData.message);
+            }
+            throw new Error(responseData.message);
         }
     } catch (error: unknown) {
-        console.error(`Error with ${method}:`, error);
+        console.error(`Error with ${method} request:`, error);
+        throw error; // re-throw so await can catch it?
     }
 }

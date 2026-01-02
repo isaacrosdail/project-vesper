@@ -119,9 +119,10 @@ document.addEventListener('dblclick', async (e) => {
         }
         const url = `/${module}/${subtype}/${itemId}`;
 
-        apiRequest('PATCH', url, (responseData: { message: string }) => {
-            makeToast(responseData.message, 'success');
-        }, { [field]: newValue });
-    
+        apiRequest('PATCH', url, { [field]: newValue }, {
+            onSuccess: (responseData: { message: string }) => {
+                makeToast(responseData.message, 'success');
+            }
+        });
     }
 });

@@ -52,7 +52,11 @@ async function handleListActionClick(targetEl: HTMLElement): Promise<void> {
             );
             if (!confirmed) return;
 
-            apiRequest('DELETE', url, () => item.remove());
+            apiRequest('DELETE', url, null, {
+                onSuccess: () => {
+                    item.remove();
+                }
+            });
             return;
         }
 
@@ -77,18 +81,24 @@ async function handleListActionClick(targetEl: HTMLElement): Promise<void> {
                 );
                 if (!confirmed) return;
 
-                apiRequest('DELETE', url, () => item.remove());
+                apiRequest('DELETE', url, null, {
+                    onSuccess: () => {
+                        item.remove();
+                    }
+                });
                 return;
             }
 
             const btn = targetEl as HTMLButtonElement;
             btn.disabled = true;
 
-            apiRequest('PATCH', url, () => {
-                qtySpan.textContent = newQty;
-                item.dataset['quantityWanted'] = newQty;
-                btn.disabled = false;
-            }, { quantity_wanted: newQty });
+            apiRequest('PATCH', url, { quantity_wanted: newQty }, {
+                onSuccess: () => {
+                    qtySpan.textContent = newQty;
+                    item.dataset['quantityWanted'] = newQty;
+                    btn.disabled = false;
+                }
+            });
             break;
 
         }
