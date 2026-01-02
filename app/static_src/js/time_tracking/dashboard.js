@@ -41,7 +41,7 @@ function updatePieChart(data) {
 
                 // path (slice)
                 g.append('path')
-                    .attr("class", "pie tooltip")
+                    .attr("class", "pie")
                     .attr("fill", d => color(d.data.category))
                     .each(function(d) { this._current = d; }) // store start?
                     .attr("d", arc);

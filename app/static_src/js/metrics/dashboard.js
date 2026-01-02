@@ -62,13 +62,13 @@ const line2 = d3.line()
 
 const STATIC_LINE_CONFIG = {
     'calories': {
-        class: "bmr-line tooltip",
+        class: "bmr-line",
         label: d => `BMR: ${d}`,
         color: "red",
         data: () => [bmrValue]
     },
     'sleep_duration_minutes': {
-        class: "sleep-line tooltip",
+        class: "sleep-line",
         label: d => `Target: ${d}`,
         color: "red",
         data: () => [targetSleepDuration]
@@ -123,7 +123,7 @@ function updateLineChart(data, metricType) {
         .join(
             enter => {
                 return enter.append("path")
-                    .attr("class", "line tooltip")
+                    .attr("class", "line")
                     .attr("fill", "none")
                     .attr("stroke", "steelblue")
                     .attr("stroke-width", 2)

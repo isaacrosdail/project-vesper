@@ -11,9 +11,9 @@
 
     <div class="form-actions">
         <form action="{{ url_for('auth.init_demo') }}" method="POST">
-            <button type="submit" class="btn btn-primary tooltip" data-tip="Sign as a guest & open dashboard.">Try the demo 🚀</button>
+            <button type="submit" class="btn btn-primary" data-tip="Sign as a guest & open dashboard.">Try the demo 🚀</button>
         </form>
-        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary tooltip" data-tip="Go to the login page">Log in / Sign up</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary" data-tip="Go to the login page">Log in / Sign up</a>
     </div>
 
     {% if config.APP_ENV == 'dev' %}
