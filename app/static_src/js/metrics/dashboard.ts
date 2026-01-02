@@ -56,19 +56,15 @@ const TYPE_LABELS: Record<MetricType, string> = {
     sleep_duration_minutes: "Sleep Duration (mins)"
 }
 
-function getMetricData(metric_type: MetricType, lastNDays: number): Promise<LineDataPoint[]> {
-    return new Promise((resolve, reject) => {
-        const url = `/metrics/daily_entries/timeseries?metric_type=${metric_type}&lastNDays=${lastNDays}`;
-        apiRequest('GET', url, (responseData) => {
-            // Coerce date strings to Date objects
-            const chartData = responseData.data.map((d: ApiMetricData) => ({
-                date: new Date(d.date),
-                value: parseFloat(d.value),
-            }));
+async function getMetricData(metric_type: MetricType, lastNDays: number): Promise<LineDataPoint[]> {
+    const url = `/metrics/daily_entries/timeseries?metric_type=${metric_type}&lastNDays=${lastNDays}`;
+    const response = await apiRequest('GET', url, null);
 
-            resolve(chartData);
-        }, reject);
-    });
+    const chartData = response.data.map((d: ApiMetricData) => ({
+        date: new Date(d.date),
+        value: parseFloat(d.value),
+    }));
+    return chartData;
 }
 
 class MetricsChart {

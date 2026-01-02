@@ -117,15 +117,25 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
         // PUT
         if (modal.dataset.mode === 'edit') {
             const url = `${endpoint}/${modal.dataset.itemId}`;
-            apiRequest('PUT', url, (responseData) => {
-                makeToast(responseData.message, 'success');
-            }, formData);
+            apiRequest('PUT', url, formData, {
+                onSuccess: (responseData) => {
+                    makeToast(responseData.message, 'success');
+                },
+                onFailure: (responseData) => {
+                    makeToast(responseData.message, 'error');
+                }
+            });
         }
         // POST
         else {
-            apiRequest('POST', endpoint, (responseData) => {
-                makeToast(responseData.message, 'success');
-            }, formData);
+            apiRequest('POST', endpoint, formData, {
+                onSuccess: (responseData) => {
+                    makeToast(responseData.message, 'success');
+                },
+                onFailure: (responseData) => {
+                    makeToast(responseData.message, 'error')
+                }
+            });
         }
         submittedForm.reset();
         modal.close();

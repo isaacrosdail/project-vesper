@@ -123,29 +123,29 @@ async function markHabitComplete(checkbox: HTMLInputElement, habitId: string): P
             const url = `/habits/${habitId}/completions`;
             const data = { completed_at: completedAtUTC };
 
-            apiRequest('POST', url, (responseData) => {
-                streakCount += 1;
-                emojiSpan.dataset['streakCount'] = String(streakCount);
+            apiRequest('POST', url, data, {
+                onSuccess: (responseData) => {
+                    streakCount += 1;
+                    emojiSpan.dataset['streakCount'] = String(streakCount);
 
-                listItem?.classList.toggle('completed');
-                emojiSpan.textContent = `🔥${streakCount}`;
-                updateProgressBar('habits', responseData.data.progress)
-            }, data);
+                    listItem?.classList.toggle('completed');
+                    emojiSpan.textContent = `🔥${streakCount}`;
+                    updateProgressBar('habits', responseData.data.progress);
+                }
+            });
         } else {
             const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
             const url = `/habits/${habitId}/completions?date=${todayDateOnly}`;
 
-            apiRequest('DELETE', url, (responseData) => {
-                streakCount -= 1;
-                emojiSpan.dataset['streakCount'] = String(streakCount);
+            apiRequest('DELETE', url, null, {
+                onSuccess: (responseData) => {
+                    streakCount -= 1;
+                    emojiSpan.dataset['streakCount'] = String(streakCount);
 
-                listItem?.classList.toggle('completed');
-                if (streakCount > 0) {
-                    emojiSpan.textContent = `🔥${streakCount}`;
-                } else {
-                    emojiSpan.textContent = "";
+                    listItem?.classList.toggle('completed');
+                    emojiSpan.textContent = (streakCount > 0) ? `🔥${streakCount}` : "";
+                    updateProgressBar('habits', responseData.data.progress);
                 }
-                updateProgressBar('habits', responseData.data.progress)
             });
         }
     } catch (error) {
@@ -179,12 +179,13 @@ async function markTaskComplete(checkbox: HTMLInputElement, taskId: string): Pro
             completed_at: null
         }
     }
-    apiRequest('PATCH', url, (responseData) => {
-        const listItem = checkbox.closest('.item');
-        listItem?.classList.toggle('completed');
-        updateProgressBar('tasks', responseData.data.progress)
-    }, data);
-
+    apiRequest('PATCH', url, data, {
+        onSuccess: (responseData) => {
+            const listItem = checkbox.closest('.item');
+            listItem?.classList.toggle('completed');
+            updateProgressBar('tasks', responseData.data.progress);
+        }
+    });
 }
 
 /**
