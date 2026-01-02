@@ -47,6 +47,17 @@ Composite validators:
 - `typed_data` only includes successfully validated fields (omits keys with errors or optional empty fields rather than storing `None` values)
 - Pattern: loop through field validators, add to `typed_data` only if `typed_value` is not None
 
+### Validation Notes from txts, SORT:
+
+
+Thoughts on validation handling strategy:
+1. Frontend - Convenience only (UX feedback, not security)
+2. validators.py - DB-independent, pure functions for format/shape (makes testing easy)
+3. service.py - Business rules + DB-aware (eg, uniqueness)
+4. repo/db -> persistence + hard stop (constraints, not logic)
+
+Backend regex, frontend informational responses
+
 
 ## CSS Properties in recess order (enforced by stylelint)
 

@@ -26,7 +26,21 @@
 ## [Wed 31.12.25]
 1. Wrap up tooltip.ts fixing
     - Fixed bug. Cause: getBoundingClientRect needed to be re-invoked in the else clause AFTER we did style.top and style.left. I think this is because we needed a fresh layout calculation since it seemed the bug was it not updating the width of the tooltip box AFTER we add text. Meaning a tooltip with text of 'h' and another with text of 'Hey there this is a long msg omg hahahahaha' would both be equal, which is of course wrong.
-2. 
+2. Fix: page-gating wasn't working for landing_page since it's also part of main.home route. So in base.html, added exception for main.home but not logged in for data-page="main.landing_page". Left userStore auth guard the same since auth guarding obv is the right play there.
+3. Navbar Work
+    - CSS: added missing bg styling for mobile nav-links on hover/active. Scrapped .active class here (where'd that get set anyway?).
+        - Also: Moved nav-link active/hover styling to media queries. (<=768) for mobile bg-color, (>768) for desktop underline
+4. Frog Task display in My Day:
+    - Added accent border + bg-light for emphasis
+    - Add tasks-section grid container for vertical spacing
+5. Style/MIsc/Cleanup:
+    - Made .context-menu position absolute so it scrolls with page. This doesn't "fix" the resize weirdness where it floats detached, but.
+    - tables.ts: removeTableRow takes element instead of itemId, caller does query, export closeMenu()
+    - context-menu.ts: Clean up addShoppingListItemToDOM naming
+    - Changes to `api/`:
+        - Renamed `api/service.py` -> `api/rate_limiter.py` for clarity
+        - Cleaned up `/weather` route: removed old defaults, aligned city/country/units to current setup
+        - Refined docstrings & pruned comments
 
 ## [Tues 30.12.25]
 **Log:**
