@@ -22,26 +22,24 @@ const chartState = {
     range: 7,
 }
 
-function getData(lastNDays: number): Promise<PieDatum[]> {
-    return new Promise((resolve, reject) => {
-        const url = `/time_tracking/time_entries/summary?lastNDays=${lastNDays}`;
-        apiRequest('GET', url, (responseData) => {
-            const entries: ApiPieData[] = responseData.data;
-            
-            if(Array.isArray(entries) && entries.length === 0) {
-                return resolve([]);
-            }
-            // const rollup = d3.rollup(data, reducerFn, keyFn);
-            const rollupMap = d3.rollup(
-                entries,
-                v => d3.sum(v, d => d.duration_minutes),
-                d => d.category
-            );
-            const arr: PieDatum[] = [...rollupMap].map(([k, v]) => ({category: k, value: v}));
-            resolve(arr);
-        }, reject);
-    });
+async function getData(lastNDays: number): Promise<PieDatum[]> {
+    const url = `/time_tracking/time_entries/summary?lastNDays=${lastNDays}`;
+    const response = await apiRequest('GET', url, null);
+    const entries: ApiPieData[] = response.data;
+    
+    if(Array.isArray(entries) && entries.length === 0) {
+        return [];
+    }
+    // const rollup = d3.rollup(data, reducerFn, keyFn);
+    const rollupMap = d3.rollup(
+        entries,
+        v => d3.sum(v, d => d.duration_minutes),
+        d => d.category
+    );
+    const arr: PieDatum[] = [...rollupMap].map(([k, v]) => ({category: k, value: v}));
+    return arr;
 }
+
 
 class TimeEntriesChart {
     private dims;
