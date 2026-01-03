@@ -7,10 +7,17 @@ type ApiResponse = {
     errors?: any;
 };
 
-// Exclude functions/callbacks from data
+// Top-level
 type RequestData = 
-    | { [key: string]: string | number | boolean | null | undefined }
-    | FormData;
+    | { [key: string]: JsonValue }
+    | FormData
+    | null;
+
+// Inside obj
+type JsonValue = 
+    | string | number | boolean | null
+    | { [key: string]: JsonValue }
+    | JsonValue[];
 
 /**
  * Makes an API request & handles the response.
@@ -24,7 +31,7 @@ type RequestData =
 export async function apiRequest(
     method: string,
     endpoint: string,
-    data: RequestData | null = null,
+    data: RequestData = null,
     { onSuccess, onFailure }: {
         onSuccess?: (responseData: ApiResponse) => void,
         onFailure?: (responseData: ApiResponse) => void
