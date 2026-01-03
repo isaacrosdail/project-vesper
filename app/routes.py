@@ -9,8 +9,7 @@ from flask_login import current_user
 
 from app._infra.database import database_connection
 from app.modules.habits.service import create_habits_service
-from app.modules.tasks.repository import TasksRepository
-from app.modules.tasks.service import TasksService
+from app.modules.tasks.service import create_tasks_service
 from app.shared.datetime.helpers import (
     today_range_utc,
     day_range_utc,
@@ -44,12 +43,12 @@ def home() -> Any:
 
         # Fetch tasks, habits
         habits_service = create_habits_service(session, current_user.id, user_tz)
-        tasks_repo = TasksRepository(session, current_user.id, user_tz)
+        tasks_service = create_tasks_service(session, current_user.id, user_tz)
         habits = habits_service.habit_repo.get_all()
 
         start_utc, end_utc = day_range_utc(today, user_tz)
-        today_frog = tasks_repo.get_frog_task_in_window(start_utc, end_utc)
-        tasks = tasks_repo.get_all_regular_tasks()
+        today_frog = tasks_service.task_repo.get_frog_task_in_window(start_utc, end_utc)
+        tasks = tasks_service.task_repo.get_all_regular_tasks()
         filtered_tasks = [
             t for t in tasks
             if (t.due_date is None) or is_same_local_date(t.due_date, user_tz)
@@ -71,8 +70,7 @@ def home() -> Any:
 
         # Progress bars
         habits_progress = habits_service.calculate_all_habits_percentage_this_week()
-        tasks_svc = TasksService(tasks_repo, user_tz)
-        tasks_progress = tasks_svc.calculate_tasks_progress_today()
+        tasks_progress = tasks_service.calculate_tasks_progress_today()
 
         ctx = {
             "tasks_progress": tasks_progress,
