@@ -8,8 +8,7 @@ from flask_login import current_user
 
 
 from app._infra.database import database_connection
-from app.modules.habits.repository import HabitsRepository
-from app.modules.habits.service import HabitsService
+from app.modules.habits.service import create_habits_service
 from app.modules.tasks.repository import TasksRepository
 from app.modules.tasks.service import TasksService
 from app.shared.datetime.helpers import (
@@ -29,8 +28,8 @@ def home() -> Any:
         return render_template("landing_page.html")
 
     with database_connection() as session:
-        user_tz_str: str = current_user.timezone
-        now = now_in_timezone(user_tz_str)
+        user_tz: str = current_user.timezone
+        now = now_in_timezone(user_tz)
 
         now_time = now.strftime("%H:%M:%S")
         now_date = now.strftime("%a, %b %d")
@@ -40,29 +39,28 @@ def home() -> Any:
             else "Good evening"
         )
 
-        today = now_in_timezone(user_tz_str).date()  # user's today
+        today = now_in_timezone(user_tz).date()  # user's today
         current_date = today.isoformat()  # for time_tracking entry modal's date field
 
         # Fetch tasks, habits
-        habits_repo = HabitsRepository(session, current_user.id, user_tz_str)
-        tasks_repo = TasksRepository(session, current_user.id, user_tz_str)
-        habits = habits_repo.get_all()
+        habits_service = create_habits_service(session, current_user.id, user_tz)
+        tasks_repo = TasksRepository(session, current_user.id, user_tz)
+        habits = habits_service.habit_repo.get_all()
 
-        start_utc, end_utc = day_range_utc(today, user_tz_str)  # UTC bounds
+        start_utc, end_utc = day_range_utc(today, user_tz)
         today_frog = tasks_repo.get_frog_task_in_window(start_utc, end_utc)
         tasks = tasks_repo.get_all_regular_tasks()
         filtered_tasks = [
             t for t in tasks
-            if (t.due_date is None) or is_same_local_date(t.due_date, user_tz_str)
+            if (t.due_date is None) or is_same_local_date(t.due_date, user_tz)
         ]
 
 
-        start_utc, end_utc = today_range_utc(user_tz_str)
-        leetcode_records = habits_repo.get_all_leetcoderecords_in_window(
+        start_utc, end_utc = today_range_utc(user_tz)
+        leetcode_records = habits_service.leetcode_repo.get_all_leetcoderecords_in_window(
             start_utc, end_utc
         )
 
-        habits_service = HabitsService(habits_repo, user_tz_str)
         habit_info = {
             habit.id: {
                 "completed_today": habits_service.check_if_completed_today(habit.id),
@@ -73,7 +71,7 @@ def home() -> Any:
 
         # Progress bars
         habits_progress = habits_service.calculate_all_habits_percentage_this_week()
-        tasks_svc = TasksService(tasks_repo, user_tz_str)
+        tasks_svc = TasksService(tasks_repo, user_tz)
         tasks_progress = tasks_svc.calculate_tasks_progress_today()
 
         ctx = {
