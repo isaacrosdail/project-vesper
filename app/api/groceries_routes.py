@@ -10,8 +10,7 @@ from flask_login import current_user
 
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
-from app.modules.groceries.repository import GroceriesRepository
-from app.modules.groceries.service import GroceriesService
+from app.modules.groceries.service import create_groceries_service
 from app.modules.groceries.validators import (validate_product,
                                               validate_transaction)
 from app.shared.decorators import login_plus_session
@@ -28,8 +27,7 @@ def products(session: 'Session', product_id: int | None = None) -> Any:
     if errors:
         return validation_failed(errors), 400
 
-    groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
-    groceries_service = GroceriesService(groceries_repo)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     result = groceries_service.save_product(typed_data, product_id)
 
     if not result["success"]:
@@ -48,8 +46,7 @@ def products(session: 'Session', product_id: int | None = None) -> Any:
 @api_bp.put("/groceries/transactions/<int:transaction_id>")
 @login_plus_session
 def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
-    groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
-    groceries_service = GroceriesService(groceries_repo)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     form_data = request.form.to_dict()
     product_id_input = form_data["product_id"] # NOTE: string
 
@@ -93,8 +90,7 @@ def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
 @api_bp.post("/groceries/shopping-lists/items")
 @login_plus_session
 def add_shoppinglist_item(session: 'Session') -> Any:
-    groceries_repo = GroceriesRepository(session, current_user.id, current_user.timezone)
-    groceries_service = GroceriesService(groceries_repo)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
 
     data = request.get_json()
     product_id = data.get("product_id")
