@@ -22,8 +22,8 @@ from app.shared.decorators import login_plus_session
 import logging
 logger = logging.getLogger(__name__)
 
-@api_bp.post("/metrics/daily_entries")
-@api_bp.put("/metrics/daily_entries/<int:entry_id>")
+@api_bp.post("/metrics/daily_metrics")
+@api_bp.put("/metrics/daily_metrics/<int:entry_id>")
 @login_plus_session
 def daily_metrics(session: 'Session', entry_id: int | None = None) -> Any:
     parsed_data = parse_daily_entry_form_data(request.form.to_dict())
@@ -45,7 +45,7 @@ def daily_metrics(session: 'Session', entry_id: int | None = None) -> Any:
     ), 201
 
 
-@api_bp.get("/metrics/daily_entries/timeseries")
+@api_bp.get("/metrics/daily_metrics/timeseries")
 @login_plus_session
 def daily_metrics_timeseries(session: 'Session') -> Any:
     metric_type = request.args["metric_type"]
@@ -68,7 +68,7 @@ def daily_metrics_timeseries(session: 'Session') -> Any:
         ]
     )
 
-@api_bp.get("/metrics/daily_entries")
+@api_bp.get("/metrics/daily_metrics")
 @login_plus_session
 def daily_metrics_list(session: 'Session') -> Any:
     last_n_days = request.args.get("lastNDays", 7, type=int)

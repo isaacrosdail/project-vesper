@@ -41,7 +41,7 @@ MODEL_CLASSES: dict[tuple[str, str], Type[Any]] = {
     ("habits", "habits"): Habit,
     ("habits", "habit_completions"): HabitCompletion,
     ("habits", "leet_code_records"): LeetCodeRecord,
-    ("metrics", "daily_entries"): DailyMetrics,
+    ("metrics", "daily_metrics"): DailyMetrics,
     ("time_tracking", "time_entries"): TimeEntry,
 }
 

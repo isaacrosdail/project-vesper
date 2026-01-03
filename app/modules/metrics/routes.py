@@ -27,17 +27,17 @@ def dashboard(session: 'Session') -> Any:
     daily_metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
     # daily_metrics_repo = DailyMetricsRepository(session, current_user.id, current_user.timezone) 
 
-    daily_entries_params = get_table_params('daily_entries', 'entry_datetime')
-    start_utc, end_utc = last_n_days_range(daily_entries_params['range'], current_user.timezone)
+    daily_metrics_params = get_table_params('daily_metrics', 'entry_datetime')
+    start_utc, end_utc = last_n_days_range(daily_metrics_params['range'], current_user.timezone)
     metric_entries = daily_metrics_service.daily_metrics_repo.get_all_daily_metrics_in_window(start_utc, end_utc)
-    metric_entries = sort_by_field(metric_entries, daily_entries_params['sort_by'], daily_entries_params['order'])
+    metric_entries = sort_by_field(metric_entries, daily_metrics_params['sort_by'], daily_metrics_params['order'])
     viewmodels = [DailyMetricViewModel(e, current_user.timezone) for e in metric_entries]
 
     today = now_in_timezone(current_user.timezone).date()
     current_date = today.isoformat()
 
     ctx = {
-        "daily_entries_params": daily_entries_params,
+        "daily_metrics_params": daily_metrics_params,
         "metric_headers": DailyMetricPresenter.build_columns(),
         "metrics": viewmodels,
         "current_date": current_date,
