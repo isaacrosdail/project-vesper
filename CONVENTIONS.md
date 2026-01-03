@@ -1,9 +1,13 @@
 # Project Conventions
 
-## Module Architecture
+## Module Architecture / Naming
 - Module names: lowercase, plural where appropriate
 - Subtypes: snake_case, singular
 - Models: PascalCase, singular -> Table names are derived therefrom
+- Repository classes: Sg., match the model
+- Repository instances: Sg., match model they manage
+- Service classes: Pl., match the module
+- Service instances: Pl., match the service class
 
 Subtype names will be used even in markup/etc, ex: `class="metric_entries-modal"` to enable some nice stuff facilitated by this parity.
     `types.ts` & `MODEL_CLASSES` (in generic_routes.py) are our de facto master lists, so let's remember to keep those synced.
