@@ -3,8 +3,8 @@
 
 {# Form Modals - Specific Ones #}
 
-{% macro metric_entry_modal(id='daily_entries-entry-dashboard', title='Add Metric', entry_date=None) %}
-  {% call ui.modal('metrics', 'daily_entries', id, title) %}
+{% macro metric_entry_modal(id='daily_metrics-entry-dashboard', title='Add Metric', entry_date=None) %}
+  {% call ui.modal('metrics', 'daily_metrics', id, title) %}
       {# Entry date outside tabs, only required field #}
       <div class="form-group entry-date-field">
         <label for="entry_datetime">Entry Date:</label>

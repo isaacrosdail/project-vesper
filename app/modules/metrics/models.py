@@ -1,12 +1,13 @@
 
+from typing import ClassVar
+
 from datetime import datetime
 from decimal import Decimal
 import enum
 
-from sqlalchemy import Column, Numeric, Integer, DateTime, String, ForeignKey, Boolean
+from sqlalchemy import Numeric, Integer, DateTime
 from sqlalchemy import CheckConstraint, Index
-from sqlalchemy import Enum as SAEnum
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app._infra.db_base import Base
 from app.shared.serialization import APISerializable
@@ -20,8 +21,9 @@ from app.modules.metrics.constants import (
 )
 
 
-class DailyEntry(Base, APISerializable):
-    """Stores everything in "master" units (kg, count, kcal), will convert based on user preferences."""
+class DailyMetrics(Base, APISerializable):
+    """Stores everything in "master" units (kg, count, kcal)."""
+    __tablename__ = "daily_metrics" # type: ignore[assignment]
 
     __table_args__ = (
         CheckConstraint(f'weight > {WEIGHT_MINIMUM}', name='ck_weight_positive'),
@@ -47,11 +49,11 @@ class DailyEntry(Base, APISerializable):
     sleep_duration_minutes: Mapped[int] = mapped_column(Integer)
 
     def __repr__(self) -> str:
-        return f"<DailyEntry id={self.id} created_at={self.created_at}>"
+        return f"<DailyMetrics id={self.id} created_at={self.created_at}>"
 
     @property
     def populated_metrics(self) -> list[str]:
-        """Returns list of metrics which have entries."""
+        """Returns list of daily metrics which have entries."""
         metrics = []
         metric_types = ["weight", "steps", "wake_time", "sleep_time", "calories"]
         # Get corresponding attribute for each column to see if it's populated
