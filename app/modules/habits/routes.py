@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 from flask import Blueprint, render_template, request
 from flask_login import current_user
 
-from app.modules.habits.repository import HabitsRepository
+from app.modules.habits.service import create_habits_service
 from app.modules.habits.viewmodels import HabitPresenter, HabitViewModel, LCRecordPresenter, LCRecordViewModel
 from app.shared.decorators import login_plus_session
 from app.shared.datetime.helpers import last_n_days_range
@@ -25,10 +25,10 @@ def dashboard(session: 'Session') -> Any:
 
     records_params = get_table_params('leet_code_records', 'created_at')
 
-    habits_repo = HabitsRepository(session, current_user.id, current_user.timezone)
+    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
     start_utc, end_utc = last_n_days_range(records_params['range'], current_user.timezone)
-    habits = habits_repo.get_all_habits_and_tags()
-    records = habits_repo.get_all_leetcoderecords_in_window(start_utc, end_utc)
+    habits = habits_service.habit_repo.get_all_habits_and_tags()
+    records = habits_service.leetcode_repo.get_all_leetcoderecords_in_window(start_utc, end_utc)
 
     records = sort_by_field(records, records_params['sort_by'], records_params['order'])
 

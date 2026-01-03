@@ -18,9 +18,9 @@ from app.modules.habits.models import (DifficultyEnum, Habit, HabitCompletion,
 from app.shared.repository.base import BaseRepository
 
 
-class HabitsRepository(BaseRepository[Habit]):
-    def __init__(self, session: 'Session', user_id: int, user_tz: str):
-        super().__init__(session, user_id, user_tz, model_cls=Habit)
+class HabitRepository(BaseRepository[Habit]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=Habit)
 
     def create_habit(
             self,
@@ -53,6 +53,12 @@ class HabitsRepository(BaseRepository[Habit]):
             selectinload(Habit.tags)
         )
         return list(self.session.execute(stmt).scalars().all())
+
+
+class HabitCompletionRepository(BaseRepository[HabitCompletion]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=HabitCompletion)
+
 
     def create_habit_completion(self, habit_id: int, created_at: datetime) -> HabitCompletion:
         habit_completion = HabitCompletion(
@@ -125,6 +131,12 @@ class HabitsRepository(BaseRepository[Habit]):
             .group_by(Habit.name)
         )
         return self.session.execute(stmt).all()
+    
+
+class LeetCodeRecordRepository(BaseRepository[LeetCodeRecord]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=LeetCodeRecord)
+
 
     def create_leetcoderecord(
             self,
