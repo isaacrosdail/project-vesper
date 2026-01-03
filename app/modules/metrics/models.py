@@ -66,30 +66,3 @@ class DailyEntry(Base, APISerializable):
     def has_sleep_data(self) -> bool:
         """True if both sleep & wake times are stored."""
         return self.sleep_time is not None and self.wake_time is not None
-
-
-class ABTest(Base, APISerializable):
-
-    title: Mapped[str] = mapped_column(String(100), nullable=False)
-
-    hypothesis: Mapped[str] = mapped_column(String(100), nullable=False)
-
-    variant_a_label: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    variant_b_label: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    success_condition: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    trials = relationship("ABTrial", back_populates="ab_test", cascade="all, delete-orphan")
-
-class ABTrial(Base, APISerializable):
-
-    abtest_id = Column(Integer, ForeignKey("ab_tests.id"), nullable=False)
-
-    variant: Mapped[ABVariantEnum] = mapped_column(SAEnum(ABVariantEnum), nullable=False)
-
-    is_success: Mapped[bool] = mapped_column(Boolean(), nullable=True)
-
-    notes: Mapped[str] = mapped_column(String(200), nullable=True)
-
-    ab_test = relationship("ABTest", back_populates="trials")

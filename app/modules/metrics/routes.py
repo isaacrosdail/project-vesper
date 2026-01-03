@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from flask import Blueprint, render_template, request
 from flask_login import current_user
 
-from app.modules.metrics.repository import DailyMetricsRepository, ABTestRepository
+from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.service import DailyMetricsService
 from app.modules.metrics.viewmodels import (DailyMetricPresenter,
                                             DailyMetricViewModel)
@@ -27,15 +27,12 @@ DEFAULT_METRICS_TABLE_RANGE = 7
 def dashboard(session: 'Session') -> Any:
 
     daily_metrics_repo = DailyMetricsRepository(session, current_user.id, current_user.timezone)
-    abtest_repo = ABTestRepository(session, current_user.id, current_user.timezone)
 
     daily_entries_params = get_table_params('daily_entries', 'entry_datetime')
     start_utc, end_utc = last_n_days_range(daily_entries_params['range'], current_user.timezone)
     metric_entries = daily_metrics_repo.get_all_metrics_in_window(start_utc, end_utc)
     metric_entries = sort_by_field(metric_entries, daily_entries_params['sort_by'], daily_entries_params['order'])
     viewmodels = [DailyMetricViewModel(e, current_user.timezone) for e in metric_entries]
-
-    ab_tests = abtest_repo.get_all()
 
     today = now_in_timezone(current_user.timezone).date()
     current_date = today.isoformat()
@@ -44,7 +41,6 @@ def dashboard(session: 'Session') -> Any:
         "daily_entries_params": daily_entries_params,
         "metric_headers": DailyMetricPresenter.build_columns(),
         "metrics": viewmodels,
-        "ab_tests": ab_tests,
         "current_date": current_date,
     }
     return render_template("metrics/dashboard.html", **ctx)

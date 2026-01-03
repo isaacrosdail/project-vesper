@@ -10,13 +10,13 @@ from decimal import Decimal
 
 from sqlalchemy import select
 
-from app.modules.metrics.models import ABTest, ABTrial, DailyEntry
+from app.modules.metrics.models import DailyEntry
 from app.shared.repository.base import BaseRepository
 
 
 class DailyMetricsRepository(BaseRepository[DailyEntry]):
-    def __init__(self, session: 'Session', user_id: int, user_tz: str):
-        super().__init__(session, user_id, user_tz, model_cls=DailyEntry)
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=DailyEntry)
 
     def create_daily_metric(
             self,
@@ -70,48 +70,5 @@ class DailyMetricsRepository(BaseRepository[DailyEntry]):
             column_obj.isnot(None),
         ).order_by(DailyEntry.entry_datetime)
 
-        # Note: We don't need .scalars() here since we're intentionally selecting multiple fields
         return list(self.session.execute(stmt).all())
-    
 
-class ABTestRepository(BaseRepository[ABTest]):
-    def __init__(self, session: 'Session', user_id: int, user_tz: str):
-        super().__init__(session, user_id, user_tz, model_cls=ABTest)
-
-    def create_abtest(
-            self,
-            title: str,
-            hypothesis: str,
-            variant_a_label: str,
-            variant_b_label: str,
-            success_condition: str
-    ) -> ABTest:
-        abtest = ABTest(
-            user_id=self.user_id,
-            title=title,
-            hypothesis=hypothesis,
-            variant_a_label=variant_a_label,
-            variant_b_label=variant_b_label,
-            success_condition=success_condition
-        )
-        return self.add(abtest)
-    
-class ABTrialRepository(BaseRepository[ABTrial]):
-    def __init__(self, session: 'Session', user_id: int, user_tz: str):
-        super().__init__(session, user_id, user_tz, model_cls=ABTrial)
-
-    def create_abtrial(
-            self,
-            abtest_id: int,
-            variant: str,
-            is_success: bool,
-            notes: str
-    ) -> ABTrial:
-        abtrial = ABTrial(
-            user_id=self.user_id,
-            abtest_id=abtest_id,
-            variant=variant,
-            is_success=is_success,
-            notes=notes
-        )
-        return self.add(abtrial)
