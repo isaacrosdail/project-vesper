@@ -1,5 +1,9 @@
 
-from typing import Any
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -9,12 +13,18 @@ from app.shared.datetime.helpers import parse_time_to_datetime
 from app.api.responses import service_response
 
 
-class DailyMetricsService:
-    def __init__(self, repository: DailyMetricsRepository, user_tz: str):
-        self.repo = repository
+class MetricsService:
+    def __init__(
+        self,
+        session: 'Session',
+        user_tz: str,
+        daily_metrics_repo: DailyMetricsRepository, 
+    ):
+        self.session = session
         self.user_tz = user_tz
+        self.daily_metrics_repo = daily_metrics_repo
 
-    def save_daily_entry(self, typed_data: dict[str, Any], entry_id: int | None) -> dict[str, Any]:
+    def save_daily_metrics(self, typed_data: dict[str, Any], entry_id: int | None) -> dict[str, Any]:
         """
         Save or update daily metrics entry with sleep/wake time handling.
 
@@ -46,19 +56,18 @@ class DailyMetricsService:
             duration = typed_data["wake_time"] - typed_data["sleep_time"]
             typed_data["sleep_duration_minutes"] = int(duration.total_seconds() / 60)
 
-        ## Check for existing entry
         # UPDATE
         if entry_id is not None:
-            entry = self.repo.get_by_id(entry_id)
+            entry = self.daily_metrics_repo.get_by_id(entry_id)
             if not entry:
-                return service_response(False, "Daily entry not found")
+                return service_response(False, "Daily metrics entry not found")
             
             # Also fail if an entry for that date already exists.
             entry_datetime_utc = typed_data["entry_datetime"].astimezone(ZoneInfo("UTC"))
             start_utc, end_utc = entry_datetime_utc, (entry_datetime_utc + timedelta(days=1))
 
-            existing_entry = self.repo.get_daily_metric_in_window(start_utc, end_utc)
-            if existing_entry and existing_entry.id != entry_id:
+            existing_metrics_entry = self.daily_metrics_repo.get_daily_metrics_in_window(start_utc, end_utc)
+            if existing_metrics_entry and existing_metrics_entry.id != entry_id:
                 return service_response(
                     False,
                     "Error: An entry already exists for this date",
@@ -67,19 +76,27 @@ class DailyMetricsService:
             for field, value in typed_data.items():
                 setattr(entry, field, value)
     
-            return service_response(True, "Daily entry updated", data={"entry": entry})
+            return service_response(True, "Daily metrics entry updated", data={"entry": entry})
     
         # CREATE/UPSERT (for today)
         # If an entry for that date exists already, update/overwrite it
         entry_datetime_utc = typed_data["entry_datetime"].astimezone(ZoneInfo("UTC"))
         start_utc, end_utc = entry_datetime_utc, (entry_datetime_utc + timedelta(days=1))
 
-        existing_entry = self.repo.get_daily_metric_in_window(start_utc, end_utc)
-        if existing_entry:
+        existing_metrics_entry = self.daily_metrics_repo.get_daily_metrics_in_window(start_utc, end_utc)
+        if existing_metrics_entry:
             for field, value in typed_data.items():
-                setattr(existing_entry, field, value)
-            entry = existing_entry
+                setattr(existing_metrics_entry, field, value)
+            entry = existing_metrics_entry
         else:
-            entry = self.repo.create_daily_metric(**typed_data)
+            entry = self.daily_metrics_repo.create_daily_metrics(**typed_data)
 
-        return service_response(True, "Daily entry saved", data = {"entry": entry})
+        return service_response(True, "Daily metrics entry saved", data = {"entry": entry})
+
+def create_metrics_service(session: 'Session', user_id: int, user_tz: str) -> MetricsService:
+    """Factory function to instantiate MetricsService with required repositories."""
+    return MetricsService(
+        session=session,
+        user_tz=user_tz,
+        daily_metrics_repo=DailyMetricsRepository(session, user_id),
+    )

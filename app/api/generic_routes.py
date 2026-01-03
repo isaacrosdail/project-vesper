@@ -17,7 +17,7 @@ from app.modules.auth.service import check_item_ownership
 from app.modules.groceries.models import (Product, ShoppingList,
                                           ShoppingListItem, Transaction)
 from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
-from app.modules.metrics.models import DailyEntry
+from app.modules.metrics.models import DailyMetrics
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
 from app.shared.database.helpers import safe_delete
@@ -41,7 +41,7 @@ MODEL_CLASSES: dict[tuple[str, str], Type[Any]] = {
     ("habits", "habits"): Habit,
     ("habits", "habit_completions"): HabitCompletion,
     ("habits", "leet_code_records"): LeetCodeRecord,
-    ("metrics", "daily_entries"): DailyEntry,
+    ("metrics", "daily_metrics"): DailyMetrics,
     ("time_tracking", "time_entries"): TimeEntry,
 }
 

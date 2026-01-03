@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 from datetime import datetime, timedelta
 from app.modules.habits.models import Habit, HabitCompletion
 from app.modules.tasks.models import Task, PriorityEnum
-from app.modules.metrics.models import DailyEntry
+from app.modules.metrics.models import DailyMetrics
 from app.modules.time_tracking.models import TimeEntry
 from app.shared.models import Tag
 
@@ -119,7 +119,7 @@ def seed_demo_data(session: Session, user_id: int) -> None:
     )
     
     # Metrics
-    metric1 = DailyEntry(
+    metric1 = DailyMetrics(
         entry_datetime=datetime(2025, 11, 23),
         weight=70.5,
         steps=8500,
@@ -130,7 +130,7 @@ def seed_demo_data(session: Session, user_id: int) -> None:
         created_at=now - timedelta(days=1)
     )
     
-    metric2 = DailyEntry(
+    metric2 = DailyMetrics(
         entry_datetime=datetime(2025, 11, 23),
         weight=70.3,
         steps=10200,

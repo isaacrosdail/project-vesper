@@ -11,7 +11,7 @@ type Subtype =
 | 'products'
 | 'transactions'
 | 'shopping_list_items'
-| 'daily_entries';
+| 'daily_metrics';
 
 /**
  * Structure for human-readable labels of a (database model) subtype.
@@ -32,7 +32,7 @@ export const SUBTYPE_LABELS: Record<Subtype, SubtypeLabels> = {
     products: { singular: 'Product', plural: 'Products' },
     transactions: { singular: 'Transaction', plural: 'Transactions' },
     shopping_list_items: { singular: 'Shopping List Item', plural: 'Shopping List Items' },
-    daily_entries: { singular: 'Metric Entry', plural: 'Metric Entries'}
+    daily_metrics: { singular: 'Daily Metrics entry', plural: 'Daily Metrics Entries'}
 }
 
 /**

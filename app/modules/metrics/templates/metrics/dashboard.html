@@ -27,17 +27,17 @@
 <section id="metrics-dashboard-table" class="card-dashboard">
     <div class="card-title">
         <h2>Daily Metric Entries</h2>
-        {{ ui.plus_btn('daily_entries-entry-dashboard-btn') }}
+        {{ ui.plus_btn('daily_metrics-entry-dashboard-btn') }}
         Last
-        {% call ui.dropdown(daily_entries_params['range']) %}
-            <button class="table-range" data-range="1" data-table="daily_entries">Today</button>
-            <button class="table-range" data-range="7" data-table="daily_entries">7d</button>
-            <button class="table-range" data-range="30" data-table="daily_entries">30d</button>
+        {% call ui.dropdown(daily_metrics_params['range']) %}
+            <button class="table-range" data-range="1" data-table="daily_metrics">Today</button>
+            <button class="table-range" data-range="7" data-table="daily_metrics">7d</button>
+            <button class="table-range" data-range="30" data-table="daily_metrics">30d</button>
         {% endcall %}
         days
     </div>
 
-    {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'metrics', 'daily_entries', daily_entries_params, sortable=True) %}
+    {% call(item, headers) ui.responsive_table('Daily Metric Entries', metric_headers, metrics, 'metrics', 'daily_metrics', daily_metrics_params, sortable=True) %}
     <td class="{{ headers[0].priority}}">{{ item.entry_datetime_label }}</td>
     <td class="{{ headers[1].priority}}">{{ item.weight_label }}</td>
     <td class="{{ headers[2].priority}}">{{ item.steps_label }}</td>

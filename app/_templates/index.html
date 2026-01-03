@@ -11,7 +11,7 @@
 {# Modals #}
 {{ forms.task_entry_modal('tasks-entry-homepage', 'Add Task') }}
 {{ forms.habit_entry_modal('habits-entry-homepage', 'Add Habit') }}
-{{ forms.metric_entry_modal('daily_entries-entry-homepage', 'Add Metric Entry', entry_date=current_date) }}
+{{ forms.metric_entry_modal('daily_metrics-entry-homepage', 'Add Daily Metrics Entry', entry_date=current_date) }}
 {{ forms.time_entry_modal('time_entries-entry-homepage', 'Add Time Entry', current_date=current_date) }}
 {{ forms.leetcode_entry_modal('leet_code_records-entry-homepage') }}
 
@@ -47,7 +47,7 @@
         {{ ui.plus_btn('tasks-entry-homepage-btn', 'Add Task') }}
         {% call ui.dropdown('Quick Add', replaceable=False) %}
             <button id="time_entries-entry-homepage-btn">Time Entry</button>
-            <button id="daily_entries-entry-homepage-btn">Metric Entry</button>
+            <button id="daily_metrics-entry-homepage-btn">Metric Entry</button>
             <button id="leet_code_records-entry-homepage-btn">LeetCode Record</button>
         {% endcall %}
     </div>
