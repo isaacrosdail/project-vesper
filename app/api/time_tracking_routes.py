@@ -10,8 +10,7 @@ from flask_login import current_user
 
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
-from app.modules.time_tracking.repository import TimeTrackingRepository
-from app.modules.time_tracking.service import TimeTrackingService
+from app.modules.time_tracking.service import create_time_tracking_service
 from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.parsers import parse_time_entry_form_data
 from app.shared.datetime.helpers import last_n_days_range
@@ -30,11 +29,10 @@ def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
         if errors:
             logger.info(f"Validation errors: {errors}")
             return validation_failed(errors), 400
+        
+        time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
 
-        repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
-        service = TimeTrackingService(repo, current_user.timezone)
-        result = service.save_time_entry(typed_data, entry_id)
-
+        result = time_service.save_time_entry(typed_data, entry_id)
         if not result["success"]:
             return api_response(False, result["message"], errors=result["errors"])
 
@@ -45,13 +43,15 @@ def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
             data = entry.to_api_dict()
         ), 201
 
+
 @api_bp.get("/time_tracking/time_entries/summary")
 @login_plus_session
 def time_entries_summary(session: 'Session') -> Any:
     last_n_days = int(request.args["lastNDays"])
-    repo = TimeTrackingRepository(session, current_user.id, current_user.timezone)
-    start_utc, end_utc = last_n_days_range(last_n_days, repo.user_tz)
-    results = repo.get_all_time_entries_in_window(start_utc, end_utc)
+
+    time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
+    start_utc, end_utc = last_n_days_range(last_n_days, current_user.timezone)
+    results = time_service.time_entry_repo.get_all_time_entries_in_window(start_utc, end_utc)
 
     return api_response(
         True,
