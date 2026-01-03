@@ -19,9 +19,6 @@ from app.modules.metrics.constants import (
     CALORIES_MINIMUM,
 )
 
-class ABVariantEnum(enum.Enum):
-    A = "A"
-    B = "B"
 
 class DailyEntry(Base, APISerializable):
     """Stores everything in "master" units (kg, count, kcal), will convert based on user preferences."""
