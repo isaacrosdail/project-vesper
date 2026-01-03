@@ -13,9 +13,9 @@ from app.modules.tasks.models import PriorityEnum, Task
 from app.shared.repository.base import BaseRepository
 
 
-class TasksRepository(BaseRepository[Task]):
-    def __init__(self, session: 'Session', user_id: int, user_tz: str):
-        super().__init__(session, user_id, user_tz, model_cls=Task)
+class TaskRepository(BaseRepository[Task]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=Task)
 
     def create_task(self, name: str, is_frog: bool, priority: PriorityEnum | None, due_date: datetime | None = None) -> Task:
         """Create & add a new task. Returns said task."""
