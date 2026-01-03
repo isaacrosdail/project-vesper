@@ -7,15 +7,21 @@ if TYPE_CHECKING:
 from datetime import datetime, time, timedelta, date
 from zoneinfo import ZoneInfo
 
-from app.modules.tasks.repository import TasksRepository
+from app.modules.tasks.repository import TaskRepository
 from app.shared.datetime.helpers import day_range_utc, today_range_utc, is_same_local_date
 from app.api.responses import service_response
 from app.shared.hooks import register_patch_hook
 
 
 class TasksService:
-    def __init__(self, repository: TasksRepository, user_tz: str):
-        self.repo = repository
+    def __init__(
+        self,
+        session: 'Session',
+        user_tz: str,
+        task_repo: TaskRepository,
+    ):
+        self.session = session
+        self.task_repo = task_repo
         self.user_tz = user_tz
 
 
@@ -28,7 +34,7 @@ class TasksService:
         if typed_data["is_frog"]:
             start_utc, end_utc = day_range_utc(typed_data["due_date"].date(), self.user_tz)
 
-            existing_frog = self.repo.get_frog_task_in_window(start_utc, end_utc)
+            existing_frog = self.task_repo.get_frog_task_in_window(start_utc, end_utc)
             if existing_frog:
                 return service_response(
                     False,
@@ -38,19 +44,17 @@ class TasksService:
 
         ### UPDATE
         if task_id:
-            task = self.repo.get_by_id(task_id)
+            task = self.task_repo.get_by_id(task_id)
             if not task:
                 return service_response(False, "Task not found")
-            
-            # Update fields
+
             for field, value in typed_data.items():
                 setattr(task, field, value)
             
             return service_response(True, "Task updated", data={"task": task})
-
+        # CREATE
         else:
-            ### CREATE
-            task = self.repo.create_task(
+            task = self.task_repo.create_task(
                 name=typed_data["name"],
                 priority=typed_data.get("priority"),
                 due_date=typed_data.get("due_date"),
@@ -69,13 +73,7 @@ class TasksService:
         return eod_midnight - timedelta(seconds=1)
     
     def calculate_tasks_progress_today(self) -> dict[str, Any]:
-
-        # Get today's window
-        start_utc, end_utc = today_range_utc(self.user_tz)
-
-        # Fetch all tasks
-        all_tasks = self.repo.get_all()
-        count_today = len(all_tasks)
+        all_tasks = self.task_repo.get_all()
 
         # Count completed vs expected for today
         num_completed = 0
@@ -95,7 +93,6 @@ class TasksService:
                 num_completed += 1
                 num_expected += 1
 
-        # Completion percentage
         percent_complete = (num_completed / num_expected * 100) if num_expected > 0 else 0
 
         return {
@@ -104,11 +101,18 @@ class TasksService:
             "percent": percent_complete
         }
 
+def create_tasks_service(session: 'Session', user_id: int, user_tz: str) -> TasksService:
+    """Factory function to instantiate HabitsService with required repositories."""
+    return TasksService(
+        session=session,
+        user_tz=user_tz,
+        task_repo=TaskRepository(session, user_id),
+    )
 
-# Gets invoked by generalized PATCH route 
+
 @register_patch_hook('tasks')
 def tasks_patch_hook(item: Any, data: Any, session: 'Session', current_user: Any) -> dict[str, Any]:
-    repo = TasksRepository(session, current_user.id, current_user.timezone)
-    service = TasksService(repo, current_user.timezone)
-    progress = service.calculate_tasks_progress_today()
+    """Invoked by generalized PATCH route to re-calculate tasks progress upon changes."""
+    tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
+    progress = tasks_service.calculate_tasks_progress_today()
     return {"progress": progress}
