@@ -7,15 +7,14 @@ if TYPE_CHECKING:
 from app._infra.db_base import Base
 from sqlalchemy import select, func
 
-T = TypeVar('T', bound=Base) # Generic type for the primary model itself
+T = TypeVar('T', bound=Base)           # Generic type for the primary model itself
 TModel = TypeVar('TModel', bound=Base) # Any model for add/delete
 
 class BaseRepository(Generic[T]):
     """Constructor for base class."""
-    def __init__(self, session: 'Session', user_id: int, user_tz: str, model_cls: Type[T]) -> None:
+    def __init__(self, session: 'Session', user_id: int, model_cls: Type[T]) -> None:
         self.session = session
         self.user_id = user_id
-        self.user_tz = user_tz
         self.model_cls = model_cls
 
 
