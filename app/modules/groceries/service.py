@@ -6,20 +6,34 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from app.modules.groceries.models import Product
+    from sqlalchemy.orm import Session
 
 from app.api.responses import service_response
-from app.modules.groceries.repository import GroceriesRepository
+from app.modules.groceries.repository import ProductRepository, TransactionRepository, ShoppingListRepository, ShoppingListItemRepository
 from app.shared.datetime.helpers import today_range_utc
 
 
 class GroceriesService:
-    def __init__(self, repository: GroceriesRepository):
-        self.repo = repository
+    def __init__(
+        self,
+        session: 'Session',
+        user_tz: str,
+        product_repo: ProductRepository,
+        transaction_repo: TransactionRepository,
+        shopping_list_repo: ShoppingListRepository,
+        shopping_list_item_repo: ShoppingListItemRepository,
+    ):
+        self.session = session
+        self.product_repo = product_repo
+        self.transaction_repo = transaction_repo
+        self.shopping_list_repo = shopping_list_repo
+        self.shopping_list_item_repo = shopping_list_item_repo
+        self.user_tz = user_tz
 
     def save_product(self, typed_data: dict[str, Any], product_id: int | None) -> Any:
 
         if product_id:
-            product = self.repo.get_product_by_id(product_id)
+            product = self.product_repo.get_by_id(product_id)
             if not product:
                 return service_response(False, "Product not found")
             
@@ -31,7 +45,7 @@ class GroceriesService:
 
         else:
             # CREATE
-            product = self.repo.create_product(
+            product = self.product_repo.create_product(
                 barcode=typed_data.get("barcode"),
                 name=typed_data["name"],
                 category=typed_data["category"],
@@ -39,7 +53,7 @@ class GroceriesService:
                 unit_type=typed_data["unit_type"],
                 calories_per_100g=typed_data.get("calories_per_100g"),
             )
-            self.repo.session.flush() # TODO: Needed? original note: might need ID for transaction downstream
+            self.session.flush() # TODO: Needed? original note: might need ID for transaction downstream
 
             return service_response(True, "Product created", data={"product": product})
 
@@ -49,7 +63,7 @@ class GroceriesService:
 
         ### UPDATE
         if transaction_id:
-            transaction = self.repo.get_transaction_by_id(transaction_id)
+            transaction = self.transaction_repo.get_by_id(transaction_id)
             if not transaction:
                 return service_response(False, "Transaction not found")
             
@@ -59,18 +73,18 @@ class GroceriesService:
             return service_response(True, "Transaction updated", data={"transaction": transaction})
         
         # CREATE / INCREMENT
-        product = self.repo.get_product_by_id(product_id)
+        product = self.product_repo.get_by_id(product_id)
         if not product:
             return service_response(False, "Product not found")
-        start_utc, end_utc = today_range_utc(self.repo.user_tz)
-        existing_transaction = self.repo.get_transaction_in_window(product.id, start_utc, end_utc)
+        start_utc, end_utc = today_range_utc(self.user_tz)
+        existing_transaction = self.transaction_repo.get_transaction_in_window(product.id, start_utc, end_utc)
 
         if existing_transaction and (existing_transaction.price_at_scan == typed_data["price_at_scan"]):
             existing_transaction.quantity += typed_data["quantity"]
             transaction = existing_transaction
         else:
-            transaction = self.repo.create_transaction(product, **typed_data)
-            self.repo.session.flush()
+            transaction = self.transaction_repo.create_transaction(product, **typed_data)
+            self.session.flush()
 
         return service_response(True, "Transaction added", data={"transaction": transaction})
 
@@ -79,29 +93,41 @@ class GroceriesService:
         """Add product to shopping list, incrementing if already exists."""
         shopping_list, _ = self.get_or_create_shoppinglist()
 
-        existing_item = self.repo.get_shopping_list_item(shopping_list.id, product_id)
+        existing_item = self.shopping_list_item_repo.get_shopping_list_item(shopping_list.id, product_id)
 
         if existing_item:
             existing_item.quantity_wanted += 1 # TODO: Take qty as parameter
-            self.repo.session.flush()
+            self.shopping_list_item_repo.session.flush()
             return existing_item, False
         else:
-            item = self.repo.create_shopping_list_item(shopping_list.id, product_id, quantity_wanted)
-            self.repo.session.flush()
+            item = self.shopping_list_item_repo.create_shopping_list_item(shopping_list.id, product_id, quantity_wanted)
+            self.shopping_list_item_repo.session.flush()
             return item, True
         
     def get_or_create_shoppinglist(self) -> tuple[Any, Any]:
         """Return ShoppingList from database, else create new and return that."""
-        shopping_list = self.repo.get_shopping_list()
+        shopping_list = self.shopping_list_repo.get_shopping_list()
 
         if shopping_list:
             return shopping_list, False
-        return self.repo.create_shoppinglist(), True
+        return self.shopping_list_repo.create_shoppinglist(), True
 
     def get_or_create_product(self, typed_product_data: dict[str, Any]) -> tuple['Product', bool]:
         """Get existing product or create new one. Returns tuple (product, was_created)."""
         barcode = typed_product_data["barcode"]
-        product = self.repo.get_product_by_barcode(barcode)
+        product = self.product_repo.get_product_by_barcode(barcode)
         if product:
             return product, False
-        return self.repo.create_product(**typed_product_data), True
+        return self.product_repo.create_product(**typed_product_data), True
+    
+
+def create_groceries_service(session: 'Session', user_id: int, user_tz: str) -> GroceriesService:
+    """Factory function to instantiate GroceriesService with required repositories."""
+    return GroceriesService(
+        session=session,
+        user_tz=user_tz,
+        product_repo=ProductRepository(session, user_id),
+        transaction_repo=TransactionRepository(session, user_id),
+        shopping_list_repo=ShoppingListRepository(session, user_id),
+        shopping_list_item_repo=ShoppingListItemRepository(session, user_id),
+    )

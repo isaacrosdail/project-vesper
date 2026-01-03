@@ -18,9 +18,9 @@ from app.modules.groceries.models import (
 from app.shared.repository.base import BaseRepository
 
 
-class GroceriesRepository(BaseRepository[Product]):
-    def __init__(self, session: 'Session', user_id: int, user_tz: str):
-        super().__init__(session, user_id, user_tz, model_cls=Product)
+class ProductRepository(BaseRepository[Product]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=Product)
 
 
     def create_product(self, name: str, category: ProductCategoryEnum,
@@ -37,6 +37,7 @@ class GroceriesRepository(BaseRepository[Product]):
             calories_per_100g=calories_per_100g,
         )
         return self.add(product)
+    
 
     def get_all_products(self, include_soft_deleted: bool = False) -> list[Product]:
         stmt = self._user_select(Product)
@@ -52,9 +53,6 @@ class GroceriesRepository(BaseRepository[Product]):
         if not include_soft_deleted:
             stmt = stmt.where(Product.deleted_at.is_(None))
         return list(self.session.execute(stmt).scalars().all())
-
-    def get_product_by_id(self, product_id: int) -> Product | None:
-        return self.get_by_id(product_id)
 
     def get_product_by_barcode(self, barcode: str) -> Product | None:
         stmt = self._user_select(Product).where(
@@ -72,6 +70,10 @@ class GroceriesRepository(BaseRepository[Product]):
         result = self.session.execute(stmt).scalars().first()
         return cast(Product | None, result)
 
+
+class TransactionRepository(BaseRepository[Transaction]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=Transaction)
 
     def create_transaction(self, product: Product, price_at_scan: Decimal,
                            quantity: int) -> Transaction:
@@ -98,13 +100,6 @@ class GroceriesRepository(BaseRepository[Product]):
         )
         return list(self.session.execute(stmt).scalars().all())
 
-    def get_transaction_by_id(self, transaction_id: int) -> Transaction | None:
-        stmt = self._user_select(Transaction).where(
-            Transaction.id == transaction_id
-        )
-        result = self.session.execute(stmt).scalars().first()
-        return cast(Transaction | None, result)
-
     def get_transaction_in_window(self, product_id: int, start_utc: datetime, end_utc: datetime) -> Transaction | None:
         """Get a transaction within a certain datetime window (UTC)."""
         stmt = self._user_select(Transaction).where(
@@ -114,6 +109,12 @@ class GroceriesRepository(BaseRepository[Product]):
         )
         result = self.session.execute(stmt).scalars().first()
         return cast(Transaction | None, result)
+
+
+
+class ShoppingListRepository(BaseRepository[ShoppingList]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=ShoppingList)
 
     def create_shoppinglist(self, name: str = "DefaultListName") -> ShoppingList:
         shopping_list = ShoppingList(
@@ -127,6 +128,11 @@ class GroceriesRepository(BaseRepository[Product]):
         stmt = self._user_select(ShoppingList)
         result = self.session.execute(stmt).scalars().first()
         return cast(ShoppingList | None, result)
+
+
+class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=ShoppingListItem)
 
     def create_shopping_list_item(self, shopping_list_id: int, product_id: int, quantity_wanted: int) -> ShoppingListItem:
         shopping_list_item = ShoppingListItem(
