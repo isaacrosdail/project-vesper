@@ -12,9 +12,9 @@ from app.modules.time_tracking.models import TimeEntry
 from app.shared.repository.base import BaseRepository
 
 
-class TimeTrackingRepository(BaseRepository[TimeEntry]):
-    def __init__(self, session: 'Session', user_id: int, user_tz: str):
-        super().__init__(session, user_id, user_tz, model_cls=TimeEntry)
+class TimeEntryRepository(BaseRepository[TimeEntry]):
+    def __init__(self, session: 'Session', user_id: int):
+        super().__init__(session, user_id, model_cls=TimeEntry)
     
     def create_time_entry(self, category: str, started_at: datetime, ended_at: datetime, duration_minutes: float, description: str | None = None) -> TimeEntry:
         time_entry = TimeEntry(
