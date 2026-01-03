@@ -11,10 +11,10 @@ from flask_login import current_user
 
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
-from app.modules.metrics.repository import DailyMetricsRepository, ABTestRepository, ABTrialRepository
+from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.service import DailyMetricsService
 from app.modules.metrics.validators import validate_daily_entry
-from app.shared.parsers import parse_daily_entry_form_data, parse_abtest_form_data, parse_abtrial_form_data
+from app.shared.parsers import parse_daily_entry_form_data
 from app.shared.datetime.helpers import last_n_days_range
 from app.shared.decorators import login_plus_session
 
@@ -45,33 +45,6 @@ def daily_entries(session: 'Session', entry_id: int | None = None) -> Any:
         data = entry.to_api_dict()
     ), 201
 
-@api_bp.post("/metrics/ab_tests")
-@login_plus_session
-def ab_tests(session: 'Session') -> Any:
-    parsed_data = parse_abtest_form_data(request.form.to_dict())
-    # skip validation for now
-    repo = ABTestRepository(session, current_user.id, current_user.timezone)
-    result = repo.create_abtest(**parsed_data)
-
-    return api_response(
-        True,
-        "Saved abtest",
-        data=result.to_api_dict()
-    ), 201
-
-@api_bp.post("/metrics/ab_trials")
-@login_plus_session
-def ab_trials(session: 'Session') -> Any:
-    parsed_data = parse_abtrial_form_data(request.form.to_dict())
-    # skip validation for now
-    repo = ABTrialRepository(session, current_user.id, current_user.timezone)
-    result = repo.create_abtrial(**parsed_data)
-
-    return api_response(
-        True,
-        "Saved abtrial",
-        data=result.to_api_dict()
-    ), 201
 
 @api_bp.get("/metrics/daily_entries/timeseries")
 @login_plus_session

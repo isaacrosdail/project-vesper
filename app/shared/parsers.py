@@ -101,25 +101,6 @@ def parse_daily_entry_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
         "sleep_time": (form_data.get("sleep_time") or "").strip(),
     }
 
-@log_parser
-def parse_abtest_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "title": (form_data.get("title") or "").strip(),
-        "hypothesis": (form_data.get("hypothesis") or "").strip(),
-        "variant_a_label": (form_data.get("variant_a_label") or "").strip(),
-        "variant_b_label": (form_data.get("variant_b_label")or "").strip(),
-        "success_condition": (form_data.get("success_condition")or "").strip()
-    }
-
-@log_parser
-def parse_abtrial_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "abtest_id": (form_data.get("abtest_id") or "").strip(),
-        "variant": form_data.get("variant"),
-        "is_success": parse_checkbox(form_data.get("is_success")),
-        "notes": (form_data.get("notes") or "").strip()
-    }
-
 
 def get_table_params(prefix: str, default_sort: str) -> dict[str, Any]:
     """
