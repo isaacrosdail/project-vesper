@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.modules.metrics.models import DailyEntry
+    from app.modules.metrics.models import DailyMetrics
 
 
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
@@ -24,7 +24,7 @@ class DailyMetricPresenter(BasePresenter):
 
 
 class DailyMetricViewModel(TimestampedViewMixin):
-    def __init__(self, metric: 'DailyEntry', tz: str):
+    def __init__(self, metric: 'DailyMetrics', tz: str):
         self.id = metric.id
         self.created_at = metric.entry_datetime
         self.weight = metric.weight
