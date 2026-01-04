@@ -5,7 +5,7 @@ API routes for:
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -70,17 +70,31 @@ def get_weather(session: 'Session', city: str, country: str, units: str) -> tupl
         "units": units,
     }
 
+    def fail(code: int, message: str) -> tuple[Response, int]:
+        release_slot(session, api_name, today)
+        return api_response(False, message), code
+
     # Call API, release slot on failure
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status() # raises on 4xx/5xx
     except requests.Timeout:
         logger.exception("Upstream weather API timeout.")
-        release_slot(session, api_name, today)
-        return api_response(False, "upstream_timeout"), 504
+        return fail(504, "upstream_timeout")
+    
+    except requests.HTTPError as e:
+        status_code = e.response.status_code
+
+        if 400 <= status_code < 500:
+            # Client-side error: bad city/country, API key, etc?
+            return fail(400, f"Invalid request: {e.response.text}")
+        else:
+            return fail(503, "Weather service unavailable")
+
     except requests.RequestException:
+        # Network-level failure (DNS, conn refused, etc.)
         logger.exception("Upstream weather API failed.")
-        release_slot(session, api_name, today)
-        return api_response(False, "upstream_failed"), 502
+        return fail(502, "upstream_failed")
+
     else:
         return jsonify(response.json()), 200
