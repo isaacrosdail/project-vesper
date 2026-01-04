@@ -4,8 +4,6 @@ Development tools blueprint.
 Provides:
 - /style-reference  : Internal UI style guide (dev only, owner access)
 """
-from typing import Any
-
 import os
 
 from flask import Blueprint, render_template, current_app
@@ -21,12 +19,12 @@ devtools_bp = Blueprint('devtools', __name__, url_prefix='/devtools', template_f
 if os.environ.get('APP_ENV') == 'dev':
     @devtools_bp.get('/style_reference')
     @login_required # type: ignore
-    def style_reference() -> Any:
-        return render_template('style-reference.html')
-    
+    def style_reference() -> tuple[str, int]:
+        return render_template('style-reference.html'), 200
+
 @devtools_bp.get('/routes')
 @requires_owner
-def show_routes() -> Any:
+def show_routes() -> tuple[str, int]:
     routes = []
     for rule in current_app.url_map.iter_rules():
         methods_set = rule.methods or set()
@@ -37,4 +35,4 @@ def show_routes() -> Any:
             'function': rule.endpoint
         })
 
-    return render_template('routes.html', routes=routes)
+    return render_template('routes.html', routes=routes), 200

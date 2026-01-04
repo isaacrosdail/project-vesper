@@ -48,7 +48,7 @@ class ProductCategoryEnum(enum.Enum):
     SUPPLEMENTS = "SUPPLEMENTS"
 	
     def __lt__(self, other: Self) -> bool:
-        return self.value < other.value
+        return str(self.value) < str(other.value)
 
 
 class Product(Base, APISerializable):
@@ -105,7 +105,7 @@ class Transaction(Base, APISerializable):
 
     __api_exclude__: list[str] = []
 
-    def to_api_dict(self) -> Any:
+    def to_api_dict(self) -> dict[str, Any]:
         result = super().to_api_dict()
         result["product_name"] = self.product.name
         return result
@@ -168,7 +168,7 @@ class ShoppingListItem(Base, APISerializable):
 
     __api_exclude__: list[str] = []
 
-    def to_api_dict(self) -> Any:
+    def to_api_dict(self) -> dict[str, Any]:
         result = super().to_api_dict()
         result["product_name"] = self.product.name
         return result

@@ -82,4 +82,4 @@ class Base(TimestampMixin, DeclarativeBase):
                 ForeignKey('users.id', ondelete='CASCADE'), # so that deleting a user will auto-delete their tasks/etc?
                 nullable=False
             )
-        return None
+        return None # type: ignore[return-value]

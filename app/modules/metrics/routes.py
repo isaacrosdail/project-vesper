@@ -22,7 +22,7 @@ metrics_bp = Blueprint('metrics', __name__, template_folder='templates', url_pre
 
 @metrics_bp.get('/dashboard')
 @login_plus_session
-def dashboard(session: 'Session') -> Any:
+def dashboard(session: 'Session') -> tuple[str, int]:
 
     daily_metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
     # daily_metrics_repo = DailyMetricsRepository(session, current_user.id, current_user.timezone) 
@@ -42,4 +42,4 @@ def dashboard(session: 'Session') -> Any:
         "metrics": viewmodels,
         "current_date": current_date,
     }
-    return render_template("metrics/dashboard.html", **ctx)
+    return render_template("metrics/dashboard.html", **ctx), 200

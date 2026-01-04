@@ -3,7 +3,7 @@
 """
 from typing import Any
 
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, Response
 from flask_login import current_user
 
 
@@ -21,10 +21,10 @@ main_bp = Blueprint("main", __name__, template_folder="templates")
 
 
 @main_bp.get("/")
-def home() -> Any:
+def home() -> tuple[str, int]:
     """Return landing page for unauthenticated users, homepage for authenticated users."""
     if not current_user.is_authenticated:
-        return render_template("landing_page.html")
+        return render_template("landing_page.html"), 200
 
     with database_connection() as session:
         user_tz: str = current_user.timezone
@@ -85,11 +85,11 @@ def home() -> Any:
             "current_date": current_date,
             "greeting": greeting,
         }
-        return render_template("index.html", **ctx)
+        return render_template("index.html", **ctx), 200
 
 
 @main_bp.get("/health")
-def health_check() -> Any:
+def health_check() -> tuple[Response, int]:
     """Return for basic health check / monitoring."""
     status = {"status": "healthy", "timestamp": now_in_timezone("America/Chicago")}
-    return jsonify(status)
+    return jsonify(status), 200

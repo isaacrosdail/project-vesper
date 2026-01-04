@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
-
+from werkzeug.wrappers import Response
 from app._infra.database import database_connection, with_db_session
 from app.modules.auth.models import UserLangEnum, UserRoleEnum
 from app.modules.auth.repository import UsersRepository
@@ -21,14 +21,14 @@ auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
 @auth_bp.post('/logout')
 @login_required # type: ignore[misc]
-def logout() -> Any:
+def logout() -> Response:
     set_toast('Logout successful', 'success')
     logout_user()
     return redirect(url_for("main.home"))
 
 
 @auth_bp.route('/login', methods=["GET", "POST"])
-def login() -> Any:
+def login() -> Response | tuple[str, int]:
     if request.method == "POST":
         parsed_data = parse_user_form_data(request.form.to_dict())
 
@@ -44,11 +44,11 @@ def login() -> Any:
                 login_user(user, remember=remember)
                 return redirect(url_for('main.home'))
 
-    return render_template('auth/login.html')
+    return render_template('auth/login.html'), 200
 
 
 @auth_bp.route('/register', methods=["GET", "POST"])
-def register() -> Any:
+def register() -> Response | tuple[str, int]:
     if request.method == "POST":
         parsed_data = parse_user_form_data(request.form.to_dict())
         typed_data, errors = validate_user(parsed_data)
@@ -76,12 +76,12 @@ def register() -> Any:
         set_toast('Account successfully created!', 'success')
         return redirect(url_for("main.home"))
 
-    return render_template('auth/register.html')
+    return render_template('auth/register.html'), 200
 
 
 # Create & Seed only
 @auth_bp.post('/init-demo')
-def init_demo() -> Any:
+def init_demo() -> Response:
     logout_user() # boot logged in users just in case
 
     with database_connection() as session:
@@ -96,7 +96,7 @@ def init_demo() -> Any:
 
 # Create & Seed only
 @auth_bp.post('/init-owner')
-def init_owner() -> Any:
+def init_owner() -> Response:
     logout_user() # boot logged in users just in case
 
     with database_connection() as session:
@@ -112,7 +112,7 @@ def init_owner() -> Any:
 @auth_bp.post('/admin/reset-users')
 @requires_owner
 @with_db_session
-def reset_users(session: 'Session') -> Any:
+def reset_users(session: 'Session') -> Response:
     logout_user()
 
     delete_all_db_data(session, include_users=True, reset_sequences=True)
@@ -128,7 +128,7 @@ def reset_users(session: 'Session') -> Any:
 @auth_bp.post('/admin/reset-db')
 @requires_owner
 @with_db_session
-def reset_database(session: 'Session') -> Any:
+def reset_database(session: 'Session') -> Response:
 
     delete_all_db_data(session, include_users=False, reset_sequences=True)
 
@@ -139,7 +139,7 @@ def reset_database(session: 'Session') -> Any:
 @auth_bp.post('/admin/reset-dev')
 @requires_owner
 @with_db_session
-def reset_dev(session: 'Session') -> Any:
+def reset_dev(session: 'Session') -> Response:
 
     logout_user()
 

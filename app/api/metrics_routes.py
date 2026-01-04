@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 from zoneinfo import ZoneInfo
 
-from flask import request
+from flask import request, Response
 from flask_login import current_user
 
 from app.api import api_bp
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @api_bp.post("/metrics/daily_metrics")
 @api_bp.put("/metrics/daily_metrics/<int:entry_id>")
 @login_plus_session
-def daily_metrics(session: 'Session', entry_id: int | None = None) -> Any:
+def daily_metrics(session: 'Session', entry_id: int | None = None) -> tuple[Response, int]:
     parsed_data = parse_daily_entry_form_data(request.form.to_dict())
     typed_data, errors = validate_daily_entry(parsed_data)
     if errors:
@@ -35,7 +35,7 @@ def daily_metrics(session: 'Session', entry_id: int | None = None) -> Any:
     result = metrics_service.save_daily_metrics(typed_data, entry_id)
 
     if not result["success"]:
-        return api_response(False, result["message"], errors=result["errors"])
+        return api_response(False, result["message"], errors=result["errors"]), 400
 
     entry = result["data"]["entry"]
     return api_response(
@@ -47,7 +47,7 @@ def daily_metrics(session: 'Session', entry_id: int | None = None) -> Any:
 
 @api_bp.get("/metrics/daily_metrics/timeseries")
 @login_plus_session
-def daily_metrics_timeseries(session: 'Session') -> Any:
+def daily_metrics_timeseries(session: 'Session') -> tuple[Response, int]:
     metric_type = request.args["metric_type"]
     last_n_days = request.args.get("lastNDays", 7, type=int)
 
@@ -66,11 +66,11 @@ def daily_metrics_timeseries(session: 'Session') -> Any:
             }
             for dt, value in results
         ]
-    )
+    ), 200
 
 @api_bp.get("/metrics/daily_metrics")
 @login_plus_session
-def daily_metrics_list(session: 'Session') -> Any:
+def daily_metrics_list(session: 'Session') -> tuple[Response, int]:
     last_n_days = request.args.get("lastNDays", 7, type=int)
 
     metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)

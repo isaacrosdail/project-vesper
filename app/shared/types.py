@@ -1,7 +1,8 @@
 from enum import Enum
 from functools import total_ordering
-from typing import Self
+from typing import Self, Union
 
+NotImplementedType = type(NotImplemented)
 
 @total_ordering  
 class OrderedEnum(Enum):
@@ -19,7 +20,7 @@ class OrderedEnum(Enum):
         if self.__class__ is not other.__class__:
             return NotImplemented
         # Access via __class__ attribute directly
-        order = getattr(self.__class__, 'sort_order', None)
+        order: list[str] | None = getattr(self.__class__, 'sort_order', None)
         if not order:
             raise NotImplementedError(f"{self.__class__.__name__} must define sort_order")
         return order.index(self.name) < order.index(other.name)

@@ -7,7 +7,10 @@ Note to self: First two imports are for 1) making custom context manager and 2) 
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, ParamSpec, TypeVar, Concatenate
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -90,7 +93,7 @@ def database_connection() -> Generator[Session, None, None]:
 # 'f' is a reference to our original function
 # Decorator creates a wrapper that calls our original function
 # with extra stuff (the session)
-def with_db_session(f: Callable[..., Any]) -> Callable[..., Any]:
+def with_db_session(f: Callable[Concatenate[Session, P], R]) -> Callable[P, R]:
     """
     Decorator that injects a database session as the first parameter.
     
@@ -103,7 +106,7 @@ def with_db_session(f: Callable[..., Any]) -> Callable[..., Any]:
             # Use session here
     """
     @wraps(f)
-    def decorated_function(*args: Any, **kwargs: Any) -> Any:
+    def decorated_function(*args: P.args, **kwargs: P.kwargs) -> Any:
         with database_connection() as session:
             return f(session, *args, **kwargs)
     return decorated_function

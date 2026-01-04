@@ -21,7 +21,7 @@ habits_bp = Blueprint('habits', __name__, template_folder="templates", url_prefi
 
 @habits_bp.get("/dashboard")
 @login_plus_session
-def dashboard(session: 'Session') -> Any:
+def dashboard(session: 'Session') -> tuple[str, int]:
 
     records_params = get_table_params('leet_code_records', 'created_at')
 
@@ -41,4 +41,4 @@ def dashboard(session: 'Session') -> Any:
         "habits": habits_viewmodels,
         "lcrecords": lcrecords_viewmodels,
     }
-    return render_template("habits/dashboard.html", **ctx)
+    return render_template("habits/dashboard.html", **ctx), 200

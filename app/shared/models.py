@@ -37,7 +37,7 @@ class Tag(Base):
     habits = relationship("Habit", secondary="habit_tags", back_populates="tags")
 
     def __str__(self) -> str:
-        return cast(str, self.name)
+        return self.name
     
     def __repr__(self) -> str:
         return f"<Tag id={self.id} name='{self.name}'>"

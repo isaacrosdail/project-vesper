@@ -47,7 +47,7 @@ class LanguageEnum(enum.Enum):
     C = "C"
 
     def __lt__(self, other: Self) -> bool:
-        return self.value < other.value
+        return str(self.value) < str(other.value)
 
 
 class Habit(Base, APISerializable):
@@ -55,7 +55,7 @@ class Habit(Base, APISerializable):
     __api_exclude__: list[str] = []
 
     # Use super() to "append to" our serializer's result dict to add derived keys
-    def to_api_dict(self) -> Any:
+    def to_api_dict(self) -> dict[str, Any]:
         result = super().to_api_dict()
         result["is_promotable"] = (
             self.status is not None

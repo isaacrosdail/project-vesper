@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from flask import request
+from flask import request, Response
 from flask_login import current_user
 
 from app.api import api_bp
@@ -18,7 +18,7 @@ from app.shared.decorators import login_plus_session
 @api_bp.post("/tasks/tasks")
 @api_bp.put("/tasks/tasks/<int:task_id>")
 @login_plus_session
-def tasks(session: 'Session', task_id: int | None = None) -> Any:
+def tasks(session: 'Session', task_id: int | None = None) -> tuple[Response, int]:
     """Create or update a task (POST for new, PUT for edit)."""
     parsed_data = parse_task_form_data(request.form.to_dict())
     typed_data, errors = validate_task(parsed_data)
@@ -30,7 +30,7 @@ def tasks(session: 'Session', task_id: int | None = None) -> Any:
     result = tasks_service.save_task(typed_data, task_id) # None -> POST, else -> PUT
 
     if not result["success"]:
-        return api_response(False, result["message"], errors=result["errors"])
+        return api_response(False, result["message"], errors=result["errors"]), 400
     
     tasks_service.session.flush()
     progress = tasks_service.calculate_tasks_progress_today()

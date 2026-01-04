@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from flask import Flask
+    from app.config import BaseConfig
 
 import sys
 import logging.config
@@ -74,7 +75,7 @@ def print_env_info(app: 'Flask') -> None:
     app._config_logged = True # type: ignore
 
 
-def debug_config(config_name: str, config_class: Any) -> None:
+def debug_config(config_name: str, config_class: 'type[BaseConfig]') -> None:
     """ Print which config is being loaded """
     logger = logging.getLogger(__name__)
     logger.info(f"\n[CONFIG] Loading {config_name} config: {config_class.__name__}")

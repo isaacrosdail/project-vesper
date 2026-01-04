@@ -1,13 +1,13 @@
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 from datetime import date
 
-from flask import request
+from flask import request, Response
 from flask_login import current_user
 
 from app.api import api_bp
@@ -24,7 +24,7 @@ from app.shared.parsers import parse_habit_form_data, parse_leetcode_form_data
 @api_bp.post("/habits/habits")
 @api_bp.put("/habits/habits/<int:habit_id>")
 @login_plus_session
-def habits(session: 'Session', habit_id: int | None = None) -> Any:
+def habits(session: 'Session', habit_id: int | None = None) -> tuple[Response, int]:
         parsed_data = parse_habit_form_data(request.form.to_dict())
         typed_data, errors = validate_habit(parsed_data)
 
@@ -34,7 +34,7 @@ def habits(session: 'Session', habit_id: int | None = None) -> Any:
         habits_service = create_habits_service(session, current_user.id, current_user.timezone)
         result = habits_service.save_habit(typed_data, habit_id)
         if not result["success"]:
-            return api_response(False, result["message"], errors=result["errors"])
+            return api_response(False, result["message"], errors=result["errors"]), 400
 
         habit = result["data"]["habit"]
         return api_response(
@@ -46,7 +46,7 @@ def habits(session: 'Session', habit_id: int | None = None) -> Any:
 
 @api_bp.route("/habits/<int:habit_id>/completions", methods=["POST", "DELETE"])
 @login_plus_session
-def completions(session: 'Session', habit_id: int) -> Any:
+def completions(session: 'Session', habit_id: int) -> tuple[Response, int]:
     habits_service = create_habits_service(session, current_user.id, current_user.timezone)
     
     habit = habits_service.habit_repo.get_by_id(habit_id)
@@ -80,10 +80,12 @@ def completions(session: 'Session', habit_id: int) -> Any:
             return api_response(True, "Habit unmarked as complete", data={"progress": progress}), 200
         else:
             return api_response(False, "No completion found"), 404
+    else:
+        raise AssertionError(f"Unexpected method: {request.method}")
 
 @api_bp.get("/habits/completions/summary")
 @login_plus_session
-def horizontal_barchart(session: 'Session') -> Any:
+def horizontal_barchart(session: 'Session') -> tuple[Response, int]:
     last_n_days = int(request.args["lastNDays"])
 
     start_utc, end_utc = last_n_days_range(last_n_days, current_user.timezone)
@@ -103,7 +105,7 @@ def horizontal_barchart(session: 'Session') -> Any:
 
 @api_bp.post("/habits/leetcode_records")
 @login_plus_session
-def leetcode_records(session: 'Session') -> Any:
+def leetcode_records(session: 'Session') -> tuple[Response, int]:
     parsed_data = parse_leetcode_form_data(request.form.to_dict())
     typed_data, errors = validate_leetcode_record(parsed_data)
     if errors:

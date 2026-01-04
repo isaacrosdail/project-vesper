@@ -117,7 +117,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
         )
         return list(self.session.execute(stmt).scalars().all())
     
-    def get_completion_counts_by_habit_in_window(self, start_utc: datetime, end_utc: datetime) -> Any:
+    def get_completion_counts_by_habit_in_window(self, start_utc: datetime, end_utc: datetime) -> list[tuple[str, int]]:
         """Returns a list of (habit_name, count) tuples for completions in datetime range."""
         stmt = (
             select(Habit.name, func.count(HabitCompletion.id))
@@ -130,8 +130,9 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             )
             .group_by(Habit.name)
         )
-        return self.session.execute(stmt).all()
-    
+        result = self.session.execute(stmt).all()
+        return [tuple(row) for row in result] # unwrap each SQLAlchemy Row into a plain tuple
+
 
 class LeetCodeRecordRepository(BaseRepository[LeetCodeRecord]):
     def __init__(self, session: 'Session', user_id: int):

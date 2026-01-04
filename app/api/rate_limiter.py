@@ -3,7 +3,7 @@ Basic API call limiting helpers.
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import date
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 from sqlalchemy import text
 
 
-def reserve_slot(session: 'Session', api_name: str, call_date: date, daily_limit: int) -> Any | None:
+def reserve_slot(session: 'Session', api_name: str, call_date: date, daily_limit: int) -> int | None:
     """
     Automatically reserve one API call slot for (api_name, date).
     Returns the reserved_count if reserved, or None if the limit was already reached.
