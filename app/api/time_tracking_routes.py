@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from flask import request, current_app
+from flask import request, current_app, Response
 from flask_login import current_user
 
 from app.api import api_bp
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 @api_bp.post('/time_tracking/time_entries')
 @api_bp.put('/time_tracking/time_entries/<int:entry_id>')
 @login_plus_session
-def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
+def time_entries(session: 'Session', entry_id: int | None = None) -> tuple[Response, int]:
         parsed_data = parse_time_entry_form_data(request.form.to_dict())
 
         typed_data, errors = validate_time_entry(parsed_data)
@@ -34,7 +34,7 @@ def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
 
         result = time_service.save_time_entry(typed_data, entry_id)
         if not result["success"]:
-            return api_response(False, result["message"], errors=result["errors"])
+            return api_response(False, result["message"], errors=result["errors"]), 400
 
         entry = result["data"]["entry"]
         return api_response(
@@ -46,7 +46,7 @@ def time_entries(session: 'Session', entry_id: int | None = None) -> Any:
 
 @api_bp.get("/time_tracking/time_entries/summary")
 @login_plus_session
-def time_entries_summary(session: 'Session') -> Any:
+def time_entries_summary(session: 'Session') -> tuple[Response, int]:
     last_n_days = int(request.args["lastNDays"])
 
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
@@ -57,4 +57,4 @@ def time_entries_summary(session: 'Session') -> Any:
         True,
         f"Retrieved {len(results)} time entries",
         data = [entry.to_api_dict() for entry in results]
-    )
+    ), 200

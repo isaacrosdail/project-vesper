@@ -23,7 +23,7 @@ groceries_bp = Blueprint('groceries', __name__, template_folder="templates", url
 
 @groceries_bp.get("/dashboard")
 @login_plus_session
-def dashboard(session: 'Session') -> Any:
+def dashboard(session: 'Session') -> tuple[str, int]:
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
 
     transactions_params = get_table_params('transactions', 'created_at')
@@ -65,4 +65,4 @@ def dashboard(session: 'Session') -> Any:
         "o_shopping_list": shopping_list,
         "l_category_options": category_options,
     }
-    return render_template("groceries/dashboard.html", **ctx)
+    return render_template("groceries/dashboard.html", **ctx), 200
