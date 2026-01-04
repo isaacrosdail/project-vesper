@@ -135,7 +135,8 @@ async function markHabitComplete(checkbox: HTMLInputElement, habitId: string): P
             });
         } else {
             const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
-            const url = `/habits/${habitId}/completions?date=${todayDateOnly}`;
+            const params = new URLSearchParams({ date: todayDateOnly });
+            const url = `/habits/${habitId}/completions?${params}`;
 
             apiRequest('DELETE', url, null, {
                 onSuccess: (responseData) => {
