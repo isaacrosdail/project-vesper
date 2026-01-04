@@ -1,5 +1,8 @@
 
-from typing import Any, Callable
+from typing import Any, Callable, ParamSpec, TypeVar
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 from functools import wraps
 import os
@@ -13,9 +16,7 @@ from app.modules.auth.repository import UsersRepository
 from app.shared.database.seed.seed_db import seed_data_for
 
 
-# TODO: Prune these
-# Custom decorator for enforcing owner role permissions
-def requires_owner(f: Callable[..., Any]) -> Callable[..., Any]:
+def requires_owner(f: Callable[P, R]) -> Callable[P, R]:
     """
     Decorator that ensures current_user is authenticaed and has OWNER role.
 
@@ -23,7 +24,7 @@ def requires_owner(f: Callable[..., Any]) -> Callable[..., Any]:
     """
     @wraps(f)
     @login_required # type: ignore[misc]
-    def decorated_function(*args: Any, **kwargs: Any) -> Any:
+    def decorated_function(*args: P.args, **kwargs: P.kwargs) -> R:
         # Check if user has owner role
         if not current_user.is_owner:
             return abort(403)

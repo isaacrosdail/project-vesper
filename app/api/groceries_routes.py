@@ -1,11 +1,11 @@
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from flask import request
+from flask import request, Response
 from flask_login import current_user
 
 from app.api import api_bp
@@ -20,7 +20,7 @@ from app.shared.parsers import parse_product_data, parse_transaction_data
 @api_bp.post("/groceries/products")
 @api_bp.put("/groceries/products/<int:product_id>")
 @login_plus_session
-def products(session: 'Session', product_id: int | None = None) -> Any:
+def products(session: 'Session', product_id: int | None = None) -> tuple[Response, int]:
 
     parsed_data = parse_product_data(request.form.to_dict())
     typed_data, errors = validate_product(parsed_data)
@@ -31,7 +31,7 @@ def products(session: 'Session', product_id: int | None = None) -> Any:
     result = groceries_service.save_product(typed_data, product_id)
 
     if not result["success"]:
-        return api_response(False, result["message"], errors=result["errors"])
+        return api_response(False, result["message"], errors=result["errors"]), 400
     
     product = result["data"]["product"]
     return api_response(
@@ -45,7 +45,7 @@ def products(session: 'Session', product_id: int | None = None) -> Any:
 @api_bp.post("/groceries/transactions")
 @api_bp.put("/groceries/transactions/<int:transaction_id>")
 @login_plus_session
-def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
+def transactions(session: 'Session', transaction_id: int | None = None) -> tuple[Response, int]:
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     form_data = request.form.to_dict()
     product_id_input = form_data["product_id"] # NOTE: string
@@ -89,7 +89,7 @@ def transactions(session: 'Session', transaction_id: int | None = None) -> Any:
 
 @api_bp.post("/groceries/shopping-lists/items")
 @login_plus_session
-def add_shoppinglist_item(session: 'Session') -> Any:
+def add_shoppinglist_item(session: 'Session') -> tuple[Response, int]:
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
 
     data = request.get_json()

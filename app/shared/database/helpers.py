@@ -82,7 +82,7 @@ def delete_user_data(session: 'Session', user_id: int, table: str) -> None:
     _delete_rows(session, table, "user_id = :user_id", {"user_id": user_id}) # parametrized -> avoids SQL injection risk
 
 
-def safe_delete(session: 'Session', item: Any) -> Any:
+def safe_delete[T](session: 'Session', item: T) -> T:
     """
     Soft-delete if `deleted_at` column exists, else hard-delete. Returns the item.
     """

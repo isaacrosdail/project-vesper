@@ -15,7 +15,7 @@ import os
 from datetime import datetime, timezone
 
 import requests
-from flask import current_app, jsonify
+from flask import current_app, jsonify, Response
 from flask_login import current_user, login_required
 
 from app._infra.database import with_db_session
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 @api_bp.get('/profile/me')
 @login_required # type: ignore
-def get_my_profile() -> Any:
+def get_my_profile() -> Response:
     """Internal API for fetching profile information used in JS."""
     return jsonify({
         'timezone': current_user.timezone,
@@ -41,7 +41,7 @@ def get_my_profile() -> Any:
 
 @api_bp.get('/weather/<city>/<country>/<units>')
 @with_db_session
-def get_weather(session: 'Session', city: str, country: str, units: str) -> Any:
+def get_weather(session: 'Session', city: str, country: str, units: str) -> tuple[Response, int]:
     """
     Fetch current weather data from OpenWeatherMap for a given city and country,
     with rate limiting enforced per API key.
