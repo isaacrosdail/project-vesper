@@ -21,7 +21,7 @@ time_tracking_bp = Blueprint('time_tracking', __name__, template_folder='templat
 
 @time_tracking_bp.get('/dashboard')
 @login_plus_session
-def dashboard(session: 'Session') -> Any:
+def dashboard(session: 'Session') -> tuple[str, int]:
 
     time_entries_params = get_table_params('time_entries', 'started_at')
 
@@ -40,6 +40,6 @@ def dashboard(session: 'Session') -> Any:
         "entries": viewmodels,
         "current_date": current_date,
     }
-    return render_template("time_tracking/dashboard.html", **ctx)
+    return render_template("time_tracking/dashboard.html", **ctx), 200
 
 

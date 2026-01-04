@@ -18,7 +18,7 @@ tasks_bp = Blueprint('tasks', __name__, template_folder="templates", url_prefix=
 
 @tasks_bp.get("/dashboard")
 @login_plus_session
-def dashboard(session: 'Session') -> Any:
+def dashboard(session: 'Session') -> tuple[str, int]:
     tasks_params = get_table_params('tasks', 'due_date')
 
     tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
@@ -32,4 +32,4 @@ def dashboard(session: 'Session') -> Any:
         "task_headers": TaskPresenter.build_columns(),
         "tasks": viewmodel,
     }
-    return render_template("tasks/dashboard.html", **ctx)
+    return render_template("tasks/dashboard.html", **ctx), 200

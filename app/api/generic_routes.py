@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 import logging
 from datetime import datetime
 
-from flask import abort, request
+from flask import abort, request, Response
 from flask_login import current_user
 
 from app.api import api_bp
@@ -50,7 +50,7 @@ def get_model_class(module: str, subtype: str) -> Type[Any] | None:
 
 @api_bp.route("/<module>/<subtype>/<int:item_id>", methods=["GET", "PATCH", "DELETE"])
 @login_plus_session
-def item(session: 'Session', module: str, subtype: str, item_id: int) -> Any:
+def item(session: 'Session', module: str, subtype: str, item_id: int) -> tuple[Response, int]:
 
     model_class = get_model_class(module, subtype) # so 'tasks', 'task' returns Task class
     if model_class is None:
