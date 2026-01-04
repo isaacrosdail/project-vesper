@@ -33,13 +33,12 @@ class HabitsService:
 
     def save_habit(self, typed_data: dict[str, Any], habit_id: int | None) -> Any:
 
-        ### UPDATE
+        # UPDATE
         if habit_id:
             habit = self.habit_repo.get_by_id(habit_id)
             if not habit:
                 return service_response(False, "Habit not found")
-            
-            # Update fields
+
             for field, value in typed_data.items():
                 setattr(habit, field, value)
 
