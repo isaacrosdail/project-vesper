@@ -38,11 +38,13 @@ def daily_metrics(session: 'Session', entry_id: int | None = None) -> tuple[Resp
         return api_response(False, result["message"], errors=result["errors"]), 400
 
     entry = result["data"]["entry"]
+    status_code = 201 if request.method == 'POST' else 200
+
     return api_response(
         True,
         result["message"],
         data = entry.to_api_dict()
-    ), 201
+    ), status_code
 
 
 @api_bp.get("/metrics/daily_metrics/timeseries")
@@ -55,7 +57,6 @@ def daily_metrics_timeseries(session: 'Session') -> tuple[Response, int]:
     metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
     results = metrics_service.daily_metrics_repo.get_daily_metrics_by_type_in_window(metric_type, start_utc, end_utc)
 
-    logger.debug(f"result: {results}")
     return api_response(
         True,
         f"Retrieved {len(results)} {metric_type} entries",
@@ -77,9 +78,8 @@ def daily_metrics_list(session: 'Session') -> tuple[Response, int]:
     start_utc, end_utc = last_n_days_range(last_n_days, current_user.timezone)
     result = metrics_service.daily_metrics_repo.get_all_daily_metrics_in_window(start_utc, end_utc)
 
-    logger.debug(f"result: {result}")
     return api_response(
         True,
         f"Retrieved {len(result)} entries",
         data = [entry.to_api_dict() for entry in result]
-    ), 201
+    ), 200
