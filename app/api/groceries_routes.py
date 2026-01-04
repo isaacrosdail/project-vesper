@@ -34,11 +34,13 @@ def products(session: 'Session', product_id: int | None = None) -> tuple[Respons
         return api_response(False, result["message"], errors=result["errors"]), 400
     
     product = result["data"]["product"]
+
+    status_code = 201 if request.method == 'POST' else 200
     return api_response(
         True,
         result["message"],
         data = product.to_api_dict()
-    ), 201
+    ), status_code
 
 
 
@@ -61,9 +63,13 @@ def transactions(session: 'Session', transaction_id: int | None = None) -> tuple
         # 3. Call service to create product, use its id for below transaction add
         result = groceries_service.save_product(typed_product_data, product_id=None)
 
-        # TODO: Implement failure of product creation response
         if not result["success"]:
-            pass
+            return api_response(
+                False,
+                "Failed to create product",
+                errors=result.get("errors")
+            ), 400
+
         product_id = result['data']['product'].id # NOTE: now it's an int - fix?
     # Convert str from form to int
     else:
@@ -79,11 +85,13 @@ def transactions(session: 'Session', transaction_id: int | None = None) -> tuple
     result = groceries_service.save_transaction(product_id, typed_transaction_data, transaction_id) # None -> POST, else PUT
     
     transaction = result["data"]["transaction"]
+
+    status_code = 201 if request.method == 'POST' else 200
     return api_response(
         True,
         result["message"],
         data = transaction.to_api_dict()
-    ), 201
+    ), status_code
 
 
 
@@ -96,10 +104,10 @@ def add_shoppinglist_item(session: 'Session') -> tuple[Response, int]:
     product_id = data.get("product_id")
     quantity_wanted = data.get("quantity_wanted")
 
-    item, _ = groceries_service.add_item_to_shoppinglist(product_id, quantity_wanted)
-
+    result = groceries_service.add_item_to_shoppinglist(product_id, quantity_wanted)
+    item = result["data"]["item"]
     return api_response(
         True,
-        f"Updated shopping list",
+        result["message"],
         data = item.to_api_dict()
     ), 201

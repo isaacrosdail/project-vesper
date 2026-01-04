@@ -25,23 +25,26 @@ from app.shared.parsers import parse_habit_form_data, parse_leetcode_form_data
 @api_bp.put("/habits/habits/<int:habit_id>")
 @login_plus_session
 def habits(session: 'Session', habit_id: int | None = None) -> tuple[Response, int]:
-        parsed_data = parse_habit_form_data(request.form.to_dict())
-        typed_data, errors = validate_habit(parsed_data)
+    parsed_data = parse_habit_form_data(request.form.to_dict())
+    typed_data, errors = validate_habit(parsed_data)
 
-        if errors:
-            return validation_failed(errors), 400
+    if errors:
+        return validation_failed(errors), 400
 
-        habits_service = create_habits_service(session, current_user.id, current_user.timezone)
-        result = habits_service.save_habit(typed_data, habit_id)
-        if not result["success"]:
-            return api_response(False, result["message"], errors=result["errors"]), 400
+    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
 
-        habit = result["data"]["habit"]
-        return api_response(
-            True,
-            result["message"],
-            data = habit.to_api_dict()
-        ), 201
+    result = habits_service.save_habit(typed_data, habit_id)
+    if not result["success"]:
+        return api_response(False, result["message"], errors=result["errors"]), 400
+
+    habit = result["data"]["habit"]
+    status_code = 201 if request.method == 'POST' else 200
+
+    return api_response(
+        True,
+        result["message"],
+        data = habit.to_api_dict()
+    ), status_code
 
 
 @api_bp.route("/habits/<int:habit_id>/completions", methods=["POST", "DELETE"])
@@ -56,6 +59,7 @@ def completions(session: 'Session', habit_id: int) -> tuple[Response, int]:
     if request.method == "POST":
         completed_at = parse_js_instant(request.get_json()["completed_at"])
         completion = habits_service.completion_repo.create_habit_completion(habit_id, completed_at)
+
         habits_service.session.flush()
         progress = habits_service.calculate_all_habits_percentage_this_week()
         return api_response(

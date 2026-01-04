@@ -89,7 +89,7 @@ class GroceriesService:
         return service_response(True, "Transaction added", data={"transaction": transaction})
 
 
-    def add_item_to_shoppinglist(self, product_id: int, quantity_wanted: int) -> tuple[Any, bool]:
+    def add_item_to_shoppinglist(self, product_id: int, quantity_wanted: int) -> dict[str, Any]:
         """Add product to shopping list, incrementing if already exists."""
         shopping_list, _ = self.get_or_create_shoppinglist()
 
@@ -98,11 +98,19 @@ class GroceriesService:
         if existing_item:
             existing_item.quantity_wanted += 1 # TODO: Take qty as parameter
             self.shopping_list_item_repo.session.flush()
-            return existing_item, False
+            return service_response(
+                True,
+                "Quantity updated in shopping list",
+                data={ "item": existing_item }
+            )
         else:
             item = self.shopping_list_item_repo.create_shopping_list_item(shopping_list.id, product_id, quantity_wanted)
             self.shopping_list_item_repo.session.flush()
-            return item, True
+            return service_response(
+                True,
+                "Item added to shopping list",
+                data={ "item": item }
+            )
         
     def get_or_create_shoppinglist(self) -> tuple[Any, Any]:
         """Return ShoppingList from database, else create new and return that."""

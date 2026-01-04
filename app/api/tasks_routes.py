@@ -36,8 +36,10 @@ def tasks(session: 'Session', task_id: int | None = None) -> tuple[Response, int
     progress = tasks_service.calculate_tasks_progress_today()
 
     task = result["data"]["task"]
+    status_code = 201 if request.method == 'POST' else 200
+
     return api_response(
         True,
         result["message"],
         data = task.to_api_dict() | {"progress": progress}
-    ), 201
+    ), status_code
