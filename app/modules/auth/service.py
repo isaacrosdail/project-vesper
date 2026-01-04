@@ -32,16 +32,6 @@ def requires_owner(f: Callable[P, R]) -> Callable[P, R]:
         return f(*args, **kwargs)
     return decorated_function
 
-def requires_role(role: UserRoleEnum) -> Callable[..., Any]:
-    def decorator(f: Callable[..., Any]) -> Callable[..., Any]:
-        @wraps(f)
-        def decorated_function(*args: Any, **kwargs: Any) -> Any:
-            if not current_user.has_role(role):
-                return abort(403)
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
 def check_item_ownership(item: Any, user_id: int) -> None:
     """Ensure item belongs to given user. Triggers abort(403) if not."""
     if hasattr(item, 'user_id') and item.user_id != user_id:
