@@ -14,7 +14,8 @@ const chartState = {
 }
 
 async function getHabitsData(lastNDays: number): Promise<BarData[]> {
-    const url = `/habits/completions/summary?lastNDays=${lastNDays}`;
+    const params = new URLSearchParams({ lastNDays: lastNDays.toString()})
+    const url = `/habits/completions/summary?${params}`;
     const response = await apiRequest('GET', url, null);
     return response.data;
 }

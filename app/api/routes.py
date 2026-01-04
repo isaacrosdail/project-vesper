@@ -62,11 +62,17 @@ def get_weather(session: 'Session', city: str, country: str, units: str) -> Any:
         return api_response(False, "Error: Usage limit reached"), 429
     
     api_key = os.environ.get('OPENWEATHER_API_KEY')
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city},{country}&APPID={api_key}&units={units}"
-    
+
+    url = "https://api.openweathermap.org/data/2.5/weather?"
+    params = {
+        "q": f"{city},{country}",
+        "APPID": api_key,
+        "units": units,
+    }
+
     # Call API, release slot on failure
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, params=params, timeout=10)
         response.raise_for_status() # raises on 4xx/5xx
     except requests.Timeout:
         logger.exception("Upstream weather API timeout.")

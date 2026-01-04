@@ -23,7 +23,8 @@ const chartState = {
 }
 
 async function getData(lastNDays: number): Promise<PieDatum[]> {
-    const url = `/time_tracking/time_entries/summary?lastNDays=${lastNDays}`;
+    const params = new URLSearchParams({ lastNDays: lastNDays.toString() })
+    const url = `/time_tracking/time_entries/summary?${params}`;
     const response = await apiRequest('GET', url, null);
     const entries: ApiPieData[] = response.data;
     

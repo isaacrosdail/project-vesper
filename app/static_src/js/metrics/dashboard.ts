@@ -57,7 +57,11 @@ const TYPE_LABELS: Record<MetricType, string> = {
 }
 
 async function getMetricData(metric_type: MetricType, lastNDays: number): Promise<LineDataPoint[]> {
-    const url = `/metrics/daily_entries/timeseries?metric_type=${metric_type}&lastNDays=${lastNDays}`;
+    const params = new URLSearchParams({
+        metric_type,
+        lastNDays: lastNDays.toString()
+    });
+    const url = `/metrics/daily_metrics/timeseries?${params}`;
     const response = await apiRequest('GET', url, null);
 
     const chartData = response.data.map((d: ApiMetricData) => ({
