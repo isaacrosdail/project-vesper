@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app.modules.metrics.repository import DailyMetricsRepository
+from app.shared.conversions import lbs_to_kg
 from app.shared.datetime.helpers import parse_time_to_datetime
 from app.api.responses import service_response
 
@@ -55,6 +56,21 @@ class MetricsService:
             ## Calc sleep_duration_minutes
             duration = typed_data["wake_time"] - typed_data["sleep_time"]
             typed_data["sleep_duration_minutes"] = int(duration.total_seconds() / 60)
+        
+        # Always store weight in kg
+        if "weight" in typed_data:
+            if "weight_units" not in typed_data:
+                return service_response(False, "Error converting weight: Missing weight_units")
+
+            weight_value = typed_data["weight"]
+            weight_units = typed_data.pop("weight_units")
+
+            if weight_units == "lbs":
+                weight_kg = lbs_to_kg(weight_value)
+            else:
+                weight_kg = weight_value
+            
+            typed_data["weight"] = weight_kg
 
         # UPDATE
         if entry_id is not None:

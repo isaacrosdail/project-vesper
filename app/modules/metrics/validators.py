@@ -91,7 +91,17 @@ VALIDATION_FUNCS = {
 @log_validator
 def validate_daily_entry(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     typed_data = {}
-    errors = {}
+    errors: dict[str, list[str]] = {}
+
+    if data.get("weight") and not data.get("weight_units"):
+        errors["weight_units"] = ["Weight units required"]
+
+    elif data.get("weight_units") and data.get("weight_units") not in ["kg", "lbs"]:
+        errors["weight_units"] = ["Must be in 'kg' or 'lbs'"]
+    else:
+        # weight_units is valid -> add to typed_data
+        if data.get("weight"):
+            typed_data["weight_units"] = data["weight_units"]
 
     for field, func in VALIDATION_FUNCS.items():
         value = data.get(field)

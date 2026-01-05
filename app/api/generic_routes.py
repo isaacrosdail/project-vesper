@@ -13,6 +13,7 @@ from flask_login import current_user
 
 from app.api import api_bp
 from app.api.responses import api_response
+from app.modules.auth.models import UnitSystemEnum
 from app.modules.auth.service import check_item_ownership
 from app.modules.groceries.models import (Product, ShoppingList,
                                           ShoppingListItem, Transaction)
@@ -20,6 +21,7 @@ from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
 from app.modules.metrics.models import DailyMetrics
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
+from app.shared.conversions import kg_to_lbs
 from app.shared.database.helpers import safe_delete
 from app.shared.decorators import login_plus_session
 from app.shared.hooks import PATCH_HOOKS
@@ -65,7 +67,16 @@ def item(session: 'Session', module: str, subtype: str, item_id: int) -> tuple[R
     check_item_ownership(item, current_user.id)
     
     if request.method == 'GET':
-        return api_response(True, f"Retrieved {item.__tablename__}", data=item.to_api_dict()), 200
+        data = item.to_api_dict()
+
+        # Convert weight for display
+        if "weight" in data and current_user.units == UnitSystemEnum.IMPERIAL:
+            data["weight"] = kg_to_lbs(data["weight"])
+            data["weight_units"] = "lbs"
+        elif "weight" in data:
+            data["weight_units"] = "kg"
+
+        return api_response(True, f"Retrieved {item.__tablename__}", data=data), 200
 
     if request.method == 'PATCH':
         data = request.get_json()
