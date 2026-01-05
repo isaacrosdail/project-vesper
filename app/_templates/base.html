@@ -1,7 +1,7 @@
 {# Base Class Template #}
 
 {% import '_partials/_ui.html' as ui %}
-{% import '_partials/_forms.html' as forms %}
+{% import '_partials/_forms.html' as forms with context %}
 <!DOCTYPE html>
 <html
     lang="{{ default_lang or 'en' }}"

@@ -96,6 +96,7 @@ def parse_daily_entry_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
         "entry_date": form_data.get("entry_datetime") or None,
         "steps": (form_data.get("steps") or "").strip(),
         "weight": (form_data.get("weight") or "").strip(),
+        "weight_units": form_data.get("weight_units"),
         "calories": (form_data.get("calories") or "").strip(),
         "wake_time": (form_data.get("wake_time") or "").strip(),
         "sleep_time": (form_data.get("sleep_time") or "").strip(),
