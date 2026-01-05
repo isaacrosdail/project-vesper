@@ -15,5 +15,3 @@ select = ["ALL"]
 ignore = [
     "COM812"
 ]
-
-[tool.djlint]
