@@ -1,7 +1,9 @@
 """
 Repository layer for groceries module.
 """
-from typing import TYPE_CHECKING, cast
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -12,14 +14,18 @@ from decimal import Decimal
 from sqlalchemy.orm import joinedload
 
 from app.modules.groceries.models import (
-    Product, Transaction, ShoppingList, ShoppingListItem,
-    ProductCategoryEnum, UnitEnum
-    )
+    Product,
+    ProductCategoryEnum,
+    ShoppingList,
+    ShoppingListItem,
+    Transaction,
+    UnitEnum,
+)
 from app.shared.repository.base import BaseRepository
 
 
 class ProductRepository(BaseRepository[Product]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=Product)
 
 
@@ -37,14 +43,14 @@ class ProductRepository(BaseRepository[Product]):
             calories_per_100g=calories_per_100g,
         )
         return self.add(product)
-    
+
 
     def get_all_products(self, include_soft_deleted: bool = False) -> list[Product]:
         stmt = self._user_select(Product)
         if not include_soft_deleted:
             stmt = stmt.where(Product.deleted_at.is_(None))
         return list(self.session.execute(stmt).scalars().all())
-    
+
     def get_all_products_in_window(self, start_utc: datetime, end_utc: datetime, include_soft_deleted: bool = False) -> list[Product]:
         stmt = self._user_select(Product).where(
             Product.created_at >= start_utc,
@@ -59,20 +65,18 @@ class ProductRepository(BaseRepository[Product]):
             Product.barcode == barcode,
             Product.deleted_at.is_(None)
         )
-        result = self.session.execute(stmt).scalars().first()
-        return cast(Product | None, result)
+        return self.session.execute(stmt).scalars().first()
 
     def get_product_by_name(self, name: str) -> Product | None:
         stmt = self._user_select(Product).where(
             Product.name == name,
             Product.deleted_at.is_(None)
         )
-        result = self.session.execute(stmt).scalars().first()
-        return cast(Product | None, result)
+        return self.session.execute(stmt).scalars().first()
 
 
 class TransactionRepository(BaseRepository[Transaction]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=Transaction)
 
     def create_transaction(self, product: Product, price_at_scan: Decimal,
@@ -91,7 +95,7 @@ class TransactionRepository(BaseRepository[Transaction]):
             joinedload(Transaction.product)
         )
         return list(self.session.execute(stmt).scalars().all())
-    
+
     def get_all_transactions_in_window(self, start_utc: datetime, end_utc: datetime) -> list[Transaction]:
         """"""
         stmt = self._user_select(Transaction).where(
@@ -107,13 +111,11 @@ class TransactionRepository(BaseRepository[Transaction]):
             Transaction.created_at >= start_utc,
             Transaction.created_at < end_utc,
         )
-        result = self.session.execute(stmt).scalars().first()
-        return cast(Transaction | None, result)
-
+        return self.session.execute(stmt).scalars().first()
 
 
 class ShoppingListRepository(BaseRepository[ShoppingList]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=ShoppingList)
 
     def create_shoppinglist(self, name: str = "DefaultListName") -> ShoppingList:
@@ -123,15 +125,14 @@ class ShoppingListRepository(BaseRepository[ShoppingList]):
         )
         return self.add(shopping_list)
 
-    # One list per user, for now
     def get_shopping_list(self) -> ShoppingList | None:
+        """Get shopping list for user. One list per user."""
         stmt = self._user_select(ShoppingList)
-        result = self.session.execute(stmt).scalars().first()
-        return cast(ShoppingList | None, result)
+        return self.session.execute(stmt).scalars().first()
 
 
 class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=ShoppingListItem)
 
     def create_shopping_list_item(self, shopping_list_id: int, product_id: int, quantity_wanted: int) -> ShoppingListItem:
@@ -148,5 +149,4 @@ class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):
             ShoppingListItem.shopping_list_id == shopping_list_id,
             ShoppingListItem.product_id == product_id
         )
-        result = self.session.execute(stmt).scalars().first()
-        return cast(ShoppingListItem | None, result)
+        return self.session.execute(stmt).scalars().first()

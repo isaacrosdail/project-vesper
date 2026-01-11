@@ -6,7 +6,7 @@ import { removeTableRow } from '../tables.js';
 import { confirmationManager } from './modal-manager.js';
 import { FormDialog } from '../../types';
 import { getJSInstant } from '../datetime.js';
-import { getSubtypeLabel } from '../../types.js';
+import { isSubtype, getSubtypeLabel } from '../../types.js';
 
 type MenuOptionTypes = 'products' | 'transactions' | 'tasks';
 
@@ -34,7 +34,7 @@ type ContextObject = {
         module: string;
         subtype: MenuOptionTypes;
         isDone?: boolean;
-        productId?: string | undefined;
+        productId?: string;
     }
 }
 type ContextMenuTrigger = ContextObject & {
@@ -137,11 +137,9 @@ function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>
             default:
                 if (input.type === 'number') {
                     const step = parseFloat(input.step) || 1;
-                    if (step === 1) {
-                        input.value = String(Math.round(fieldValue));
-                    } else {
-                        input.value = formatDecimal(fieldValue, 2);
-                    }
+                    input.value = (step === 1)
+                        ? String(Math.round(fieldValue))
+                        : formatDecimal(fieldValue, 2);
                 } else {
                     input.value = String(fieldValue);
                 }
@@ -300,9 +298,12 @@ document.addEventListener('contextmenu', (e) => {
             return;
         }
         const { itemId, module, subtype } = row.dataset;
+        const productId = row?.dataset['productId'];
+        const includeIsDone = module === 'tasks';
+        const isDone = includeIsDone ? row.dataset['isDone'] === 'True' : undefined;
 
         if (!itemId || !module || !subtype) {
-            console.error('Missing required dataset attributes');
+            console.error('Missing itemId/module/subtype attribute(s)');
             return;
         }
         e.preventDefault();
@@ -317,7 +318,9 @@ document.addEventListener('contextmenu', (e) => {
                 module,
                 subtype: subtype as MenuOptionTypes,
                 isDone: row?.dataset['isDone'] === 'True',
-                productId: row?.dataset['productId']
+                ...(productId !== undefined ? { productId } : {}),
+                ...(isDone !== undefined ? { isDone } : {})
+                // productId: row?.dataset['productId']
             }
         };
 

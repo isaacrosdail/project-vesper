@@ -1,25 +1,32 @@
 """
 Repository layer for Habits module.
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from datetime import datetime
 
-from datetime import datetime
+    from sqlalchemy.orm import Session
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from app.modules.habits.models import (DifficultyEnum, Habit, HabitCompletion,
-                                       LanguageEnum, LCStatusEnum,
-                                       LeetCodeRecord, StatusEnum)
+from app.modules.habits.models import (
+    DifficultyEnum,
+    Habit,
+    HabitCompletion,
+    LanguageEnum,
+    LCStatusEnum,
+    LeetCodeRecord,
+    StatusEnum,
+)
 from app.shared.repository.base import BaseRepository
 
 
 class HabitRepository(BaseRepository[Habit]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=Habit)
 
     def create_habit(
@@ -44,7 +51,7 @@ class HabitRepository(BaseRepository[Habit]):
             selectinload(Habit.tags)
         )
         return list(self.session.execute(stmt).scalars().all())
-    
+
     def get_all_habits_and_tags_in_window(self, start_utc: datetime, end_utc: datetime) -> list[Habit]:
         stmt = self._user_select(Habit).where(
             Habit.created_at >= start_utc,
@@ -56,7 +63,7 @@ class HabitRepository(BaseRepository[Habit]):
 
 
 class HabitCompletionRepository(BaseRepository[HabitCompletion]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=HabitCompletion)
 
 
@@ -68,7 +75,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
         )
         return self.add(habit_completion)
 
-    def get_all_habit_completions(self, habit_id: int, order_desc: bool = False) -> list[HabitCompletion]:
+    def get_all_habit_completions(self, habit_id: int, *, order_desc: bool = False) -> list[HabitCompletion]:
         stmt = self._user_select(HabitCompletion).where(
             HabitCompletion.habit_id == habit_id
         )
@@ -116,7 +123,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             )
         )
         return list(self.session.execute(stmt).scalars().all())
-    
+
     def get_completion_counts_by_habit_in_window(self, start_utc: datetime, end_utc: datetime) -> list[tuple[str, int]]:
         """Returns a list of (habit_name, count) tuples for completions in datetime range."""
         stmt = (
@@ -135,7 +142,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
 
 
 class LeetCodeRecordRepository(BaseRepository[LeetCodeRecord]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=LeetCodeRecord)
 
 

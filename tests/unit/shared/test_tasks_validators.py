@@ -1,16 +1,19 @@
 
-import pytest
 import datetime
-from app.modules.tasks.validators import *
+
+import pytest
+
+from app.modules.tasks import validators as v
+from app.modules.tasks.models import PriorityEnum
 
 
 @pytest.mark.parametrize("task_name, expected_value, expected_errors", [
     ("Task 1", "Task 1", []),
-    ("", None, [TASK_NAME_REQUIRED]),
-    ("a" * 151, None, [TASK_NAME_TOO_LONG]),
+    ("", None, [v.TASK_NAME_REQUIRED]),
+    ("a" * 151, None, [v.TASK_NAME_TOO_LONG]),
 ])
 def test_validate_task_name(task_name, expected_value, expected_errors):
-    typed_value, errors = validate_task_name(task_name)
+    typed_value, errors = v.validate_task_name(task_name)
     assert typed_value == expected_value
     assert errors == expected_errors
 
@@ -18,10 +21,10 @@ def test_validate_task_name(task_name, expected_value, expected_errors):
 @pytest.mark.parametrize("priority, expected_value, expected_errors", [
     ("HIGH", PriorityEnum.HIGH, []),
     ("", None, []), # Optional at field-level, existence enforced in validate_task
-    ("not_a_priority", None, [PRIORITY_INVALID]),
+    ("not_a_priority", None, [v.PRIORITY_INVALID]),
 ])
 def test_validate_task_priority(priority, expected_value, expected_errors):
-    typed_value, errors = validate_task_priority(priority)
+    typed_value, errors = v.validate_task_priority(priority)
     assert typed_value == expected_value
     assert errors == expected_errors
 
@@ -44,7 +47,7 @@ def test_validate_task_priority(priority, expected_value, expected_errors):
         {"name": "Dust shelves"},
         {"name": "Dust shelves", "due_date": None, "priority": None}, # priority comes out as None, but we still fail. Weird, but correct
         {
-            "priority": [PRIORITY_REQUIRED_NON_FROG]
+            "priority": [v.PRIORITY_REQUIRED_NON_FROG]
         },
         id="non-frog-priority-required"
     ),
@@ -52,7 +55,7 @@ def test_validate_task_priority(priority, expected_value, expected_errors):
         {"name": "Make bed", "is_frog": True, "priority": None},
         {"name": "Make bed", "is_frog": True, "due_date": None, "priority": None},
         {
-            "due_date": [FROG_REQUIRES_DUE_DATE]
+            "due_date": [v.FROG_REQUIRES_DUE_DATE]
         },
         id="frog-requires-due-date"
     ),
@@ -60,13 +63,13 @@ def test_validate_task_priority(priority, expected_value, expected_errors):
         {"name": "Grab snacks", "is_frog": True, "due_date": "2025-09-28", "priority": "HIGH"},
         {"name": "Grab snacks", "is_frog": True, "due_date": datetime.date(2025, 9, 28), "priority": PriorityEnum.HIGH},
         {
-            "priority": [FROG_REQUIRES_NO_PRIORITY]
+            "priority": [v.FROG_REQUIRES_NO_PRIORITY]
         },
         id="frog-priority-must-be-none"
     ),
 ])
 def test_validate_task(data, expected_typed_data, expected_errors):
-    typed_data, errors = validate_task(data)
+    typed_data, errors = v.validate_task(data)
     assert typed_data == expected_typed_data
     assert errors == expected_errors
 
@@ -74,20 +77,20 @@ def test_validate_task(data, expected_typed_data, expected_errors):
 
 @pytest.mark.parametrize("tag_name, expected_value, expected_errors", [
     ("MyTag", "MyTag", []),
-    ("TagTooLong" * 10, None, [TAG_NAME_LENGTH]),
+    ("TagTooLong" * 10, None, [v.TAG_NAME_LENGTH]),
 ])
 def test_validate_tag_name(tag_name, expected_value, expected_errors):
-    typed_value, errors = validate_tag_name(tag_name)
+    typed_value, errors = v.validate_tag_name(tag_name)
     assert typed_value == expected_value
     assert errors == expected_errors
 
 
 @pytest.mark.parametrize("tag_scope, expected_value, expected_errors", [
     ("MyTag", "MyTag", []),
-    ("TagTooLong" * 10, None, [TAG_SCOPE_LENGTH]),
+    ("TagTooLong" * 10, None, [v.TAG_SCOPE_LENGTH]),
 ])
 def test_validate_tag_scope(tag_scope, expected_value, expected_errors):
-    typed_value, errors = validate_tag_scope(tag_scope)
+    typed_value, errors = v.validate_tag_scope(tag_scope)
     assert typed_value == expected_value
     assert errors == expected_errors
 
@@ -102,29 +105,29 @@ def test_validate_tag_scope(tag_scope, expected_value, expected_errors):
     pytest.param(
         {"name": "a" * 51},
         {"scope": None},
-        {"name": [TAG_NAME_LENGTH]},
+        {"name": [v.TAG_NAME_LENGTH]},
         id="name-too-long"
     ),
     pytest.param(
         {"scope": "a" * 21},
         {},
-        {"name": [TAG_NAME_REQUIRED], "scope": [TAG_SCOPE_LENGTH]},
+        {"name": [v.TAG_NAME_REQUIRED], "scope": [v.TAG_SCOPE_LENGTH]},
         id="missing-name+scope-too-long"
     ),
     pytest.param(
         {},
         {"scope": None},
-        {"name": [TAG_NAME_REQUIRED]},
+        {"name": [v.TAG_NAME_REQUIRED]},
         id="missing-name"
     ),
     pytest.param(
         {"name": "home", "scope": "a" * 21},
         {"name": "home"},
-        {"scope": [TAG_SCOPE_LENGTH]},
+        {"scope": [v.TAG_SCOPE_LENGTH]},
         id="valid-name+scope-too-long"
     ),
 ])
 def test_validate_tag(data, expected_typed_data, expected_errors):
-    typed_data, errors = validate_tag(data)
+    typed_data, errors = v.validate_tag(data)
     assert typed_data == expected_typed_data
     assert errors == expected_errors

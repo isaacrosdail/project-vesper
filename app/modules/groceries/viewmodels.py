@@ -1,5 +1,6 @@
+from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     from app.modules.groceries.models import Product, Transaction
@@ -7,24 +8,24 @@ if TYPE_CHECKING:
 
 from app.modules.groceries.models import ProductCategoryEnum as Category
 from app.modules.groceries.models import UnitEnum as UnitType
-from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
+from app.shared.view_mixins import BasePresenter, TimestampedViewMixin
+
 
 class TransactionPresenter(BasePresenter):
-
-    VISIBLE_COLUMNS = [
+    VISIBLE_COLUMNS: ClassVar[list[str]] = [
         "product_name", "price_at_scan", "price_per_100g", "created_at"
     ]
 
-    COLUMN_CONFIG = {
-    "product_name": {"label": "Product Name", "priority": "essential"},
-    "price_at_scan": {"label": "Price (qty)", "priority": "essential"},
-    "quantity": {"label": "Qty", "priority": "desktop-only"},
-    "created_at": {"label": "Date", "priority": "essential"},
-    "price_per_100g": {"label": "Price (100g)", "priority": "desktop-only"}
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
+        "product_name": {"label": "Product Name", "priority": "essential"},
+        "price_at_scan": {"label": "Price (qty)", "priority": "essential"},
+        "quantity": {"label": "Qty", "priority": "desktop-only"},
+        "created_at": {"label": "Date", "priority": "essential"},
+        "price_per_100g": {"label": "Price (100g)", "priority": "desktop-only"}
     }
 
 class TransactionViewModel(TimestampedViewMixin):
-    def __init__(self, txn: 'Transaction', tz: str):
+    def __init__(self, txn: Transaction, tz: str) -> None:
         self.id = txn.id
         self.product_id = txn.product_id
         self.product_name = txn.product.name
@@ -39,11 +40,11 @@ class TransactionViewModel(TimestampedViewMixin):
     def price_label(self) -> str:
         total_price = self.price_at_scan * self.quantity
         return f"${total_price:.2f} ({self.quantity}x)"
-    
+
     @property
     def price_per_100g_label(self) -> str:
         return f"${self.price_per_100g:.2f}"
-    
+
     @property
     def created_at_label(self) -> str:
         return self.format_created_at_label()
@@ -51,11 +52,10 @@ class TransactionViewModel(TimestampedViewMixin):
 
 
 class ProductPresenter(BasePresenter):
-
-    VISIBLE_COLUMNS = [
+    VISIBLE_COLUMNS: ClassVar[list[str]] = [
         "barcode", "name", "category", "net_weight_display", "calories_per_100g"
     ]
-    COLUMN_CONFIG = {
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
         "id": {"label": "ID", "priority": "desktop-only"},
         "name": {"label": "Product Name", "priority": "essential"},
         "category": {"label": "Category", "priority": "essential"},
@@ -66,9 +66,9 @@ class ProductPresenter(BasePresenter):
         "created_at": {"label": "Created", "priority": "desktop-only"}
     }
 
-    
+
 class ProductViewModel(TimestampedViewMixin):
-    CATEGORY_LABELS = {
+    CATEGORY_LABELS: ClassVar[dict[Category, str]] = {
         Category.FRUITS: "Fruits",
         Category.VEGETABLES: "Vegetables",
         Category.LEGUMES: "Legumes",
@@ -85,7 +85,7 @@ class ProductViewModel(TimestampedViewMixin):
         Category.PROCESSED_CONVENIENCE: "Processed & Convenience",
         Category.SUPPLEMENTS: "Supplements",
     }
-    UNIT_TYPE_LABELS = {
+    UNIT_TYPE_LABELS: ClassVar[dict[UnitType, str]] = {
         UnitType.G: "g",
         UnitType.KG: "kg",
         UnitType.OZ: "oz",
@@ -96,7 +96,7 @@ class ProductViewModel(TimestampedViewMixin):
         UnitType.EA: "ea.",
     }
 
-    def __init__(self, product: 'Product', tz: str):
+    def __init__(self, product: Product, tz: str) -> None:
         self.id = product.id
         self.barcode = product.barcode
         self.name = product.name
@@ -117,9 +117,9 @@ class ProductViewModel(TimestampedViewMixin):
     @property
     def net_weight_label(self) -> str:
         return f"{self.net_weight:.2f} ({ProductViewModel.UNIT_TYPE_LABELS[self.unit_type]})"
-    
+
     @property
     def calories_label(self) -> str:
         if self.calories_per_100g:
             return "--"
-        return str(int(round(self.calories_per_100g)))
+        return str(round(self.calories_per_100g))

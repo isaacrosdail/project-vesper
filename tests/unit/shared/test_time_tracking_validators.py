@@ -1,18 +1,17 @@
 from datetime import date
-import sys
+
 import pytest
 
-from app.modules.time_tracking.validators import *
-from app.shared.validators import DATE_REQUIRED
+from app.modules.time_tracking import validators as v
 
 
 @pytest.mark.parametrize("category, expected_value, expected_errors", [
     ("Programming", "Programming", []),
-    ("", None, [CATEGORY_REQUIRED]),
-    ("a" * 51, None, [CATEGORY_TOO_LONG]),
+    ("", None, [v.CATEGORY_REQUIRED]),
+    ("a" * 51, None, [v.CATEGORY_TOO_LONG]),
 ])
 def test_validate_category(category, expected_value, expected_errors):
-    typed_value, errors = validate_category(category)
+    typed_value, errors = v.validate_category(category)
     assert typed_value == expected_value
     assert errors == expected_errors
 
@@ -21,10 +20,10 @@ def test_validate_category(category, expected_value, expected_errors):
     (None, None, []),
     ("", None, []),
     ("Some description", "Some description", []),
-    ("a" * 201, None, [DESCRIPTION_LENGTH]),
+    ("a" * 201, None, [v.DESCRIPTION_LENGTH]),
 ])
 def test_validate_description(description, expected_value, expected_errors):
-    typed_value, errors = validate_description(description)
+    typed_value, errors = v.validate_description(description)
     assert typed_value == expected_value
     assert errors == expected_errors
 
@@ -39,13 +38,13 @@ def test_validate_description(description, expected_value, expected_errors):
         {"category": "", "description": "a" * 201, "started_at": "12:00", "ended_at": "13:20"},
         {"started_at": "12:00", "ended_at": "13:20"},
         {
-            "category": [CATEGORY_REQUIRED],
-            "description": [DESCRIPTION_LENGTH],
-            "entry_date": [DATE_REQUIRED]
+            "category": [v.CATEGORY_REQUIRED],
+            "description": [v.DESCRIPTION_LENGTH],
+            "entry_date": [v.DATE_REQUIRED]
         }
     )
 ])
 def test_validate_time_entry(data, expected_typed_data, expected_errors):
-    typed_data, errors = validate_time_entry(data)
+    typed_data, errors = v.validate_time_entry(data)
     assert typed_data == expected_typed_data
     assert errors == expected_errors

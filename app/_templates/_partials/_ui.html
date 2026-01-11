@@ -36,10 +36,11 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     #}
 
 {% macro responsive_table(caption, headers, items, module_name, subtype, params={}, sortable=False) %}
+
 <table 
-    id="{{ subtype }}-table"
+    id="{{ items[0].subtype if items else '' }}-table"
     data-module="{{ module_name }}"
-    data-subtype="{{ subtype }}"
+    data-subtype="{{ items[0].subtype if items else '' }}"
     class="table-standard">
   <caption class="sr-only">{{ caption }}</caption>
   <thead class="table-header">
@@ -47,7 +48,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
       {% for col in headers %}
         <th class="{{ col.priority }}"
         {% if (sortable and params) %}
-        {# Will use explicit sort_field if defined, otherwise fall back to col.key #}
+        {# Will use explicit sort_field if defined in viewmodels.py, otherwise fall back to col.key #}
             data-column="{{ col.sort_field or col.key }}"
             {% if params.sort_by == (col.sort_field or col.key) %}
                 data-order="{{ params.order }}"
@@ -69,9 +70,10 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
   <tbody>
     {% if items %}
       {% for item in items %}
-        <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ subtype }}"
+      {{ item.subtype }}
+        <tr class="table-row" data-item-id="{{ item.id }}" data-module="{{ module_name }}" data-subtype="{{ item.subtype }}"
             {% if item.is_done %}data-is-done="{{ item.is_done }}"{% endif %}
-            {% if subtype == 'transactions' %}data-product-id="{{ item.product_id }}"{% endif %}
+            {% if item.subtype == 'transactions' %}data-product-id="{{ item.product_id }}"{% endif %}
             >
           {{ caller(item, headers) }}
           <td class="table-cell delete-cell">

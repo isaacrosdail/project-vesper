@@ -1,20 +1,18 @@
 """
 - /health : JSON health check endpoint (for monitoring)
 """
-from typing import Any
 
-from flask import Blueprint, render_template, jsonify, Response
+from flask import Blueprint, Response, jsonify, render_template
 from flask_login import current_user
-
 
 from app._infra.database import database_connection
 from app.modules.habits.service import create_habits_service
 from app.modules.tasks.service import create_tasks_service
 from app.shared.datetime.helpers import (
-    today_range_utc,
     day_range_utc,
-    now_in_timezone,
     is_same_local_date,
+    now_in_timezone,
+    today_range_utc,
 )
 
 main_bp = Blueprint("main", __name__, template_folder="templates")
@@ -22,7 +20,10 @@ main_bp = Blueprint("main", __name__, template_folder="templates")
 
 @main_bp.get("/")
 def home() -> tuple[str, int]:
-    """Return landing page for unauthenticated users, homepage for authenticated users."""
+    """
+    Return landing page for unauthenticated users,
+    homepage for authenticated users.
+    """
     if not current_user.is_authenticated:
         return render_template("landing_page.html"), 200
 
@@ -32,16 +33,17 @@ def home() -> tuple[str, int]:
 
         now_time = now.strftime("%H:%M:%S")
         now_date = now.strftime("%a, %b %d")
+
+        noon, evening = 12, 18
         greeting = (
-            "Good morning" if now.hour < 12
-            else "Good afternoon" if now.hour < 18
+            "Good morning" if now.hour < noon
+            else "Good afternoon" if now.hour < evening
             else "Good evening"
         )
 
         today = now_in_timezone(user_tz).date()  # user's today
         current_date = today.isoformat()  # for time_tracking entry modal's date field
 
-        # Fetch tasks, habits
         habits_service = create_habits_service(session, current_user.id, user_tz)
         tasks_service = create_tasks_service(session, current_user.id, user_tz)
         habits = habits_service.habit_repo.get_all()

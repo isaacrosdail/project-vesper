@@ -2,13 +2,15 @@
 Configuration classes for different environments.
 Manages database URIs, debug settings, and environment-specific settings.
 """
-import os, logging
+import logging
+import os
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 # Only load .env in non-prod
 if os.getenv("APP_ENV", "dev") != "prod":
-    load_dotenv(override=False) # real env (Docker) wins if already set, so we pull our env vars from our container instead of 
+    load_dotenv(override=False) # real env (Docker) wins if already set, so we pull our env vars from our container instead of
 
 class BaseConfig:
     LOGGING_LEVEL = logging.INFO
@@ -22,6 +24,10 @@ class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-me")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REMEMBER_COOKIE_DURATION = timedelta(days=30) # Flask automatically picks this up
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "",
+        "postgresql://user:password@localhost:5432/not_a_db"
+    )
 
 class DevConfig(BaseConfig):
     LOGGING_LEVEL = logging.DEBUG
@@ -39,7 +45,10 @@ class ProdConfig(BaseConfig):
     AUTO_MIGRATE = True
     USE_PROXY_FIX = True   # For playing nice with our CSP/nginx headers
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URI",
+        "postgresql://user:password@localhost:5432/dev_dbname"
+    )
 
 class TestConfig(BaseConfig):
     LOGGING_LEVEL = logging.WARNING
@@ -56,3 +65,12 @@ config_map = {
     "prod": ProdConfig,
     "testing": TestConfig,
 }
+
+def get_config(config_name: str | None = None) -> type[BaseConfig]:
+    """Get config class based on name or APP_ENV."""
+    config_name = config_name or os.environ.get("APP_ENV", "dev")
+
+    if config_name not in config_map:
+        raise RuntimeError(f"Unknown APP_ENV '{config_name}'")
+    
+    return config_map[config_name]

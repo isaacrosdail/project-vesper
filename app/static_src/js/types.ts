@@ -1,5 +1,13 @@
 
 /**
+ * List of valid module subtypes used for runtime subtype checks.
+ */
+const SUBTYPES = [
+    'time_entries', 'leet_code_records', 'habits', 'tasks', 'products',
+    'transactions', 'shopping_list_items', 'daily_metrics'
+] as const;
+
+/**
  * Internal identifiers for entities across all modules.
  * Used for API routing, DB queries, & UI labels.
  */
@@ -19,6 +27,15 @@ type Subtype =
 type SubtypeLabels = {
     singular: string;
     plural: string;
+}
+
+/**
+ * 
+ * @param x String representing subtype to be checked
+ * @returns 
+ */
+export function isSubtype(x: string): x is Subtype {
+    return (SUBTYPES as readonly string[]).includes(x);
 }
 
 /**

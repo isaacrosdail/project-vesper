@@ -1,17 +1,19 @@
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     from app.modules.habits.models import Habit, LeetCodeRecord
 
-from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
+from app.shared.view_mixins import BasePresenter, TimestampedViewMixin
+
 
 class HabitPresenter(BasePresenter):
-    VISIBLE_COLUMNS = [
+    VISIBLE_COLUMNS: ClassVar[list[str]] = [
         "name", "status", "created_at"
     ]
-    COLUMN_CONFIG = {
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
         "id": {"label": "ID", "priority": "desktop-only"},
         "name": {"label": "Name", "priority": "essential"},
         "tags": {"label": "Tag(s)", "priority": "desktop-only"},
@@ -21,9 +23,9 @@ class HabitPresenter(BasePresenter):
         "promotion_threshold": {"label": "Promotion Threshold", "priority": "desktop-only"}
     }
 
-    
+
 class HabitViewModel(TimestampedViewMixin):
-    def __init__(self, habit: 'Habit', tz: str):
+    def __init__(self, habit: Habit, tz: str) -> None:
         self.id = habit.id
         self.name = habit.name
         self.status = habit.status
@@ -31,22 +33,22 @@ class HabitViewModel(TimestampedViewMixin):
         self.promotion_threshold = habit.promotion_threshold
         self.created_at = habit.created_at
         self._tz = tz
-    
+
     @property
     def status_label(self) -> str:
         return f"{self.status.value.title()}"
-    
+
     @property
     def created_at_label(self) -> str:
         return self.format_created_at_label()
-    
+
 
 class LCRecordPresenter(BasePresenter):
-    VISIBLE_COLUMNS = [
+    VISIBLE_COLUMNS: ClassVar[list[str]] = [
         "leetcode_id", "title", "difficulty", "language", "status"
     ]
 
-    COLUMN_CONFIG = {
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
         "id": {"label": "ID", "priority": "essential"},
         "leetcode_id": {"label": "Leetcode ID", "priority": "essential"},
         "title": {"label": "Title", "priority": "essential"},
@@ -56,7 +58,7 @@ class LCRecordPresenter(BasePresenter):
     }
 
 class LCRecordViewModel(TimestampedViewMixin):
-    def __init__(self, record: 'LeetCodeRecord', tz: str):
+    def __init__(self, record: LeetCodeRecord, tz: str) -> None:
         self.id = record.id
         self.leetcode_id = record.leetcode_id
         self.title = record.title
@@ -72,7 +74,7 @@ class LCRecordViewModel(TimestampedViewMixin):
     @property
     def difficulty_label(self) -> str:
         return f"{self.difficulty.value.title()}"
-    
+
     @property
     def language_label(self) -> str:
         return f"{self.language.value.title()}"

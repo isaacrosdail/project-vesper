@@ -1,10 +1,10 @@
 
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol
-
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 from zoneinfo import ZoneInfo
 
 from app.shared.datetime.helpers import convert_to_timezone
+
 
 class HasTimestampedFields(Protocol):
     _tz: str
@@ -19,11 +19,14 @@ class HasTimestampedFields(Protocol):
 class TimestampedViewMixin:
     """Adds datetime-related conversion & formatting methods to inheriting classes."""
 
-    if TYPE_CHECKING: # TODO: TEMP! Need better solution
+    if TYPE_CHECKING: # NOTE: TEMP! Need better solution
         _tz: str
         created_at: datetime
         updated_at: datetime
         due_date: datetime | None
+
+        WEEK_CUTOFF = 7
+        SOON_START = 2
 
     def format_dt(self, dt: datetime, fmt: str ="%Y-%m-%d %H:%M") -> str:
         """Format datetime in user's timezone."""
@@ -33,7 +36,7 @@ class TimestampedViewMixin:
     def format_due_label(self) -> str:
         if not self.due_date:
             return ""
-        
+
         today = datetime.now(ZoneInfo(self._tz)).date()
         # Stored at exclusive EOD (ie 00:00 next day), so timedelta -1 second to adjust
         due_local = convert_to_timezone(self._tz, self.due_date)
@@ -48,7 +51,7 @@ class TimestampedViewMixin:
 
         if delta_days in rules:
             return rules[delta_days]
-        elif 2 <= delta_days < 7:
+        if self.SOON_START <= delta_days < self.WEEK_CUTOFF:
             return self.format_dt(self.due_date, "%a")
         else:
             return self.format_dt(self.due_date, "%b %d")
@@ -65,13 +68,13 @@ class TimestampedViewMixin:
 
         if delta_days in rules:
             return rules[delta_days]
-        elif 2 <= delta_days <= 7:
+        if self.SOON_START <= delta_days <= self.WEEK_CUTOFF:
             return self.format_dt(self.created_at, "%a")
         else:
             return self.format_dt(self.created_at, "%b %d")
-    
 
-    
+
+
 
 class BasePresenter:
     VISIBLE_COLUMNS: ClassVar[list[str]] = []
@@ -81,12 +84,14 @@ class BasePresenter:
     def build_columns(cls) -> list[dict[str, Any]]:
         """
         Builds a list of column definitions for use as table headers.
-        Respects the order defined in `VISIBLE_COLUMNS` & excludes fields not explicitly whitelisted.
+        Respects order defined in `VISIBLE_COLUMNS`.
+        Excludes fields not explicitly whitelisted.
         """
+        # NOTE: sort_field optional: fall back to key in macro if sort_field missing
         return [
             {
                 "key": col,
-                "sort_field": cls.COLUMN_CONFIG[col].get("sort_field"), #NOTE: Optional, fall back to key in macro if sort_field isn't specified
+                "sort_field": cls.COLUMN_CONFIG[col].get("sort_field"),
                 "label": cls.COLUMN_CONFIG[col]["label"],
                 "priority": cls.COLUMN_CONFIG[col]["priority"]
             }

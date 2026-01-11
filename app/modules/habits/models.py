@@ -5,19 +5,28 @@ import enum
 from datetime import datetime
 from typing import Any, Self
 
-from sqlalchemy import CheckConstraint, DateTime
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
-from app.modules.habits.constants import (HABIT_NAME_MAX_LENGTH,
-                                          LC_TITLE_MAX_LENGTH,
-                                          PROMOTION_THRESHOLD_MAX,
-                                          PROMOTION_THRESHOLD_MIN)
-from app.shared.models import Tag, habit_tags
+from app.modules.habits.validation_constants import (
+    HABIT_NAME_MAX_LENGTH,
+    LC_TITLE_MAX_LENGTH,
+    PROMOTION_THRESHOLD_MAX,
+    PROMOTION_THRESHOLD_MIN,
+)
+from app.shared.models import habit_tags
 from app.shared.serialization import APISerializable
-from app.shared.types import OrderedEnum
+from app.shared.type_defs import OrderedEnum
 
 
 class StatusEnum(OrderedEnum):
@@ -65,9 +74,9 @@ class Habit(Base, APISerializable):
 
     __table_args__ = (
         CheckConstraint(
-            f'promotion_threshold is NULL OR (promotion_threshold >= {PROMOTION_THRESHOLD_MIN} AND promotion_threshold <= {PROMOTION_THRESHOLD_MAX})', name='ck_promotion_threshold_range_0_1'
+            f"promotion_threshold is NULL OR (promotion_threshold >= {PROMOTION_THRESHOLD_MIN} AND promotion_threshold <= {PROMOTION_THRESHOLD_MAX})", name="ck_promotion_threshold_range_0_1"
         ),
-        UniqueConstraint('user_id', 'name', name='uq_user_habit_name'),
+        UniqueConstraint("user_id", "name", name="uq_user_habit_name"),
     )
 
     name: Mapped[str] = mapped_column(
@@ -88,13 +97,13 @@ class Habit(Base, APISerializable):
     )
     # Represents target completion rate per week
     target_frequency: Mapped[int] = mapped_column(Integer, nullable=False)
-    
+
     tags = relationship("Tag", secondary=habit_tags, back_populates="habits")
     habit_completions = relationship("HabitCompletion", back_populates="habit", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         return self.name
-    
+
     def __repr__(self) -> str:
         return f"<Habit id={self.id} name='{self.name}'>"
 
@@ -102,8 +111,8 @@ class Habit(Base, APISerializable):
 class HabitCompletion(Base, APISerializable):
     """Stores each completion as a new entry, enabling better analytics."""
 
-    habit_id: Mapped[int] = mapped_column(Integer, ForeignKey('habits.id'), nullable=False)
-    
+    habit_id: Mapped[int] = mapped_column(Integer, ForeignKey("habits.id"), nullable=False)
+
     habit = relationship("Habit", back_populates="habit_completions")
 
     def __repr__(self) -> str:
@@ -113,7 +122,7 @@ class HabitCompletion(Base, APISerializable):
 class LeetCodeRecord(Base, APISerializable):
 
     leetcode_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    
+
     title: Mapped[str] = mapped_column(String(LC_TITLE_MAX_LENGTH))
 
     difficulty: Mapped[DifficultyEnum] = mapped_column(

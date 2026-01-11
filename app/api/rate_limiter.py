@@ -1,20 +1,20 @@
-"""
-Basic API call limiting helpers.
+"""Basic API call limiting helpers.
 """
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import date
+
     from sqlalchemy.orm import Session
 
 from sqlalchemy import text
 
 
-def reserve_slot(session: 'Session', api_name: str, call_date: date, daily_limit: int) -> int | None:
-    """
-    Automatically reserve one API call slot for (api_name, date).
+def reserve_slot(session: Session, api_name: str, call_date: date, daily_limit: int) -> int | None:
+    """Automatically reserve one API call slot for (api_name, date).
     Returns the reserved_count if reserved, or None if the limit was already reached.
     """
     result = session.execute(
@@ -31,9 +31,8 @@ def reserve_slot(session: 'Session', api_name: str, call_date: date, daily_limit
     return result.scalar_one_or_none()
 
 
-def release_slot(session: 'Session', api_name: str, call_date: date) -> None:
-    """
-    Decrements the daily API call count for a given (api_name, call_date) tuple, for undoing
+def release_slot(session: Session, api_name: str, call_date: date) -> None:
+    """Decrements the daily API call count for a given (api_name, call_date) tuple, for undoing
     a reservation after upstream failure.
     """
     session.execute(
@@ -41,6 +40,6 @@ def release_slot(session: 'Session', api_name: str, call_date: date) -> None:
             UPDATE api_call_records
             SET call_count = GREATEST(api_call_records.call_count - 1, 0)
             WHERE api_called = :a AND date = :d
-        """), 
+        """),
         {"a": api_name, "d": call_date}
     )

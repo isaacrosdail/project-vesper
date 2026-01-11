@@ -105,17 +105,19 @@ def parse_daily_entry_form_data(form_data: dict[str, Any]) -> dict[str, Any]:
 
 def get_table_params(prefix: str, default_sort: str) -> dict[str, Any]:
     """
-    Extracts table state parameters from request query parameters and returns them as a dict.
+    Extracts table state parameters from request query parameters and
+    returns them as a dict.
 
     Args:
         subtype: The table/entity type (eg., 'habits', 'time_entries')
         default_sort: The default field to sort by if not specified in query params
 
     Returns:
-        Dict with 'range' (days to query), 'sort_by' (field to be used as key), and 'order' (asc/desc)
+        Dict with 'range' (days to query), 'sort_by' (field to be used as key),
+        and 'order' (asc/desc)
     """
     return {
-        'range': request.args.get(f"{prefix}_range", 7, type=int),
-        'sort_by': request.args.get(f"{prefix}_sort", default_sort),
-        'order': request.args.get(f"{prefix}_order", "desc")
+        "range": request.args.get(f"{prefix}_range", 7, type=int),
+        "sort_by": request.args.get(f"{prefix}_sort", default_sort),
+        "order": request.args.get(f"{prefix}_order", "desc")
     }

@@ -13,9 +13,9 @@ from app.shared.repository.base import BaseRepository
 
 
 class TimeEntryRepository(BaseRepository[TimeEntry]):
-    def __init__(self, session: 'Session', user_id: int):
+    def __init__(self, session: "Session", user_id: int) -> None:
         super().__init__(session, user_id, model_cls=TimeEntry)
-    
+
     def create_time_entry(self, category: str, started_at: datetime, ended_at: datetime, duration_minutes: float, description: str | None = None) -> TimeEntry:
         time_entry = TimeEntry(
             user_id=self.user_id,
@@ -33,12 +33,13 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
             TimeEntry.ended_at < end_utc,
         )
         return list(self.session.execute(stmt).scalars().all())
- 
+
     def get_entries_by_category_in_window(
             self,
             category: str,
             start_utc: datetime,
             end_utc: datetime,
+            *,
             order_desc: bool = True,
         ) -> list[TimeEntry]:
         """Get all entries of a given category within a certain datetime window."""

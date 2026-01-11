@@ -98,7 +98,7 @@ def test_last_n_days_range(days_ago, tz_str, expected_start_utc, expected_end_ut
 # TODO: parse_time_to_datetime
 @pytest.mark.parametrize("time_str, date, tz_str, expected_datetime", [
     (
-        "14:30", 
+        "14:30",
         date(2025, 9, 29),
         "America/Chicago",
         datetime(2025, 9, 29, 14, 30, tzinfo=ZoneInfo("America/Chicago"))

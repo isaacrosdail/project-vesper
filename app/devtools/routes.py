@@ -1,38 +1,37 @@
-"""
-Development tools blueprint.
+"""Development tools blueprint.
 
 Provides:
 - /style-reference  : Internal UI style guide (dev only, owner access)
 """
 import os
-
-from flask import Blueprint, render_template, current_app
+import sys
+from flask import request
+from flask import Blueprint, current_app, render_template
 from flask_login import login_required
 
-from app.modules.auth.service import requires_owner
+from app.modules.auth.service import owner_required
+
+devtools_bp = Blueprint("devtools", __name__, url_prefix="/devtools", template_folder="templates")
 
 
-devtools_bp = Blueprint('devtools', __name__, url_prefix='/devtools', template_folder='templates')
-
-
-# Only register style_reference in development
-if os.environ.get('APP_ENV') == 'dev':
-    @devtools_bp.get('/style_reference')
+if os.environ.get("APP_ENV") == "dev":
+    @devtools_bp.get("/style_reference")
     @login_required # type: ignore
     def style_reference() -> tuple[str, int]:
-        return render_template('style-reference.html'), 200
+        """NOTE: Only registered in `dev` environment."""
+        return render_template("style-reference.html"), 200
 
-@devtools_bp.get('/routes')
-@requires_owner
+@devtools_bp.get("/routes")
+@owner_required
 def show_routes() -> tuple[str, int]:
     routes = []
     for rule in current_app.url_map.iter_rules():
         methods_set = rule.methods or set()
-        methods = ','.join(sorted(methods_set - {'HEAD', 'OPTIONS'}))
+        methods = ",".join(sorted(methods_set - {"HEAD", "OPTIONS"}))
         routes.append({
-            'methods': methods,
-            'endpoint': rule.rule,
-            'function': rule.endpoint
+            "methods": methods,
+            "endpoint": rule.rule,
+            "function": rule.endpoint
         })
 
-    return render_template('routes.html', routes=routes), 200
+    return render_template("routes.html", routes=routes), 200

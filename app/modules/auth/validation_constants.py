@@ -3,7 +3,8 @@
 # Username: 3-30, Unicode letters, numbers, & underscores
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
-USERNAME_REGEX = rf"^[\p{{L}}0-9_]{{{USERNAME_MIN_LENGTH},{USERNAME_MAX_LENGTH}}}$"
+USERNAME_REGEX = \
+    rf"^[\p{{L}}0-9_]{{{USERNAME_MIN_LENGTH},{USERNAME_MAX_LENGTH}}}$"
 
 USERNAME_REQUIRED = "Username is required"
 USERNAME_CHARSET = (
@@ -14,10 +15,12 @@ USERNAME_CHARSET = (
 # Password
 PASSWORD_MIN_LENGTH = 8
 PASSWORD_MAX_LENGTH = 50
-PASSWORD_REGEX = rf"^.{{{PASSWORD_MIN_LENGTH},{PASSWORD_MAX_LENGTH}}}$" # 8-50 chars, any allowed
+PASSWORD_REGEX = \
+    rf"^.{{{PASSWORD_MIN_LENGTH},{PASSWORD_MAX_LENGTH}}}$" # 8-50 chars, any allowed
 
-PASSWORD_REQUIRED = "Password is required"
-PASSWORD_INVALID = f"Password must be {PASSWORD_MIN_LENGTH}-{PASSWORD_MAX_LENGTH} characters"
+PASSWORD_REQUIRED = "Password is required" # noqa: S105
+PASSWORD_INVALID = \
+    f"Password must be {PASSWORD_MIN_LENGTH}-{PASSWORD_MAX_LENGTH} characters"
 
 # Name (optional): 1-50, Unicode letters, plus space/apostrophe/hyphen
 NAME_MIN_LENGTH = 1
@@ -38,5 +41,5 @@ USERLANG_REQUIRED = "UserLang is required"
 USERLANG_INVALID = "UserLang not a valid enum"
 
 # Timezone
-# TODO: Use ZoneInfo's actual list: ZoneInfo.available_timezones()
+# NOTE: Use ZoneInfo's actual list: ZoneInfo.available_timezones()
 TIMEZONE_MAX_LENGTH = 50

@@ -1,18 +1,21 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypeVar, Generic, Any, Type
+
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
+    from sqlalchemy import Select
     from sqlalchemy.orm import Session
-    
-from app._infra.db_base import Base
-from sqlalchemy import select, func
 
-T = TypeVar('T', bound=Base)           # Generic type for the primary model itself
-TModel = TypeVar('TModel', bound=Base) # Any model for add/delete
+from sqlalchemy import func, select
+
+from app._infra.db_base import Base
+
+T = TypeVar("T", bound=Base)           # Generic type for the primary model itself
+TModel = TypeVar("TModel", bound=Base) # Any model for add/delete
 
 class BaseRepository(Generic[T]):
     """Constructor for base class."""
-    def __init__(self, session: 'Session', user_id: int, model_cls: Type[T]) -> None:
+    def __init__(self, session: Session, user_id: int, model_cls: type[T]) -> None:
         self.session = session
         self.user_id = user_id
         self.model_cls = model_cls
@@ -21,13 +24,13 @@ class BaseRepository(Generic[T]):
     def add(self, item: TModel) -> TModel:
         self.session.add(item)
         return item
-    
+
     def delete(self, item: TModel) -> TModel:
         self.session.delete(item)
         return item
 
     # Returns -> Select[Tuple[model_cls]] statement
-    def _user_select(self, model_cls: Type[TModel]) -> Any:
+    def _user_select(self, model_cls: type[TModel]) -> Select[tuple[TModel]]:
         return select(model_cls).where(
             model_cls.user_id == self.user_id
         )

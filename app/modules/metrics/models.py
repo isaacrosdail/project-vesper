@@ -1,35 +1,31 @@
 
-from typing import ClassVar
 
 from datetime import datetime
 from decimal import Decimal
-import enum
 
-from sqlalchemy import Numeric, Integer, DateTime
-from sqlalchemy import CheckConstraint, Index
+from sqlalchemy import CheckConstraint, DateTime, Index, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app._infra.db_base import Base
-from app.shared.serialization import APISerializable
-
-from app.modules.metrics.constants import (
+from app.modules.metrics.validation_constants import (
+    CALORIES_MINIMUM,
+    STEPS_MINIMUM,
+    WEIGHT_MINIMUM,
     WEIGHT_PRECISION,
     WEIGHT_SCALE,
-    WEIGHT_MINIMUM,
-    STEPS_MINIMUM,
-    CALORIES_MINIMUM,
 )
+from app.shared.serialization import APISerializable
 
 
 class DailyMetrics(Base, APISerializable):
     """Stores everything in "master" units (kg, count, kcal)."""
-    __tablename__ = "daily_metrics" # type: ignore[assignment]
+    __tablename__ = "daily_metrics"
 
     __table_args__ = (
-        CheckConstraint(f'weight > {WEIGHT_MINIMUM}', name='ck_weight_positive'),
-        CheckConstraint(f'steps >= {STEPS_MINIMUM}', name='ck_steps_non_negative'),
-        CheckConstraint(f'calories >= {CALORIES_MINIMUM}', name='ck_calories_non_negative'),
-        Index('ix_user_entry_datetime', 'user_id', 'entry_datetime'),
+        CheckConstraint(f"weight > {WEIGHT_MINIMUM}", name="ck_weight_positive"),
+        CheckConstraint(f"steps >= {STEPS_MINIMUM}", name="ck_steps_non_negative"),
+        CheckConstraint(f"calories >= {CALORIES_MINIMUM}", name="ck_calories_non_negative"),
+        Index("ix_user_entry_datetime", "user_id", "entry_datetime"),
     )
 
     entry_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -54,13 +50,14 @@ class DailyMetrics(Base, APISerializable):
     @property
     def populated_metrics(self) -> list[str]:
         """Returns list of daily metrics which have entries."""
-        metrics = []
         metric_types = ["weight", "steps", "wake_time", "sleep_time", "calories"]
         # Get corresponding attribute for each column to see if it's populated
         # If yes, store in metrics list
-        metrics = [metric_type for metric_type in metric_types if getattr(self, metric_type) is not None]
-        return metrics
-    
+        return [
+            metric_type for metric_type in metric_types
+            if getattr(self, metric_type) is not None
+        ]
+
     @property
     def has_sleep_data(self) -> bool:
         """True if both sleep & wake times are stored."""

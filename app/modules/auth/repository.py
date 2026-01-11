@@ -2,6 +2,7 @@
 AuthRepository class doesn't make sense here yet, but will add for some useful "post-auth" operations.
 """
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ from app.modules.auth.models import User, UserLangEnum, UserRoleEnum
 
 
 class UsersRepository:
-    def __init__(self, session: 'Session'):
+    def __init__(self, session: Session) -> None:
         self.session = session
 
     def create_user(self, username: str, password: str, name: str | None,

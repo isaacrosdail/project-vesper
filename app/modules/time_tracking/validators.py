@@ -2,7 +2,13 @@
 
 from typing import Any
 
-from app.modules.time_tracking.constants import *
+from app.modules.time_tracking.validation_constants import (
+    CATEGORY_MAX_LENGTH,
+    CATEGORY_REQUIRED,
+    CATEGORY_TOO_LONG,
+    DESCRIPTION_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
+)
 from app.shared.decorators import log_validator
 from app.shared.validators import validate_date_iso, validate_time_hhmm
 

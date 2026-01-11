@@ -1,56 +1,91 @@
-
+import time
+import contextlib
 import logging
+from collections.abc import Callable, Generator
 from functools import wraps
-from typing import Any, Callable, TypeVar, ParamSpec, Concatenate
+from typing import Any, Concatenate, ParamSpec, TypeVar
+
+from flask.typing import ResponseReturnValue
+
+from app.modules.auth.service import typed_login_required
+from app._infra.database import database_connection
 
 P = ParamSpec("P")
-R = TypeVar('R')
+R = TypeVar("R")
 
 type Data = dict[str, Any]
 type Errors = dict[str, list[str]]
 type Validator = Callable[[Data], tuple[Data, Errors]]
 type Parser = Callable[[Data], Data]
 
-from flask_login import login_required
 
-from app._infra.database import database_connection
-
-
-# Decorator to combine login_required & with_db_session
-def login_plus_session(f: Callable[Concatenate[Any, P], R]) -> Callable[P, R]:
-    """Combines @login_required and @with_db_session decorators."""
-    @wraps(f)
-    @login_required  # type: ignore[misc]
-    def decorated_function(*args: P.args, **kwargs: P.kwargs) -> R:
+def login_plus_session(func: Callable[Concatenate[Any, P], ResponseReturnValue]) -> Callable[P, ResponseReturnValue]:
+    """
+    Combines `@login_required` and `@with_db_session` decorators.
+    
+    Ensures user is authenticated and passes a scoped DB session as first argument.
+    """
+    @wraps(func)
+    @typed_login_required
+    def decorated_function(*args: P.args, **kwargs: P.kwargs) -> ResponseReturnValue:
         with database_connection() as session:
-            return f(session, *args, **kwargs)
+            return func(session, *args, **kwargs)
     return decorated_function
 
 
-def log_parser(f: Parser) -> Parser:
+def log_parser(func: Parser) -> Parser:
     """Logs input & output of parser functions"""
-    @wraps(f)
+    @wraps(func)
     def wrapper(form_data: Data) -> Data:
-        logger = logging.getLogger(f.__module__)
-        logger.debug(f"{f.__name__} input: {form_data}")
+        logger = logging.getLogger(func.__module__)
+        logger.debug("%s input: %s", func.__name__, form_data)
 
-        result = f(form_data)
-        logger.debug(f"{f.__name__} output: {result}")
+        result = func(form_data)
+        logger.debug("%s output: %s", func.__name__, result)
         return result
     return wrapper
 
 
-def log_validator(f: Validator) -> Validator:
+def log_validator(func: Validator) -> Validator:
     """Logs validation attempts and errors"""
-    @wraps(f)
+    @wraps(func)
     def wrapper(data: Data) -> tuple[Data, Errors]:
-        logger = logging.getLogger(f.__module__)
-        logger.debug(f"{f.__name__} validating: {data}")
-        
-        typed_data, errors = f(data)
+        logger = logging.getLogger(func.__module__)
+        logger.debug("%s validating: %s", func.__name__, data)
+
+        typed_data, errors = func(data)
         if errors:
-            logger.warning(f"{f.__name__} validation failed: {errors}")
+            logger.warning("%s validation failed: %s", func.__name__, errors)
         else:
-            logger.debug(f"{f.__name__} validation passed")
+            logger.debug("%s validation passed", func.__name__)
         return typed_data, errors
     return wrapper
+
+
+def timing(name: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    def timing_dec(func: Callable[P, R]) -> Callable[P, R]:
+        @wraps(func)
+        def timing_dec_impl(*args: P.args, **kwargs: P.kwargs) -> R:
+            t0 = time.monotonic()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                t1 = time.monotonic()
+                print(f"LOG: {name} took: {t1 - t0}")
+        return timing_dec_impl
+    return timing_dec
+
+# @timing('g.timing')
+# def g(x: int) -> int:
+#     return x ** x
+
+# g(10)
+
+@contextlib.contextmanager
+def timing_ctx(name: str) -> Generator[None, None, None]:
+    t0 = time.monotonic()
+    try:
+        yield
+    finally:
+        t1 = time.monotonic()
+        print(f"LOG: {name} took: {t1 - t0}")

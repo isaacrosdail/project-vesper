@@ -1,9 +1,7 @@
 import pytest
-from hypothesis import given, settings, strategies as st
 
-from app.modules.auth.constants import *
+from app.modules.auth.validation_constants import *
 from app.modules.auth.validators import *
-
 
 # NOTE: Trying out Hypothesis
 # @settings(max_examples=20)

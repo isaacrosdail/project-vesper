@@ -1,35 +1,46 @@
 # Handles DB models for grocery module
 import enum
-from decimal import Decimal
 from datetime import datetime
-from typing import Self, Any
+from decimal import Decimal
+from typing import Any, Self
 
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, CheckConstraint, UniqueConstraint
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
+from app.modules.groceries.validation_constants import (
+    BARCODE_MAX_LENGTH,
+    CALORIES_PRECISION,
+    CALORIES_SCALE,
+    NET_WEIGHT_PRECISION,
+    NET_WEIGHT_SCALE,
+    PRICE_PRECISION,
+    PRICE_SCALE,
+    PRODUCT_NAME_MAX_LENGTH,
+    SHOPPING_LIST_NAME_MAX_LENGTH,
+)
 from app.shared.serialization import APISerializable
-from app.shared.types import OrderedEnum
 
-from app.modules.groceries.constants import (
-       PRODUCT_NAME_MAX_LENGTH, BARCODE_MAX_LENGTH, 
-       NET_WEIGHT_PRECISION, NET_WEIGHT_SCALE,
-       CALORIES_PRECISION, CALORIES_SCALE,
-       PRICE_PRECISION, PRICE_SCALE,
-	   SHOPPING_LIST_NAME_MAX_LENGTH
-   )
 
 class UnitEnum(enum.Enum):
-	G = "G"
-	KG = "KG"
-	OZ = "OZ"
-	LB = "LB"
-	ML = "ML"
-	L = "L"
-	FL_OZ = "FL_OZ"
-	EA = "EA" 	# each
-	
+    G = "G"
+    KG = "KG"
+    OZ = "OZ"
+    LB = "LB"
+    ML = "ML"
+    L = "L"
+    FL_OZ = "FL_OZ"
+    EA = "EA" 	# each
+
 class ProductCategoryEnum(enum.Enum):
     FRUITS = "FRUITS"
     VEGETABLES = "VEGETABLES"
@@ -46,7 +57,7 @@ class ProductCategoryEnum(enum.Enum):
     CONDIMENTS_SAUCES = "CONDIMENTS_SAUCES"
     PROCESSED_CONVENIENCE = "PROCESSED_CONVENIENCE"
     SUPPLEMENTS = "SUPPLEMENTS"
-	
+
     def __lt__(self, other: Self) -> bool:
         return str(self.value) < str(other.value)
 
@@ -55,9 +66,9 @@ class Product(Base, APISerializable):
     """Acts as a catalog of 'known' products and includes the more 'static' data about the product."""
 
     __table_args__ = (
-        CheckConstraint('calories_per_100g >= 0', name='ck_product_calories_non_negative'),
-        UniqueConstraint('user_id', 'name', name='uq_user_product_name'),
-        UniqueConstraint('user_id', 'barcode', name='uq_user_product_barcode'),
+        CheckConstraint("calories_per_100g >= 0", name="ck_product_calories_non_negative"),
+        UniqueConstraint("user_id", "name", name="uq_user_product_name"),
+        UniqueConstraint("user_id", "barcode", name="uq_user_product_barcode"),
     )
 
     name: Mapped[str] = mapped_column(
@@ -111,8 +122,8 @@ class Transaction(Base, APISerializable):
         return result
 
     __table_args__ = (
-        CheckConstraint('price_at_scan >= 0', name='ck_transaction_price_non_negative'),
-        CheckConstraint('quantity > 0', name='ck_transaction_quantity_positive'),
+        CheckConstraint("price_at_scan >= 0", name="ck_transaction_price_non_negative"),
+        CheckConstraint("quantity > 0", name="ck_transaction_quantity_positive"),
     )
 
     product_id: Mapped[int] = mapped_column(
@@ -174,7 +185,7 @@ class ShoppingListItem(Base, APISerializable):
         return result
 
     __table_args__ = (
-        CheckConstraint('quantity_wanted > 0', name='ck_shopping_quantity_wanted_positive'),
+        CheckConstraint("quantity_wanted > 0", name="ck_shopping_quantity_wanted_positive"),
     )
 
     quantity_wanted: Mapped[int] = mapped_column(
@@ -184,13 +195,13 @@ class ShoppingListItem(Base, APISerializable):
 
     shopping_list_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey('shopping_lists.id'),
+        ForeignKey("shopping_lists.id"),
         nullable=False
     )
 
     product_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey('products.id'),
+        ForeignKey("products.id"),
         nullable=False
     )
 

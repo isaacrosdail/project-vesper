@@ -1,30 +1,35 @@
 """
 Presentation layer: Wraps models to provide display-friendly fields. Think: formatting, show in local timezone, etc.
 """
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     from app.modules.time_tracking.models import TimeEntry
 
 
-from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
+from app.shared.view_mixins import BasePresenter, TimestampedViewMixin
+
 
 class TimeEntryPresenter(BasePresenter):
-    VISIBLE_COLUMNS = [
+    VISIBLE_COLUMNS: ClassVar[list[str]] = [
         "date", "category", "time_window", "description"
     ]
 
-    COLUMN_CONFIG = {
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
         "id": {"label": "ID", "priority": "desktop-only"},
         "category": {"label": "Category", "priority": "essential"},
         "description": {"label": "Description", "priority": "essential"},
-        "time_window": {"label": "Time Window (Duration)", "priority": "essential", "sort_field": "started_at"},
+        "time_window": {
+            "label": "Time Window (Duration)",
+            "priority": "essential",
+            "sort_field": "started_at"
+        },
         "date": {"label": "Date", "priority": "essential", "sort_field": "started_at"}
     }
 
 
 class TimeEntryViewModel(TimestampedViewMixin):
-    def __init__(self, entry: 'TimeEntry', tz: str):
+    def __init__(self, entry: "TimeEntry", tz: str) -> None:
         self.id = entry.id
         self.category = entry.category
         self.duration = entry.duration_minutes
@@ -36,7 +41,7 @@ class TimeEntryViewModel(TimestampedViewMixin):
     @property
     def date_label(self) -> str:
         return self.format_dt(self.started_at, fmt="%m/%d")
-    
+
     @property
     def time_window_label(self) -> str:
         mins = self.duration
@@ -49,7 +54,7 @@ class TimeEntryViewModel(TimestampedViewMixin):
     @property
     def started_at_label(self) -> str:
         return self.format_dt(self.started_at, fmt="%I:%M%p (%d.%m.%y)")
-    
+
     @property
     def desc_label(self) -> str:
         return self.description if self.description else "--"

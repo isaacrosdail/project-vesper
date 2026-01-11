@@ -18,7 +18,7 @@ def test_time_machine_basic():
 # For testing, we don't care about the whole TimestampedViewMixin,
 # we just need something with .due_date, ._tz, and .format()
 class Dummy(TimestampedViewMixin):
-    def __init__(self, due_date, tz="UTC"):
+    def __init__(self, due_date, tz="UTC") -> None:
         self.due_date = due_date
         self._tz = tz
 

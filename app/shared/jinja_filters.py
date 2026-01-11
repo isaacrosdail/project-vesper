@@ -1,11 +1,13 @@
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from flask import Flask
 
 from datetime import datetime
+
 
 def prettyiso(value: str) -> str:
     if value is None:
@@ -15,4 +17,4 @@ def prettyiso(value: str) -> str:
     return str(value)
 
 def register_filters(app: Flask) -> None:
-    app.jinja_env.filters['prettyiso'] = prettyiso
+    app.jinja_env.filters["prettyiso"] = prettyiso
