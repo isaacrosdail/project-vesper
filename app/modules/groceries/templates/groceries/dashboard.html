@@ -10,7 +10,7 @@
 
 {# So JS can clone from template to append li's #}
 <template id="shoppinglist-item-template">
-    <li class="shoppinglist-item inline-flex-md" data-product-id="" data-item-id="" data-quantity-wanted="">
+    <li class="shoppinglist-item" data-product-id="" data-item-id="" data-quantity-wanted="">
         <button class="btn-icon btn-round inline-delete" data-action="delete" aria-label="Remove shopping list item">{{ ui.x_svg() }}</button>
         <span class="item-text"></span>
         <span class="qty-controls">
@@ -31,7 +31,7 @@
     <ul class="shopping-list">
     {% if o_shopping_list.items %}
         {% for o_item in o_shopping_list.items %}
-            <li class="shoppinglist-item inline-flex-md" data-product-id="{{ o_item.product_id }}" data-item-id="{{ o_item.id }}" data-quantity-wanted="{{ o_item.quantity_wanted }}">
+            <li class="shoppinglist-item" data-product-id="{{ o_item.product_id }}" data-item-id="{{ o_item.id }}" data-quantity-wanted="{{ o_item.quantity_wanted }}">
                 <button class="btn-icon btn-round inline-delete" data-action="delete" aria-label="Remove shopping list item">{{ ui.x_svg() }}</button>
                 <span class="item-text">{{ o_item.product.name }}</span>
                 <span class="qty-controls">
