@@ -1,7 +1,5 @@
 import logging
-import os
 import secrets
-import sys
 from typing import Any
 
 from flask import Flask, g, current_app
@@ -22,13 +20,11 @@ from app.shared.setup_logging import setup_logging
 
 def has_dev_tools() -> bool:
     """Dev tools visible to anyone in dev, owner-only in prod."""
-    if current_app.config['APP_ENV'] == 'dev':
+    if current_app.config["APP_ENV"] == "dev":
         return True
 
-    return bool(
-        current_user.is_authenticated
-        and current_user.is_owner
-    )
+    return bool(current_user.is_authenticated and current_user.is_owner)
+
 
 # Global cache instance? Docs unclear
 cache = Cache()
@@ -42,7 +38,7 @@ def create_app(config_name: str | None = None) -> Flask:
     if config_name not in config_map:
         raise RuntimeError(f"Unknown APP_ENV '{config_name}'")
 
-    app = Flask(__name__, template_folder='_templates')
+    app = Flask(__name__, template_folder="_templates")
 
     _apply_config(app, config_name)
     setup_logging(app)  # Must read logging level after being set by apply_config
@@ -54,8 +50,7 @@ def create_app(config_name: str | None = None) -> Flask:
     print(f"[AFTER _setup_database] Root: {logging.getLogger().level}", file=sys.stderr)
     setup_logging(app) # after Alembic borks it, before Blueprints so level applies there
     _register_blueprints(app)
-    print(f"[AFTER _register_blueprints] Root: {logging.getLogger().level}", file=sys.stderr)
-    
+
     jinja_filters.register_filters(app)
 
     return app
@@ -67,7 +62,6 @@ def _setup_database(app: Flask) -> None:
     with app.app_context():
         init_db(app.config)
         if app.config["AUTO_MIGRATE"]:
-            # Run Alembic migration(s) on startup
             alembic_cfg = AlembicConfig("alembic.ini")
             alembic_cfg.set_main_option("sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"]) # Make Alembic use the same db URL our Flask app is using instead of whatever APP_ENV/alembic.ini/'alembic/env.py' might try to guess.
             command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
@@ -77,10 +71,8 @@ def _setup_database(app: Flask) -> None:
     # Hook db_session.remove() into teardown
     # Prevents sessions leaking between requests
     @app.teardown_appcontext
-    def remove_session(exception=None): # type: ignore
+    def remove_session(exception=None):  # type: ignore[no-untyped-def]
         db_session.remove()
-
-    print(f"[AFTER _setup_database] Root: {logging.getLogger().level}", file=sys.stderr)
 
 
 def _register_blueprints(app: Flask) -> None:
@@ -96,9 +88,18 @@ def _register_blueprints(app: Flask) -> None:
     from app.modules.tasks.routes import tasks_bp
     from app.modules.time_tracking.routes import time_tracking_bp
     from app.routes import main_bp
+
     blueprints = [
-        main_bp, auth_bp, api_bp, groceries_bp, tasks_bp, habits_bp, 
-        metrics_bp, time_tracking_bp, devtools_bp, errors_bp
+        main_bp,
+        auth_bp,
+        api_bp,
+        groceries_bp,
+        tasks_bp,
+        habits_bp,
+        metrics_bp,
+        time_tracking_bp,
+        devtools_bp,
+        errors_bp,
     ]
     for bp in blueprints:
         app.register_blueprint(bp)
@@ -141,12 +142,12 @@ def _setup_request_hooks(app: Flask) -> None:
     # Injects helpful globals (can reference globally as regular vars)
     @app.context_processor
     def inject_globals() -> dict[str, Any]:
-        return dict(
-            has_dev_tools=has_dev_tools, # Prefer config over raw os.environ now that we pick config class from env
-            nonce=getattr(g, 'nonce', ''), # inject our nonce here as well,
-            UserRole=UserRoleEnum   # Make our UserRoleEnum available for role checks in templates directly
-        )
-    
+        return {
+            "has_dev_tools": has_dev_tools,  # Prefer config over raw os.environ now that we pick config class from env
+            "nonce": getattr(g, "nonce", ""),  # inject our nonce here as well,
+            "UserRole": UserRoleEnum,  # Make our UserRoleEnum available for role checks in templates directly
+        }
+
     # # Apply CSP headers
     # @app.after_request
     # def apply_csp(response):
@@ -164,9 +165,9 @@ def _setup_request_hooks(app: Flask) -> None:
     #         return response
     #     # Get current domain
     #     current_host = request.host
-    #     nonce = getattr(g, 'nonce', '')
+    #     nonce = getattr(g, "nonce", "")
 
-    #     response.headers['Content-Security-Policy'] = (
+    #     response.headers["Content-Security-Policy"] = (
     #         f"default-src 'self'; "
     #         f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
     #         f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"

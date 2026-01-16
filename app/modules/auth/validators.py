@@ -1,10 +1,22 @@
-
 from typing import Any
 
 import regex
 
-from app.modules.auth.constants import *
 from app.modules.auth.models import UserLangEnum, UserRoleEnum
+from app.modules.auth.validation_constants import (
+    NAME_CHARSET,
+    NAME_REGEX,
+    PASSWORD_INVALID,
+    PASSWORD_REGEX,
+    PASSWORD_REQUIRED,
+    USERLANG_INVALID,
+    USERLANG_REQUIRED,
+    USERNAME_CHARSET,
+    USERNAME_REGEX,
+    USERNAME_REQUIRED,
+    USERROLE_INVALID,
+    USERROLE_REQUIRED,
+)
 from app.shared.decorators import log_validator
 from app.shared.validators import validate_enum
 
@@ -41,12 +53,16 @@ def validate_name(name: str | None) -> tuple[str | None, list[str]]:
 
 def validate_role(role: str) -> tuple[Any, list[str]]:
     """Required. Valid UserRoleEnum value."""
-    return validate_enum(role, UserRoleEnum, USERROLE_REQUIRED, USERROLE_INVALID)
+    if not role:
+        return (None, [USERROLE_REQUIRED])
+    return validate_enum(role, UserRoleEnum, USERROLE_INVALID)
 
 
 def validate_lang(lang: str) -> tuple[Any, list[str]]:
     """Required. Valid UserLangEnum value."""
-    return validate_enum(lang, UserLangEnum, USERLANG_REQUIRED, USERLANG_INVALID)
+    if not lang:
+        return (None, [USERLANG_REQUIRED])
+    return validate_enum(lang, UserLangEnum, USERLANG_INVALID)
 
 
 VALIDATION_FUNCS = {
@@ -54,6 +70,8 @@ VALIDATION_FUNCS = {
     "password": validate_password,
     "name": validate_name,
 }
+
+
 @log_validator
 def validate_user(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     typed_data = {}

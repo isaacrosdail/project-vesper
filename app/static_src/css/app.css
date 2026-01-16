@@ -535,7 +535,6 @@ label[for="remember_user"] {
     font-size: var(--font-size-xxl);
 }
 
-/* TODO: Rename */
 .icon-wiggle {
     display: block;
     width: clamp(12rem, 30vw, 20rem);

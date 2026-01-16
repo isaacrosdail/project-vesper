@@ -72,7 +72,7 @@ class LCRecordViewModel(TimestampedViewMixin):
     @property
     def difficulty_label(self) -> str:
         return f"{self.difficulty.value.title()}"
-    
+
     @property
     def language_label(self) -> str:
         return f"{self.language.value.title()}"
