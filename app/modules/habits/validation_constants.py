@@ -1,4 +1,3 @@
-
 # Habit field constraints
 HABIT_NAME_MAX_LENGTH = 100
 
@@ -18,9 +17,7 @@ PROMOTION_THRESHOLD_MIN = 0.0
 PROMOTION_THRESHOLD_MAX = 1.0
 
 PROMOTION_THRESHOLD_INVALID = "Promotion threshold must be a valid number"
-PROMOTION_THRESHOLD_RANGE = (
-    f"Promotion threshold must be between {PROMOTION_THRESHOLD_MIN} and {PROMOTION_THRESHOLD_MAX}"
-)
+PROMOTION_THRESHOLD_RANGE = f"Promotion threshold must be between {PROMOTION_THRESHOLD_MIN} and {PROMOTION_THRESHOLD_MAX}"
 
 # LeetCode Record
 LC_TITLE_MAX_LENGTH = 200

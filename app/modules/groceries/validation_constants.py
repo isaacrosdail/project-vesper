@@ -1,16 +1,17 @@
-
 # Product field
 
 # Name
 PRODUCT_NAME_MAX_LENGTH = 80
 PRODUCT_NAME_REQUIRED = "Product name is required"
-PRODUCT_NAME_TOO_LONG = f"Product name cannot exceed {PRODUCT_NAME_MAX_LENGTH} characters"
+PRODUCT_NAME_TOO_LONG = (
+    f"Product name cannot exceed {PRODUCT_NAME_MAX_LENGTH} characters"
+)
 
 # Barcode
 BARCODE_MIN_LENGTH = 8
 BARCODE_MAX_LENGTH = 32
 # Alphanumeric for UPC/QR/UUID support
-BARCODE_REGEX = rf'^[A-Za-z0-9]{{{BARCODE_MIN_LENGTH},{BARCODE_MAX_LENGTH}}}$'
+BARCODE_REGEX = rf"^[A-Za-z0-9]{{{BARCODE_MIN_LENGTH},{BARCODE_MAX_LENGTH}}}$"
 
 BARCODE_REQUIRED = "Barcode is required"
 BARCODE_INVALID = (
@@ -67,7 +68,7 @@ QUANTITY_INVALID = "Quantity must be a valid whole number"
 
 # Quantity Wanted
 QUANTITY_WANTED_REQUIRED = "Quantity is required"
-QUANTITY_WANTED_POSITIVE = "Quantity must be greater than 0" 
+QUANTITY_WANTED_POSITIVE = "Quantity must be greater than 0"
 QUANTITY_WANTED_INVALID = "Quantity must be a valid whole number"
 
 # Relationships
