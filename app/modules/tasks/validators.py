@@ -1,20 +1,18 @@
-
+from datetime import date
 from typing import Any
 
-from datetime import date
-
-from app.modules.tasks.constants import *
+from app.modules.tasks import validation_constants as c
 from app.modules.tasks.models import PriorityEnum
-from app.shared.validators import validate_enum, validate_date_iso
 from app.shared.decorators import log_validator
+from app.shared.validators import validate_date_iso, validate_enum
 
 
 def validate_task_name(name: str | None) -> tuple[str | None, list[str]]:
     """Required. String, max 150 chars."""
     if not name:
-        return (None, [TASK_NAME_REQUIRED])
-    elif len(name) > TASK_NAME_MAX_LENGTH:
-        return (None, [TASK_NAME_TOO_LONG])
+        return (None, [c.TASK_NAME_REQUIRED])
+    elif len(name) > c.TASK_NAME_MAX_LENGTH:
+        return (None, [c.TASK_NAME_TOO_LONG])
 
     return (name, [])
 
@@ -26,7 +24,7 @@ def validate_task_priority(priority: str | None) -> tuple[Any, list[str]]:
     """
     if not priority:
         return (None, [])
-    return validate_enum(priority, PriorityEnum, PRIORITY_REQUIRED, PRIORITY_INVALID)
+    return validate_enum(priority, PriorityEnum, c.PRIORITY_INVALID)
 
 
 def validate_due_date(due_date: str | None) -> tuple[date | None, list[str]]:
@@ -43,12 +41,13 @@ TASK_VALIDATION_FUNCS = {
     "due_date": validate_due_date,
 }
 
+
 @log_validator
 def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate task data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}
-    
+
     # Insert is_frog directly
     if data.get("is_frog") is not None:
         typed_data["is_frog"] = data.get("is_frog")
@@ -68,27 +67,24 @@ def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[
     if is_frog:
         # Frog tasks must have due_date
         if not due_date:
-            errors.setdefault("due_date", []).append(FROG_REQUIRES_DUE_DATE)
+            errors.setdefault("due_date", []).append(c.FROG_REQUIRES_DUE_DATE)
         # Frog tasks must not have priority
         if priority is not None:
-            errors.setdefault("priority", []).append(FROG_REQUIRES_NO_PRIORITY)
-    else:
-        # Non-frog tasks must have priority
-        if priority is None:
-            errors.setdefault("priority", []).append(PRIORITY_REQUIRED_NON_FROG)
-    
+            errors.setdefault("priority", []).append(c.FROG_REQUIRES_NO_PRIORITY)
+    # Non-frog tasks must have priority
+    elif priority is None:
+        errors.setdefault("priority", []).append(c.PRIORITY_REQUIRED_NON_FROG)
+
     return (typed_data, errors)
-
-
 
 
 def validate_tag_name(name: str | None) -> tuple[str | None, list[str]]:
     """Required. String, max 50 chars."""
     if not name:
-        return (None, [TAG_NAME_REQUIRED])
-    if len(name) > TAG_NAME_MAX_LENGTH:
-        return (None, [TAG_NAME_LENGTH])
-    
+        return (None, [c.TAG_NAME_REQUIRED])
+    if len(name) > c.TAG_NAME_MAX_LENGTH:
+        return (None, [c.TAG_NAME_LENGTH])
+
     return (name, [])
 
 
@@ -96,18 +92,16 @@ def validate_tag_scope(scope: str | None) -> tuple[str | None, list[str]]:
     """Optional. String, max 20 chars."""
     if not scope:
         return (None, [])
-    if len(scope) > TAG_SCOPE_MAX_LENGTH:
-        return (None, [TAG_SCOPE_LENGTH])
+    if len(scope) > c.TAG_SCOPE_MAX_LENGTH:
+        return (None, [c.TAG_SCOPE_LENGTH])
 
     return (scope, [])
 
 
-TAG_VALIDATION_FUNCS = {
-    "name": validate_tag_name,
-    "scope": validate_tag_scope
-}
+TAG_VALIDATION_FUNCS = {"name": validate_tag_name, "scope": validate_tag_scope}
 
-# TODO: Move elsewhere now that this is in shared/models.py?
+
+# NOTE: Move elsewhere now that this is in shared/models.py?
 @log_validator
 def validate_tag(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate tag data. Returns (typed_data, errors)."""

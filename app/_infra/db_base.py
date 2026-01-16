@@ -1,6 +1,5 @@
-"""
-Defines our core Mixins as well as our BaseModel & declarative Base.
-"""
+"""Defines our core Mixins as well as our BaseModel & declarative Base."""
+
 from datetime import datetime, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -9,8 +8,7 @@ import regex
 from flask import current_app
 from flask_login import current_user
 from sqlalchemy import DateTime, ForeignKey, Integer, MetaData
-from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
-                            mapped_column)
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 # Auto-assigns constraint names when we don't explicitly name them
 metadata = MetaData(
@@ -23,28 +21,30 @@ metadata = MetaData(
     }
 )
 
+
 # Core mixins
 class TimestampMixin:
     """Adds created_at and updated_at timestamps to models."""
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
-    
+
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc)
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 
     @property
     def created_at_local(self) -> datetime:
-        """Returns created_at in user's local timezone."""
+        """Returns `created_at` in user's local timezone."""
         tzname = current_app.config.get(current_user.timezone, "America/Chicago")
         return self.created_at.astimezone(ZoneInfo(tzname))
-    
+
     @property
     def updated_at_local(self) -> datetime | None:
-        """Returns updated_at in user's local timezone (or None)."""
+        """Returns `updated_at` in user's local timezone (or `None`)."""
         tzname = current_app.config.get(current_user.timezone, "America/Chicago")
         return self.updated_at.astimezone(ZoneInfo(tzname)) if self.updated_at else None
 
@@ -56,6 +56,7 @@ class CustomBaseTaskMixin:
 
 class Base(TimestampMixin, DeclarativeBase):
     """Base class for all models. Auto-timestamps, user association, table naming."""
+
     metadata = metadata
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -76,10 +77,13 @@ class Base(TimestampMixin, DeclarativeBase):
     # Automatically add user_id FKey to all models except User & ApiCallRecord (latter is global for internal use)
     @declared_attr.directive
     def user_id(cls) -> Mapped[Any]:
-        if cls.__name__ not in ['User', 'ApiCallRecord']:
+        """Automatically adds `user_id` foreign key to all models except: `User`, `ApiCallRecord`."""
+        if cls.__name__ not in ["User", "ApiCallRecord"]:
             return mapped_column(
                 Integer,
-                ForeignKey('users.id', ondelete='CASCADE'), # so that deleting a user will auto-delete their tasks/etc?
-                nullable=False
+                ForeignKey(
+                    "users.id", ondelete="CASCADE"
+                ),  # so that deleting a user will auto-delete their tasks/etc?
+                nullable=False,
             )
-        return None # type: ignore[return-value]
+        return None  # type: ignore[return-value]

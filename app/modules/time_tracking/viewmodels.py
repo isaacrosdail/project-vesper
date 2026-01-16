@@ -1,9 +1,14 @@
 """
-Presentation layer: Wraps models to provide display-friendly fields. Think: formatting, show in local timezone, etc.
+Presentation layer: Wraps models to provide display-friendly fields.
 """
-from typing import TYPE_CHECKING, Any
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from app.modules.time_tracking.models import TimeEntry
 
 

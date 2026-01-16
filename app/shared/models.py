@@ -1,11 +1,11 @@
-
-from typing import cast
-
-from sqlalchemy import ForeignKey, Table, Column, String, UniqueConstraint
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import Column, ForeignKey, String, Table, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
-from app.modules.tasks.constants import TAG_NAME_MAX_LENGTH, TAG_SCOPE_MAX_LENGTH
+from app.modules.tasks.validation_constants import (
+    TAG_NAME_MAX_LENGTH,
+    TAG_SCOPE_MAX_LENGTH,
+)
 
 # Tasks association table (many-to-many link between tasks & tags)
 task_tags = Table(
@@ -23,14 +23,15 @@ habit_tags = Table(
     Column("tag_id", ForeignKey("tags.id"), primary_key=True),
 )
 
-class Tag(Base):
 
-    __table_args__ = (
-        UniqueConstraint('user_id', 'name', name='uq_user_tag_name'),
-    )
+class Tag(Base):
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_tag_name"),)
 
     name: Mapped[str] = mapped_column(String(TAG_NAME_MAX_LENGTH), nullable=False)
-    scope: Mapped[str] = mapped_column(String(TAG_SCOPE_MAX_LENGTH), default="universal")
+
+    scope: Mapped[str] = mapped_column(
+        String(TAG_SCOPE_MAX_LENGTH), default="universal"
+    )
 
     # Reciprocal relationships for many-to-many
     tasks = relationship("Task", secondary="task_tags", back_populates="tags")
@@ -38,6 +39,6 @@ class Tag(Base):
 
     def __str__(self) -> str:
         return self.name
-    
+
     def __repr__(self) -> str:
         return f"<Tag id={self.id} name='{self.name}'>"

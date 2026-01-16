@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -26,7 +25,9 @@ class MetricsService:
         self.user_tz = user_tz
         self.daily_metrics_repo = daily_metrics_repo
 
-    def save_daily_metrics(self, typed_data: dict[str, Any], entry_id: int | None) -> dict[str, Any]:
+    def save_daily_metrics(
+        self, typed_data: dict[str, Any], entry_id: int | None
+    ) -> dict[str, Any]:
         """
         Save or update daily metrics entry with sleep/wake time handling.
 
@@ -43,11 +44,12 @@ class MetricsService:
         )
         typed_data["entry_datetime"] = entry_datetime
 
-
         day_of = typed_data["entry_datetime"].date()
         for key in ("wake_time", "sleep_time"):
             if key in typed_data:
-                typed_data[key] = dth.parse_time_to_datetime(typed_data[key], day_of, self.user_tz)
+                typed_data[key] = dth.parse_time_to_datetime(
+                    typed_data[key], day_of, self.user_tz
+                )
 
         # Assign sleep_time dt to yesterday for cases where sleep_time >= wake_time
         wake = typed_data.get("wake_time")
@@ -58,26 +60,36 @@ class MetricsService:
                 typed_data["sleep_time"] -= timedelta(days=1)
 
             sleep_duration = typed_data["wake_time"] - typed_data["sleep_time"]
-            typed_data["sleep_duration_minutes"] = int(sleep_duration.total_seconds() / 60)
+            typed_data["sleep_duration_minutes"] = int(
+                sleep_duration.total_seconds() / 60
+            )
 
         # Always store weight in kg
         if "weight" in typed_data:
             if "weight_units" not in typed_data:
-                return service_response(success=False, message="Error converting weight: Missing weight_units")
-            typed_data["weight"] = self._convert_weight(typed_data["weight"], typed_data.pop("weight_units"))
+                return service_response(
+                    success=False,
+                    message="Error converting weight: Missing weight_units",
+                )
+            typed_data["weight"] = self._convert_weight(
+                typed_data["weight"], typed_data.pop("weight_units")
+            )
 
         # Get UTC window for duplicate checking plus grab entry to compare against, if any
         start_utc, end_utc = dth.day_range_utc(
-            typed_data["entry_datetime"],
-            self.user_tz
+            typed_data["entry_datetime"], self.user_tz
         )
-        existing_metrics_entry = self.daily_metrics_repo.get_daily_metrics_in_window(start_utc, end_utc)
+        existing_metrics_entry = self.daily_metrics_repo.get_daily_metrics_in_window(
+            start_utc, end_utc
+        )
 
         # UPDATE
         if entry_id is not None:
             entry = self.daily_metrics_repo.get_by_id(entry_id)
             if not entry:
-                return service_response(success=False, message="Daily metrics entry not found")
+                return service_response(
+                    success=False, message="Daily metrics entry not found"
+                )
 
             if existing_metrics_entry and existing_metrics_entry.id != entry_id:
                 return service_response(
@@ -87,7 +99,11 @@ class MetricsService:
 
             self._update_fields(entry, typed_data)
 
-            return service_response(success=True, message="Daily metrics entry updated", data={"entry": entry})
+            return service_response(
+                success=True,
+                message="Daily metrics entry updated",
+                data={"entry": entry},
+            )
 
         # CREATE
         if existing_metrics_entry:
@@ -96,7 +112,9 @@ class MetricsService:
         else:
             entry = self.daily_metrics_repo.create_daily_metrics(**typed_data)
 
-        return service_response(success=True, message="Daily metrics entry saved", data = {"entry": entry})
+        return service_response(
+            success=True, message="Daily metrics entry saved", data={"entry": entry}
+        )
 
     def _update_fields(self, entry: Any, typed_data: dict[str, Any]) -> Any:
         for field, value in typed_data.items():
@@ -109,7 +127,10 @@ class MetricsService:
             return lbs_to_kg(weight)
         return weight
 
-def create_metrics_service(session: Session, user_id: int, user_tz: str) -> MetricsService:
+
+def create_metrics_service(
+    session: Session, user_id: int, user_tz: str
+) -> MetricsService:
     """Factory function to instantiate MetricsService with required repositories."""
     return MetricsService(
         session=session,

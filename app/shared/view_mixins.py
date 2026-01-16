@@ -33,7 +33,7 @@ class TimestampedViewMixin:
     def format_due_label(self) -> str:
         if not self.due_date:
             return ""
-        
+
         today = datetime.now(ZoneInfo(self._tz)).date()
         # Stored at exclusive EOD (ie 00:00 next day), so timedelta -1 second to adjust
         due_local = convert_to_timezone(self._tz, self.due_date)
@@ -86,8 +86,9 @@ class BasePresenter:
         return [
             {
                 "key": col,
-                "sort_field": cls.COLUMN_CONFIG[col].get("sort_field"), #NOTE: Optional, fall back to key in macro if sort_field isn't specified
+                "sort_field": cls.COLUMN_CONFIG[col].get("sort_field"),
                 "label": cls.COLUMN_CONFIG[col]["label"],
-                "priority": cls.COLUMN_CONFIG[col]["priority"]
+                "priority": cls.COLUMN_CONFIG[col]["priority"],
             }
-            for col in cls.VISIBLE_COLUMNS]
+            for col in cls.VISIBLE_COLUMNS
+        ]

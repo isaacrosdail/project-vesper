@@ -1,17 +1,20 @@
-# Grabbing certain times / formatting datetimes
+"""Datetime helpers. Utilities for date manipulation/checks, formatting, and timezone conversions."""
 
-from datetime import datetime, time, timedelta, timezone, date
+from datetime import date, datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 def parse_js_instant(iso_str: str) -> datetime:
     """
     Parse a JS Date.toISOString() string into a timezone-aware UTC datetime.
+
     Intended for internal API calls from frontend.
+
     Must end in 'Z'. Example: "2025-08-21T03:14:15.123Z"
     """
     if not iso_str.endswith("Z"):
-        raise ValueError(f"Expected UTC instant ending with 'Z', got: {iso_str}")
+        msg = f"Expected UTC instant ending with 'Z', got: {iso_str}"
+        raise ValueError(msg)
     return datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
 
 
@@ -24,29 +27,32 @@ def now_in_timezone(tz_str: str) -> datetime:
     """Return the current datetime in the given timezone."""
     try:
         tz = ZoneInfo(tz_str)
-    except ZoneInfoNotFoundError:
-        raise ValueError(f"Invalid timezone: {tz_str}")
+    except ZoneInfoNotFoundError as err:
+        msg = f"Invalid timezone: {tz_str}"
+        raise ValueError(msg) from err
     return datetime.now(tz)
 
 
 def convert_to_timezone(tz_str: str, dt: datetime) -> datetime:
     """Convert a timezone-aware datetime to the given timezone."""
     if dt.tzinfo is None:
-        raise ValueError("Naive datetimes not allowed")
+        msg = "Naive datetimes not allowed"
+        raise ValueError(msg)
     try:
         tz = ZoneInfo(tz_str)
-    except ZoneInfoNotFoundError:
-        raise ValueError(f"Invalid timezone: {tz_str}")
+    except ZoneInfoNotFoundError as err:
+        msg = f"Invalid timezone: {tz_str}"
+        raise ValueError(msg) from err
     return dt.astimezone(tz)
 
 
 def day_range_utc(date: date, tz_str: str) -> tuple[datetime, datetime]:
-    """Return (start, end) UTC bounds of the given *calendar day* in the specified timezone. Interval is [start, end)"""
+    """Return UTC `[start, end)` datetimes for the calendar given day in the specified timezone."""
     tz = ZoneInfo(tz_str)
     # Extract date, make midnight in target timezone
     start_local = datetime.combine(date, time.min, tzinfo=tz)
     start_utc = start_local.astimezone(timezone.utc)
-    end_utc = start_utc + timedelta(days=1) # end is midnight
+    end_utc = start_utc + timedelta(days=1)  # end is midnight
     return start_utc, end_utc
 
 
@@ -78,7 +84,7 @@ def parse_time_to_datetime(time_str: str, date: date, tz_str: str) -> datetime:
 
 
 def is_same_local_date(dt: datetime, tz_str: str) -> bool:
-    """Return True if given datetime occurs on the same calendar date as 'now' in user's timezone."""
+    """Returns True if dt falls on today's date in the given timezone."""
     local_dt = dt.astimezone(ZoneInfo(tz_str))
     today_local = now_utc().astimezone(ZoneInfo(tz_str)).date()
     return local_dt.date() == today_local

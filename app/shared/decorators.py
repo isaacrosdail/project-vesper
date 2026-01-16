@@ -1,10 +1,9 @@
-
 import logging
 from functools import wraps
 from typing import Any, Callable, TypeVar, ParamSpec, Concatenate
 
 P = ParamSpec("P")
-R = TypeVar('R')
+R = TypeVar("R")
 
 type Data = dict[str, Any]
 type Errors = dict[str, list[str]]
@@ -27,30 +26,33 @@ def login_plus_session(f: Callable[Concatenate[Any, P], R]) -> Callable[P, R]:
     return decorated_function
 
 
-def log_parser(f: Parser) -> Parser:
+def log_parser(func: Parser) -> Parser:
     """Logs input & output of parser functions"""
-    @wraps(f)
-    def wrapper(form_data: Data) -> Data:
-        logger = logging.getLogger(f.__module__)
-        logger.debug(f"{f.__name__} input: {form_data}")
 
-        result = f(form_data)
-        logger.debug(f"{f.__name__} output: {result}")
+    @wraps(func)
+    def wrapper(form_data: Data) -> Data:
+        logger = logging.getLogger(func.__module__)
+        logger.debug("%s input: %s", func.__name__, form_data)
+
+        result = func(form_data)
+        logger.debug("%s output: %s", func.__name__, result)
         return result
+
     return wrapper
 
 
-def log_validator(f: Validator) -> Validator:
+def log_validator(func: Validator) -> Validator:
     """Logs validation attempts and errors"""
-    @wraps(f)
+
+    @wraps(func)
     def wrapper(data: Data) -> tuple[Data, Errors]:
-        logger = logging.getLogger(f.__module__)
-        logger.debug(f"{f.__name__} validating: {data}")
-        
-        typed_data, errors = f(data)
+        logger = logging.getLogger(func.__module__)
+        logger.debug("%s validating: %s", func.__name__, data)
+
+        typed_data, errors = func(data)
         if errors:
-            logger.warning(f"{f.__name__} validation failed: {errors}")
+            logger.warning("%s validation failed: %s", func.__name__, errors)
         else:
-            logger.debug(f"{f.__name__} validation passed")
+            logger.debug("%s validation passed", func.__name__)
         return typed_data, errors
     return wrapper

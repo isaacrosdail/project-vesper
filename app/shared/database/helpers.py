@@ -1,9 +1,12 @@
 """
-Database utility functions. 
-Provides helpers for low-level database operations that don't belong to any single model/repository/service.
+Database utility functions.
+Provides helpers for low-level database operations that don't
+belong to any single model/repository/service.
 """
+
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -23,10 +26,7 @@ NEVER_DELETE = {
     "alembic_version",
 }
 # Skip sequence reset for association tables of course
-NO_SEQ = {
-    "habit_tags",
-    "task_tags"
-}
+NO_SEQ = {"habit_tags", "task_tags"}
 
 def _delete_rows(session: 'Session', table: str, where: str | None = None, params: dict[str, Any] | None = None) -> None:
     """
@@ -44,15 +44,19 @@ def _delete_rows(session: 'Session', table: str, where: str | None = None, param
     session.execute(text(sql), params or {})
 
 
-def delete_all_db_data(session: 'Session', include_users: bool = False, reset_sequences: bool = False) -> None:
+def delete_all_db_data(
+    session: Session, *, include_users: bool = False, reset_sequences: bool = False
+) -> None:
     """Delete all database data. Optionally delete users, sequences."""
 
-    logger.info(
-        f"delete_all_db_data: include_users={include_users}, reset_sequences={reset_sequences}"
+    logger.debug(
+        "delete_all_db_data: include_users=%s, reset_sequences=%s",
+        include_users,
+        reset_sequences,
     )
 
-    # Reversing .sorted_tables gives us tables in dependency order (ie, respecting FKeys)
-    # Also build filtered, dependency-ordered list once for resetting sequences hereafter
+    # Reversing .sorted_tables gives tables in dependency order (ie, respecting FKeys)
+    # Also build filtered, dependency-ordered list once for resetting sequences after
     filtered_names = []
     for table in reversed(Base.metadata.sorted_tables):
         name = table.name.lower()
@@ -71,10 +75,9 @@ def delete_all_db_data(session: 'Session', include_users: bool = False, reset_se
     if reset_sequences:
         for name in filtered_names:
             if name not in NO_SEQ:
-                seq_name = _get_sequence_name(session, name)
-                if seq_name:
+                if seq_name := _get_sequence_name(session, name):
                     session.execute(text(f'ALTER SEQUENCE "{seq_name}" RESTART WITH 1'))
-                    logger.debug(f"Resetting sequence: {seq_name}")
+                    logger.debug("Sequence %s reset", seq_name)
 
 def delete_user_data(session: 'Session', user_id: int, table: str) -> None:
     """User-facing delete: Delete data for a specific user from a single table."""
@@ -82,7 +85,8 @@ def delete_user_data(session: 'Session', user_id: int, table: str) -> None:
     _delete_rows(session, table, "user_id = :user_id", {"user_id": user_id}) # parametrized -> avoids SQL injection risk
 
 
-def safe_delete[T](session: 'Session', item: T) -> T:
+
+def safe_delete[T](session: Session, item: T) -> T:
     """
     Soft-delete if `deleted_at` column exists, else hard-delete. Returns the item.
     """
@@ -91,19 +95,23 @@ def safe_delete[T](session: 'Session', item: T) -> T:
         session.query(ShoppingListItem).filter(
             ShoppingListItem.product_id == item.id
         ).delete()
-    if hasattr(item, 'deleted_at'):
+    if hasattr(item, "deleted_at"):
         if item.deleted_at is None:
             item.deleted_at = datetime.now(timezone.utc)
         return item
     session.delete(item)
     return item
 
-def _get_sequence_name(session: 'Session', table_name: str) -> str | None:
+
+def _get_sequence_name(session: Session, table_name: str) -> str | None:
     """Get actual sequence name for a table's id column."""
-    result = session.execute(text("""
+    result = session.execute(
+        text("""
         SELECT pg_get_serial_sequence(:table_name, 'id')
-"""), {'table_name': table_name}).scalar()
-    
+"""),
+        {"table_name": table_name},
+    ).scalar()
+
     if result:
-        return str(result).split('.')[-1] # get just sequence name
+        return str(result).split(".")[-1]  # get just sequence name
     return None

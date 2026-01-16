@@ -1,17 +1,16 @@
+from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from app.modules.tasks.models import Task
+    from datetime import datetime
 
 from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
 
 
 class TaskPresenter(BasePresenter):
-    VISIBLE_COLUMNS = [
-        "name", "priority", "is_frog", "due_date"
-    ]
-    COLUMN_CONFIG = {
+    VISIBLE_COLUMNS: ClassVar[list[str]] = ["name", "priority", "is_frog", "due_date"]
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
         "id": {"label": "Task ID", "priority": "desktop-only"},
         "name": {"label": "Task", "priority": "essential"},
         "is_done": {"label": "Status", "priority": "essential"},
@@ -40,7 +39,7 @@ class TaskViewModel(TimestampedViewMixin):
 
     @property
     def frog_label(self) -> str:
-        return "Yes" if self.is_frog else ''
+        return "Yes" if self.is_frog else ""
 
     @property
     def due_label(self) -> str:
