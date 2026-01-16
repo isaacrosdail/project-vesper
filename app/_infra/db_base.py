@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 import regex
 from flask import current_app
 from flask_login import current_user
-from sqlalchemy import DateTime, ForeignKey, Integer, MetaData
+from sqlalchemy import DateTime, ForeignKey, Integer, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 # Auto-assigns constraint names when we don't explicitly name them
@@ -27,20 +27,26 @@ class TimestampMixin:
     """Adds created_at and updated_at timestamps to models."""
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), server_default=func.now(),
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
+        nullable=True,
     )
 
     @property
     def created_at_local(self) -> datetime:
         """Returns `created_at` in user's local timezone."""
-        tzname = current_app.config.get(current_user.timezone, "America/Chicago")
-        return self.created_at.astimezone(ZoneInfo(tzname))
+        # tzname = current_app.config.get(current_user.timezone, "America/Chicago")
+        # return self.created_at.astimezone(ZoneInfo(tzname))
+        if hasattr(self, "user") and self.user:
+            tz = self.user.timezone
+        else:
+            tz = "America/Chicago"
+        return convert_to_timezone(tz, self.created_at)
 
     @property
     def updated_at_local(self) -> datetime | None:

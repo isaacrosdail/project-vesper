@@ -35,6 +35,6 @@ class TimeEntry(Base, APISerializable):
     ended_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
-    
+    user = relationship("User", back_populates="time_entry")
     def __repr__(self) -> str:
         return f"<TimeEntry id={self.id} category='{self.category}' started_at={self.started_at}>"

@@ -99,7 +99,7 @@ class Habit(Base, APISerializable):
     promotion_threshold: Mapped[float] = mapped_column(Float, nullable=True)
     # Represents target completion rate per week
     target_frequency: Mapped[int] = mapped_column(Integer, nullable=False)
-    
+    user = relationship("User", back_populates="habits")
     tags = relationship("Tag", secondary=habit_tags, back_populates="habits")
     habit_completions = relationship(
         "HabitCompletion", back_populates="habit", cascade="all, delete-orphan"
@@ -118,6 +118,8 @@ class HabitCompletion(Base, APISerializable):
     habit_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("habits.id"), nullable=False
     )
+
+    user = relationship("User", back_populates="habit_completion")
     habit = relationship("Habit", back_populates="habit_completions")
 
     def __repr__(self) -> str:
@@ -141,6 +143,8 @@ class LeetCodeRecord(Base, APISerializable):
     status: Mapped[LCStatusEnum] = mapped_column(
         SAEnum(LCStatusEnum, name="lcstatus_enum"), nullable=False
     )
+
+    user = relationship("User", back_populates="leet_code_record")
 
     def __repr__(self) -> str:
         return f"<LeetCodeRecord id={self.id} title='{self.title}'>"
