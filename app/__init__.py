@@ -1,8 +1,13 @@
+from __future__ import annotations
 import logging
 import secrets
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from flask import Flask, g, current_app
+if TYPE_CHECKING:
+    from flask import Response
+
+from flask import Flask, abort, current_app, g, request
+from flask import session as fsession
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -105,47 +110,54 @@ def _register_blueprints(app: Flask) -> None:
         app.register_blueprint(bp)
 
 
-def _apply_config(app: Flask, config_name: str) -> None:
-    # Takes config class (DevConfig, ProdConfig, etc) from config_map & copy all class attrs into app.config
-    app.config.from_object(config_map[config_name])
-    
-
-    # Makes sure app.config has an "APP_ENV" key
-    # If config class already has APP_ENV defined, does nothing?
-    # If it doesn't, it sets it to the value from the class    
-    app.config.setdefault("APP_ENV", config_map[config_name].APP_ENV)
+def _apply_config(app: Flask, config_name: str | None) -> None:
+    """
+    Copies our config from config_name into app config? (same as current_app?)
+    Takes config class (DevConfig, ProdConfig, etc) from config_map & copy all class attrs into app.config
+    """
+    app.config.from_object(get_config(config_name))
 
     # For Flask to play nice with CSP headers
-    if app.config.get('USE_PROXY_FIX', False):
-        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1) # type: ignore
-
-
-def _setup_debug(app: Flask, config_name: str) -> None:
-    # Debug what's being loaded
-    from .shared.debug import debug_config, print_env_info
-    debug_config(config_name, config_map[config_name])
-
-    # Print full env info (dev or testing)
-    if config_name in ('dev', 'testing'):
-        print_env_info(app)
-        setup_request_debugging(app)
+    if app.config.get("USE_PROXY_FIX", False):
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 
 def _setup_request_hooks(app: Flask) -> None:
-    # Before each request: Evaluate has_dev_tools, generate nonce (allows our inline theme JS to execute)
+    """
+    Register Flask request lifecycle hooks.
+
+    Namely:
+    - before_request: Generates CSP nonce and checks dev tools privileges.
+    - context_processor: Injects globals (has_dev_tools, nonce, UserRoleEnum) into all templates
+    """
+
     @app.before_request
     def generate_nonce() -> None:
         g.nonce = secrets.token_urlsafe(16)
         g.has_dev_tools = has_dev_tools()
 
-    # Context processor runs before every template render
-    # Injects helpful globals (can reference globally as regular vars)
+        if "csrf_token" not in fsession:
+            fsession["csrf_token"] = secrets.token_urlsafe(32)
+        g.csrf_token = fsession["csrf_token"]
+
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+            form_token = (
+                request.form.get("csrf_token")
+                or (request.get_json(silent=True) or {}).get("csrf_token")  # silent=True for accepting null-bodied apiRequests
+                or request.headers.get("X-CSRFToken")
+            )
+            fsession_token = fsession.get("csrf_token")
+            if form_token is None or fsession_token is None:
+                abort(403)
+            valid = secrets.compare_digest(form_token, fsession_token)
+            if not valid:
+                abort(403)
+
     @app.context_processor
     def inject_globals() -> dict[str, Any]:
         return {
-            "has_dev_tools": has_dev_tools,  # Prefer config over raw os.environ now that we pick config class from env
-            "nonce": getattr(g, "nonce", ""),  # inject our nonce here as well,
-            "UserRole": UserRoleEnum,  # Make our UserRoleEnum available for role checks in templates directly
+            "has_dev_tools": g.has_dev_tools,
+            "nonce": getattr(g, "nonce", ""),
         }
 
     # # Apply CSP headers

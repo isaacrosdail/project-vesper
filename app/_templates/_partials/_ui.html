@@ -112,6 +112,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     </div>
     <div class="modal-body">
         <form class="{{ form_class if form_class else '' }}">
+            <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
             {{ caller() }}
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Save</button>

@@ -41,9 +41,19 @@ export async function apiRequest(
         const isFormData = data instanceof FormData; // formData objs: must lack a Content-Type header AND not be stringified
         const url = `/api${endpoint}`;
 
+        if (!window.csrfToken) {
+            console.error('CSRF token missing');
+            throw new Error('CSRF token not found');
+        }
+
+        const headers = new Headers({ 'X-CSRFToken': window.csrfToken });
+        if (!isFormData) {
+            headers.set('Content-Type', 'application/json');
+        }
+
         const response = await fetch(url, {
             method,
-            headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+            headers,
             body: isFormData ? data : (data ? JSON.stringify(data) : null)
         });
         const responseData: ApiResponse = await response.json();

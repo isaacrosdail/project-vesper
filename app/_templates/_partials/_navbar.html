@@ -90,7 +90,7 @@
     <button id="close-profile-modal-btn" class="btn-icon btn-round modal-close" type="button">&times;</button>
 
     <form action="{{ url_for('auth.logout') }}" method="post" data-noajax>
-        {# TODO: Add CSRF token here #}
+        <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
         <button class="btn btn-destructive" type="submit">Log out</button>
     </form>
 
@@ -101,6 +101,7 @@
             <a class="btn btn-secondary" href="{{ url_for('devtools.show_routes')}}">Show Routes</a>
             <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
             <form action="{{ url_for('auth.reset_dev') }}" method="post" data-noajax>
+                <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                 <button class="btn btn-destructive" type="submit">
                     Reset Dev
                 </button>
