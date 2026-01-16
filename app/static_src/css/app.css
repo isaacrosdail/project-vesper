@@ -323,6 +323,7 @@ svg {
 .highlight-label { 
     font-weight: var(--font-weight-semibold);
 }
+
 /* Vertical stack for frog + task list */
 .tasks-section {
     display: grid;
@@ -331,11 +332,11 @@ svg {
 
 /* Accent 'card' to highlight priority items (accent lborder + bg-light) used for today's frog */
 .highlight-item {
-    border-left: 4px solid var(--accent-subtle);
-    border-radius: calc(0.8 * var(--border-radius));
-    background: var(--bg-light);
     padding: var(--space-xs);
     padding-left: var(--space-sm);
+    background: var(--bg-light);
+    border-left: 4px solid var(--accent-subtle);
+    border-radius: calc(0.8 * var(--border-radius));
 }
 
 .progress-bar,

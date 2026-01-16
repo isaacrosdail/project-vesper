@@ -17,7 +17,6 @@ from alembic.config import Config as AlembicConfig
 from app._infra.database import db_session, init_db
 from app.config import config_map
 from app.extensions import _setup_extensions
-from app.modules.auth.models import UserRoleEnum
 from app.shared import jinja_filters
 from app.shared.debug import setup_dev_debugging
 from app.shared.setup_logging import setup_logging

@@ -18,7 +18,7 @@ class TaskPresenter(BasePresenter):
         "is_frog": {"label": "'Frog Task'?", "priority": "desktop-only"},
         "due_date": {"label": "Due Date", "priority": "essential"},
         "created_at": {"label": "Created", "priority": "desktop-only"},
-        "completed_at": {"label": "Completed", "priority": "desktop-only"}
+        "completed_at": {"label": "Completed", "priority": "desktop-only"},
     }
 
 class TaskViewModel(TimestampedViewMixin):
