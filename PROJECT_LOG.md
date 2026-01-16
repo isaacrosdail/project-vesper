@@ -19,9 +19,59 @@
 - Whitelisted all local IPs for access from laptop/etc
 
 
+## [Thurs 08.01.25]
+1. Move to custom script on prod
+    - ./scripts/deploy.sh
+2. 
 
+## [Sun 04.01.25]
+**Log:**
+1. Fix up HTTP status codes throughout
+2. Actually implement the units field thing
+    - User model already had units: UnitSystemEnum (imperial/metric)
+    - DailyMetrics stores in master units (kg)
+    - Convert inbound data at service, outbound weight in generic GET route
+    - Added needed pieces in parsers, validators (requires weight_units if weight is present, must be "kg" or "lbs")
+    - Added weight units dropdown to daily metrics form (units default to value of user's units field)
 
-########## 29TH: LEFT OFF: Mid-rebasing, need to figure out all the "SQUASH into `<commit_hash>`" things. I forgot rebasing gives all subsequently-changed commits new hashes, sooo....fun. :(
+LEFT OFF: ruff check codebase-wide, working on pruning debug terminal output
+    Once done with that, onto other linting/etc.
+
+## [Sat 03.01.25]
+**Log:**
+1. Purge 'Any' typing from most, if not all, functions/view functions
+
+Misc. Replace manual query parameter handling with native options (JavaScript's `URLSearchParams`, Python's `request`)
+
+## [Fri 02.01.25]
+**Log:**
+1. Refactoring Service/Repository
+    - Moving to one repository (class) per model (Applied to all modules, although only a few needed real splitting-up here as not all even have 2+ models to them.)
+    - Removed `user_tz` from BaseRepository since, duh, only services need timezone.
+    - Services hold session, pruned/rethought parameters/args passed into services and repositories
+    - Add factory functions for convenience
+2. Ripped out ABTests/Trials 'feature' entirely.
+    - This was half-baked, and doesn't really fit with what I wanna do here anyway?
+3. Naming consistency: DailyMetrics
+    - Renamed model to DailyMetrics for clarity (better fits 'composite metrics')
+    - Since we auto-gen table names, and this is the only one which is already plural, our auto-gen added another 's' mistakenly. So we just explicitly set the tablename for dailymetrics as a (likely) one-time exception case.
+
+## [Thurs 01.01.25]
+**Log:**
+1. `apiRequest` improvements
+    - Added `onFailure` callback for failure handling
+        - Both `onSuccess` and `onFailure` callbacks are optional (destructuring options obj with default {})
+    - Tightened `data` parameter typing to prevent passing functions as data
+        - Now using `unknown` rather than `any`
+        - Previously valid but not what we want: `apiRequest('DELETE', url, () => item.remove())` 
+            - We restricted to `unknown` to TS still typechecks
+    - Fixed Promise return behavior
+        - Previously swallowed the `fetch` Promise, now returns it explicitly.
+        - Now supports either pattern: `await apiRequest()` for data, or callbacks for DOM manipulation
+        - Eliminated wrapper Promises in D3 chart data-fetching functions
+            - Previously had to wrap apiRequest in `new Promise()` because it didn't return anything useful. This was goofy, and we can now
+                simply return apiRequest().
+
 
 ## [Wed 31.12.25]
 1. Wrap up tooltip.ts fixing
