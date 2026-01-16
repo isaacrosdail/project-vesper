@@ -7,6 +7,7 @@
 
 <div class="card-dashboard card--narrower">
     <form action="{{ url_for('auth.register') }}" method="post" spellcheck="false">
+        <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
         <div class="form-column">
             <h3>Register:</h3>
             <div class="faded-field" data-tip="3-30 characters, letters/numbers/underscores allowed">

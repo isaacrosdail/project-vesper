@@ -8,6 +8,7 @@
         </p>
         <div class="landing-actions">
             <form action="{{ url_for("auth.init_demo") }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                 <button type="submit"
                         class="btn btn-primary"
                         data-tip="Sign as a guest & open dashboard.">Try the demo 🚀</button>
@@ -18,6 +19,7 @@
         </div>
         {% if config.APP_ENV == 'dev' %}
             <form action="{{ url_for("auth.init_owner") }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                 <button type="submit" class="btn btn-primary">OWNER INIT</button>
             </form>
         {% endif %}
