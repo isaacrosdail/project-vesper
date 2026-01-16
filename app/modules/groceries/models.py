@@ -100,6 +100,8 @@ class Product(Base, APISerializable):
 
     deleted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    user = relationship("User", back_populates="products")
+
     def __str__(self) -> str:
         return f"{self.name} ({self.barcode})"
 
@@ -133,6 +135,7 @@ class Transaction(Base, APISerializable):
 
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
 
+    user = relationship("User", back_populates="transactions")
     product = relationship("Product")
 
     @property
@@ -162,6 +165,7 @@ class ShoppingList(Base, APISerializable):
         String(SHOPPING_LIST_NAME_MAX_LENGTH), default="Current List"
     )
 
+    user = relationship("User", back_populates="shopping_list")
     items = relationship("ShoppingListItem", back_populates="shopping_list")
 
     def __repr__(self) -> str:
@@ -197,6 +201,7 @@ class ShoppingListItem(Base, APISerializable):
         Integer, ForeignKey("products.id"), nullable=False
     )
 
+    user = relationship("User", back_populates="shopping_list_item")
     shopping_list = relationship("ShoppingList", back_populates="items")
     product = relationship("Product")
 

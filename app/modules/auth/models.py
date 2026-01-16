@@ -84,6 +84,17 @@ class User(Base, UserMixin):  # type: ignore[misc]
         server_default="imperial",
     )
 
+    habits = relationship("Habit", back_populates="user")
+    tasks = relationship("Task", back_populates="user")
+    daily_metrics = relationship("DailyMetrics", back_populates="user")
+    products = relationship("Product", back_populates="user")
+    transactions = relationship("Transaction", back_populates="user")
+    shopping_list = relationship("ShoppingList", back_populates="user")
+    shopping_list_item = relationship("ShoppingListItem", back_populates="user")
+    time_entry = relationship("TimeEntry", back_populates="user")
+    habit_completion = relationship("HabitCompletion", back_populates="user")
+    leet_code_record = relationship("LeetCodeRecord", back_populates="user")
+
     def __repr__(self) -> str:
         return f"<User id={self.id} username: {self.username} role={self.role}>"
 
