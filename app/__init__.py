@@ -46,8 +46,6 @@ def create_app(config_name: str | None = None) -> Flask:
     _setup_extensions(app)
     _setup_request_hooks(app)
     _setup_database(app)
-    print(f"[AFTER _setup_database] Root: {logging.getLogger().level}", file=sys.stderr)
-    setup_logging(app) # after Alembic borks it, before Blueprints so level applies there
     _register_blueprints(app)
 
     jinja_filters.register_filters(app)
