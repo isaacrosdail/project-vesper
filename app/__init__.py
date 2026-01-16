@@ -6,6 +6,7 @@ from typing import Any, TYPE_CHECKING
 if TYPE_CHECKING:
     from flask import Response
 
+from alembic.config import Config as AlembicConfig
 from flask import Flask, abort, current_app, g, request
 from flask import session as fsession
 from flask_caching import Cache
@@ -13,9 +14,8 @@ from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from alembic import command
-from alembic.config import Config as AlembicConfig
 from app._infra.database import db_session, init_db
-from app.config import config_map
+from app.config import get_config
 from app.extensions import _setup_extensions
 from app.shared import jinja_filters
 from app.shared.debug import setup_dev_debugging
@@ -33,14 +33,9 @@ def has_dev_tools() -> bool:
 # Global cache instance? Docs unclear
 cache = Cache()
 
-# Central app factory => Loads configs, inits extensions, runs DB migrations, registers blueprints, & sets global helpers, too
-# Using our APP_ENV over Flask's built-ins
-def create_app(config_name: str | None = None) -> Flask:
-    # Determine which config to load, if not passed => read the APP_ENV var, default to dev
-    config_name = config_name or os.environ.get('APP_ENV', 'dev')
 
-    if config_name not in config_map:
-        raise RuntimeError(f"Unknown APP_ENV '{config_name}'")
+def create_app(config_name: str | None = None) -> Flask:
+    """Central app factory. Loads configs, extensions, register blueprints, etc."""
 
     app = Flask(__name__, template_folder="_templates")
 
@@ -61,17 +56,31 @@ def create_app(config_name: str | None = None) -> Flask:
 
 
 def _setup_database(app: Flask) -> None:
-    # Initialize DB
-    # TODO: Move auto-migration here into CI instead, disable on prod
+    """
+    Initialize database engine, session, and optionally run migrations.
+
+    Sets up SQLAlchemy engine and configures the database session. If AUTO_MIGRATE is enabled,
+    runs Alembic migrations programmatically (equivalent to `alembic upgrade head`)
+    Inits database with `app.app_context()`. If app.config's `AUTO_MIGRATE` flag is set to true, then runs
+    Alembic migration(s) as well, using `SQLALCHEMY_DATABASE_URI`'s value as `sqlalchemy.url`.
+
+    Note: When running migrations using command.upgrade(), we need to explicitly set `sqlalchemy.url` because
+    programmatic calls don't use `alembic/env.py` (unlike CLI commands).
+
+    Registers a teardown handler to clean up database sessions after each request.
+    """
     with app.app_context():
         init_db(app.config)
         if app.config["AUTO_MIGRATE"]:
             alembic_cfg = AlembicConfig("alembic.ini")
-            alembic_cfg.set_main_option("sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"]) # Make Alembic use the same db URL our Flask app is using instead of whatever APP_ENV/alembic.ini/'alembic/env.py' might try to guess.
-            command.upgrade(alembic_cfg, "head")           # "Run alembic upgrade head but from inside Python"
+            alembic_cfg.set_main_option(
+                "sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"]
+            )
+            command.upgrade(alembic_cfg, "head")
 
-        # Set logging level back after Alembic borks it
-        logging.getLogger().setLevel(app.config['LOGGING_LEVEL'])
+        # TODO: fix? Set logging level back after Alembic borks it
+        logging.getLogger().setLevel(app.config["LOGGING_LEVEL"])
+
     # Hook db_session.remove() into teardown
     # Prevents sessions leaking between requests
     @app.teardown_appcontext
@@ -80,6 +89,14 @@ def _setup_database(app: Flask) -> None:
 
 
 def _register_blueprints(app: Flask) -> None:
+    """
+    Imports and register all application blueprints.
+
+    Blueprints are imported here (not at module level) for two reasons:
+    1. Ensures setup_logging() runs before blueprint imports, so module-level
+    logger = logging.getLogger(__name__) declarations work correctly.
+    2. Avoids circular import issues when blueprint files import from app.
+    """
     # Import blueprints here so setup_logging() runs BEFORE these imports
     # That way we can have logger = logging.getLogger(__name__) declared top-level in files since it resolves after our logger is set up
     from app.api import api_bp

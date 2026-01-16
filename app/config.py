@@ -70,3 +70,14 @@ config_map = {
     "prod": ProdConfig,
     "testing": TestConfig,
 }
+
+
+def get_config(config_name: str | None = None) -> type[BaseConfig]:
+    """Get config class based on name or APP_ENV."""
+    config_name = config_name or os.environ.get("APP_ENV", "dev")
+
+    if config_name not in config_map:
+        msg = f"Unknown APP_ENV '{config_name}'"
+        raise RuntimeError(msg)
+
+    return config_map[config_name]
