@@ -1,4 +1,3 @@
-
 # Weight
 WEIGHT_PRECISION = 5
 WEIGHT_SCALE = 2
