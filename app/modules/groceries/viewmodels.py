@@ -27,16 +27,30 @@ class TransactionPresenter(BasePresenter):
         "price_per_100g": {"label": "Price (100g)", "priority": "desktop-only"},
     }
 
-class TransactionViewModel(TimestampedViewMixin):
-    def __init__(self, txn: 'Transaction', tz: str):
-        self.id = txn.id
-        self.product_id = txn.product_id
+
+class TransactionViewModel(BaseViewModel):
+    product_id: int
+    product_name: str
+    barcode: int
+    price_at_scan: float
+    quantity: int
+    price_per_100g: float
+
+    def __init__(self, txn: Transaction, tz: str) -> None:
+        fields = {
+            "id",
+            "product_id",
+            "price_at_scan",
+            "quantity",
+            "created_at_local",
+            "price_per_100g",
+            "subtype",
+        }
+        for name in fields:
+            setattr(self, name, getattr(txn, name))
+
         self.product_name = txn.product.name
         self.barcode = txn.product.barcode
-        self.price_at_scan = txn.price_at_scan
-        self.quantity = txn.quantity
-        self.created_at = txn.created_at
-        self.price_per_100g = txn.price_per_100g        # calculated field
         self._tz = tz
 
     @property
@@ -76,9 +90,9 @@ class ProductPresenter(BasePresenter):
         "created_at": {"label": "Created", "priority": "desktop-only"},
     }
 
-    
-class ProductViewModel(TimestampedViewMixin):
-    CATEGORY_LABELS = {
+
+class ProductViewModel(BaseViewModel):
+    CATEGORY_LABELS: ClassVar[dict[Category, str]] = {
         Category.FRUITS: "Fruits",
         Category.VEGETABLES: "Vegetables",
         Category.LEGUMES: "Legumes",
@@ -114,6 +128,7 @@ class ProductViewModel(TimestampedViewMixin):
         self.net_weight = product.net_weight
         self.unit_type = product.unit_type
         self.calories_per_100g = product.calories_per_100g
+        self.subtype = product.subtype
         self._tz = tz
 
     @property

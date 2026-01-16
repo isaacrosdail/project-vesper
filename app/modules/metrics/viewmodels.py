@@ -32,17 +32,30 @@ class DailyMetricPresenter(BasePresenter):
     }
 
 
-class DailyMetricViewModel(TimestampedViewMixin):
-    def __init__(self, metric: 'DailyMetrics', tz: str):
-        self.id = metric.id
-        self.created_at = metric.entry_datetime
-        self.weight = metric.weight
-        self.steps = metric.steps
-        self.wake_time = metric.wake_time
-        self.sleep_time = metric.sleep_time
-        self.calories = metric.calories
-        self._tz = tz
+class DailyMetricViewModel(BaseViewModel):
+    entry_datetime: datetime
+    weight: int
+    steps: int
+    wake_time_local: datetime
+    sleep_time_local: datetime
+    calories: int | None
+    subtype: str
 
+    def __init__(self, metric: DailyMetrics, tz: str) -> None:
+        fields = {
+            "id",
+            "weight",
+            "steps",
+            "wake_time_local",
+            "sleep_time_local",
+            "calories",
+            "subtype",
+        }
+        for name in fields:
+            setattr(self, name, getattr(metric, name))
+
+        self.created_at_local = metric.entry_datetime_local
+        self._tz = tz
 
     @property
     def entry_datetime_label(self) -> str:
