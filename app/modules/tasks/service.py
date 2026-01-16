@@ -132,8 +132,8 @@ def create_tasks_service(session: Session, user_id: int, user_tz: str) -> TasksS
 
 @register_patch_hook("tasks")
 def tasks_patch_hook(
-    item: Any, data: Any, session: Session, current_user: User
-) -> dict[str, Any]:  # noqa: ANN401,ARG001
+    item: Any, data: Any, session: Session, current_user: User   # noqa: ANN401,ARG001
+) -> dict[str, Any]:
     """Invoked by generalized PATCH route to re-calculate tasks progress upon changes."""
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone

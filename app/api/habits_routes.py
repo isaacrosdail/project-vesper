@@ -78,7 +78,7 @@ def completions(session: Session, habit_id: int) -> tuple[Response, int]:
             start_utc, end_utc = dth.today_range_utc(current_user.timezone)
         else:
             parsed_date = date.fromisoformat(date_received)
-            start_utc, end_utc = day_range_utc(parsed_date, current_user.timezone)
+            start_utc, end_utc = dth.day_range_utc(parsed_date, current_user.timezone)
 
         if habit_completion:
             habits_service.completion_repo.delete(habit_completion)

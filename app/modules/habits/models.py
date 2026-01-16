@@ -115,8 +115,9 @@ class Habit(Base, APISerializable):
 class HabitCompletion(Base, APISerializable):
     """Stores each completion as a new entry, enabling better analytics."""
 
-    habit_id: Mapped[int] = mapped_column(Integer, ForeignKey('habits.id'), nullable=False)
-    
+    habit_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("habits.id"), nullable=False
+    )
     habit = relationship("Habit", back_populates="habit_completions")
 
     def __repr__(self) -> str:
