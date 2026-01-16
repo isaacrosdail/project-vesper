@@ -9,6 +9,8 @@
 - Service classes: Pl., match the module
 - Service instances: Pl., match the service class
 
+Service object naming shorthand end in `_svc` -> ex: `groceries_svc`?
+
 Subtype names will be used even in markup/etc, ex: `class="metric_entries-modal"` to enable some nice stuff facilitated by this parity.
     `types.ts` & `MODEL_CLASSES` (in generic_routes.py) are our de facto master lists, so let's remember to keep those synced.
 
@@ -22,7 +24,12 @@ Subtype names will be used even in markup/etc, ex: `class="metric_entries-modal"
 Default to classes over IDs for everything except form inputs and auto-discovery modal-related stuff
 
 
-## API Response Standardization
+## API Notes
+
+We'll return HTTP code 200 on DELETEs, since we'll return the item in the body of the return as well.
+Semantically, it feels fuzzy, but the utility of having the full item info outweighs this, in my opinion.
+
+This means every API operation returns the affected item.
 
 # TODO: Under construction
 
