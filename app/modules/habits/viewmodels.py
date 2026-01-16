@@ -31,15 +31,15 @@ class HabitViewModel(TimestampedViewMixin):
         self.promotion_threshold = habit.promotion_threshold
         self.created_at = habit.created_at
         self._tz = tz
-    
+
     @property
     def status_label(self) -> str:
         return f"{self.status.value.title()}"
-    
+
     @property
     def created_at_label(self) -> str:
         return self.format_created_at_label()
-    
+
 
 class LCRecordPresenter(BasePresenter):
     VISIBLE_COLUMNS = [

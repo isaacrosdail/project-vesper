@@ -50,8 +50,11 @@ class TimestampMixin:
 
 
 class CustomBaseTaskMixin:
-    """Adds completed_at timestamp to task-like models. (unsure about this one)"""
-    completed_at: Mapped[datetime] =  mapped_column(DateTime(timezone=True), nullable=True)
+    """Adds `completed_at` timestamp to task-like models. (unsure about this one)"""
+
+    completed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class Base(TimestampMixin, DeclarativeBase):
