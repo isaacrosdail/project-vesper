@@ -1,29 +1,38 @@
-
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from app.modules.habits.models import Habit, LeetCodeRecord
+    from datetime import datetime
 
-from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
+    from app.modules.habits.models import Habit, LeetCodeRecord, StatusEnum
+
+
+from app.shared.view_mixins import BasePresenter, BaseViewModel
+
 
 class HabitPresenter(BasePresenter):
-    VISIBLE_COLUMNS = [
-        "name", "status", "created_at"
-    ]
-    COLUMN_CONFIG = {
+    VISIBLE_COLUMNS: ClassVar[list[str]] = ["name", "status", "created_at"]
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
         "id": {"label": "ID", "priority": "desktop-only"},
         "name": {"label": "Name", "priority": "essential"},
         "tags": {"label": "Tag(s)", "priority": "desktop-only"},
         "status": {"label": "Status", "priority": "essential"},
         "created_at": {"label": "Created", "priority": "desktop-only"},
         "established_date": {"label": "Date Promoted", "priority": "desktop-only"},
-        "promotion_threshold": {"label": "Promotion Threshold", "priority": "desktop-only"}
+        "promotion_threshold": {
+            "label": "Promotion Threshold",
+            "priority": "desktop-only",
+        },
     }
 
-    
-class HabitViewModel(TimestampedViewMixin):
-    def __init__(self, habit: 'Habit', tz: str):
+
+class HabitViewModel(BaseViewModel):
+    name: str
+    status: StatusEnum
+    established_date: datetime
+
+    def __init__(self, habit: Habit, tz: str) -> None:
         self.id = habit.id
         self.name = habit.name
         self.status = habit.status
@@ -42,11 +51,15 @@ class HabitViewModel(TimestampedViewMixin):
 
 
 class LCRecordPresenter(BasePresenter):
-    VISIBLE_COLUMNS = [
-        "leetcode_id", "title", "difficulty", "language", "status"
+    VISIBLE_COLUMNS: ClassVar[list[str]] = [
+        "leetcode_id",
+        "title",
+        "difficulty",
+        "language",
+        "status",
     ]
 
-    COLUMN_CONFIG = {
+    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
         "id": {"label": "ID", "priority": "essential"},
         "leetcode_id": {"label": "Leetcode ID", "priority": "essential"},
         "title": {"label": "Title", "priority": "essential"},
@@ -55,8 +68,9 @@ class LCRecordPresenter(BasePresenter):
         "status": {"label": "Status", "priority": "essential"},
     }
 
-class LCRecordViewModel(TimestampedViewMixin):
-    def __init__(self, record: 'LeetCodeRecord', tz: str):
+
+class LCRecordViewModel(BaseViewModel):
+    def __init__(self, record: LeetCodeRecord, tz: str) -> None:
         self.id = record.id
         self.leetcode_id = record.leetcode_id
         self.title = record.title

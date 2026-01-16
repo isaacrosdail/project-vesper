@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING, ClassVar
 if TYPE_CHECKING:
     from datetime import datetime
 
-from app.shared.view_mixins import TimestampedViewMixin, BasePresenter
+    from app.modules.tasks.models import PriorityEnum, Task
+
+from app.shared.view_mixins import BasePresenter, BaseViewModel, HasDueDateMixin
 
 
 class TaskPresenter(BasePresenter):
@@ -21,15 +23,30 @@ class TaskPresenter(BasePresenter):
         "completed_at": {"label": "Completed", "priority": "desktop-only"},
     }
 
-class TaskViewModel(TimestampedViewMixin):
-    def __init__(self, task: 'Task', tz: str):
-        self.id = task.id
-        self.name = task.name
-        self.is_done = task.is_done
-        self.priority = task.priority
-        self.is_frog = task.is_frog
-        self.due_date = task.due_date
-        self.completed_at = task.completed_at
+
+class TaskViewModel(BaseViewModel, HasDueDateMixin):
+    name: str
+    is_done: bool
+    priority: PriorityEnum
+    is_frog: bool
+    due_date: datetime
+    completed_at: datetime
+    subtype: str
+
+    def __init__(self, task: Task, tz: str) -> None:
+        fields = {
+            "id",
+            "name",
+            "is_done",
+            "priority",
+            "is_frog",
+            "due_date_local",
+            "completed_at",
+            "subtype",
+        }
+        for name in fields:
+            setattr(self, name, getattr(task, name))
+
         self.tags = task.tags
         self._tz = tz
 
