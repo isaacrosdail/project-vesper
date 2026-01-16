@@ -10,7 +10,7 @@ __pycache__/
 # ==========================
 # Tools & Scratch
 # ==========================
-_playground/
+_sandbox/
 seed_dev_db.py
 .VSCodeCounter/
 .ruff_cache/

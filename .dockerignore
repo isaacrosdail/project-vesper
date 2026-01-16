@@ -3,7 +3,7 @@
 .gitignore
 
 # Python build caches
-_pycache__/
+**/_pycache__/
 *.pyc
 .pytest_cache/
 .coverage
@@ -21,3 +21,20 @@ build/
 # Local envs
 .env
 prod.env
+
+# Misc.
+CONVENTIONS.md
+PROJECT_LOG_ARCHIVE/
+PROJECT_LOG.md
+README.md
+**/.md
+
+# Other Dockerfiles
+Dockerfile.pi
+docker-compose.pi.yml
+docker-compose.yml
+
+
+# Tests
+happydom.ts
+tests/
