@@ -37,6 +37,7 @@ class DevConfig(BaseConfig):
     LOGGING_LEVEL = logging.DEBUG
     APP_ENV = "dev"
     DEBUG = True  # Enables debug mode, reloader, detailed error pages
+    USE_PROXY_FIX = False
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URI", "postgresql://user:password@localhost:5432/dbname"
     )

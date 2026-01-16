@@ -160,31 +160,39 @@ def _setup_request_hooks(app: Flask) -> None:
             "nonce": getattr(g, "nonce", ""),
         }
 
-    # # Apply CSP headers
-    # @app.after_request
-    # def apply_csp(response):
-    #     if os.environ.get('APP_ENV') == 'dev':
-    #         # Much simpler dev CSP - no nonces, no HTTPS
-    #         response.headers['Content-Security-Policy'] = (
-    #             "default-src 'self'; "
-    #             "script-src 'self' 'unsafe-inline'; "
-    #             "style-src 'self' 'unsafe-inline'; "
-    #             "img-src 'self' data:; "
-    #             "object-src 'none'; "
-    #             "base-uri 'self';"
-    #         )
-    #         print("DEV CSP applied (permissive)", file=sys.stderr)
-    #         return response
-    #     # Get current domain
-    #     current_host = request.host
-    #     nonce = getattr(g, "nonce", "")
+    # Apply CSP headers
+    @app.after_request
+    def apply_csp(response: Response) -> Response:
+        from flask import request
+        if request.endpoint == "devtools.style_reference" or request.endpoint == "static":
+            return response
 
-    #     response.headers["Content-Security-Policy"] = (
-    #         f"default-src 'self'; "
-    #         f"script-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
-    #         f"style-src 'self' https://vesper.isaacrosdail.com 'nonce-{nonce}';"
-    #         f"img-src 'self' data:;"
-    #         f"object-src 'none'; "
-    #         f"base-uri 'self';"
-    #     )
-    #     return response
+        nonce = getattr(g, "nonce", "")
+
+        if current_app.config['APP_ENV'] == 'dev':
+            # Lax dev
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data:; "
+                "object-src 'none'; "
+                "base-uri 'self';"
+            )
+
+        else:
+            # Strict prod
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                f"script-src 'self' 'nonce-{nonce}'; "
+                f"style-src 'self' 'nonce-{nonce}'; "
+                "img-src 'self' data:; "
+                "connect-src 'self'; "       # backend handles external APIs
+                "font-src 'self'; "
+                "form-action 'self'; "
+                "frame-ancestors 'none'; "   # anti-clickjacking
+                "object-src 'none'; "
+                "base-uri 'self'; "          # base tag hijacking
+                "upgrade-insecure-requests;" # force HTTPS for HTTP responses
+            )
+        return response
