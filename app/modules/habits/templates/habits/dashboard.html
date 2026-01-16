@@ -42,11 +42,10 @@
     </div>
 
     {% call(item, headers) ui.responsive_table('LC Records', lcrecords_headers, lcrecords, 'habits', 'leet_code_records', records_params, sortable=True) %}
-        <td class="{{ headers[0].priority }}">{{ item.leetcode_id }}</td>
-        <td class="{{ headers[1].priority }}">{{ item.title_label }}</td>
-        <td class="{{ headers[2].priority }}">{{ item.difficulty_label }}</td>
-        <td class="{{ headers[3].priority }}">{{ item.language_label }}</td>
-        <td class="{{ headers[4].priority }}">{{ item.status_label }}</td>
+        <td class="{{ headers[0].priority }}">{{ item.leetcode_id_plus_title_label }}</td>
+        <td class="{{ headers[1].priority }}">{{ item.difficulty_label }}</td>
+        <td class="{{ headers[2].priority }}">{{ item.language_label }}</td>
+        <td class="{{ headers[3].priority }}">{{ item.status_label }}</td>
     {% endcall %}
 </div>
 {% endblock %}
