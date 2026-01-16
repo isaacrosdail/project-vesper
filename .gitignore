@@ -14,6 +14,7 @@ _sandbox/
 seed_dev_db.py
 .VSCodeCounter/
 .ruff_cache/
+db_backups/
 
 # ==========================
 # Environment files / venv
