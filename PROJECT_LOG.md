@@ -18,6 +18,9 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+# Files to clean up:
+1. validators.ts (when we do frontend validation)
+
 
 ## [Thurs 08.01.25]
 1. Move to custom script on prod
