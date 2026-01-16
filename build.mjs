@@ -12,7 +12,7 @@ const jsOptions = {
   minify: isProd,
   format: 'esm',
   metafile: true,
-  logLevel: 'info',
+  logLevel: 'warning',
 };
 
 // Build CSS
@@ -23,7 +23,7 @@ const cssOptions = {
     sourcemap: !isProd,
     minify: isProd,
     metafile: true,
-    logLevel: 'info',
+    logLevel: 'warning',
 };
 
 const jsContext = await esbuild.context(jsOptions);

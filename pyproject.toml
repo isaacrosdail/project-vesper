@@ -1,7 +1,22 @@
 [tool.mypy]
+incremental = true  # only checks changed files (how is this not the default?)
+cache_dir = ".mypy_cache"
 strict = true
 ignore_missing_imports = true
-exclude = "^(_playground|tests|alembic)/"
+exclude = [
+    '^_playground/',
+    '^tests/',
+    '^alembic/',
+]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+# For .gitignored sandbox folder
+[[tool.mypy.overrides]]
+module = "_sandbox.*"
+ignore_errors = true
 
 [tool.pytest.ini_options]
 env = [
@@ -11,7 +26,31 @@ pythonpath = ["."]
 testpaths = ["tests"]
 
 [tool.ruff]
-select = ["ALL"]
-ignore = [
-    "COM812"
+lint.select = ["ALL"]
+lint.ignore = [
+    "COM812",
+    "D",         # Docstring warnings
+    "RET505",    # Dumb rule
+    "TD002",     # Missing author in TODO
+    "PT006",
+    "E501",      # TODO: TEMP line too long
+    "TD003",     # Missing link for TODO
+    "ERA001",    # commented out code, almost entirely false positives
+    "N806",      # silly rule for silly people
 ]
+extend-exclude=["app/api/__init__.py"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/api/generic_routes.py" = ["D103", "C901", "PLR0912"]
+"*_routes.py" = ["D103"]
+# "tests/**/*.py" = [
+#     "S101",      # allow asserts in tests
+#     "ANN001",
+#     "ANN201",    # suppress return type for pub func warning
+#     "E501",
+#     "PLR2004",   # allow magic numbers in tests (that's...kind of the point isn't it?)
+#     "F405",      # TODO: TEMP Remove
+# ]
+"tests/**/*.py" = ["ALL"]
+"alembic/**" = ["ALL"]
+"**/*repository.py" = ["PLR0913"] # Too many function args
