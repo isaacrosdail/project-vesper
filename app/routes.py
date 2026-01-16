@@ -1,63 +1,64 @@
 """
 - /health : JSON health check endpoint (for monitoring)
 """
-from typing import Any
 
-from flask import Blueprint, render_template, jsonify, Response
+from flask import Blueprint, Response, jsonify, render_template
 from flask_login import current_user
 
-
+import app.shared.datetime.helpers as dth
 from app._infra.database import database_connection
 from app.modules.habits.service import create_habits_service
 from app.modules.tasks.service import create_tasks_service
-from app.shared.datetime.helpers import (
-    today_range_utc,
-    day_range_utc,
-    now_in_timezone,
-    is_same_local_date,
-)
 
 main_bp = Blueprint("main", __name__, template_folder="templates")
 
 
 @main_bp.get("/")
 def home() -> tuple[str, int]:
-    """Return landing page for unauthenticated users, homepage for authenticated users."""
+    """
+    Return landing page for unauthenticated users,
+    homepage for authenticated users.
+    """
     if not current_user.is_authenticated:
         return render_template("landing_page.html"), 200
 
     with database_connection() as session:
         user_tz: str = current_user.timezone
-        now = now_in_timezone(user_tz)
+        now = dth.now_in_timezone(user_tz)
 
         now_time = now.strftime("%H:%M:%S")
         now_date = now.strftime("%a, %b %d")
+
+        noon, evening = 12, 18
         greeting = (
-            "Good morning" if now.hour < 12
-            else "Good afternoon" if now.hour < 18
+            "Good morning"
+            if now.hour < noon
+            else "Good afternoon"
+            if now.hour < evening
             else "Good evening"
         )
 
-        today = now_in_timezone(user_tz).date()  # user's today
+        today = dth.now_in_timezone(user_tz).date()  # user's today
         current_date = today.isoformat()  # for time_tracking entry modal's date field
 
-        # Fetch tasks, habits
         habits_service = create_habits_service(session, current_user.id, user_tz)
         tasks_service = create_tasks_service(session, current_user.id, user_tz)
         habits = habits_service.habit_repo.get_all()
 
-        start_utc, end_utc = day_range_utc(today, user_tz)
+        start_utc, end_utc = dth.day_range_utc(today, user_tz)
         today_frog = tasks_service.task_repo.get_frog_task_in_window(start_utc, end_utc)
         tasks = tasks_service.task_repo.get_all_regular_tasks()
         filtered_tasks = [
-            t for t in tasks
-            if (t.due_date is None) or is_same_local_date(t.due_date, user_tz)
+            t
+            for t in tasks
+            if (t.due_date is None) or dth.is_same_local_date(t.due_date, user_tz)
         ]
 
-
-        start_utc, end_utc = today_range_utc(user_tz)
-        leetcode_records = habits_service.leetcode_repo.get_all_leetcoderecords_in_window(
-            start_utc, end_utc
+        start_utc, end_utc = dth.today_range_utc(user_tz)
+        leetcode_records = (
+            habits_service.leetcode_repo.get_all_leetcoderecords_in_window(
+                start_utc, end_utc
+            )
         )
 
         habit_info = {
@@ -91,5 +92,5 @@ def home() -> tuple[str, int]:
 @main_bp.get("/health")
 def health_check() -> tuple[Response, int]:
     """Return for basic health check / monitoring."""
-    status = {"status": "healthy", "timestamp": now_in_timezone("America/Chicago")}
+    status = {"status": "healthy", "timestamp": dth.now_in_timezone("America/Chicago")}
     return jsonify(status), 200

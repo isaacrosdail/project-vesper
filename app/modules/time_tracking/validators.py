@@ -1,8 +1,12 @@
-
-
 from typing import Any
 
-from app.modules.time_tracking.constants import *
+from app.modules.time_tracking.validation_constants import (
+    CATEGORY_MAX_LENGTH,
+    CATEGORY_REQUIRED,
+    CATEGORY_TOO_LONG,
+    DESCRIPTION_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
+)
 from app.shared.decorators import log_validator
 from app.shared.validators import validate_date_iso, validate_time_hhmm
 
@@ -27,7 +31,6 @@ def validate_description(description: str | None) -> tuple[str | None, list[str]
     return (description, [])
 
 
-
 VALIDATION_FUNCS = {
     "category": validate_category,
     "description": validate_description,
@@ -35,8 +38,12 @@ VALIDATION_FUNCS = {
     "started_at": validate_time_hhmm,
     "ended_at": validate_time_hhmm,
 }
+
+
 @log_validator
-def validate_time_entry(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[str]]]:
+def validate_time_entry(
+    data: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, list[str]]]:
     """Validate time entry data. Returns (typed_data, errors)."""
     typed_data = {}
     errors = {}

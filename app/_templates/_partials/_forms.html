@@ -30,7 +30,7 @@
           </div>
           <div>
               <label for="weight_units">Units:</label>
-              <select name="weight_units">
+              <select name="weight_units" id="weight_units">
                 <option value="kg" {{ 'selected' if current_user.units.value == 'metric' }}>kg</option>
                 <option value="lbs" {{ 'selected' if current_user.units.value == 'imperial' }}>lbs</option>
               </select>

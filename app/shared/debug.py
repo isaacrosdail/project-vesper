@@ -59,19 +59,18 @@ def print_startup_info(app: Flask) -> None:
     )
 
 
-def setup_request_debugging(app: 'Flask') -> None:
+def setup_request_debugging(app: Flask) -> None:
     """Set up request logging for dev environment"""
 
     @app.before_request
     def log_request() -> None:
         """Logs incoming request data (form data & query args) for debugging."""
         # Skip logging for CSS/JS files
-        if '/static' in request.path:
+        if "/static" in request.path:
             return
 
         logger = logging.getLogger(__name__)
-        # Only log form data & args if they're not empty
         if request.form:
-            logger.debug(f"Form data: {dict(request.form)}")
+            logger.debug("Form data: %s", dict(request.form))
         if request.args:
-            logger.debug(f"Query args: {dict(request.args)}")
+            logger.debug("Query args: %s", dict(request.args))

@@ -48,7 +48,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
       {% for col in headers %}
         <th class="{{ col.priority }}"
         {% if (sortable and params) %}
-        {# Will use explicit sort_field if defined, otherwise fall back to col.key #}
+        {# Will use explicit sort_field if defined in viewmodels.py, otherwise fall back to col.key #}
             data-column="{{ col.sort_field or col.key }}"
             {% if params.sort_by == (col.sort_field or col.key) %}
                 data-order="{{ params.order }}"
