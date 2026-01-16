@@ -16,7 +16,8 @@ from app.config import config_map
 from app.extensions import _setup_extensions
 from app.modules.auth.models import UserRoleEnum
 from app.shared import jinja_filters
-from app.shared.debug import setup_logging, setup_request_debugging
+from app.shared.debug import setup_dev_debugging
+from app.shared.setup_logging import setup_logging
 
 
 def has_dev_tools() -> bool:
@@ -44,7 +45,9 @@ def create_app(config_name: str | None = None) -> Flask:
     app = Flask(__name__, template_folder='_templates')
 
     _apply_config(app, config_name)
-    _setup_debug(app, config_name)
+    setup_logging(app)  # Must read logging level after being set by apply_config
+    if config_name in ("dev", "testing"):
+        setup_dev_debugging(app)
     _setup_extensions(app)
     _setup_request_hooks(app)
     _setup_database(app)

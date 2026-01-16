@@ -10,75 +10,53 @@ import logging.config
 
 from flask import Flask, request
 from sqlalchemy.engine.url import make_url
+from sqlalchemy.exc import ArgumentError
+from werkzeug.serving import is_running_from_reloader
 
-LOGGING_CONFIG: dict[str, Any] = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "simple": {
-            "format": "%(levelname)s: %(message)s",
-        }
-    },
-    "handlers": { # dictates where logs go (console, file, etc.)
-        "stdout": {
-            "class": "logging.StreamHandler", # prints to console
-            "formatter": "simple", # references formatter above
-            "stream": "ext://sys.stderr", # ext:// means "external" ie "this is a variable that's defined outside of this config"
-        }
-    },
-    "root": {
-        "level": "DEBUG",
-        "handlers": ["stdout"]
-    },
-}
-
-def setup_logging(app: 'Flask') -> None:
-    """Configure logging based on app config"""
-    print(f"Root level before: {logging.getLogger().level}", file=sys.stderr)
-    config = LOGGING_CONFIG.copy()
-    print(f"Config dict root level: {config['root']['level']}", file=sys.stderr)    
-    config['root']['level'] = app.config['LOGGING_LEVEL']
-    print(f"[setup_logging] Setting root to: {app.config['LOGGING_LEVEL']}", file=sys.stderr)
-    print(f"Config dict after update: {config['root']['level']}", file=sys.stderr)
-    
-    logging.config.dictConfig(config=config)
-    
-    # Silence some 3rd party
-    logging.getLogger('urllib3').setLevel(logging.WARNING)
-    
-    print(f"[AFTER setup_logging] Root level name: {logging.getLevelName(logging.getLogger().level)}", file=sys.stderr)
+# ANSI Colors
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RESET = "\033[0m"
 
 
-# Masks DB password in debug output
-def safe_db_uri(uri: str) -> str:
+def setup_dev_debugging(app: Flask) -> None:
+    """
+    Initialize extra debug output for dev, testing ENVs.
+    """
+    print_startup_info(app)
+    setup_request_debugging(app)
+
+
+def _safe_db_uri(uri: str) -> str:
+    """Mask database password in debug output."""
     try:
-        return make_url(uri).render_as_string(hide_password=True) # Displays DB password as **
-    except Exception:
-        return uri  # TODO: NOTES: non-SQLAlchemy URI?
+        return make_url(uri).render_as_string(hide_password=True)
+    except ArgumentError:
+        return uri
 
-def print_env_info(app: 'Flask') -> None:
-    """ Print current env & config info for debugging """
-    # Prevent repeated logging on every reload
-    if getattr(app, "_config_logged", False):
+
+def print_startup_info(app: Flask) -> None:
+    """Print startup info once in the child process."""
+    if not is_running_from_reloader():
         return
-    
+
     logger = logging.getLogger(__name__)
-    app_env = app.config.get('APP_ENV')
-    debug = app.config.get('DEBUG')
-    testing = app.config.get('TESTING')
-    db = app.config['SQLALCHEMY_DATABASE_URI']
-    logger.info(f"\n\nENVIRONMENT INFO")
-    logger.info(f"APP_ENV: {app_env} | Debug: {debug} | Testing: {testing}")
-    logger.info(f"Database: {safe_db_uri(db)}\n\n")
+    app_env = app.config.get("APP_ENV")
+    debug = app.config.get("DEBUG")
+    db = _safe_db_uri(app.config["SQLALCHEMY_DATABASE_URI"]).rsplit("/", 1)[1]
 
-    # don't repeat on reload
-    app._config_logged = True # type: ignore
+    # get actual log level (vs logger.level which doesn't check inheritance)
+    log_level = logger.getEffectiveLevel()
 
-
-def debug_config(config_name: str, config_class: 'type[BaseConfig]') -> None:
-    """ Print which config is being loaded """
-    logger = logging.getLogger(__name__)
-    logger.info(f"\n[CONFIG] Loading {config_name} config: {config_class.__name__}")
+    logger.debug(
+        "[APP INIT] %s | DEBUG: %s | DB: %s | LOG LEVEL: %s",
+        app_env,
+        debug,
+        db,
+        log_level,
+    )
 
 
 def setup_request_debugging(app: 'Flask') -> None:
@@ -86,6 +64,7 @@ def setup_request_debugging(app: 'Flask') -> None:
 
     @app.before_request
     def log_request() -> None:
+        """Logs incoming request data (form data & query args) for debugging."""
         # Skip logging for CSS/JS files
         if '/static' in request.path:
             return
