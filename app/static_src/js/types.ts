@@ -1,4 +1,10 @@
 
+// declare => "not creating Window, merely informing TS that it has an additional property csrfToken"
+declare global {
+    interface Window {
+        csrfToken: string;
+    }
+}
 /**
  * Internal identifiers for entities across all modules.
  * Used for API routing, DB queries, & UI labels.

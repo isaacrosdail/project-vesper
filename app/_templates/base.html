@@ -21,6 +21,9 @@
     {# Set data-theme value so CSS can apply theme from cookie #}
     {# Waiting on JS elsewhere results in "flash" of incorrect theme on page load #}
     <script nonce="{{ nonce }}">
+        (() => {
+            window.csrfToken = "{{ g.csrf_token }}";
+        })();
         (function () {
             const cookie = document.cookie;
             if (cookie.includes('theme=light')) {

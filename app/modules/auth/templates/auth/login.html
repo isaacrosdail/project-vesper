@@ -6,7 +6,8 @@
 {% block content %}
 
 <div class="card-dashboard card--narrower">
-    <form action="{{ url_for('auth.login') }}" method="post">
+    <form action="{{ url_for('auth.login') }}" method="post" spellcheck="false">
+        <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
         <div class="form-column">
             <h3>Login:</h3>
             <div class="faded-field">
