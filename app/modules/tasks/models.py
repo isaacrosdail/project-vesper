@@ -55,6 +55,7 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
     is_done: Mapped[bool] = mapped_column(Boolean, default=False)
     due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    user = relationship("User", back_populates="tasks")
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
     def __str__(self) -> str:
