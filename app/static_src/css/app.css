@@ -19,12 +19,13 @@
 
 /* Thoughts on z-index standardization (as insurance)
  * 0-99    - Base layout elements
- * 100-199 - Tooltips, dropdowns
+ * 100-199 - Dropdowns
  * 200-299 - Context menus, popovers, navbar, sticky side panels
  * 300-399 - Modals, backdrop overlays
  * 400-499 - Toasts, system-level UI (spinners?)
  * 500+    - Debug layer, devtools, etc.
  * 999     - Confetti / joyous celebration effects
+ * 1000    - Tooltips
 */
 
 :root {
@@ -224,11 +225,12 @@ td .status-span.is-done > svg {
 svg {
     overflow: visible; /* for hovering pie chart slices */
 }
+
 /* Gonna centrally size our D3 charts here as well to prevent pop-in/down on render */
 [id$="chart-container"] {
-    height: var(--chart-height);
-    width: var(--chart-width);
     align-self: center;
+    width: var(--chart-width);
+    height: var(--chart-height);
 }
 
 /* ===================================
