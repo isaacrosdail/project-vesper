@@ -1,5 +1,5 @@
-
-from typing import TYPE_CHECKING, Any
+from itertools import chain
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -9,9 +9,8 @@ from flask_login import login_required, login_user, logout_user
 from werkzeug.wrappers import Response
 
 from app._infra.database import database_connection, with_db_session
-from app.modules.auth.models import UserLangEnum, UserRoleEnum
 from app.modules.auth.repository import UsersRepository
-from app.modules.auth.service import AuthService, requires_owner
+from app.modules.auth.service import AuthService, owner_required
 from app.modules.auth.validators import validate_user
 from app.shared.database.helpers import delete_all_db_data
 from app.shared.middleware import set_toast
