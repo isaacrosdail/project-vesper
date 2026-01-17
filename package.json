@@ -26,7 +26,7 @@
   "scripts": {
     "build": "node build.mjs --prod",
     "build:watch": "node build.mjs --watch",
-    "dev": "concurrently -k -p \"[{name}]\" -n esbuild,flask,sync \"npm:build:watch\" \"npm:flask:dev\" \"npm:sync\"",
+    "dev": "concurrently -k -p \"[{name}]\" -n esbuild,flask,sync \"npm run -s build:watch\" \"npm run -s flask:dev\" \"npm run -s sync\"",
     "flask:dev": "flask run --debug",
     "sync": "wait-on tcp:127.0.0.1:5000 --timeout 5000 && browser-sync start --proxy http://127.0.0.1:5000 --port 5001 --files \"app/_templates/**/*.html, app/static_src/**/*\" --no-ui --open local",
     "lint:ts": "eslint app/static_src/js",
