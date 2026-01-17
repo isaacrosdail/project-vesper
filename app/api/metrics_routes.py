@@ -14,7 +14,6 @@ from flask_login import current_user
 import app.shared.datetime.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
-from app.modules.metrics.repository import DailyMetricsRepository
 from app.modules.metrics.service import create_metrics_service
 from app.modules.metrics.validators import validate_daily_entry
 from app.shared.decorators import login_plus_session

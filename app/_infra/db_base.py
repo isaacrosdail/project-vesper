@@ -86,16 +86,19 @@ class Base(TimestampMixin, DeclarativeBase):
     # @declared_attr that returns something other than a col/relationship descriptor -> use .directive
     @declared_attr.directive
     def __tablename__(cls) -> str:
-        # First regex pass handles 'ABTest' -> 'ab_test'
-        name = regex.sub('([A-Z]+)([A-Z][a-z])', r'\1_\2', cls.__name__)
-        name = regex.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower() # camelCase -> snake_case first
-        # Pluralize
-        if name.endswith('y') and name[-2] not in 'aeiou':
-            return name[:-1] + 'ies'
-        else:
-            return name + 's'
-    
-    # Automatically add user_id FKey to all models except User & ApiCallRecord (latter is global for internal use)
+        """
+        Auto-generate pluralized, snake_case table names from class names.
+
+        First regex pass handles 'ABTest' -> 'ab_test', then camelCase -> snake_case, and finally
+        pluralizing.
+        """
+        name = regex.sub("([A-Z]+)([A-Z][a-z])", r"\1_\2", cls.__name__)
+        name = regex.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
+
+        if name.endswith("y") and name[-2] not in "aeiou":
+            return name[:-1] + "ies"
+        return name + "s"
+
     @declared_attr.directive
     def user_id(cls) -> Mapped[Any]:
         """Automatically adds `user_id` foreign key to all models except: `User`, `ApiCallRecord`."""

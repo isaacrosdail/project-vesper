@@ -80,6 +80,12 @@ def completions(session: Session, habit_id: int) -> tuple[Response, int]:
             parsed_date = date.fromisoformat(date_received)
             start_utc, end_utc = dth.day_range_utc(parsed_date, current_user.timezone)
 
+        habit_completion = (
+            habits_service.completion_repo.get_habit_completion_in_window(
+                habit_id, start_utc, end_utc
+            )
+        )
+
         if habit_completion:
             habits_service.completion_repo.delete(habit_completion)
             progress = habits_service.calculate_all_habits_percentage_this_week()
