@@ -1,5 +1,9 @@
 # Project Conventions
 
+## Systems to keep in mind
+- We don't use type=number, instead use data-type-float and data-type-int (plus inputmode for mobile)
+
+
 ## Module Architecture / Naming
 - Module names: lowercase, plural where appropriate
 - Subtypes: snake_case, singular
