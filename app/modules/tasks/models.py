@@ -1,7 +1,9 @@
 """
 Database models for the Tasks module.
 """
+
 from datetime import datetime
+from typing import ClassVar
 
 from sqlalchemy import (
     Boolean,
@@ -54,6 +56,14 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
     is_frog: Mapped[bool] = mapped_column(Boolean, default=False)
     is_done: Mapped[bool] = mapped_column(Boolean, default=False)
     due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    @property
+    def due_date_local(self) -> datetime | None:
+        return (
+            convert_to_timezone(self.user.timezone, self.due_date)
+            if self.due_date
+            else None
+        )
 
     user = relationship("User", back_populates="tasks")
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
