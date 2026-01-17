@@ -24,6 +24,19 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  db_backup:
+    image: prodrigestivill/postgres-backup-local  # NOTE: community-maintained
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_NAME}
+      SCHEDULE: "0 3 */4 * *"  # note: change this to "@once" to "just run a backup"
+    volumes:
+      - ./db_backups:/backups
+    depends_on:
+      - db
+
 volumes:
   pgdata-dev:
     name: vesper-pgdata-dev
