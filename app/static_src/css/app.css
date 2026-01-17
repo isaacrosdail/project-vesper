@@ -155,10 +155,17 @@ td .status-span.is-done > svg {
     font-style: italic;
     color: var(--text-muted);
 }
+.shopping-list {
+    display: flex;
+    flex-direction: column;
+}
 
 /* Position our "x" button "outside"/"to the side of" the inline content */
 .shoppinglist-item {
     position: relative; /* positioning context for inline-delete */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-self: start;
 }
 .shoppinglist-item svg {
     width: 100%;
