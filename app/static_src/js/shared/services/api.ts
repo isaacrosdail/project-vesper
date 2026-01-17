@@ -3,8 +3,8 @@
 type ApiResponse = {
     success: boolean;
     message: string;
-    data?: any; // Could be list, dict, etc. Consider using generics in future
-    errors?: any;
+    data?: unknown;
+    errors?: unknown;
 };
 
 // Top-level

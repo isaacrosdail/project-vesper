@@ -35,7 +35,7 @@ export function createTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: 
         ? (targetElRect.top + 2 * (targetElRect.height / 3))
         : targetElRect.bottom;
 
-    tooltip.style.zIndex = '1000'; // TODO: Consider dropping to 100-199 range to adhere to z-index notes in app.css
+    tooltip.style.zIndex = '1000';
 
     // Tooltips in dialogs need dialog parent to avoid stacking context issues
     const parentDialogEl = targetEl.closest('dialog');
