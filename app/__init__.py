@@ -185,7 +185,7 @@ def _setup_request_hooks(app: Flask) -> None:
 
         if current_app.config['APP_ENV'] == 'dev':
             # Lax dev
-            response.headers['Content-Security-Policy'] = (
+            response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self' 'unsafe-inline'; "
                 "style-src 'self' 'unsafe-inline'; "
