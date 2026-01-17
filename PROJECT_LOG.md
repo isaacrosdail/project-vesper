@@ -21,13 +21,55 @@
 # Files to clean up:
 1. validators.ts (when we do frontend validation)
 
+## [Thurs 21.01.26]
+1. Finish updating parsers.py
+2. Switched wake_time/sleep_time fields to using datetime-local
+    - Then removed the weird sleep_time logic since it's now unambiguous
 
-## [Thurs 08.01.25]
+## [Wed 20.01.26]
+1. Further JS-side validation stuff
+2. Start fixing up `parsers.py` & updating call sites
+3. Start adding datetime-local to metrics form for wake/sleep fields
+
+MISC:
+- Updated calculate_habit_streak to use `pairwise()`
+- Renamed datetime/ to datetime_/ to avoid shadowing stdlib
+
+## [Tues 19.01.26]
+1. 
+
+## [Mon 18.01.26]
+1. Implement frontend validation for register.html
+2. Refactor modal-manager.ts so form submission logic is in forms.ts, not mixed in with modal-manager.
+    - Added `form-type` data attribute to distinguish between modal, full-page, and "single action" forms. Added to all form tags (I think)
+
+
+## [Sat 17.01.26]
+1. Learn proxies, do some frontend validation setup (just login page atm)
+2. Tweak LeetCode record table to condense - batch LC_ID and Title together into one cell
+3. Add thorough documentation to view_mixins.py for the whole "viewmodels/presenters" system.
+4. Add border-left & increase stroke-width on password toggle eye SVG so it's more visible.
+
+## [Sun 15.01.26]
+1. CSRF Token implementation
+    - 
+2. Viewmodels (most): 
+    - Split TimestampedViewModel into BaseViewModel & HasDueDateMixin
+    - Cut timezone conversions from here, instead using model properties now
+
+3. Model changes (ORM-side, not Postgres-side)
+    - Added `*_local` properties for all applicable model fields involving datetimes
+    - Added proper relationships between User <-> (models) class defs
+
+## [Sat 14.01.26]
+1. Mostly learning/drills - generators, sets, comprehensions
+
+## [Thurs 08.01.26]
 1. Move to custom script on prod
     - ./scripts/deploy.sh
 2. 
 
-## [Sun 04.01.25]
+## [Sun 04.01.26]
 **Log:**
 1. Fix up HTTP status codes throughout
 2. Actually implement the units field thing
@@ -40,13 +82,13 @@
 LEFT OFF: ruff check codebase-wide, working on pruning debug terminal output
     Once done with that, onto other linting/etc.
 
-## [Sat 03.01.25]
+## [Sat 03.01.26]
 **Log:**
 1. Purge 'Any' typing from most, if not all, functions/view functions
 
 Misc. Replace manual query parameter handling with native options (JavaScript's `URLSearchParams`, Python's `request`)
 
-## [Fri 02.01.25]
+## [Fri 02.01.26]
 **Log:**
 1. Refactoring Service/Repository
     - Moving to one repository (class) per model (Applied to all modules, although only a few needed real splitting-up here as not all even have 2+ models to them.)
@@ -59,7 +101,7 @@ Misc. Replace manual query parameter handling with native options (JavaScript's 
     - Renamed model to DailyMetrics for clarity (better fits 'composite metrics')
     - Since we auto-gen table names, and this is the only one which is already plural, our auto-gen added another 's' mistakenly. So we just explicitly set the tablename for dailymetrics as a (likely) one-time exception case.
 
-## [Thurs 01.01.25]
+## [Thurs 01.01.26]
 **Log:**
 1. `apiRequest` improvements
     - Added `onFailure` callback for failure handling
@@ -148,9 +190,8 @@ MISC:
 		LEFT OFF: Debugging some openMenu stuff in context-menu.ts. Namely refactoring listeners a bit, need to reorganize, and also made closeMenu() but need to figure out semantics since openMenu/closeMenu really should be called makeAndShowMenu and destroyMenu lmao.
 
 
-## [Sat 20.12.25]
+## [Sat 20.12.25] - Continue Cleanup
 **Log:**
-1. Continue cleanup
 1. Extend ... changes to all other form modals/modules
 	A. Tasks:
 		1. Rearrange form / add grid(s) if needed
@@ -158,7 +199,6 @@ MISC:
 			A. Add checkbox with JS to ......something something...
 			B. Set display none if completed I guess?
 2. CSS Tweaks/cleanup alongside
-	- 
 3. Linting/Formatting tooling additions/changes:
 	- ALL: Rolled configs for mypy, pytest, Ruff, and djLint into a new `pyproject.toml` to better unify configs.
 	- Stylelint (CSS): Config is `stylelint.config.mjs`
@@ -169,7 +209,15 @@ MISC:
 		Steps: `pip install djlint`
 		DEPS: djlint, 
 	- Ruff (Python): Already had Ruff :D Tested using `ruff format app/routes.py`. | CONFIG: pyproject.toml?
-========== LEFT OFF:	Radio form control styling (and generally applying a better, compact-er grid layout for forms where sensible)
+========== LEFT OFF:	Radio form control styling (and generally applying a better, more compact grid layout for some forms)
+
+
+## [Fri 19.12.25]
+1. Form tweaks
+    - Changed time_entries description input field to `<textarea>`
+    - Added justify-content: center; to .tab stylings so the icon+text groupings are horizontally centered in their button elements.
+    - Changed from inline-flex to flex for some elements
+    - Worked a bit on tuning grid styling for "price + quantity" type groupings
 
 ## [Wed 17.12.25]
 **Log:**
