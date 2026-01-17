@@ -99,6 +99,11 @@ class Habit(Base, APISerializable):
     promotion_threshold: Mapped[float] = mapped_column(Float, nullable=True)
     # Represents target completion rate per week
     target_frequency: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    @property
+    def established_date_local(self) -> datetime | None:
+        return convert_to_timezone(self.user.timezone, self.established_date)
+
     user = relationship("User", back_populates="habits")
     tags = relationship("Tag", secondary=habit_tags, back_populates="habits")
     habit_completions = relationship(

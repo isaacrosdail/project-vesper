@@ -62,6 +62,15 @@ class CustomBaseTaskMixin:
         DateTime(timezone=True), nullable=True
     )
 
+    @property
+    def completed_at_local(self) -> datetime | None:
+        tzname = current_app.config.get(current_user.timezone, "America/Chicago")
+        return (
+            self.completed_at.astimezone(ZoneInfo(tzname))
+            if self.completed_at
+            else None
+        )
+
 
 class Base(TimestampMixin, DeclarativeBase):
     """Base class for all models. Auto-timestamps, user association, table naming."""
@@ -70,7 +79,10 @@ class Base(TimestampMixin, DeclarativeBase):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    # Autogenerate pluralized, snake_case table names from class names
+    @property
+    def subtype(self) -> str:
+        return self.__tablename__
+
     # @declared_attr that returns something other than a col/relationship descriptor -> use .directive
     @declared_attr.directive
     def __tablename__(cls) -> str:
