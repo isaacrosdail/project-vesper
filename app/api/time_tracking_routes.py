@@ -1,10 +1,13 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from flask import request, current_app, Response
+import logging
+
+from flask import Response, request
 from flask_login import current_user
 
 import app.shared.datetime.helpers as dth
@@ -15,7 +18,6 @@ from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.decorators import login_plus_session
 from app.shared.parsers import parse_time_entry_form_data
 
-import logging
 logger = logging.getLogger(__name__)
 
 
