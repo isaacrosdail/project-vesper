@@ -1,11 +1,11 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from flask import Flask
-    from app.config import BaseConfig
 
-import sys
+
 import logging.config
 
 from flask import Flask, request
