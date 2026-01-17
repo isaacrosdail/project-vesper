@@ -9,16 +9,17 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from sqlalchemy import ColumnElement, Table
     from sqlalchemy.orm import Session
 
+import logging
 from datetime import datetime, timezone
 
-from flask import current_app
-from sqlalchemy import text
+from sqlalchemy import delete, text
+
 from app._infra.db_base import Base
 from app.modules.groceries.models import Product, ShoppingListItem
 
-import logging
 logger = logging.getLogger(__name__)
 
 NEVER_DELETE = {
@@ -28,20 +29,17 @@ NEVER_DELETE = {
 # Skip sequence reset for association tables of course
 NO_SEQ = {"habit_tags", "task_tags"}
 
-def _delete_rows(session: 'Session', table: str, where: str | None = None, params: dict[str, Any] | None = None) -> None:
-    """
-    Notes:
-        - Uses parameter binding (:param style) to avoid SQL injection.
-        - params (dict, optional): bound parameters for the WHERE clause
-    """
-    logger.info(f"Deleting from {table} {where if where else 'all rows'}")
 
-    sql = f'DELETE FROM "{table}"'  #  "" -> Postgres treats as identifier, not a keyword (for our 'user' table)
-    if where:
-        sql += f' WHERE {where}'
-    
-    # params or {} ensures safe binding even if None is passed
-    session.execute(text(sql), params or {})
+def _delete_rows(
+    session: Session, table: Table, where_clause: ColumnElement[bool] | None = None
+) -> None:
+    """Delete rows from an SQLAlchemy table object."""
+    stmt = delete(table)
+    if where_clause is not None:
+        stmt = stmt.where(where_clause)
+
+    session.execute(stmt)
+    logger.debug("Deleted from %s", table.name)
 
 
 def delete_all_db_data(
@@ -69,7 +67,7 @@ def delete_all_db_data(
         if not include_users and "user_id" in table.c:
             continue
 
-        _delete_rows(session, table.name)
+        _delete_rows(session, table)
         filtered_names.append(name)
 
     if reset_sequences:
@@ -79,11 +77,12 @@ def delete_all_db_data(
                     session.execute(text(f'ALTER SEQUENCE "{seq_name}" RESTART WITH 1'))
                     logger.debug("Sequence %s reset", seq_name)
 
-def delete_user_data(session: 'Session', user_id: int, table: str) -> None:
-    """User-facing delete: Delete data for a specific user from a single table."""
-    logger.debug(f"Deleting user {user_id} data from: {table}")
-    _delete_rows(session, table, "user_id = :user_id", {"user_id": user_id}) # parametrized -> avoids SQL injection risk
 
+def delete_user_data(session: Session, table: Table, user_id: int) -> None:
+    """Delete data for a specific user from a single table."""
+    stmt = delete(table).where(table.c.user_id == user_id)
+    session.execute(stmt)
+    logger.debug("Deleted user %s data from: %s", user_id, table)
 
 
 def safe_delete[T](session: Session, item: T) -> T:
