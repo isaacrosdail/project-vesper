@@ -27,14 +27,13 @@ const MENU_CONFIG: Record<'default' | 'products' | 'transactions' | 'tasks', Men
     tasks: [{text: 'Toggle complete', action: 'toggleTaskComplete'}]
 }
 
-// Disciminated union for triggerInfo object:
 type ContextObject = {
     context: {
         itemId: string;
         module: string;
         subtype: MenuOptionTypes;
         isDone?: boolean;
-        productId?: string | undefined;
+        productId?: string;
     }
 }
 type ContextMenuTrigger = ContextObject & {
@@ -137,11 +136,9 @@ function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>
             default:
                 if (input.type === 'number') {
                     const step = parseFloat(input.step) || 1;
-                    if (step === 1) {
-                        input.value = String(Math.round(fieldValue));
-                    } else {
-                        input.value = formatDecimal(fieldValue, 2);
-                    }
+                    input.value = (step === 1)
+                        ? String(Math.round(fieldValue))
+                        : formatDecimal(fieldValue, 2);
                 } else {
                     input.value = String(fieldValue);
                 }
@@ -300,9 +297,12 @@ document.addEventListener('contextmenu', (e) => {
             return;
         }
         const { itemId, module, subtype } = row.dataset;
+        const productId = row?.dataset['productId'];
+        const includeIsDone = module === 'tasks';
+        const isDone = includeIsDone ? row.dataset['isDone'] === 'True' : undefined;
 
         if (!itemId || !module || !subtype) {
-            console.error('Missing required dataset attributes');
+            console.error('Missing itemId/module/subtype attribute(s)');
             return;
         }
         e.preventDefault();
@@ -317,7 +317,9 @@ document.addEventListener('contextmenu', (e) => {
                 module,
                 subtype: subtype as MenuOptionTypes,
                 isDone: row?.dataset['isDone'] === 'True',
-                productId: row?.dataset['productId']
+                ...(productId !== undefined ? { productId } : {}),
+                ...(isDone !== undefined ? { isDone } : {})
+                // productId: row?.dataset['productId']
             }
         };
 
@@ -357,10 +359,9 @@ document.addEventListener('click', async (e) => {
         menu.remove();
     }
 
-    // TODO: Refine/rename
     if (target.matches('.dots-btn')) {
-        const button = target.closest('.row-actions')!; // non-assert for now!
-        const row = target.closest<HTMLElement>('.table-row')!; // non-assert for now!
+        const button = target.closest<HTMLButtonElement>('.row-actions')!;
+        const row = target.closest<HTMLElement>('.table-row')!;
         const { itemId, module, subtype } = row.dataset;
 
         if (!itemId || !module || !subtype) {

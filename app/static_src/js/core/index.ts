@@ -182,7 +182,7 @@ async function markTaskComplete(checkbox: HTMLInputElement, taskId: string): Pro
     }
     apiRequest('PATCH', url, data, {
         onSuccess: (responseData) => {
-            const listItem = checkbox.closest('.item');
+            const listItem = checkbox.closest<HTMLLIElement>('.item');
             listItem?.classList.toggle('completed');
             updateProgressBar('tasks', responseData.data.progress);
         }
@@ -219,7 +219,8 @@ async function getWeatherInfo() {
     weatherInfo = await fetchWeatherData(city, country, units);
 
     const { temp, emoji, sunsetFormatted } = weatherInfo;
-    tempDisplay.textContent = `${temp}°${units === 'metric' ? 'C' : 'F'} ${emoji}`;
+    const tempUnit = units === 'metric' ? 'C' : 'F';
+    tempDisplay.textContent = `${temp}°${tempUnit} ${emoji}`;
     sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
 }
 
@@ -388,7 +389,7 @@ function initClock() {
         timeDisplay.textContent = formatTimeString(new Date());
     }
 
-    updateClock(); // Show immediately
+    updateClock();
     setInterval(updateClock, 30 * 1000);
 }
 
