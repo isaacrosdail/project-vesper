@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 import logging
 import secrets
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from flask import Response
@@ -183,7 +184,7 @@ def _setup_request_hooks(app: Flask) -> None:
 
         nonce = getattr(g, "nonce", "")
 
-        if current_app.config['APP_ENV'] == 'dev':
+        if current_app.config["APP_ENV"] == "dev":
             # Lax dev
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "

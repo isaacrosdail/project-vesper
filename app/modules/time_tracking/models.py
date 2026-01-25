@@ -24,7 +24,7 @@ class TimeEntry(Base, APISerializable):
     )
 
     category: Mapped[str] = mapped_column(
-        String(CATEGORY_MAX_LENGTH),  # 'Programming', 'Workout', etc
+        String(CATEGORY_MAX_LENGTH),
         nullable=False,
     )
 

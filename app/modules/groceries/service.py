@@ -62,7 +62,7 @@ class GroceriesService:
                 unit_type=typed_data["unit_type"],
                 calories_per_100g=typed_data.get("calories_per_100g"),
             )
-            self.session.flush()  # TODO: Needed? original note: might need ID for transaction downstream
+            self.session.flush()
 
             return service_response(
                 success=True, message="Product created", data={"product": product}

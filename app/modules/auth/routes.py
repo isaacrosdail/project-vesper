@@ -53,11 +53,9 @@ def register() -> Response | tuple[str, int]:
         typed_data, errors = validate_user(parsed_data)
 
         if errors:
-            for field_errors in errors.values():
-                for error in field_errors:
-                    set_toast(error, 'error')
-            return redirect(url_for('auth.register'))
-
+            for e in chain.from_iterable(errors.values()):
+                set_toast(e, "error")
+            return redirect(url_for("auth.register"))
 
         with database_connection() as session:
             repo = UsersRepository(session)
