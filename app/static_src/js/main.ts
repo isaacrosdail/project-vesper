@@ -23,6 +23,7 @@ import { init as initHabits } from './habits/dashboard.js';
 import { init as initTasks } from './tasks/dashboard.js';
 import { init as initTimeTracking } from './time_tracking/dashboard.js';
 import { init as initMetrics } from './metrics/dashboard.js';
+import { init as initRegisterPage } from './register.js';
 
 
 const initRegistry = {
@@ -33,6 +34,7 @@ const initRegistry = {
     "tasks.dashboard": () => initTasks(),
     "time_tracking.dashboard": () => initTimeTracking(),
     "metrics.dashboard": () => initMetrics(),
+    "auth.register": () => initRegisterPage(),
 };
 
 export async function initMain() {

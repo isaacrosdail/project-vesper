@@ -277,6 +277,7 @@ svg {
 }
 
 
+/* Faded fields only on login/register templates */
 .faded-field {
     opacity: 0.7;
 }
@@ -284,16 +285,17 @@ svg {
     opacity: 1;
 }
 
-/* Don't fade when invalid
-    TODO: Update this when we use our own validation
-*/
-.faded-field:has(:user-invalid) {
+/* Don't fade when invalid */
+.faded-field:has(.invalid) {
     opacity: 1;
 }
 
 /* For drafting the frontend validation stuff for username on register */
 [class^="error-inline"] {
-    background: rgb(219 149 149);
+    min-height: var(--line-height-default);
+    visibility: hidden;
+    color: var(--clr-error);
+    /* background: rgb(219 149 149); */
 }
 
 
@@ -479,7 +481,8 @@ label[for="remember_user"] {
     transform: translateY(-50%); /* move down by half its height */
 }
 .password-toggle {
-    color: var(--accent-strong);
+    color: var(--accent-subtle);
+    border-left: 1px solid grey;
     opacity: 1;
     transition: opacity 0.2s ease, color 0.2s ease;
 }

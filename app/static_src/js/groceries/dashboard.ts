@@ -1,6 +1,7 @@
 // Entry point for groceries JS
 import { confirmationManager } from '../shared/ui/modal-manager.js';
 import { apiRequest } from '../shared/services/api.js';
+import { initValidation, makeValidator } from '../shared/validators';
 
 type UnitGroupKey = 'weight' | 'volume';
 type Unit = 'g' | 'kg' | 'oz' | 'lb' | 'ml' | 'l' | 'fl_oz';
@@ -212,29 +213,98 @@ export function init() {
         if (isDigit) {
             e.preventDefault();
 
-            const num = Math.round(Number(priceField.value) * 100);
-            const combined = String(num) + e.key;
-            const nextValue = (Number(combined) / 100);
+            const currentCents = Math.round(Number(priceField.value) * 100);
+            const newCentsString = String(currentCents) + e.key;
+            const newCents = Number(newCentsString);
+            const newPrice = newCents / 100;
 
-            priceField.value = nextValue.toFixed(2);
+            priceField.value = newPrice.toFixed(2);
+            priceField.dispatchEvent(new Event('input', { bubbles: true }));
+
         } else if (e.key === 'Backspace') {
             e.preventDefault();
+            const currentCents = Math.round(Number(priceField.value) * 100);
 
-            const currentDigit = Math.round(Number(priceField.value) * 100);
-            const thing = Math.floor(currentDigit / 10);
-            const nextValue = thing === 0 ? 0 : thing / 100;
+            if (currentCents === 0) {
+                priceField.value = '';
+            } else {
+                const centsAfterBackspace = Math.floor(currentCents / 10);
+                const newPrice = centsAfterBackspace / 100;
 
-            priceField.value = nextValue.toFixed(2);
+                priceField.value = newPrice.toFixed(2);
+            }
+
+            priceField.dispatchEvent(new Event('input', { bubbles: true }));
         }
     })
 
     priceField.addEventListener('paste', (e) => {
         e.preventDefault();
-        const pasted = e.clipboardData?.getData('text') ?? "";
         const currentCents = Math.round(Number(priceField.value) * 100);
-        const nextCentsString = String(currentCents) + pasted;
-        const nextValue = Number(nextCentsString) / 100;
+        const pastedDigits = e.clipboardData?.getData('text') ?? "";
+        const nextCentsString = String(currentCents) + pastedDigits;
+        const newCents = Number(nextCentsString);
+        const newPrice = newCents / 100;
 
-        priceField.value = nextValue.toFixed(2);
+        priceField.value = newPrice.toFixed(2);
+        priceField.dispatchEvent(new Event('input', { bubbles: true }));
     })
+
+    const validatePrice = makeValidator('price_at_scan', {
+        isFloat: true,
+        min: 0.01,
+        max: 1000000,
+    });
+
+    const validateQuantity = makeValidator('quantity', {
+        isInt: true,
+        min: 1,
+        max: 999
+    });
+
+    const validateCalories = makeValidator('calories_per_100g', {
+        isFloat: true,
+        min: 0,
+        max: 900,
+    });
+
+    const validateNetWeight = makeValidator('net_weight', {
+        isFloat: true,
+        min: 0,
+    });
+
+    const validateBarcode = makeValidator('barcode', {
+        minLength: 8,
+        maxLength: 14,
+        pattern: /^\d+$/
+    });
+
+    const validateProductName = makeValidator('name', {
+        maxLength: 80,
+    });
+
+    // Validators
+    const transactionForm = document.querySelector<HTMLFormElement>('#transactions-form')!;
+    initValidation(
+        transactionForm,
+        {
+            price_at_scan: validatePrice,
+            quantity: validateQuantity,
+            name: validateProductName,
+            barcode: validateBarcode,
+            calories_per_100g: validateCalories,
+            net_weight: validateNetWeight,
+        }
+    )
+
+    const productForm = document.querySelector<HTMLFormElement>('#products-form')!;
+    initValidation(
+        productForm,
+        {
+            name: validateProductName,
+            barcode: validateBarcode,
+            calories_per_100g: validateCalories,
+            net_weight: validateNetWeight,
+        }
+    )
 }

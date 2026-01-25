@@ -7,7 +7,7 @@
             Vesper is a personal "life OS" - starting as a routine tracker and evolving into a home OS + automation platform driven by data.
         </p>
         <div class="landing-actions">
-            <form action="{{ url_for("auth.init_demo") }}" method="post">
+            <form action="{{ url_for("auth.init_demo") }}" method="post" data-form-type="action">
                 <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                 <button type="submit"
                         class="btn btn-primary"
@@ -18,7 +18,7 @@
                data-tip="Go to the login page">Log in / Sign up</a>
         </div>
         {% if config.APP_ENV == 'dev' %}
-            <form action="{{ url_for("auth.init_owner") }}" method="post">
+            <form action="{{ url_for("auth.init_owner") }}" method="post" data-form-type="action">
                 <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                 <button type="submit" class="btn btn-primary">OWNER INIT</button>
             </form>

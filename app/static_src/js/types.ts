@@ -62,6 +62,10 @@ export type FormDialog = HTMLDialogElement & {
     }
 }
 
+export type FormControlElement = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+export type ValidatableElement = HTMLInputElement | HTMLTextAreaElement;
+
 export type WeatherResult = {
     temp: number | string;
     emoji: string;

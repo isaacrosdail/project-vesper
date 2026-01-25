@@ -21,12 +21,14 @@
 
       <div role="tabpanel" class="tab-content" id="tab-steps">
           <label for="steps">Steps:</label>
-          <input type="number" id="steps" name="steps" min="0" max="40000" step="1">
+          <input type="text" inputmode="numeric" data-type-int id="steps" name="steps">
+          <small class="error-inline"></small>
       </div>
       <div role="tabpanel" class="tab-content field-pair field-pair--weighted" id="tab-weight" hidden>
           <div>
               <label for="weight">Weight:</label>
-              <input type="number" id="weight" name="weight" min="0" max="500" step="0.1">
+              <input type="text" inputmode="decimal" data-type-float data-step="0.1" id="weight" name="weight">
+              <small class="error-inline"></small>
           </div>
           <div>
               <label for="weight_units">Units:</label>
@@ -41,20 +43,20 @@
       <div role="tabpanel" class="tab-content" id="tab-calories" hidden>
           <label for="calories">Calories:</label>
           <input type="text" inputmode="numeric" data-type-int id="calories" name="calories">
-          <small class="error-inline-calories"></small>
+          <small class="error-inline"></small>
       </div>
       <div role="tabpanel" class="tab-content" id="tab-sleep" hidden>
         <div>
           <label for="wake_datetime">Wake Time:</label>
           <input type="datetime-local" id="wake_datetime" name="wake_datetime"
             {% if entry_date %}value="{{entry_date}}T00:00"{% endif %}>
-          <small class="error-inline-wake_datetime"></small>
+          <small class="error-inline"></small>
         </div>
         <div>
           <label for="sleep_datetime">Sleep Time:</label>
           <input type="datetime-local" id="sleep_datetime" name="sleep_datetime"
             {% if entry_date %}value="{{entry_date}}T00:00"{% endif %}>
-          <small class="error-inline-sleep_datetime"></small>
+          <small class="error-inline"></small>
         </div>
       </div>
   {% endcall %}
@@ -72,22 +74,25 @@
         <div>
             <label for="started_at">Start:</label>
             <input type="time" id="started_at" name="started_at" required>
+            <small class="error-inline"></small>
         </div>
         <div>
             <label for="ended_at">End:</label>
             <input type="time" id="ended_at" name="ended_at" required>
+            <small class="error-inline"></small>
         </div>
     </div>
 
     <div>
         <label for="category">Category:</label>
         <input type="text" id="category" name="category" required placeholder="Project Work">
+        <small class="error-inline"></small>
     </div>
     <div>
         <label for="description">Description (Optional):</label>
          <textarea id="description" name="description" rows="5" cols="5"
-                    placeholder="Added styling, added name to Github repo"
-                    ></textarea>
+            ></textarea>
+        <small class="error-inline"></small>
     </div>
   {% endcall %}
 {% endmacro %}
@@ -97,6 +102,7 @@
     <div>
       <label for="name">Task:</label>
       <input type="text" id="name" name="name" required>
+      <small class="error-inline"></small>
     </div>
     <div>
       <label for="priority">Priority</label>
@@ -106,14 +112,17 @@
         <option value="medium">Medium</option>
         <option value="high">High</option>
       </select>
+      <small class="error-inline"></small>
     </div>
     <div>
       <input type="checkbox" id="is_frog" name="is_frog">
       <label for="is_frog">"Daily Frog" Task?</label>
+      <small class="error-inline"></small>
     </div>
     <div>
       <label for="due_date">Due Date:</label>
       <input type="date" id="due_date" name="due_date">
+      <small class="error-inline"></small>
     </div>
   {% endcall %}
 {% endmacro %}
@@ -123,14 +132,18 @@
         <div>
             <label for="name">Habit:</label>
             <input type="text" id="name" name="name" required>
+            <small class="error-inline"></small>
         </div>
         <div>
             <label for="target_frequency">Target (per wk):</label>
-            <input type="number" id="target_frequency" name="target_frequency" required>
+            <input type="text" id="target_frequency" name="target_frequency" required
+                inputmode="numeric" data-type-int>
+            <small class="error-inline"></small>
         </div>
         <div>
             <label for="is_promotable">Promotion-based?</label>
             <input type="checkbox" id="is_promotable" name="is_promotable">
+            <small class="error-inline"></small>
         </div>
     {% endcall %}
 {% endmacro %}
@@ -144,7 +157,7 @@
         </div>
         <div>
             <label for="leetcode_id">Problem ID:</label>
-            <input type="number" id="leetcode_id" name="leetcode_id" min="1" step="1" required>
+            <input type="text" inputmode="numeric" data-type-int id="leetcode_id" name="leetcode_id" required>
         </div>
     </div>
 
@@ -197,6 +210,7 @@
         <div>
             <label for="name">Product Name:</label>
             <input type="text" id="name" name="name" required>
+            <small class="error-inline"></small>
         </div>
         <div>
             <label for="barcode">Barcode:</label>
@@ -204,11 +218,12 @@
                 minlength="8" maxlength="14"
                 pattern="[0-9]{8,14}"
                 placeholder="Scan or enter barcode">
+            <small class="error-inline"></small>
         </div>
         <div>
             <label for="category">Category</label>
             <select name="category" id="category" required>
-                <option value="" disabled selected hidden>--</option>
+                <option value="" disabled selected hidden data-initial-disabled>--</option>
                 {% for category in list %}
                     <option value="{{ category.value }}">{{ category.text.title() }}</option>
                 {% endfor %}
@@ -216,12 +231,14 @@
         </div>
         <div>
             <label for="calories_per_100g">Calories (per 100g):</label>
-            <input type="number" step="0.01" min="0" max="900" id="calories_per_100g" name="calories_per_100g">
+            <input type="text" inputmode="decimal" data-type-float data-step="0.1" id="calories_per_100g" name="calories_per_100g">
+            <small class="error-inline"></small>
         </div>
         <div class="field-pair field-pair--weighted">
             <div>
                 <label for="net_weight">Net Weight:</label>
-                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" required>
+                <input type="text" inputmode="decimal" data-type-float data-step="0.01" id="net_weight" name="net_weight" required>
+                <small class="error-inline"></small>
             </div>
             <div>
                 <label for="unit_type">Units:</label>
@@ -235,6 +252,8 @@
                     <option value="l">l (liters)</option>
                     <option value="fl_oz">fl oz (fluid ounces)</option>
                 </select>
+                <!-- To stabilize grid cell height in this field-pair -->
+                <small class="error-inline-UNUSED"></small>
             </div>
         </div>
     {% endcall %}
@@ -257,21 +276,24 @@
         <div class=" field-pair field-pair--weighted">
             <div>
                 <label for="price_at_scan">Price (each):</label>
-                <input type="number" step="0.01" min="0" id="price_at_scan" name="price_at_scan"
+                <input type="text" inputmode="decimal" data-type-float data-step="0.01" id="price_at_scan" name="price_at_scan"
                     value="{{ transaction_data.price_at_scan if transaction_data else '' }}"
                     required>
+                <small class="error-inline"></small>
             </div>
             <div>
                 <label for="quantity">Quantity:</label>
-                <input type="number" step="1" min="1" id="quantity" name="quantity"
+                <input type="text" inputmode="numeric" data-type-int id="quantity" name="quantity"
                     value="{{ transaction_data.quantity if transaction_data else '' }}"
                     required>
+                <small class="error-inline"></small>
             </div>
         </div>
 
         <div class="product-field" hidden>
             <label for="name">Product Name</label>
-            <input type="text" id="name" name="name" disabled required>
+            <input type="text" id="name" name="name" disabled required data-initial-disabled>
+            <small class="error-inline"></small>
         </div>
         <div class="product-field" hidden>
             <label for="barcode">Barcode:</label>
@@ -279,11 +301,12 @@
                 value="{{ transaction_data.barcode if transaction_data else ''}}"
                 minlength="8" maxlength="14"
                 placeholder="01234567">
+                <small class="error-inline"></small>
         </div>
         <div class="product-field" hidden>
             <label for="category">Category</label>
-            <select name="category" id="category" disabled required>
-                <option value="" disabled selected hidden>--</option>
+            <select name="category" id="category" disabled required data-initial-disabled>
+                <option value="" disabled selected hidden data-initial-disabled>--</option>
                 {% for category in list %}
                     <option value="{{ category.value }}">{{ category.text.title() }}</option>
                 {% endfor %}
@@ -291,16 +314,18 @@
         </div>
         <div class="product-field" hidden>
             <label for="calories_per_100g">Calories (per 100g):</label>
-            <input type="number" step="0.01" min="0" max="900" id="calories_per_100g" name="calories_per_100g" disabled required>
+            <input type="text" inputmode="decimal" data-type-float data-step="0.01" id="calories_per_100g" name="calories_per_100g" disabled required data-initial-disabled>
+            <small class="error-inline"></small>
         </div>
         <div class="field-pair field-pair--weighted">
             <div class="product-field" hidden>
                 <label for="net_weight">Net Weight:</label>
-                <input type="number" step="0.01" min="0" id="net_weight" name="net_weight" disabled required>
+                <input type="text" inputmode="decimal" data-type-float data-step="0.01" id="net_weight" name="net_weight" disabled required data-initial-disabled>
+                <small class="error-inline"></small>
             </div>
             <div class="product-field" hidden>
                 <label for="unit_type">Units:</label>
-                <select name="unit_type" id="unit_type" disabled required>
+                <select name="unit_type" id="unit_type" disabled required data-initial-disabled>
                     <option value="" disabled selected>-- Units --</option>
                     <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
@@ -310,6 +335,8 @@
                     <option value="l">l (liters)</option>
                     <option value="fl_oz">fl oz (fluid ounces)</option>
                 </select>
+                <!-- To stabilize grid cell height in this field-pair -->
+                <small class="error-inline-UNUSED"></small>
             </div>
         </div>
     {% endcall %}

@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
 import { apiRequest } from '../shared/services/api';
 import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
+import { initValidation, makeValidator } from '../shared/validators';
 
 type MetricType = 'steps' | 'weight' | 'calories' | 'sleep_duration_minutes';
 type StaticLineMetric = 'calories' | 'sleep_duration_minutes';
@@ -278,4 +279,32 @@ export async function init() {
             window.location.href = url.toString();
         }
     });
+
+    const validateSteps = makeValidator('steps', {
+        isInt: true,
+        min: 1,
+        max: 40_000,
+        pattern: /^\d+$/
+    })
+    const validateCalories = makeValidator('calories', {
+        isInt: true,
+        min: 0,
+        max: 10_000
+    })
+    const validateWeight = makeValidator('weight', {
+        isFloat: true,
+        min: 0,
+        max: 300
+    })
+    // Validation
+    const metricsForm = document.querySelector<HTMLFormElement>('#daily_metrics-form')!;
+    initValidation(
+        metricsForm,
+        {
+            steps: validateSteps,
+            calories: validateCalories,
+            weight: validateWeight,
+
+        }
+    )
 }
