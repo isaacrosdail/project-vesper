@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from app.modules.metrics import validation_constants as c
@@ -13,6 +13,15 @@ def validate_entry_date(entry_date_str: str | None) -> tuple[date | None, list[s
 
     return v.validate_date_iso(entry_date_str)
 
+def validate_datetime_local(dt_str: str | None) -> tuple[datetime | None, list[str]]:
+    """Parse datetime-local string (YYYY-MM-DDTHH:MM) return naive datetime."""
+    if not dt_str:
+        return (None, [])
+
+    try:
+        return (datetime.fromisoformat(dt_str), [])
+    except ValueError:
+        return (None, ["Invalid datetime format"])
 
 def validate_weight(weight: str | None) -> tuple[float | None, list[str]]:
     """Positive float"""
@@ -83,8 +92,8 @@ VALIDATION_FUNCS = {
     "entry_date": validate_entry_date,
     "weight": validate_weight,
     "steps": validate_steps,
-    "wake_time": validate_time_hhmm_format,
-    "sleep_time": validate_time_hhmm_format,
+    "wake_datetime": validate_datetime_local,
+    "sleep_datetime": validate_datetime_local,
     "calories": validate_calories,
 }
 

@@ -16,8 +16,8 @@ class DailyMetricPresenter(BasePresenter):
         "entry_datetime",
         "weight",
         "steps",
-        "wake_time",
-        "sleep_time",
+        "wake_datetime",
+        "sleep_datetime",
         "calories",
     ]
 
@@ -26,8 +26,8 @@ class DailyMetricPresenter(BasePresenter):
         "updated_at": {"label": "Last Updated", "priority": "desktop-only"},
         "weight": {"label": "Weight", "priority": "essential"},
         "steps": {"label": "Steps", "priority": "essential"},
-        "wake_time": {"label": "Wake Time", "priority": "essential"},
-        "sleep_time": {"label": "Sleep Time", "priority": "essential"},
+        "wake_datetime": {"label": "Wake Time", "priority": "essential"},
+        "sleep_datetime": {"label": "Sleep Time", "priority": "essential"},
         "calories": {"label": "Calories", "priority": "essential"},
     }
 
@@ -36,8 +36,8 @@ class DailyMetricViewModel(BaseViewModel):
     entry_datetime: datetime
     weight: int
     steps: int
-    wake_time_local: datetime
-    sleep_time_local: datetime
+    wake_datetime_local: datetime
+    sleep_datetime_local: datetime
     calories: int | None
     subtype: str
 
@@ -46,8 +46,8 @@ class DailyMetricViewModel(BaseViewModel):
             "id",
             "weight",
             "steps",
-            "wake_time_local",
-            "sleep_time_local",
+            "wake_datetime_local",
+            "sleep_datetime_local",
             "calories",
             "subtype",
         }
@@ -70,18 +70,18 @@ class DailyMetricViewModel(BaseViewModel):
         return str(self.steps) if self.steps is not None else "--"
 
     @property
-    def wake_time_label(self) -> str:
+    def wake_datetime_label(self) -> str:
         return (
-            self.wake_time_local.strftime("%H:%M")
-            if self.wake_time_local is not None
+            self.wake_datetime_local.strftime("%H:%M")
+            if self.wake_datetime_local is not None
             else "--"
         )
 
     @property
-    def sleep_time_label(self) -> str:
+    def sleep_datetime_label(self) -> str:
         return (
-            self.sleep_time_local.strftime("%H:%M")
-            if self.sleep_time_local is not None
+            self.sleep_datetime_local.strftime("%H:%M")
+            if self.sleep_datetime_local is not None
             else "--"
         )
 

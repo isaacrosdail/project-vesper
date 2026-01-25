@@ -7,8 +7,8 @@
   {% call ui.modal('metrics', 'daily_metrics', id, title) %}
       {# Entry date outside tabs, only required field #}
       <div class="form-group entry-date-field">
-        <label for="entry_datetime">Entry Date:</label>
-        <input type="date" id="entry_datetime" name="entry_datetime" required
+        <label for="entry_date">Entry Date:</label>
+        <input type="date" id="entry_date" name="entry_date" required
                 {% if entry_date %}value="{{ entry_date }}"{% endif %}
         >
       </div>
@@ -34,20 +34,27 @@
                 <option value="kg" {{ 'selected' if current_user.units.value == 'metric' }}>kg</option>
                 <option value="lbs" {{ 'selected' if current_user.units.value == 'imperial' }}>lbs</option>
               </select>
+              <!-- To stabilize grid cell height in this field-pair -->
+              <small class="error-inline-UNUSED"></small>
           </div>
       </div>
       <div role="tabpanel" class="tab-content" id="tab-calories" hidden>
           <label for="calories">Calories:</label>
-          <input type="number" id="calories" name="calories" min="0" max="10000" step="1">
+          <input type="text" inputmode="numeric" data-type-int id="calories" name="calories">
+          <small class="error-inline-calories"></small>
       </div>
-      <div role="tabpanel" class="tab-content field-pair" id="tab-sleep" hidden>
+      <div role="tabpanel" class="tab-content" id="tab-sleep" hidden>
         <div>
-          <label for="wake_time">Wake Time:</label>
-          <input type="time" id="wake_time" name="wake_time">
+          <label for="wake_datetime">Wake Time:</label>
+          <input type="datetime-local" id="wake_datetime" name="wake_datetime"
+            {% if entry_date %}value="{{entry_date}}T00:00"{% endif %}>
+          <small class="error-inline-wake_datetime"></small>
         </div>
-        <div data-tip="If sleep time is later than wake time, sleep is assumed to be from the previous night">
-          <label for="sleep_time">Sleep Time:</label>
-          <input type="time" id="sleep_time" name="sleep_time">
+        <div>
+          <label for="sleep_datetime">Sleep Time:</label>
+          <input type="datetime-local" id="sleep_datetime" name="sleep_datetime"
+            {% if entry_date %}value="{{entry_date}}T00:00"{% endif %}>
+          <small class="error-inline-sleep_datetime"></small>
         </div>
       </div>
   {% endcall %}

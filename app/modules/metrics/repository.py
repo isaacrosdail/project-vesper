@@ -22,8 +22,8 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
         entry_datetime: datetime,
         weight: float | None = None,
         steps: int | None = None,
-        wake_time: datetime | None = None,
-        sleep_time: datetime | None = None,
+        wake_datetime: datetime | None = None,
+        sleep_datetime: datetime | None = None,
         sleep_duration_minutes: int | None = None,
         calories: int | None = None,
     ) -> DailyMetrics:
@@ -33,8 +33,8 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
             entry_datetime=entry_datetime,
             weight=weight,
             steps=steps,
-            wake_time=wake_time,
-            sleep_time=sleep_time,
+            wake_datetime=wake_datetime,
+            sleep_datetime=sleep_datetime,
             sleep_duration_minutes=sleep_duration_minutes,
             calories=calories,
         )

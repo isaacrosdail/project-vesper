@@ -122,8 +122,8 @@ def seed_demo_data(session: Session, user_id: int) -> None:
         weight=70.5,
         steps=8500,
         calories=2100,
-        wake_time=now.replace(hour=7, minute=0),
-        sleep_time=(now - timedelta(days=1)).replace(hour=23, minute=30),
+        wake_datetime=now.replace(hour=7, minute=0),
+        sleep_datetime=(now - timedelta(days=1)).replace(hour=23, minute=30),
         user_id=user_id,
         created_at=now - timedelta(days=1),
     )
@@ -133,8 +133,8 @@ def seed_demo_data(session: Session, user_id: int) -> None:
         weight=70.3,
         steps=10200,
         calories=2050,
-        wake_time=now.replace(hour=6, minute=45),
-        sleep_time=(now - timedelta(days=1)).replace(hour=23, minute=0),
+        wake_datetime=now.replace(hour=6, minute=45),
+        sleep_datetime=(now - timedelta(days=1)).replace(hour=23, minute=0),
         user_id=user_id,
         created_at=now,
     )
