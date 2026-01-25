@@ -1,6 +1,6 @@
 import { makeToast } from './toast.js';
 import { apiRequest } from '../services/api.js';
-import { FormDialog } from '../../types';
+import { FormDialog, FormControlElement } from '../../types';
 
 /**
  * Modal Manager
@@ -69,19 +69,30 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
      * Restores modal state so it can be re-invoked:
      * - Resets form values
      * - Clears edit-mode dataset attributes
-     * - Reverts `disabled` state of any fields marked with `data-initial-disabled`
+     * - Reverts `disabled` states of fields to initial values `data-initial-disabled`
      */
     modal.addEventListener('close', () => {
         form.reset();
         delete modal.dataset.mode;
         delete modal.dataset.itemId;
 
-        // Clear disabled on fields which overrode it
-        const initialDisabled = modal.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-initial-disabled]');
-        initialDisabled.forEach((el) => {
-            el.disabled = (el.dataset['initialDisabled'] === 'true');
-            el.removeAttribute('data-initial-disabled');
+        // Revert fields to their original disabled states
+        // for all initialDisabled => disable
+        // for all now disabled without initialDisabled => re-enable them
+        const formEls = modal.querySelectorAll<FormControlElement>('input, textarea, select');
+
+        formEls.forEach((el) => {
+            el.disabled = el.dataset['initialDisabled'] !== undefined;
+
+            // Wipe invalid states
+            el.classList.remove('invalid');
         });
+
+        // Wipe all error messages
+        const smallEls = modal.querySelectorAll('small');
+        smallEls.forEach(el => {
+            el.textContent = '';
+        })
 
         const legend = modal.querySelector('legend');
         if (legend && legend.dataset['originalText']) {
@@ -100,46 +111,41 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
             delete productSelect.dataset['originalInnerHTML'];
         }
     });
+}
 
-    modal.addEventListener('submit', async (e) => {
-        const submittedForm = e.target as HTMLFormElement;
-        if (submittedForm.hasAttribute('data-noajax')) {
-            return;  // Skip interception if the form opts out
-        }
-        e.preventDefault();
-        
-        const formData = new FormData(submittedForm);
-        const endpoint = modal.dataset.endpoint; // embedded dynamically in all form modals
-        if (!endpoint) {
-            throw new Error('FormDialog modal missing data-endpoint attribute');
-        }
-        
-        // PUT
-        if (modal.dataset.mode === 'edit') {
-            const url = `${endpoint}/${modal.dataset.itemId}`;
-            apiRequest('PUT', url, formData, {
-                onSuccess: (responseData) => {
-                    makeToast(responseData.message, 'success');
-                },
-                onFailure: (responseData) => {
-                    makeToast(responseData.message, 'error');
-                }
-            });
-        }
-        // POST
-        else {
-            apiRequest('POST', endpoint, formData, {
-                onSuccess: (responseData) => {
-                    makeToast(responseData.message, 'success');
-                },
-                onFailure: (responseData) => {
-                    makeToast(responseData.message, 'error')
-                }
-            });
-        }
-        submittedForm.reset();
-        modal.close();
-    });
+export function handleModalFormSubmit(submittedForm: HTMLFormElement, modal: HTMLDialogElement) {
+    const formData = new FormData(submittedForm);
+    const endpoint = modal.dataset.endpoint; // embedded in all form modals
+
+    if (!endpoint) {
+        throw new Error('FormDialog modal missing data-endpoint attribute');
+    }
+
+    // PUT
+    if (modal.dataset.mode === 'edit') {
+        const url = `${endpoint}/${modal.dataset.itemId}`;
+        apiRequest('PUT', url, formData, {
+            onSuccess: (responseData) => {
+                makeToast(responseData.message, 'success');
+            },
+            onFailure: (responseData) => {
+                makeToast(responseData.message, 'error');
+            }
+        });
+    }
+    // POST
+    else {
+        apiRequest('POST', endpoint, formData, {
+            onSuccess: (responseData) => {
+                makeToast(responseData.message, 'success');
+            },
+            onFailure: (responseData) => {
+                makeToast(responseData.message, 'error')
+            }
+        });
+    }
+    submittedForm.reset();
+    modal.close();
 }
 
 /**

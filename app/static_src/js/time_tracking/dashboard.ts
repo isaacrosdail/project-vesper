@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { removeTooltip, createTooltip } from '../shared/ui/tooltip';
 import { apiRequest } from '../shared/services/api';
 import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
+import { initValidation, makeValidator } from '../shared/validators';
 
 type PieDatum = {
     category: string;
@@ -239,6 +240,22 @@ export async function init() {
             url.searchParams.set(`${table}_range`, range);
             window.location.href = url.toString();
         }
+    });
+
+    const validateCategory = makeValidator('category', {
+        maxLength: 50,
+    });
+
+    const validateDescription = makeValidator('description', {
+        maxLength: 200,
+    })
+
+    // Validation
+    const timeTrackingForm = document.querySelector<HTMLFormElement>('#time_entries-form')!;
+
+    initValidation(timeTrackingForm, {
+        category: validateCategory,
+        description: validateDescription,
     });
 }
 

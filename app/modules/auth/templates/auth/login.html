@@ -6,7 +6,7 @@
 {% block content %}
 
 <div class="card-dashboard card--narrower">
-    <form action="{{ url_for('auth.login') }}" method="post" spellcheck="false">
+    <form action="{{ url_for('auth.login') }}" method="post" spellcheck="false" data-form-type="page">
         <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
         <div class="form-column">
             <h3>Login:</h3>
@@ -15,15 +15,17 @@
                 <input type="text" id="username" name="username"
                         required minlength="3" maxlength="30" 
                         placeholder="johndoe">
+                <small class="error-inline-username"></small>
             </div>
             <div class="faded-field">
                 <label for="password">Password:</label>
                 <div class="password-input-group">
                     <input type="password" id="password" name="password" 
-                            required minlength="8" maxlength="50"
+                            required minlength="5" maxlength="128"
                             placeholder="••••••••">
                     <button type="button" data-password-toggle="password" class="btn-icon password-toggle">{{ ui.eye_slash_svg() }}</button>
                 </div>
+                <small class="error-inline-password"></small>
             </div>
             <label for="remember_user">
                 <input type="checkbox" id="remember_user" name="remember_user">

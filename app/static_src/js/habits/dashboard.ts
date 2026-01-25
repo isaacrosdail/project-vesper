@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { apiRequest } from '../shared/services/api';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
 import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
+import { initValidation, makeValidator } from '../shared/validators';
 
 type BarData = {
     name: string;
@@ -153,4 +154,22 @@ export async function init() {
             window.location.href = url.toString();
         }
     });
+
+    const validateHabitName = makeValidator('habit', {
+        maxLength: 50
+    })
+    const validateTargetFrequency = makeValidator('target_frequency', {
+        isInt: true,
+        min: 1,
+        max: 21
+    })
+
+    const form = document.querySelector<HTMLFormElement>('#habits-form')!;
+    initValidation(
+        form,
+        {
+            name: validateHabitName,
+            target_frequency: validateTargetFrequency,
+        }
+    )
 }

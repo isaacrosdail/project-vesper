@@ -212,12 +212,8 @@ dialog::backdrop {
    Forms & Form Groups/Groupings
    ========================================= */
 
-/* Moving away from using user-in/valid for control */
-form :is(input, select, textarea).valid {
-    background: var(--clr-success);
-}
 form :is(input, select, textarea).invalid {
-    background: var(--clr-error);
+    border: 2px solid var(--clr-error);
 }
 
 /* Applied to form elements themselves - for spacing between div(label+input) groups */

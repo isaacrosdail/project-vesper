@@ -6,25 +6,27 @@
 {% block content %}
 
 <div class="card-dashboard card--narrower">
-    <form action="{{ url_for('auth.register') }}" method="post" spellcheck="false">
+    <form action="{{ url_for('auth.register') }}" id="register-form" method="post" spellcheck="false" data-form-type="page">
         <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
         <div class="form-column">
             <h3>Register:</h3>
             <div class="faded-field" data-tip="3-30 characters, letters/numbers/underscores allowed">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" 
-                        required minlength="3" maxlength="50"
+                        required
                         autocomplete="username"
                         placeholder="johndoe">
-                <small class="text-muted"></small>
+                <small class="error-inline-username"></small>
             </div>
-            <div class="faded-field" data-tip="Must be 8-50 characters">
+            <div class="faded-field" data-tip="Must be 5-128 characters">
                 <label for="password">Password:</label>
                 <div class="password-input-group">
-                    <input type="password" id="password" name="password" 
-                            required minlength="8" maxlength="50" placeholder="••••••••">
+                    <input type="password" id="password" name="password"
+                            required
+                            placeholder="••••••••">
                     <button type="button" data-password-toggle="password" class="btn-icon password-toggle">{{ ui.eye_slash_svg() }}</button>
                 </div>
+                <small class="error-inline-password"></small>
             </div>
             <div class="faded-field">
                 <label for="name">Name (optional):</label>

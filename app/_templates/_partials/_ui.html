@@ -111,7 +111,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
         <button type="button" class="btn-icon btn-round btn-lg modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>
     </div>
     <div class="modal-body">
-        <form class="{{ form_class if form_class else '' }}">
+        <form class="{{ form_class if form_class else '' }}" id="{{ subtype }}-form" data-form-type="modal">
             <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
             {{ caller() }}
             <div class="form-actions">
