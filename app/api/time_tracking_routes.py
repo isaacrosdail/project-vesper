@@ -16,7 +16,7 @@ from app.api.responses import api_response, validation_failed
 from app.modules.time_tracking.service import create_time_tracking_service
 from app.modules.time_tracking.validators import validate_time_entry
 from app.shared.decorators import login_plus_session
-from app.shared.parsers import parse_time_entry_form_data
+from app.shared.parsers_ import TIME_ENTRY_SCHEMA, parse_form
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @api_bp.put("/time_tracking/time_entries/<int:entry_id>")
 @login_plus_session
 def time_entries(session: Session, entry_id: int | None = None) -> tuple[Response, int]:
-    parsed_data = parse_time_entry_form_data(request.form.to_dict())
+    parsed_data = parse_form(request.form.to_dict(), TIME_ENTRY_SCHEMA)
 
     typed_data, errors = validate_time_entry(parsed_data)
     if errors:

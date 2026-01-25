@@ -13,14 +13,14 @@ from app.api.responses import api_response, validation_failed
 from app.modules.groceries.service import create_groceries_service
 from app.modules.groceries.validators import validate_product, validate_transaction
 from app.shared.decorators import login_plus_session
-from app.shared.parsers import parse_product_data, parse_transaction_data
+from app.shared.parsers_ import PRODUCT_SCHEMA, TRANSACTION_SCHEMA, parse_form
 
 
 @api_bp.post("/groceries/products")
 @api_bp.put("/groceries/products/<int:product_id>")
 @login_plus_session
 def products(session: Session, product_id: int | None = None) -> tuple[Response, int]:
-    parsed_data = parse_product_data(request.form.to_dict())
+    parsed_data = parse_form(request.form.to_dict(), PRODUCT_SCHEMA)
     typed_data, errors = validate_product(parsed_data)
     if errors:
         return validation_failed(errors), 400
@@ -58,7 +58,7 @@ def transactions(
     # Case A: Create new product first
     if product_id_input == "__new__":
         # 1. Validate product
-        parsed_product_data = parse_product_data(form_data)
+        parsed_product_data = parse_form(form_data, PRODUCT_SCHEMA)
         typed_product_data, product_errors = validate_product(parsed_product_data)
         if product_errors:
             return validation_failed(product_errors), 400
@@ -79,7 +79,7 @@ def transactions(
 
     # Case B (fall through): Use existing product, create transaction only
     # 1. Validate transaction
-    parsed_transaction_data = parse_transaction_data(form_data)
+    parsed_transaction_data = parse_form(form_data, TRANSACTION_SCHEMA)
     typed_transaction_data, transaction_errors = validate_transaction(
         parsed_transaction_data
     )

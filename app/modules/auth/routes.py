@@ -14,7 +14,7 @@ from app.modules.auth.service import AuthService, owner_required
 from app.modules.auth.validators import validate_user
 from app.shared.database.helpers import delete_all_db_data
 from app.shared.middleware import set_toast
-from app.shared.parsers import parse_user_form_data
+from app.shared.parsers_ import USER_SCHEMA, parse_form
 
 auth_bp = Blueprint("auth", __name__, template_folder="templates")
 
@@ -30,7 +30,7 @@ def logout() -> Response:
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login() -> Response | tuple[str, int]:
     if request.method == "POST":
-        parsed_data = parse_user_form_data(request.form.to_dict())
+        parsed_data = parse_form(request.form.to_dict(), USER_SCHEMA)
 
         with database_connection() as session:
             users_repo = UsersRepository(session)
@@ -49,7 +49,7 @@ def login() -> Response | tuple[str, int]:
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register() -> Response | tuple[str, int]:
     if request.method == "POST":
-        parsed_data = parse_user_form_data(request.form.to_dict())
+        parsed_data = parse_form(request.form.to_dict(), USER_SCHEMA)
         typed_data, errors = validate_user(parsed_data)
 
         if errors:
