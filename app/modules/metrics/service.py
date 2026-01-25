@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from app.api.responses import service_response
@@ -31,8 +31,8 @@ class MetricsService:
         """
         Save or update daily metrics entry with sleep/wake time handling.
 
-        Handles datetime conversion for sleep/wake times, automatically adjusting sleep_time to previous day when
-        it would otherwise occur after wake_time (eg, sleep at 22:00, wake at 08:00). Calculates sleep_duration_minutes from
+        Handles datetime conversion for sleep/wake times, automatically adjusting sleep_datetime to previous day when
+        it would otherwise occur after wake_datetime (eg, sleep at 22:00, wake at 08:00). Calculates sleep_duration_minutes from
         the adjusted timestamps.
         """
         entry_date: datetime = typed_data.pop("entry_date")
@@ -44,22 +44,15 @@ class MetricsService:
         )
         typed_data["entry_datetime"] = entry_datetime
 
-        day_of = typed_data["entry_datetime"].date()
-        for key in ("wake_time", "sleep_time"):
-            if key in typed_data:
-                typed_data[key] = dth.parse_time_to_datetime(
-                    typed_data[key], day_of, self.user_tz
-                )
+        for key in ("wake_datetime", "sleep_datetime"):
+            if typed_data.get(key):
+                typed_data[key] = typed_data[key].replace(tzinfo=ZoneInfo(self.user_tz))
 
-        # Assign sleep_time dt to yesterday for cases where sleep_time >= wake_time
-        wake = typed_data.get("wake_time")
-        sleep = typed_data.get("sleep_time")
+        wake = typed_data.get("wake_datetime")
+        sleep = typed_data.get("sleep_datetime")
 
         if sleep and wake:
-            if sleep >= wake:
-                typed_data["sleep_time"] -= timedelta(days=1)
-
-            sleep_duration = typed_data["wake_time"] - typed_data["sleep_time"]
+            sleep_duration = typed_data["wake_datetime"] - typed_data["sleep_datetime"]
             typed_data["sleep_duration_minutes"] = int(
                 sleep_duration.total_seconds() / 60
             )
