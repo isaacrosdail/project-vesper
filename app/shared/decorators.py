@@ -14,7 +14,7 @@ R = TypeVar("R")
 type Data = dict[str, Any]
 type Errors = dict[str, list[str]]
 type Validator = Callable[[Data], tuple[Data, Errors]]
-type Parser = Callable[[Data], Data]
+type Parser = Callable[[Data, Any], Data]
 
 
 def login_plus_session(
@@ -39,11 +39,11 @@ def log_parser(func: Parser) -> Parser:
     """Logs input & output of parser functions"""
 
     @wraps(func)
-    def wrapper(form_data: Data) -> Data:
+    def wrapper(form_data: Data, schema: Any) -> Data:
         logger = logging.getLogger(func.__module__)
         logger.debug("%s input: %s", func.__name__, form_data)
 
-        result = func(form_data)
+        result = func(form_data, schema)
         logger.debug("%s output: %s", func.__name__, result)
         return result
 
@@ -62,7 +62,7 @@ def log_validator(func: Validator) -> Validator:
         if errors:
             logger.warning("%s validation failed: %s", func.__name__, errors)
         else:
-            logger.debug("%s validation passed", func.__name__)
+            logger.debug("%s validation passed: %s", func.__name__, typed_data)
         return typed_data, errors
 
     return wrapper
