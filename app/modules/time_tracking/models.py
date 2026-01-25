@@ -8,7 +8,7 @@ from app.modules.time_tracking.validation_constants import (
     CATEGORY_MAX_LENGTH,
     DESCRIPTION_MAX_LENGTH,
 )
-from app.shared.datetime.helpers import convert_to_timezone
+from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.serialization import APISerializable
 
 

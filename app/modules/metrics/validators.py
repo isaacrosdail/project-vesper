@@ -15,24 +15,22 @@ def validate_entry_date(entry_date_str: str | None) -> tuple[date | None, list[s
 
 
 def validate_weight(weight: str | None) -> tuple[float | None, list[str]]:
-    """Positive Numeric(5, 2)"""
+    """Positive float"""
 
     if not weight:
         return (None, [])
 
-    is_valid, error_type = v.validate_numeric(
-        weight, c.WEIGHT_PRECISION, c.WEIGHT_SCALE, c.WEIGHT_MINIMUM, strict_min=True
-    )
-    if not is_valid:
-        errors = []
-        if error_type in {v.FORMAT_ERROR, v.SCALE_EXCEEDED, v.PRECISION_EXCEEDED}:
-            errors.append(c.WEIGHT_INVALID)
-        elif error_type == v.CONSTRAINT_VIOLATION:
+    errors = []
+    try:
+        weight_float = float(weight)
+        if weight_float < 0:
             errors.append(c.WEIGHT_POSITIVE)
-        return (None, errors)  # had errors -> no typed value
+            return (None, errors)
+    except ValueError:
+        errors.append(c.WEIGHT_INVALID)
+        return (None, errors)
 
-    typed_weight = float(weight)
-    return (typed_weight, [])
+    return (weight_float, [])
 
 
 def validate_steps(steps: str | None) -> tuple[int | None, list[str]]:

@@ -37,7 +37,7 @@ class ProductRepository(BaseRepository[Product]):
         net_weight: Decimal,
         unit_type: UnitEnum,
         barcode: str | None,
-        calories_per_100g: Decimal | None,
+        calories_per_100g: float | None,
     ) -> Product:
         product = Product(
             user_id=self.user_id,

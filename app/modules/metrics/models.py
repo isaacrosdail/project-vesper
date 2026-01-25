@@ -1,7 +1,6 @@
 from datetime import datetime
-from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, DateTime, Index, Integer, Numeric
+from sqlalchemy import CheckConstraint, DateTime, Float, Index, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
@@ -9,10 +8,8 @@ from app.modules.metrics.validation_constants import (
     CALORIES_MINIMUM,
     STEPS_MINIMUM,
     WEIGHT_MINIMUM,
-    WEIGHT_PRECISION,
-    WEIGHT_SCALE,
 )
-from app.shared.datetime.helpers import convert_to_timezone
+from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.serialization import APISerializable
 
 
@@ -34,38 +31,35 @@ class DailyMetrics(Base, APISerializable):
         DateTime(timezone=True), nullable=False
     )
 
-    # TODO: make float
-    weight: Mapped[Decimal] = mapped_column(
-        Numeric(WEIGHT_PRECISION, WEIGHT_SCALE),
-    )
+    weight: Mapped[float] = mapped_column(Float, nullable=True)
 
-    steps: Mapped[int] = mapped_column(Integer)
+    steps: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    calories: Mapped[int] = mapped_column(Integer)
+    calories: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    wake_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    wake_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    sleep_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    sleep_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    sleep_duration_minutes: Mapped[int] = mapped_column(Integer)
+    sleep_duration_minutes: Mapped[int] = mapped_column(Integer, nullable=True)
 
     @property
     def entry_datetime_local(self) -> datetime:
         return convert_to_timezone(self.user.timezone, self.entry_datetime)
 
     @property
-    def wake_time_local(self) -> datetime | None:
+    def wake_datetime_local(self) -> datetime | None:
         return (
-            convert_to_timezone(self.user.timezone, self.wake_time)
-            if self.wake_time
+            convert_to_timezone(self.user.timezone, self.wake_datetime)
+            if self.wake_datetime
             else None
         )
 
     @property
-    def sleep_time_local(self) -> datetime | None:
+    def sleep_datetime_local(self) -> datetime | None:
         return (
-            convert_to_timezone(self.user.timezone, self.sleep_time)
-            if self.sleep_time
+            convert_to_timezone(self.user.timezone, self.sleep_datetime)
+            if self.sleep_datetime
             else None
         )
 
@@ -77,7 +71,7 @@ class DailyMetrics(Base, APISerializable):
     @property
     def populated_metrics(self) -> list[str]:
         """Returns list of daily metrics which have entries."""
-        metric_types = {"weight", "steps", "wake_time", "sleep_time", "calories"}
+        metric_types = {"weight", "steps", "wake_datetime", "sleep_datetime", "calories"}
         return [
             metric_type
             for metric_type in metric_types
@@ -87,4 +81,4 @@ class DailyMetrics(Base, APISerializable):
     @property
     def has_sleep_data(self) -> bool:
         """True if both sleep & wake times are stored."""
-        return self.sleep_time is not None and self.wake_time is not None
+        return self.sleep_datetime is not None and self.wake_datetime is not None

@@ -22,10 +22,8 @@ from app._infra.db_base import Base
 from app.modules.habits.validation_constants import (
     HABIT_NAME_MAX_LENGTH,
     LC_TITLE_MAX_LENGTH,
-    PROMOTION_THRESHOLD_MAX,
-    PROMOTION_THRESHOLD_MIN,
 )
-from app.shared.datetime.helpers import convert_to_timezone
+from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.models import habit_tags
 from app.shared.serialization import APISerializable
 from app.shared.type_defs import OrderedEnum
@@ -70,7 +68,6 @@ class LanguageEnum(enum.Enum):
 class Habit(Base, APISerializable):
     __api_exclude__: ClassVar[list[str]] = []
 
-    # Use super() to "append to" our serializer's result dict to add derived keys
     def to_api_dict(self) -> dict[str, Any]:
         result = super().to_api_dict()
         result["is_promotable"] = (
@@ -80,7 +77,7 @@ class Habit(Base, APISerializable):
 
     __table_args__ = (
         CheckConstraint(
-            f"promotion_threshold is NULL OR (promotion_threshold >= {PROMOTION_THRESHOLD_MIN} AND promotion_threshold <= {PROMOTION_THRESHOLD_MAX})",
+            "promotion_threshold is NULL OR (promotion_threshold >= 0 AND promotion_threshold <= 1.0)",
             name="ck_promotion_threshold_range_0_1",
         ),
         UniqueConstraint("user_id", "name", name="uq_user_habit_name"),
@@ -97,8 +94,11 @@ class Habit(Base, APISerializable):
     )
 
     promotion_threshold: Mapped[float] = mapped_column(Float, nullable=True)
+
     # Represents target completion rate per week
     target_frequency: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    pillar_id: Mapped[int] = mapped_column(ForeignKey("pillars.id"), nullable=True)
 
     @property
     def established_date_local(self) -> datetime | None:
@@ -106,6 +106,7 @@ class Habit(Base, APISerializable):
 
     user = relationship("User", back_populates="habits")
     tags = relationship("Tag", secondary=habit_tags, back_populates="habits")
+    pillar = relationship("Pillar", back_populates="habits")
     habit_completions = relationship(
         "HabitCompletion", back_populates="habit", cascade="all, delete-orphan"
     )
