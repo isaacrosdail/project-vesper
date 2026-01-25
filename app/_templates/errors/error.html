@@ -1,0 +1,24 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{{ status_code }} Error{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <h1>{{ status_code }}</h1>
+
+    {% if status_code == 400 %}
+        <h2>Bad Request</h2>
+        <p>{{ message or "Something went wrong with your request." }}</p>
+    {% elif status_code == 403 %}
+        <h2>Access Denied</h2>
+        <p>{{ message or "You don't have permission to access this resource." }}</p>
+    {% else %}
+        <h2>Ruh-roh Raggy</h2>
+        <p>{{ message or "Something unexpected happened." }}</p>
+    {% endif %}
+
+    {{ ui.error_link('Back to home', 'main.home')}}
+</div>
+
+{% endblock %}

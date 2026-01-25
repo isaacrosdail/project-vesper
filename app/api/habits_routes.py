@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from datetime import date
 
-from flask import Response, request
+from flask import Response, abort, request
 from flask_login import current_user
 
 import app.shared.datetime.helpers as dth
@@ -102,7 +102,9 @@ def completions(session: Session, habit_id: int) -> tuple[Response, int]:
 @api_bp.get("/habits/completions/summary")
 @login_plus_session
 def horizontal_barchart(session: Session) -> tuple[Response, int]:
-    last_n_days = int(request.args["lastNDays"])
+    last_n_days = request.args.get("lastNDays", type=int)
+    if last_n_days is None:
+        abort(400, description="Query parameter 'lastNDays' is required and must be an integer.")
 
     start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
     habits_service = create_habits_service(

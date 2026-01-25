@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 
 import requests
 from flask import Response, current_app, jsonify
-from flask_login import current_user, login_required
+from flask_login import current_user
 
 from app._infra.database import with_db_session
 from app.api import api_bp

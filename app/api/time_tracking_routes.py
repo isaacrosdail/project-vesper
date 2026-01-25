@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 import logging
 
-from flask import Response, request
+from flask import Response, abort, request
 from flask_login import current_user
 
 import app.shared.datetime.helpers as dth
@@ -53,7 +53,9 @@ def time_entries(session: Session, entry_id: int | None = None) -> tuple[Respons
 @api_bp.get("/time_tracking/time_entries/summary")
 @login_plus_session
 def time_entries_summary(session: Session) -> tuple[Response, int]:
-    last_n_days = int(request.args["lastNDays"])
+    last_n_days = request.args.get("lastNDays", type=int)
+    if last_n_days is None:
+        abort(400, description="Query parameter 'lastNDays' is required and must be an integer.")
 
     time_service = create_time_tracking_service(
         session, current_user.id, current_user.timezone
