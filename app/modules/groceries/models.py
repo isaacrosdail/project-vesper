@@ -7,6 +7,7 @@ from typing import Any, ClassVar, Self
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     Numeric,
@@ -19,8 +20,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app._infra.db_base import Base
 from app.modules.groceries.validation_constants import (
     BARCODE_MAX_LENGTH,
-    CALORIES_PRECISION,
-    CALORIES_SCALE,
     NET_WEIGHT_PRECISION,
     NET_WEIGHT_SCALE,
     PRICE_PRECISION,
@@ -94,8 +93,8 @@ class Product(Base, APISerializable):
         default=UnitEnum.G,
     )
 
-    calories_per_100g: Mapped[Decimal] = mapped_column(
-        Numeric(CALORIES_PRECISION, CALORIES_SCALE), nullable=True
+    calories_per_100g: Mapped[float] = mapped_column(
+        Float, nullable=True
     )
 
     deleted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -128,7 +127,6 @@ class Transaction(Base, APISerializable):
         Integer, ForeignKey("products.id"), nullable=False
     )
 
-    # TODO: make float
     price_at_scan: Mapped[Decimal] = mapped_column(
         Numeric(PRICE_PRECISION, PRICE_SCALE), nullable=False
     )
@@ -142,7 +140,6 @@ class Transaction(Base, APISerializable):
     def product_name(self) -> str | None:
         return self.product.name if self.product else None
 
-    # TODO: make float
     @property
     def price_per_100g(self) -> Decimal:
         weight_decimal = Decimal(str(self.product.net_weight))

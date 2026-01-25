@@ -42,3 +42,16 @@ class Tag(Base):
 
     def __repr__(self) -> str:
         return f"<Tag id={self.id} name='{self.name}'>"
+
+
+
+class Pillar(Base):
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_pillar_name"),)
+
+    name: Mapped[str] = mapped_column(String(30), nullable=False)
+
+    habits = relationship("Habit", back_populates="pillar")
+
+    def __repr__(self) -> str:
+        return f"<Pillar id={self.id} name='{self.name}'>"
+

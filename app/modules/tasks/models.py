@@ -17,7 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base, CustomBaseTaskMixin
 from app.modules.tasks.validation_constants import TASK_NAME_MAX_LENGTH
-from app.shared.datetime.helpers import convert_to_timezone
+from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.models import task_tags
 from app.shared.serialization import APISerializable
 from app.shared.type_defs import OrderedEnum

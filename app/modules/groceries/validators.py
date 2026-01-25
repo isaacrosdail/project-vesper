@@ -61,21 +61,22 @@ def validate_unit_type(unit_type: str | None) -> tuple[Any, list[str]]:
 
 
 def validate_calories(calories: str | None) -> tuple[float | None, list[str]]:
-    """Optional. Numeric(5,2), non-negative."""
-    if calories:
-        is_valid, error_type = v.validate_numeric(
-            calories, c.CALORIES_PRECISION, c.CALORIES_SCALE, c.CALORIES_MINIMUM
-        )
-        if not is_valid:
-            if error_type in {v.FORMAT_ERROR, v.PRECISION_EXCEEDED, v.SCALE_EXCEEDED}:
-                return (None, [c.CALORIES_INVALID])
-            elif error_type == v.CONSTRAINT_VIOLATION:
-                return (None, [c.CALORIES_NEGATIVE])
+    """Optional, positive float"""
 
+    if not calories:
+        return (None, [])
+
+    errors = []
+    try:
         calories_float = float(calories)
-        return (calories_float, [])
+        if calories_float < 0:
+            errors.append(c.CALORIES_NEGATIVE)
+            return (None, errors)
+    except ValueError:
+        errors.append(c.CALORIES_INVALID)
+        return (None, errors)
 
-    return (None, [])
+    return (calories_float, [])
 
 
 PRODUCT_VALIDATION_FUNCS = {

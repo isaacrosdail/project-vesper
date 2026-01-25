@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from datetime import datetime
-    from decimal import Decimal
 
     from sqlalchemy.orm import Session
 
@@ -21,7 +20,7 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
     def create_daily_metrics(
         self,
         entry_datetime: datetime,
-        weight: Decimal | None = None,
+        weight: float | None = None,
         steps: int | None = None,
         wake_time: datetime | None = None,
         sleep_time: datetime | None = None,
