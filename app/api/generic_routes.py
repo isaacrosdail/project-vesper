@@ -66,7 +66,7 @@ def item(
     model_class = _get_model_class(module, subtype)
     if model_class is None:
         logger.warning("Unknown model for %s, %s", module, subtype)
-        abort(404)
+        abort(404, description="Requested resource not found")
 
     item = session.get(model_class, item_id)
     if not item:

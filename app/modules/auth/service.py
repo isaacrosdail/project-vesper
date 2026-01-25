@@ -38,7 +38,7 @@ def owner_required(
     @typed_login_required
     def decorated_view(*args: P.args, **kwargs: P.kwargs) -> ResponseReturnValue:
         if not current_user.is_owner:
-            return abort(403)
+            return abort(403, description="Owner privileges required")
         return func(*args, **kwargs)
 
     return decorated_view
@@ -70,7 +70,7 @@ def typed_login_required(
 def check_item_ownership[T: Base](item: T, user_id: int) -> None:
     """Ensure item belongs to given user. Triggers abort(403) if not."""
     if hasattr(item, "user_id") and item.user_id != user_id:
-        abort(403)
+        abort(404)
 
 
 class AuthService:
