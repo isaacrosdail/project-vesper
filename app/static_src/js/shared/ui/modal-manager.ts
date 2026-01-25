@@ -26,7 +26,7 @@ function initModals() {
 
         const fullId = modal.id; // "habit-entry-dashboard-modal"
         const baseId = fullId.replace('-modal', ''); // "habit-entry-dashboard"
-        const button = document.querySelector(`#${baseId}-btn`) as HTMLButtonElement;
+        const button = document.querySelector<HTMLButtonElement>(`#${baseId}-btn`);
 
         if (button) {
             setupModal(modal, button);
@@ -152,14 +152,16 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
  * Auto-activates the first tab on setup.
  */
 function setupTabbedModal(modal: FormDialog): void {
-    modal.querySelectorAll<HTMLButtonElement>('.tab-group button').forEach(btn => {
+    const tabGroupBtns = modal.querySelectorAll<HTMLButtonElement>('.tab-group button');
+
+    tabGroupBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             // hide all panels & remove active
             modal.querySelectorAll<HTMLButtonElement>('.tab-group button').forEach(b => b.classList.remove('active'));
             modal.querySelectorAll<HTMLElement>('.tab-content').forEach(p => p.hidden = true);
             // show selected
             const tabId = 'tab-' + btn.dataset['tab'];
-            const panel = modal.querySelector(`#${tabId}`) as HTMLElement;
+            const panel = modal.querySelector<HTMLElement>(`#${tabId}`);
             if (panel) {
                 btn.classList.add('active');
                 panel.hidden = false;

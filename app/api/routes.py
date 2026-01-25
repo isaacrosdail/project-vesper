@@ -45,7 +45,7 @@ def get_my_profile() -> Response:
 @with_db_session
 def get_weather(
     session: Session, city: str, country: str, units: str
-) -> tuple[Response, int]:  # noqa: PLR0911
+) -> tuple[Response, int]:
     """Fetch current weather data from OpenWeatherMap for a given city and country,
     with rate limiting enforced per API key.
     """
