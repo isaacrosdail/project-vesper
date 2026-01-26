@@ -1,5 +1,6 @@
 import { makeToast } from '../ui/toast.js';
 import { WeatherResult } from '../../types.js';
+import { formatToUserTimeString } from '../datetime.js';
 
 export async function fetchWeatherData(city: string, country: string, units: string): Promise<WeatherResult> {
     
@@ -34,14 +35,11 @@ export async function fetchWeatherData(city: string, country: string, units: str
         // Find first weather condition key matching desc, return its emoji or undefined
         const emoji = Object.entries(weatherConditions).find(
             ([key]) => desc.includes(key)
-        )?.[1] ?? '🌡️'; // "?? '🌡️'" <= Nullish coalescing: fallback if nothing found
+        )?.[1] ?? '🌡️';
         
         // Convert sunset time to date & local (TODO: Use helpers?)
         const sunsetTime = new Date(sunset * 1000); // Unix-style, so convert first
-        const sunsetFormatted = sunsetTime.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const sunsetFormatted = formatToUserTimeString(sunsetTime);
 
         return { temp, emoji, sunsetFormatted, sunrise, sunset };
 
