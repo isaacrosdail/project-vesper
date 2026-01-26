@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from flask import Blueprint, render_template
 from flask_login import current_user
 
-import app.shared.datetime.helpers as dth
+import app.shared.datetime_.helpers as dth
 from app.modules.time_tracking.service import create_time_tracking_service
 from app.modules.time_tracking.viewmodels import TimeEntryPresenter, TimeEntryViewModel
 from app.shared.collection_utils import sort_by_field

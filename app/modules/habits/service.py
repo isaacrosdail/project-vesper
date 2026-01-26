@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-import app.shared.datetime.helpers as dth
+import app.shared.datetime_.helpers as dth
 from app.api.responses import service_response
 from app.modules.habits.repository import (
     HabitCompletionRepository,

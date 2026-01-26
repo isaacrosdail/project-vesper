@@ -18,7 +18,7 @@ from app.modules.groceries.repository import (
     ShoppingListRepository,
     TransactionRepository,
 )
-from app.shared.datetime.helpers import today_range_utc
+from app.shared.datetime_.helpers import today_range_utc
 
 
 class GroceriesService:

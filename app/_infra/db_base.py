@@ -10,6 +10,8 @@ from flask_login import current_user
 from sqlalchemy import DateTime, ForeignKey, Integer, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
+from app.shared.datetime_.helpers import convert_to_timezone
+
 # Auto-assigns constraint names when we don't explicitly name them
 metadata = MetaData(
     naming_convention={

@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from app.api.responses import service_response
 from app.modules.time_tracking.repository import TimeEntryRepository
-from app.shared.datetime.helpers import day_range_utc, parse_time_to_datetime
+from app.shared.datetime_.helpers import day_range_utc, parse_time_to_datetime
 
 
 class TimeTrackingService:

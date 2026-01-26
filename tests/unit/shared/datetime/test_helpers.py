@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 import pytest
 import time_machine
 
-from app.shared.datetime.helpers import *
+from app.shared.datetime_.helpers import *
 
 
 @pytest.mark.parametrize("iso_str, expected_datetime", [
