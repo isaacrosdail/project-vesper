@@ -10,7 +10,7 @@ from datetime import date
 from flask import Response, abort, request
 from flask_login import current_user
 
-import app.shared.datetime.helpers as dth
+import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response, validation_failed
 from app.modules.habits.service import create_habits_service

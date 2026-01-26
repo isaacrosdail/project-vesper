@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 from flask import Blueprint, render_template
 from flask_login import current_user
 
-import app.shared.datetime.helpers as dth
+import app.shared.datetime_.helpers as dth
 from app.modules.metrics.service import create_metrics_service
 from app.modules.metrics.viewmodels import DailyMetricPresenter, DailyMetricViewModel
 from app.shared.collection_utils import sort_by_field
