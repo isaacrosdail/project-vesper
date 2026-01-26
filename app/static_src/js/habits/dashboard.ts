@@ -93,6 +93,7 @@ class HabitsChart {
             update => update
                 .transition()
                 .duration(D3_TRANSITION_DURATION_MS)
+                .attr("y", (d: BarData) => this.yScale(d.name)!)
                 .attr("width", (d: BarData) => this.xScale(d.count))
                 .attr("height", this.yScale.bandwidth()),
             exit => exit.remove()
