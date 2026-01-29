@@ -4,7 +4,6 @@
     
     "editor.quickSuggestionsDelay": 800,
 
-    "terminal.integrated.cwd": "/home/user/projects/project-vesper",
     "terminal.integrated.env.linux": {
         "PRE_NAMESPACE_PWD": "${cwd}"
     },
