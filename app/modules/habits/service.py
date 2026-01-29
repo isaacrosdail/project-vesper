@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 
 from datetime import datetime
+from itertools import pairwise
 from zoneinfo import ZoneInfo
 
 import app.shared.datetime_.helpers as dth
@@ -64,7 +65,11 @@ class HabitsService:
                 success=True, message="Habit added", data={"habit": habit}
             )
 
-    ### NOTE: Performance - N+1 query issue for dashboard, batch/cache?
+    # Streak calc: scan completion dates looking for consecutive days
+    #  Similar pattern to LC#121 (Best Time to Buy/Sell Stock) - one-pass scan with invariant
+    # prices[i] <-> completion_dates[i]
+    # min_price <-> anchor date (most recent valid completion)
+    # max_profit <-> streak length
     def calculate_habit_streak(self, habit_id: int) -> int:
         """Calculate current streak for given habit."""
         habit_completions = self.completion_repo.get_all_habit_completions(
@@ -75,28 +80,28 @@ class HabitsService:
             return 0
 
         # Convert to user timezone for calendar day logic
-        # local_completion_dates => list of dates of completions only, in user's timezone
         user_timezone = ZoneInfo(self.user_tz)
         today_date = datetime.now(user_timezone).date()
         local_completion_dates = [
             c.created_at.astimezone(user_timezone).date() for c in habit_completions
         ]
 
-        # Check if streak exists (within 2 days of most recent)
-        if (today_date - local_completion_dates[0]).days < STREAK_GRACE_DAYS:
-            streak = 1
-            for i in range(
-                len(local_completion_dates) - 1
-            ):  # Remember: -1 here to avoid out of bounds!
-                if (
-                    local_completion_dates[i] - local_completion_dates[i + 1]
-                ).days == 1:
-                    streak += 1
-                else:
-                    break  # gap found, streak ends here!
-            return streak
-        else:
+        # Check if streak exists (must be within 2 days of today)
+        if (today_date - local_completion_dates[0]).days >= STREAK_GRACE_DAYS:
             return 0
+
+        # Count consecutive days using pairwise()
+        # pairwise() = lazy iterator, no list allocation: O(n) time, O(1) extra space
+        # Stil O(n) like zip(seq, seq[1:]) would be
+        streak = 1
+        for curr_date, prev_date in pairwise(local_completion_dates):
+            if (curr_date - prev_date).days == 1:
+                streak += 1
+            else:
+                break
+
+        return streak
+
 
     def check_if_completed_today(self, habit_id: int) -> bool:
         """
@@ -110,6 +115,12 @@ class HabitsService:
 
     # NOTE: "Percent completion habits this week" - Mon to Sun
     def calculate_all_habits_percentage_this_week(self) -> dict[str, Any]:
+        """
+        Calculate aggregate habit completion progress for the current week.
+
+        Computes total number of recorded habit completions from Mon. through today (inclusive), the
+        total expected completions based on each habit's target frequency, and the resulting completion percentage.
+        """
         # Determine current day in the week
         today = datetime.now(ZoneInfo(self.user_tz))
         days_into_week = today.weekday() + 1  # offset: incl today as day # 1
