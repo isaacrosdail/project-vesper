@@ -25,7 +25,10 @@ export function initPasswordToggles() {
         if (!inputId) return; // apparently JS *might* search for '#undefined'? unhinged.
         const input = document.querySelector<HTMLInputElement>(`#${inputId}`);
         if (!input) return;
-        btn.setAttribute('aria-pressed', input.type === 'text' ? 'true' : 'false')
+        const ariaPressed = input.type === 'text'
+            ? 'true'
+            : 'false';
+        btn.setAttribute('aria-pressed', ariaPressed)
 
         btn.addEventListener('click', () => {
             const isPressed = btn.getAttribute('aria-pressed') === 'true';
