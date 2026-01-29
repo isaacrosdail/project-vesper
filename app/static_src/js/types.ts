@@ -5,6 +5,15 @@ declare global {
         csrfToken: string;
     }
 }
+
+/**
+ * List of valid module subtypes used for runtime subtype checks.
+ */
+const SUBTYPES = [
+    'time_entries', 'leet_code_records', 'habits', 'tasks', 'products',
+    'transactions', 'shopping_list_items', 'daily_metrics'
+] as const;
+
 /**
  * Internal identifiers for entities across all modules.
  * Used for API routing, DB queries, & UI labels.
@@ -25,6 +34,16 @@ type Subtype =
 type SubtypeLabels = {
     singular: string;
     plural: string;
+}
+
+/**
+ * Type guard to check if a string is a valid Subtype identifier.
+ * Narrows type from string to Subtype when true.
+ * 
+ * @param x String to validate as a Subtype
+ */
+export function isSubtype(x: string): x is Subtype {
+    return (SUBTYPES as readonly string[]).includes(x);
 }
 
 /**
