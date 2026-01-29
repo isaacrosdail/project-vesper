@@ -97,6 +97,7 @@
     {% if g.has_dev_tools %}
         <h3>Dev Tools</h3>
         <div class="stack-md">
+            <a class="btn btn-primary" href="{{ url_for('main.pillars')}}">DRAFT: PILLARS</a>
             <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
             <a class="btn btn-secondary" href="{{ url_for('devtools.show_routes')}}">Show Routes</a>
             <a class="btn btn-primary" href="/my-fake/route">Test 404</a>

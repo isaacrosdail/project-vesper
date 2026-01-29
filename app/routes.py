@@ -89,6 +89,10 @@ def home() -> tuple[str, int]:
         return render_template("index.html", **ctx), 200
 
 
+@main_bp.get("/pillars")
+def pillars() -> tuple[str, int]:
+    """DRAFTING: Pillars mockup to spur ideas"""
+    return render_template("DRAFT_pillars.html"), 200
 @main_bp.get("/health")
 def health_check() -> tuple[Response, int]:
     """Return for basic health check / monitoring."""
