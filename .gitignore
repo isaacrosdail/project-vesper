@@ -20,7 +20,7 @@ db_backups/
 # Environment files / venv
 # ==========================
 *.env
-# .venv
+.venv
 # env/
 # venv/
 # ENV/
