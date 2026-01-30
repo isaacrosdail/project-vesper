@@ -24,6 +24,7 @@ import { init as initTasks } from './tasks/dashboard.js';
 import { init as initTimeTracking } from './time_tracking/dashboard.js';
 import { init as initMetrics } from './metrics/dashboard.js';
 import { init as initRegisterPage } from './register.js';
+import { init as initTasksWebPage } from './tasks_web.js';
 
 
 const initRegistry = {
@@ -35,6 +36,8 @@ const initRegistry = {
     "time_tracking.dashboard": () => initTimeTracking(),
     "metrics.dashboard": () => initMetrics(),
     "auth.register": () => initRegisterPage(),
+
+    "main.tasks_web": () => initTasksWebPage(),
 };
 
 export async function initMain() {
