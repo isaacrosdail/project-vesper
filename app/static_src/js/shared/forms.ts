@@ -44,7 +44,6 @@ document.addEventListener('submit', (e) => {
 
     // Route to appropriate handler
     const formType = submittedForm.dataset['formType'];
-    console.log(formType)
     switch (formType) {
         case 'modal':
             const modal = submittedForm.closest('dialog')!;
@@ -52,7 +51,6 @@ document.addEventListener('submit', (e) => {
             break;
         case 'page':
         case 'action':
-            console.log("trying page/action submit...")
             submittedForm.submit();
     }
 });
@@ -94,7 +92,6 @@ function setupNumericInputRestrictions() {
                 }
 
                 const stepSize = parseFloat(input.dataset.step || '1'); // default 1 for ints
-                console.log(`Stepsize: ${stepSize}`)
                 const stepInterval = e.key === 'ArrowDown'
                     ? -stepSize
                     : stepSize;
@@ -105,9 +102,6 @@ function setupNumericInputRestrictions() {
                     ? Math.round(newVal * multiplier) / multiplier
                     : newVal;
 
-                console.log(`stepInterval: ${stepInterval}`)
-                console.log(`num: ${num}`)
-                console.log(`roundedVal: ${roundedVal}`)
                 if (roundedVal === 0) {
                     input.value = '';
                 } else {
