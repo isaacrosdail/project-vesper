@@ -136,7 +136,7 @@ class HabitCompletion(Base, APISerializable):
 class LeetCodeRecord(Base, APISerializable):
     leetcode_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    title: Mapped[str] = mapped_column(String(LC_TITLE_MAX_LENGTH))
+    title: Mapped[str] = mapped_column(String(LC_TITLE_MAX_LENGTH), nullable=True)
 
     difficulty: Mapped[DifficultyEnum] = mapped_column(
         SAEnum(DifficultyEnum, name="difficulty_enum"), nullable=False
