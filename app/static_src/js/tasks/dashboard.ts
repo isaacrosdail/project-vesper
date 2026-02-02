@@ -19,16 +19,8 @@ function validateDueDate(dueDateString: string): string | null {
 
 // Validators
 const validateTaskName = makeValidator('name', {
-    maxLength: 3,
+    maxLength: 150,
 });
-
-// function validateSleepTimes() {
-//     const blech = document.querySelector<HTMLInputElement>('#wake_datetime');
-//     const blech2 = document.querySelector<HTMLInputElement>('#sleep_datetime');
-
-//     // ensure sleep is after wake?
-
-// }
 
 export function init() {
     const isFrogCheckbox = document.querySelector<HTMLInputElement>('#is_frog');
@@ -42,7 +34,7 @@ export function init() {
     });
 
     const form = document.querySelector<HTMLFormElement>('#tasks-form')!;
-    // Validation
+
     initValidation(
     form,
         {
