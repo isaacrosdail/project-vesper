@@ -28,7 +28,7 @@ class TimeEntry(Base, APISerializable):
         nullable=False,
     )
 
-    description: Mapped[str] = mapped_column(String(DESCRIPTION_MAX_LENGTH))
+    description: Mapped[str] = mapped_column(String(DESCRIPTION_MAX_LENGTH), nullable=True)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
