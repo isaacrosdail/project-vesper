@@ -41,7 +41,7 @@ def create_app(config_name: str | None = None) -> Flask:
 
     _apply_config(app, config_name)
     setup_logging(app)  # Must read logging level after being set by apply_config
-    if config_name in ("dev", "testing"):
+    if app.config.get('DEBUG'):
         setup_dev_debugging(app)
     _setup_extensions(app)
     _setup_request_hooks(app)
