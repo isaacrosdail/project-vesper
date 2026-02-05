@@ -18,7 +18,6 @@ from alembic import command
 from app._infra.database import db_session, init_db
 from app.config import get_config
 from app.extensions import _setup_extensions
-from app.shared import jinja_filters
 from app.shared.debug import setup_dev_debugging
 from app.shared.setup_logging import setup_logging
 
@@ -48,8 +47,6 @@ def create_app(config_name: str | None = None) -> Flask:
     _setup_request_hooks(app)
     _setup_database(app)
     _register_blueprints(app)
-
-    jinja_filters.register_filters(app)
 
     return app
 

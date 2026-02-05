@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 from app.api.responses import service_response
 from app.modules.metrics.repository import DailyMetricsRepository
-from app.shared.conversions import lbs_to_kg
+from app.shared.utils import lbs_to_kg
 from app.shared.datetime_ import helpers as dth
 
 

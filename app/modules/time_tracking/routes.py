@@ -9,9 +9,9 @@ from flask_login import current_user
 import app.shared.datetime_.helpers as dth
 from app.modules.time_tracking.service import create_time_tracking_service
 from app.modules.time_tracking.viewmodels import TimeEntryPresenter, TimeEntryViewModel
-from app.shared.collection_utils import sort_by_field
+from app.shared.utils import sort_by_field
 from app.shared.decorators import login_plus_session
-from app.shared.parsers_ import get_table_params
+from app.shared.utils import get_table_params
 
 time_tracking_bp = Blueprint(
     "time_tracking", __name__, template_folder="templates", url_prefix="/time_tracking"

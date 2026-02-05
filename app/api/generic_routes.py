@@ -27,7 +27,7 @@ from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
 from app.modules.metrics.models import DailyMetrics
 from app.modules.tasks.models import Task
 from app.modules.time_tracking.models import TimeEntry
-from app.shared.conversions import kg_to_lbs
+from app.shared.utils import kg_to_lbs
 from app.shared.database.helpers import safe_delete
 from app.shared.decorators import login_plus_session
 from app.shared.hooks import PATCH_HOOKS

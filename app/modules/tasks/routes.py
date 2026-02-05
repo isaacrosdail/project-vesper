@@ -8,9 +8,9 @@ from flask_login import current_user
 
 from app.modules.tasks.service import create_tasks_service
 from app.modules.tasks.viewmodels import TaskPresenter, TaskViewModel
-from app.shared.collection_utils import sort_by_field
+from app.shared.utils import sort_by_field
 from app.shared.decorators import login_plus_session
-from app.shared.parsers_ import get_table_params
+from app.shared.utils import get_table_params
 
 tasks_bp = Blueprint(
     "tasks", __name__, template_folder="templates", url_prefix="/tasks"

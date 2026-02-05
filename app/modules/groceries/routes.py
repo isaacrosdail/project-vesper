@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -13,10 +14,10 @@ from app.modules.groceries.viewmodels import (
     TransactionPresenter,
     TransactionViewModel,
 )
-from app.shared.collection_utils import sort_by_field
+from app.shared.utils import sort_by_field
 from app.shared.datetime_.helpers import last_n_days_range
 from app.shared.decorators import login_plus_session
-from app.shared.parsers_ import get_table_params
+from app.shared.utils import get_table_params
 
 groceries_bp = Blueprint(
     "groceries", __name__, template_folder="templates", url_prefix="/groceries"
