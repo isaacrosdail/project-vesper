@@ -270,7 +270,7 @@
                 {% endfor %}
                 <option value="__new__">+ Create New Product</option>
             </select>
-            <input type="hidden" name="product_id" id="product_id_hidden" value=""> {# update via JS when we open in edit mode #}
+            <input type="hidden" name="product_id" id="product_id_hidden" value="" disabled data-initial-disabled> {# update via JS when we open in edit mode #}
         </div>
 
         <div class=" field-pair field-pair--weighted">
@@ -298,7 +298,6 @@
         <div class="product-field" hidden>
             <label for="barcode">Barcode:</label>
             <input type="text" id="barcode" name="barcode"
-                value="{{ transaction_data.barcode if transaction_data else ''}}"
                 minlength="8" maxlength="14"
                 placeholder="01234567">
                 <small class="error-inline"></small>

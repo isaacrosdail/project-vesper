@@ -2,8 +2,13 @@ from datetime import date, datetime
 from typing import Any
 
 from app.modules.metrics import validation_constants as c
-from app.shared import validators as v
 from app.shared.decorators import log_validator
+from app.shared.type_defs import ValidatorFunc
+from app.shared.validators import (
+    validate_date_iso,
+    validate_optional_int,
+    validate_time_hhmm,
+)
 
 
 def validate_entry_date(entry_date_str: str | None) -> tuple[date | None, list[str]]:
@@ -11,7 +16,7 @@ def validate_entry_date(entry_date_str: str | None) -> tuple[date | None, list[s
     if not entry_date_str:
         return (None, ["Entry date is required"])
 
-    return v.validate_date_iso(entry_date_str)
+    return validate_date_iso(entry_date_str)
 
 def validate_datetime_local(dt_str: str | None) -> tuple[datetime | None, list[str]]:
     """Parse datetime-local string (YYYY-MM-DDTHH:MM) return naive datetime."""
@@ -29,55 +34,14 @@ def validate_weight(weight: str | None) -> tuple[float | None, list[str]]:
     if not weight:
         return (None, [])
 
-    errors = []
     try:
         weight_float = float(weight)
         if weight_float < 0:
-            errors.append(c.WEIGHT_POSITIVE)
-            return (None, errors)
+            return (None, [c.WEIGHT_POSITIVE])
     except ValueError:
-        errors.append(c.WEIGHT_INVALID)
-        return (None, errors)
+        return (None, [c.WEIGHT_INVALID])
 
     return (weight_float, [])
-
-
-def validate_steps(steps: str | None) -> tuple[int | None, list[str]]:
-    """Non-negative int"""
-
-    if not steps:
-        return (None, [])
-
-    errors = []
-    try:
-        steps_int = int(steps)
-        if steps_int < 0:
-            errors.append(c.STEPS_NEGATIVE)
-            return (None, errors)
-    except ValueError:
-        errors.append(c.STEPS_INVALID)
-        return (None, errors)
-
-    return (steps_int, [])
-
-
-def validate_calories(calories: str | None) -> tuple[int | None, list[str]]:
-    """Non-negative int"""
-
-    if not calories:
-        return (None, [])
-
-    errors = []
-    try:
-        calories_int = int(calories)
-        if calories_int < 0:
-            errors.append(c.CALORIES_NEGATIVE)
-            return (None, errors)
-    except (ValueError, TypeError):
-        errors.append(c.CALORIES_INVALID)
-        return (None, errors)
-
-    return (calories_int, [])
 
 
 def validate_time_hhmm_format(time_str: str | None) -> tuple[str | None, list[str]]:
@@ -85,16 +49,20 @@ def validate_time_hhmm_format(time_str: str | None) -> tuple[str | None, list[st
     if not time_str:
         return (None, [])
 
-    return v.validate_time_hhmm(time_str)
+    return validate_time_hhmm(time_str)
 
 
-VALIDATION_FUNCS = {
+VALIDATION_FUNCS: dict[str, ValidatorFunc] = {
     "entry_date": validate_entry_date,
     "weight": validate_weight,
-    "steps": validate_steps,
+    "steps": lambda v: validate_optional_int(
+        v, c.STEPS_INVALID
+    ),
     "wake_datetime": validate_datetime_local,
     "sleep_datetime": validate_datetime_local,
-    "calories": validate_calories,
+    "calories": lambda v: validate_optional_int(
+        v, c.CALORIES_INVALID
+    ),
 }
 
 
@@ -116,11 +84,11 @@ def validate_daily_entry(
 
     for field, func in VALIDATION_FUNCS.items():
         value = data.get(field)
-        typed_value, field_errors = func(value)  # unpack tuple
+        typed_value, field_errors = func(value)
 
         if field_errors:
             errors[field] = field_errors
-        elif typed_value is not None:  # only store if no errors for given field?
+        elif typed_value is not None:
             typed_data[field] = typed_value
 
     return typed_data, errors

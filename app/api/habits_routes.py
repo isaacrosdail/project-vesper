@@ -16,15 +16,13 @@ from app.api.responses import api_response, validation_failed
 from app.modules.habits.service import create_habits_service
 from app.modules.habits.validators import validate_habit, validate_leetcode_record
 from app.shared.decorators import login_plus_session
-from app.shared.parsers_ import HABIT_SCHEMA, LEETCODE_SCHEMA, parse_form
 
 
 @api_bp.post("/habits/habits")
 @api_bp.put("/habits/habits/<int:habit_id>")
 @login_plus_session
 def habits(session: Session, habit_id: int | None = None) -> tuple[Response, int]:
-    parsed_data = parse_form(request.form.to_dict(), HABIT_SCHEMA)
-    typed_data, errors = validate_habit(parsed_data)
+    typed_data, errors = validate_habit(request.json)
 
     if errors:
         return validation_failed(errors), 400
@@ -128,8 +126,7 @@ def horizontal_barchart(session: Session) -> tuple[Response, int]:
 @api_bp.post("/habits/leetcode_records")
 @login_plus_session
 def leetcode_records(session: Session) -> tuple[Response, int]:
-    parsed_data = parse_form(request.form.to_dict(), LEETCODE_SCHEMA)
-    typed_data, errors = validate_leetcode_record(parsed_data)
+    typed_data, errors = validate_leetcode_record(request.json)
     if errors:
         return validation_failed(errors), 400
 

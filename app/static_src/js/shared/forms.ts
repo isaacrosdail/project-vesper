@@ -144,6 +144,46 @@ function setupNumericInputRestrictions() {
     })
 }
 
+/**
+ * Extracts data from a form element into JSON.
+ * 
+ * @param form 
+ * @returns JSON-ified form data
+ */
+export function formToJSON(form: HTMLFormElement): Record<string, any> {
+    const formData = new FormData(form);
+    const result: Record<string, any> = {};
+
+    for (const [name, value] of formData) {
+        // coerce checkbox "on" to bool true
+        let finalValue: any = value;
+        if (value === "on") {
+            finalValue = true;
+        } else if (value === "") {
+            finalValue = null;
+        }
+
+        const path = name.replace(/\]/g, '').split('[');
+        let current = result;
+
+        for (let i = 0; i < path.length - 1; i++) {
+            const key = path[i];
+            const nextKey = path[i + 1];
+            const nextIsArray = /^\d+$/.test(nextKey);
+
+            if (!(key in current)) {
+                current[key] = nextIsArray ? [] : {};
+            }
+            current = current[key];
+        }
+
+        current[path[path.length - 1]] = finalValue;
+    }
+
+    console.log("Returning:", result)
+    return result;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     setupNumericInputRestrictions();
 });

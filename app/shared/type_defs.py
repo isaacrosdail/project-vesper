@@ -1,8 +1,11 @@
 from enum import Enum
 from functools import total_ordering
-from typing import Self
+from typing import Self, Callable, TypeAlias, Any
 
 NotImplementedType = type(NotImplemented)
+
+ValidatorFunc: TypeAlias = Callable[[str | None], tuple[Any, list[str]]]
+ValidationErrors: TypeAlias = dict[str, list[str]]
 
 
 @total_ordering

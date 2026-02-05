@@ -13,15 +13,13 @@ from app.api.responses import api_response, validation_failed
 from app.modules.groceries.service import create_groceries_service
 from app.modules.groceries.validators import validate_product, validate_transaction
 from app.shared.decorators import login_plus_session
-from app.shared.parsers_ import PRODUCT_SCHEMA, TRANSACTION_SCHEMA, parse_form
 
 
 @api_bp.post("/groceries/products")
 @api_bp.put("/groceries/products/<int:product_id>")
 @login_plus_session
 def products(session: Session, product_id: int | None = None) -> tuple[Response, int]:
-    parsed_data = parse_form(request.form.to_dict(), PRODUCT_SCHEMA)
-    typed_data, errors = validate_product(parsed_data)
+    typed_data, errors = validate_product(request.json)
     if errors:
         return validation_failed(errors), 400
 
@@ -52,14 +50,14 @@ def transactions(
     groceries_service = create_groceries_service(
         session, current_user.id, current_user.timezone
     )
-    form_data = request.form.to_dict()
+
+    form_data = request.json
     product_id_input = form_data["product_id"]
 
     # Case A: Create new product first
     if product_id_input == "__new__":
         # 1. Validate product
-        parsed_product_data = parse_form(form_data, PRODUCT_SCHEMA)
-        typed_product_data, product_errors = validate_product(parsed_product_data)
+        typed_product_data, product_errors = validate_product(request.json)
         if product_errors:
             return validation_failed(product_errors), 400
 
@@ -79,9 +77,8 @@ def transactions(
 
     # Case B (fall through): Use existing product, create transaction only
     # 1. Validate transaction
-    parsed_transaction_data = parse_form(form_data, TRANSACTION_SCHEMA)
     typed_transaction_data, transaction_errors = validate_transaction(
-        parsed_transaction_data
+        request.json
     )
     if transaction_errors:
         return validation_failed(transaction_errors), 400
@@ -107,7 +104,7 @@ def add_shoppinglist_item(session: Session) -> tuple[Response, int]:
         session, current_user.id, current_user.timezone
     )
 
-    data = request.get_json()
+    data = request.json
     product_id = data.get("product_id")
     quantity_wanted = data.get("quantity_wanted")
 

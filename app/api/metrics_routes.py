@@ -17,7 +17,6 @@ from app.api.responses import api_response, validation_failed
 from app.modules.metrics.service import create_metrics_service
 from app.modules.metrics.validators import validate_daily_entry
 from app.shared.decorators import login_plus_session
-from app.shared.parsers_ import DAILY_METRICS_SCHEMA, parse_form
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +27,7 @@ logger = logging.getLogger(__name__)
 def daily_metrics(
     session: Session, entry_id: int | None = None
 ) -> tuple[Response, int]:
-    parsed_data = parse_form(request.form.to_dict(), DAILY_METRICS_SCHEMA)
-    typed_data, errors = validate_daily_entry(parsed_data)
+    typed_data, errors = validate_daily_entry(request.json)
     if errors:
         return validation_failed(errors), 400
 

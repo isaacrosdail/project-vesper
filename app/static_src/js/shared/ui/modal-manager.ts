@@ -1,6 +1,7 @@
 import { makeToast } from './toast.js';
 import { apiRequest } from '../services/api.js';
 import { FormDialog, FormControlElement } from '../../types';
+import { formToJSON } from '../forms.js';
 
 /**
  * Modal Manager
@@ -114,7 +115,7 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
 }
 
 export function handleModalFormSubmit(submittedForm: HTMLFormElement, modal: HTMLDialogElement) {
-    const formData = new FormData(submittedForm);
+    const formData = formToJSON(submittedForm);
     const endpoint = modal.dataset.endpoint; // embedded in all form modals
 
     if (!endpoint) {

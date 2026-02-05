@@ -10,6 +10,9 @@ HABIT_NAME_TOO_LONG = too_long("Habit name", HABIT_NAME_MAX_LENGTH)
 STATUS_REQUIRED = required("Status")
 STATUS_INVALID = invalid("Status")
 
+TARGET_FREQ_REQUIRED = required("Target frequency")
+TARGET_FREQ_INVALID = invalid("Target frequency")
+
 # Habit Completion
 HABIT_REQUIRED = required("Habit")
 HABIT_ID_INVALID = invalid("Habit ID")

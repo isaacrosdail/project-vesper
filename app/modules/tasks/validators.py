@@ -4,27 +4,13 @@ from typing import Any
 from app.modules.tasks import validation_constants as c
 from app.modules.tasks.models import PriorityEnum
 from app.shared.decorators import log_validator
-from app.shared.validators import validate_date_iso, validate_enum
-
-
-def validate_task_name(name: str | None) -> tuple[str | None, list[str]]:
-    """Required. String, max 150 chars."""
-    if not name:
-        return (None, [c.TASK_NAME_REQUIRED])
-    elif len(name) > c.TASK_NAME_MAX_LENGTH:
-        return (None, [c.TASK_NAME_TOO_LONG])
-
-    return (name, [])
-
-
-def validate_task_priority(priority: str | None) -> tuple[Any, list[str]]:
-    """
-    Optional*. Valid PriorityEnum value.
-    *Required if task is not a frog; must be None if it is.
-    """
-    if not priority:
-        return (None, [])
-    return validate_enum(priority, PriorityEnum, c.PRIORITY_INVALID)
+from app.shared.type_defs import ValidatorFunc
+from app.shared.validators import (
+    validate_date_iso,
+    validate_optional_enum,
+    validate_optional_string,
+    validate_required_string,
+)
 
 
 def validate_due_date(due_date: str | None) -> tuple[date | None, list[str]]:
@@ -35,9 +21,13 @@ def validate_due_date(due_date: str | None) -> tuple[date | None, list[str]]:
     return validate_date_iso(due_date)
 
 
-TASK_VALIDATION_FUNCS = {
-    "name": validate_task_name,
-    "priority": validate_task_priority,
+TASK_VALIDATION_FUNCS: dict[str, ValidatorFunc] = {
+    "name": lambda v: validate_required_string(
+        v, c.TASK_NAME_MAX_LENGTH, c.TASK_NAME_REQUIRED, c.TASK_NAME_TOO_LONG
+    ),
+    "priority": lambda v: validate_optional_enum(
+        v, PriorityEnum, c.PRIORITY_INVALID
+    ),
     "due_date": validate_due_date,
 }
 
@@ -48,10 +38,6 @@ def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[
     typed_data = {}
     errors = {}
 
-    # Insert is_frog directly
-    if data.get("is_frog") is not None:
-        typed_data["is_frog"] = data.get("is_frog")
-
     for field, func in TASK_VALIDATION_FUNCS.items():
         value = data.get(field)
         typed_value, field_errors = func(value)
@@ -60,7 +46,10 @@ def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[
         else:
             typed_data[field] = typed_value
 
-    is_frog = typed_data.get("is_frog")
+    # Insert is_frog directly
+    is_frog = data.get("is_frog", False)
+    typed_data['is_frog'] = is_frog
+
     due_date = typed_data.get("due_date")
     priority = typed_data.get("priority")
 
@@ -78,27 +67,14 @@ def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[
     return (typed_data, errors)
 
 
-def validate_tag_name(name: str | None) -> tuple[str | None, list[str]]:
-    """Required. String, max 50 chars."""
-    if not name:
-        return (None, [c.TAG_NAME_REQUIRED])
-    if len(name) > c.TAG_NAME_MAX_LENGTH:
-        return (None, [c.TAG_NAME_LENGTH])
-
-    return (name, [])
-
-
-def validate_tag_scope(scope: str | None) -> tuple[str | None, list[str]]:
-    """Optional. String, max 20 chars."""
-    if not scope:
-        return (None, [])
-    if len(scope) > c.TAG_SCOPE_MAX_LENGTH:
-        return (None, [c.TAG_SCOPE_LENGTH])
-
-    return (scope, [])
-
-
-TAG_VALIDATION_FUNCS = {"name": validate_tag_name, "scope": validate_tag_scope}
+TAG_VALIDATION_FUNCS: dict[str, ValidatorFunc] = {
+    "name": lambda v: validate_required_string(
+        v, c.TAG_NAME_MAX_LENGTH, c.TAG_NAME_REQUIRED, c.TAG_NAME_LENGTH
+    ),
+    "scope": lambda v: validate_optional_string(
+        v, c.TAG_SCOPE_MAX_LENGTH, c.TAG_SCOPE_LENGTH
+    )
+}
 
 
 # NOTE: Move elsewhere now that this is in shared/models.py?

@@ -14,7 +14,7 @@ from app.modules.auth.service import AuthService, owner_required
 from app.modules.auth.validators import validate_user
 from app.shared.database.helpers import delete_all_db_data
 from app.shared.middleware import set_toast
-from app.shared.parsers_ import USER_SCHEMA, parse_form
+
 
 auth_bp = Blueprint("auth", __name__, template_folder="templates")
 
@@ -30,13 +30,16 @@ def logout() -> Response:
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login() -> Response | tuple[str, int]:
     if request.method == "POST":
-        parsed_data = parse_form(request.form.to_dict(), USER_SCHEMA)
+        data = request.form.to_dict()
+
+        username = data.get("username", "").strip()
+        password = data.get("password", "")
 
         with database_connection() as session:
             users_repo = UsersRepository(session)
-            user = users_repo.get_user_by_username(parsed_data["username"])
+            user = users_repo.get_user_by_username(username)
 
-            if not user or not user.check_password(parsed_data["password"]):
+            if not user or not user.check_password(password):
                 set_toast("Invalid username or password", "error")
                 return redirect(url_for("auth.login"))
             remember = "remember_user" in request.form
@@ -49,9 +52,9 @@ def login() -> Response | tuple[str, int]:
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register() -> Response | tuple[str, int]:
     if request.method == "POST":
-        parsed_data = parse_form(request.form.to_dict(), USER_SCHEMA)
-        typed_data, errors = validate_user(parsed_data)
+        data = request.form.to_dict()
 
+        typed_data, errors = validate_user(data)
         if errors:
             for e in chain.from_iterable(errors.values()):
                 set_toast(e, "error")

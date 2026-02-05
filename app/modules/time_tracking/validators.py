@@ -8,32 +8,18 @@ from app.modules.time_tracking.validation_constants import (
     DESCRIPTION_MAX_LENGTH,
 )
 from app.shared.decorators import log_validator
-from app.shared.validators import validate_date_iso, validate_time_hhmm
-
-
-def validate_category(category: str | None) -> tuple[str | None, list[str]]:
-    """Required. String, max 50 chars."""
-    if not category:
-        return (None, [CATEGORY_REQUIRED])
-    if len(category) > CATEGORY_MAX_LENGTH:
-        return (None, [CATEGORY_TOO_LONG])
-
-    return (category, [])
-
-
-def validate_description(description: str | None) -> tuple[str | None, list[str]]:
-    """Optional. String, max 200 chars."""
-    if not description:
-        return (None, [])
-    if len(description) > DESCRIPTION_MAX_LENGTH:
-        return (None, [DESCRIPTION_LENGTH])
-
-    return (description, [])
+from app.shared.validators import (
+    validate_date_iso, validate_time_hhmm, validate_optional_string, validate_required_string
+)
 
 
 VALIDATION_FUNCS = {
-    "category": validate_category,
-    "description": validate_description,
+    "category": lambda v: validate_required_string(
+        v, CATEGORY_MAX_LENGTH, CATEGORY_REQUIRED, CATEGORY_TOO_LONG
+    ),
+    "description": lambda v: validate_optional_string(
+        v, DESCRIPTION_MAX_LENGTH, DESCRIPTION_LENGTH
+    ),
     "entry_date": validate_date_iso,
     "started_at": validate_time_hhmm,
     "ended_at": validate_time_hhmm,

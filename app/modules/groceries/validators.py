@@ -4,26 +4,19 @@ import regex
 
 from app.modules.groceries import validation_constants as c
 from app.modules.groceries.models import ProductCategoryEnum, UnitEnum
-from app.shared import validators as v
 from app.shared.decorators import log_validator
-
-
-def validate_product_name(product_name: str | None) -> tuple[str | None, list[str]]:
-    """Required. String, max 50 chars."""
-    if not product_name:
-        return (None, [c.PRODUCT_NAME_REQUIRED])
-    if len(product_name) > c.PRODUCT_NAME_MAX_LENGTH:
-        return (None, [c.PRODUCT_NAME_TOO_LONG])
-
-    return (product_name, [])
-
-
-def validate_category(category: str | None) -> tuple[Any, list[str]]:
-    if not category:
-        return (None, [c.CATEGORY_REQUIRED])
-    """Required. Valid ProductCategoryEnum value."""
-    return v.validate_enum(category, ProductCategoryEnum, c.CATEGORY_INVALID)
-
+from app.shared.type_defs import ValidatorFunc
+from app.shared.validators import (
+    CONSTRAINT_VIOLATION,
+    FORMAT_ERROR,
+    PRECISION_EXCEEDED,
+    SCALE_EXCEEDED,
+    validate_numeric,
+    validate_optional_int,
+    validate_required_enum,
+    validate_required_int,
+    validate_required_string,
+)
 
 def validate_barcode(barcode: str | None) -> tuple[str | None, list[str]]:
     """Optional. Alphanumeric string."""
@@ -40,52 +33,34 @@ def validate_net_weight(net_weight: str | None) -> tuple[float | None, list[str]
     if not net_weight:
         return (None, [c.NET_WEIGHT_REQUIRED])
 
-    is_valid, error_type = v.validate_numeric(
+    is_valid, error_type = validate_numeric(
         net_weight, c.NET_WEIGHT_PRECISION, c.NET_WEIGHT_SCALE, c.NET_WEIGHT_MINIMUM
     )
     if not is_valid:
-        if error_type in {v.FORMAT_ERROR, v.PRECISION_EXCEEDED, v.SCALE_EXCEEDED}:
+        if error_type in {FORMAT_ERROR, PRECISION_EXCEEDED, SCALE_EXCEEDED}:
             return (None, [c.NET_WEIGHT_INVALID])
-        elif error_type == v.CONSTRAINT_VIOLATION:
+        elif error_type == CONSTRAINT_VIOLATION:
             return (None, [c.NET_WEIGHT_POSITIVE])
 
     net_weight_float = float(net_weight)
     return (net_weight_float, [])
 
 
-def validate_unit_type(unit_type: str | None) -> tuple[Any, list[str]]:
-    if not unit_type:
-        return (None, [c.UNIT_TYPE_REQUIRED])
-    """Required. Valid UnitEnum value."""
-    return v.validate_enum(unit_type, UnitEnum, c.UNIT_TYPE_INVALID)
-
-
-def validate_calories(calories: str | None) -> tuple[float | None, list[str]]:
-    """Optional, positive float"""
-
-    if not calories:
-        return (None, [])
-
-    errors = []
-    try:
-        calories_float = float(calories)
-        if calories_float < 0:
-            errors.append(c.CALORIES_NEGATIVE)
-            return (None, errors)
-    except ValueError:
-        errors.append(c.CALORIES_INVALID)
-        return (None, errors)
-
-    return (calories_float, [])
-
-
-PRODUCT_VALIDATION_FUNCS = {
-    "name": validate_product_name,
-    "category": validate_category,
+PRODUCT_VALIDATION_FUNCS: dict[str, ValidatorFunc] = {
+    "name": lambda v: validate_required_string(
+        v, c.PRODUCT_NAME_MAX_LENGTH, c.PRODUCT_NAME_REQUIRED, c.PRODUCT_NAME_TOO_LONG
+    ),
+    "category": lambda v: validate_required_enum(
+        v, ProductCategoryEnum, c.CATEGORY_INVALID, c.CATEGORY_REQUIRED
+    ),
     "barcode": validate_barcode,
     "net_weight": validate_net_weight,
-    "unit_type": validate_unit_type,
-    "calories_per_100g": validate_calories,
+    "unit_type": lambda v: validate_required_enum(
+        v, UnitEnum, c.UNIT_TYPE_INVALID, c.UNIT_TYPE_REQUIRED
+    ),
+    "calories_per_100g": lambda v: validate_optional_int(
+        v, c.CALORIES_INVALID
+    ),
 }
 
 
@@ -123,24 +98,11 @@ def validate_price(price: str | None) -> tuple[float | None, list[str]]:
     return (price_float, [])
 
 
-def validate_quantity(quantity: str | None) -> tuple[int | None, list[str]]:
-    """Required. Positive integer."""
-    if not quantity:
-        return (None, [c.QUANTITY_REQUIRED])
-
-    try:
-        quantity_int = int(quantity)
-        if quantity_int <= 0:
-            return (None, [c.QUANTITY_POSITIVE])
-    except (ValueError, TypeError):
-        return (None, [c.QUANTITY_INVALID])
-
-    return (quantity_int, [])
-
-
-TRANSACTION_VALIDATION_FUNCS = {
+TRANSACTION_VALIDATION_FUNCS: dict[str, ValidatorFunc] = {
     "price_at_scan": validate_price,
-    "quantity": validate_quantity,
+    "quantity": lambda v: validate_required_int(
+        v, c.QUANTITY_INVALID, c.QUANTITY_INVALID
+    ),
 }
 
 
@@ -180,43 +142,16 @@ def validate_shopping_list(
     return (typed_data, errors)
 
 
-def validate_quantity_wanted(
-    quantity_wanted: str | None,
-) -> tuple[int | None, list[str]]:
-    """Required. Positive integer."""
-    if not quantity_wanted:
-        return (None, [c.QUANTITY_WANTED_REQUIRED])
-
-    try:
-        quantity_wanted_int = int(quantity_wanted)
-        if quantity_wanted_int <= 0:
-            return (None, [c.QUANTITY_WANTED_POSITIVE])
-    except (ValueError, TypeError):
-        return (None, [c.QUANTITY_WANTED_INVALID])
-
-    return (quantity_wanted_int, [])
-
-
-def validate_shopping_list_id(
-    shopping_list_id: str | None,
-) -> tuple[int | None, list[str]]:
-    if not shopping_list_id:
-        return (None, [c.SHOPPING_LIST_ID_REQUIRED])
-    """Required. Valid integer ID."""
-    return v.validate_id_field(shopping_list_id, c.SHOPPING_LIST_ID_INVALID)
-
-
-def validate_product_id(product_id: str | None) -> tuple[int | None, list[str]]:
-    if not product_id:
-        return (None, [c.PRODUCT_ID_REQUIRED])
-    """Required. Valid integer ID."""
-    return v.validate_id_field(product_id, c.PRODUCT_ID_INVALID)
-
-
-SHOPPING_LIST_ITEM_VALIDATION_FUNCS = {
-    "quantity_wanted": validate_quantity_wanted,
-    "shopping_list_id": validate_shopping_list_id,
-    "product_id": validate_product_id,
+SHOPPING_LIST_ITEM_VALIDATION_FUNCS: dict[str, ValidatorFunc] = {
+    "quantity_wanted": lambda val: validate_required_int(
+        val, c.QUANTITY_WANTED_INVALID, c.QUANTITY_WANTED_REQUIRED
+    ),
+    "shopping_list_id": lambda val: validate_required_int(
+        val, c.SHOPPING_LIST_ID_INVALID, c.SHOPPING_LIST_ID_REQUIRED
+    ),
+    "product_id": lambda val: validate_required_int(
+        val, c.PRODUCT_ID_INVALID, c.PRODUCT_ID_REQUIRED
+    ),
 }
 
 

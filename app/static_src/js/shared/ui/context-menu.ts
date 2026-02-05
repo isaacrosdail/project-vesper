@@ -199,10 +199,10 @@ function handleEdit(menuContext: ContextObject['context']) {
                 if (productSelectInput && productInputHidden) {
                     productSelectInput.dataset['originalInnerHTML'] = productSelectInput.innerHTML;
                     productSelectInput.innerHTML = `<option selected>${responseData.data.product_name}</option>`;
-                    
-                    productSelectInput.dataset['initialDisabled'] = String(productSelectInput.disabled);
+
                     productSelectInput.disabled = true;
                     productInputHidden.value = responseData.data.product_id;
+                    productInputHidden.disabled = false; // enable for edit, starts out disabled
                 }
             }
         }

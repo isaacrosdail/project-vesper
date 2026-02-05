@@ -1,6 +1,10 @@
+from __future__ import annotations
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from enum import Enum
 
 import regex
 
@@ -92,26 +96,114 @@ def validate_time_hhmm(time_str: str | None) -> tuple[str | None, list[str]]:
     return (time_str, [])
 
 
-def validate_id_field(
-    id_value: str, invalid_error: str
+def validate_int(
+    int_value: str, invalid_error: str
 ) -> tuple[int | None, list[str]]:
+    """Coerce string to positive int. Does not handle None/empty."""
     try:
-        id_int = int(id_value)
+        typed_value = int(int_value)
+        if typed_value <= 0:
+            return (None, [invalid_error])
+        return (typed_value, [])
     except (ValueError, TypeError):
         return (None, [invalid_error])
-    else:
-        return (id_int, [])
+
+def validate_required_int(
+    id_value: str | None, invalid_error: str, required_error: str
+) -> tuple[int | None, list[str]]:
+    """Validate required integer ID field. Returns error if missing or invalid."""
+    if not id_value:
+        return (None, [required_error])
+    return validate_int(id_value, invalid_error)
+
+def validate_optional_int(
+    id_value: str | None, invalid_error: str
+) -> tuple[int | None, list[str]]:
+    """Validate optional integer ID field. Returns (None, []) if missing."""
+    if not id_value:
+        return (None, [])
+    return validate_int(id_value, invalid_error)
+
+
+def validate_string(
+    value: str | None, max_length: int | None, length_error: str
+) -> tuple[str | None, list[str]]:
+    """Validate & normalize a string value.
+    - strips whitespace
+    - converts "" -> None
+    - Checks max length if provided
+    Does not handle optional/required logic.
+    """
+    if not value:
+        return (None, [])
+
+    stripped = value.strip()
+    if not stripped:
+        return (None, [])
+
+    if max_length and len(stripped) > max_length:
+        return (None, [length_error])
+
+    return (stripped, [])
+
+
+def validate_required_string(
+    value: str | None,
+    max_length: int | None,
+    required_error: str,
+    length_error: str
+) -> tuple[str | None, list[str]]:
+    """Required string with optional max length."""
+    if not value or not value.strip():
+        return (None, [required_error])
+
+    return validate_string(value, max_length, length_error)
+
+
+def validate_optional_string(
+    value: str | None, 
+    max_length: int | None, 
+    length_error: str
+) -> tuple[str | None, list[str]]:
+    """Optional string with optional max length. Returns (None, []) if missing."""
+    if not value:
+        return (None, [])
+    
+    return validate_string(value, max_length, length_error)
+
 
 
 def validate_enum(
-    enum_str: str, enum_cls: type[Any], invalid_error: str
-) -> tuple[Any, list[str]]:
+    value: str, enum_class: type[Enum], invalid_error: str
+) -> tuple[Enum | None, list[str]]:
+    """
+    Validate enum value, normalizing to uppercase.
+    Returns enum member if valid, None otherwise.
+    """
     try:
-        enum_member = enum_cls[enum_str]
+        enum_member = enum_class[value.upper()]
+        return (enum_member, [])
     except KeyError:
         return (None, [invalid_error])
-    else:
-        return (enum_member, [])
+
+def validate_required_enum(
+    value: str | None,
+    enum_class: type[Enum],
+    invalid_error: str,
+    required_error: str
+) -> tuple[Enum | None, list[str]]:
+    if not value:
+        return (None, [required_error])
+    return validate_enum(value, enum_class, invalid_error)
+
+def validate_optional_enum(
+    value: str | None,
+    enum_class: type[Enum],
+    invalid_error: str,
+) -> tuple[Enum | None, list[str]]:
+    if not value:
+        return (None, [])
+    return validate_enum(value, enum_class, invalid_error)
 
 
 def parse_decimal(value: float | str) -> tuple[bool, Decimal | None]:
