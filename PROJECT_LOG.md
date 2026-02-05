@@ -18,8 +18,11 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
-# Files to clean up:
-1. validators.ts (when we do frontend validation)
+## [Tues 03.02.26]
+1. Recipe feature
+    - Add Recipe, RecipeIngredient models & revision
+    - Add RecipeRepository
+    
 
 ## [Thurs 21.01.26]
 1. Finish updating parsers.py
