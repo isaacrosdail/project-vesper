@@ -21,6 +21,8 @@ from app.modules.groceries.models import (
     ShoppingList,
     ShoppingListItem,
     Transaction,
+    Recipe,
+    RecipeIngredient,
     UnitEnum,
 )
 from app.shared.repository.base import BaseRepository
@@ -163,3 +165,66 @@ class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):
             ShoppingListItem.product_id == product_id,
         )
         return self.session.execute(stmt).scalars().first()
+
+class RecipeRepository(BaseRepository[Recipe]):
+    def __init__(self, session: Session, user_id: int) -> None:
+        super().__init__(session, user_id, model_cls=Recipe)
+
+    def create_recipe(
+            self, name: str, yields: float, yields_units: UnitEnum
+    ) -> Recipe:
+        recipe = Recipe(
+            user_id=self.user_id,
+            name=name,
+            yields=yields,
+            yields_units=yields_units
+        )
+
+        return self.add(recipe)
+
+    def get_recipe_with_ingredients(
+        self, recipe_id: int
+    ) -> Recipe | None:
+        stmt = self._user_select(Recipe).where(
+            Recipe.id==recipe_id
+        ).options(
+            joinedload(Recipe.ingredients).joinedload(RecipeIngredient.product)
+        )
+        import sys
+        result = self.session.execute(stmt).scalars().unique().one_or_none()
+        # print("=== RAW SQLALCHEMY OBJECT ===", file=sys.stderr)
+        # print(f"Type: {type(result)}", file=sys.stderr)
+        # print(f"result.name: {result.name}", file=sys.stderr)
+        # print(f"result.yields: {result.yields}", file=sys.stderr)
+        # print(f"result.ingredients type: {type(result.ingredients)}", file=sys.stderr)
+        # print(f"result.ingredients length: {len(result.ingredients)}", file=sys.stderr)
+        
+        # for i, ing in enumerate(result.ingredients):
+        #     print(f"\n--- Ingredient {i} ---", file=sys.stderr)
+        #     print(f"  Type: {type(ing)}", file=sys.stderr)
+        #     print(f"  ing.product_id: {ing.product_id}", file=sys.stderr)
+        #     print(f"  ing.amount_value: {ing.amount_value}", file=sys.stderr)
+        #     print(f"  ing.amount_units: {ing.amount_units}", file=sys.stderr)
+        #     print(f"  hasattr 'product': {hasattr(ing, 'product')}", file=sys.stderr)
+        #     if hasattr(ing, 'product'):
+        #         print(f"  ing.product: {ing.product}", file=sys.stderr)
+        #         print(f"  ing.product.name: {ing.product.name if ing.product else None}", file=sys.stderr)
+    
+        return result
+
+class RecipeIngredientRepository(BaseRepository[RecipeIngredient]):
+    def __init__(self, session: Session, user_id: int) -> None:
+        super().__init__(session, user_id, model_cls=RecipeIngredient)
+
+    def create_recipe_ingredient(
+            self, recipe_id: int, product_id: int, amount_value: float, amount_units: UnitEnum
+    ) -> RecipeIngredient:
+        recipe_ingredient = RecipeIngredient(
+            user_id=self.user_id,
+            recipe_id=recipe_id,
+            product_id=product_id,
+            amount_value=amount_value,
+            amount_units=amount_units
+        )
+
+        return self.add(recipe_ingredient)

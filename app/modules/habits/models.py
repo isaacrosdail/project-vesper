@@ -68,8 +68,8 @@ class LanguageEnum(enum.Enum):
 class Habit(Base, APISerializable):
     __api_exclude__: ClassVar[list[str]] = []
 
-    def to_api_dict(self) -> dict[str, Any]:
-        result = super().to_api_dict()
+    def to_api_dict(self, include_relations: bool = True) -> dict[str, Any]:
+        result = super().to_api_dict(include_relations)
         result["is_promotable"] = (
             self.status is not None and self.promotion_threshold is not None
         )

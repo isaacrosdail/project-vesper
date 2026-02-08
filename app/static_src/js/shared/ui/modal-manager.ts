@@ -2,6 +2,9 @@ import { makeToast } from './toast.js';
 import { apiRequest } from '../services/api.js';
 import { FormDialog, FormControlElement } from '../../types';
 import { formToJSON } from '../forms.js';
+import { isoToTimeInput, isoToDateInput } from '../datetime.js';
+import { formatDecimal } from '../numbers.js';
+import { removeTableRow } from '../tables.js';
 
 /**
  * Modal Manager
@@ -77,6 +80,10 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
         delete modal.dataset.mode;
         delete modal.dataset.itemId;
 
+        // trying custom event
+        // dispatch BEFORE doing cleanup so listeners can save state if needed?
+        modal.dispatchEvent(new CustomEvent('modal:cleanup'));
+
         // Revert fields to their original disabled states
         // for all initialDisabled => disable
         // for all now disabled without initialDisabled => re-enable them
@@ -95,11 +102,12 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
             el.textContent = '';
         })
 
-        const legend = modal.querySelector('legend');
-        if (legend && legend.dataset['originalText']) {
-            legend.textContent = legend.dataset['originalText'];
-            delete legend.dataset['originalText'];
-        }
+        // DEBUG: Should now be covered by our newHandleEdit function
+        // const legend = modal.querySelector('legend');
+        // if (legend && legend.dataset['originalText']) {
+        //     legend.textContent = legend.dataset['originalText'];
+        //     delete legend.dataset['originalText'];
+        // }
 
         const productHidden = modal.querySelector<HTMLInputElement>('#product_id_hidden');
         if (productHidden) {
@@ -177,6 +185,107 @@ function setupTabbedModal(modal: FormDialog): void {
     });
     const firstTab = modal.querySelector<HTMLButtonElement>('.tab-group button');
     firstTab?.click();
+}
+
+// TODO: Actually use subtype instead of itemLabel? for transactions
+// specific product select behavior
+export function newHandleEdit(
+    itemId: string,
+    url: string,       // caller builds url
+    modal: FormDialog, // caller finds modal
+    itemLabel: string, // for legend text: "Edit Product", etc
+) {
+    apiRequest('GET', url, null, {
+        onSuccess: (responseData) => {
+            modal.dataset.mode = 'edit';
+            modal.dataset.itemId = itemId;
+            // modal.dataset.subtype = subtype; does it break without this?
+            modal.showModal();
+            populateModalFields(modal, responseData.data);
+
+            const legend = modal.querySelector('legend');
+
+            modal.addEventListener('modal:cleanup', () => {
+                if (legend?.dataset.originalText) {
+                    legend.textContent = legend.dataset.originalText;
+                    delete legend.dataset['originalText'];
+                }
+            }, { once: true });
+
+            if (legend) {
+                legend.dataset.originalText = legend.textContent;
+                legend.textContent = `Edit ${itemLabel}`;
+            }
+        }
+    })
+}
+
+export async function handleDelete(
+    itemId: string,
+    url: string,
+) {
+    const confirmed = await confirmationManager.show("You sure you wanna delete?");
+    if (!confirmed) return;
+
+    apiRequest('DELETE', url, null, {
+        onSuccess: () => {
+            makeToast(`${itemId} deleted`, 'success');
+            const itemRow = document.querySelector<HTMLTableRowElement>(`[data-item-id="${itemId}"]`);
+            if (!itemRow) return;
+            removeTableRow(itemRow);
+        }
+    })
+}
+
+
+/**
+ * Populates form modal fields with data from API response.
+ * Matches field names to input element IDs and handles type-specific formatting
+ * (dates, times, checkboxes, selects, etc)
+ * 
+ * @remarks
+ * Relies on backend field names aligning with frontend input IDs.
+ */
+function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>) {
+    Object.entries(data).forEach(([fieldName, fieldValue]) => {
+        const input = modal.querySelector<HTMLInputElement>(`#${fieldName}`);
+        if (!input || fieldValue === null) return;
+
+        switch (input.type) {
+            case 'checkbox':
+                input.checked = fieldValue;
+                break;
+            case 'date':
+                input.value = isoToDateInput(fieldValue);
+                break;
+            case 'time':
+                input.value = isoToTimeInput(fieldValue);
+                break;
+            case 'select-one':
+                if (typeof fieldValue === 'string') {
+                    input.value = fieldValue.toLowerCase();
+                } else {
+                    input.value = fieldValue;
+                }
+                break;
+            default:
+                if (input.type === 'number') {
+                    const step = parseFloat(input.step) || 1;
+                    input.value = (step === 1)
+                        ? String(Math.round(fieldValue))
+                        : formatDecimal(fieldValue, 2);
+                } else {
+                    input.value = String(fieldValue);
+                }
+        }
+    });
+    // For time entries, derive entry_date from started_at
+    if ('started_at' in data) {
+        const entryDateInput = modal.querySelector<HTMLInputElement>('#entry_date');
+        if (entryDateInput) {
+            entryDateInput.value = isoToDateInput(data['started_at']);
+        }
+    }
 }
 
 /**

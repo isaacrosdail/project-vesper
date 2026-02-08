@@ -22,6 +22,8 @@ from app.modules.groceries.models import (
     ShoppingList,
     ShoppingListItem,
     Transaction,
+    Recipe,
+    RecipeIngredient,
 )
 from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
 from app.modules.metrics.models import DailyMetrics
@@ -45,6 +47,8 @@ MODEL_CLASSES: dict[tuple[str, str], type[Any]] = {
     ("groceries", "transactions"): Transaction,
     ("groceries", "shopping_lists"): ShoppingList,
     ("groceries", "shopping_list_items"): ShoppingListItem,
+    ("groceries", "recipes"): Recipe,
+    ("groceries", "recipe_ingredients"): RecipeIngredient,
     ("tasks", "tasks"): Task,
     ("habits", "habits"): Habit,
     ("habits", "habit_completions"): HabitCompletion,

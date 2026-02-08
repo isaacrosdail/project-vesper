@@ -1,6 +1,9 @@
 
 import { formatToUserTimeString } from "../shared/datetime";
 import { initValidation, makeValidator } from '../shared/validators';
+import { contextMenu } from '../shared/ui/context-menu';
+import { confirmationManager, newHandleEdit, handleDelete } from '../shared/ui/modal-manager.js';
+
 
 function validateDueDate(dueDateString: string): string | null {
     const isFrogCheckBox = document.querySelector<HTMLInputElement>('#is_frog');
@@ -37,7 +40,7 @@ export function init() {
     if (!isFrogCheckbox || !dueDateField) return;
 
     isFrogCheckbox.addEventListener('change', () => {
-        // dueDateField.required = isFrogCheckbox.checked;
+        dueDateField.required = isFrogCheckbox.checked;
         priorityField.disabled = isFrogCheckbox.checked;
     });
 
@@ -49,4 +52,37 @@ export function init() {
         due_date: validateDueDate,
         name: validateTaskName,
     })
+
+    document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+
+        if (target.matches('.js-table-options')) {
+            const button = target.closest('.row-actions')!;
+            const modal = document.querySelector('#tasks-entry-dashboard-modal');
+            const itemId = target.closest('.table-row')!.dataset.itemId;
+            // const { itemId, module, subtype } = row.dataset;
+            const url = `/tasks/tasks/${itemId}`;
+
+            const rect = button.getBoundingClientRect();
+            contextMenu.create({
+                position: { x: rect.left, y: rect.bottom },
+                items: [
+                    {
+                        label: 'Edit',
+                        action: () => {
+                            console.log("Editing task: ", itemId);
+                            newHandleEdit(itemId, url, modal, 'Task');
+                        }
+                    },
+                    {
+                        label: 'Delete',
+                        action: () => {
+                            console.log("Deleting task: ", itemId);
+                            handleDelete(itemId, url);
+                        }
+                    }
+                ]
+            })
+        }
+    });
 }

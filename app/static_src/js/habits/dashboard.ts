@@ -4,6 +4,8 @@ import { apiRequest } from '../shared/services/api';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
 import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
 import { initValidation, makeValidator } from '../shared/validators';
+import { confirmationManager, newHandleEdit, handleDelete } from '../shared/ui/modal-manager.js';
+
 
 type BarData = {
     name: string;
@@ -153,6 +155,35 @@ export async function init() {
             const url = new URL(window.location.href);
             url.searchParams.set(`${table}_range`, range);
             window.location.href = url.toString();
+        }
+
+        if (target.matches('.js-table-options')) {
+            const button = target.closest('.row-actions')!;
+            const modal = document.querySelector('#habits-entry-dashboard-modal');
+            const itemId = target.closest('.table-row')!.dataset.itemId;
+            // const { itemId, module, subtype } = row.dataset;
+            const url = `/tasks/tasks/${itemId}`;
+
+            const rect = button.getBoundingClientRect();
+            contextMenu.create({
+                position: { x: rect.left, y: rect.bottom },
+                items: [
+                    {
+                        label: 'Edit',
+                        action: () => {
+                            console.log("Editing task: ", itemId);
+                            newHandleEdit(itemId, url, modal, 'Task');
+                        }
+                    },
+                    {
+                        label: 'Delete',
+                        action: () => {
+                            console.log("Deleting task: ", itemId);
+                            handleDelete(itemId, url);
+                        }
+                    }
+                ]
+            })
         }
     });
 

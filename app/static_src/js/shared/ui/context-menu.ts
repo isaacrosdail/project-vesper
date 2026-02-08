@@ -1,7 +1,6 @@
 import { makeToast } from './toast.js';
 import { apiRequest } from '../services/api.js';
-import { isoToTimeInput, isoToDateInput } from '../datetime.js';
-import { formatDecimal } from '../numbers.js';
+
 import { removeTableRow } from '../tables.js';
 import { confirmationManager } from './modal-manager.js';
 import { FormDialog } from '../../types';
@@ -16,16 +15,6 @@ type MenuItem = {
 }
 
 type ActionType = 'edit' | 'delete' | 'addToShoppingList' | 'toggleTaskComplete';
-
-const MENU_CONFIG: Record<'default' | 'products' | 'transactions' | 'tasks', MenuItem[]> = {
-    default: [
-        {text: 'Edit', action: 'edit'},
-        {text: 'Delete', action: 'delete'}
-    ],
-    products: [{text: 'Add to shopping list', action: 'addToShoppingList'}],
-    transactions: [{text: 'Add to shopping list', action: 'addToShoppingList'}],
-    tasks: [{text: 'Toggle complete', action: 'toggleTaskComplete'}]
-}
 
 type ContextObject = {
     context: {
@@ -47,6 +36,16 @@ type DotsMenuTrigger = ContextObject & {
 }
 
 type TriggerInfo = ContextMenuTrigger | DotsMenuTrigger;
+
+const MENU_CONFIG: Record<'default' | 'products' | 'transactions' | 'tasks', MenuItem[]> = {
+    default: [
+        {text: 'Edit', action: 'edit'},
+        {text: 'Delete', action: 'delete'}
+    ],
+    products: [{text: 'Add to shopping list', action: 'addToShoppingList'}],
+    transactions: [{text: 'Add to shopping list', action: 'addToShoppingList'}],
+    tasks: [{text: 'Toggle complete', action: 'toggleTaskComplete'}]
+}
 
 /**
  * Creates & displays a context menu at the specified position.
@@ -103,55 +102,6 @@ export function closeMenu() {
     document.querySelector('.context-menu')?.remove();
 }
 
-/**
- * Populates form modal fields with data from API response.
- * Matches field names to input element IDs and handles type-specific formatting
- * (dates, times, checkboxes, selects, etc)
- * 
- * @remarks
- * Relies on backend field names aligning with frontend input IDs.
- */
-function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>) {
-    Object.entries(data).forEach(([fieldName, fieldValue]) => {
-        const input = modal.querySelector<HTMLInputElement>(`#${fieldName}`);
-        if (!input || fieldValue === null) return;
-
-        switch (input.type) {
-            case 'checkbox':
-                input.checked = fieldValue;
-                break;
-            case 'date':
-                input.value = isoToDateInput(fieldValue);
-                break;
-            case 'time':
-                input.value = isoToTimeInput(fieldValue);
-                break;
-            case 'select-one':
-                if (typeof fieldValue === 'string') {
-                    input.value = fieldValue.toLowerCase();
-                } else {
-                    input.value = fieldValue;
-                }
-                break;
-            default:
-                if (input.type === 'number') {
-                    const step = parseFloat(input.step) || 1;
-                    input.value = (step === 1)
-                        ? String(Math.round(fieldValue))
-                        : formatDecimal(fieldValue, 2);
-                } else {
-                    input.value = String(fieldValue);
-                }
-        }
-    });
-    // For time entries, derive entry_date from started_at
-    if ('started_at' in data) {
-        const entryDateInput = modal.querySelector<HTMLInputElement>('#entry_date');
-        if (entryDateInput) {
-            entryDateInput.value = isoToDateInput(data['started_at']);
-        }
-    }
-}
 
 /**
  * Opens form modal dialog and populates fields with data fetched from API.
@@ -209,6 +159,37 @@ function handleEdit(menuContext: ContextObject['context']) {
     });
 }
 
+// export function newHandleEdit(
+//     itemId: string,
+//     url: string,       // caller builds url
+//     modal: FormDialog, // caller finds modal
+//     itemLabel: string, // for legend text: "Edit Product", etc
+// ) {
+//     apiRequest('GET', url, null, {
+//         onSuccess: (responseData) => {
+//             modal.dataset.mode = 'edit';
+//             modal.dataset.itemId = itemId;
+//             // modal.dataset.subtype = subtype; does it break without this?
+//             modal.showModal();
+//             populateModalFields(modal, responseData.data);
+
+//             const legend = modal.querySelector('legend');
+
+//             modal.addEventListener('modal:cleanup', () => {
+//                 if (legend?.dataset.originalText) {
+//                     legend.textContent = legend.dataset.originalText;
+//                     delete legend.dataset['originalText'];
+//                 }
+//             }, { once: true });
+
+//             if (legend) {
+//                 legend.dataset.originalText = legend.textContent;
+//                 legend.textContent = `Edit ${itemLabel}`;
+//             }
+//         }
+//     })
+// }
+
 /**
  * Prompts for confirmation, then deletes the item via API.
  * Removes the table row from DOM on success.
@@ -233,32 +214,32 @@ async function handleDelete(menuContext: ContextObject['context']) {
     });
 }
 
-/**
- * Adds product to shopping list or increments quantity if already present.
- */
-function handleAddToShoppingList(menuContext: ContextObject['context']) {
-    const productId = (menuContext.subtype === 'transactions')
-        ? menuContext.productId
-        : menuContext.itemId;
-    const quantityWanted = 1;
-    const url = '/groceries/shopping-lists/items';
-    const data = { product_id: productId, quantity_wanted: quantityWanted };
+// /**
+//  * Adds product to shopping list or increments quantity if already present.
+//  */
+// function handleAddToShoppingList(menuContext: ContextObject['context']) {
+//     const productId = (menuContext.subtype === 'transactions')
+//         ? menuContext.productId
+//         : menuContext.itemId;
+//     const quantityWanted = 1;
+//     const url = '/groceries/shopping-lists/items';
+//     const data = { product_id: productId, quantity_wanted: quantityWanted };
 
-    apiRequest('POST', url, data, {
-        onSuccess: (responseData) => {
-            const { id, product_id, product_name } = responseData.data;
-            const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${productId}"]`);
-            if (existingLi) {
-                const newQty = updateQty(existingLi);
-                makeToast(`Updated ${product_name} quantity to ${newQty}`, 'success');
-                return;
-            }
+//     apiRequest('POST', url, data, {
+//         onSuccess: (responseData) => {
+//             const { id, product_id, product_name } = responseData.data;
+//             const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${productId}"]`);
+//             if (existingLi) {
+//                 const newQty = updateQty(existingLi);
+//                 makeToast(`Updated ${product_name} quantity to ${newQty}`, 'success');
+//                 return;
+//             }
 
-            addShoppingListItemToDOM(id, product_id, product_name);
-            makeToast(`Added ${product_name} to shopping list`, 'success');
-        }
-    });
-}
+//             addShoppingListItemToDOM(id, product_id, product_name);
+//             makeToast(`Added ${product_name} to shopping list`, 'success');
+//         }
+//     });
+// }
 
 function toggleTaskComplete(menuContext: ContextObject['context']) {
     const newIsDone = !menuContext.isDone;
@@ -327,102 +308,222 @@ document.addEventListener('contextmenu', (e) => {
     }
 });
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeMenu();
+// document.addEventListener('keydown', (e) => {
+//     if (e.key === 'Escape') {
+//         closeMenu();
+//     }
+// });
+
+// document.addEventListener('click', async (e) => {
+    // const menu = document.querySelector('.context-menu');
+    // const target = e.target as HTMLElement;
+
+    // // if (menu && !menu.contains(target)) {
+    // //     menu.remove();
+    // //     return;
+    // // }
+
+    // const action = target.dataset['action'] as ActionType | undefined;
+
+    // // // This is just an object where keys are strings and values are function references (not calling them, just storing them)
+    // // const actionHandlers: Record<ActionType, (context: ContextObject['context']) => void> = {
+    // //     'edit': handleEdit,
+    // //     'delete': handleDelete,
+    // //     'addToShoppingList': handleAddToShoppingList,
+    // //     'toggleTaskComplete': toggleTaskComplete
+    // // }
+
+    // // With guard, call appropriate action & pass in menu.context
+    // if (action && menu && actionHandlers[action]) {
+    //     actionHandlers[action]((menu as any).context);
+    //     // since handleX functions now lack access to menu element, we'll clean menu up here instead
+    //     menu.remove();
+    // }
+
+//     if (target.matches('.js-table-options')) {
+//         const button = target.closest<HTMLButtonElement>('.row-actions')!;
+//         const row = target.closest<HTMLElement>('.table-row')!;
+//         const { itemId, module, subtype } = row.dataset;
+
+//         if (!itemId || !module || !subtype) {
+//             console.error('Missing required data on row');
+//             return;
+//         }
+
+//         const triggerInfo: DotsMenuTrigger =
+//         {
+//             type: 'dots',
+//             rect: button.getBoundingClientRect(),
+//             context: {
+//                 itemId,
+//                 module,
+//                 subtype: subtype as MenuOptionTypes,
+//                 isDone: row?.dataset['isDone'] === 'True',
+//                 productId: row?.dataset['productId']
+//             }
+//         };
+
+//         openMenu(triggerInfo);
+//     }
+// });
+
+// function updateQty(existingLi: HTMLLIElement) {
+//     const qtySpan = existingLi.querySelector('.item-qty');
+//     if (!qtySpan) {
+//         throw new Error('Quantity span not found');
+//     }
+
+//     const currentQty = parseInt(existingLi.dataset['quantityWanted'] ?? '0', 10);
+//     const newQty = currentQty + 1;
+
+//     qtySpan.textContent = String(newQty);
+//     existingLi.dataset['quantityWanted'] = String(newQty);
+//     return newQty;
+// }
+
+// function addShoppingListItemToDOM(itemId: string, productId: string, productName: string, quantity = 1) {
+//     const ul = document.querySelector('.shopping-list');
+//     if (!ul) {
+//         throw new Error('Shopping list <ul> not found')
+//     }
+
+//     document.querySelector('#list-empty')?.remove(); // placeholder text
+
+//     // Clone the contents of our template for the new li
+//     const template = document.querySelector<HTMLTemplateElement>('#shoppinglist-item-template');
+//     const fragment = template?.content.cloneNode(true) as DocumentFragment;
+
+//     const li = fragment.querySelector('li');
+//     if (!li) throw new Error('li not found in template');
+
+//     const itemText = li.querySelector('.item-text');
+//     const itemQty = li.querySelector('.item-qty');
+//     if (!itemText || !itemQty) throw new Error('Template structure invalid');
+
+//     itemText.textContent = productName;
+//     itemQty.textContent = String(quantity);
+//     li.dataset['itemId'] = itemId;
+//     li.dataset['productId'] = productId;
+//     li.dataset['quantityWanted'] = String(quantity);
+//     ul.appendChild(li);
+// }
+
+// // Usage draft:
+// contextMenu.create({
+//     position: {x, y},
+//     items: [
+//         {
+//             label: 'Delete',
+//             action: () => {
+//                 handleDelete(recipeId);
+//             }
+//         }
+//     ]
+// })
+
+type ContextMenuItem = {
+    label: string;
+    action: () => void | Promise<void>;
+}
+
+type ContextMenuConfig = {
+    position: {x: number, y: number};
+    items: ContextMenuItem[];
+}
+
+
+// DRAFTING IMPROVED CONTEXT MENU 'API':
+class ContextMenu {
+    private isCreating = false;
+
+    constructor() {
+        this.setupGlobalListeners();
     }
-});
 
-document.addEventListener('click', async (e) => {
-    const menu = document.querySelector('.context-menu');
-    const target = e.target as HTMLElement;
+    private setupGlobalListeners(): void {
+        // close when clcking outside
+        document.addEventListener('click', (e) => {
+            if (this.isCreating) return;
+            const menu = document.querySelector('.context-menu');
+            const target = e.target;
 
-    if (menu && !menu.contains(target)) {
-        menu.remove();
-        return;
+            if (menu && !menu.contains(target)) {
+                this.close();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.close();
+            }
+        });
     }
 
-    const action = target.dataset['action'] as ActionType | undefined;
+    create(config: ContextMenuConfig): void {
+        // Close THIS menu
+        this.close();
+        this.isCreating = true; // prevent global click listener from auto-closing
 
-    // This is just an object where keys are strings and values are function references (not calling them, just storing them)
-    const actionHandlers: Record<ActionType, (context: ContextObject['context']) => void> = {
-        'edit': handleEdit,
-        'delete': handleDelete,
-        'addToShoppingList': handleAddToShoppingList,
-        'toggleTaskComplete': toggleTaskComplete
-    }
-
-    // With guard, call appropriate action & pass in menu.context
-    if (action && menu && actionHandlers[action]) {
-        actionHandlers[action]((menu as any).context);
-        // since handleX functions now lack access to menu element, we'll clean menu up here instead
-        menu.remove();
-    }
-
-    if (target.matches('.dots-btn')) {
-        const button = target.closest<HTMLButtonElement>('.row-actions')!;
-        const row = target.closest<HTMLElement>('.table-row')!;
-        const { itemId, module, subtype } = row.dataset;
-
-        if (!itemId || !module || !subtype) {
-            console.error('Missing required data on row');
+        if (config.items.length === 0) {
+            console.warn('ContextMenu: No items provided');
+            this.isCreating = false;
             return;
         }
 
-        const triggerInfo: DotsMenuTrigger =
-        {
-            type: 'dots',
-            rect: button.getBoundingClientRect(),
-            context: {
-                itemId,
-                module,
-                subtype: subtype as MenuOptionTypes,
-                isDone: row?.dataset['isDone'] === 'True',
-                productId: row?.dataset['productId']
-            }
-        };
+        // build menu from config
+        const menu = document.createElement('ul');
+        menu.classList.add('context-menu');
 
-        openMenu(triggerInfo);
+        // this time, caller just passes what they want :D
+        const items = config.items;
+
+        // build & append li els
+        const menuEls = items.map(item => {
+            const li = document.createElement('li');
+            li.textContent = item.label; // was item.text now item.label
+
+            // li.dataset.action = item.action; <-- now, instead of this approach
+            // where we'd then look up the string action to dictate what to call
+            // we'll feed the function to be exec'ed in as a callback,
+            // and then attach a listener for said li to run said callback?
+            li.addEventListener('click', async() => {
+                // Note: await is only needed since some actions might be async
+                // Case in point: Delete, since it shows the confirmationManager!
+                try {
+                    await item.action(); // exec stored func
+                    this.close(); // exec internal close() method?
+                } catch (error) {
+                    console.error('ContextMenu action failed: ', error);
+                    this.close();
+                }
+            });
+
+            return li;
+        });
+        console.log("appending children...")
+        menuEls.forEach(el => menu.appendChild(el));
+        console.log(menu)
+        // position menu
+        // Since we're taking {x, y} directly from caller, this gets STUPID simple
+        menu.style.left = config.position.x + 'px';
+        menu.style.top = config.position.y + 'px';
+
+        menu.style.display = 'block';
+        console.log("appending menu to DOM...")
+        // (menu as any).context = triggerInfo.context; <-- dont need! :D
+
+        // append to body
+        document.body.appendChild(menu);
+
+        setTimeout(() => {
+            this.isCreating = false;
+        }, 0); // defer reset to next tick
     }
-});
 
-function updateQty(existingLi: HTMLLIElement) {
-    const qtySpan = existingLi.querySelector('.item-qty');
-    if (!qtySpan) {
-        throw new Error('Quantity span not found');
+    close(): void {
+        document.querySelector('.context-menu')?.remove();
     }
-
-    const currentQty = parseInt(existingLi.dataset['quantityWanted'] ?? '0', 10);
-    const newQty = currentQty + 1;
-
-    qtySpan.textContent = String(newQty);
-    existingLi.dataset['quantityWanted'] = String(newQty);
-    return newQty;
 }
 
-function addShoppingListItemToDOM(itemId: string, productId: string, productName: string, quantity = 1) {
-    const ul = document.querySelector('.shopping-list');
-    if (!ul) {
-        throw new Error('Shopping list <ul> not found')
-    }
-
-    document.querySelector('#list-empty')?.remove(); // placeholder text
-
-    // Clone the contents of our template for the new li
-    const template = document.querySelector<HTMLTemplateElement>('#shoppinglist-item-template');
-    const fragment = template?.content.cloneNode(true) as DocumentFragment;
-
-    const li = fragment.querySelector('li');
-    if (!li) throw new Error('li not found in template');
-
-    const itemText = li.querySelector('.item-text');
-    const itemQty = li.querySelector('.item-qty');
-    if (!itemText || !itemQty) throw new Error('Template structure invalid');
-
-    itemText.textContent = productName;
-    itemQty.textContent = String(quantity);
-    li.dataset['itemId'] = itemId;
-    li.dataset['productId'] = productId;
-    li.dataset['quantityWanted'] = String(quantity);
-    ul.appendChild(li);
-}
+// export singleton
+export const contextMenu = new ContextMenu();

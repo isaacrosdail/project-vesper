@@ -91,6 +91,7 @@ class User(Base, UserMixin):  # type: ignore[misc]
     transactions = relationship("Transaction", back_populates="user")
     shopping_list = relationship("ShoppingList", back_populates="user")
     shopping_list_item = relationship("ShoppingListItem", back_populates="user")
+    recipes = relationship("Recipe", back_populates="user")
     time_entry = relationship("TimeEntry", back_populates="user")
     habit_completion = relationship("HabitCompletion", back_populates="user")
     leet_code_record = relationship("LeetCodeRecord", back_populates="user")

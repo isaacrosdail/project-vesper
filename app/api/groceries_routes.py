@@ -113,3 +113,45 @@ def add_shoppinglist_item(session: Session) -> tuple[Response, int]:
     return api_response(
         success=True, message=result["message"], data=item.to_api_dict()
     ), 201
+
+@api_bp.post("/groceries/recipes/")
+@login_plus_session
+def recipes(session: Session) -> tuple[Response, int]:
+    data = request.json
+    import sys
+    from pprint import pprint
+    pprint(data, stream=sys.stderr)
+
+    # typed_data, errors = validate_recipe(pass)
+    groceries_service = create_groceries_service(
+        session, current_user.id, current_user.timezone
+    )
+
+    item = groceries_service.create_recipe_with_ingredients(
+        data['recipe_name'], data['yields'], data['yields_units'], data['ingredients']
+    )
+
+    ## TODO: Return the actual item.to_api_dict()
+    return api_response(
+        success=True, message="noice", data= { "heck": 2 }
+    ), 201
+
+@api_bp.get("/groceries/recipes/<int:recipe_id>/details")
+@login_plus_session
+def get_recipe_detail(session: Session, recipe_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(
+        session, current_user.id, current_user.timezone
+    )
+
+    recipe = groceries_service.recipe_repo.get_recipe_with_ingredients(recipe_id)
+    if not recipe:
+        return api_response(
+            success=False,
+            message="Recipe not found :(",
+        ), 404
+
+    return api_response(
+        success=True,
+        message="yolo",
+        data=recipe.to_api_dict(include_relations=True)
+    ), 200
