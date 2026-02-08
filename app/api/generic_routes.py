@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
 import logging
 from contextlib import suppress
+from dataclasses import dataclass
 from datetime import datetime
 
 from flask import Response, abort, request
@@ -42,24 +43,29 @@ logger = logging.getLogger(__name__)
 
 # Map to correct model based on module passed in
 # This uses module + subtype to resolve to the specific model
-MODEL_CLASSES: dict[tuple[str, str], type[Any]] = {
-    ("groceries", "products"): Product,
-    ("groceries", "transactions"): Transaction,
-    ("groceries", "shopping_lists"): ShoppingList,
-    ("groceries", "shopping_list_items"): ShoppingListItem,
-    ("groceries", "recipes"): Recipe,
-    ("groceries", "recipe_ingredients"): RecipeIngredient,
-    ("tasks", "tasks"): Task,
-    ("habits", "habits"): Habit,
-    ("habits", "habit_completions"): HabitCompletion,
-    ("habits", "leet_code_records"): LeetCodeRecord,
-    ("metrics", "daily_metrics"): DailyMetrics,
-    ("time_tracking", "time_entries"): TimeEntry,
+# NOTE: Using dataclass for learning, tuple keys would be simpler here
+@dataclass(frozen=True)
+class ModelKey:
+    module: str
+    subtype: str
+
+MODEL_CLASSES: dict[ModelKey, type[Any]] = {
+    ModelKey("groceries", "products"): Product,
+    ModelKey("groceries", "transactions"): Transaction,
+    ModelKey("groceries", "shopping_lists"): ShoppingList,
+    ModelKey("groceries", "shopping_list_items"): ShoppingListItem,
+    ModelKey("groceries", "recipes"): Recipe,
+    ModelKey("groceries", "recipe_ingredients"): RecipeIngredient,
+    ModelKey("tasks", "tasks"): Task,
+    ModelKey("habits", "habits"): Habit,
+    ModelKey("habits", "habit_completions"): HabitCompletion,
+    ModelKey("habits", "leet_code_records"): LeetCodeRecord,
+    ModelKey("metrics", "daily_metrics"): DailyMetrics,
+    ModelKey("time_tracking", "time_entries"): TimeEntry,
 }
 
-
 def _get_model_class(module: str, subtype: str) -> type[Any] | None:
-    return MODEL_CLASSES.get((module, subtype))
+    return MODEL_CLASSES.get(ModelKey(module, subtype))
 
 
 @api_bp.route("/<module>/<subtype>/<int:item_id>", methods=["GET", "PATCH", "DELETE"])
