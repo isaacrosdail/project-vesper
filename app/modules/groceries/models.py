@@ -204,3 +204,70 @@ class ShoppingListItem(Base, APISerializable):
 
     def __repr__(self) -> str:
         return f"<ShoppingListItem id={self.id} product={self.product.name!r} qty={self.quantity_wanted}>"
+
+
+class Recipe(Base, APISerializable):
+    """Represents individual recipe, itself consisting of ????"""
+
+    __table_args__ = (
+        CheckConstraint(
+            "yields > 0", name="ck_recipe_yields_positive"
+        ),
+    )
+
+    name: Mapped[str] = mapped_column(
+        String, nullable=False
+    )
+
+    yields: Mapped[float] = mapped_column(
+        Float, nullable=False
+    )
+
+    yields_units: Mapped[UnitEnum] = mapped_column(
+        SAEnum(
+            UnitEnum, values_callable=lambda x: [e.value for e in x]
+        ),
+        nullable=False,
+        default=UnitEnum.G,
+        server_default='G'
+    )
+
+    user = relationship("User", back_populates="recipes")
+    ingredients = relationship(
+        "RecipeIngredient",
+        back_populates="recipe",
+        cascade="all, delete-orphan"
+    )
+
+class RecipeIngredient(Base, APISerializable):
+    """Represents single ingredient in a given Recipe (list)"""
+
+    __table_args__ = (
+        CheckConstraint(
+            "amount_value > 0", name="ck_recipe_ingredient_amount_value_positive"
+        ),
+    )
+
+    recipe_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("recipes.id"), nullable=False
+    )
+
+    product_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("products.id"), nullable=False
+    )
+
+    amount_value: Mapped[float] = mapped_column(
+        Float, nullable=False
+    )
+
+    amount_units: Mapped[UnitEnum] = mapped_column(
+        SAEnum(
+            UnitEnum, values_callable=lambda x: [e.value for e in x]
+        ),
+        nullable=False,
+        default=UnitEnum.G,
+        server_default='G'
+    )
+
+    recipe = relationship("Recipe", back_populates="ingredients")
+    product = relationship("Product")
