@@ -1,8 +1,10 @@
 import * as d3 from 'd3';
 
-import { removeTooltip, createTooltip } from '../shared/ui/tooltip';
+import { D3_TRANSITION_DURATION_MS, getChartDimensions } from '../shared/charts';
 import { apiRequest } from '../shared/services/api';
-import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
+import { contextMenu } from '../shared/ui/context-menu';
+import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
+import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
 import { initValidation, makeValidator } from '../shared/validators';
 
 type PieDatum = {
@@ -239,6 +241,30 @@ export async function init() {
             const url = new URL(window.location.href);
             url.searchParams.set(`${table}_range`, range);
             window.location.href = url.toString();
+        }
+
+        // Handle table ellipsis options click
+        if (target.matches('.js-table-options')) {
+            const button = target.closest('.row-actions')!;
+            const row = target.closest('.table-row')!;
+            const { itemId } = row.dataset;
+            const url = `/time_tracking/time_entries/${itemId}`;
+            const modal = document.querySelector('#time_entries-entry-dashboard-modal');
+            const rect = button.getBoundingClientRect();
+
+            contextMenu.create({
+                position: { x: rect.left, y: rect.bottom },
+                items: [
+                    {
+                        label: 'Edit',
+                        action: () => openModalForEdit(itemId, url, modal, 'Time Entry')
+                    },
+                    {
+                        label: 'Delete',
+                        action: () => handleDelete(itemId, url)
+                    }
+                ]
+            })
         }
     });
 

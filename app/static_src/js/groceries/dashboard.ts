@@ -1,7 +1,10 @@
-// Entry point for groceries JS
-import { confirmationManager } from '../shared/ui/modal-manager.js';
+
 import { apiRequest } from '../shared/services/api.js';
+import { contextMenu } from '../shared/ui/context-menu';
+import { confirmationManager, handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
+import { makeToast } from '../shared/ui/toast.js';
 import { initValidation, makeValidator } from '../shared/validators';
+
 
 type UnitGroupKey = 'weight' | 'volume';
 type Unit = 'g' | 'kg' | 'oz' | 'lb' | 'ml' | 'l' | 'fl_oz';
@@ -159,7 +162,75 @@ function toggleProductFields(e: Event): void {
 }
 
 
-export function init() {
+function updateQty(existingLi: HTMLLIElement) {
+    const qtySpan = existingLi.querySelector('.item-qty');
+    if (!qtySpan) {
+        throw new Error('Quantity span not found');
+    }
+
+    const currentQty = parseInt(existingLi.dataset['quantityWanted'] ?? '0', 10);
+    const newQty = currentQty + 1;
+
+    qtySpan.textContent = String(newQty);
+    existingLi.dataset['quantityWanted'] = String(newQty);
+    return newQty;
+}
+
+function addShoppingListItemToDOM(itemId: string, productId: string, productName: string, quantity = 1) {
+    const ul = document.querySelector('.shopping-list');
+    if (!ul) {
+        throw new Error('Shopping list <ul> not found')
+    }
+
+    document.querySelector('#list-empty')?.remove(); // placeholder text
+
+    // Clone the contents of our template for the new li
+    const template = document.querySelector<HTMLTemplateElement>('#shoppinglist-item-template');
+    const fragment = template?.content.cloneNode(true) as DocumentFragment;
+
+    const li = fragment.querySelector('li');
+    if (!li) throw new Error('li not found in template');
+
+    const itemText = li.querySelector('.item-text');
+    const itemQty = li.querySelector('.item-qty');
+    if (!itemText || !itemQty) throw new Error('Template structure invalid');
+
+    itemText.textContent = productName;
+    itemQty.textContent = String(quantity);
+    li.dataset['itemId'] = itemId;
+    li.dataset['productId'] = productId;
+    li.dataset['quantityWanted'] = String(quantity);
+    ul.appendChild(li);
+}
+
+
+/**
+ * Adds product to shopping list or increments quantity if already present.
+ */
+function handleAddToShoppingList(
+    productId: string,
+) {
+    const quantityWanted = 1;
+    const url = '/groceries/shopping-lists/items';
+    const data = { product_id: productId, quantity_wanted: quantityWanted };
+
+    apiRequest('POST', url, data, {
+        onSuccess: (responseData) => {
+            const { id, product_id, product_name } = responseData.data;
+            const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${productId}"]`);
+            if (existingLi) {
+                const newQty = updateQty(existingLi);
+                makeToast(`Updated ${product_name} quantity to ${newQty}`, 'success');
+                return;
+            }
+
+            addShoppingListItemToDOM(id, product_id, product_name);
+            makeToast(`Added ${product_name} to shopping list`, 'success');
+        }
+    });
+}
+
+export async function init() {
     const transactionModal = document.querySelector<HTMLDialogElement>('#transactions-entry-dashboard-modal');
     const priceField = transactionModal?.querySelector<HTMLInputElement>('[name="price_at_scan"]');
     const shoppingList = document.querySelector('.shopping-list');
@@ -307,4 +378,67 @@ export function init() {
             net_weight: validateNetWeight,
         }
     )
+
+    // Handle table ellipsis clicks
+    document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+
+        if (target.matches('.js-table-options')) {
+            const button = target.closest<HTMLButtonElement>('.row-actions')!;
+            const row = target.closest<HTMLElement>('.table-row')!;
+            const { itemId, module, subtype } = row.dataset;
+
+            if (!itemId || !module || !subtype) {
+                console.error('Missing required data on row');
+                return;
+            }
+
+            const rect = button.getBoundingClientRect();
+
+            if (subtype === 'products') {
+                const modal = document.querySelector(`#${subtype}-entry-dashboard-modal`);
+                const url = `/groceries/products/${itemId}`;
+
+                contextMenu.create({
+                    position: { x: rect.left, y: rect.bottom },
+                    items: [
+                        {
+                            label: 'Edit',
+                            action: () => openModalForEdit(itemId, url, modal, 'Product')
+                        },
+                        {
+                            label: 'Delete',
+                            action: () => handleDelete(itemId, url)
+                        },
+                        {
+                            label: 'Add to Shopping List',
+                            action: () => handleAddToShoppingList(itemId)
+                        }
+                    ]
+                });
+            } else if (subtype === 'transactions') {
+                const modal = document.querySelector(`#${subtype}-entry-dashboard-modal`);
+                const productId = row.dataset.productId;
+                const url = `/groceries/transactions/${itemId}`;
+
+                contextMenu.create({
+                    position: { x: rect.left, y: rect.bottom },
+                    items: [
+                        {
+                            label: 'Edit',
+                            action: () => openModalForEdit(itemId, url, modal, 'Transaction')
+                        },
+                        {
+                            label: 'Delete',
+                            action: () => handleDelete(itemId, url)
+                        },
+                        {
+                            label: 'Add to Shopping List',
+                            action: () => handleAddToShoppingList(productId)
+                        }
+                    ]
+                });
+            }
+        }
+    });
 }

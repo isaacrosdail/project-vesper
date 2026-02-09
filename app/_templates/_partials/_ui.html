@@ -76,8 +76,8 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
             >
           {{ caller(item, headers) }}
           <td class="table-cell delete-cell">
-            <button class="row-actions dots-btn btn-icon btn-square" data-item-id="{{ item.id }}">
-                {{ options_ellipsis() }}
+            <button class="js-table-options row-actions dots-btn btn-icon btn-square" data-item-id="{{ item.id }}">
+                {{ ellipsis_svg() }}
             </button>
           </td>
         </tr>
@@ -261,7 +261,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
   </svg>
 {% endmacro %}
 
-{% macro options_ellipsis() %}
+{% macro ellipsis_svg() %}
 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
   <path d="M7 12a3 3 0 10-6 0 3 3 0 106 0m8 0a3 3 0 10-6 0 3 3 0 106 0m8 0a3 3 0 10-6 0 3 3 0 106 0" />
 </svg>

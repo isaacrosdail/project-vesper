@@ -1,9 +1,12 @@
 import * as d3 from 'd3';
 
+import { D3_TRANSITION_DURATION_MS, getChartDimensions } from '../shared/charts';
 import { apiRequest } from '../shared/services/api';
+import { contextMenu } from '../shared/ui/context-menu';
+import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
-import { getChartDimensions, D3_TRANSITION_DURATION_MS } from '../shared/charts';
 import { initValidation, makeValidator } from '../shared/validators';
+
 
 type BarData = {
     name: string;
@@ -153,6 +156,48 @@ export async function init() {
             const url = new URL(window.location.href);
             url.searchParams.set(`${table}_range`, range);
             window.location.href = url.toString();
+        }
+
+        if (target.matches('.js-table-options')) {
+            const button = target.closest('.row-actions')!;
+            const row = target.closest('.table-row')!;
+            const { itemId, subtype } = row.dataset;
+            const rect = button.getBoundingClientRect();
+            
+            if (subtype === 'habits') {
+                const url = `/habits/habits/${itemId}`;
+                const modal = document.querySelector('#habits-entry-dashboard-modal');
+
+                contextMenu.create({
+                    position: { x: rect.left, y: rect.bottom },
+                    items: [
+                        {
+                            label: 'Edit',
+                            action: () => openModalForEdit(itemId, url, modal, 'Habit')
+                        },
+                        {
+                            label: 'Delete',
+                            action: () => handleDelete(itemId, url)
+                        }
+                    ]
+                });
+            } else if (subtype === 'leet_code_records') {
+                const url = `/habits/leet_code_records/${itemId}`;
+                const modal = document.querySelector<HTMLDialogElement>('#leet_code_records-entry-dashboard-modal');
+                contextMenu.create({
+                    position: { x: rect.left, y: rect.bottom },
+                    items: [
+                        {
+                            label: 'Edit',
+                            action: () => openModalForEdit(itemId, url, modal, 'lcrecord')
+                        },
+                        {
+                            label: 'Delete',
+                            action: () => handleDelete(itemId, url)
+                        }
+                    ]
+                });
+            }
         }
     });
 
