@@ -91,7 +91,7 @@ def item(
         data = item.to_api_dict()
 
         # Convert weight for display
-        if "weight" in data and current_user.units == UnitSystemEnum.IMPERIAL:
+        if data.get("weight") is not None and current_user.units == UnitSystemEnum.IMPERIAL:
             data["weight"] = kg_to_lbs(data["weight"])
             data["weight_units"] = "lbs"
         elif "weight" in data:
