@@ -18,6 +18,29 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+
+
+## [Thurs 12.02.2026]
+1. Add instructions to README for how to run locally
+    - Add .env.example
+
+
+## [Mon 09.02.26]
+
+TODO: Add "clean up / dedupe dialog stylings for confirmation vs form-modal" to checklist somewhere
+
+1. Commit contextMenu changes
+2. URLs:
+    - api.ts: Add routes mapping const thing
+    - MORE STUFF
+3. Style improvements:
+    1. Ingredients row in form: Gave more visual distinctness & positioned delete svg in top right,
+        with hover effects to make it clear what it references
+            - ALSO: Un-wrapped delete_btn SVG from button inside macro, just svg now. Need to update name & remove commented part
+    2. Confirmation modal styling:
+        - Switch from using form-actions to new confirmation-actions (kinda sloppy but works)
+        - 
+
 ## [Tues 03.02.26]
 1. Recipe feature
     - Add Recipe, RecipeIngredient models & revision

@@ -34,7 +34,65 @@ using CSS tokens.
     - Custom UI toolkit (no frameworks)
     - Charts: D3.js
 
+## How to Get Running Locally:
+Tested / Operational with the following:
+- Linux (or WSL2 if on Windows)
+- Python 3.12.3+
+- Node: 25.5.0 (Node 23-25 *should* work but are unverified)
 
+Docker:
+- Docker Engine (Linux) (see install options for your Linux distro: https://docs.docker.com/engine/install/)
+OR
+- Docker Desktop on Windows using WSL2 (install here: https://docs.docker.com/desktop/setup/install/windows-install/)
+    - I initially developed on Windows inside WSL2, have since moved to full Linux
+
+- Optionally: Bun (use for SOME testing, otherwise not required of course)
+
+#### Note:
+- Repository includes both an `.nvmrc` as well as a `.python-version` for optional use with nvm and pyenv to match my local setup.
+
+1. Clone repository & install requirements:
+```bash
+git clone git@github.com:isaacrosdail/project-vesper.git
+
+# Install requirements for Python & Node
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+npm install
+```
+
+2. Configure env
+```bash
+cp .env.example .env
+```
+The default values in `.env.example` are safe for local dev. You do not key real API keys to run the app locally, just note that
+the weather data fetch itself will of course fail.
+
+3. Start Postgres (Docker, dev default)
+```bash
+docker compose up -d
+```
+Compose here refers to the `docker-compose.yml` file in project root. This will build the Postgres image if needed.
+
+Optional alternative: Run the full containerized stack (prod-style; includes both db & web services)
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+4. Run the app (dev path)
+```bash
+npm run dev
+```
+
+4B. If you chose the prod version, the web service should now be running at:
+`http://localhost:5000`
+
+
+#### Some further notes:
+- Bun is optional and only used for some tests
+- Postgres is containerized for dev; prod uses full containerization (both db & web services)
 
 
 ## Attributions
