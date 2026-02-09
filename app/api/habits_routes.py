@@ -97,7 +97,7 @@ def completions(session: Session, habit_id: int) -> tuple[Response, int]:
     raise AssertionError(msg)
 
 
-@api_bp.get("/habits/completions/summary")
+@api_bp.get("/habits/habit_completions/summary")
 @login_plus_session
 def horizontal_barchart(session: Session) -> tuple[Response, int]:
     last_n_days = request.args.get("lastNDays", type=int)

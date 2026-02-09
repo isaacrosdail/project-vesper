@@ -97,7 +97,7 @@ def transactions(
     ), status_code
 
 
-@api_bp.post("/groceries/shopping-lists/items")
+@api_bp.post("/groceries/shopping_list_items")
 @login_plus_session
 def add_shoppinglist_item(session: Session) -> tuple[Response, int]:
     groceries_service = create_groceries_service(

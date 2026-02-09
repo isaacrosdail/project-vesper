@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 import { D3_TRANSITION_DURATION_MS, getChartDimensions } from '../shared/charts';
-import { apiRequest } from '../shared/services/api';
+import { apiRequest, routes } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
@@ -64,7 +64,7 @@ async function getMetricData(metric_type: MetricType, lastNDays: number): Promis
         metric_type,
         lastNDays: lastNDays.toString()
     });
-    const url = `/metrics/daily_metrics/timeseries?${params}`;
+    const url = routes.metrics.daily_metrics.timeseries(params);
     const response = await apiRequest('GET', url, null);
 
     const chartData = response.data.map((d: ApiMetricData) => ({
@@ -286,7 +286,7 @@ export async function init() {
             const button = target.closest('.row-actions')!;
             const row = target.closest('.table-row')!;
             const { itemId } = row.dataset;
-            const url = `/metrics/daily_metrics/${itemId}`;
+            const url = routes.metrics.daily_metrics.item(itemId);
             const modal = document.querySelector('#daily_metrics-entry-dashboard-modal');
             const rect = button.getBoundingClientRect();
 

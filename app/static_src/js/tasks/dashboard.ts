@@ -1,6 +1,6 @@
 
 import { formatToUserTimeString, getJSInstant } from "../shared/datetime";
-import { apiRequest } from '../shared/services/api';
+import { apiRequest, routes } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { makeToast } from '../shared/ui/toast';
@@ -47,7 +47,7 @@ function toggleTaskComplete(
         is_done: newIsDone,
         completed_at: completedAtUTC
     }
-    const url = `/tasks/tasks/${itemId}`;
+    const url = routes.tasks.tasks.item(itemId);
 
     apiRequest('PATCH', url, data, {
         onSuccess: () => {
@@ -94,7 +94,7 @@ export function init() {
             const button = target.closest('.row-actions')!;
             const row = target.closest('.table-row')!;
             const { itemId } = row.dataset;
-            const url = `/tasks/tasks/${itemId}`;
+            const url = routes.tasks.tasks.item(itemId);
             const modal = document.querySelector('#tasks-entry-dashboard-modal');
             const rect = button.getBoundingClientRect();
 

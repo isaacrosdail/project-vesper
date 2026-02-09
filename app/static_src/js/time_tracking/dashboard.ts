@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 import { D3_TRANSITION_DURATION_MS, getChartDimensions } from '../shared/charts';
-import { apiRequest } from '../shared/services/api';
+import { apiRequest, routes } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
@@ -27,7 +27,7 @@ const chartState = {
 
 async function getData(lastNDays: number): Promise<PieDatum[]> {
     const params = new URLSearchParams({ lastNDays: lastNDays.toString() })
-    const url = `/time_tracking/time_entries/summary?${params}`;
+    const url = routes.time_tracking.time_entries.summary(params);
     const response = await apiRequest('GET', url, null);
     const entries: ApiPieData[] = response.data;
     
@@ -248,7 +248,7 @@ export async function init() {
             const button = target.closest('.row-actions')!;
             const row = target.closest('.table-row')!;
             const { itemId } = row.dataset;
-            const url = `/time_tracking/time_entries/${itemId}`;
+            const url = routes.time_tracking.time_entries.item(itemId);
             const modal = document.querySelector('#time_entries-entry-dashboard-modal');
             const rect = button.getBoundingClientRect();
 

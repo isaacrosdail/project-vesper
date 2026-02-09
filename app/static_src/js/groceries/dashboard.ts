@@ -1,5 +1,5 @@
 
-import { apiRequest } from '../shared/services/api.js';
+import { apiRequest, routes } from '../shared/services/api.js';
 import { contextMenu } from '../shared/ui/context-menu';
 import { confirmationManager, handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { makeToast } from '../shared/ui/toast.js';
@@ -47,7 +47,7 @@ async function handleListActionClick(targetEl: HTMLElement): Promise<void> {
     const item = targetEl.closest('.shoppinglist-item');
     if (!(item instanceof HTMLElement)) return;
     const itemId = item.dataset['itemId'];
-    const url = `/groceries/shopping_list_items/${itemId}`;
+    const url = routes.groceries.shopping_list_items.item(itemId);
 
     switch(action) {
         case "delete": {
@@ -211,7 +211,7 @@ function handleAddToShoppingList(
     productId: string,
 ) {
     const quantityWanted = 1;
-    const url = '/groceries/shopping-lists/items';
+    const url = routes.groceries.shopping_list_items.collection;
     const data = { product_id: productId, quantity_wanted: quantityWanted };
 
     apiRequest('POST', url, data, {
@@ -397,7 +397,7 @@ export async function init() {
 
             if (subtype === 'products') {
                 const modal = document.querySelector(`#${subtype}-entry-dashboard-modal`);
-                const url = `/groceries/products/${itemId}`;
+                const url = routes.groceries.products.item(itemId);
 
                 contextMenu.create({
                     position: { x: rect.left, y: rect.bottom },
@@ -419,7 +419,7 @@ export async function init() {
             } else if (subtype === 'transactions') {
                 const modal = document.querySelector(`#${subtype}-entry-dashboard-modal`);
                 const productId = row.dataset.productId;
-                const url = `/groceries/transactions/${itemId}`;
+                const url = routes.groceries.transactions.item(itemId);
 
                 contextMenu.create({
                     position: { x: rect.left, y: rect.bottom },

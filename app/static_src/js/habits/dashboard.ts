@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 import { D3_TRANSITION_DURATION_MS, getChartDimensions } from '../shared/charts';
-import { apiRequest } from '../shared/services/api';
+import { apiRequest, routes } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
@@ -19,7 +19,7 @@ const chartState = {
 
 async function getHabitsData(lastNDays: number): Promise<BarData[]> {
     const params = new URLSearchParams({ lastNDays: lastNDays.toString()})
-    const url = `/habits/completions/summary?${params}`;
+    const url = routes.habits.habit_completions.summary(params);
     const response = await apiRequest('GET', url, null);
     return response.data;
 }
@@ -165,7 +165,7 @@ export async function init() {
             const rect = button.getBoundingClientRect();
             
             if (subtype === 'habits') {
-                const url = `/habits/habits/${itemId}`;
+                const url = routes.habits.habits.item(itemId);
                 const modal = document.querySelector('#habits-entry-dashboard-modal');
 
                 contextMenu.create({
@@ -182,7 +182,7 @@ export async function init() {
                     ]
                 });
             } else if (subtype === 'leet_code_records') {
-                const url = `/habits/leet_code_records/${itemId}`;
+                const url = routes.habits.leet_code_records.item(itemId);
                 const modal = document.querySelector<HTMLDialogElement>('#leet_code_records-entry-dashboard-modal');
                 contextMenu.create({
                     position: { x: rect.left, y: rect.bottom },
