@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 import pytest
 import time_machine
 
-from app.shared.view_mixins import TimestampedViewMixin
+from app.shared.view_mixins import HasDueDateMixin
 
 
 # Sanity test for time-machine, remove later
@@ -17,7 +17,7 @@ def test_time_machine_basic():
 # Since it's not @staticmethod, we need an instance.
 # For testing, we don't care about the whole TimestampedViewMixin,
 # we just need something with .due_date, ._tz, and .format()
-class Dummy(TimestampedViewMixin):
+class Dummy(HasDueDateMixin):
     def __init__(self, due_date, tz="UTC"):
         self.due_date = due_date
         self._tz = tz
