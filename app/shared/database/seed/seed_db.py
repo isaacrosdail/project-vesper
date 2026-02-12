@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
     from app.modules.auth.models import User
 
+import random
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -162,4 +163,22 @@ def seed_demo_data(session: Session, user_id: int) -> None:
 
 # Comprehensive dataset for development
 def seed_rich_data(session: Session, user_id: int) -> None:
-    pass
+    # ~30d data?
+    # Roll score for "performance" - low/med/high
+    # high = 3-4 completions, 90-180mins tracked
+    # med  = 1-2 completions, 30-90mins
+    # low  = 0-1 completions, 0-30mins
+    score = random.random()
+
+    if score > 0.7: # high productivity
+        n_completions = random.randint(3, 5)
+    elif score > 0.55: # med productivity
+        n_completions = random.randint(1, 3)
+    else: # low productivity
+        n_completions = random.randint(0, 2)
+
+    # Create habits
+    habits = ["walk", "eat", "talk", "sleep", "think", "move", "drink"]
+    # Fields needed: name, target_frequency
+    for habit in habits:
+        

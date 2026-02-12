@@ -26,8 +26,8 @@ NEVER_DELETE = {
     "api_call_records",
     "alembic_version",
 }
-# Skip sequence reset for association tables of course
-NO_SEQ = {"habit_tags", "task_tags"}
+# Skip sequence reset for association tables
+NO_SEQ = {"habit_tags", "task_tags", "task_links"}
 
 
 def _delete_rows(

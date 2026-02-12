@@ -1,0 +1,63 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Groceries - Recipes{% endblock %}
+
+{% block content %}
+
+{{ forms.recipe_entry_modal(products) }}
+
+<dialog id="recipe-detail-modal">
+    <button type="button" aria-label="Close"
+        class="btn-icon btn-round btn-lg modal-close"
+        id="recipe-detail-modal-close-btn"
+    >
+        {{ ui.x_svg() }}
+    </button>
+
+    <div class="top-section">
+        <h1 class="recipe-header">HEADER</h1>
+        <p class="recipe-metadata">description and stuff like that</p>
+    </div>
+
+    <div class="ingredients-col">
+        <h2>Ingredients:</h2>
+        <ul>
+        </ul>
+    </div>
+    <div class="directions-col">
+        <h2>Directions:</h2>
+        <ol>
+            <li>Do thing</li>
+            <li>Cook it</li>
+            <li>Cut it</li>
+            <li>Eat it</li>
+        </ol>
+    </div>
+
+</dialog>
+
+
+<div class="all-recipes-grid card-dashboard" id="recipes-grid">
+    <div class="card-title">
+        <h1 class="all-recipes-header">Recipes:</h1>
+        {{ ui.plus_btn('recipes-entry-dashboard-btn') }}
+    </div>
+
+    {% for recipe in recipes %}
+    <div class="recipe-card" data-recipe-id="{{ recipe.id }}">
+        <button class="dots-btn btn-icon btn-square js-recipe-options">
+            {{ ui.ellipsis_svg() }}
+        </button>
+        <h3 class="recipe-name">{{ recipe.name }}</h3>
+        <p class="recipe-metadata">
+            {{ recipe.yields }}{{recipe.yields_units.value}} |
+            ~30 min
+        </p>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

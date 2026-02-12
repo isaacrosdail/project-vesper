@@ -125,7 +125,9 @@ dialog {
   border-radius: var(--border-radius);
   box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
 }
-.form-modal {
+.form-modal,
+.profile-modal,
+#recipe-detail-modal {
   top: 5%;
   left: 50%;
   transform: translateX(-50%);

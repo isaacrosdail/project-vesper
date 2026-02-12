@@ -341,3 +341,65 @@
     {% endcall %}
 {% endmacro %}
 
+{% macro recipe_entry_modal(products, id='recipes-entry-dashboard', title='Add Recipe') %}
+    {% call ui.modal('groceries', 'recipes', id, title) %}
+        <div>
+            <label for="recipe_name">Recipe Name:</label>
+            <input type="text" name="recipe_name" id="recipe_name" required>
+        </div>
+        <div class="field-pair field-pair--weighted">
+            <div>
+                <label for="yields">Yields:</label>
+                <input type="text" inputmode="decimal" data-type-float data-step="0.1" name="yields" id="yields">
+            </div>
+            <div>
+                <label for="yields_units">Units:</label>
+                <select name="yields_units" id="yields_units" required>
+                    <option value="G" selected>g (grams)</option>
+                </select>
+            </div>
+        </div>
+        <h3>Ingredients: </h3>
+        <div id="ingredients-container">
+
+            <div class="ingredient-row" data-index="0">
+                <label for="ingredients[0][product_id]">
+                    Select Ingredient #<span class="ingredient-number-span">1</span>:
+                </label>
+                <select name="ingredients[0][product_id]" required>
+                    <option value="">--</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}">{{ product.name }}</option>
+                    {% endfor %}
+                </select>
+                
+                <div class="field-pair field-pair--weighted">
+                    <div>
+                        <label for="ingredients[0][amount_value]">Amount:</label>
+                        <input type="text" inputmode="decimal" data-type-float data-step="0.1" name="ingredients[0][amount_value]" required>
+                    </div>
+                    
+                    <div>
+                        <label for="ingredients[0][amount_units]">Units:</label>
+                        <select name="ingredients[0][amount_units]" required>
+                            <option value="G">G</option>
+                            <option value="other options">toImplement</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Remove button, hide on first row -->
+                <button 
+                    class="btn-icon btn-square btn-lg btn-remove-ingredient js-remove-ingredient"
+                    >
+                    {{ ui.delete_btn() }}
+                </button>
+            </div>
+
+        </div>
+
+        <div class="btn btn-primary" id="add-ingredient">
+            + Ingredient
+        </div>
+    {% endcall %}
+{% endmacro %}

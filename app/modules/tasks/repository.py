@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
     from sqlalchemy.orm import Session
 
+from sqlalchemy.orm import joinedload
+
 from app.modules.tasks.models import PriorityEnum, Task
 from app.shared.repository.base import BaseRepository
 
@@ -48,6 +50,17 @@ class TaskRepository(BaseRepository[Task]):
             Task.due_date >= start_utc, Task.due_date < end_utc
         )
         return list(self.session.execute(stmt).scalars().all())
+
+    def get_all_tasks_with_links(self) -> list[Task]:
+        """TODO: For tasks web visualization. Prune comments here"""
+        stmt = (
+            self._user_select(Task)
+            .options(joinedload(Task.supertasks), joinedload(Task.subtasks))
+        )
+        # .unique() = With joinedload + many-to-many, it can produce duplicate
+        # rows (task is there once for each link it's part of)
+        # unique just de-dupes these back into unique Task objs
+        return list(self.session.execute(stmt).scalars().unique().all())
 
     def get_frog_task_in_window(
         self, start_utc: datetime, end_utc: datetime

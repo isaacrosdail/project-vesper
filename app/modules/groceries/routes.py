@@ -85,3 +85,19 @@ def dashboard(session: "Session") -> tuple[str, int]:
         "l_category_options": category_options,
     }
     return render_template("groceries/dashboard.html", **ctx), 200
+
+@groceries_bp.get("/recipes")
+@login_plus_session
+def recipes(session: Session) -> tuple[str, int]:
+    groceries_service = create_groceries_service(
+        session, current_user.id, current_user.timezone
+    )
+
+    recipes = groceries_service.recipe_repo.get_all()
+    products = groceries_service.product_repo.get_all_products()
+
+    ctx = {
+        "recipes": recipes,
+        "products": products,
+    }
+    return render_template("groceries/recipes.html", **ctx), 200

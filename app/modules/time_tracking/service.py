@@ -5,9 +5,11 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
+import pandas as pd
+
 from app.api.responses import service_response
 from app.modules.time_tracking.repository import TimeEntryRepository
-from app.shared.datetime_.helpers import day_range_utc, parse_time_to_datetime
+import app.shared.datetime_.helpers as dth
 
 
 class TimeTrackingService:
@@ -26,10 +28,10 @@ class TimeTrackingService:
     ) -> dict[str, Any]:
         # Derived field values
         entry_date = typed_data["entry_date"]
-        started_at = parse_time_to_datetime(
+        started_at = dth.parse_time_to_datetime(
             typed_data["started_at"], entry_date, self.user_tz
         )
-        ended_at = parse_time_to_datetime(
+        ended_at = dth.parse_time_to_datetime(
             typed_data["ended_at"], entry_date, self.user_tz
         )
 
@@ -91,6 +93,26 @@ class TimeTrackingService:
         return service_response(
             success=True, message="Time entry added", data={"entry": entry}
         )
+
+    def get_time_stuff(self) -> pd.DataFrame:
+        # fetch all time entries
+        time_entries = self.time_entry_repo.get_all()
+
+        import sys
+
+        # build df
+        df = pd.DataFrame([{
+            "date": dth.convert_to_timezone(self.user_tz, entry.started_at).date(),
+            "duration_minutes": entry.duration_minutes
+        }
+        for entry in time_entries
+        ])
+        # we don't use name= here in reset_index because ["duration_minutes"].sum() produces
+        # a Series already named "duration_minutes" (inherits the column name)
+        df = df.groupby("date")["duration_minutes"].sum().reset_index() # sum duration_mins col per date?
+        print(df, file=sys.stderr)
+
+        return df
 
 
 def create_time_tracking_service(

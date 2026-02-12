@@ -20,7 +20,7 @@ class APISerializable:
             ..etc..
     """
 
-    def to_api_dict(self) -> dict[str, Any]:
+    def to_api_dict(self, include_relations: bool = False) -> dict[str, Any]:
         """Convert model to JSON-safe dict
 
         Uses SQLAlchemy introspection to iterate over columns and serialize values.
@@ -64,4 +64,33 @@ class APISerializable:
                 result[col.name] = value
 
         result["subtype"] = self.__tablename__  # type: ignore[attr-defined]
+
+        import sys
+        from pprint import pprint
+
+        ## TODO: Trying to truly generalize
+        # here, include_relations param must be list[str] = []
+        # then pass in something like: item.to_api_dict(include_relations=['ingredients'])
+        # if include_relations:
+        #     for rel in mapper.relationships:
+        #         if rel.key in include_relations:
+        #             print(rel.key, file=sys.stderr)
+
+        ## Add ingredients info
+        if hasattr(self, 'ingredients'):
+            result['ingredients'] = [
+                {
+                    "product_id": ing.product_id,
+                    "product_name": ing.product.name,
+                    "amount_value": ing.amount_value,
+                    "amount_units": ing.amount_units.value
+                }
+                for ing in self.ingredients
+            ]
+
+        # Tasks web: Add subtasks/supertasks data
+        if hasattr(self, 'subtasks'):
+            result['subtasks'] = [t.id for t in self.subtasks]
+            result['supertasks'] = [t.id for t in self.supertasks]
+
         return result

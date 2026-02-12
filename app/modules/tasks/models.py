@@ -12,7 +12,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Table, Column, Integer, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base, CustomBaseTaskMixin
@@ -22,6 +22,16 @@ from app.shared.models import task_tags
 from app.shared.serialization import APISerializable
 from app.shared.type_defs import OrderedEnum
 
+
+# Association table for task_links
+# PKey for each means the link itself forms a composite key:
+# (subtask_id, supertask_id)
+task_links = Table(
+    "task_links",
+    Base.metadata,
+    Column("subtask_id", Integer, ForeignKey("tasks.id"), primary_key=True),
+    Column("supertask_id", Integer, ForeignKey("tasks.id"), primary_key=True)
+)
 
 class PriorityEnum(OrderedEnum):
     LOW = "LOW"
@@ -56,6 +66,23 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
     is_frog: Mapped[bool] = mapped_column(Boolean, default=False)
     is_done: Mapped[bool] = mapped_column(Boolean, default=False)
     due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Facilitates relationships to multiple super/subtasks
+    supertasks = relationship(
+        "Task",
+        secondary=task_links,
+        primaryjoin=lambda: Task.id == task_links.c.subtask_id,
+        secondaryjoin=lambda: Task.id == task_links.c.supertask_id,
+        back_populates="subtasks"
+    )
+
+    subtasks = relationship(
+        "Task",
+        secondary=task_links,
+        primaryjoin=lambda: Task.id == task_links.c.supertask_id,
+        secondaryjoin=lambda: Task.id == task_links.c.subtask_id,
+        back_populates="supertasks"
+    )
 
     @property
     def due_date_local(self) -> datetime | None:

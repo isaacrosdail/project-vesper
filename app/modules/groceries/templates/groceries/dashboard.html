@@ -5,6 +5,11 @@
 
 {% block content %}
 
+{# Recipes page: debug access button #}
+<a class="btn btn-primary" href="{{ url_for('groceries.recipes') }}">
+    Recipes Page
+</a>
+
 {{ forms.product_entry_modal(list=l_category_options) }}
 {{ forms.transaction_entry_modal(l_products_for_dropdown, list=l_category_options) }}
 

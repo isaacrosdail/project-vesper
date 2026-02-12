@@ -113,8 +113,8 @@ class Transaction(Base, APISerializable):
 
     __api_exclude__: ClassVar[list[str]] = []
 
-    def to_api_dict(self) -> dict[str, Any]:
-        result = super().to_api_dict()
+    def to_api_dict(self, include_relations: bool = False) -> dict[str, Any]:
+        result = super().to_api_dict(include_relations)
         result["product_name"] = self.product.name
         return result
 
@@ -174,8 +174,8 @@ class ShoppingListItem(Base, APISerializable):
 
     __api_exclude__: ClassVar[list[str]] = []
 
-    def to_api_dict(self) -> dict[str, Any]:
-        result = super().to_api_dict()
+    def to_api_dict(self, include_relations: bool = False) -> dict[str, Any]:
+        result = super().to_api_dict(include_relations)
         result["product_name"] = self.product.name
         return result
 

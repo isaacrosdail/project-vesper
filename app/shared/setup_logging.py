@@ -12,7 +12,7 @@ LOGGING_CONFIG: dict[str, Any] = {
     "disable_existing_loggers": False,
     "formatters": {
         "simple": {
-            "format": "%(levelname)s: %(message)s",
+            "format": "\033[93m%(levelname)s\033[0m: %(message)s",
         }
     },
     "handlers": {  # dictates where logs go (console, file, etc.)

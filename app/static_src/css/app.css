@@ -54,6 +54,10 @@ input {
     accent-color: var(--accent-subtle);
 }
 
+h1 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
 h2 {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
@@ -149,6 +153,16 @@ td .status-span.is-done > svg {
 }
 
 /* ===================================
+    PAGE-SPECIFIC: Tasks Web
+   =================================== */
+
+/* node, link */
+/* D3 drag handlers cover changing from grab -> grabbing -> grab */
+.node:hover {
+  cursor: grab;
+}
+
+/* ===================================
     PAGE-SPECIFIC: Groceries Dashboard
    =================================== */
 #list-empty {
@@ -209,6 +223,173 @@ td .status-span.is-done > svg {
     opacity: 1;
 }
 
+
+/* ===================================
+    PAGE-SPECIFIC: Recipes Page
+   =================================== */
+
+
+
+/* form stuff, tbd where this ought to go */
+#ingredients-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-sm);
+}
+.ingredient-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-sm);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius);
+  background: var(--bg-hover);
+  padding: var(--space-md);
+}
+.ingredient-row:has(.btn-remove-ingredient:hover, .btn-remove-ingredient:focus-visible) {
+  outline: thin solid var(--clr-error);
+  box-shadow: 0px 0px 5px var(--clr-error);
+}
+.btn-remove-ingredient {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  color: var(--clr-error);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.btn-remove-ingredient:hover,
+.btn-remove-ingredient:focus-visible {
+  background: color-mix(in srgb, red 12%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, red 40%, transparent);
+}
+
+
+/* ====== ACTUAL RECIPES PAGE STUFF BELOW ======  */
+.all-recipes-grid {
+  display: grid;
+  /* grid-template-columns: 1fr 1fr; */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  padding: var(--space-lg);
+  gap: var(--gap-md);
+}
+.all-recipes-header {
+  grid-column: 1 / -1;
+}
+
+/* Note: Using for both recipe preview cards in 
+  grid AND recipe modal display
+*/
+.recipe-metadata {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.recipe-card {
+  position: relative; /* context for ellipsis_svg button */
+  border-left: 5px solid var(--accent-subtle);
+  min-height: 10vh;
+  background: var(--bg-dark);
+  border-radius: var(--border-radius);
+  padding: var(--space-sm);
+}
+.recipe-card:hover {
+  transform: translateY(-2px);
+  /* box-shadow: 1px 1px 10px var(--accent-strong); */
+  cursor: pointer;
+}
+
+.recipe-card button {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.recipe-card button:hover {
+  background: var(--accent-hover);
+  border-radius: 50%;
+}
+
+/* inside each recipe card: */
+/* Also: has styling in components.css, should centralize */
+#recipe-detail-modal[open] {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* ingr: directions = 1:2 */
+  grid-template-rows: 1fr 2fr;    /* top : bottom = 1:2 */
+  gap: var(--gap-sm);
+  width: clamp(300px, 80vw, 700px);
+  height: 80vh;
+}
+.top-section {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+
+.ingredients-col {
+  border-right: 2px solid var(--text-muted);
+}
+.ingredients-col ul {
+  padding: 0.5rem;
+}
+.ingredients-col li {
+  position: relative;
+  padding: var(--space-sm);
+  padding-left: var(--space-md);
+}
+
+.ingredients-col,
+.directions-col {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+.ingredients-col h2,
+.directions-col h2 {
+  text-align: center;
+}
+
+.directions-col ol {
+  counter-reset: li-counter;
+  padding: var(--space-sm);
+
+  /* flex container all our li's */
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.directions-col ol li {
+  counter-increment: li-counter;
+
+  /* flex container for EACH li (circle + text) */
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start; /* Aligns number to top if text wraps */
+}
+.directions-col ol li:before {
+  content: counter(li-counter);
+
+  /* Circle styling */
+  background-color: var(--accent-subtle);
+  color: white;
+
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  /* flex container for each circle/bullet point + number */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  font-weight: bold;
+  font-size: 0.9em;
+}
 /* ===================================
     D3 Charts: Habits, Metrics, Time Tracking
    =================================== */

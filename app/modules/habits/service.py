@@ -7,12 +7,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from datetime import date
     from sqlalchemy.orm import Session
 
 
 from datetime import datetime
 from itertools import pairwise
 from zoneinfo import ZoneInfo
+
+import pandas as pd
 
 import app.shared.datetime_.helpers as dth
 from app.api.responses import service_response
@@ -153,6 +156,35 @@ class HabitsService:
             "total": expected_completions,
             "percent": percent_completed,
         }
+    
+    def get_daily_completion_counts(self) -> pd.DataFrame:
+        # fetches all completion records for user
+        completion_records = self.completion_repo.get_all()
+
+        # convert each created_at to local date, so we'll just have
+        # a list of completion counts per date
+        completion_records_local = [
+            dth.convert_to_timezone(self.user_tz, entry.created_at).date()
+            for entry in completion_records
+        ]
+        import sys
+        print(completion_records_local, file=sys.stderr)
+
+        # group by local date + count completions per day
+
+        # creating dataframe from a list:
+        df = pd.DataFrame({ "date": completion_records_local })
+        print(df, file=sys.stderr)
+
+        # count occurrences of each val in a col:
+        # groupby("date") groups rows by unique date values
+        # size() counts how many rows are in each group
+        # .reset_index(name="completion_count") turns it back into a clean two-col DataFrame:
+        # date and completion_count
+        df = df.groupby("date").size().reset_index(name="completion_count")
+        print(df, file=sys.stderr)
+
+        return df
 
 
 def create_habits_service(

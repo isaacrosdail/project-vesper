@@ -39,6 +39,9 @@ def dashboard(session: "Session") -> tuple[str, int]:
 
     current_date = dth.now_in_timezone(current_user.timezone).date().isoformat()
 
+    # DEBUG
+    time_entries_debug = time_service.get_time_stuff()
+
     ctx = {
         "time_entries_params": time_entries_params,
         "entry_headers": TimeEntryPresenter.build_columns(),

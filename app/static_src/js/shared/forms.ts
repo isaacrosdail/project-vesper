@@ -154,6 +154,8 @@ export function formToJSON(form: HTMLFormElement): Record<string, any> {
     const formData = new FormData(form);
     const result: Record<string, any> = {};
 
+    console.log(Array.from(formData.entries()))
+
     for (const [name, value] of formData) {
         // coerce checkbox "on" to bool true
         let finalValue: any = value;
