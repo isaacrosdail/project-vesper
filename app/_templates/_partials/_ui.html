@@ -102,6 +102,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 #}
 {% macro modal(module, subtype, id, title, form_class='form-column') %}
 <dialog 
+    class="form-modal"
     id="{{ id }}-modal"
     data-module="{{ module }}"
     data-subtype="{{ subtype }}"
@@ -129,7 +130,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 <dialog id="confirmation-modal">
   <div class="confirmation-content">
     <p class="confirmation-message">Are you sure?</p>
-    <div class="form-actions">
+    <div class="confirmation-actions">
       <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
       <button id="confirm-ok" class="btn btn-primary">OK</button>
     </div>

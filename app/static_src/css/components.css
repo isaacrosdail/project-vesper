@@ -117,17 +117,19 @@
     gap: var(--gap-md);
 }
 dialog {
-    top: 5%;
-    left: 50%;
-    width: clamp(20rem, 90vw, 30rem);
-    max-height: 90vh;
-    padding: var(--space-xl);
-    overflow: hidden;
-    background-color: var(--bg);
-    border: none;
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
-    transform: translateX(-50%);
+  width: clamp(20rem, 90vw, 30rem);
+  max-height: 90vh;
+  padding: var(--space-xl);
+  background-color: var(--bg);
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
+}
+.form-modal {
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
 }
 dialog[open] {
     display: flex;
@@ -163,11 +165,23 @@ dialog::backdrop {
 }
 
 /* Confirmation modal variant's content */
+#confirmation-modal[open] {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  margin: auto;
+  inset: 0;
+}
 .confirmation-content {
-    align-items: center;
+  text-align: center;
 }
 .confirmation-message {
     padding: var(--space-sm);
+}
+.confirmation-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--gap-md);
 }
 
 
