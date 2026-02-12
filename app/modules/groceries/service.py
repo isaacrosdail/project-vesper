@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-    from app.modules.groceries.models import Product
+    from app.modules.groceries.models import Product, UnitEnum
 
 from app.api.responses import service_response
 from app.modules.groceries.repository import (
@@ -17,6 +17,8 @@ from app.modules.groceries.repository import (
     ShoppingListItemRepository,
     ShoppingListRepository,
     TransactionRepository,
+    RecipeRepository,
+    RecipeIngredientRepository,
 )
 from app.shared.datetime_.helpers import today_range_utc
 
@@ -30,12 +32,16 @@ class GroceriesService:
         transaction_repo: TransactionRepository,
         shopping_list_repo: ShoppingListRepository,
         shopping_list_item_repo: ShoppingListItemRepository,
+        recipe_repo: RecipeRepository,
+        recipe_ingredient_repo: RecipeIngredientRepository,
     ) -> None:
         self.session = session
         self.product_repo = product_repo
         self.transaction_repo = transaction_repo
         self.shopping_list_repo = shopping_list_repo
         self.shopping_list_item_repo = shopping_list_item_repo
+        self.recipe_repo = recipe_repo
+        self.recipe_ingredient_repo = recipe_ingredient_repo
         self.user_tz = user_tz
 
     def save_product(self, typed_data: dict[str, Any], product_id: int | None) -> Any:
@@ -160,6 +166,30 @@ class GroceriesService:
             return product, False
         return self.product_repo.create_product(**typed_product_data), True
 
+    def create_recipe_with_ingredients(
+            self,
+            name: str,
+            yields: float,
+            yields_units: UnitEnum,
+            ingredients: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        recipe = self.recipe_repo.create_recipe(name, yields, yields_units)
+        self.recipe_repo.session.flush()
+
+        # ingredients
+        for ingredient in ingredients:
+            self.recipe_ingredient_repo.create_recipe_ingredient(
+                recipe_id=recipe.id,
+                product_id=ingredient['product_id'],
+                amount_value=ingredient['amount_value'],
+                amount_units=ingredient['amount_units'],
+            )
+
+        return {
+            "success": True,
+            "message": "Recipe created",
+            "data": { "recipe": recipe }
+        }
 
 def create_groceries_service(
     session: Session, user_id: int, user_tz: str
@@ -172,4 +202,6 @@ def create_groceries_service(
         transaction_repo=TransactionRepository(session, user_id),
         shopping_list_repo=ShoppingListRepository(session, user_id),
         shopping_list_item_repo=ShoppingListItemRepository(session, user_id),
+        recipe_repo=RecipeRepository(session, user_id),
+        recipe_ingredient_repo=RecipeIngredientRepository(session, user_id)
     )

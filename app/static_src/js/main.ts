@@ -24,8 +24,9 @@ import { init as initTasks } from './tasks/dashboard.js';
 import { init as initTimeTracking } from './time_tracking/dashboard.js';
 import { init as initMetrics } from './metrics/dashboard.js';
 import { init as initRegisterPage } from './register.js';
-import { init as initTasksWebPage } from './tasks_web.js';
 
+import { init as initTasksWebPage } from './tasks_web.js';
+import { init as initRecipesPage } from './groceries/recipes.js';
 
 const initRegistry = {
     "main.home": () => initCore(),
@@ -37,6 +38,8 @@ const initRegistry = {
     "metrics.dashboard": () => initMetrics(),
     "auth.register": () => initRegisterPage(),
 
+    // Prototyping stuff
+    "groceries.recipes": () => initRecipesPage(),
     "main.tasks_web": () => initTasksWebPage(),
 };
 

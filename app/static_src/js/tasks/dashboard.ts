@@ -74,7 +74,7 @@ export function init() {
     if (!isFrogCheckbox || !dueDateField) return;
 
     isFrogCheckbox.addEventListener('change', () => {
-        // dueDateField.required = isFrogCheckbox.checked;
+        dueDateField.required = isFrogCheckbox.checked;
         priorityField.disabled = isFrogCheckbox.checked;
     });
 
