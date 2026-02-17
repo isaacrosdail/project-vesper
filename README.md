@@ -1,6 +1,15 @@
+
 # Vesper - Personal Life OS (WIP)
 Vesper is a data-driven productivity web app designed for my own use to help me track
 habits, metrics (like weight, steps, sleep, etc), and time, all from the same, centralized interface.
+
+## Tech Stack
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+
 
 # Project Status
 Actively expanding. Current focus: refining core modules, improving efficiency across systems, and
@@ -20,15 +29,6 @@ analysis.
 using CSS tokens.
 - D3.js: Dynamic visualizations for habit completions, time logs, and physical metrics (weight, steps, etc)
 - Time tracking module: Manual and category-based time logs, with viewmodels for readable durations and time windows.
-
-
-## Tech Stack
-
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 
 
