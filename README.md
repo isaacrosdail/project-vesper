@@ -21,28 +21,7 @@ using CSS tokens.
 - D3.js: Dynamic visualizations for habit completions, time logs, and physical metrics (weight, steps, etc)
 - Time tracking module: Manual and category-based time logs, with viewmodels for readable durations and time windows.
 
-# Tech Stack
-**Backend**:
-    - Python, Flask, SQLAlchemy, PostgreSQL  Alembic
-    
-    - Testing with pytest
-    
-    - Development: Docker, NGINX
-    
-    - Linting: `ruff` (Python), `eslint` (TS/JS), `stylelint` (CSS)
-    
-    - Build: `esbuild` (minifies CSS/JS for deployment)
-    
-    - Type Checking: `mypy` (Python), TypeScript (strict)
 
-**Frontend**: 
-
-    - HTML, CSS (token-based theming), TypeScript
-    
-    - Custom UI toolkit (no frameworks)
-    
-    - Charts: D3.js
-   
 ## Tech Stack
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
