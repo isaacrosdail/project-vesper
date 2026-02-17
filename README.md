@@ -24,14 +24,23 @@ using CSS tokens.
 # Tech Stack
 **Backend**:
     - Python, Flask, SQLAlchemy, PostgreSQL  Alembic
+    
     - Testing with pytest
+    
     - Development: Docker, NGINX
+    
     - Linting: `ruff` (Python), `eslint` (TS/JS), `stylelint` (CSS)
+    
     - Build: `esbuild` (minifies CSS/JS for deployment)
+    
     - Type Checking: `mypy` (Python), TypeScript (strict)
+
 **Frontend**: 
+
     - HTML, CSS (token-based theming), TypeScript
+    
     - Custom UI toolkit (no frameworks)
+    
     - Charts: D3.js
 
 
