@@ -119,6 +119,38 @@ class TasksService:
             "total": num_expected,
             "percent": percent_complete,
         }
+    
+    def calc_overdue_rate(self, *, days: int) -> dict[str, int]:
+        """Takes int val for days 'into the past' to check against, and returns """
+        ## take all tasks where due_date != None and falls within last N days
+        ## of those - count where is_done = False, those are the ones overdue
+        ## Rate = overdue / total as percentage
+        now = dth.now_utc()
+        start = now - timedelta(days=days)
+
+        tasks_in_window = self.task_repo.get_all_tasks_in_window(start, now)
+        total = len(tasks_in_window)
+        if total == 0:
+            return { "rate": 0, "overdue": 0, "total": 0 }
+        overdue = len([t for t in tasks_in_window if not t.is_done])
+        rate = round((overdue/total) * 100)
+
+        return { "rate": rate, "overdue": overdue, "total": total }
+    
+    def calc_frog_completion_rate(self, *, days: int) -> dict[str, int]:
+        now = dth.now_utc()
+        start = now - timedelta(days=days)
+
+        tasks = self.task_repo.get_all_tasks_in_window(start, now)
+        frogs = [t for t in tasks if t.is_frog]
+        total = len(frogs)
+        if total == 0:
+            return { "rate": 0, "done": 0, "total": 0 }
+
+        done = len([t for t in frogs if t.is_done])
+        rate = round((done / total) * 100)
+
+        return { "rate": rate, "done": done, "total": total }
 
 
 def create_tasks_service(session: Session, user_id: int, user_tz: str) -> TasksService:

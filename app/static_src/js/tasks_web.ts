@@ -21,7 +21,7 @@ interface TaskLink {
 
 const height = window.innerHeight;
 const width = window.innerWidth;
-const radius = 40;
+const nodeRadius = 40;
 
 const margin = { top: 20, right: 20, bottom: 30, left: 40 };
 const innerWidth = width - margin.left - margin.right;
@@ -56,7 +56,7 @@ let links: TaskLink[] = [
 class CanvasManager {
     private width: number;
     private height: number;
-    private radius: number;
+    private nodeRadius: number;
     private nodes: TaskNode[];
     private links: TaskLink[];
     private nodesMap: Map<number, TaskNode>;
@@ -65,10 +65,10 @@ class CanvasManager {
     private linksContainer!: any;
     private zoomContainer!: any;
 
-    constructor(height: number, width: number, radius: number, nodes: TaskNode[], links: TaskLink[]) {
+    constructor(height: number, width: number, nodeRadius: number, nodes: TaskNode[], links: TaskLink[]) {
         this.height = height;
         this.width = width;
-        this.radius = radius;
+        this.nodeRadius = nodeRadius;
 
         this.nodes = nodes;
         this.links = links;
@@ -82,7 +82,7 @@ class CanvasManager {
         this.svg = d3.select('#web')
             .append("svg")
             .attr("viewBox", [0, 0, this.width, this.height])
-            .attr("style", "outline: 5px solid red")
+            // .attr("style", "outline: 5px solid red")
 
         this.svg
             .append("svg:defs") // one-time definition for markers?
@@ -106,7 +106,7 @@ class CanvasManager {
         const zoom = d3.zoom()
             // defines scale factor range allowed
             .scaleExtent([0.7, 2])
-            .translateExtent([[0, 0], [width, height]])
+            // .translateExtent([[0, 0], [width, height]]) - scrap? locks panning, pointless now i think
             .on("zoom", (event) => {
                 this.zoomContainer.attr("transform", event.transform)
             })
@@ -117,7 +117,6 @@ class CanvasManager {
 
         // make group for all nodes
         this.nodesContainer = this.zoomContainer.append("g")
-            .attr("stroke", "cyan")
             .attr("stroke-width", 1.5)
             .style("outline", "1px solid red") // DEBUG
 
@@ -153,17 +152,14 @@ class CanvasManager {
                         .attr("transform", d => `translate(${d.x}, ${d.y})`);
 
                     nodeGroup.append("circle")
-                        .attr("r", this.radius)
+                        .attr("r", this.nodeRadius)
                         .attr("cx", 0)
                         .attr("cy", 0)
-                        .attr("stroke", "blue")
                         .attr("fill", d => color(d.priority));
 
                     nodeGroup.append("text")
-                        // .attr("x", 0)
-                        // .attr("y", 0)
                         .attr("dy", 20)
-                        .attr("stroke", "var(--text-muted)")
+                        .attr("fill", "var(--text-muted)")
                         .attr("text-anchor", "middle")
                         .text(d => d.name);
                     
@@ -176,11 +172,9 @@ class CanvasManager {
                                 .style("cursor", "grabbing");
 
                         })
-                        // .on("drag", this._dragged)
-                        // .on("end", this._dragEnded)
                         .on("drag", function(event, d) {
-                            d.x = Math.max(radius, Math.min(width - radius, event.x));
-                            d.y = Math.max(radius, Math.min(height - radius, event.y));
+                            d.x = event.x;
+                            d.y = event.y;
                             d3.select(this).attr("transform", `translate(${d.x}, ${d.y})`);
 
                             // update links too?
@@ -341,38 +335,22 @@ export async function init() {
             id: 4, name: "Bobby"
         })
         thingies.addLink(1, 4)
-        console.log(thingies.nodes)
     })
-    // This mocks our DB join table for:
-    // tasks_dependencies(task_id, prereq_id)
-    const dummyLinks = [
-        {subtask: 3, supertask: 2},
-        {subtask: 6, supertask: 3}
-    ]
 
     // grab some task info quick to see
     const url = routes.tasks.tasks.collection;
-    console.log(url)
     const response = await apiRequest('GET', url, null);
-    console.log(response.data)
-    const pos = [
-        200,
-        200,
-        200
-    ]
-    const posy = [
-        400, // stretch
-        200, // sdf
-        600 // readme
-    ]
+
+    // Circular layout formula for nodes' starting positions.
+    // center of viewport?
+    const [center_x, center_y] = [width/2, height/2];
+    const num_nodes = response.data.length;
+    const layoutRadius = Math.min(width, height) * 0.35;
     const tasksWithPositions: TaskNode[] = response.data.map((task: TaskNode, i: number) => ({
         ...task,
-        x: pos[i] || 100 + (i * 100),
-        y: posy[i] || 100 + (i * 100),
+        x: center_x + layoutRadius * Math.cos((2 * Math.PI * i) / num_nodes),
+        y: center_y + layoutRadius * Math.sin((2 * Math.PI * i) / num_nodes),
     }))
-    console.log("response.data:")
-    console.table(response.data)
-    console.log(dummyLinks)
 
     const links = response.data.flatMap(task =>
         task.supertasks.map(supertaskId => ({
@@ -383,11 +361,10 @@ export async function init() {
     console.log("Links:")
     console.log(links)
 
-    const thingies = new CanvasManager(height, width, radius, tasksWithPositions, links);
+    const thingies = new CanvasManager(height, width, nodeRadius, tasksWithPositions, links);
     thingies.init();
     thingies.updateNodes();
     thingies.updateLinks();
-    console.log(thingies.links)
     thingies.addLink(1, 2)
 }
 

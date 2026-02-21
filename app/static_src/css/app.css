@@ -152,6 +152,11 @@ td .status-span.is-done > svg {
     stroke: var(--clr-success);
 }
 
+.progress {
+  display: flex;
+  gap: var(--gap-lg);
+}
+
 /* ===================================
     PAGE-SPECIFIC: Tasks Web
    =================================== */

@@ -124,6 +124,25 @@
       <input type="date" id="due_date" name="due_date">
       <small class="error-inline"></small>
     </div>
+
+    <!-- DRAFT: New search-to-filter for subtasks/supertasks -->
+    <template data-task-template>
+        <div class="card">
+            <div class="header" data-header>My Task</div>
+            <div class="body" data-body>Priority: Like literally rn, bruh</div>
+        </div>
+    </template>
+
+    <div class="search-wrapper" data-search-wrapper>
+        <label for="search">Search for subtasks:</label>
+        <input type="search" id="search" data-search placeholder="Search tasks">
+    </div>
+    <div class="task-cards" data-task-card-container>
+        <div class="card">
+            <div class="header"></div>
+            <div class="body"></div>
+        </div>
+    </div>
   {% endcall %}
 {% endmacro %}
 

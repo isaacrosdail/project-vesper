@@ -67,6 +67,19 @@ function toggleTaskComplete(
     });
 }
 
+function enableStats() {
+    document.querySelectorAll<HTMLDivElement>('.stats-ring').forEach(statsCircle => {
+        const progress = Number(statsCircle.dataset.progress ?? 50); // we'll need to update this value to update the visual progress
+
+        statsCircle.setAttribute("role", "progressbar");
+        statsCircle.setAttribute("aria-valuenow", progress); // this value is grabbed by our stats-progress
+        // content to show the percentage/value
+        statsCircle.style.setProperty('--progress', progress + "%"); // set visual ring val
+        statsCircle.setAttribute("aria-live", "polite")
+
+    })
+}
+
 export function init() {
     const isFrogCheckbox = document.querySelector<HTMLInputElement>('#is_frog');
     const dueDateField = document.querySelector<HTMLInputElement>('#due_date');
@@ -77,6 +90,56 @@ export function init() {
         dueDateField.required = isFrogCheckbox.checked;
         priorityField.disabled = isFrogCheckbox.checked;
     });
+
+    // Circular progress/stats bar(s)
+    enableStats();
+
+    // Stuff for the tasks form search thing:
+    const taskCardTemplate = document.querySelector('[data-task-template]');
+    const taskCardContainer = document.querySelector('[data-task-card-container]');
+    const searchInput = document.querySelector('[data-search]');
+    let tasks = [] // empty arr for hiding stuff?
+
+    searchInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        const normalizedValue = value.trim().toLowerCase();
+        console.log(`normalized: ${normalizedValue}`)
+        tasks.forEach(task => {
+            const isVisible = task.name.toLowerCase().includes(normalizedValue);
+            task.element.classList.toggle("hide", !isVisible)
+        })
+    })
+
+    document.addEventListener('click', (e) => {
+        // if target is search -> open dropdown
+        const target = e.target;
+        if (target.closest('[data-search-wrapper]')) {
+            console.log("yes")
+        }
+    })
+    // If click outside search wrapper -> close dropdown
+    const taskForm = document.querySelector('#tasks-entry-dashboard-modal');
+    taskForm.addEventListener('click', (e) => {
+        if (!(e.target.closest('[data-search-wrapper]'))) {
+            console.log("no")
+        }
+     })
+
+    const url = routes.tasks.tasks.collection;
+    const response = apiRequest('GET', url, null, {
+        onSuccess: (responseData) => {
+            console.table(responseData)
+            tasks = responseData.data.map(task => {
+                const card = taskCardTemplate.content.cloneNode(true).children[0];
+                const header = card.querySelector("[data-header]")
+                const body = card.querySelector("[data-body]")
+                header.textContent = task.name;
+                body.textContent = task.priority;
+                taskCardContainer.append(card)
+                return { name: task.name, priority: task.priority, element: card }
+            })
+        }
+    })
 
     const form = document.querySelector<HTMLFormElement>('#tasks-form')!;
     // Validation

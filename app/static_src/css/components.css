@@ -280,6 +280,16 @@ form :is(input, select, textarea).invalid {
     border-radius: var(--border-radius);
 }
 
+/* DEBUG/TODO: CLEANUP */
+.card {
+  border: 1px solid red;
+  background: var(--bg-light);
+  padding: var(--space-xs);
+}
+.hide {
+  display: none;
+}
+
 /* =========================================
    Inputs
    ========================================= */
@@ -577,4 +587,136 @@ input:not([type="checkbox"], [type="radio"]) {
 }
 .dropdown-menu > button:only-child:hover {
     border-radius: var(--border-radius);
+}
+
+
+/* =========================================
+   D3: Pill buttons for chart ranges / metric types
+   ========================================= */
+
+.timeframe-selector {
+  display: inline-flex;
+  align-self: flex-start;
+  flex-direction: flex-column;
+  /* gap: var(--gap-sm); */
+  background: var(--bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.timeframe-selector > button {
+  /* border-radius: var(--border-radius); */
+  padding: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+}
+.timeframe-selector > button:not(:last-child) {
+  border-right: 1px solid var(--border-color);
+}
+.timeframe-selector > button:hover {
+  background: var(--bg-hover);
+}
+.timeframe-selector > button.active {
+  background: var(--accent-subtle);
+}
+.timeframe-selector > button:first-child {
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+.timeframe-selector > button:last-child {
+  border-top-right-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+/* =========================================
+   Stats "pills"/circles/etc
+   ========================================= */
+
+.card-stats {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: var(--gap-md);
+  /* flex-direction: column; */
+  aspect-ratio: 1 / 1;
+  width: clamp(150px, 30vw, 200px);
+
+  padding: var(--space-xs);
+  background-color: var(--bg);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+}
+
+.stats-header {
+  flex: 1;
+  font-size: var(--font-size-sm);
+}
+
+@property --progress {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+/* Ring for progress */
+.stats-ring {
+  --size: 100px;
+  --bar-width: 25px;
+  
+  position: relative;
+  display: grid;
+  place-items: center;
+
+  align-self: center;
+  justify-self: center;
+
+  /* margin: 0 auto; */
+  width: var(--size);
+  height: var(--size);
+  aspect-ratio: 1 / 1;
+  
+  /* This creates the actual progress ring around,
+    with --progress being the percentage progress
+  */
+  background: conic-gradient(
+    var(--accent-subtle) var(--progress, 0),
+    var(--bg-light) 0%
+  );
+  border-radius: 50%;
+  color: var(--accent-subtle);
+  transition: --progress 500ms linear;
+}
+/* Text inside the donut hole punchout */
+.stats-center {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  inset: 0;
+}
+
+.stats-center .percentage {
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+}
+.stats-center .n-of-k {
+  font-size: var(--font-size-sm);
+}
+
+/* Donut hole punchout */
+.stats-ring::after {
+  /* with content, we can actually take any attr that's on that element, take the value that's on it,
+  and use it here? */
+  /* content: attr(aria-valuenow) "%"; "50 %" since val is pulled from JS, % hardcoded ofc */
+  content: "";
+  /* display: grid; */
+  /* place-items: center; */
+  width: calc(100% - var(--bar-width));
+  aspect-ratio: 1 / 1;
+
+  background: var(--bg);
+  border-radius: inherit;
 }

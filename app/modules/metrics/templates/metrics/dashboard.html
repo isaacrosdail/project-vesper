@@ -7,6 +7,19 @@
 
 {{ forms.metric_entry_modal(entry_date=current_date) }}
 
+<div class="timeframe-selector">
+    <button class="chart-range" data-range="7">7d</button>
+    <button class="chart-range" data-range="30">30d</button>
+    <button class="chart-range" data-range="90">90d</button>
+</div>
+
+<div class="timeframe-selector">
+    <button class="chart-type" data-type="weight">Weight</button>
+    <button class="chart-type" data-type="steps">Steps</button>
+    <button class="chart-type" data-type="calories">Calories</button>
+    <button class="chart-type" data-type="sleep_duration_minutes">Sleep Duration</button>
+</div>
+
 <div id="metrics-chart-container"></div>
 
 <div class="inline-flex-md">

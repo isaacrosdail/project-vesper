@@ -167,7 +167,10 @@ class MetricsChart {
             combinedValues = [...dataValues, ...staticLineValues]; // spread both arrays
         }
         const [min, max] = d3.extent(combinedValues) as [number, number];
-        this.yScale.domain([Math.floor(min * 0.7), max * 1.1]);
+        // Give a more reasonable "window" for min-max range
+        const spread = max - min;
+        const padding = spread === 0 ? 1 : spread * 0.2;
+        this.yScale.domain([Math.floor(min - padding), max + padding]);
 
         this.gXAxis.call(d3.axisBottom(this.xScale).tickFormat((d) => d3.timeFormat("%m/%d")(d as Date)));
         this.gYAxis.call(d3.axisLeft(this.yScale).ticks(ticks));
@@ -261,15 +264,30 @@ class MetricsChart {
 export async function init() {
     const metricsChart = new MetricsChart('#metrics-chart-container');
     await metricsChart.refreshLineChart();
+    // set default chart range button's active class
+    const btn = document.querySelector('[data-range="7"]');
+    btn.classList.add('active');
+    const btnType = document.querySelector('[data-type="steps"]');
+    btnType.classList.add('active');
 
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
         if (target.matches('.chart-type')) {
             chartState.metricType = target.dataset['type']! as MetricType;
+            document.querySelectorAll('.chart-type').forEach(btn => {
+                btn.classList.remove('active');
+            })
+            target.classList.add('active');
+
             await metricsChart.refreshLineChart();
         }
         else if (target.matches('.chart-range')) {
-            chartState.range = parseInt(target.dataset['range']!);
+            chartState.range = parseInt(target.dataset['range']!, 10);
+            document.querySelectorAll('.chart-range').forEach(btn => {
+                btn.classList.remove('active');
+            })
+            target.classList.add('active');
+
             await metricsChart.refreshLineChart();
         }
         else if (target.matches('.table-range')) {

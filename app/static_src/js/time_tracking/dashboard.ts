@@ -88,7 +88,6 @@ class TimeEntriesChart {
 
     showEmptyChart() {
         this.gLegend.selectAll('g.legend-item').remove();
-        this.gLegend.selectAll('.debug').remove();
         this.gChart.selectAll('g.slice').remove();
 
         const _emptyMessage = this.gChart.selectAll('text.empty-message')
@@ -225,14 +224,21 @@ class TimeEntriesChart {
 }
 
 export async function init() {
-    const time_entriesChart = new TimeEntriesChart('#time_tracking-chart-container');
-    await time_entriesChart.refreshPieChart();
+    const timeEntriesChart = new TimeEntriesChart('#time_tracking-chart-container');
+    await timeEntriesChart.refreshPieChart();
+    const btn = document.querySelector('[data-range="7"]');
+    btn.classList.add('active');
 
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
         if (target.matches('.chart-range')) {
             chartState.range = parseInt(target.dataset['range']!, 10);
-            time_entriesChart.refreshPieChart();
+            document.querySelectorAll('.chart-range').forEach(btn => {
+                btn.classList.remove('active');
+            })
+            target.classList.add('active');
+
+            timeEntriesChart.refreshPieChart();
         }
         else if (target.matches('.table-range')) {
             const range = target.dataset['range']!;
