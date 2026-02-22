@@ -6,6 +6,11 @@
 
 {{ forms.task_entry_modal() }}
 
+<div class="progress">
+{{ ui.stats_circle("Overdue (Last 7 days)", overdue_stat.rate, overdue_stat.overdue, overdue_stat.total) }}
+{{ ui.stats_circle("Frog Completion (Last 7 days)", frog_stat.rate, frog_stat.done, frog_stat.total) }}
+</div>
+
 <div id="tasks-dashboard-table" class="card-dashboard">
     <div class="card-title">
         <h2>Tasks</h2>

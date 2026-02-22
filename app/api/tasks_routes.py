@@ -1,9 +1,10 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from flask import Response, request
+from flask import Response, request, abort
 from flask_login import current_user
 
 from app.api import api_bp
@@ -16,7 +17,7 @@ from app.shared.decorators import login_plus_session
 @api_bp.route("/tasks/tasks", methods = ["GET", "POST"])
 @api_bp.put("/tasks/tasks/<int:task_id>")
 @login_plus_session
-def tasks(session: "Session", task_id: int | None = None) -> tuple[Response, int]:
+def tasks(session: Session, task_id: int | None = None) -> tuple[Response, int]:
     """Create or update a task (POST for new, PUT for edit). Or GET for the collection."""
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone
@@ -55,3 +56,43 @@ def tasks(session: "Session", task_id: int | None = None) -> tuple[Response, int
         message=result["message"],
         data=task.to_api_dict() | {"progress": progress},
     ), status_code
+
+
+@api_bp.route("/tasks/task_links", methods = ["POST", "DELETE"])
+@login_plus_session
+def task_links(session: Session) -> tuple[Response, int]:
+    tasks_service = create_tasks_service(
+        session, current_user.id, current_user.timezone
+    )
+
+    import sys
+    print("Received:", file=sys.stderr)
+    print(request.json, file=sys.stderr)
+
+    data = request.json
+    try:
+        sub_id = int(data.get("subtask_id"))
+        super_id = int(data.get("supertask_id"))
+    except (TypeError, ValueError):
+        return api_response(success=False, message="IDs must be integers"), 400
+
+    if request.method == "POST":
+        result = tasks_service.save_link(sub_id, super_id)
+        if not result["success"]:
+            return api_response(success=False, message=result["message"]), 404
+
+        return api_response(
+            success=True,
+            message=result["message"],
+            data={ "subtask_id": sub_id, "supertask_id": super_id }
+        ), 201
+
+    # DELETE
+    result = tasks_service.delete_link(sub_id, super_id)
+    if not result["success"]:
+        return api_response(success=False, message=result["message"]), 404
+
+    return api_response(
+        success=True,
+        message="done",
+    ), 200

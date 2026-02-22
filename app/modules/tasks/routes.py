@@ -30,9 +30,15 @@ def dashboard(session: "Session") -> tuple[str, int]:
 
     viewmodel = [TaskViewModel(t, current_user.timezone) for t in tasks]
 
+    ## WIP: Overdue rate calc
+    overdue_stat = tasks_service.calc_overdue_rate(days=7)
+    frog_stat = tasks_service.calc_frog_completion_rate(days=7)
+
     ctx = {
         "tasks_params": tasks_params,
         "task_headers": TaskPresenter.build_columns(),
         "tasks": viewmodel,
+        "overdue_stat": overdue_stat,
+        "frog_stat": frog_stat,
     }
     return render_template("tasks/dashboard.html", **ctx), 200

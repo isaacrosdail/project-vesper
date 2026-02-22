@@ -29,8 +29,8 @@ from app.shared.type_defs import OrderedEnum
 task_links = Table(
     "task_links",
     Base.metadata,
-    Column("subtask_id", Integer, ForeignKey("tasks.id"), primary_key=True),
-    Column("supertask_id", Integer, ForeignKey("tasks.id"), primary_key=True)
+    Column("subtask_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
+    Column("supertask_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True)
 )
 
 class PriorityEnum(OrderedEnum):

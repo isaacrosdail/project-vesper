@@ -46,6 +46,15 @@ def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[
         else:
             typed_data[field] = typed_value
 
+    # Insert subtask_ids
+    subtask_ids_raw = data.get('subtask_ids', '')
+    typed_data['subtask_ids'] = [
+        int(s)
+        for s in subtask_ids_raw.split(',')
+        if s.strip()
+    ]
+    # should give us = [8, 1, 6] OR [] if empty/absent
+
     # Insert is_frog directly
     is_frog = data.get("is_frog", False)
     typed_data['is_frog'] = is_frog

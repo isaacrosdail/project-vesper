@@ -7,13 +7,13 @@
 {{ forms.habit_entry_modal() }}
 {{ forms.leetcode_entry_modal() }}
 
-<div id="habits-chart-container"></div>
-
-{% call ui.dropdown('Select Window') %}
-    <button class="chart-range" data-range="1">Today</button>
+<div class="timeframe-selector">
     <button class="chart-range" data-range="7">7d</button>
     <button class="chart-range" data-range="30">30d</button>
-{% endcall %}
+    <button class="chart-range" data-range="90">90d</button>
+</div>
+
+<div id="habits-chart-container"></div>
 
 <div class="card-dashboard">
     <div class="card-title">

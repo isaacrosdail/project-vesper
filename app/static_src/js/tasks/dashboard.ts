@@ -67,6 +67,19 @@ function toggleTaskComplete(
     });
 }
 
+function enableStats() {
+    document.querySelectorAll<HTMLDivElement>('.stats-ring').forEach(statsCircle => {
+        const progress = Number(statsCircle.dataset.progress ?? 50); // we'll need to update this value to update the visual progress
+
+        statsCircle.setAttribute("role", "progressbar");
+        statsCircle.setAttribute("aria-valuenow", progress); // this value is grabbed by our stats-progress
+        // content to show the percentage/value
+        statsCircle.style.setProperty('--progress', progress + "%"); // set visual ring val
+        statsCircle.setAttribute("aria-live", "polite")
+
+    })
+}
+
 export function init() {
     const isFrogCheckbox = document.querySelector<HTMLInputElement>('#is_frog');
     const dueDateField = document.querySelector<HTMLInputElement>('#due_date');
@@ -78,8 +91,126 @@ export function init() {
         priorityField.disabled = isFrogCheckbox.checked;
     });
 
+    enableStats(); // Circular progress/stats bar(s)
+
+    // Stuff for the tasks form search thing:
+    const taskForm = document.querySelector('#tasks-entry-dashboard-modal');
+    const taskCardTemplate = taskForm.querySelector('[data-task-template]');
+    const taskCardContainer = taskForm.querySelector('[data-task-card-container]');
+    const searchInput = taskForm.querySelector('[data-search]');
+    const pillTemplate = taskForm.querySelector('[data-pill-template]');
+    const pillContainer = taskForm.querySelector('.pill-container');
+    let tasks = [] // empty arr for hiding stuff?
+    let selectedTasks = [] // selected tasks from the input list
+
+    // Hook into modal:cleanup so we clear off pills and hidden
+    taskForm.addEventListener('modal:cleanup', () => {
+        selectedTasks = []
+        pillContainer.innerHTML = ''
+        searchInput.value = ''
+        tasks.forEach(task => task.element.classList.remove('hide'));
+        document.querySelector('#subtask_ids_hidden').value = '';
+    })
+
+    searchInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        const normalizedValue = value.trim().toLowerCase();
+
+        tasks.forEach(task => {
+            const isSelected = selectedTasks.some(s => s.id === task.element.dataset.id);
+            if (isSelected) return;
+            const isVisible = task.name.toLowerCase().includes(normalizedValue);
+            task.element.classList.toggle("hide", !isVisible)
+        })
+    })
+
+    // event delegation events as closures, so we can keep refs
+    function handleSubtaskEntry(e) {
+        const clickedEl = e.target;
+        // Click on a card for a task within the "dropdown":
+        if (clickedEl.closest('.card')) {
+            const card = clickedEl.closest('.card');
+            
+            card.classList.toggle('hide', true); // hide from list
+
+            // 2. push {id, name} to selectedTasks, grab from dataset on div.card
+            const { id, name } = card.dataset;
+            selectedTasks.push({ id: id, name: name });
+
+            // 3. Render a pill for this task; clone pill, modify text, & append to container
+            const pill = pillTemplate.content.cloneNode(true).children[0];
+            const pillName = pill.querySelector('.pill-name');
+            pillName.textContent = name;
+            // also put data-id on the pill for easy removal
+            pill.dataset.id = id;
+            pillContainer.appendChild(pill);
+
+            // 4. append hidden input's .value for this task for submission
+            // const hiddenTaskInput = document.createElement('input');
+            const hiddenTaskInput = document.querySelector('#subtask_ids_hidden');
+            // update value for hidden input (remember: this is a comma-separated list! "7,5,2" etc)
+            hiddenTaskInput.value = selectedTasks.map(task => task.id).join(',');
+            console.log(selectedTasks)
+        }
+
+        if (clickedEl.matches('.pill-remove')) {
+            console.log("clicked")
+            // 1. filter out of selectedTasks
+            const pill = clickedEl.closest('.my-pill');
+            const taskId = pill.dataset.id;
+            // want to keep only the task that dont match this id
+            selectedTasks = selectedTasks.filter(task => task.id !== taskId)
+
+            // find the card matching data-id in the dropdown and remove hide
+            const card = taskForm.querySelector(`[data-id="${taskId}"]`);
+            card.classList.remove('hide');
+
+            // remove pill & remove this task's id from our hidden input
+            const hiddenTaskInput = document.querySelector('#subtask_ids_hidden');
+            hiddenTaskInput.value = selectedTasks.map(task => task.id).join(',');
+            pill.remove();
+        }
+
+        // if clickedEl is search -> open dropdown
+        // remove hidden from the card container
+        else if (clickedEl.closest('[data-search-wrapper]')) {
+            const cardContainer = document.querySelector('[data-task-card-container]');
+            console.log(cardContainer)
+            cardContainer.classList.remove('hide');
+
+            // Position under search bar input
+            const inputRect = searchInput.getBoundingClientRect();
+            cardContainer.style.top = `${inputRect.bottom}px`;
+            cardContainer.style.left = `${inputRect.left}px`;
+            cardContainer.style.width = `${inputRect.width}px`;
+        }
+        // Click outside search area -> hide 'dropdown'
+        else if (!(clickedEl.closest('[data-search-wrapper]'))) {
+            const cardContainer = document.querySelector('[data-task-card-container]');
+            cardContainer.classList.add('hide');
+        }
+    }
+
+    taskForm.addEventListener('click', handleSubtaskEntry);
+
+    const url = routes.tasks.tasks.collection;
+    const response = apiRequest('GET', url, null, {
+        onSuccess: (responseData) => {
+            tasks = responseData.data.map(task => {
+                const card = taskCardTemplate.content.cloneNode(true).children[0];
+                const header = card.querySelector("[data-header]")
+                const body = card.querySelector("[data-body]")
+                card.dataset.id = task.id;
+                card.dataset.name = task.name;
+                header.textContent = task.name;
+                body.textContent = task.priority;
+                taskCardContainer.append(card)
+                return { name: task.name, priority: task.priority, element: card }
+            })
+        }
+    })
+
     const form = document.querySelector<HTMLFormElement>('#tasks-form')!;
-    // Validation
     initValidation(
     form,
         {

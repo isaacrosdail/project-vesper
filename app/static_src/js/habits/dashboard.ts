@@ -72,6 +72,7 @@ class HabitsChart {
         this.gXAxis.call(
             d3.axisBottom(this.xScale)
                 .tickValues(d3.range(0, d3.max(data, (d: BarData) => d.count)! + 1, 1))
+                .tickFormat(d3.format("d")) // force integer display for bottom-axis ticks
             )
         this.gYAxis.call(d3.axisLeft(this.yScale));
 
@@ -86,7 +87,7 @@ class HabitsChart {
                     .attr("height", this.yScale.bandwidth())
                     .attr("fill", "var(--accent-strong)")
                     .attr("class", "bar")
-                
+
                 rects.transition()
                     .duration(D3_TRANSITION_DURATION_MS)
                     .attr("width", (d: BarData) => this.xScale(d.count))
@@ -105,6 +106,30 @@ class HabitsChart {
         bars.on('mouseenter', function(this: d3.BaseType, _event: Event, d: BarData) {
             createTooltip(this as SVGRectElement, `${d.name}: ${d.count}`);
         }).on('mouseleave', removeTooltip);
+
+        const labels = this.gChart.selectAll("text.value")
+        .data(data, d => d.name)
+        .join(
+            enter => enter.append("text")
+                .attr("class", "value")
+                .attr("y", d => this.yScale(d.name)! + this.yScale.bandwidth() / 2)
+                .attr("dominant-baseline", "middle")
+                .attr("x", 0)
+                .text(d => d.count)
+                .attr("fill", "var(--text)")
+                .call(enter => enter.transition()
+                    .duration(D3_TRANSITION_DURATION_MS)
+                    .attr("x", d => this.xScale(d.count) + 6)
+            ),
+            update => update
+                .text(d => d.count)
+                .call(update => update.transition()
+                    .duration(D3_TRANSITION_DURATION_MS)
+                    .attr("x", d => this.xScale(d.count) + 6)
+                    .attr("y", d => this.yScale(d.name)! + this.yScale.bandwidth() / 2)
+            ),
+            exit => exit.remove()
+        )
     }
 
     showEmptyChart() {
@@ -141,12 +166,20 @@ class HabitsChart {
 export async function init() {
     const habitsChart = new HabitsChart('#habits-chart-container');
     await habitsChart.refreshBarChart();
+    // set default chart range button's active class
+    const btn = document.querySelector('[data-range="7"]');
+    btn.classList.add('active');
 
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
         
         if (target.matches('.chart-range')) {
             chartState.range = parseInt(target.dataset['range']!, 10);
+            document.querySelectorAll('.chart-range').forEach(btn => {
+                btn.classList.remove('active');
+            })
+            target.classList.add('active');
+
             await habitsChart.refreshBarChart();
         }
         else if (target.matches('.table-range')) {

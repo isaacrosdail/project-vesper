@@ -72,9 +72,38 @@ class TasksService:
                 due_date=typed_data.get("due_date"),
                 is_frog=typed_data["is_frog"],
             )
+            # Add subtasks, if any
+            for subtask_id in typed_data.get('subtask_ids', []):
+                subtask = self.task_repo.get_by_id(subtask_id)
+                if subtask:
+                    # leverages our relationship to "reach into" subtasks links, setting the (subtask_id, supertask_id) entry
+                    task.subtasks.append(subtask)
+
             return service_response(
                 success=True, message="Task added", data={"task": task}
             )
+
+    def save_link(self, subtask_id: int, supertask_id: int) -> dict[str, Any]:
+        subtask = self.task_repo.get_by_id(subtask_id)
+        supertask = self.task_repo.get_by_id(supertask_id)
+        if not subtask or not supertask:
+            return service_response(success=False, message="Task not found")
+        if subtask in supertask.subtasks:
+            return service_response(success=False, message="Link already exists")
+
+        supertask.subtasks.append(subtask)
+        return service_response(success=True, message="Link created")
+    
+    def delete_link(self, subtask_id: int, supertask_id: int) -> dict[str, Any]:
+        subtask = self.task_repo.get_by_id(subtask_id)
+        supertask = self.task_repo.get_by_id(supertask_id)
+        if not subtask or not supertask:
+            return service_response(success=False, message="Tasks not found for link")
+        if subtask not in supertask.subtasks:
+            return service_response(success=False, message="Link not found")
+        
+        supertask.subtasks.remove(subtask)
+        return service_response(success=True, message="Link deleted")
 
     def to_eod_datetime(self, date: date | None, tz_str: str) -> datetime | None:
         """Convert a date to exclusive EOD datetime in given timezone."""
@@ -119,6 +148,38 @@ class TasksService:
             "total": num_expected,
             "percent": percent_complete,
         }
+    
+    def calc_overdue_rate(self, *, days: int) -> dict[str, int]:
+        """Takes int val for days 'into the past' to check against, and returns """
+        ## take all tasks where due_date != None and falls within last N days
+        ## of those - count where is_done = False, those are the ones overdue
+        ## Rate = overdue / total as percentage
+        now = dth.now_utc()
+        start = now - timedelta(days=days)
+
+        tasks_in_window = self.task_repo.get_all_tasks_in_window(start, now)
+        total = len(tasks_in_window)
+        if total == 0:
+            return { "rate": 0, "overdue": 0, "total": 0 }
+        overdue = len([t for t in tasks_in_window if not t.is_done])
+        rate = round((overdue/total) * 100)
+
+        return { "rate": rate, "overdue": overdue, "total": total }
+    
+    def calc_frog_completion_rate(self, *, days: int) -> dict[str, int]:
+        now = dth.now_utc()
+        start = now - timedelta(days=days)
+
+        tasks = self.task_repo.get_all_tasks_in_window(start, now)
+        frogs = [t for t in tasks if t.is_frog]
+        total = len(frogs)
+        if total == 0:
+            return { "rate": 0, "done": 0, "total": 0 }
+
+        done = len([t for t in frogs if t.is_done])
+        rate = round((done / total) * 100)
+
+        return { "rate": rate, "done": done, "total": total }
 
 
 def create_tasks_service(session: Session, user_id: int, user_tz: str) -> TasksService:

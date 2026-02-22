@@ -144,3 +144,64 @@ More relationships just means adding more entries to the table, rather than rede
 
 #### Stuff to iron out:
 - zoom, panning limits, "web as a whole page" idea from Obsidian to fix that.
+
+
+## Feb 19: Taking a stab at analytics
+
+Built:
+- get_daily_completion_counts() on HabitsService, returns DataFrame of completions per day
+- get_daily_time_stuff() on TimeTrackingService — returns DataFrame of duration per day
+- AnalyticsService in shared/analytics.py — composes both services, 
+    computes Pearson correlation with pandas merge + .corr()
+- create_analytics_service() factory
+- seed_rich_data() - Updated this to include 30 days of correlated habit/time data using productivity score
+
+Learned/used:
+  - pandas: DataFrame, groupby, size(), sum(), merge, fillna, corr()
+  - Python random: random(), randint, choice, sample
+  - Pearson correlation: what the -1 to 1 range means
+  - Association table rationale (many-to-many vs self-referential FK)
+  - DESIGN.md: problem -> decision -> why -> example structure
+
+To wrap up later:
+  - Strip debug print/import sys from service methods
+  - Wire analytics to a real route/template beyond the dummy index placeholder
+  - Revisit Tasks Web section of DESIGN.md
+  - Per-habit correlation breakdown (instead of the simpler, flatter one we have now)
+  - Showing/getting the p-value? -> scipy.stats.pearsonr
+  - Consider promoting shared/analytics.py to a proper module once we iron out the basics
+  - Flesh out seed_rich_data() later with the rest of our modules. Update seed_data() (guest) too
+
+
+
+### Analytics notes
+Streak consistency for habits
+Task aging? / cycle time?
+Price-per-calorie for groceries
+Time allocation drift for time_tracking?
+
+Metrics:
+    - Windowed deltas & anomalies (eg steps vs sleep correlation)
+    - Week-over-week change
+    - Outlier detection for steps / calories
+
+Habits:
+    - Adherence rate
+    - Longest streak
+    - Decay after missed days
+    - Forecast of next-week completions from recent windows?
+
+Tasks:
+    - Overdue rate
+    - Frog task completion impact on same-day throughput
+
+Time tracking:
+    - Fragmentation index?
+    - Rolling averages
+
+
+## Starting on Tasks page today:
+- Add macro for stat_circle (header/rate/numerator/denominator), with progress ring styling
+- Tasks service (defaulting to 7d in route calls)
+    - calc_overdue_rate()
+    - calc_frog_completion_rate()
