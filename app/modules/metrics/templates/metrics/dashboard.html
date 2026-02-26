@@ -7,34 +7,26 @@
 
 {{ forms.metric_entry_modal(entry_date=current_date) }}
 
-<div class="timeframe-selector">
-    <button class="chart-range" data-range="7">7d</button>
-    <button class="chart-range" data-range="30">30d</button>
-    <button class="chart-range" data-range="90">90d</button>
-</div>
 
-<div class="timeframe-selector">
-    <button class="chart-type" data-type="weight">Weight</button>
-    <button class="chart-type" data-type="steps">Steps</button>
-    <button class="chart-type" data-type="calories">Calories</button>
-    <button class="chart-type" data-type="sleep_duration_minutes">Sleep Duration</button>
-</div>
+<div id="metrics-stats">
+    <div class="chart-controls">
+        <div class="timeframe-selector">
+            <button class="chart-range" data-range="7">7d</button>
+            <button class="chart-range" data-range="30">30d</button>
+            <button class="chart-range" data-range="90">90d</button>
+        </div>
+        <div class="timeframe-selector">
+            <button class="chart-type" data-type="all">All</button>
+            <button class="chart-type" data-type="weight">Weight</button>
+            <button class="chart-type" data-type="steps">Steps</button>
+            <button class="chart-type" data-type="calories">Calories</button>
+            <button class="chart-type" data-type="sleep_duration_minutes">Sleep Duration</button>
+        </div>
+    </div>
 
-<div id="metrics-chart-container"></div>
-
-<div class="inline-flex-md">
-    {% call ui.dropdown('Select Type') %}
-        <button class="chart-type" data-type="weight">Weight</button>
-        <button class="chart-type" data-type="steps">Steps</button>
-        <button class="chart-type" data-type="calories">Calories</button>
-        <button class="chart-type" data-type="sleep_duration_minutes">Sleep Duration</button>
-    {% endcall %}
-
-    {% call ui.dropdown('Select Timeframe') %}
-        <button class="chart-range" data-range="1">Today</button>
-        <button class="chart-range" data-range="7">7d</button>
-        <button class="chart-range" data-range="30">30d</button>
-    {% endcall %}
+    <div id="metrics-line-chart-container"></div>
+    <div id="metrics-bar-chart-container"></div>
+    <div id="metrics-multi-chart-container"></div>
 </div>
 
 <section id="metrics-dashboard-table" class="card-dashboard">

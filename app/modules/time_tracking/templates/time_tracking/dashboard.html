@@ -6,13 +6,15 @@
 
 {{ forms.time_entry_modal(current_date=current_date) }}
 
-<div class="timeframe-selector">
-    <button class="chart-range" data-range="7">7d</button>
-    <button class="chart-range" data-range="30">30d</button>
-    <button class="chart-range" data-range="90">90d</button>
-</div>
 
-<div id="time_tracking-chart-container"></div>
+<div id="time-stats">
+    <div class="timeframe-selector">
+        <button class="chart-range" data-range="7">7d</button>
+        <button class="chart-range" data-range="30">30d</button>
+        <button class="chart-range" data-range="90">90d</button>
+    </div>
+    <div id="time_tracking-chart-container"></div>
+</div>
 
 <section id="activity-log-card" class="card-dashboard">
     <div class="card-title">

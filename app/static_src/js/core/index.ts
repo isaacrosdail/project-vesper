@@ -422,8 +422,6 @@ function initWeatherSection() {
 }
 
 export function init() {
-    console.debug('Initializing dashboard widgets...');
-
     updateProgressBar('habits');
     updateProgressBar('tasks');
 

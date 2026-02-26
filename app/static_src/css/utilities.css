@@ -1,55 +1,55 @@
 /* Utilities: Tiny helpers, atomic styles */
 
 .stack-md {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
 }
 
 .stack-lg {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
 }
 
 .grid-2col-7030 {
-    display: grid;
-    grid-template-columns: 7fr 3fr;
-    gap: var(--gap-sm);
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: var(--gap-sm);
 }
 
 .grid-2col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--gap-sm);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-sm);
 }
 
 .inline-flex-sm {
-    display: inline-flex;
-    gap: var(--gap-sm);
-    align-items: center;
+  display: inline-flex;
+  gap: var(--gap-sm);
+  align-items: center;
 }
 
 .inline-flex-md {
-    display: inline-flex;
-    gap: var(--gap-md);
-    align-items: center;
+  display: inline-flex;
+  gap: var(--gap-md);
+  align-items: center;
 }
 
 .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    white-space: nowrap;
-    border: 0;
-    /* stylelint-disable-next-line property-no-deprecated */
-    clip: rect(0, 0, 0, 0);
-    clip-path: inset(50%);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  /* stylelint-disable-next-line property-no-deprecated */
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
 }
 
 .text-right {
-    text-align: right;
+  text-align: right;
 }

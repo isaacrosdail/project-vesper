@@ -58,6 +58,20 @@ class TasksService:
             if not task:
                 return service_response(success=False, message="Task not found")
 
+            # Handling our subtask IDs
+            incoming_ids = set(typed_data.pop('subtask_ids', []))
+            current_ids = set(s.id for s in task.subtasks)
+
+            for subtask_id in incoming_ids - current_ids:
+                subtask = self.task_repo.get_by_id(subtask_id)
+                if subtask:
+                    task.subtasks.append(subtask)
+
+            for subtask_id in current_ids - incoming_ids:
+                subtask = self.task_repo.get_by_id(subtask_id)
+                if subtask:
+                    task.subtasks.remove(subtask)
+
             for field, value in typed_data.items():
                 setattr(task, field, value)
 

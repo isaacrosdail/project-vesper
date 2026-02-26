@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from enum import Enum
 from typing import Any
 
@@ -20,7 +21,7 @@ class APISerializable:
             ..etc..
     """
 
-    def to_api_dict(self, include_relations: bool = False) -> dict[str, Any]:
+    def to_api_dict(self, include_relations: bool = False, tz: str = "UTC") -> dict[str, Any]:
         """Convert model to JSON-safe dict
 
         Uses SQLAlchemy introspection to iterate over columns and serialize values.
@@ -59,7 +60,10 @@ class APISerializable:
             if isinstance(value, Enum):
                 result[col.name] = value.value
             elif isinstance(value, datetime):
-                result[col.name] = value.isoformat()
+                user_tz = ZoneInfo(tz)
+                import sys
+                print(tz, file=sys.stderr)
+                result[col.name] = value.astimezone(user_tz).isoformat()
             else:
                 result[col.name] = value
 

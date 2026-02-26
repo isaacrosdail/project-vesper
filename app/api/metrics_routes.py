@@ -49,48 +49,33 @@ def daily_metrics(
     ), status_code
 
 
-@api_bp.get("/metrics/daily_metrics/timeseries")
-@login_plus_session
-def daily_metrics_timeseries(session: Session) -> tuple[Response, int]:
-    metric_type = request.args["metric_type"]
-    last_n_days = request.args.get("lastNDays", 7, type=int)
-
-    start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
-    metrics_service = create_metrics_service(
-        session, current_user.id, current_user.timezone
-    )
-    results = metrics_service.daily_metrics_repo.get_daily_metrics_by_type_in_window(
-        metric_type, start_utc, end_utc
-    )
-
-    return api_response(
-        success=True,
-        message=f"Retrieved {len(results)} {metric_type} entries",
-        data=[
-            {
-                "date": dt.astimezone(ZoneInfo(current_user.timezone)).isoformat(),
-                "value": value,
-            }
-            for dt, value in results
-        ],
-    ), 200
-
-
 @api_bp.get("/metrics/daily_metrics")
 @login_plus_session
 def daily_metrics_list(session: Session) -> tuple[Response, int]:
+    metric_type = request.args.get("metric_type")
     last_n_days = request.args.get("lastNDays", 7, type=int)
 
+    start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
     metrics_service = create_metrics_service(
         session, current_user.id, current_user.timezone
     )
-    start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
-    result = metrics_service.daily_metrics_repo.get_all_daily_metrics_in_window(
-        start_utc, end_utc
+    results = metrics_service.daily_metrics_repo.get_all_daily_metrics_in_window(
+        start_utc, end_utc, metric_type
     )
+
+    data = [e.to_api_dict(tz=current_user.timezone) for e in results]
+    if metric_type:
+        data = [
+            {"date": d["entry_datetime"], "value": d[metric_type]}
+            for d in data
+        ]
+
+    from pprint import pprint
+    import sys
+    pprint(data, stream=sys.stderr)
 
     return api_response(
         success=True,
-        message=f"Retrieved {len(result)} entries",
-        data=[entry.to_api_dict() for entry in result],
+        message=f"Retrieved {len(results)} entries",
+        data=data,
     ), 200

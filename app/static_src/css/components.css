@@ -8,22 +8,22 @@
    ========================================= */
 
 .btn {
-    display: inline-flex;       /* icons+text align */
-    gap: var(--gap-sm);
-    align-items: center;        /* for icon+label vertical centering? */
-    justify-content: center;    /* center text when full width */
-    padding: var(--space-sm) var(--space-md);
-    user-select: none;
-    border: var(--border-default);
-    border-radius: var(--border-radius);
+  display: inline-flex;       /* icons+text align */
+  gap: var(--gap-sm);
+  align-items: center;        /* for icon+label vertical centering? */
+  justify-content: center;    /* center text when full width */
+  padding: var(--space-sm) var(--space-md);
+  user-select: none;
+  border: var(--border-default);
+  border-radius: var(--border-radius);
 }
 .btn-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--btn-size-md);
-    height: var(--btn-size-md);
-    padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-size-md);
+  height: var(--btn-size-md);
+  padding: 0;
 }
 
 /* =========================================
@@ -33,8 +33,8 @@
 /* TODO: Focus ring: visual feedback for keyboard users */
 .btn:focus-visible,
 .btn-icon:focus-visible {
-    outline: var(--focus-ring);
-    outline-offset: var(--focus-offset);
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }
 
 /* Catch native + ARIA-disabled buttons */
@@ -42,42 +42,47 @@
 .btn-icon[disabled],
 .btn[aria-disabled="true"],
 .btn-icon[aria-disabled="true"] {
-    cursor: not-allowed;
-    opacity: 0.6;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Pressed effect (only for text buttons & tabbed modal tabs) */
 .btn:active {
-    filter: brightness(0.9);
-    transform: translateY(1px);
+  filter: brightness(0.9);
+  transform: translateY(1px);
 }
 
 /* Hover states (skip on touchscreen) */
 @media (hover: hover) {
-    .btn-primary:hover {
-        background-color: var(--accent-hover);
-    }
-    .btn-secondary:hover {
-        background-color: var(--bg-hover);
-    }
-    .btn-destructive:hover {
-        color: var(--bg-light);
-        background-color: var(--text-destructive);
-    }
+  .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+  .btn-secondary:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--accent-subtle);
+  }
+  .btn-destructive:hover {
+    color: var(--bg-light);
+    background-color: var(--text-destructive);
+  }
 }
 
 /* =========================================
    Intent variants
    ========================================= */
 .btn-primary {
-    background-color: var(--accent-subtle);
+  background-color: var(--accent-strong);
 }
 .btn-secondary {
-    background-color: var(--bg-light);
+  background-color: var(--bg-light);
+  border: 1px solid transparent; /* prevent layout shift on hover */
+  transition:
+    border-color var(--transition-hover),
+    background-color var(--transition-hover);
 }
 .btn-destructive {
-    color: var(--text-destructive);
-    border-color: var(--text-destructive);
+  color: var(--text-destructive);
+  border-color: var(--text-destructive);
 }
 
 /* =========================================
@@ -86,15 +91,15 @@
 
 /* Icon sizing (proportional: always 50% of buttons) */
 .btn-icon svg {
-    width: calc(var(--btn-size-md) * var(--icon-scale));
-    height: calc(var(--btn-size-md) * var(--icon-scale));
-    pointer-events: none;
+  width: calc(var(--btn-size-md) * var(--icon-scale));
+  height: calc(var(--btn-size-md) * var(--icon-scale));
+  pointer-events: none;
 }
 .btn-round {
-    border-radius: 50%;
+  border-radius: 50%;
 }
 .btn-square {
-    border-radius: var(--border-radius);
+  border-radius: var(--border-radius);
 }
 
 /* =========================================
@@ -102,19 +107,19 @@
    ========================================= */
 
 .btn-lg {
-    width: var(--btn-size-lg);
-    height: var(--btn-size-lg);
-}
-.btn-lg svg {
+  width: var(--btn-size-lg);
+  height: var(--btn-size-lg);
+
+  & svg {
     width: calc(var(--btn-size-lg) * var(--icon-scale));
     height: calc(var(--btn-size-lg) * var(--icon-scale));
+  }
 }
 
-
 .profile-modal[open] {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
 }
 dialog {
   width: clamp(20rem, 90vw, 30rem);
@@ -129,42 +134,41 @@ dialog {
 .profile-modal,
 #recipe-detail-modal {
   top: 5%;
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
   margin: 0 auto;
   overflow: hidden;
 }
 dialog[open] {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
 }
 dialog[open] .modal-header {
-    border-bottom: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--border-color);
 }
 dialog[open] .modal-body {
-    flex: 1;
-    min-height: 0;
-    padding: var(--space-xs);
-    overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-xs);
+  overflow-y: auto;
 }
 dialog::backdrop {
-    background-color: rgb(0 0 0 / 50%);
-    backdrop-filter: blur(8px);
+  background-color: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(8px);
 }
 
 /* Modal X button styling */
 .modal-close {
-    position: absolute;
-    inset: 1rem 1rem auto auto;
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-size-xl);
-    color: var(--text-muted);
-    background: transparent;
-    border: none;
-}
-.modal-close:hover {
+  position: absolute;
+  inset: 1rem 1rem auto auto;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xl);
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+
+  &:hover {
     color: var(--text-destructive);
+  }
 }
 
 /* Confirmation modal variant's content */
@@ -189,40 +193,40 @@ dialog::backdrop {
 
 
 .tooltip { 
-    position: relative; /* positioning context for ::after */
-    max-width: 28ch;
-    padding: 4px;
-    margin-top: 8px;
-    color: var(--bg); /* then use current bg as text for color parity */
-    overflow-wrap: break-word;
-    pointer-events: none;
-    background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
-    border: var(--border-default);
-    border-radius: var(--border-radius);
+  position: relative; /* positioning context for ::after */
+  max-width: 28ch;
+  padding: 4px;
+  margin-bottom: 8px;
+  color: var(--bg); /* then use current bg as text for color parity */
+  overflow-wrap: break-word;
+  pointer-events: none;
+  background-color: color-mix(in srgb, var(--text) 90%, transparent); /* steal other theme's TEXT color - should be appropriate */
+  border: var(--border-default);
+  border-radius: var(--border-radius);
 }
 .tooltip:not(#no-after)::after {
-    position: absolute;
-    top: -0.4rem;
-    left: var(--caret-pos, 50%); /* --caret-pos calculated via JS */
-    content: "";
-    border: 0.4rem solid transparent; /* forms our triangle "arrow" */
-    border-bottom-color: color-mix(in srgb, var(--text) 90%, transparent);
-    opacity: 1;
-    transform: translate(-50%, -40%);
+  content: "";
+  position: absolute;
+  bottom: -1rem;
+  left: var(--caret-pos, 50%); /* --caret-pos calculated via JS */
+  border: 0.4rem solid transparent; /* forms our triangle "arrow" */
+  border-top-color: color-mix(in srgb, var(--text) 90%, transparent);
+  opacity: 1;
+  transform: translate(-50%, -40%);
 }
 
 /* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
 .card-dashboard {
-    position: relative; /* positioning context for .card-title */
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
-    align-self: stretch;
-    padding: var(--space-xl) var(--space-lg) var(--space-lg);
-    background-color: var(--bg);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+  position: relative; /* positioning context for .card-title */
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  align-self: stretch;
+  padding: var(--space-xl) var(--space-lg) var(--space-lg);
+  background-color: var(--bg);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
 }
 
 /* =========================================
@@ -230,123 +234,162 @@ dialog::backdrop {
    ========================================= */
 
 form :is(input, select, textarea).invalid {
-    border: 2px solid var(--clr-error);
+  border: 2px solid var(--clr-error);
 }
 
 /* Applied to form elements themselves - for spacing between div(label+input) groups */
 .form-column {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--gap-sm);
-}
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-sm);
 
-/* Target divs at any depth which themselves directly contain a label 
-    For label+input groupings */
-.form-column div:has(> label) {
+  /* Target divs at any depth which themselves directly contain a label 
+  For label+input groupings */
+  & div:has(> label) {
     display: grid;
     align-items: center;
+  }
 }
 
 /* CTA + maybe secondary button(s) */
 .form-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--gap-sm);
-    align-self: start;
-    justify-content: center;
-    width: clamp(5rem, 60vw, 15rem);
-}
-.form-actions > * {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
+  align-self: start;
+  justify-content: center;
+  width: clamp(5rem, 60vw, 15rem);
+
+  & > * {
     flex: 1; /* size each button equally */
+  }
 }
 
 /* Two fields side-by-side (equal or weighted split) */
 .field-pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--gap-sm);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-sm);
 }
 .field-pair--weighted {
-    grid-template-columns: 7fr 3fr;
+  grid-template-columns: 7fr 3fr;
 }
 
 .radio-fieldset {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--gap-sm);
-    justify-content: center;
-}
-.radio-fieldset > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-sm);
+  justify-content: center;
+
+  & > div {
     place-items: center;
     border-radius: var(--border-radius);
+    border: 1px solid var(--border-default);
+  }
+  & legend {
+    padding: 0 var(--space-xs);
+    margin-bottom: var(--space-xs);
+  }
 }
 
-/* DEBUG/TODO: CLEANUP */
+
+/* DEBUG/TODO: CLEANUP for task link stuff */
 [data-search] {
   position: relative;
 }
 .task-cards {
   position: fixed;
-  z-index: 888;
-  top: 100%;
+  z-index: 50;
+  top: calc(100% + 6px);
   width: 100%;
   max-height: min(300px, 40vh);
   overflow-y: auto;
+  background: var(--bg);
 }
 .card {
-  border: 1px solid red;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border: 1px solid var(--accent-subtle);
   background: var(--bg-light);
   padding: var(--space-xs);
+
+  &:hover {
+    background: var(--bg-hover);
+  }
 }
+.card + .card {
+  border-top: 1px solid var(--accent-subtle);
+}
+
+
 .hide {
   display: none;
 }
 
-/* TODO: task pill stuff */
+/* wraps all pills */
 .pill-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--gap-sm);
 }
+/* each pill as a whole (x_svg + name) */
 .my-pill {
   display: inline-flex;
-  background: red;
+  align-items: center;
+  gap: var(--gap-sm);
+  background: var(--bg-light);
+  color: var(--accent-strong);
+  border: 1px solid var(--accent-strong);
   border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
 }
 .pill-remove {
-
+  opacity: 0.7;
+  cursor: pointer;
 }
+.pill-remove:hover {
+  opacity: 1;
+  color: var(--clr-error);
+}
+/* wraps label + search input + dropdown */
+.search-wrapper:has(.task-cards:not(.hide)) input {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 
 /* =========================================
    Inputs
    ========================================= */
 
 input, select, textarea {
-    padding: var(--space-sm) 0.75rem;
-    color: var(--text);
-    accent-color: var(--accent-subtle);
-    background-color: var(--bg-light);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
-}
-input[disabled]:hover,
-select[disabled]:hover,
-textarea[disabled]:hover {
+  padding: var(--space-sm) 0.75rem;
+  color: var(--text);
+  accent-color: var(--accent-subtle);
+  background-color: var(--bg-light);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+
+  &[disabled]:hover {
     cursor: not-allowed;
+  }
 }
+
 input:not([type="checkbox"], [type="radio"]) {
-    width: 100%;
+  width: 100%;
 }
 :where(input, select, textarea):focus-visible {
-    outline: var(--focus-ring);
-    outline-offset: var(--focus-offset);
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }
 
 /* TODO: Tune this a bit for table cells */
 .input-inline {
-    padding-block: var(--space-xs); /* top+bottom Slightly tighter */
-    font-size: var(--font-size-sm);
-    border: none;
-    border-bottom: var(--border-default);
+  padding-block: var(--space-xs); /* top+bottom Slightly tighter */
+  font-size: var(--font-size-sm);
+  border: none;
+  border-bottom: var(--border-default);
 }
 
 
@@ -358,85 +401,89 @@ input:not([type="checkbox"], [type="radio"]) {
 
 /* TODO: BUG: Fix this & sort out why table-cell class is required for delete-btn's to style properly */
 .table-cell.delete-cell {
-    width: 0; /* prevent us from consuming extra table width */
-    padding: 0;
-    background-color: var(--bg);
-    border: none;
+  width: 0; /* prevent us from consuming extra table width */
+  padding: 0;
+  background-color: var(--bg);
+  border: none;
 }
 
 .table-empty {
-    padding: var(--space-sm) 0;
-    font-style: italic;
-    color: var(--text-muted);
-    text-align: center;
+  padding: var(--space-sm) 0;
+  font-style: italic;
+  color: var(--text-muted);
+  text-align: center;
 }
 .table-standard {
-    width: 100%;
-    font-size: 0.875rem;
-    table-layout: auto;
-    caption-side: top;
-    border-collapse: collapse;
-}
-.table-standard th,
-.table-standard td {
+  width: 100%;
+  font-size: 0.875rem;
+  table-layout: auto;
+  caption-side: top;
+  border-collapse: collapse;
+
+  & :is(th, td) {
     padding: var(--space-sm);
     border: var(--border-default);
+  }
 }
-.table-header th {
+
+.table-header {
+  & th {
     font-weight: var(--font-weight-semibold);
-    background-color: var(--accent-subtle);
-}
-
-/* Rotate table header chevrons when sorted */
-.table-header th[data-order="asc"] svg {
+    background-color: var(--bg);
+    border-bottom: 2px solid var(--accent-strong);
+    color: var(--accent-strong);
+  }
+  /* Rotate table header chevrons when sorted */
+  & th[data-order="asc"] svg {
     transform: rotate(180deg);
-}
-.table-row {
-    transition: background-color 25ms ease-out;
+  }
+
 }
 
-/* Table context menu ellipsis */
-.table-row .row-actions {
+.table-row {
+  transition: background-color 25ms ease-out;
+
+  & .row-actions { /* table context menu ellipsis */
     visibility: hidden;
-}
-.table-row:hover .row-actions {
+  }
+  &:hover .row-actions {
     visibility: visible;
-}
-.table-row:nth-child(even) {
+  }
+  &:nth-child(even) {
     background-color: var(--bg-light);
-}
-.table-row:hover {
-    background-color: var(--accent-hover);
+  }
+  &:hover {
+    background-color: var(--accent-subtle);
+  }
 }
 
 /* =========================================
    Context Menu
    ========================================= */
 .context-menu {
-    position: absolute;
-    z-index: 200;
-    max-width: 50%;
-    background-color: var(--bg);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
-}
-.context-menu > li {
-    padding: var(--space-sm) var(--space-md);
-}
-.context-menu > li:hover {
-    cursor: pointer;
-    background-color: var(--accent-hover);
-}
+  position: absolute;
+  z-index: 200;
+  max-width: 50%;
+  background-color: var(--bg);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
 
-/* Style hover so its corners don't jut out from ul element itself */
-.context-menu > li:first-child:hover {
+  & > li {
+    padding: var(--space-sm) var(--space-md);
+  }
+  & > li:hover {
+    cursor: pointer;
+    background-color: var(--accent-subtle);
+  }
+  & > li:first-child:hover {
     border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
-}
-.context-menu > li:last-child:hover {
+  }
+  & > li:last-child:hover {
     border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
-}
-.context-menu > li:only-child:hover {
+  }
+  & > li:only-child:hover {
     border-radius: var(--border-radius);
+  }
 }
 
 /* =========================================
@@ -445,24 +492,25 @@ input:not([type="checkbox"], [type="radio"]) {
 
 /* Mimick <fieldset>'s 'title intersects border' effect for container headers */
 .card-title {
-    position: absolute;
-    top: -0.9rem;
-    left: 1rem;
-    display: flex;
-    gap: var(--gap-sm);
-    align-items: center;
-    padding: 0 0.05rem;
-    background: linear-gradient(
-        to bottom,
-        var(--bg-dark) 48%,
-        var(--bg) 52%
-    );
-}
-.card-title h2 {
+  position: absolute;
+  top: -0.9rem;
+  left: 1rem;
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+  padding: 0 0.05rem;
+  background: linear-gradient(
+      to bottom,
+      var(--bg-dark) 48%,
+      var(--bg) 52%
+  );
+
+  & h2 {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-higher);
     pointer-events: none;
+  }
 }
 
 /* =========================================
@@ -470,47 +518,47 @@ input:not([type="checkbox"], [type="radio"]) {
    ========================================= */
 
 #toast-container {
-    position: fixed;
-    top: calc(1.3 * var(--min-navbar-height));
-    right: 1rem;
-    z-index: 400;
-    display: flex;
-    flex-direction: column-reverse;
-    gap: var(--gap-sm);
-    border-radius: var(--border-radius-mild);
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px 0 rgb(0 0 0 / 6%);
+  position: fixed;
+  top: calc(1.3 * var(--min-navbar-height));
+  right: 1rem;
+  z-index: 400;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--gap-sm);
+  border-radius: var(--border-radius-mild);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px 0 rgb(0 0 0 / 6%);
 }
 .toast {
-    padding: var(--gap-xs) var(--gap-sm);
-    border: solid 1px transparent;
-    border-radius: var(--border-radius-mild);
+  padding: var(--gap-xs) var(--gap-sm);
+  border: solid 1px transparent;
+  border-radius: var(--border-radius-mild);
 }
 .toast-success {
-    color: var(--clr-success);
-    background-color: color-mix(in srgb, var(--clr-success) 10%, white); /* Derive from clr-success */
-    border-color: var(--clr-success);
+  color: var(--clr-success);
+  background-color: color-mix(in srgb, var(--clr-success) 10%, white); /* Derive from clr-success */
+  border-color: var(--clr-success);
 }
 .toast-error {
-    color: var(--clr-error);
-    background-color: color-mix(in srgb, var(--clr-error) 10%, white);
-    border-color: var(--clr-error);
+  color: var(--clr-error);
+  background-color: color-mix(in srgb, var(--clr-error) 10%, white);
+  border-color: var(--clr-error);
 }
 
 /* =========================================
    Checklist styling
    ========================================= */
 .item-list {
-    display: grid;
-    gap: var(--gap-sm);
+  display: grid;
+  gap: var(--gap-sm);
 }
 .item-row {
-    display: flex;
-    gap: var(--gap-sm);
-    align-items: center;
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
 }
 .item.completed .item-title {
-    color: var(--text-muted);
-    text-decoration: line-through;
+  color: var(--text-muted);
+  text-decoration: line-through;
 }
 
 
@@ -518,102 +566,102 @@ input:not([type="checkbox"], [type="radio"]) {
    Tabbed Modals
    ========================================= */
 .tab-group {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--gap-xs);
-    padding: var(--space-xs);
-    background-color: var(--bg-light);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap-xs);
+  padding: var(--space-xs);
+  background-color: var(--bg-light);
+  border-radius: var(--border-radius);
 }
 .tab {
-    display: flex;
-    flex: 1;
-    gap: var(--gap-xs);
-    align-items: center;     /* centers icons vertically */
-    justify-content: center; /* centers icon+text buttons horizontally */
-    padding: var(--space-sm);
-}
-.tab svg {
+  display: flex;
+  gap: var(--gap-xs);
+  align-items: center;     /* centers icons vertically */
+  justify-content: center; /* centers icon+text buttons horizontally */
+  padding: var(--space-sm);
+  border-radius: var(--border-radius);
+
+  & svg {
     width: 1em;
     height: 1em;
-}
-.tab-group, .tab {
-    border-radius: var(--border-radius);
-}
-.tab:hover {
+  }
+  &:hover {
     background-color: var(--bg-hover);
     filter: brightness(0.9);
-}
-.tab:active {
+  }
+  &:active {
     background-color: var(--bg-hover);
     filter: brightness(0.9);
     transform: translateY(1px);
-}
-.tab.active {
+  }
+  &.active {
     background-color: var(--accent-subtle);
     filter: brightness(1.2);
     transform: translateY(1px);
+  }
 }
+
 
 /* =========================================
    Dropdown Menu
    ========================================= */
 .dropdown {
-    position: relative;
+  position: relative;
 }
+.dropdown.is-open svg {
+  transform: rotate(180deg);
+}
+.dropdown.is-open .dropdown-menu {
+  display: flex;
+}
+
 .dropdown-toggle {
-    display: inline-flex;
-    gap: var(--gap-sm);
-    align-items: center;
-    padding: var(--space-xs) var(--space-sm);
-    white-space: nowrap;
-    background-color: var(--bg-light);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
+  display: inline-flex;
+  gap: var(--gap-sm);
+  align-items: center;
+  padding: var(--space-xs) var(--space-sm);
+  white-space: nowrap;
+  background-color: var(--bg-light);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
 }
 .dropdown-toggle-chevron,
 .dropdown-toggle-label {
     pointer-events: none;
 }
 .dropdown-toggle-chevron svg {
-    width: 1em;
-    height: 1em;
-    transition: transform 0.2s ease;
+  width: 1em;
+  height: 1em;
+  transition: transform 0.2s ease;
 }
 .dropdown-menu {
-    position: absolute;
-    z-index: 200;
-    display: none;
-    flex-direction: column;
-    background-color: var(--bg-light);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
-}
-.dropdown.is-open svg {
-    transform: rotate(180deg);
-}
-.dropdown.is-open .dropdown-menu {
-    display: flex;
-}
+  position: absolute;
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  background-color: var(--bg-light);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
 
-.dropdown-menu > button {
+  & > button {
     padding: var(--space-sm) var(--space-md);
     text-align: left;
-}
-.dropdown-menu > button:hover {
-    background-color: var(--accent-hover);
+  }
+  & > button:hover {
+    background-color: var(--accent-subtle);
+  }
+  & > button:first-child:hover {
+    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
+  }
+  & > button:last-child:hover {
+    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
+  }
+  & > button:only-child:hover {
+    border-radius: var(--border-radius);
+  }
 }
 
-/* Style hover so its corners don't jut out from ul element itself */
-.dropdown-menu > button:first-child:hover {
-    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
-}
-.dropdown-menu > button:last-child:hover {
-    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
-}
-.dropdown-menu > button:only-child:hover {
-    border-radius: var(--border-radius);
-}
 
 
 /* =========================================
@@ -622,36 +670,34 @@ input:not([type="checkbox"], [type="radio"]) {
 
 .timeframe-selector {
   display: inline-flex;
+  flex-direction: row;
   align-self: flex-start;
-  flex-direction: flex-column;
-  /* gap: var(--gap-sm); */
   background: var(--bg);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-}
 
-.timeframe-selector > button {
-  /* border-radius: var(--border-radius); */
-  padding: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
-}
-.timeframe-selector > button:not(:last-child) {
-  border-right: 1px solid var(--border-color);
-}
-.timeframe-selector > button:hover {
-  background: var(--bg-hover);
-}
-.timeframe-selector > button.active {
-  background: var(--accent-subtle);
-}
-.timeframe-selector > button:first-child {
-  border-top-left-radius: var(--border-radius);
-  border-bottom-left-radius: var(--border-radius);
-}
+  & > button {
+    padding: var(--space-xs) var(--space-md);
 
-.timeframe-selector > button:last-child {
-  border-top-right-radius: var(--border-radius);
-  border-bottom-right-radius: var(--border-radius);
+    &:not(:last-child) {
+      border-right: 1px solid var(--border-color);
+    }
+    &:hover {
+      background: var(--bg-hover);
+    }
+    &.active {
+      color: var(--accent-subtle);
+      background: var(--bg-light);
+    }
+    &:first-child {
+      border-top-left-radius: var(--border-radius);
+      border-bottom-left-radius: var(--border-radius);
+    }
+    &:last-child {
+      border-top-right-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
+    }
+  }
 }
 
 /* =========================================
@@ -659,14 +705,20 @@ input:not([type="checkbox"], [type="radio"]) {
    ========================================= */
 
 .card-stats {
-  position: relative;
+  position: relative; /* context for ?? */
   display: grid;
-  grid-template-rows: auto auto;
-  gap: var(--gap-md);
-  /* flex-direction: column; */
-  aspect-ratio: 1 / 1;
+  grid-template-columns: auto 1fr; /* makes header portion "left-aligned to end of ring"? */
+  grid-template-rows: auto 1fr; /* ??? */
+  grid-template-areas:
+    "ring header"
+    "ring n-of-k";
+/*
+[      ][ header ]
+[ ring ][ header ]
+[      ][ n-of-k ]
+*/
+  gap: var(--gap-sm);
   width: clamp(150px, 30vw, 200px);
-
   padding: var(--space-xs);
   background-color: var(--bg);
   border: var(--border-default);
@@ -675,8 +727,14 @@ input:not([type="checkbox"], [type="radio"]) {
 }
 
 .stats-header {
-  flex: 1;
+  grid-area: header;
   font-size: var(--font-size-sm);
+}
+.n-of-k {
+  font-size: var(--font-size-md);
+  color: var(--accent-strong);
+  grid-area: n-of-k;
+  place-self: end; /* put at...end? bottom? */
 }
 
 @property --progress {
@@ -687,32 +745,43 @@ input:not([type="checkbox"], [type="radio"]) {
 
 /* Ring for progress */
 .stats-ring {
-  --size: 100px;
-  --bar-width: 25px;
-  
+  --size: 70px;
+  --bar-width: 20px;
+
+  grid-area: ring;
   position: relative;
   display: grid;
   place-items: center;
+  align-self: center; /* vertically center ring */
 
-  align-self: center;
-  justify-self: center;
-
-  /* margin: 0 auto; */
   width: var(--size);
   height: var(--size);
-  aspect-ratio: 1 / 1;
   
   /* This creates the actual progress ring around,
     with --progress being the percentage progress
   */
   background: conic-gradient(
-    var(--accent-subtle) var(--progress, 0),
+    var(--accent-strong) var(--progress, 0),
     var(--bg-light) 0%
   );
   border-radius: 50%;
-  color: var(--accent-subtle);
+  color: var(--accent-strong);
   transition: --progress 500ms linear;
 }
+
+/* Donut hole punchout */
+.stats-ring::after {
+  /* with content, we can actually take any attr that's on that element, take the value that's on it,
+  and use it here? */
+  /* content: attr(aria-valuenow) "%"; "50 %" since val is pulled from JS, % hardcoded ofc */
+  content: "";
+  width: calc(100% - var(--bar-width));
+  aspect-ratio: 1 / 1;
+
+  background: var(--bg);
+  border-radius: inherit;
+}
+
 /* Text inside the donut hole punchout */
 .stats-center {
   position: absolute;
@@ -722,27 +791,9 @@ input:not([type="checkbox"], [type="radio"]) {
   align-items: center;
   justify-content: center;
   inset: 0;
-}
 
-.stats-center .percentage {
-  font-weight: 600;
-  font-size: var(--font-size-lg);
-}
-.stats-center .n-of-k {
-  font-size: var(--font-size-sm);
-}
-
-/* Donut hole punchout */
-.stats-ring::after {
-  /* with content, we can actually take any attr that's on that element, take the value that's on it,
-  and use it here? */
-  /* content: attr(aria-valuenow) "%"; "50 %" since val is pulled from JS, % hardcoded ofc */
-  content: "";
-  /* display: grid; */
-  /* place-items: center; */
-  width: calc(100% - var(--bar-width));
-  aspect-ratio: 1 / 1;
-
-  background: var(--bg);
-  border-radius: inherit;
+  & .percentage {
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+  }
 }

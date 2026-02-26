@@ -4,7 +4,7 @@ Repository layer for Habits module.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -102,6 +102,18 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             )
         )
         return self.session.execute(stmt).scalars().first()
+    
+    def get_completion_counts_in_window(self, start_utc: datetime, end_utc: datetime) -> list[dict[str, Any]]:
+        stmt = (
+                select(func.date(HabitCompletion.created_at).label("date"), func.count().label("count"))
+                .where(
+                    HabitCompletion.user_id == self.user_id,
+                    HabitCompletion.created_at.between(start_utc, end_utc)
+                )
+                .group_by(func.date(HabitCompletion.created_at))
+            )
+        results = self.session.execute(stmt).all()
+        return [{ "date": str(row.date), "count": row.count } for row in results]
 
     ## All for a given habit
     def get_all_single_habit_completions_in_window(
@@ -136,10 +148,16 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
 
     def get_completion_counts_by_habit_in_window(
         self, start_utc: datetime, end_utc: datetime
-    ) -> list[tuple[str, int]]:
-        """Returns a list of (habit_name, count) tuples for completions in datetime range."""
+    ) -> list[dict[str, str | int]]:
+        """Returns a list of (habit_name, count, target_frequency) dicts for completions in datetime range.
+        Grouped by habit name, and in descending order by completion count.
+        """
         stmt = (
-            select(Habit.name, func.count(HabitCompletion.id))
+            select(
+                Habit.name,
+                func.count(HabitCompletion.id).label("completion_count"),
+                Habit.target_frequency
+            )
             .select_from(HabitCompletion)
             .join(Habit)
             .where(
@@ -147,12 +165,14 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
                 HabitCompletion.created_at >= start_utc,
                 HabitCompletion.created_at < end_utc,
             )
-            .group_by(Habit.name)
+            .group_by(Habit.name, Habit.target_frequency)
+            .order_by(func.count(HabitCompletion.id).desc())
         )
         result = self.session.execute(stmt).all()
         return [
-            tuple(row) for row in result
-        ]  # unwrap each SQLAlchemy Row into a plain tuple
+            {"name": row.name, "count": row.completion_count, "target_frequency": row.target_frequency }
+            for row in result
+        ]  # unwrap each SQLAlchemy Row into a list of dicts
 
 
 class LeetCodeRecordRepository(BaseRepository[LeetCodeRecord]):

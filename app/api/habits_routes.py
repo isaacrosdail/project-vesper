@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from datetime import date
+from datetime import date, timedelta
 
 from flask import Response, abort, request
 from flask_login import current_user
@@ -114,13 +114,25 @@ def horizontal_barchart(session: Session) -> tuple[Response, int]:
         )
     )
 
-    chart_data = [{"name": name, "count": count} for name, count in aggregate_data]
-
     return api_response(
         success=True,
-        message=f"Retrieved completion counts for {len(chart_data)} habits",
-        data=chart_data,
+        message=f"Retrieved completion counts for {len(aggregate_data)} habits",
+        data=aggregate_data,
     ), 200
+
+@api_bp.get("/habits/habit_completions/heatmap")
+@login_plus_session
+def completions_heatmap(session: Session) -> tuple[Response, int]:
+    # trailing 12 months from today (rather than a fixed calendar year)
+    end_utc = dth.now_utc()
+    start_utc = end_utc - timedelta(days=365)
+
+    habits_service = create_habits_service(
+        session, current_user.id, current_user.timezone
+    )
+    heatmap_data = habits_service.completion_repo.get_completion_counts_in_window(start_utc, end_utc)
+
+    return api_response(success=True, message="done", data=heatmap_data), 200
 
 
 @api_bp.post("/habits/leetcode_records")

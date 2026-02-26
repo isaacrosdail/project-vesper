@@ -14,15 +14,13 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {# For stats/analytics "progress circle cards" #}
 {% macro stats_circle(header, rate, numerator, denominator) %}
 <div class="card-stats">
-    <div class="stats-header">
-        {{ header }}
-    </div>
     <div class="stats-ring" data-progress="{{ rate }}">
         <div class="stats-center">
             <span class="percentage">{{ rate }}%</span>
-            <span class="n-of-k">{{ numerator }} of {{ denominator }}</span>
         </div>
     </div>
+    <div class="stats-header">{{ header }}</div>
+    <span class="n-of-k">{{ numerator }} / {{ denominator }}</span>
 </div>
 {% endmacro %}
 
@@ -124,7 +122,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     data-subtype="{{ subtype }}"
     data-endpoint="/{{ module }}/{{ subtype }}">
     <div class="modal-header">
-        <legend>{{ title }}</legend>
+        <h2>{{ title }}</h2>
         <button type="button" class="btn-icon btn-round btn-lg modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>
     </div>
     <div class="modal-body">

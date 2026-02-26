@@ -7,13 +7,25 @@
 {{ forms.habit_entry_modal() }}
 {{ forms.leetcode_entry_modal() }}
 
-<div class="timeframe-selector">
-    <button class="chart-range" data-range="7">7d</button>
-    <button class="chart-range" data-range="30">30d</button>
-    <button class="chart-range" data-range="90">90d</button>
+<div id="habits-stats-container">
+    <div class="heatmap-group">HEATMAP</div>
+    <div class="tiles-group">
+        {{ ui.stats_circle("Completed this week", 45,2,3) }}
+        {{ ui.stats_circle("Avg. last N days", 32,5,6) }}
+        {{ ui.stats_circle("Yolo", 78,8,9) }}
+    </div>
+    <div class="breakdown-group">
+        <div class="timeframe-selector">
+            <button class="chart-range" data-range="7">7d</button>
+            <button class="chart-range" data-range="30">30d</button>
+            <button class="chart-range" data-range="90">90d</button>
+        </div>
+        <div id="habits-hbar-chart-container"></div>
+    </div>
 </div>
 
-<div id="habits-chart-container"></div>
+<!-- <div id="heatmap-container"></div> -->
+<!-- <div id="habits-chart-container"></div> -->
 
 <div class="card-dashboard">
     <div class="card-title">

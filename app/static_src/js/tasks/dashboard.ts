@@ -5,6 +5,7 @@ import { contextMenu } from '../shared/ui/context-menu';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { makeToast } from '../shared/ui/toast';
 import { initValidation, makeValidator } from '../shared/validators';
+import { enableStats } from '../shared/charts';
 
 
 function validateDueDate(dueDateString: string): string | null {
@@ -67,18 +68,18 @@ function toggleTaskComplete(
     });
 }
 
-function enableStats() {
-    document.querySelectorAll<HTMLDivElement>('.stats-ring').forEach(statsCircle => {
-        const progress = Number(statsCircle.dataset.progress ?? 50); // we'll need to update this value to update the visual progress
+// function enableStats() {
+//     document.querySelectorAll<HTMLDivElement>('.stats-ring').forEach(statsCircle => {
+//         const progress = Number(statsCircle.dataset.progress ?? 50); // we'll need to update this value to update the visual progress
 
-        statsCircle.setAttribute("role", "progressbar");
-        statsCircle.setAttribute("aria-valuenow", progress); // this value is grabbed by our stats-progress
-        // content to show the percentage/value
-        statsCircle.style.setProperty('--progress', progress + "%"); // set visual ring val
-        statsCircle.setAttribute("aria-live", "polite")
+//         statsCircle.setAttribute("role", "progressbar");
+//         statsCircle.setAttribute("aria-valuenow", progress); // this value is grabbed by our stats-progress
+//         // content to show the percentage/value
+//         statsCircle.style.setProperty('--progress', progress + "%"); // set visual ring val
+//         statsCircle.setAttribute("aria-live", "polite")
 
-    })
-}
+//     })
+// }
 
 export function init() {
     const isFrogCheckbox = document.querySelector<HTMLInputElement>('#is_frog');
@@ -109,6 +110,7 @@ export function init() {
         pillContainer.innerHTML = ''
         searchInput.value = ''
         tasks.forEach(task => task.element.classList.remove('hide'));
+        taskCardContainer.classList.add('hide');
         document.querySelector('#subtask_ids_hidden').value = '';
     })
 
@@ -124,37 +126,35 @@ export function init() {
         })
     })
 
+    function selectTask(id: string, name: string) {
+        const card = tasks.find(t => t.element.dataset.id === id).element;
+
+        card.classList.add('hide'); // hide card
+        selectedTasks.push({ id, name }); // include in selectedTasks
+
+        // Render a pill for this task; clone pill, modify text, & append to container
+        const pill = pillTemplate.content.cloneNode(true).children[0];
+        pill.querySelector('.pill-name').textContent = name;
+        pill.dataset.id = id; // put ID on dataset for pill for removal
+        pillContainer.appendChild(pill);
+
+        // 4. append hidden input's .value for this task for submission
+        const hiddenTaskInput = document.querySelector('#subtask_ids_hidden');
+        // update value for hidden input (remember: this is a comma-separated list! "7,5,2" etc)
+        hiddenTaskInput.value = selectedTasks.map(task => task.id).join(',');
+    }
+
     // event delegation events as closures, so we can keep refs
     function handleSubtaskEntry(e) {
         const clickedEl = e.target;
         // Click on a card for a task within the "dropdown":
         if (clickedEl.closest('.card')) {
             const card = clickedEl.closest('.card');
-            
-            card.classList.toggle('hide', true); // hide from list
-
-            // 2. push {id, name} to selectedTasks, grab from dataset on div.card
             const { id, name } = card.dataset;
-            selectedTasks.push({ id: id, name: name });
-
-            // 3. Render a pill for this task; clone pill, modify text, & append to container
-            const pill = pillTemplate.content.cloneNode(true).children[0];
-            const pillName = pill.querySelector('.pill-name');
-            pillName.textContent = name;
-            // also put data-id on the pill for easy removal
-            pill.dataset.id = id;
-            pillContainer.appendChild(pill);
-
-            // 4. append hidden input's .value for this task for submission
-            // const hiddenTaskInput = document.createElement('input');
-            const hiddenTaskInput = document.querySelector('#subtask_ids_hidden');
-            // update value for hidden input (remember: this is a comma-separated list! "7,5,2" etc)
-            hiddenTaskInput.value = selectedTasks.map(task => task.id).join(',');
-            console.log(selectedTasks)
+            selectTask(id, name);
         }
 
         if (clickedEl.matches('.pill-remove')) {
-            console.log("clicked")
             // 1. filter out of selectedTasks
             const pill = clickedEl.closest('.my-pill');
             const taskId = pill.dataset.id;
@@ -175,7 +175,6 @@ export function init() {
         // remove hidden from the card container
         else if (clickedEl.closest('[data-search-wrapper]')) {
             const cardContainer = document.querySelector('[data-task-card-container]');
-            console.log(cardContainer)
             cardContainer.classList.remove('hide');
 
             // Position under search bar input
@@ -220,35 +219,47 @@ export function init() {
 
     document.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
-
-        if (target.matches('.js-table-options')) {
-            const button = target.closest('.row-actions')!;
-            const row = target.closest('.table-row')!;
-            const { itemId } = row.dataset;
-            const url = routes.tasks.tasks.item(itemId);
-            const modal = document.querySelector('#tasks-entry-dashboard-modal');
-            const rect = button.getBoundingClientRect();
-
-            contextMenu.create({
-                position: { x: rect.left, y: rect.bottom },
-                items: [
-                    {
-                        label: 'Edit',
-                        action: () => openModalForEdit(itemId, url, modal, 'Task')
-                    },
-                    {
-                        label: 'Delete',
-                        action: () => handleDelete(itemId, url)
-                    },
-                    {
-                        label: 'Toggle task complete',
-                        action: () => {
-                            const isDone = row.dataset.isDone === 'True';
-                            toggleTaskComplete(itemId, isDone);
-                        }
-                    }
-                ]
-            })
+        if (!(target.matches('.js-table-options'))) {
+            return;
         }
+        const button = target.closest('.row-actions')!;
+        const row = target.closest('.table-row')!;
+        const { itemId } = row.dataset;
+        const url = routes.tasks.tasks.item(itemId);
+        const modal = document.querySelector('#tasks-entry-dashboard-modal');
+        const rect = button.getBoundingClientRect();
+
+        contextMenu.create({
+            position: { x: rect.left, y: rect.bottom },
+            items: [
+                {
+                    label: 'Edit',
+                    action: () => openModalForEdit(itemId, url, modal, 'Task',
+                        (data) => {
+                            // data.subtasks = [8, 11]
+                            // loop, make pills, hide cards
+                            data.subtasks.forEach((id: number) => {
+                                const task = tasks.find(t => t.element.dataset.id === String(id));
+                                if (task) {
+                                    selectTask((String(id)), task.element.dataset.name)
+                                }
+                            })
+                        }
+                    )
+                },
+                {
+                    label: 'Delete',
+                    action: () => handleDelete(itemId, url)
+                },
+                {
+                    label: 'Toggle task complete',
+                    action: () => {
+                        const isDone = row.dataset.isDone === 'True';
+                        toggleTaskComplete(itemId, isDone);
+                    }
+                }
+            ]
+        })
+        // }
     });
 }

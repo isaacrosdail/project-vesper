@@ -202,14 +202,17 @@ export function openModalForEdit(
     url: string,       // caller builds url
     modal: FormDialog, // caller finds modal
     itemLabel: string, // for legend text: "Edit Product", etc
+    onPopulated?: (data: any) => void
 ): void {
     apiRequest('GET', url, null, {
         onSuccess: (responseData) => {
+            console.log(responseData.data)
             modal.dataset.mode = 'edit';
             modal.dataset.itemId = itemId;
             // modal.dataset.subtype = subtype; does it break without this?
             modal.showModal();
             populateModalFields(modal, responseData.data);
+            onPopulated?.(responseData.data);
 
             const legend = modal.querySelector('legend');
 

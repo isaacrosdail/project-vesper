@@ -51,6 +51,9 @@ export const routes = {
       collection: '/tasks/tasks',
       item: (id: string) => `/tasks/tasks/${id}`,
     },
+    task_links: {
+        collection: '/tasks/task_links'
+    },
   },
   habits: {
     habits: {
@@ -71,7 +74,7 @@ export const routes = {
     daily_metrics: {
       collection: '/metrics/daily_metrics',
       item: (id: string) => `/metrics/daily_metrics/${id}`,
-      timeseries: (params: URLSearchParams) => `/metrics/daily_metrics/timeseries?${params}`
+      query: (params: URLSearchParams) => `/metrics/daily_metrics?${params}`
     },
   },
   time_tracking: {

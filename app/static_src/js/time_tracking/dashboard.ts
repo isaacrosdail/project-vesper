@@ -1,11 +1,21 @@
 import * as d3 from 'd3';
 
-import { D3_TRANSITION_DURATION_MS, getChartDimensions } from '../shared/charts';
+import { D3_TRANSITION_DURATION_MS, hourMinsDisplay, getChartDimensions } from '../shared/charts';
 import { apiRequest, routes } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
 import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
 import { initValidation, makeValidator } from '../shared/validators';
+
+/**
+ * Thoughts:
+ * - Am I spending time on the right things?
+ * - Balance: Am I over-indexing on one category and neglecting others?
+ * - Work vs rest ratio: Burning out? Coasting?
+ * - Trends: Is activity A going up or down over the given window?
+ */
+
+
 
 type PieDatum = {
     category: string;
@@ -46,22 +56,21 @@ async function getData(lastNDays: number): Promise<PieDatum[]> {
 
 
 class TimeEntriesChart {
-    private dims;
-    private pie;
-    private arc;
+    private dims; radius;
+    private pie; arc;
     private color;
-    private radius;
-    private gLegend;
-    private gChart;
-    private gRoot;
+    private gRoot; gChart; gLegend; centerLabel;
 
     constructor(containerSelector: string) {
         this.dims = getChartDimensions(containerSelector);
 
         this.radius = Math.min(this.dims.innerWidth, this.dims.innerHeight) / 2;
 
-        const svg = d3.select(containerSelector)
-            .append("svg")
+        const legendHeight = 40;
+        const gap = 12;
+        const chartAreaHeight = this.dims.innerHeight - legendHeight - gap;
+
+        const svg = d3.select(containerSelector).append("svg")
             .attr("width", this.dims.width)
             .attr("height", this.dims.height);
 
@@ -69,21 +78,23 @@ class TimeEntriesChart {
             .attr("transform", `translate(${this.dims.margin.left}, ${this.dims.margin.top})`);
 
         this.gChart = this.gRoot.append("g")
-        .attr("transform", `translate(${this.dims.innerWidth/2}, ${this.dims.innerHeight/2})`);
+                .attr("transform", `translate(${this.dims.innerWidth/2}, ${chartAreaHeight / 2})`)
 
-        const pad = 20;
-        const legendXOffset = (this.dims.innerWidth / 2) + this.radius + pad;
+        this.centerLabel = this.gChart.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "middle")
+            .attr("class", "donut-center-label")
+
         this.gLegend = this.gRoot.append("g")
             .attr("class", "legend")
-            .attr("transform", `translate(${legendXOffset}, 0)`);
+            .attr("transform", `translate(0, ${chartAreaHeight + gap + legendHeight})`) // moving legend to bottom "row"
 
-        // d3.pie() takes our array data and calculates angles
-        this.pie = d3.pie<PieDatum>().value(d => d.value);
-        // d3.arc() draws the curved slice shapes based on those angles
-        this.arc = d3.arc<d3.PieArcDatum<PieDatum>>()
-            .innerRadius(0)
+        this.pie = d3.pie<PieDatum>().value(d => d.value); // calc angles from array
+        this.arc = d3.arc<d3.PieArcDatum<PieDatum>>() // draw curved slice shapes from angles
+            .innerRadius(this.radius * 0.7) // prime real estate
             .outerRadius(this.radius);
-        this.color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        this.color = d3.scaleOrdinal(d3.schemeTableau10);
     }
 
     showEmptyChart() {
@@ -94,10 +105,9 @@ class TimeEntriesChart {
             .data([1])
             .join("text")
             .attr("class", "empty-message")
+            .attr("text-anchor", "middle")
             .attr("x", 0)
             .attr("y", 0)
-            .attr("text-anchor", "middle")
-            .attr("fill", "grey")
             .text(`No time entry data for this period.`)
     }
 
@@ -110,27 +120,51 @@ class TimeEntriesChart {
         this.updatePieChart(data);
     }
 
+    // Adjust text label positions for each slice to show at appropriate locations
+    private labelTransform(d): string {
+        const mid = (d.startAngle + d.endAngle) / 2;
+        const [x, y] = this.arc.centroid(d);
+        const xOffset = mid < Math.PI ? 15 : -15;
+        const yOffsetSign = Math.sign(Math.sin(mid - Math.PI / 2));
+        const yOffset = yOffsetSign * 20;
+        return `translate(${x + xOffset}, ${y + yOffset})`
+    }
+
     updatePieChart(data: PieDatum[]) {
         this.gRoot.selectAll('.empty-message').remove();
 
-        const pieData = this.pie(data);
+        const sorted = [...data].toSorted((a, b) => b.value - a.value);
+        const pieData = this.pie(sorted);
 
         const groups = this.gChart.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
-            // .data(data, keyFn)
             .data(pieData, d => d.data.category)
             .join(
                 enter => {
-                    const g = enter.append("g").attr("class", "slice");
+                    const g = enter.append("g")
+                        .attr("class", "slice");
 
-                    // path (slice)
-                    g.append('path')
+                    g.append('path') // slice
                         .attr("class", "pie")
                         .attr("fill", d => this.color(d.data.category))
-                        .each(
-                            function(this: ArcPathElement, d) {
-                                this._current = d;
-                            })
+                        .each(function(this: ArcPathElement, d) {
+                            this._current = d;
+                        })
                         .attr("d", this.arc);
+
+                    g.append("text") // thing?
+                        .attr("transform", d => this.labelTransform(d))
+                        .attr("class", "slice-label")
+                        .attr("opacity", 1) // TODO: RETURN TO 0 WHEN DONE DEBUGGING
+                        .attr("pointer-events", "none")
+                        .attr("stroke", d => this.color(d.data.category))
+                        .attr("text-anchor", d => {
+                            const mid = (d.startAngle + d.endAngle) / 2;
+                            const isRight = mid < Math.PI;
+                            return isRight ? "start" : "end"
+                        })
+                        .text(d => {
+                            return `${hourMinsDisplay(d.data.value)} - 50%` // TODO fix
+                        })
 
                     return g;
                 },
@@ -146,10 +180,36 @@ class TimeEntriesChart {
                             return t => arc(i(t)) ?? "";
                         });
 
+                    update.select(".slice-label")
+                        .attr("transform", d => this.labelTransform(d))
+                        .attr("text-anchor", d => {
+                            const mid = (d.startAngle + d.endAngle) / 2;
+                            const isRight = mid < Math.PI;
+                            return isRight ? "start" : "end"
+                        })
+
                     return update;
                 },
                 exit => exit.remove()
             );
+
+        // Text in the center of donut
+        const highest = data.reduce((a, b) => a.value > b.value ? a : b)
+        const totalMins = data.reduce((a, b) => a + b.value, 0)
+        this.centerLabel.selectAll("tspan").remove();
+        this.centerLabel
+        .append("tspan")
+        .attr("x", 0)
+        .attr("dy", "0em")
+        .text(`Total: ${hourMinsDisplay(totalMins)}`)
+        
+        this.centerLabel
+        .append("tspan")
+        .attr("x", 0)
+        .attr("dy", "1.6em")
+        .attr("font-size", "0.8rem")
+        .text(`Top: ${highest.category}`)
+        // ==============================
 
         const _legendItems = this.gLegend.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.legend-item")
             .data(pieData, d => d.data.category)
@@ -157,33 +217,39 @@ class TimeEntriesChart {
                 enter => {
                     const g = enter.append("g")
                         .attr("class", "legend-item")
-                        .attr("transform", (_d, i) => `translate(0, ${i * 22})`);
+                        .attr("transform", (_d, i, nodes) => {
+                            const x = (i + 0.5) / nodes.length * this.dims.innerWidth;
+                            return `translate(${x}, 0)`
+                        })
 
                     // legend circle
-                    g.append('circle')
-                        .attr("cx", 10)
-                        .attr("cy", 10)
-                        .attr("r", 6)
-                        .attr("class", "pie legend-dot")
-                        .attr("fill", d => this.color(d.data.category));
+                    // g.append('circle')
+                    //     .attr("cx", 0)
+                    //     .attr("cy", 0)
+                    //     .attr("r", 6)
+                    //     .attr("class", "pie legend-dot")
+                    //     .attr("fill", d => this.color(d.data.category));
 
                     // text alongside
                     g.append('text')
                         .attr("x", 18)
                         .attr("y", 14)
                         .attr("class", "chart-legend-text")
-                        .text(d => `${d.data.category} - ${d.data.value} min`)
-
+                        .attr("text-anchor", "middle")
+                        .attr("stroke", d => this.color(d.data.category))
+                        // .text(d => `${d.data.category} - ${hourMinsDisplay(d.data.value)}`)
+                        .text(d => `${d.data.category}`)
                     return g;
                 },
                 update => {
-                    update.attr("transform", (_d, i) => {
-                        return `translate(0, ${i * 22})`;
+                    update.attr("transform", (_d, i, nodes) => {
+                        const x = (i + 0.5) / nodes.length * this.dims.innerWidth;
+                        return `translate(${x}, 0)`;
                     });
                     update.select('circle')
                         .attr("fill", d => this.color(d.data.category))
                     update.select('text')
-                        .text(d => `${d.data.category} - ${d.data.value} min`)
+                        .text(d => `${d.data.category} - ${hourMinsDisplay(d.data.value)}`)
 
                     return update;
                 },
@@ -192,10 +258,32 @@ class TimeEntriesChart {
 
         // Enable tooltip on hover to see data
         const radius = this.radius; // Capture outside callback
-        groups.on('mouseenter', function(_event, d) {
-            createTooltip(this, `${d.data.category}: ${d.data.value}`);
+        _legendItems.on('mouseenter', (_event, d) =>  {
+            const match = this.gChart.selectAll("g.slice")
+                .filter(sd => sd.data.category === d.data.category);
 
-            // Don't trigger hover effect if slice is > 75% of circle (since 2pi is full circle, so here we do 1.5pi)
+            match.select("text")
+                .attr("opacity", 1)
+            const sd = match.datum();
+            const mid = (sd.startAngle + sd.endAngle) / 2 - Math.PI / 2;
+            const dist = this.radius / 10;
+
+            match.transition().duration(D3_TRANSITION_DURATION_MS)
+                .attr("transform", `translate(${Math.cos(mid) * dist}, ${Math.sin(mid) * dist})`)
+                // .attr("opacity", 1)
+        })
+        .on('mouseleave', (_event, d) => {
+            const match = this.gChart.selectAll("g.slice")
+                .filter(sd => sd.data.category === d.data.category)
+                .transition().duration(D3_TRANSITION_DURATION_MS)
+                .attr("transform", "translate(0, 0)")
+            match.select("text")
+                .attr("opacity", 0)
+        })
+        groups.on('mouseenter', function(_event, d) {
+            createTooltip(this, `${d.data.category}: ${hourMinsDisplay(d.data.value)}`);
+
+            // Skip hover effect if slice is > 75% of circle (since 2pi is full circle, so here we do 1.5pi)
             const sliceAngle = (d.endAngle - d.startAngle);
             if (sliceAngle > Math.PI * 1.5) {
                 return;
@@ -238,7 +326,7 @@ export async function init() {
             })
             target.classList.add('active');
 
-            timeEntriesChart.refreshPieChart();
+            await timeEntriesChart.refreshPieChart();
         }
         else if (target.matches('.table-range')) {
             const range = target.dataset['range']!;

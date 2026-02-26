@@ -29,29 +29,31 @@
 */
 
 :root {
-    --min-navbar-height: 4rem;
-    --confetti-size-base: 0.375rem;
+  --min-navbar-height: 4rem;
+  --confetti-size-base: 0.375rem;
 
-    /* D3 charts starting dimensions */
-    --chart-width: 400px;
-    --chart-height: 300px;
+  /* D3 charts starting dimensions */
+  --chart-width: 400px;
+  --chart-height: 300px;
 }
 ::selection {
     background-color: var(--bg-selection);
 }
 
 fieldset {
-    background: var(--bg-light);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
-}
-legend {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-inline-size: 0;
+
+  & legend {
+    padding: 0;
     margin-bottom: var(--gap-sm);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
+  }
 }
+
 input {
-    accent-color: var(--accent-subtle);
+  accent-color: var(--accent-subtle);
 }
 
 h1 {
@@ -59,31 +61,32 @@ h1 {
   font-weight: var(--font-weight-semibold);
 }
 h2 {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
 }
 h3 {
-    font-size: var(--font-size-lg);
+  font-size: var(--font-size-lg);
 }
-label {
-    font-weight: var(--font-weight-semibold);
+label,
+fieldset legend {
+  font-weight: var(--font-weight-semibold);
 }
 textarea {
-    resize: none;
+  resize: none;
 }
 footer {
-    padding: 8px;
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-    text-align: center;
+  padding: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-align: center;
 }
 
 @media (width <= 600px) {
     /* TODO: Overriding utility class used for form modals mostly */
-    .field-pair,
-    .field-pair--weighted {
-        grid-template-columns: 1fr;
-    }
+  .field-pair,
+  .field-pair--weighted {
+      grid-template-columns: 1fr;
+  }
 }
 
 /* ==== MEDIA QUERIES ==== */
@@ -99,18 +102,20 @@ footer {
     }
 
     /* Suppress underline effect on mobile nav, use bg again */
-    .nav-link::after {
+    .nav-link {
+
+      &:after {
         display: none;
-    }
-    .nav-link:hover,
-    .nav-link[aria-current="page"] {
+      }
+      &:hover, &[aria-current="page"] {
         border-radius: var(--border-radius);
-    }
-    .nav-link:hover {
+      }
+      &:hover {
         background-color: var(--accent-subtle);
-    }
-    .nav-link[aria-current="page"] {
+      }
+      &[aria-current="page"] {
         background-color: color-mix(in oklch, var(--accent-subtle) 85%, grey);
+      }
     }
 }
 @media (width > 768px) {
@@ -171,47 +176,49 @@ td .status-span.is-done > svg {
     PAGE-SPECIFIC: Groceries Dashboard
    =================================== */
 #list-empty {
-    font-style: italic;
-    color: var(--text-muted);
+  font-style: italic;
+  color: var(--text-muted);
 }
 .shopping-list {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Position our "x" button "outside"/"to the side of" the inline content */
 .shoppinglist-item {
-    position: relative; /* positioning context for inline-delete */
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-self: start;
-}
-.shoppinglist-item svg {
+  position: relative; /* positioning context for inline-delete */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-self: start;
+
+  & svg {
     width: 100%;
     height: 100%;
     pointer-events: none;
+  }
 }
+
 .inline-delete {
-    position: absolute;
-    top: 50%; /* position button's top edge at middle of container */
-    left: -1.4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border: 1px solid var(--clr-error);
-    opacity: 0;
-    transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
-    transition: opacity var(--transition-fade);
+  position: absolute;
+  top: 50%; /* position button's top edge at middle of container */
+  left: -1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--clr-error);
+  opacity: 0;
+  transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
+  transition: opacity var(--transition-fade);
 }
 
 .qty-controls {
-    display: flex;
-    gap: var(--gap-sm);
-    align-items: center;
-}
-.qty-controls button {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+
+  & button {
     width: 20px;
     height: 20px;
     color: var(--accent-subtle);
@@ -220,6 +227,7 @@ td .status-span.is-done > svg {
     border-radius: 50%;
     opacity: 0;
     transition: opacity var(--transition-fade);
+  }
 }
 
 /* Show hidden controls on hover */
@@ -228,12 +236,9 @@ td .status-span.is-done > svg {
     opacity: 1;
 }
 
-
 /* ===================================
     PAGE-SPECIFIC: Recipes Page
    =================================== */
-
-
 
 /* form stuff, tbd where this ought to go */
 #ingredients-container {
@@ -265,12 +270,11 @@ td .status-span.is-done > svg {
   place-items: center;
   background: transparent;
   transition: background-color 120ms ease, box-shadow 120ms ease;
-}
 
-.btn-remove-ingredient:hover,
-.btn-remove-ingredient:focus-visible {
-  background: color-mix(in srgb, red 12%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, red 40%, transparent);
+  &:hover, &:focus-visible {
+    background: color-mix(in srgb, red 12%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, red 40%, transparent);
+  }
 }
 
 
@@ -301,21 +305,21 @@ td .status-span.is-done > svg {
   background: var(--bg-dark);
   border-radius: var(--border-radius);
   padding: var(--space-sm);
-}
-.recipe-card:hover {
-  transform: translateY(-2px);
-  /* box-shadow: 1px 1px 10px var(--accent-strong); */
-  cursor: pointer;
-}
 
-.recipe-card button {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-.recipe-card button:hover {
-  background: var(--accent-hover);
-  border-radius: 50%;
+  & button {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  & button:hover {
+    background: var(--accent-subtle);
+    border-radius: 50%;
+  }
+  &:hover {
+    transform: translateY(-2px);
+    cursor: pointer;
+    /* box-shadow: 1px 1px 10px var(--accent-strong); */
+  }
 }
 
 /* inside each recipe card: */
@@ -337,86 +341,201 @@ td .status-span.is-done > svg {
 
 .ingredients-col {
   border-right: 2px solid var(--text-muted);
-}
-.ingredients-col ul {
-  padding: 0.5rem;
-}
-.ingredients-col li {
-  position: relative;
-  padding: var(--space-sm);
-  padding-left: var(--space-md);
+
+  & ul {
+    padding: 0.5rem;
+  }
+  & li {
+    position: relative;
+    padding: var(--space-sm);
+    padding-left: var(--space-md);
+  }
 }
 
 .ingredients-col,
 .directions-col {
-  padding: 1rem;
-  border: 1px solid var(--border-color);
+  padding: var(--space-md);
+  border: var(--border-default);
   border-radius: var(--border-radius);
+
+  & h2 {
+    text-align: center;
+  }
 }
-.ingredients-col h2,
-.directions-col h2 {
-  text-align: center;
+
+.directions-col {
+  & ol {
+    /* flex container all our li's */
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+
+    counter-reset: li-counter;
+    padding: var(--space-sm);
+
+    & li {
+      /* flex container for EACH li (circle + text) */
+      display: flex;
+      gap: var(--gap-md);
+      align-items: flex-start; /* Aligns number to top if text wraps */
+      counter-increment: li-counter;
+    }
+    & li:before {
+      content: counter(li-counter);
+      
+      /* Circle styling */
+      background-color: var(--accent-subtle);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      
+      /* flex container for each circle/bullet point + number */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      flex-shrink: 0;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+  }
 }
 
-.directions-col ol {
-  counter-reset: li-counter;
-  padding: var(--space-sm);
-
-  /* flex container all our li's */
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-sm);
-}
-.directions-col ol li {
-  counter-increment: li-counter;
-
-  /* flex container for EACH li (circle + text) */
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start; /* Aligns number to top if text wraps */
-}
-.directions-col ol li:before {
-  content: counter(li-counter);
-
-  /* Circle styling */
-  background-color: var(--accent-subtle);
-  color: white;
-
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-
-  /* flex container for each circle/bullet point + number */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-  font-weight: bold;
-  font-size: 0.9em;
-}
 /* ===================================
     D3 Charts: Habits, Metrics, Time Tracking
    =================================== */
 
+/* habits page drafting */
+#habits-stats-container {
+  display: grid;
+  grid-template-areas:
+    "heatmap"
+    "tiles"
+    "breakdown";
+  gap: var(--space-sm);
+  grid-template-rows: 220px auto auto;
+  align-self: center;
+}
+@media ( width >= 768px) {
+  #habits-stats-container {
+    grid-template-columns: 1fr 220px;
+    grid-template-areas:
+      "heatmap tiles"
+      "breakdown tiles";
+    grid-template-rows: 220px auto;
+  }
+}
+
+.heatmap-group {
+  grid-area: heatmap;
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.tiles-group {
+  grid-area: tiles;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-sm);
+
+  & > * {
+    height: 100%; /* to make card-stats inside take up their "grid spots"? */
+    width: 100%;
+  }
+}
+
+.breakdown-group {
+  grid-area: breakdown;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  padding: var(--space-sm);
+}
+/* END HABITS PAGE DRAFTING */
+
+/* DRAFT: should prob condense this */
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+#time-stats {
+  align-self: center;
+  border: 1px solid red;
+}
+
+/* styling "1" tick for multi-line chart */
+.thing {
+  fill: var(--accent-strong);
+  stroke: var(--accent-strong);
+}
+
+.axis-y,
+.axis-x {
+  & text {
+    fill: var(--text-muted);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+  }
+  & :is(path, line) {
+    stroke: var(--border-color);
+  }
+}
+
+path.line {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-width: 2;
+}
+
+
 /* TODO: Refine / refactor */
+
+/* Target lines: bmr-target-line & sleep-target-line */
+[class$="-target-line"] {
+  fill: red;
+}
+
 .chart-title,
-.chart-legend-text {
-    fill: var(--text);
+.chart-legend-text,
+text {
+  fill: var(--text);
+}
+.bisect-label {
+  font-size: var(--font-size-md);
+}
+.bisect-line {
+  stroke: var(--text-muted); /* TODO: make blue? */
+}
+/* for metrics chart? all of em? idk */
+.empty-message {
+  fill: var(--text-muted);
+}
+.chart-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.bar,
+.line {
+  fill: var(--accent-strong);
 }
 
 .pie,
 .bar,
 .line {
-    transition: opacity 0.1s ease;
-}
-.pie:hover,
-.bar:hover,
-.line:hover {
+  transition: opacity 0.1s ease;
+
+  &:hover {
     opacity: 0.7;
+  }
 }
+
 svg {
-    overflow: visible; /* for hovering pie chart slices */
+  overflow: visible; /* for hovering pie chart slices */
 }
 
 /* Gonna centrally size our D3 charts here as well to prevent pop-in/down on render */
@@ -434,47 +553,47 @@ svg {
 
 /* Flex container for header/content/footer */
 .wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: calc(1.5 * var(--gap-lg));
-    min-height: 100vh;
-    background-color: var(--bg-dark);
+  display: flex;
+  flex-direction: column;
+  gap: calc(1.5 * var(--gap-lg));
+  min-height: 100vh;
+  background-color: var(--bg-dark);
 }
 
 /* Main content area: fills remaining viewport space below navbar */
 .content {
-    display: flex;
-    flex: 1 0 auto;                        /* only grow vertically */
-    flex-direction: column;
-    gap: var(--gap-lg);
-    width: 100%;                           /* take full width by default */
-    max-width: clamp(35rem, 90vw, 90rem);  /* cap width responsively */
-    padding-inline: clamp(1rem, 4vw, 2rem);
-    margin-inline: auto;                   /* center horizontally */
+  display: flex;
+  flex: 1 0 auto;                        /* only grow vertically */
+  flex-direction: column;
+  gap: var(--gap-lg);
+  width: 100%;                           /* take full width by default */
+  max-width: clamp(35rem, 90vw, 90rem);  /* cap width responsively */
+  padding-inline: clamp(1rem, 4vw, 2rem);
+  margin-inline: auto;                   /* center horizontally */
 }
 
 /* For pages using our content_mod Jinja block to provide narrower styling for content */
 .content--narrow {
-    max-width: clamp(35rem, 90vw, 50rem);
+  max-width: clamp(35rem, 90vw, 50rem);
 }
 .card--narrower {
-    align-self: center;
-    width: clamp(15rem, 90vw, 25rem);
+  align-self: center;
+  width: clamp(15rem, 90vw, 25rem);
 }
 
 
 /* Faded fields only on login/register templates */
 .faded-field {
-    opacity: 0.7;
-}
-.faded-field:focus-within {
+  opacity: 0.7;
+
+  &:focus-within {
     opacity: 1;
+  }
+  &:has(.invalid) {
+    opacity: 1; /* Don't fade when invalid */
+  }
 }
 
-/* Don't fade when invalid */
-.faded-field:has(.invalid) {
-    opacity: 1;
-}
 
 /* For drafting the frontend validation stuff for username on register */
 [class^="error-inline"] {
@@ -490,114 +609,116 @@ svg {
    =================================== */
 
 #greeting-card {
-    position: relative;
-    height: clamp(150px, 15vh, 300px);
+  position: relative;
+  height: clamp(150px, 15vh, 300px);
 }
 #sky-canvas {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
 }
 .greeting-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 .weather-info {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    place-items: end;
-    justify-content: right;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  place-items: end;
+  justify-content: right;
 }
 
 /* Styling for text of today's frog / LeetCode to subtly emphasize them */
 .highlight-label { 
-    font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Vertical stack for frog + task list */
 .tasks-section {
-    display: grid;
-    gap: var(--space-sm);
+  display: grid;
+  gap: var(--space-sm);
 }
 
 /* Accent 'card' to highlight priority items (accent lborder + bg-light) used for today's frog */
 .highlight-item {
-    padding: var(--space-xs);
-    padding-left: var(--space-sm);
-    background: var(--bg-light);
-    border-left: 4px solid var(--accent-subtle);
-    border-radius: calc(0.8 * var(--border-radius));
+  padding: var(--space-xs);
+  padding-left: var(--space-sm);
+  background: var(--bg-light);
+  border-left: 4px solid var(--accent-subtle);
+  border-radius: calc(0.8 * var(--border-radius));
 }
 
 .progress-bar,
 .progress-bar-fill {
-    height: 1.25rem;
+  height: 1.25rem;
 }
 .progress-bar {
-    width: 80%;
-    max-width: 300px;
-    overflow: hidden; /* make rounded edges clean on lower percentages, effectively 'clips' overlap */
-    background-color: oklch(85% 0 0deg);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
+  width: 80%;
+  max-width: 300px;
+  overflow: hidden; /* make rounded edges clean on lower percentages, effectively 'clips' overlap */
+  background-color: var(--progress-bar-bg);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
 }
 .progress-bar-fill {
-    position: relative; /* positioning context for progress-bar-fill::after */
-    overflow: hidden; /* clips our ::after's pulsing effect cleanly */
-    background: var(--progress-bar-fill);
-    transform: scaleX(0); /* JS can set scaleX using our percent progress directly this way */
-    transform-origin: left; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
-    transition: transform 0.2s ease-in-out;
-}
-.progress-bar-fill::after {
+  position: relative; /* positioning context for progress-bar-fill::after */
+  overflow: hidden; /* clips our ::after's pulsing effect cleanly */
+  background: var(--progress-bar-fill);
+  transform: scaleX(0); /* JS can set scaleX using our percent progress directly this way */
+  transform-origin: left; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
+  transition: transform 0.2s ease-in-out;
+
+  &:after {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 50%;
     height: 100%;
-    content: "";
-}
-.progress-bar-fill.surging {
+  }
+  &.surging {
     animation: pulse 1.5s ease-in-out infinite;
-}
-.progress-bar-fill.surging::after {
-    background: linear-gradient(
-        to right,
-        transparent,
-        rgb(255 255 255 / 40%),
-        transparent
-    );
-    animation: surge 1.5s ease-in-out infinite;
+
+    &:after {
+      background: linear-gradient(
+          to right,
+          transparent,
+          rgb(255 255 255 / 40%),
+          transparent
+      );
+      animation: surge 1.5s ease-in-out infinite;
+    }
+  }
 }
 
 /* NOTE: confetti-layer is a z-index/overflow container only.
  * Particle positions are calculated via JS getBoundingClientRect(), not relative to this element's position.
  */
 #confetti-layer {
-    position: fixed;
-    top: 0; left: 0;
-    z-index: 999;
-    width: 100vw;
-    height: 100vh;
-    overflow: visible;
-    pointer-events: none;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 999;
+  width: 100vw;
+  height: 100vh;
+  overflow: visible;
+  pointer-events: none;
 }
 .dot {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: var(--confetti-size-base);
-    height: var(--confetti-size-base);
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    offset-rotate: 0deg;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--confetti-size-base);
+  height: var(--confetti-size-base);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  offset-rotate: 0deg;
 }
 
 /* Sprucing our confetti up with some shapes */
@@ -639,50 +760,55 @@ svg {
 
 /* For "Log in" and "Sign up" anchor tags */
 .link-action {
-    font-weight: var(--font-weight-semibold);
-    color: var(--accent-subtle);
-}
-.link-action:hover {
+  font-weight: var(--font-weight-semibold);
+  color: var(--accent-subtle);
+
+  &:hover {
     text-decoration: underline;
+  }
 }
+
 label[for="remember_user"] {
     display: inline-flex;
     gap: var(--gap-sm);
     align-items: center;
 }
 
-
 .password-input-group {
-    position: relative;
-}
-.password-input-group input {
+  position: relative;
+
+  & input {
     width: 100%;
     padding-right: var(--space-lg);
-}
-
-.password-input-group > button {
+  }
+  & > button {
     position: absolute;
     top: 50%;                    /* puts top edge at the middle */
     right: var(--space-sm);
     transform: translateY(-50%); /* move down by half its height */
+  }
 }
+
 .password-toggle {
-    color: var(--accent-subtle);
-    border-left: 1px solid grey;
-    opacity: 1;
-    transition: opacity 0.2s ease, color 0.2s ease;
-}
-.password-toggle[aria-pressed="true"] {
+  color: var(--accent-subtle);
+  border-left: var(--border-default);
+  opacity: 1;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease;
+
+  &[aria-pressed="true"] {
     color: var(--text-muted);
     opacity: 0.8;
-}
-.password-toggle .slash {
+  }
+  & .slash {
     stroke-dasharray: 26;  /* total length of slash line */
     stroke-dashoffset: 26; /* hide line to start */
     transition: stroke-dashoffset 0.2s ease;
-}
-.password-toggle[aria-pressed="true"] .slash {
+  }
+  &[aria-pressed="true"] .slash {
     stroke-dashoffset: 0; /* draw line in */
+  }
 }
 
 /* ===================================
@@ -691,31 +817,31 @@ label[for="remember_user"] {
 
 /* Container for landing page content */
 .landing-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-lg);
-    align-items: center;
-    padding: var(--space-xl) var(--space-md);
-    overflow: hidden; /* ?? */
-}
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+  align-items: center;
+  padding: var(--space-xl) var(--space-md);
+  overflow: hidden;
 
-/* Cap the paragraph for legibility */
-.landing-content p {
+  & p {
     max-width: 60ch;
     color: var(--text-muted);
     text-align: center;
-}
-.landing-content h1 {
+  }
+  & h1 {
     font-size: var(--font-size-xxl);
     font-weight: var(--font-weight-semibold);
-}
-.landing-content a {
+  }
+  & a {
     text-align: center;
+  }
 }
+
 .landing-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--gap-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
 }
 
 /* ===================================
@@ -724,20 +850,21 @@ label[for="remember_user"] {
 
 /* 404 + 500 error pages */
 .error-page {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-md);
-    align-items: center;
-    text-align: center;
-}
-.error-page > h1 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  align-items: center;
+  text-align: center;
+
+  & > h1 {
     font-size: var(--font-size-xxl);
+  }
 }
 
 .icon-wiggle {
-    display: block;
-    width: clamp(12rem, 30vw, 20rem);
-    height: auto;
+  display: block;
+  width: clamp(12rem, 30vw, 20rem);
+  height: auto;
 }
 
 /* ===================================
@@ -786,52 +913,51 @@ html[data-page="devtools.style_reference"] .btn-icon {
 .tile,
 .stepped-bg,
 .stepped-accents {
-    border: var(--border-default);
-    border-radius: var(--border-radius);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
 }
 
 /* Design token tiles - smaller */
 .tile {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 100px;
-    aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100px;
+  aspect-ratio: 1;
 }
 
 /* Stepped gradient tiles for bg/accents */
 .stepped-bg,
 .stepped-accents {
-    display: flex;
-    grid-column: 1 / -1; /* span the whole row */
-    align-items: center;
-    justify-content: space-evenly; /* distribute labels evenly across */
-    height: 80px;
+  display: flex;
+  grid-column: 1 / -1; /* span the whole row */
+  align-items: center;
+  justify-content: space-evenly; /* distribute labels evenly across */
+  height: 80px;
 }
 
 /* Stepped gradient backgrounds */
 .stepped-bg {
-    background: linear-gradient(
-        to right in oklch,
-        var(--bg-dark)   0%, var(--bg-dark)  25%,
-        var(--bg)       25%, var(--bg)       50%,
-        var(--bg-light) 50%, var(--bg-light) 75%,
-        var(--bg-hover) 75%, var(--bg-hover) 100%
-    );
+  background: linear-gradient(
+      to right in oklch,
+      var(--bg-dark)   0%, var(--bg-dark)  25%,
+      var(--bg)       25%, var(--bg)       50%,
+      var(--bg-light) 50%, var(--bg-light) 75%,
+      var(--bg-hover) 75%, var(--bg-hover) 100%
+  );
 }
 .stepped-accents {
-    background: linear-gradient(
-        to right in oklch,
-        var(--accent-strong)   0%, var(--accent-strong)  33%,
-        var(--accent-subtle)  33%, var(--accent-subtle)  66%,
-        var(--accent-hover)   66%, var(--accent-hover)   100%
-    );
+  background: linear-gradient(
+      to right in oklch,
+      var(--accent-strong)   0%, var(--accent-strong)  50%,
+      var(--accent-subtle)  50%, var(--accent-subtle)  100%,
+  );
 }
 .progbar {
-    grid-column: 1 / -1;
-    align-items: center;
-    height: 60px;
-    background: var(--progress-bar-fill);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
+  grid-column: 1 / -1;
+  align-items: center;
+  height: 60px;
+  background: var(--progress-bar-fill);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
 }

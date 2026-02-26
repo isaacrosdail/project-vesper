@@ -51,31 +51,18 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
         return self.session.execute(stmt).scalars().first()
 
     def get_all_daily_metrics_in_window(
-        self, start_utc: datetime, end_utc: datetime
+        self, start_utc: datetime, end_utc: datetime, metric_type: str | None = None
     ) -> list[DailyMetrics]:
-        """Returns the first DailyMetrics entry in a UTC datetime range."""
+        """Returns all DailyMetrics entry in a UTC datetime range. Skips empty rows for given
+        metric_type if specified.
+        """
         stmt = self._user_select(DailyMetrics).where(
             DailyMetrics.entry_datetime >= start_utc,
             DailyMetrics.entry_datetime < end_utc,
         )
+        if metric_type:
+            column_obj = getattr(DailyMetrics, metric_type)
+            stmt = stmt.where(column_obj.isnot(None))
+        stmt = stmt.order_by(DailyMetrics.entry_datetime.asc())
         result = self.session.execute(stmt).scalars().all()
         return list(result)
-
-    def get_daily_metrics_by_type_in_window(
-        self, metric_type: str, start_utc: datetime, end_utc: datetime
-    ) -> list[Any]:
-        """Returns list of (entry_datetime, <metric_value>) tuples for a given metric type."""
-        column_obj = getattr(DailyMetrics, metric_type)
-
-        stmt = (
-            select(DailyMetrics.entry_datetime, column_obj)
-            .where(
-                DailyMetrics.user_id == self.user_id,
-                DailyMetrics.entry_datetime >= start_utc,
-                DailyMetrics.entry_datetime < end_utc,
-                column_obj.isnot(None),
-            )
-            .order_by(DailyMetrics.entry_datetime)
-        )
-
-        return list(self.session.execute(stmt).all())

@@ -47,7 +47,7 @@ def validate_task(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[
             typed_data[field] = typed_value
 
     # Insert subtask_ids
-    subtask_ids_raw = data.get('subtask_ids', '')
+    subtask_ids_raw = data.get('subtask_ids', '') or ''
     typed_data['subtask_ids'] = [
         int(s)
         for s in subtask_ids_raw.split(',')

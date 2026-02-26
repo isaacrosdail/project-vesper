@@ -1,4 +1,6 @@
 
+## Sales pitch for this app: Every app tracks - we tell you what to do about it.
+
 
 ## Service / Repo / Controller pattern
 

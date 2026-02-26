@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { contextMenu } from './shared/ui/context-menu';
 import { apiRequest, routes } from './shared/services/api';
 import { confirmationManager } from './shared/ui/modal-manager';
+import { makeToast } from './shared/ui/toast';
 
 
 interface TaskNode {
@@ -25,10 +26,6 @@ const height = window.innerHeight;
 const width = window.innerWidth;
 const nodeRadius = 40;
 
-// const margin = { top: 20, right: 20, bottom: 30, left: 40 };
-// const innerWidth = width - margin.left - margin.right;
-// const innerHeight = height - margin.top - margin.bottom;
-
 const color = d3.scaleOrdinal() // specify our own color mapping here so priorities are coded intuitively
     .domain(["LOW", "MEDIUM", "HIGH"])
     .range(["#42af46", "#FFC107", "#d2352a"]);
@@ -36,14 +33,8 @@ const color = d3.scaleOrdinal() // specify our own color mapping here so priorit
 
 let pendingSource: number | null = null;
 
-// Gist: draw a <line> from source <-> supertask, layered behind the nodes container
-// So for that first link, we'd need to:
-// 1. Get subtask's coords based on id
-// 2. Get supertask's coords based on id
-// 3. Draw a <line> from one to the other using said coords
 
-// NOTE: Look into incremental diffs to render on adding/removing nodes.
-// Also: On hover of a given node, highlight it + all nodes 1 hop away from it
+// TODO: Look into incremental diffs to render on adding/removing nodes.
 class CanvasManager {
     private width: number;
     private height: number;
@@ -73,6 +64,7 @@ class CanvasManager {
         this.svg = d3.select('#web')
             .append("svg")
             .attr("viewBox", [0, 0, this.width, this.height])
+            .attr("background", "var(--bg)")
 
         this.svg
             .append("svg:defs") // one-time definition for markers?
@@ -108,43 +100,28 @@ class CanvasManager {
             .attr("stroke-width", 1.5) // TODO: remove?
     }
 
-    // rebuilds nodesMap and prunes links based on current nodes
+    // Rebuilds nodesMap and prunes links to match current nodes
     recomputeDerivedState() {
-        // rebuild nodesMap
         this.nodesMap = new Map(this.nodes.map(node => [node.id, node]));
-        // prune links arr
-        // remove any node where EITHER subtask OR supertask's val === d.id?
-        // links = links.filter(n => n.subtask !== d.id && n.supertask !== d.id)
-        // since we dont wanna tie 'd' (need to pass it in) to this, lets prune links
-        // based on kinda "diff'ing to nodeMap's updated contents"?
-        // leverage Maps' constant lookups here
-        // Prune links array by diff'ing to what's in nodesMap
+        // Keep only links where both ends still exist in nodesMap
         this.links = this.links.filter(
             link => this.nodesMap.has(link.subtask) && this.nodesMap.has(link.supertask)
         )
     }
 
     private onDragStart = (event, d) => {
-        console.log()
-        console.log(event.sourceEvent.currentTarget)
         d3.select(event.sourceEvent.currentTarget).select("circle")
             .attr("fill", "red")
             .attr("cursor", "grabbing");
     }
 
     updateNodes() {
-        // Capture 'this'
-        const capturedThis = this;
+        const capturedThis = this; // capture 'this'
         // initial graph of nodes setup?
         this.nodesContainer.selectAll("g.node") // g.node = a single node, in full (circle+text)
             .data(this.nodes, d => d.id)
             .join(
                 enter => {
-                    // Making a single node each time here in enter
-                    console.log(`this in enter:`)
-                    console.dir(this)
-
-                    //#region 
                     const nodeGroup = enter.append("g")
                         .attr("class", "node")
                         .attr("data", d => `id-${d.id}`) // represents id from node arr
@@ -158,10 +135,9 @@ class CanvasManager {
 
                     nodeGroup.append("text")
                         .attr("dy", 20)
-                        .attr("fill", "var(--text-muted)")
+                        .attr("fill", "var(--text-muted)") // TODO: move to CSS class!
                         .attr("text-anchor", "middle")
                         .text(d => d.name);
-                    //#endregion
 
                     // Set up drag handlers
                     nodeGroup.call(d3.drag()
@@ -195,14 +171,17 @@ class CanvasManager {
                         // B. If pendingSource, then link mode active -> set THIS node as the "link to this" one?
                         if (pendingSource !== null) {
                             // then this node's id is the one to be linked to the pendingSource's id?
-                            // so a POST for (pendingSource, d.id)?
-                            const url = '/tasks/task_links';
+                            const url = routes.tasks.task_links.collection;
                             const subtaskId = pendingSource; // capture before clearing
                             apiRequest('POST', url, { subtask_id: subtaskId, supertask_id: d.id }, {
                                 onSuccess: (responseData) => {
                                     capturedThis.addLink(subtaskId, d.id);
                                     pendingSource = null; // revert out of link mode
                                     d3.selectAll("circle").attr("opacity", "1.0");
+                                },
+                                onFailure: (responseData) => {
+                                    pendingSource = null;
+                                    makeToast(responseData.message, 'error');
                                 }
                             })
                             return
@@ -230,7 +209,7 @@ class CanvasManager {
                                             onSuccess: () => {
                                                 // Filter out the el in nodes whose id === d.id
                                                 this.nodes = this.nodes.filter(n => n.id !== d.id);
-                                                // rebuilds this.nodes, nodesMap & updates links arr
+
                                                 this.recomputeDerivedState();
                                                 this.updateNodes();
                                                 this.updateLinks();
@@ -311,7 +290,7 @@ class CanvasManager {
                     enter.append("line")
                         .attr("stroke-linecap", "round")
                         .attr("marker-end", "url(#end)")
-                        .attr("stroke", "#3f3f3f")
+                        .attr("stroke", "#4e4e4e")
                 ),
                 update => applyCoords(update),
                 exit => exit.remove()
@@ -346,12 +325,10 @@ class CanvasManager {
 }
 
 export async function init() {
-    // grab some task info quick to see
     const url = routes.tasks.tasks.collection;
     const response = await apiRequest('GET', url, null);
 
-    // Circular layout formula for nodes' starting positions.
-    // center of viewport?
+    // Circular layout formula for nodes' starting positions. center of viewport?
     const [center_x, center_y] = [width/2, height/2];
     const num_nodes = response.data.length;
     const layoutRadius = Math.min(width, height) * 0.35;
@@ -368,10 +345,10 @@ export async function init() {
         }))
     )
 
-    const thingies = new CanvasManager(height, width, nodeRadius, tasksWithPositions, links);
-    thingies.init();
-    thingies.updateNodes();
-    thingies.updateLinks();
+    const canvas = new CanvasManager(height, width, nodeRadius, tasksWithPositions, links);
+    canvas.init();
+    canvas.updateNodes();
+    canvas.updateLinks();
 
     // TODO: Right spot for this?
     document.addEventListener('keydown', (e) => {

@@ -1,5 +1,5 @@
 {
-    "editor.parameterHints.enabled": true,
+    "editor.parameterHints.enabled": false,
     "editor.parameterHints.cycle": false, // don't cycle thru overloads automatically
     
     "editor.quickSuggestionsDelay": 800,

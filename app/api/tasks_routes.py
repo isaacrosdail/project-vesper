@@ -27,16 +27,12 @@ def tasks(session: Session, task_id: int | None = None) -> tuple[Response, int]:
         tasks = tasks_service.task_repo.get_all_tasks_with_links()
         return api_response(
             success=True, message="Got em",
-            data = [
-                t.to_api_dict()
-                for t in tasks
-            ]
+            data = [ t.to_api_dict() for t in tasks ]
         ), 200
 
     typed_data, errors = validate_task(request.json)
     if errors:
         return validation_failed(errors), 400
-
 
     result = tasks_service.save_task(typed_data, task_id)  # None -> POST, else -> PUT
 
@@ -64,10 +60,6 @@ def task_links(session: Session) -> tuple[Response, int]:
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone
     )
-
-    import sys
-    print("Received:", file=sys.stderr)
-    print(request.json, file=sys.stderr)
 
     data = request.json
     try:

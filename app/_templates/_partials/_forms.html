@@ -12,7 +12,7 @@
                 {% if entry_date %}value="{{ entry_date }}"{% endif %}
         >
       </div>
-      <div class="tab-group">
+      <div class="tab-group" role="tablist">
         <button type="button" role="tab" data-tab="steps" class="tab">{{ ui.steps_svg() }} Steps</button>
         <button type="button" role="tab" data-tab="weight" class="tab">{{ ui.scale_svg() }} Weight</button>
         <button type="button" role="tab" data-tab="sleep" class="tab">{{ ui.sleep_svg() }} Sleep</button>
@@ -105,6 +105,24 @@
       <small class="error-inline"></small>
     </div>
     <div>
+        <fieldset class="radio-fieldset">
+            <legend>Priority:</legend>
+            <div>
+                <input type="radio" name="priority" id="priority-low" value="low">
+                <label for="priority-low">Low</label>
+            </div>
+            <div>
+                <input type="radio" name="priority" id="priority-medium" value="medium">
+                <label for="priority-medium">Medium</label>
+            </div>
+            <div>
+                <input type="radio" name="priority" id="priority-high" value="high">
+                <label for="priority-high">High</label>
+            </div>
+            <small class="error-inline"></small>
+        </fieldset>
+    </div>
+    {#<div>
       <label for="priority">Priority</label>
       <select name="priority" id="priority" required>
         <option value="">--</option>
@@ -113,7 +131,7 @@
         <option value="high">High</option>
       </select>
       <small class="error-inline"></small>
-    </div>
+    </div>#}
     <div>
       <input type="checkbox" id="is_frog" name="is_frog">
       <label for="is_frog">"Daily Frog" Task?</label>
@@ -157,10 +175,7 @@
         <label for="search">Search for subtasks:</label>
         <input type="search" id="search" data-search placeholder="Search tasks">
         <div class="task-cards" data-task-card-container>
-            <div class="card">
-                <div class="header"></div>
-                <div class="body"></div>
-            </div>
+
         </div>
     </div>
   {% endcall %}
@@ -169,12 +184,12 @@
 {% macro habit_entry_modal(id='habits-entry-dashboard', title='Add Habit') %}
     {% call ui.modal('habits', 'habits', id, title) %}
         <div>
-            <label for="name">Habit:</label>
+            <label for="name" data-tip="ndh">Habit:</label>
             <input type="text" id="name" name="name" required>
             <small class="error-inline"></small>
         </div>
         <div>
-            <label for="target_frequency">Target (per wk):</label>
+            <label for="target_frequency" data-tip="yes">Target (per wk):</label>
             <input type="text" id="target_frequency" name="target_frequency" required
                 inputmode="numeric" data-type-int>
             <small class="error-inline"></small>
@@ -200,32 +215,16 @@
         </div>
     </div>
 
-    <div class="field-pair field-pair--weighted">
-        <div>
-            <label for="language">Language:</label>
-            <select name="language" id="language">
-                <option value="Python">Python</option>
-                <option value="JavaScript">JavaScript</option>
-                <option value="C">C</option>
-                <option value="C++">C++</option>
-            </select>
-        </div>
-        <fieldset class="radio-fieldset">
-            <legend>Status:</legend>
-            <div>
-                <input type="radio" id="solved" name="status" value="solved" checked>
-                <label for="solved">Solved</label>
-            </div>
-            <div>
-                <input type="radio" id="attempted" name="status" value="attempted">
-                <label for="attempted">Attempted</label>
-            </div>
-            <div>
-                <input type="radio" id="reviewed" name="status" value="reviewed">
-                <label for="reviewed">Reviewed</label>
-            </div>
-        </fieldset>
+    <div>
+        <label for="language">Language:</label>
+        <select name="language" id="language">
+            <option value="Python">Python</option>
+            <option value="JavaScript">JavaScript</option>
+            <option value="C">C</option>
+            <option value="C++">C++</option>
+        </select>
     </div>
+
     <fieldset class="radio-fieldset">
         <legend>Difficulty:</legend>
         <div>
@@ -239,6 +238,22 @@
         <div>
             <input type="radio" id="hard" name="difficulty" value="hard">
             <label for="hard">Hard</label>
+        </div>
+    </fieldset>
+
+    <fieldset class="radio-fieldset">
+        <legend>Status:</legend>
+        <div>
+            <input type="radio" id="solved" name="status" value="solved" checked>
+            <label for="solved">Solved</label>
+        </div>
+        <div>
+            <input type="radio" id="attempted" name="status" value="attempted">
+            <label for="attempted">Attempted</label>
+        </div>
+        <div>
+            <input type="radio" id="reviewed" name="status" value="reviewed">
+            <label for="reviewed">Reviewed</label>
         </div>
     </fieldset>
     {% endcall %}

@@ -31,9 +31,9 @@ export function createTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: 
     const targetElRect = targetEl.getBoundingClientRect();
     const isTall = targetElRect.height > 80;
     const centerX = (targetElRect.left + targetElRect.right) / 2; // gives us dist from end to center for caret
-    const y = isTall
-        ? (targetElRect.top + 2 * (targetElRect.height / 3))
-        : targetElRect.bottom;
+    // const y = isTall
+    //     ? (targetElRect.top + 2 * (targetElRect.height / 3))
+    //     : targetElRect.bottom;
 
     tooltip.style.zIndex = '1000';
 
@@ -43,24 +43,28 @@ export function createTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: 
 
     if (isInDialog) {
         parentDialogEl.appendChild(tooltip);
+        tooltip.style.position = 'absolute';
     } else {
         document.body.appendChild(tooltip);
+        tooltip.style.position = 'fixed';
     }
 
     const tooltipRect = tooltip.getBoundingClientRect(); // gives tooltips curr size and position 
+    console.log(tooltipRect.height)
     const tooltipCenterOffset = (tooltipRect.width / 2); // calc caret position inside tooltip
+    const y = isTall
+        ? (targetElRect.top + 2 * (targetElRect.height / 3))
+        : targetElRect.top;
 
     if (isInDialog) {
         const dialogRect = parentDialogEl.getBoundingClientRect();
         
-        tooltip.style.position = 'absolute';
         tooltip.style.top = `${y - dialogRect.top}px`;
         tooltip.style.left = `${centerX - dialogRect.left - tooltipCenterOffset}px`;
 
     } else {
-        tooltip.style.position = 'fixed';
-        tooltip.style.top = `${y}px`;
         const tooltipRectNew = tooltip.getBoundingClientRect(); // Must measure after position: fixed since element width changes when removed from document flow
+        tooltip.style.top = `${y - tooltipRectNew.height - 6}px`;
         tooltip.style.left = `${centerX - (tooltipRectNew.width/2)}px`;
     }
     tooltip.style.setProperty('--caret-pos', '50%');
