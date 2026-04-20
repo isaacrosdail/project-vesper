@@ -1,9 +1,9 @@
-import { makeToast } from '../ui/toast.js';
-import { WeatherResult } from '../../types.js';
-import { formatToUserTimeString } from '../datetime.js';
+import { makeToast } from '../ui/toast';
+import { WeatherResult } from '../../types';
+import { formatToUserTimeString } from '../datetime';
 
 export async function fetchWeatherData(city: string, country: string, units: string): Promise<WeatherResult> {
-    
+
     try {
         const response = await fetch(`/api/weather/${city}/${country}/${units}`);
         const weatherData = await response.json();
@@ -18,24 +18,22 @@ export async function fetchWeatherData(city: string, country: string, units: str
         const sunrise = weatherData.sys.sunrise;
         const sunset = weatherData.sys.sunset;
 
-        const weatherConditions: Record<string, string> = {
-            thunder: '⛈️',
-            drizzle: '🌦️',
-            rain: '🌧️',
-            overcast: '☁️',
-            snow: '❄️',
-            mist: '🌫️',
-            fog: '🌫️',
-            clear: '☀️',
-            "few clouds": '🌤️',
-            scattered: '⛅',
-            broken: '⛅',
-            tornado: '🌪️'
+        const weatherIcons: Record<string, string> = {
+            thunder: 'icon-weather-thunder',
+            drizzle: 'icon-weather-drizzle',
+            rain: 'icon-weather-rain',
+            overcast: 'icon-weather-clouds',
+            snow: 'icon-weather-snow',
+            mist: 'icon-weather-fog',
+            fog: 'icon-weather-fog',
+            clear: 'icon-weather-clear',
+            "few clouds": 'icon-weather-clouds',
+            scattered: 'icon-weather-clouds',
+            broken: 'icon-weather-broken',
+            tornado: 'icon-weather-tornado',
+            "clear sky": 'icon-weather-clear'
         }
-        // Find first weather condition key matching desc, return its emoji or undefined
-        const emoji = Object.entries(weatherConditions).find(
-            ([key]) => desc.includes(key)
-        )?.[1] ?? '🌡️';
+        const emoji = weatherIcons[desc] ?? '🌡️'; // TODO: fix, use svg instead or just nothing?
         
         // Convert sunset time to date & local (TODO: Use helpers?)
         const sunsetTime = new Date(sunset * 1000); // Unix-style, so convert first

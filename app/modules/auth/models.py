@@ -1,4 +1,4 @@
-import enum
+from enum import Enum, StrEnum, auto
 
 from flask_login import UserMixin
 from sqlalchemy import Enum as SAEnum
@@ -7,32 +7,55 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app._infra.db_base import Base
-from app.modules.auth.validation_constants import (
-    NAME_MAX_LENGTH,
-    TIMEZONE_MAX_LENGTH,
-    USERNAME_MAX_LENGTH,
+
+PASSWORD_MIN_LENGTH = 5
+PASSWORD_MAX_LENGTH = 128
+
+NAME_MIN_LENGTH = 1
+
+NAME_MAX_LENGTH = 50
+NAME_REGEX = rf"^[\p{{L}}' -]{{1,{NAME_MAX_LENGTH}}}$"
+NAME_CHARSET = (
+    f"Name must be {NAME_MIN_LENGTH}-{NAME_MAX_LENGTH} characters "
+    "and may only include letters, spaces, apostrophes, and hyphens"
 )
+USERNAME_MIN_LENGTH = 3
+USERNAME_MAX_LENGTH = 30
+# Username: 3-30, Unicode letters, numbers, & underscores
+USERNAME_REGEX = rf"^[\p{{L}}0-9_]{{{USERNAME_MIN_LENGTH},{USERNAME_MAX_LENGTH}}}$"
 
 # CONSTANTS
 PASSWORD_HASH_MAX_LENGTH = 256
+# NOTE: Use ZoneInfo's actual list: ZoneInfo.available_timezones()
+TIMEZONE_MAX_LENGTH = 50
+
+SUPPORTED_LOCATIONS = {
+    "US": ["New York", "Chicago", "Denver", "Miami", "Los Angeles"],
+    "GB": ["London", "Manchester"],
+    "AU": ["Syndey", "Melbourne", "Brisbane"],
+    "CA": ["Toronto", "Vancouver"],
+    "DE": ["Berlin", "Munich"],
+    "IT": ["Rome", "Naples"],
+    "RU": ["Moscow", "Novosibirsk"],
+    "NO": ["Oslo", "Bergen"]
+}
+
+class UserRoleEnum(StrEnum):
+    OWNER = auto()
+    ADMIN = auto()
+    USER = auto()
 
 
-class UserRoleEnum(enum.Enum):
-    OWNER = "OWNER"
-    ADMIN = "ADMIN"
-    USER = "USER"
-
-
-class UserLangEnum(enum.Enum):
+class UserLangEnum(Enum):
     """Lower case (ISO)"""
 
     EN = "en"
     DE = "de"
 
 
-class UnitSystemEnum(enum.Enum):
-    METRIC = "metric"
-    IMPERIAL = "imperial"
+class UnitSystemEnum(StrEnum):
+    METRIC = auto()
+    IMPERIAL = auto()
 
 
 class User(Base, UserMixin):  # type: ignore[misc]
@@ -48,15 +71,17 @@ class User(Base, UserMixin):  # type: ignore[misc]
     )
 
     role: Mapped[UserRoleEnum] = mapped_column(
-        SAEnum(UserRoleEnum, name="user_role_enum"),
+        SAEnum(UserRoleEnum, name="user_role_enum", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
         default=UserRoleEnum.USER,
+        server_default="user"
     )
 
     timezone: Mapped[str] = mapped_column(
         String(TIMEZONE_MAX_LENGTH), nullable=False, server_default="America/Chicago"
     )
 
+    # TODO: Scrap
     lang: Mapped[UserLangEnum] = mapped_column(
         SAEnum(
             UserLangEnum,
@@ -95,6 +120,7 @@ class User(Base, UserMixin):  # type: ignore[misc]
     time_entry = relationship("TimeEntry", back_populates="user")
     habit_completion = relationship("HabitCompletion", back_populates="user")
     leet_code_record = relationship("LeetCodeRecord", back_populates="user")
+    preferences: Mapped[list["UserPreference"]] = relationship("UserPreference", back_populates="user")
 
     def __repr__(self) -> str:
         return f"<User id={self.id} username: {self.username} role={self.role}>"
@@ -120,3 +146,15 @@ class User(Base, UserMixin):  # type: ignore[misc]
     def has_role(self, role: UserRoleEnum) -> bool:
         """Returns `True` if user is of the given role."""
         return self.role == role
+
+    @property
+    def prefs(self) -> dict[str, str]:
+        return {p.key: p.value for p in self.preferences}
+
+
+class UserPreference(Base):
+    ## For stuff like targets (weight/cals/etc), etc. Stored as strings, cast on read
+    key: Mapped[str] = mapped_column(String(50), nullable=False)
+    value: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    user: Mapped["User"] = relationship("User", back_populates="preferences")

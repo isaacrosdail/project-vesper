@@ -49,3 +49,7 @@ export const userStore: UserStore = {
         }
     }
 }
+
+export function getNumPref(key: string, fallback: number): number {
+    return Number(userStore.data?.preferences?.[key]) || fallback;
+}

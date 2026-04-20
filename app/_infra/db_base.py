@@ -56,11 +56,11 @@ class TimestampMixin:
         tzname = current_app.config.get(current_user.timezone, "America/Chicago")
         return self.updated_at.astimezone(ZoneInfo(tzname)) if self.updated_at else None
 
-
+# TODO: Address this - remove?
 class CustomBaseTaskMixin:
     """Adds `completed_at` timestamp to task-like models. (unsure about this one)"""
 
-    completed_at: Mapped[datetime] = mapped_column(
+    completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 

@@ -48,6 +48,7 @@ class ContextMenu {
                 this.close();
             }
         });
+        window.addEventListener('scroll', () => this.close())
     }
 
     create(config: ContextMenuConfig): void {

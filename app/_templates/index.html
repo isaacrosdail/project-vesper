@@ -9,12 +9,12 @@
 {% block content %}
 
 {# Modals #}
-{{ forms.task_entry_modal('tasks-entry-homepage', 'Add Task') }}
-{{ forms.habit_entry_modal('habits-entry-homepage', 'Add Habit') }}
-{{ forms.metric_entry_modal('daily_metrics-entry-homepage', 'Add Daily Metrics Entry', entry_date=current_date) }}
-{{ forms.time_entry_modal('time_entries-entry-homepage', 'Add Time Entry', current_date=current_date) }}
-{{ forms.leetcode_entry_modal('leet_code_records-entry-homepage') }}
-{{ completions }}
+{{ forms.task_entry_modal('tasks-entry-homepage', 'Add Task', pillars=pillars) }}
+{{ forms.habit_entry_modal('habits-entry-homepage', 'Add Habit', pillars=pillars) }}
+{{ forms.metric_entry_modal('daily_metrics-entry-homepage', 'Add Daily Metrics Entry', entry_date=now.date().isoformat()) }}
+{{ forms.time_entry_modal('time_entries-entry-homepage', 'Add Time Entry', current_date=current_date, pillars=pillars) }}
+{{ forms.leetcode_entry_modal('leet_code_records-entry-homepage', languages=languages) }}
+
 <div id="confetti-layer"></div>
 
 {# Greeting & Time/Date Card #}
@@ -27,12 +27,12 @@
                 {{ greeting }}
             {% endif %}
         </h2>
+        <!-- TODO: Remove, for debugging -->
+         <div>Flask TZ: {{ current_user.timezone }}</div>
     </div>
 
-    <canvas id="sky-canvas"></canvas>
-
     <div class="greeting-content">
-        <p><span id="time-display">{{ now_time }}</span> | {{ now_date }}</p>
+        <p><span id="time-display">{{ now.strftime("%H:%M") }}</span> | {{ now.strftime(("%a, %b %d")) }}</p>
         <div class="weather-info">
             <div id="weather-temp"></div>
             <div id="weather-sunset"></div>
@@ -45,7 +45,7 @@
     <div class="card-title">
         <h2>My Day</h2>
         {{ ui.plus_btn('tasks-entry-homepage-btn', 'Add Task') }}
-        {% call ui.dropdown('Quick Add', replaceable=False) %}
+        {% call ui.dropdown_new('Quick Add', 'thing', replaceable=False) %}
             <button id="time_entries-entry-homepage-btn">Time Entry</button>
             <button id="daily_metrics-entry-homepage-btn">Metric Entry</button>
             <button id="leet_code_records-entry-homepage-btn">LeetCode Record</button>
@@ -53,12 +53,14 @@
     </div>
 
     <div class="tasks-section">
+        {% if today_frog %}
         <div class="highlight-item">
-            <span >Today's Frog: </span>
+            <span>Today's Frog: </span>
             <span class="highlight-label">
-                {{ today_frog.name if today_frog else "" }}
+                {{ today_frog.name }}
             </span>
         </div>
+        {% endif %}
         <ul class="item-list">
         {% for task in filtered_tasks %}
             <li class="item {% if task.is_done %}completed{% endif %}">
@@ -103,7 +105,9 @@
                         {% if habit_info[habit.id].completed_today %}checked{% endif %}>
                     <span class="item-title">{{ habit.name }}</span>
                     <span class="habit-streak" data-streak-count="{{ habit_info[habit.id].streak_count }}">
-                        {% if habit_info[habit.id].streak_count > 0 %}🔥{{ habit_info[habit.id].streak_count }}{% endif %}
+                        <svg class="streak-icon"><use href="#icon-flame"></use></svg>
+                        <span class="streak-count">{{ habit_info[habit.id].streak_count or '' }}</span>
+                        {#% if habit_info[habit.id].streak_count > 0 %}{{ ui.calories_svg() }}{{ habit_info[habit.id].streak_count }}{% endif %#}
                     </span>
                 </div>
             </li>

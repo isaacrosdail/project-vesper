@@ -1,10 +1,9 @@
-import { makeToast } from './toast.js';
-import { apiRequest } from '../services/api.js';
-import { FormDialog, FormControlElement } from '../../types';
-import { formToJSON } from '../forms.js';
-import { isoToTimeInput, isoToDateInput } from '../datetime.js';
-import { formatDecimal } from '../numbers.js';
-import { removeTableRow } from '../tables.js';
+import { FormControlElement, FormDialog, Task } from '../../types';
+import { isoToUserDate, formatToUserTimeString } from '../datetime';
+import { formToJSON } from '../utils';
+import { api } from '../services/api';
+import { removeTableRow } from '../tables';
+import { makeToast } from './toast';
 
 /**
  * Modal Manager
@@ -23,7 +22,7 @@ import { removeTableRow } from '../tables.js';
  * wires them up with matching '-btn' triggers.
  */
 function initModals() {
-    const modals = document.querySelectorAll('[id$="-modal"]');
+    const modals = document.querySelectorAll<FormDialog>('[id$="-modal"]');
 
     modals.forEach(modal => {
         if (!(modal instanceof HTMLDialogElement)) return;
@@ -76,11 +75,14 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
      * - Reverts `disabled` states of fields to initial values `data-initial-disabled`
      */
     modal.addEventListener('close', () => {
+        // Reset all hidden fields - somehow, JS considers these to be different than non-hidden
+        // Retain csrf_token
+        document.querySelectorAll('input[type="hidden"]:not([name="csrf_token"])')
+            .forEach(el => el.value = '');
         form.reset();
         delete modal.dataset.mode;
         delete modal.dataset.itemId;
 
-        // trying custom event
         // dispatch BEFORE doing cleanup so listeners can save state if needed?
         modal.dispatchEvent(new CustomEvent('modal:cleanup'));
 
@@ -88,66 +90,36 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
         // for all initialDisabled => disable
         // for all now disabled without initialDisabled => re-enable them
         const formEls = modal.querySelectorAll<FormControlElement>('input, textarea, select');
-
         formEls.forEach((el) => {
             el.disabled = el.dataset['initialDisabled'] !== undefined;
-
-            // Wipe invalid states
-            el.classList.remove('invalid');
+            el.classList.remove('invalid'); // Also wipe validation invalid states
         });
 
         // Wipe all error messages
-        const smallEls = modal.querySelectorAll('small');
-        smallEls.forEach(el => {
-            el.textContent = '';
-        })
-
-        const productHidden = modal.querySelector<HTMLInputElement>('#product_id_hidden');
-        if (productHidden) {
-            productHidden.value = "";
-        }
-        // Restore product_id product list for Transaction form modal
-        const productSelect = modal.querySelector<HTMLSelectElement>('#product_id');
-        if (productSelect?.dataset['originalInnerHTML']) {
-            productSelect.innerHTML = productSelect.dataset['originalInnerHTML'];
-            delete productSelect.dataset['originalInnerHTML'];
-        }
+        modal.querySelectorAll('small').forEach(el => el.textContent = '');
     });
 }
 
-export function handleModalFormSubmit(submittedForm: HTMLFormElement, modal: HTMLDialogElement) {
+export async function handleModalFormSubmit(submittedForm: HTMLFormElement, modal: FormDialog) {
     const formData = formToJSON(submittedForm);
-    const endpoint = modal.dataset.endpoint; // embedded in all form modals
 
-    if (!endpoint) {
-        throw new Error('FormDialog modal missing data-endpoint attribute');
+    const itemId = modal.dataset.itemId;
+    const resource = modal.dataset.resource;
+    const isEdit = !!itemId; // presence/absence of itemId (only set in edit mode) tells us if it's edit anyway
+    if (!resource) {
+        console.error('handleModalFormSubmit: modal missing data-resource')
+        return
     }
-
-    // PUT
-    if (modal.dataset.mode === 'edit') {
-        const url = `${endpoint}/${modal.dataset.itemId}`;
-        apiRequest('PUT', url, formData, {
-            onSuccess: (responseData) => {
-                makeToast(responseData.message, 'success');
-            },
-            onFailure: (responseData) => {
-                makeToast(responseData.message, 'error');
-            }
-        });
+    try {
+        const response = isEdit
+            ? await api[resource].patch(itemId, formData)
+            : await api[resource].post(formData);
+        makeToast(response.message, 'success') // TODO: Should make it be success or error appropriately?
+        submittedForm.reset();
+        modal.close();
+    } catch (error) {
+        makeToast(error.message || 'Something went wrong', 'error');
     }
-    // POST
-    else {
-        apiRequest('POST', endpoint, formData, {
-            onSuccess: (responseData) => {
-                makeToast(responseData.message, 'success');
-            },
-            onFailure: (responseData) => {
-                makeToast(responseData.message, 'error')
-            }
-        });
-    }
-    submittedForm.reset();
-    modal.close();
 }
 
 /**
@@ -180,69 +152,70 @@ function setupTabbedModal(modal: FormDialog): void {
     firstTab?.click();
 }
 
+// const populators = {
+//     tasks: populateTaskModal,
+//     habits: populateHabitModal,
+//     metrics: populateHabitModal
+// } as const;
+
+// const taskFormSchema = {
+//     name: { type: 'text' },
+//     priority: { type: 'radio' },
+//     due_date: { type: 'date' },
+// }
+
+// function populateTaskModal(modal: FormDialog, data: Task) {
+//     modal.querySelector('#name').value = data.name;
+//     modal.querySelector('#due_date').value = data.due_date ? isoToUserDate(data.due_date) : '';
+//     const radio = modal.querySelector(`input[name="priority"][value="${data.priority}"]`);
+//     if (radio) radio.checked = true;
+// }
+
 /**
  * Opens a form modal in edit mode & populates fields with data from backend via API.
  * 
  * Side effects:
  * - Sets modal `data-mode="edit"` to route form submission to PATCH
  * - Populates form inputs based on API response.
- * TODO: Check/clarify below:
- * - For `transactions`, disables the `select#product_id` and mirrors
- * its value into `input#product_id_hidden` to preserve submission.
- * The disabled field is tagged with `data-disabled-overriden` and must be reverted
- * upon modal close.
  * 
  * @param itemId - ID of the item to edit
  * @param url - API endpoint to fetch item data (e.g., `/groceries/products/123`)
  * @param modal - The modal element to populate
  * @param itemLabel - Human-readable label for legend (e.g., "Product", "Task")
  */
-export function openModalForEdit(
+export async function openModalForEdit<T = unknown>(
     itemId: string,
-    url: string,       // caller builds url
+    // url: string,       // caller builds url
+    // resource: string,
     modal: FormDialog, // caller finds modal
     itemLabel: string, // for legend text: "Edit Product", etc
-    onPopulated?: (data: any) => void
-): void {
-    apiRequest('GET', url, null, {
-        onSuccess: (responseData) => {
-            console.log(responseData.data)
-            modal.dataset.mode = 'edit';
-            modal.dataset.itemId = itemId;
-            // modal.dataset.subtype = subtype; does it break without this?
-            modal.showModal();
-            populateModalFields(modal, responseData.data);
-            onPopulated?.(responseData.data);
+    onPopulated?: (data: T) => void
+): Promise<void> {
 
-            const legend = modal.querySelector('legend');
+    const resource = modal.dataset.resource;
+    const response = await api[resource].getById(itemId);
 
-            modal.addEventListener('modal:cleanup', () => {
-                if (legend?.dataset.originalText) {
-                    legend.textContent = legend.dataset.originalText;
-                    delete legend.dataset['originalText'];
-                }
-            }, { once: true });
+    // TODO: Add guard here
 
-            if (legend) {
-                legend.dataset.originalText = legend.textContent;
-                legend.textContent = `Edit ${itemLabel}`;
-            }
+    modal.dataset.mode = 'edit';
+    modal.dataset.itemId = itemId;
+    modal.showModal();
+    populateModalFields(modal, response.data);
+    onPopulated?.(response.data);
 
-            // Transaction form-specific hack: Not ideal, but probably the clearest option for now
-            if (modal.id === 'transactions-entry-dashboard-modal') {
-                const productSelectInput = modal.querySelector<HTMLSelectElement>('#product_id');
-                const productInputHidden = modal.querySelector<HTMLInputElement>('#product_id_hidden');
-                if (productSelectInput && productInputHidden) {
-                    productSelectInput.dataset['originalInnerHTML'] = productSelectInput.innerHTML;
-                    productSelectInput.innerHTML = `<option selected>${responseData.data.product_name}</option>`;
+    const legend = modal.querySelector('legend');
 
-                    productSelectInput.disabled = true;
-                    productInputHidden.value = responseData.data.product_id;
-                    productInputHidden.disabled = false; // enable for edit, starts out disabled
-                }
-            }
+    modal.addEventListener('modal:cleanup', () => {
+        if (legend?.dataset.originalText) {
+            legend.textContent = legend.dataset.originalText;
+            delete legend.dataset['originalText'];
         }
-    })
+    }, { once: true });
+
+    if (legend) {
+        legend.dataset.originalText = legend.textContent;
+        legend.textContent = `Edit ${itemLabel}`;
+    }
 }
 
 /**
@@ -256,19 +229,16 @@ export function openModalForEdit(
  */
 export async function handleDelete(
     itemId: string,
-    url: string,
+    // url: string,
+    resource: string,
 ) {
     const confirmed = await confirmationManager.show("You sure you wanna delete?");
     if (!confirmed) return;
 
-    apiRequest('DELETE', url, null, {
-        onSuccess: () => {
-            makeToast(`${itemId} deleted`, 'success');
-            const itemRow = document.querySelector<HTMLTableRowElement>(`[data-item-id="${itemId}"]`);
-            if (!itemRow) return;
-            removeTableRow(itemRow);
-        }
-    })
+    await api[resource].delete(itemId)
+    makeToast(`${itemId} deleted`, 'success');
+    const itemRow = document.querySelector<HTMLTableRowElement>(`[data-item-id="${itemId}"]`);
+    if (itemRow) removeTableRow(itemRow);
 }
 
 
@@ -280,8 +250,12 @@ export async function handleDelete(
  * @remarks
  * Relies on backend field names aligning with frontend input IDs.
  */
-function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>) {
+function populateModalFields(modal: FormDialog, data: Record<string, unknown>) {
     Object.entries(data).forEach(([fieldName, fieldValue]) => {
+        const radios = modal.querySelectorAll<HTMLInputElement>(`input[name="${fieldName}"][type="radio"]`);
+        if (radios.length) {
+            radios.forEach(r => r.checked = r.value === String(fieldValue.toLowerCase()));
+        }
         const input = modal.querySelector<HTMLInputElement>(`#${fieldName}`);
         if (!input || fieldValue === null) return;
 
@@ -290,36 +264,34 @@ function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>
                 input.checked = fieldValue;
                 break;
             case 'date':
-                input.value = isoToDateInput(fieldValue);
+                input.value = isoToUserDate(fieldValue);
+                break;
+            case 'datetime-local':
+                input.value = (fieldValue).slice(0, 16);
                 break;
             case 'time':
-                input.value = isoToTimeInput(fieldValue);
+                input.value = formatToUserTimeString(new Date(fieldValue));
                 break;
             case 'select-one':
-                if (typeof fieldValue === 'string') {
-                    input.value = fieldValue.toLowerCase();
-                } else {
-                    input.value = fieldValue;
-                }
+                input.value = typeof fieldValue === 'string'
+                    ? fieldValue.toLowerCase()
+                    : fieldValue;
+                // if (typeof fieldValue === 'string') {
+                //     input.value = fieldValue.toLowerCase();
+                // } else {
+                //     input.value = fieldValue;
+                // }
                 break;
             default:
-                if (input.type === 'number') {
-                    const step = parseFloat(input.step) || 1;
-                    input.value = (step === 1)
-                        ? String(Math.round(fieldValue))
-                        : formatDecimal(fieldValue, 2);
+                if (input.type === 'number' || input.hasAttribute('data-type-float')) {
+                    const step = parseFloat(input.dataset.step || input.step) || 1;
+                    const decimals = step < 1 ? String(step).split('.')[1].length : 0;
+                    input.value = parseFloat(fieldValue).toFixed(decimals);
                 } else {
                     input.value = String(fieldValue);
                 }
         }
     });
-    // For time entries, derive entry_date from started_at
-    if ('started_at' in data) {
-        const entryDateInput = modal.querySelector<HTMLInputElement>('#entry_date');
-        if (entryDateInput) {
-            entryDateInput.value = isoToDateInput(data['started_at']);
-        }
-    }
 }
 
 /**
@@ -335,51 +307,90 @@ function populateModalFields(modal: HTMLDialogElement, data: Record<string, any>
  * - `.confirmation-message` (text container)
  * - `#confirm-ok` / `#confirm-cancel` (buttons)
  */
-export const confirmationManager: {
-    currentResolve: ((value: boolean) => void) | null;
-    modal: HTMLDialogElement | null;
-    modalMsg: HTMLElement | null;
-    init(): void;
-    show(message: string): Promise<boolean>;
-} = {
-    currentResolve: null, // store active resolve function
-    modal: null,
-    modalMsg: null,
+// export const confirmationManager: {
+//     currentResolve: ((value: boolean) => void) | null; // TODO: use Promise.withResolvers()?
+//     modal: HTMLDialogElement | null;
+//     modalMsg: HTMLElement | null;
+//     init(): void;
+//     show(message: string): Promise<boolean>;
+// } = {
+//     currentResolve: null, // store active resolve function
+//     modal: null,
+//     modalMsg: null,
 
-    init() {
-        // one-time setup for confirmation modals
-        const modal = document.querySelector('#confirmation-modal') as HTMLDialogElement;
-        const modalMsg = document.querySelector('.confirmation-message') as HTMLElement;
-        if (!modal || !modalMsg) {
-            throw new Error('Confirmation modal / message element not found');
-        }
-        this.modal = modal;
-        this.modalMsg = modalMsg;
+//     init() {
+//         // one-time setup for confirmation modals
+//         const modal = document.querySelector('#confirmation-modal') as HTMLDialogElement;
+//         const modalMsg = document.querySelector('.confirmation-message') as HTMLElement;
+//         if (!modal || !modalMsg) {
+//             throw new Error('Confirmation modal / message element not found');
+//         }
+//         this.modal = modal;
+//         this.modalMsg = modalMsg;
         
-        this.modal.addEventListener('click', (e) => {
+//         this.modal.addEventListener('click', (e) => {
+//             const target = e.target as HTMLElement;
+//             if (target.matches('#confirm-ok') && this.currentResolve) {
+//                 this.currentResolve(true); // lets our await receive its answer
+//                 this.modal!.close();
+//                 this.currentResolve = null; // then clean it up
+//             }
+//             else if (target.matches('#confirm-cancel') && this.currentResolve) {
+//                 this.currentResolve(false);
+//                 this.modal!.close();
+//                 this.currentResolve = null;
+//             }
+//         })
+//     },
+
+//     show(message: string): Promise<boolean> {
+//         return new Promise((resolve) => {
+//             this.modalMsg!.textContent = message;
+//             this.modal!.showModal();
+
+//             this.currentResolve = resolve; // store THIS promise's resolve
+//         });
+//     }
+// }
+
+class ConfirmationManager {
+    #modal;
+    #msg;
+    #currentResolve: ((value: boolean) => void) | null = null;
+
+    constructor() {
+        this.#modal = document.querySelector<HTMLDialogElement>('#confirmation-modal');
+        this.#msg = document.querySelector<HTMLElement>('.confirmation-message');
+        if (!this.#modal || !this.#msg) {
+            throw new Error('Confirmation modal/msg element not found');
+        }
+
+        this.#modal.addEventListener('click', (e) => {
             const target = e.target as HTMLElement;
-            if (target.matches('#confirm-ok') && this.currentResolve) {
-                this.currentResolve(true); // lets our await receive its answer
-                this.modal!.close();
-                this.currentResolve = null; // then clean it up
-            }
-            else if (target.matches('#confirm-cancel') && this.currentResolve) {
-                this.currentResolve(false);
-                this.modal!.close();
-                this.currentResolve = null;
+            if (target.matches('#confirm-ok')) {
+                this.#resolve(true);
+            } else if (target.matches('#confirm-cancel')) {
+                this.#resolve(false);
             }
         })
-    },
+    }
 
-    show(message: string): Promise<boolean> {
+    #resolve(value: boolean) {
+        if (!this.#currentResolve) return;
+        this.#currentResolve(value);
+        this.#modal.close();
+        this.#currentResolve = null;
+    }
+
+    show(msg: string): Promise<boolean> {
         return new Promise((resolve) => {
-            this.modalMsg!.textContent = message;
-            this.modal!.showModal();
-
-            this.currentResolve = resolve; // store THIS promise's resolve
-        });
+            this.#msg.textContent = msg;
+            this.#modal.showModal();
+            this.#currentResolve = resolve;
+        })
     }
 }
 
-confirmationManager.init();
+// confirmationManager.init();
+export const confirmationManager = new ConfirmationManager();
 initModals();

@@ -12,72 +12,95 @@
  * @remarks
  * Styling via `.tooltip` class, behavior via `data-tip` attribute
  */
+
+const tooltip = document.querySelector('#tooltip');
+
 export function createTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: string): void {
     const text = tooltipText || targetEl.getAttribute('data-tip');
     if (!text) {
         console.warn('No tooltip text provided');
         return;
     }
+    console.log(targetEl);
+    console.log(typeof targetEl);
+    console.log(targetEl instanceof SVGElement);
+    console.log(targetEl.style);
+    console.log(tooltip)
+    console.log(targetEl)
+    // targetEl.style.anchorName = '--tooltip-anchor';
+    targetEl.style.setProperty('anchor-name', '--tooltip-anchor')
+    tooltip.textContent = targetEl.dataset.tip ?? tooltipText;
+    targetEl.setAttribute('aria-describedby', 'tooltip');
+    tooltip.showPopover();
 
-    const tooltip = document.createElement('div');
-    tooltip.id = 'tooltip';
-    tooltip.className = 'tooltip';
-    tooltip.setAttribute('role', 'tooltip'); // For a11y
-    tooltip.setAttribute('aria-hidden', 'false');
-    targetEl.setAttribute('aria-describedby', tooltip.id); // Must be on trigger, not tooltip itself
+    console.log("hit")
 
-    tooltip.textContent = text;
 
-    const targetElRect = targetEl.getBoundingClientRect();
-    const isTall = targetElRect.height > 80;
-    const centerX = (targetElRect.left + targetElRect.right) / 2; // gives us dist from end to center for caret
+    // // const tooltip = document.createElement('div');
+    // tooltip.id = 'tooltip';
+    // tooltip.className = 'tooltip';
+    // tooltip.setAttribute('role', 'tooltip'); // For a11y
+    // tooltip.setAttribute('aria-hidden', 'false');
+    // targetEl.setAttribute('aria-describedby', tooltip.id); // Must be on trigger, not tooltip itself
+
+    // tooltip.textContent = text;
+
+    // const targetElRect = targetEl.getBoundingClientRect();
+    // const isTall = targetElRect.height > 80;
+    // const centerX = (targetElRect.left + targetElRect.right) / 2; // gives us dist from end to center for caret
+    // // const y = isTall
+    // //     ? (targetElRect.top + 2 * (targetElRect.height / 3))
+    // //     : targetElRect.bottom;
+
+    // // tooltip.style.zIndex = '1000';
+
+    // // Tooltips in dialogs need dialog parent to avoid stacking context issues
+    // const parentDialogEl = targetEl.closest('dialog');
+    // const isInDialog = parentDialogEl && parentDialogEl instanceof HTMLDialogElement;
+
+    // if (isInDialog) {
+    //     parentDialogEl.appendChild(tooltip);
+    //     tooltip.style.position = 'absolute';
+    // } else {
+    //     document.body.appendChild(tooltip);
+    //     tooltip.style.position = 'fixed';
+    // }
+
+    // const tooltipRect = tooltip.getBoundingClientRect(); // gives tooltips curr size and position 
+    // const tooltipCenterOffset = (tooltipRect.width / 2); // calc caret position inside tooltip
     // const y = isTall
     //     ? (targetElRect.top + 2 * (targetElRect.height / 3))
-    //     : targetElRect.bottom;
+    //     : targetElRect.top;
 
-    tooltip.style.zIndex = '1000';
-
-    // Tooltips in dialogs need dialog parent to avoid stacking context issues
-    const parentDialogEl = targetEl.closest('dialog');
-    const isInDialog = parentDialogEl && parentDialogEl instanceof HTMLDialogElement;
-
-    if (isInDialog) {
-        parentDialogEl.appendChild(tooltip);
-        tooltip.style.position = 'absolute';
-    } else {
-        document.body.appendChild(tooltip);
-        tooltip.style.position = 'fixed';
-    }
-
-    const tooltipRect = tooltip.getBoundingClientRect(); // gives tooltips curr size and position 
-    console.log(tooltipRect.height)
-    const tooltipCenterOffset = (tooltipRect.width / 2); // calc caret position inside tooltip
-    const y = isTall
-        ? (targetElRect.top + 2 * (targetElRect.height / 3))
-        : targetElRect.top;
-
-    if (isInDialog) {
-        const dialogRect = parentDialogEl.getBoundingClientRect();
+    // if (isInDialog) {
+    //     const dialogRect = parentDialogEl.getBoundingClientRect();
         
-        tooltip.style.top = `${y - dialogRect.top}px`;
-        tooltip.style.left = `${centerX - dialogRect.left - tooltipCenterOffset}px`;
+    //     tooltip.style.top = `${y - dialogRect.top}px`;
+    //     tooltip.style.left = `${centerX - dialogRect.left - tooltipCenterOffset}px`;
 
-    } else {
-        const tooltipRectNew = tooltip.getBoundingClientRect(); // Must measure after position: fixed since element width changes when removed from document flow
-        tooltip.style.top = `${y - tooltipRectNew.height - 6}px`;
-        tooltip.style.left = `${centerX - (tooltipRectNew.width/2)}px`;
-    }
-    tooltip.style.setProperty('--caret-pos', '50%');
+    // } else {
+    //     const tooltipRectNew = tooltip.getBoundingClientRect(); // Must measure after position: fixed since element width changes when removed from document flow
+
+    //     tooltip.style.top = `${y - tooltipRectNew.height - 6}px`;
+    //     tooltip.style.left = `${centerX - (tooltipRectNew.width/2)}px`;
+    // }
+    // tooltip.style.setProperty('--caret-pos', '50%');
 }
 
-export function removeTooltip() {
-    document.querySelector<HTMLElement>('#tooltip')?.remove();
+export function removeTooltip(targetEl: HTMLElement | SVGElement) {
+    // document.querySelector<HTMLElement>('#tooltip')?.remove();
+    if (targetEl) {
+        // targetEl.style.anchorName = '';
+        targetEl.style.setProperty('anchor-name', '');
+        tooltip.hidePopover();
+    }
+    tooltip.hidePopover();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const tooltipTriggers = document.querySelectorAll<HTMLElement>('[data-tip]');
 
-    // Add listener to each tooltip
+    // Add listener to each targetEl
     tooltipTriggers.forEach(el => {
         el.addEventListener('mouseenter', () => {
             const tooltipText = el.getAttribute('data-tip');
@@ -87,8 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             createTooltip(el, tooltipText);
         });
-        el.addEventListener('mouseleave', () => {
-            removeTooltip();
-        });
+        el.addEventListener('mouseleave', () => removeTooltip(el));
     });
 });

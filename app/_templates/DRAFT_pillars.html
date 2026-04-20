@@ -4,6 +4,199 @@
 
 {% block content %}
 
-<p>hey</p>
+<!-- DRAFTING -->
+<div class="draft-container">
+    <div class="layer1"></div>
+    <div class="layer2"></div>
+    <div class="layer3"></div>
+</div>
+
+<div class="radar-container reveal">
+    <div id="radar-chart-container">
+    </div>
+</div>
+
+
+<h1>What Pillars, and Vesper as a whole, tries to answer: Why track at all?</h1>
+<ol>
+    The core vision here: Tracking without data synthesis is just data hoarding, and an illusion of going anywhere.
+    <li>Radar Chart - Hero. Immediate "shape of my life" gestalt</li>
+    <li>Neglect Callout - Text warning, only shows if something's off. Hidden when balanced</li>
+    <li>Per-pillar bars - Detail breakdown with threshold markers, for when we want to </li>
+</ol>
+
+
+<!-- 1: Vision: what & why -->
+<section>
+    <h2>Radar Chart: Shape of My Life</h2>
+    <p>Three layers explained. Asymmetric threshold polygon</p>
+    <ol>
+        <li>Layer 0: Maslow Minimum: Red dotted line in radar chart.</li>
+        <li>Layer 1: 6-12mo performance - our "normal"/baseline. Lighter cyan color</li>
+        <li>Layer 2: Recent (14d) performance. Accent-subtle color</li>
+    </ol>
+    <p>
+        The radar chart is the central insight of the app, a single glance at whether your life is in balance.<br>
+        Each axis represents a research-backed domain of well-being, with the shape surfacing what data alone doesn't.<br>
+        You should be able to intuitively SEE how balanced your life is.
+    </p>
+    <ol>
+        <li>
+            Maslow-informed asymmetry: Not all pillars are equal.<br>
+            Health crashing is existential, whereas Purpose dipping is fine for a bit.<br>
+            MM thresholds encode that hierarchy.
+        </li>
+        <li>
+            Temporal layers: Your baseline vs your recent tells you <i>direction</i>.
+            "I'm at 60% career but was at 80% career three months ago" is a signal.
+        </li>
+    </ol>
+    <p>
+        Immediate "shape of my life" gestalt.<br>
+        Cascade pattern / Maslow connection<br>
+        Neglect signal idea<br>
+        Encode great/ehh/neglected into the fill shading for the layers too?
+    </p>
+    <p>
+        Could be a great chance to explain the science-thinking behind it, and/or formulas? 
+        Should arrange the axes in the radar chart by "most important maslow minimum -> descending?"
+    </p>
+</section>
+
+<section>
+    <h2>Five Pillars</h2>
+    <div>
+        <span>Maslows Hierarchy of Needs:</span>
+        <img src="../static/img/maslows.png" width="400" height="300">
+    </div>
+    <p>
+        Definitions and data sources
+        Each pillar with its research backing
+        MM Threshold
+        What feeds it
+    </p>
+
+    <details>
+        <summary>Neglect Signal</summary>
+        <p>
+            EX:
+            The idea: "Your Career pillar is thriving & your Health
+            pillar is starving, and historically that pattern makes you
+            miserable by week 3."
+        </p>
+        <p>
+            Cascade pattern that maps to Maslow:
+            Health failing
+            <pre>-> Rest drops (can't recover properly)</pre>
+            <pre>  -> Rigidity increases (stress response)</pre>
+            <pre>    -> Relationships narrow (no energy/confidence for people)</pre>
+            <pre>       -> Growth stalls (can't learn when depleted, also confidence-related prob)</pre>
+            <pre>          -> Purpose disappears (becomes a moot point -> in survival mode now)</pre>
+        </p>
+        <p>This cascade IS the neglect algorithm? System shouldn't just flag health if that dips - everything downstream is at risk.</p>
+        <p>The threshold polygon on your radar would be lopsided by design - not a regular
+        pentagon but a shape that's wider on Health and narrower on Purpose. That asymmetry
+        IS the Maslow hierarchy expressed visually.
+        </p>
+        <h2>Example of neglect signal?</h2>
+        <div>
+            Careful man: I sense an imbalance in the force...s of your life. Namely: {PILLAR}
+            <br>In the last 14 days, {PILLAR} has had a share of only ~13% of your time/tasks/idk.
+            Flag whenever any pillar drops below a min threshold for N consecutive / "clustered" days.
+            Could have some sort of "forgiveness percentage", like a "fuzzy find" but...threshold.
+            Sorta like our STREAK_GRACE_DAYS value for habit streaks.
+        </div>
+    </details>
+
+    <details>
+        <summary>Health (physical: exercise, sleep, nutrition)</summary>
+        <h2>TODO: Include nutrition info ("macros good?") & "ratio of food types"? ("2/3 of cals were processed man? wtf?")</h2>
+        <p>Data feeding it: Metrics for sleep/calories/steps/weight, as well as Time Entries (currently assumed to be exercise)</p>
+        <p>MM: 0.6. High, because everything else suffers if this does. No health -> no energy, capacity for anything else in the best case.</p>
+    </details>
+
+    <details>
+        <summary>Career/Growth (work, learning, skills)</summary>
+        <ol>
+            <li>Absorbs: SDT's Competence, PERMA's Accomplishment + Engagement, Ryff's Personal Growth</li>
+            <li>Data feeding it: time tracked on work/learning. TODO: Rope in tasks completed, skills practice (habits like leetcode)</li>
+            <li>MM: 0.3. Lower, stands around the "Esteem/Self-actualization" segments of Maslow hierarchy.</li>
+            <li>TODO: The "open to new experiences" rigidity thing is interesting - could track as a ratio of novel
+        vs routine tasks over time
+            </li>
+            <li>
+                2. Career: Retool a bit into "Growth/Career"? Eventual split for "Finance"/Autonomy?
+                - Could then do "% goals actually followed through on vs roadmap" or similar
+                - Fragmentation index for goals, not sure how I'd rank that tho
+            </li>
+        </ol>
+    </details>
+
+    <details>
+        <summary>Relationships (MM: love & belonging) (friends, family, community)</summary>
+        <ol>
+            <li>TODO: Track interaction frequency (distinct from time spent), quality (1-5 rating, "energizing/fulfilling" vs draining/forced),
+            initiative balance (who reached out?)
+            </li>
+            <li>Quantifiable inputs: social time entries, social habits, maybe a contact diversity metric</li>
+            <li>The diversity index idea is solid - not just "time spent socializing" but "with how many
+        different people/groups?" Prevents the "I only hang out with one person" trap</li>
+            <li>Hardest to track passively - might lean more on self-report or simple habit check-ins</li>
+        </ol>
+    </details>
+
+    <details>
+        <summary>Rest/Recovery (MM: Safety - moderate threshold?) (downtime, leisure, fun)</summary>
+        <ol>
+            <li>Quantifiable inputs: leisure time entries, sleep quality, days without work-tagged entries</li>
+            <li>This is the counterbalance to Career - the app can literally detect "you haven't logged a
+        single Rest-tagged activity in 12 days"</li>
+            <li>My rigidity-under-stress observation fits here too - when Rest drops, openness drops, which
+        tanks Relationships and Growth</li>
+            <li>
+                3. Rest: Perhaps split physical vs mental vs "spiritual"? Find research to indicate whether this'd make sense even
+            </li>
+        </ol>
+    </details>
+
+    <details>
+        <summary>Purpose/Meaning (MM: self-actualization, lowest min threshold obv) (spirituality, volunteering, reflection)</summary>
+        <ol>
+            <li>Hardest to quantify, but that's actually fine.</li>
+            <li>MM is lowest bc Maslow says you really only pursue this when the others are met</li>
+            <li>Could just be a weekly reflection habit or journaling check-in. Don't force more here.</li>
+        </ol>
+    </details>
+</section>
+
+
+<section>
+    <h2>Implementation Status?</h2>
+    <ol>
+        <li>What's wired up: join tables, scoring, aggregate endpoints, form tagging via checkboxes</li>
+        <li>Open questions: purpose scoring, relationship quality metrics, neglect algo</li>
+        <li>Open TODO: Add '?' tooltip next to each axis' title: "What does 'Rest' mean? What goes into its score, in brief?"</li>
+    </ol>
+    <p>Also added this to the onPopulated callbacks to those 3's open for edit thing:</p>
+    <code >
+        data.pillars.forEach((id: number) => {
+            const cb = modal.querySelector(`input[value="${id}"]`);
+            if (cb) cb.checked = true;
+        })
+        // also sync the hidden input
+        modal.querySelector('#pillar_ids_hidden').value = data.pillars.join(',') ?? '';
+    </code>
+    <p>
+        Notes on what I did: Tweaked Pillar model in shared/models.py (removed the habits relationship, we'll use
+        join tables). Also made the decision to have Pillars be user-definable (cap 30 chars) BUT we seed the "core 5"
+        on all user creations (auth/service.py).
+        Added join tables for habit_pillars, task_pillars, and time_entry_pillars in shared models too.
+        Also then added secondary/back_populates relationships for habits/tasks/time_entries.
+        Added this to the NO_SEQ set in db helpers: "habit_pillars", "task_pillars", "time_entry_pillars"
+        Ofc also revisioned.
+        Serialization.py now includes a hasattr check for "pillars", and tacks them onto the results as an array of ids.
+        Added aggregate_in_window functions for both time_entries and metrics for this.
+    </p>
+</section>
 
 {% endblock %}

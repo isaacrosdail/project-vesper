@@ -1,17 +1,14 @@
-import { formatTimeString, getJSInstant } from '../shared/datetime.js';
-import { calcCelestialBodyPos, CelestialRenderer, CelestialType, setupCanvas } from '../shared/canvas.js';
-import { apiRequest } from '../shared/services/api.js';
-import { fetchWeatherData } from '../shared/services/weather-service.js';
-import { userStore } from '../shared/services/userStore.js';
-import { randInt, randFloat } from '../shared/numbers.js';
-
-import { WeatherResult } from '../types.js';
+import { formatToUserTimeString } from '../shared/datetime';
+import { initHabitForm, initMetricsForm, initTaskForm, initTimeEntryForm } from '../shared/forms';
+import { api } from '../shared/services/api';
+import { userStore } from '../shared/services/userStore';
+import { fetchWeatherData } from '../shared/services/weather-service';
+import { makeToast } from '../shared/ui/toast';
+import { randFloat, randInt } from '../shared/utils';
+import { FormDialog, WeatherResult } from '../types';
 
 // Weather widget state
 let weatherInfo: WeatherResult | null = null;
-let currentCanvasState: { bodyType: CelestialType; x: number; y: number; } | null = null;
-let renderer: CelestialRenderer | null = null;
-let resizeTimeout: ReturnType<typeof setTimeout> | undefined;
 
 // Progress bar UI state
 let isInitialRender = true;
@@ -105,52 +102,33 @@ function updateProgressBar(module: ProgressBarModule, options: UpdateProgressBar
  * - Updates streak count in `.habit-streak` span (data attr + emoji text)
  */
 async function markHabitComplete(checkbox: HTMLInputElement, habitId: string): Promise<void> {
-    try {
-        // Mark complete => POST HabitCompletion
-        const completedAtUTC = getJSInstant();
-
+    try { // TODO: why try/catch here? api already throws, no?
         const row = checkbox.closest('.item-row');
-        const emojiSpan = row?.querySelector<HTMLSpanElement>('.habit-streak');
+        const streakCountSpan = row?.querySelector<HTMLSpanElement>('.streak-count');
+        // const streakIcon = row?.querySelector('.streak-icon');
         const listItem = row?.closest<HTMLLIElement>('.item');
-        if (!row || !emojiSpan || !listItem) {
+        if (!row || !streakCountSpan || !listItem) {
             console.error('.item-row parent for checkbox not found')
             return;
         }
-        const streakValue = emojiSpan.dataset['streakCount'];
+        const streakValue = streakCountSpan.dataset['streakCount'];
         let streakCount = (streakValue && streakValue !== '') ? parseInt(streakValue, 10) : 0;
 
         if (checkbox.checked) {
-            const url = `/habits/${habitId}/completions`;
-            const data = { completed_at: completedAtUTC };
-
-            apiRequest('POST', url, data, {
-                onSuccess: (responseData) => {
-                    streakCount += 1;
-                    emojiSpan.dataset['streakCount'] = String(streakCount);
-
-                    listItem?.classList.toggle('completed');
-                    emojiSpan.textContent = `🔥${streakCount}`;
-                    updateProgressBar('habits', responseData.data.progress);
-                }
-            });
+            const response = await api.habitCompletions.post(habitId);
+            streakCount++;
+            updateProgressBar('habits', response.data.progress);
         } else {
-            const todayDateOnly = new Intl.DateTimeFormat('en-CA').format(new Date());
-            const params = new URLSearchParams({ date: todayDateOnly });
-            const url = `/habits/${habitId}/completions?${params}`;
-
-            apiRequest('DELETE', url, null, {
-                onSuccess: (responseData) => {
-                    streakCount -= 1;
-                    emojiSpan.dataset['streakCount'] = String(streakCount);
-
-                    listItem?.classList.toggle('completed');
-                    emojiSpan.textContent = (streakCount > 0) ? `🔥${streakCount}` : "";
-                    updateProgressBar('habits', responseData.data.progress);
-                }
-            });
+            const response = await api.habitCompletions.deleteToday(habitId);
+            streakCount--;
+            updateProgressBar('habits', response.data.progress);
         }
+        streakCountSpan.dataset['streakCount'] = String(streakCount);
+        listItem?.classList.toggle('completed', checkbox.checked);
+        streakCountSpan.textContent = (streakCount > 0) ? String(streakCount) : '';
     } catch (error) {
-        console.error('Error during habit completion request:', error);
+        makeToast('Failed to update habit status', 'error');
+        checkbox.checked != checkbox.checked;
     }
 }
 
@@ -165,28 +143,15 @@ async function markHabitComplete(checkbox: HTMLInputElement, habitId: string): P
  * - Toggle `.completed` class on `.item` element
  */
 async function markTaskComplete(checkbox: HTMLInputElement, taskId: string): Promise<void> {
-    const completedAtUTC = getJSInstant();
-    const url = `/tasks/tasks/${taskId}`;
-
-    let data;
-    if (checkbox.checked) {
-        data = {
-            is_done: true,
-            completed_at: completedAtUTC 
-        };
-    } else {
-        data = {
-            is_done: false,
-            completed_at: null
-        }
+    try {
+        const response = await api.tasks.toggleComplete(taskId, checkbox.checked);
+        const listItem = checkbox.closest('.item');
+        listItem?.classList.toggle('completed');
+        updateProgressBar('tasks', response.data.progress);
+    } catch (error) {
+        makeToast('Failed to update task status', 'error');
+        checkbox.checked != checkbox.checked;
     }
-    apiRequest('PATCH', url, data, {
-        onSuccess: (responseData) => {
-            const listItem = checkbox.closest<HTMLLIElement>('.item');
-            listItem?.classList.toggle('completed');
-            updateProgressBar('tasks', responseData.data.progress);
-        }
-    });
 }
 
 /**
@@ -220,61 +185,51 @@ async function getWeatherInfo() {
 
     const { temp, emoji, sunsetFormatted } = weatherInfo;
     const tempUnit = units === 'metric' ? 'C' : 'F';
-    tempDisplay.textContent = `${temp}°${tempUnit} ${emoji}`;
-    sunsetDisplay.textContent = `Sunset: ${sunsetFormatted} 🌅`;
+
+    tempDisplay.textContent = `${temp}°${tempUnit} ${emoji} (${city}, ${country})`;
+    tempDisplay.innerHTML = `
+        ${temp}°${tempUnit}
+        <svg class="icon"><use href="#${emoji}"></use></svg>
+         - ${city}
+    `;
+    sunsetDisplay.textContent = `Sunset ${sunsetFormatted}`;
 }
 
-/**
- * Calculates and renders sun/moon position based on current time relative to sunrise/sunset.
- * 
- * Updates global `currentCanvasState` and triggers canvas redraw.
- */
-function updateCelestialBodyPos() {
-    if (!weatherInfo) return;
+export function calcCelestialBodyPos(startTime: number, endTime:
+number, now: number): { x: number, y: number } {
+    const progress = (now - startTime) / (endTime - startTime);
+    const clampedProgress = Math.max(0, Math.min(1, progress));
+
+    const x = clampedProgress;
+    const y = Math.sin(clampedProgress * Math.PI); // sin curve: 0 -> 1 -> 0
+
+    return { x, y };
+}
+
+function updateSky() {
+    if (!weatherInfo) return; // TODO: use that circuit breaker pattern thing?
     const { sunrise, sunset } = weatherInfo;
-    if (!sunrise || !sunset) {
-        console.debug('Sunrise/sunset data null, skipping celestial body position update');
-        return;
-    }
-
     const now = Math.floor(Date.now() / 1000);
+    const isDay = now >= sunrise && now <= sunset;
 
-    let startTime: number;
-    let endTime: number;
-    let bodyType: CelestialType = 'moon';
-
-    if (now >= sunrise && now <= sunset) {
-        // Daytime
-        bodyType = 'sun';
-        startTime = sunrise;
-        endTime = sunset;
-    } else if (now > sunset) {
-        // Night (after sunset)
-        startTime = sunset;
-        endTime = sunrise + (24 * 60 * 60); // next sunrise
+    // Sky gradient
+    const card = document.querySelector('#greeting-card');
+    if (isDay) {
+        card.style.setProperty('--sky-top', '#4a90d9');
+        card.style.setProperty('--sky-bottom', '#87ceeb');
     } else {
-        // Last night (before sunrise)
-        startTime = sunset - (24 * 60 * 60); // previous sunset
-        endTime = sunrise;
+        card.style.setProperty('--sky-top', '#0a1628');
+        card.style.setProperty('--sky-bottom', '#1a2a4a');
     }
-    const position = calcCelestialBodyPos(startTime, endTime, now);
-    currentCanvasState = { bodyType, x: position.x, y: position.y };
-    redrawCanvas();
-}
 
-/**
- * Redraws the celestial body canvas at current position.
- * Called after window resize to prevent distortion.
- */
-function redrawCanvas() {
-    setupCanvas();
-    if (currentCanvasState && renderer) {
-        renderer.draw(
-            currentCanvasState.x, 
-            currentCanvasState.y, 
-            currentCanvasState.bodyType
-        );
-    }
+    // Sun/moon position — reuse your existing calcCelestialBodyPos
+    const startTime = isDay ? sunrise : (now > sunset ? sunset : sunset - 86400);
+    const endTime = isDay ? sunset : (now > sunset ? sunrise + 86400 : sunrise);
+    const pos = calcCelestialBodyPos(startTime, endTime, now);
+
+    // Drive a CSS element instead of canvas
+    card.style.setProperty('--celestial-x', `${pos.x * 100}%`);
+    card.style.setProperty('--celestial-y', `${pos.y * 100}%`);
 }
 
 /**
@@ -378,6 +333,7 @@ function initCheckboxHandlers() {
     });
 }
 
+// TODO: buggy, would use browser tz, no?
 /**
  * Initializes the live clock display and updates it every 30 seconds.
  */
@@ -386,7 +342,7 @@ function initClock() {
     if (!timeDisplay) return;
 
     const updateClock = () => {
-        timeDisplay.textContent = formatTimeString(new Date());
+        timeDisplay.textContent = formatToUserTimeString(new Date());
     }
 
     updateClock();
@@ -405,17 +361,19 @@ function initWeatherSection() {
     }
 
     try {
-        renderer = new CelestialRenderer('#sky-canvas');
+        // renderer = new CelestialRenderer('#sky-canvas');
         getWeatherInfo();         // Cache weather data
-        updateCelestialBodyPos(); // Draw sun immediately
+        // updateCelestialBodyPos(); // Draw sun immediately
+        updateSky();
 
         setInterval(getWeatherInfo, 1*60*60*1000);  // Update weather every hour
-        setInterval(updateCelestialBodyPos, /*5 * 60 * 1000*/6000); // Update sun from weatherInfo every 5 mins => 5*60*1000
+        setInterval(updateSky, /*5 * 60 * 1000*/6000); // Update sun from weatherInfo every 5 mins => 5*60*1000
 
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(redrawCanvas, 100); // debounce redraw
-        });
+        // // TODO: ResizeObserver!!
+        // window.addEventListener('resize', () => {
+        //     clearTimeout(resizeTimeout);
+        //     resizeTimeout = setTimeout(redrawCanvas, 100); // debounce redraw
+        // });
     } catch (error) {
         console.error(`Weather widget init failed: ${error}`)
     }
@@ -428,4 +386,21 @@ export function init() {
     initCheckboxHandlers();
     initWeatherSection();
     initClock();
+
+    const taskDialog = document.querySelector<FormDialog>('#tasks-entry-homepage-modal');
+    const timeEntryDialog = document.querySelector<FormDialog>('#time_entries-entry-homepage-modal');
+    const habitDialog = document.querySelector<FormDialog>('#habits-entry-homepage-modal');
+    const metricDialog = document.querySelector<FormDialog>('#daily_metrics-entry-homepage-modal');
+    if (!taskDialog || !timeEntryDialog || !habitDialog || !metricDialog) {
+        console.warn('index.ts init: missing FormDialog(s)')
+        return;
+    }
+    initTaskForm(taskDialog);
+    initTimeEntryForm(timeEntryDialog);
+    initHabitForm(habitDialog)
+    initMetricsForm(metricDialog)
+
+    // TODO: Need to add?
+    // const leetCodeRecordsDialog = document.querySelector('#leet_code_records-entry-homepage-modal');
+    // initLeetCodeRecordForm(leetCodeRecordsDialog);
 }

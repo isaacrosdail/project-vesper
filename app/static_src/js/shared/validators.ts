@@ -1,12 +1,11 @@
-// For frontend validation. (Name might be bad, idk)
+// For frontend validation
 
-import { title } from '../shared/strings';
+import { title } from '../shared/utils';
 import { ValidatableElement } from '../types';
 
 type ValidatorFn = (value: string) => string | null;
 
-const debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
-
+const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 /**
  * Show or clear the inline validation error for a given form field.
@@ -17,9 +16,15 @@ const debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
  * @remarks
  * Assumes the error container is a sibling `<small>` element.
  */
-function handleErrorMessages(field: string, errorMsg: string | null = null) {
-    const fieldEl = document.querySelector<ValidatableElement>(`#${field}`)!;
-    const errorBox = fieldEl.parentElement?.querySelector('small')!;
+export function handleErrorMessages(field: string, errorMsg: string | null = null) {
+    const fieldEl = document.querySelector<ValidatableElement>(`#${field}`);
+    if (!fieldEl) {
+        throw new Error(`handleErrorMessages: no field #${field}`)
+    }
+    const errorBox = fieldEl.parentElement?.querySelector('small');
+    if (!errorBox) {
+        throw new Error(`handleErrorMessages: no <small> sibling for #${field}`)
+    }
 
     if (errorMsg) {
         errorBox.style.visibility = 'visible';
@@ -38,7 +43,7 @@ function handleErrorMessages(field: string, errorMsg: string | null = null) {
  * @param value 
  * @returns 
  */
-function shouldSkipValidation(fieldEl: ValidatableElement | null, value: string): boolean {
+function shouldSkipValidation(fieldEl: ValidatableElement, value: string): boolean {
     const isDisabled = fieldEl?.disabled;
     const isOptionalAndBlank = !value.trim() && !fieldEl?.required;
     return isDisabled || isOptionalAndBlank;
@@ -56,14 +61,14 @@ function validateFieldOnInput(proxyObj: Record<string, string>, e: Event) {
     // Clear errors & bail for now-empty fields
     if (target.value === '') {
         handleErrorMessages(field, null);
-        clearTimeout(debounceTimers[field]);
+        clearTimeout(debounceTimers.get(field));
         return;
     }
 
-    clearTimeout(debounceTimers[field]);
-    debounceTimers[field] = setTimeout(() => {
+    clearTimeout(debounceTimers.get(field));
+    debounceTimers.set(field, setTimeout(() => {
         proxyObj[field] = target.value;
-    }, 300);
+    }, 300));
 }
 
 /**
@@ -80,20 +85,24 @@ function validateFormOnSubmit(form: HTMLFormElement, validatorMap: Record<string
 
     // Check if valid, loop thru validatormap
     Object.entries(validatorMap).forEach(([field, validatorFn]) => {
-        const fieldEl = form.querySelector(`[name="${field}"]`) as ValidatableElement;
+        const fieldEl = form.querySelector<ValidatableElement>(`[name="${field}"]`);
+        if (!fieldEl) {
+            throw new Error(`validateFormOnSubmit: no field [name="${field}"] in form`)
+        }
         const value = fieldEl.value;
-        const result = validatorFn(value)
 
         if (shouldSkipValidation(fieldEl, value)) {
             return;
         }
+        const result = validatorFn(value)
+
         if (result !== null) {
             handleErrorMessages(field, result);
             hasErrors = true;
         }
     });
 
-    // Prevent submission in presence of errors
+    // Prevent submission if errors
     if (hasErrors) {
         e.stopPropagation();
     }
@@ -113,21 +122,27 @@ function validateFormOnSubmit(form: HTMLFormElement, validatorMap: Record<string
  * @throws {Error} If the form reference is null or undefined.
  */
 export function initValidation(form: HTMLFormElement, validatorMap: Record<string, ValidatorFn>) {
-    if (!form) {
-        throw new Error('Error: invalid/missing form ref')
-    }
+    if (!form) throw new Error('Error[initValidation]: invalid/missing form ref');
 
-    const formEls = form.querySelectorAll<ValidatableElement>('input, textarea');
+    const fieldEls = new Map<string, ValidatableElement>();
+
+    Object.keys(validatorMap).forEach(field => {
+        const el = form.querySelector<ValidatableElement>(`[name="${field}"]`);
+        if (!el) throw new Error(`initValidation: no field [name="${field}"] in form`);
+        fieldEls.set(field, el);
+    
+        // Debounced proxy trigger for input fields. Timers per field
+        el.addEventListener('input', (e) => validateFieldOnInput(proxyObj, e));
+    });
 
     // Proxy to validate on debounced input
     const proxyObj = new Proxy<Record<string, string>>({}, {
-        set(target, property, value, _receiver) {
-            if (!(typeof property === 'string' && validatorMap[property])) {
+        set(target, property, value) {
+            if (typeof property !== 'string' || !fieldEls.has(property)) {
                 return true;
             }
 
-            const field = form.querySelector<ValidatableElement>(`[name="${property}"]`);
-
+            const field = fieldEls.get(property)!
             if (shouldSkipValidation(field, value)) {
                 target[property] = value;
                 return true;
@@ -136,27 +151,8 @@ export function initValidation(form: HTMLFormElement, validatorMap: Record<strin
             target[property] = value;
             const validatorResult = validatorMap[property](value);
             handleErrorMessages(property, validatorResult);
-
-            // Cross-field validation for time_tracking
-            // TODO: Formalize as this expands
-            if (['started_at', 'ended_at'].includes(property)) {
-                const [start, end] = [target['started_at'], target['ended_at']]
-                if (!start || !end) return true;
-
-                const message = start < end ? null : 'Times must be in order';
-                handleErrorMessages('started_at', message);
-                handleErrorMessages('ended_at', message);
-            }
-
             return true;
         }
-    });
-
-    // Debounced proxy trigger for input fields. Timers per field
-    formEls.forEach(el => {
-        el.addEventListener('input', (e) => {
-            validateFieldOnInput(proxyObj, e);
-        });
     });
 
     form.addEventListener('submit', (e) => {
@@ -165,52 +161,45 @@ export function initValidation(form: HTMLFormElement, validatorMap: Record<strin
     });
 }
 
-export type ValidationRule = {
+type StringRules = {
     maxLength?: number;
     minLength?: number;
-    isInt?: boolean;
-    isFloat?: boolean;
-    min?: number;
-    max?: number;
     pattern?: RegExp;
     patternMsg?: string;
 }
+type NumericRules = {
+    numType: 'int' | 'float';
+    min?: number;
+    max?: number;
+}
+
+type ValidationRule = StringRules | NumericRules;
 
 /**
  * Factory function to create validator as per the given ruleset.
  */
 export function makeValidator(fieldName: string, rules: ValidationRule): ValidatorFn {
     return (value: string): string | null => {
-
         const fieldDisplay = title(fieldName);
 
-        if (rules.maxLength && value.length > rules.maxLength) {
-            return `${fieldDisplay} must be under ${rules.maxLength} characters`;
-        }
-        if (rules.minLength && value.length < rules.minLength) {
-            return `${fieldDisplay} must be at least ${rules.minLength} characters`;
-        }
-        if (rules.isInt || rules.isFloat) {
-            if (rules.isInt && rules.isFloat) {
-                throw new Error('RealityError: Cannot have both isInt and isFloat')
-            }
-            const num = rules.isInt
+        if ('numType' in rules) {
+            const num = rules.numType === 'int'
                 ? parseInt(value, 10)
                 : parseFloat(value);
 
             if (isNaN(num)) return `${fieldDisplay} must be a number`;
-            if (rules.min !== undefined && num < rules.min) {
-                return `${fieldDisplay} must be at least ${rules.min}`
-            }
-            if (rules.max !== undefined && num > rules.max) {
-                return `${fieldDisplay} must be less than ${rules.max}`
-            }
-        }
-        if (rules.pattern && !rules.pattern.test(value)) {
-            return rules.patternMsg
-                ? rules.patternMsg
-                : `${fieldDisplay} invalid pattern.`
+            if (rules.min !== undefined && num < rules.min)
+                return `${fieldDisplay} must be at least ${rules.min}`;
+            if (rules.max !== undefined && num > rules.max)
+                return `${fieldDisplay} must be less than ${rules.max}`;
+        } else {
+            if (rules.maxLength && value.length > rules.maxLength)
+                return `${fieldDisplay} must be under ${rules.maxLength} characters`;
+            if (rules.minLength && value.length < rules.minLength)
+                return `${fieldDisplay} must be at least ${rules.minLength} characters`;
+            if (rules.pattern && !rules.pattern.test(value))
+                return rules.patternMsg ?? `${fieldDisplay} invalid pattern.`;
         }
         return null;
-    }
+    };
 }

@@ -52,15 +52,32 @@ function setCookie(name: string, value: string, maxAge: number = 31536000): void
  * Triggers change to ensure cookie is written on first visit.
  */
 document.addEventListener('DOMContentLoaded', () => {
-    const themeSelect = document.querySelector<HTMLSelectElement>('#theme')!;
+    // const themeSelect = document.querySelector<HTMLSelectElement>('#theme')!;
+    const themeToggle = document.querySelector<HTMLInputElement>('#theme-toggle');
 
-    themeSelect.addEventListener('change', () => {
-        const cookieValue = themeMap[themeSelect.value];
-        setCookie('theme', cookieValue);
-        document.documentElement.dataset['theme'] = cookieValue;
+    // Init: check cookie, fall back to sys preference
+    const stored = getCookie('theme');
+    const isDarkTheme = stored
+        ? stored === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    themeToggle.checked = !isDarkTheme;
+    document.documentElement.dataset['theme'] = isDarkTheme ? 'dark' : 'light';
+
+    // On change:
+    themeToggle.addEventListener('change', () => {
+        const theme = themeToggle.checked ? 'light' : 'dark';
+        setCookie('theme', theme);
+        document.documentElement.dataset['theme'] = theme;
     });
 
-    const savedTheme = getCookie('theme') ?? 'system';
-    themeSelect.value = reverseThemeMap[savedTheme as keyof typeof reverseThemeMap];
-    themeSelect.dispatchEvent(new Event('change'));
+    // themeSelect.addEventListener('change', () => {
+    //     const cookieValue = themeMap[themeSelect.value];
+    //     setCookie('theme', cookieValue);
+    //     document.documentElement.dataset['theme'] = cookieValue;
+    // });
+
+    // const savedTheme = getCookie('theme') ?? 'system';
+    // themeSelect.value = reverseThemeMap[savedTheme as keyof typeof reverseThemeMap];
+    // themeSelect.dispatchEvent(new Event('change'));
 });

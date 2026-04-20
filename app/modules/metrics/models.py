@@ -1,16 +1,23 @@
 from datetime import datetime
+from enum import StrEnum, auto
 
 from sqlalchemy import CheckConstraint, DateTime, Float, Index, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
-from app.modules.metrics.validation_constants import (
-    CALORIES_MINIMUM,
-    STEPS_MINIMUM,
-    WEIGHT_MINIMUM,
-)
 from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.serialization import APISerializable
+
+
+class WeightUnitsEnum(StrEnum):
+    LBS = auto()
+    KG = auto()
+
+
+# TODO: prob doesnt belong here?
+from typing import Literal
+
+MetricType = Literal["weight", "steps", "calories", "sleep_duration_minutes"]
 
 
 class DailyMetrics(Base, APISerializable):
@@ -19,11 +26,13 @@ class DailyMetrics(Base, APISerializable):
     __tablename__ = "daily_metrics"
 
     __table_args__ = (
-        CheckConstraint(f"weight > {WEIGHT_MINIMUM}", name="ck_weight_positive"),
-        CheckConstraint(f"steps >= {STEPS_MINIMUM}", name="ck_steps_non_negative"),
-        CheckConstraint(
-            f"calories >= {CALORIES_MINIMUM}", name="ck_calories_non_negative"
-        ),
+        CheckConstraint("weight > 0", name="weight_positive"),
+        CheckConstraint("steps > 0", name="steps_non_negative"),
+        CheckConstraint("calories > 0", name="calories_non_negative"),
+        # CheckConstraint(
+        #     "(weight IS NULL AND weight_units IS NULL) OR (weight IS NOT NULL AND weight_units IS NOT NULL)",
+        #     name="weight_requires_units"
+        # ),
         Index("ix_user_entry_datetime", "user_id", "entry_datetime"),
     )
 
@@ -31,17 +40,22 @@ class DailyMetrics(Base, APISerializable):
         DateTime(timezone=True), nullable=False
     )
 
-    weight: Mapped[float] = mapped_column(Float, nullable=True)
+    weight: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    steps: Mapped[int] = mapped_column(Integer, nullable=True)
+    # weight_units: Mapped[WeightUnitsEnum | None] = mapped_column(
+    #     SAEnum(WeightUnitsEnum, name="weight_units_enum", values_callable=lambda x: [e.value for e in x]),
+    #     nullable=True
+    # )
 
-    calories: Mapped[int] = mapped_column(Integer, nullable=True)
+    steps: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    wake_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    calories: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    sleep_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    wake_datetime: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    sleep_duration_minutes: Mapped[int] = mapped_column(Integer, nullable=True)
+    sleep_datetime: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    sleep_duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     @property
     def entry_datetime_local(self) -> datetime:

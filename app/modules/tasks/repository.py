@@ -11,9 +11,10 @@ if TYPE_CHECKING:
 
     from sqlalchemy.orm import Session
 
-from sqlalchemy.orm import joinedload
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
-from app.modules.tasks.models import PriorityEnum, Task
+from app.modules.tasks.models import PriorityEnum, Task, task_links
 from app.shared.repository.base import BaseRepository
 
 
@@ -25,48 +26,50 @@ class TaskRepository(BaseRepository[Task]):
         self,
         *,
         name: str,
-        is_frog: bool,
         priority: PriorityEnum | None,
         due_date: datetime | None = None,
+        pillar_ids: list[int] | None = None,
     ) -> Task:
         """Create & add a new task. Returns said task."""
         task = Task(
             user_id=self.user_id,
             name=name,
             priority=priority,
-            is_frog=is_frog,
             due_date=due_date,
         )
         return self.add(task)
 
     def get_all_regular_tasks(self) -> list[Task]:
-        stmt = self._user_select(Task).where(~Task.is_frog)
-        return list(self.session.execute(stmt).scalars().all())
-
-    def get_all_tasks_in_window(
-        self, start_utc: datetime, end_utc: datetime
-    ) -> list[Task]:
-        stmt = self._user_select(Task).where(
-            Task.due_date >= start_utc, Task.due_date < end_utc
-        )
+        # stmt = self._user_select(Task).where(~Task.is_frog)
+        stmt = self._user_select(Task).where(Task.priority != PriorityEnum.FROG)
         return list(self.session.execute(stmt).scalars().all())
 
     def get_all_tasks_with_links(self) -> list[Task]:
         """TODO: For tasks web visualization. Prune comments here"""
         stmt = (
             self._user_select(Task)
-            .options(joinedload(Task.supertasks), joinedload(Task.subtasks))
+            # .options(joinedload(Task.supertasks), joinedload(Task.subtasks)) #
+            .options(selectinload(Task.supertasks), selectinload(Task.subtasks)) # with selectinload
         )
         # .unique() = With joinedload + many-to-many, it can produce duplicate
         # rows (task is there once for each link it's part of)
         # unique just de-dupes these back into unique Task objs
-        return list(self.session.execute(stmt).scalars().unique().all())
+        return list(self.session.execute(stmt).scalars().all())
+
+    def get_all_links(self) -> list[tuple[int, int]]:
+        return [
+            (row.subtask_id, row.supertask_id) for row
+            in self.session.execute(select(task_links)).all()
+        ]
 
     def get_frog_task_in_window(
         self, start_utc: datetime, end_utc: datetime
     ) -> Task | None:
         """Return frog task in given window, or None."""
         stmt = self._user_select(Task).where(
-            Task.is_frog, Task.due_date >= start_utc, Task.due_date < end_utc
+            # Task.is_frog,
+            Task.priority == PriorityEnum.FROG,
+            Task.due_date >= start_utc,
+            Task.due_date < end_utc
         )
         return self.session.execute(stmt).scalars().first()

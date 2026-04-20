@@ -5,13 +5,17 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
+    from app.modules.metrics.models import DailyMetrics
+
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from app.api.responses import service_response
+from app.modules.metrics.models import MetricType, WeightUnitsEnum
 from app.modules.metrics.repository import DailyMetricsRepository
-from app.shared.utils import lbs_to_kg
+from app.modules.metrics.schemas import DailyMetricsCreate
 from app.shared.datetime_ import helpers as dth
+from app.shared.exceptions import ServiceError
+from app.shared.utils import lbs_to_kg
 
 
 class MetricsService:
@@ -26,8 +30,8 @@ class MetricsService:
         self.daily_metrics_repo = daily_metrics_repo
 
     def save_daily_metrics(
-        self, typed_data: dict[str, Any], entry_id: int | None
-    ) -> dict[str, Any]:
+        self, validated: DailyMetricsCreate, entry_id: int | None
+    ) -> tuple[DailyMetrics, bool]:
         """
         Save or update daily metrics entry with sleep/wake time handling.
 
@@ -35,90 +39,79 @@ class MetricsService:
         it would otherwise occur after wake_datetime (eg, sleep at 22:00, wake at 08:00). Calculates sleep_duration_minutes from
         the adjusted timestamps.
         """
-        entry_date: datetime = typed_data.pop("entry_date")
-
+        user_tz_obj = ZoneInfo(self.user_tz)
+        # entry_date: datetime = typed_data.pop("entry_date")
         entry_datetime = datetime(
-            entry_date.year, entry_date.month, entry_date.day,
+            validated.entry_date.year, validated.entry_date.month, validated.entry_date.day,
             0, 0, 0,
-            tzinfo=ZoneInfo(self.user_tz)
+            tzinfo=user_tz_obj
         )
-        typed_data["entry_datetime"] = entry_datetime
+        # typed_data["entry_datetime"] = entry_datetime
 
-        for key in ("wake_datetime", "sleep_datetime"):
-            if typed_data.get(key):
-                typed_data[key] = typed_data[key].replace(tzinfo=ZoneInfo(self.user_tz))
-
-        wake = typed_data.get("wake_datetime")
-        sleep = typed_data.get("sleep_datetime")
-
-        if sleep and wake:
-            sleep_duration = typed_data["wake_datetime"] - typed_data["sleep_datetime"]
-            typed_data["sleep_duration_minutes"] = int(
-                sleep_duration.total_seconds() / 60
-            )
+        # Making sleep/wake tz-aware, if they exist in validated
+        wake = validated.wake_datetime.replace(tzinfo=user_tz_obj) if validated.wake_datetime else None
+        sleep = validated.sleep_datetime.replace(tzinfo=user_tz_obj) if validated.sleep_datetime else None
+        sleep_duration_minutes = int((wake - sleep).total_seconds() / 60) if sleep and wake else None
+        # If both sleep and wake, find sleep duration
+        # # sleep_duration_minutes = None
+        # if sleep and wake:
+        #     sleep_duration_minutes = int((wake - sleep).total_seconds() / 60)
 
         # Always store weight in kg
-        if "weight" in typed_data:
-            if "weight_units" not in typed_data:
-                return service_response(
-                    success=False,
-                    message="Error converting weight: Missing weight_units",
-                )
-            typed_data["weight"] = self._convert_weight(
-                typed_data["weight"], typed_data.pop("weight_units")
+        weight = validated.weight
+        if "weight" in validated.model_fields_set and weight is not None and validated.weight_units is WeightUnitsEnum.LBS:
+            weight = lbs_to_kg(weight)
+
+        # Find or create entry
+        start_utc, end_utc = dth.day_range_utc(entry_datetime, self.user_tz)
+        entry = (self.daily_metrics_repo.get_by_id(entry_id) if entry_id
+                else self.daily_metrics_repo.query_one(start=start_utc, end=end_utc))
+
+        is_new = entry is None
+        if is_new:
+            entry = self.daily_metrics_repo.create_daily_metrics(
+                entry_datetime=entry_datetime,
+                weight=weight,
+                steps=validated.steps,
+                wake_datetime=validated.wake_datetime,
+                sleep_datetime=validated.sleep_datetime,
+                sleep_duration_minutes=sleep_duration_minutes,
+                calories=validated.calories,
             )
+            self.session.flush()
+            return entry, is_new
 
-        # Get UTC window for duplicate checking plus grab entry to compare against, if any
-        start_utc, end_utc = dth.day_range_utc(
-            typed_data["entry_datetime"], self.user_tz
-        )
-        existing_metrics_entry = self.daily_metrics_repo.get_daily_metrics_in_window(
-            start_utc, end_utc
-        )
+        if not entry:
+            raise ServiceError("Error: no entry found")
+        # Update only sent fields
+        entry.entry_datetime = entry_datetime
+        entry.wake_datetime = wake
+        entry.sleep_datetime = sleep
+        entry.sleep_duration_minutes = sleep_duration_minutes
 
-        # UPDATE
-        if entry_id is not None:
-            entry = self.daily_metrics_repo.get_by_id(entry_id)
-            if not entry:
-                return service_response(
-                    success=False, message="Daily metrics entry not found"
-                )
+        for field in validated.model_fields_set:
+            if field in {"entry_date", "weight_units", "wake_datetime", "sleep_datetime"}:
+                continue  # handled above
+            if field == "weight":
+                entry.weight = weight  # use converted value
+                continue
+            setattr(entry, field, getattr(validated, field))
 
-            if existing_metrics_entry and existing_metrics_entry.id != entry_id:
-                return service_response(
-                    success=False,
-                    message="Error: An entry already exists for this date",
-                )
+        return entry, is_new
 
-            self._update_fields(entry, typed_data)
 
-            return service_response(
-                success=True,
-                message="Daily metrics entry updated",
-                data={"entry": entry},
-            )
 
-        # CREATE
-        if existing_metrics_entry:
-            self._update_fields(existing_metrics_entry, typed_data)
-            entry = existing_metrics_entry
-        else:
-            entry = self.daily_metrics_repo.create_daily_metrics(**typed_data)
-
-        return service_response(
-            success=True, message="Daily metrics entry saved", data={"entry": entry}
-        )
-
-    def _update_fields(self, entry: Any, typed_data: dict[str, Any]) -> Any:
-        for field, value in typed_data.items():
-            setattr(entry, field, value)
-        return entry
-
-    def _convert_weight(self, weight: float, units: str) -> float:
-        """Always store master units in kg."""
-        if units == "lbs":
-            return lbs_to_kg(weight)
-        return weight
+    def get_daily_metrics(self, *, start: datetime | None = None, end: datetime | None = None, metric: MetricType | None = None, limit: int | None = None) -> list[dict[str, Any]]:
+        entries = self.daily_metrics_repo.query(start=start, end=end, metric=metric, limit=limit)
+        if metric:
+            return [
+                {
+                    "date": e.entry_datetime.isoformat(timespec="seconds"),
+                    "value": getattr(e, metric)
+                }
+                for e in entries
+            ]
+        return [e.to_api_dict() for e in entries]
 
 
 def create_metrics_service(

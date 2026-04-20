@@ -1,18 +1,46 @@
-import { userStore } from './services/userStore.js';
+import { userStore } from './services/userStore';
 
+
+// For UTC now -> backend primarily
 export const getJSInstant = (): string =>
     new Date().toISOString(); // Always UTC "..Z"
 
 
-function safeCreateDate(isoString: string): Date {
-    if (!isTZAwareISO(isoString)) {
-        throw new Error(`Invalid timezone-aware ISO string: ${isoString}`);
+export function getUserTodayDate(): string {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: userStore.data.timezone
+    }).format(new Date());
+}
+
+
+// UTC ISO string -> user's date - for comparisons
+export function isoToUserDate(iso: string): string {
+    return formatToUserTimeString(new Date(iso), {
+        year: 'numeric', month: '2-digit', day: '2-digit'
+    });
+}
+
+// UTC ISO string -> display "Mar 18"
+export function displayDate(iso: string) {
+    return formatToUserTimeString(new Date(iso), {
+        month: 'short', day: 'numeric'
+    });
+}
+
+// UTC ISO string -> display "Mar 18, 3:45 PM"
+export function displayDateTime(iso: string): string {
+    return formatToUserTimeString(new Date(iso), {
+        month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+
+function fromISO(iso: string): Date {
+    if (!iso.endsWith('Z') && !iso.match(/[+-]\d{2}:\d{2}$/)) {
+        throw new Error(`Invalid ISO string (missing timezone): ${iso}`);
     }
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) {
-        throw new Error(`Invalid date after parsing: ${isoString}`);
-    }
-    return date;
+    return new Date(iso);
 }
 
 /**
@@ -29,25 +57,6 @@ function isTZAwareISO(isoString: string): boolean {
     return hasUTCIndicator.test(isoString) || hasExplicitOffset.test(isoString);
 }
 
-export function isoToTimeInput(isoString: string): string {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) {
-        throw new Error(`isoToTimeInput: Invalid ISO date string "${isoString}"`)
-    }
-    return formatToUserTimeString(date);
-}
-
-export function isoToDateInput(isoString: string): string {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) {
-        throw new Error(`isoToDateInput: Invalid ISO date string "${isoString}"`)
-    }
-    return formatToUserTimeString(date, {year: 'numeric', month: '2-digit', day: '2-digit'});
-}
-
-export function formatTimeString(date: Date): string {
-    return formatToUserTimeString(date);
-}
 
 /**
  * Formats a Date object to be in the current user's timezone.
@@ -69,3 +78,4 @@ export function formatToUserTimeString(
     });
     return formatter.format(date); // eg, "03:45"
 }
+

@@ -86,8 +86,4 @@ const numbers = [
         'age': 26
     }
 ];
-const sortedNumbers = _bubbleSort(numbers, 'name');
-console.log("Sorted:")
-console.log(sortedNumbers);  // [1, 2, 5, 8, 9]
-console.log("Original:")
-console.log(numbers);        // [5, 2, 8, 1, 9] - original unchanged!
+const _sortedNumbers = _bubbleSort(numbers, 'name');

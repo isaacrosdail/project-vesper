@@ -2,35 +2,184 @@
 
 {% block title %}Tasks{% endblock %}
 
+
+{% block sidebar_left %}
+<div class="sidebar-container">
+    <div class="sidebar-toggle" id="sidebar-toggle" data-tip="Open/close sidebar">
+        <svg class="icon"><use href="#icon-sidebar"></use></svg>
+    </div>
+    <aside class="left-sidebar">
+        <div class="task-sidebar">
+            {#{ ui.plus_btn_with_label('tasks-entry-dashboard-btn', label='Add Task') }#}
+            {# TODO: Temp location, should pivot later to a "List | Web" view toggle in tasks dashboard itself #}
+            <a class="btn btn-primary" href="{{ url_for('main.tasks_web')}}">Tasks Web</a>
+            <button class="btn btn-primary--gradient1 sidebar-option" id="tasks-entry-dashboard-btn">
+                <svg class="icon"><use href="#icon-plus"></use></svg>
+                <span class="sidebar-label">Add Task</span>
+            </button>
+            <button class="sidebar-option" popovertarget="search-popover">
+                <svg class="icon"><use href="#icon-search"></use></svg>
+                <span class="sidebar-label">Search</span>
+            </button>
+            <button class="sidebar-option filter-btn" data-filter="all" data-tip="Show all">
+                <svg class="icon "><use href="#icon-calendar"></use></svg>
+                <span class="sidebar-label">All</span>
+            </button>
+            <button class="sidebar-option filter-btn" data-filter="today">
+                <svg class="icon" data-urgent><use href="#icon-calendar"></use></svg>
+                <span class="sidebar-label">Today</span>
+            </button>
+            <button class="sidebar-option filter-btn" data-filter="upcoming">
+                <svg class="icon calendar-warning"><use href="#icon-calendar"></use></svg>
+                <span class="sidebar-label">Upcoming</span>
+            </button>
+            <button class="sidebar-option filter-btn" data-action="cycle-priority">
+                <svg class="icon"><use href="#icon-funnel"></use></svg>
+                <span class="sidebar-label">Filter by priority</span>
+            </button>
+            <div class="sidebar-option">
+                <input type="checkbox" class="toggle-completed" autocomplete="off">
+                <span class="sidebar-label">Show completed tasks</span>
+            </div>
+    
+            <!-- <button class="sidebar-option" popovertarget="task-details-popover">TEST Details Popover</button> -->
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
 {% block content %}
 
-{{ forms.task_entry_modal() }}
+{{ forms.task_entry_modal(pillars=pillars) }}
+
+<div popover id="search-popover" class="search-popover popover">
+    <input type="search" class="task-search" placeholder="Search for a task">
+    <div class="results-container"></div>
+</div>
+
+<div popover id="task-details-popover" class="task-details-popover popover">
+    <div class="task-details__header">
+        <input type="checkbox">
+        <h2 class="name task-details__name"></h2>
+    </div>
+
+    <div class="properties task-details__props">
+        <div class="task-details__prop due-date-row">
+            <svg class="label icon"><use href="#icon-calendar"></use></svg>
+            <p class="value due_date"></p>
+        </div>
+        <div class="task-details__prop priority-row">
+            <svg class="label icon"><use class="priority-badge" href="#badge-priority-frog"></use></svg>
+            <p class="value priority"></p>
+        </div>
+        <div class="task-details__prop pillars-row">
+            <svg class="label icon"><use href="#icon-pillars"></use></svg>
+            <p class="value pillars"></p>
+        </div>
+    </div>
+
+    <div class="subtasks-container">
+    </div>
+
+    <div class="task-details__footer">
+        <div class="task-details__created">
+            <span class="secondary">Created </span>
+            <span class="created_at secondary"></span>
+        </div>
+        <div class="task-details__actions">
+            <button class="btn btn-ghost task-edit-btn">Edit</button>
+            <button class="btn btn-destructive task-delete-btn">{{ ui.delete_btn() }}</button>
+        </div>
+    </div>
+</div>
 
 <div class="progress">
 {{ ui.stats_circle("Overdue (Last 7 days)", overdue_stat.rate, overdue_stat.overdue, overdue_stat.total) }}
 {{ ui.stats_circle("Frog Completion (Last 7 days)", frog_stat.rate, frog_stat.done, frog_stat.total) }}
 </div>
 
-<div id="tasks-dashboard-table" class="card-dashboard">
-    <div class="card-title">
-        <h2>Tasks</h2>
-        {{ ui.plus_btn('tasks-entry-dashboard-btn') }}
+<!-- For the generation of subtask list in task details popover view -->
+<template id="subtask-list-template">
+    <div class="subtask-group">
+        <input type="checkbox" class="subtask-checkbox">
+        <div class="subtask-name"></div>
     </div>
-    {% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'tasks', tasks_params, sortable=True) %}
-        <td class="{{ headers[0].priority }}" data-item-id="{{ item.id }}" data-module="tasks" data-subtype="tasks" data-field="name"
-            data-tip="Double-click to edit task name.">
-            <span class="name-span editable-cell">
-                {{ item.name }}
+</template>
+
+<!-- Each task entry in dashboard list view -->
+<template id="task-li-template">
+    <li class="task" data-id="">
+        <div class="task-list-actions-gutter">
+            <button>B1</button>
+            <button class="subtask-toggle">B2</button>
+        </div>
+        <div class="task-main">
+            <input type="checkbox" class="task-toggle">
+            <span class="task-name"></span>
+            <span class="task-priority">
+                <svg class="icon" data-priority=""><use class="priority-use" href=""></use></svg>
             </span>
-            <span class="btn-lg status-span {% if item.is_done %}is-done{% endif %}">
-                {{ ui.checkmark_svg() }}
+        </div>
+        <div class="task-meta">
+            <span class="meta-subtasks">
+                <span class="meta-subtasks-icon">
+                    <!-- TODO: Obv update the icon here -->
+                    <svg class="icon"><use href="#icon-calendar"></use></svg>
+                </span>
+                <span class="meta-subtasks-text">0/1</span>
             </span>
-        </td>
-        <td class="{{ headers[1].priority }}">{{ item.priority_label }}</td>
-        <td class="{{ headers[2].priority }}">{{ item.frog_label }} </td>
-        <td class="{{ headers[3].priority }} text-right">{{ item.due_label }}</td>
-    {% endcall %}
-</div>
+            <span class="task-due-date">
+                <span class="meta-icon">
+                    <svg class="icon"><use href="#icon-calendar"></use></svg>
+                </span>
+                <span class="due_date"></span>
+            </span>
+
+            <span class="task-pillars"></span>
+        </div>
+        <div class="task-subtasks" hidden>
+        </div>
+    </li>
+</template>
+
+<section id="tasks-dashboard-list-view">
+    <ul class="tasks-list">
+        {#% for t in tasks_raw %}
+        <li class="task" data-id="{{ t.id }}">
+            <div class="task-main">
+                <input type="checkbox" class="task-toggle"
+                    {% if t.is_done %}checked{% endif %}
+                    >
+                <span class="task-name">{{ t.name }}</span>
+                <span class="task-priority">
+                    <svg class="icon" data-priority="{{ t.priority }}"><use href="#badge-priority-{{ t.priority }}"></use></svg>
+                </span>
+            </div>
+            <div class="task-meta">
+                {% if t.pillars %}
+                <span class="task-pillars">hhhh</span>
+                {% endif %}
+                <span class="task-due-date">
+                   {% if t.due_date_local %}
+                        <span class="meta-icon">
+                            <svg class="icon"><use class="due_date-use" href="#icon-calendar"></use></svg>
+                        </span>
+                        {{ t.due_date_local.strftime('%b %d, %Y') }}
+                    {% endif %}
+                </span>
+
+                {% if t.pillars %}
+                    <span class="task-pillars">
+                        {% for pillar in t.pillars %}
+                            <span>{{ pillar.name }}</span>
+                        {% endfor %}
+                    </span>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %#}
+    </ul>
+</section>
 
 {% endblock %}
 

@@ -19,11 +19,14 @@ from app._infra.database import db_session, init_db
 from app.config import get_config
 from app.extensions import _setup_extensions
 from app.shared.debug import setup_dev_debugging
+from app.shared.serialization import CustomJSONProvider
 from app.shared.setup_logging import setup_logging
 
 
 def has_dev_tools() -> bool:
     """Dev tools visible to anyone in dev, owner-only in prod."""
+    if current_app.testing:
+        return False
     if current_app.config["APP_ENV"] == "dev":
         return True
 
@@ -38,10 +41,11 @@ def create_app(config_name: str | None = None) -> Flask:
     """Central app factory. Loads configs, extensions, register blueprints, etc."""
 
     app = Flask(__name__, template_folder="_templates")
+    app.json = CustomJSONProvider(app) # TODO: Name is a WIP obv, rename this
 
     _apply_config(app, config_name)
     setup_logging(app)  # Must read logging level after being set by apply_config
-    if app.config.get('DEBUG'):
+    if app.config.get("DEBUG"):
         setup_dev_debugging(app)
     _setup_extensions(app)
     _setup_request_hooks(app)
@@ -152,7 +156,7 @@ def _setup_request_hooks(app: Flask) -> None:
             fsession["csrf_token"] = secrets.token_urlsafe(32)
         g.csrf_token = fsession["csrf_token"]
 
-        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and not app.testing:
             form_token = (
                 request.form.get("csrf_token")
                 or (request.get_json(silent=True) or {}).get("csrf_token")  # silent=True for accepting null-bodied apiRequests
@@ -175,8 +179,7 @@ def _setup_request_hooks(app: Flask) -> None:
     # Apply CSP headers
     @app.after_request
     def apply_csp(response: Response) -> Response:
-        from flask import request
-        if request.endpoint == "devtools.style_reference" or request.endpoint == "static":
+        if request.endpoint in {"devtools.style_reference", "static"}:
             return response
 
         nonce = getattr(g, "nonce", "")

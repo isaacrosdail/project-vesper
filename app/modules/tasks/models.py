@@ -1,26 +1,31 @@
 """
 Database models for the Tasks module.
 """
-
 from datetime import datetime
+from enum import StrEnum, auto
 from typing import ClassVar
 
 from sqlalchemy import (
-    Boolean,
     CheckConstraint,
+    Column,
     DateTime,
+    ForeignKey,
+    Integer,
     String,
+    Index,
+    Table,
     UniqueConstraint,
 )
-from sqlalchemy import Table, Column, Integer, ForeignKey, Enum as SAEnum
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base, CustomBaseTaskMixin
-from app.modules.tasks.validation_constants import TASK_NAME_MAX_LENGTH
 from app.shared.datetime_.helpers import convert_to_timezone
-from app.shared.models import task_tags
+from app.shared.models import task_pillars, task_tags
 from app.shared.serialization import APISerializable
-from app.shared.type_defs import OrderedEnum
+
+TASK_NAME_MAX_LENGTH = 150
 
 
 # Association table for task_links
@@ -33,39 +38,37 @@ task_links = Table(
     Column("supertask_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True)
 )
 
-class PriorityEnum(OrderedEnum):
-    LOW = "LOW"
-    MEDIUM = "MEDIUM"
-    HIGH = "HIGH"
+class PriorityEnum(StrEnum):
+    LOW =auto()
+    MEDIUM = auto()
+    HIGH = auto()
+    FROG = auto()
 
-
-# NOTE: Hacky, but lets us inherit OrderedEnum and define custom sort order
-PriorityEnum.sort_order = ["HIGH", "MEDIUM", "LOW"]  # type: ignore[attr-defined]
+    def __lt__(self, other: str) -> bool:
+        order = list(PriorityEnum)
+        return order.index(self) < order.index(PriorityEnum(other))
 
 
 class Task(Base, CustomBaseTaskMixin, APISerializable):
     __api_exclude__: ClassVar[list[str]] = []
+    __api_properties__: ClassVar[list[str]] = ["is_done"]
 
     __table_args__ = (
         CheckConstraint(
-            "NOT is_frog OR due_date IS NOT NULL", name="ck_task_frog_requires_due_date"
-        ),
-        CheckConstraint(
-            "(is_frog = true AND priority IS NULL) OR (NOT is_frog AND priority IS NOT NULL)",
-            name="ck_frog_priority_mutually_exclusive",
+            "priority != 'frog' OR due_date IS NOT NULL", name="frog_requires_due_date"
         ),
         UniqueConstraint("user_id", "name", name="uq_user_task_name"),
+        Index("ix_tasks_user_due_date", "user_id", "due_date"),
     )
 
     name: Mapped[str] = mapped_column(String(TASK_NAME_MAX_LENGTH), nullable=False)
 
     priority: Mapped[PriorityEnum] = mapped_column(
-        SAEnum(PriorityEnum, name="priority_enum"), nullable=True
+        SAEnum(PriorityEnum, name="priority_enum", values_callable=lambda x: [e.value for e in x]), # db stores lowercase too
+        nullable=False # now false since we made is_frog not a thing anymore -> thats now a priority
     )
 
-    is_frog: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_done: Mapped[bool] = mapped_column(Boolean, default=False)
-    due_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Facilitates relationships to multiple super/subtasks
     supertasks = relationship(
@@ -73,7 +76,7 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
         secondary=task_links,
         primaryjoin=lambda: Task.id == task_links.c.subtask_id,
         secondaryjoin=lambda: Task.id == task_links.c.supertask_id,
-        back_populates="subtasks"
+        back_populates="subtasks",
     )
 
     subtasks = relationship(
@@ -81,8 +84,21 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
         secondary=task_links,
         primaryjoin=lambda: Task.id == task_links.c.supertask_id,
         secondaryjoin=lambda: Task.id == task_links.c.subtask_id,
-        back_populates="supertasks"
+        back_populates="supertasks",
     )
+
+    pillars = relationship("Pillar", secondary=task_pillars, back_populates="tasks", lazy="selectin")
+
+    # Works as a Python property on instances AND as an SQL expression in queries:
+    # task.is_done rets True/False, and Task.is_done == True in a .where() generates completed_at IS NOT NULL in SQL
+    # can't desync
+    @hybrid_property
+    def is_done(self) -> bool:
+        return self.completed_at is not None
+
+    @property
+    def is_frog(self) -> bool:
+        return self.priority is PriorityEnum.FROG
 
     @property
     def due_date_local(self) -> datetime | None:

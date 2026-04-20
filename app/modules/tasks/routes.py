@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -8,9 +10,8 @@ from flask_login import current_user
 
 from app.modules.tasks.service import create_tasks_service
 from app.modules.tasks.viewmodels import TaskPresenter, TaskViewModel
-from app.shared.utils import sort_by_field
 from app.shared.decorators import login_plus_session
-from app.shared.utils import get_table_params
+from app.shared.models import Pillar
 
 tasks_bp = Blueprint(
     "tasks", __name__, template_folder="templates", url_prefix="/tasks"
@@ -19,14 +20,13 @@ tasks_bp = Blueprint(
 
 @tasks_bp.get("/dashboard")
 @login_plus_session
-def dashboard(session: "Session") -> tuple[str, int]:
-    tasks_params = get_table_params("tasks", "due_date")
-
+def dashboard(session: Session) -> tuple[str, int]:
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone
     )
+    # TODO: Since we access pillar.name, check to ensure we eager-load pillars
+    # selectinload(Task.pillars) in repo method
     tasks = tasks_service.task_repo.get_all()
-    tasks = sort_by_field(tasks, tasks_params["sort_by"], tasks_params["order"])
 
     viewmodel = [TaskViewModel(t, current_user.timezone) for t in tasks]
 
@@ -34,11 +34,15 @@ def dashboard(session: "Session") -> tuple[str, int]:
     overdue_stat = tasks_service.calc_overdue_rate(days=7)
     frog_stat = tasks_service.calc_frog_completion_rate(days=7)
 
+    # TODO: Pillars
+    pillars = session.query(Pillar).filter_by(user_id=current_user.id).all()
+
     ctx = {
-        "tasks_params": tasks_params,
         "task_headers": TaskPresenter.build_columns(),
         "tasks": viewmodel,
+        "tasks_raw": tasks,
         "overdue_stat": overdue_stat,
         "frog_stat": frog_stat,
+        "pillars": pillars,
     }
     return render_template("tasks/dashboard.html", **ctx), 200

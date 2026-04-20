@@ -23,6 +23,7 @@ from app.modules.habits.models import (
     LeetCodeRecord,
     StatusEnum,
 )
+from app.shared.models import Pillar
 from app.shared.repository.base import BaseRepository
 
 
@@ -34,16 +35,23 @@ class HabitRepository(BaseRepository[Habit]):
         self,
         name: str,
         status: StatusEnum | None,
-        promotion_threshold: float | None,
         target_frequency: int,
+        pillar_ids: list[int] | None = None
     ) -> Habit:
         habit = Habit(
             user_id=self.user_id,
             name=name,
             status=status,
-            promotion_threshold=promotion_threshold,
             target_frequency=target_frequency,
         )
+        # TODO: fixup
+        if pillar_ids:
+            stmt = select(Pillar).where(
+                Pillar.id.in_(pillar_ids),
+                Pillar.user_id == self.user_id
+            )
+            result = list(self.session.execute(stmt).scalars().all())
+            habit.pillars = result
         return self.add(habit)
 
     def get_all_habits_and_tags(self) -> list[Habit]:
@@ -70,10 +78,12 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
         super().__init__(session, user_id, model_cls=HabitCompletion)
 
     def create_habit_completion(
-        self, habit_id: int, created_at: datetime
+        self, habit_id: int, completed_at: datetime
     ) -> HabitCompletion:
         habit_completion = HabitCompletion(
-            user_id=self.user_id, habit_id=habit_id, created_at=created_at
+            user_id=self.user_id,
+            habit_id=habit_id,
+            completed_at=completed_at
         )
         return self.add(habit_completion)
 
@@ -84,7 +94,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             HabitCompletion.habit_id == habit_id
         )
         if order_desc:
-            stmt = stmt.order_by(HabitCompletion.created_at.desc())
+            stmt = stmt.order_by(HabitCompletion.completed_at.desc())
         return list(self.session.execute(stmt).scalars().all())
 
     def get_habit_completion_in_window(
@@ -96,21 +106,22 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             .join(Habit, Habit.id == HabitCompletion.habit_id)
             .where(
                 HabitCompletion.habit_id == habit_id,
-                HabitCompletion.created_at >= start_utc,
-                HabitCompletion.created_at < end_utc,
+                HabitCompletion.completed_at >= start_utc,
+                HabitCompletion.completed_at < end_utc,
                 Habit.user_id == self.user_id,
             )
         )
         return self.session.execute(stmt).scalars().first()
-    
+
     def get_completion_counts_in_window(self, start_utc: datetime, end_utc: datetime) -> list[dict[str, Any]]:
         stmt = (
-                select(func.date(HabitCompletion.created_at).label("date"), func.count().label("count"))
+                select(func.date(HabitCompletion.completed_at).label("date"), func.count().label("count"))
                 .where(
                     HabitCompletion.user_id == self.user_id,
-                    HabitCompletion.created_at.between(start_utc, end_utc)
+                    HabitCompletion.completed_at >= start_utc,
+                    HabitCompletion.completed_at < end_utc
                 )
-                .group_by(func.date(HabitCompletion.created_at))
+                .group_by(func.date(HabitCompletion.completed_at))
             )
         results = self.session.execute(stmt).all()
         return [{ "date": str(row.date), "count": row.count } for row in results]
@@ -125,24 +136,29 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             .where(
                 Habit.id == habit_id,
                 Habit.user_id == self.user_id,
-                HabitCompletion.created_at >= start_utc,
-                HabitCompletion.created_at < end_utc,
+                HabitCompletion.completed_at >= start_utc,
+                HabitCompletion.completed_at < end_utc,
             )
         )
         return list(self.session.execute(stmt).scalars().all())
 
     ## ALL habits in general
+    ## TODO: Even necessary? or should use the generic in window now?
     def get_all_completions_in_window(
         self, start_utc: datetime, end_utc: datetime
     ) -> list[HabitCompletion]:
-        stmt = (
-            select(HabitCompletion)
-            .join(Habit, Habit.id == HabitCompletion.habit_id)
-            .where(
-                Habit.user_id == self.user_id,
-                HabitCompletion.created_at >= start_utc,
-                HabitCompletion.created_at < end_utc,
-            )
+        # stmt = (
+        #     select(HabitCompletion)
+        #     .join(Habit, Habit.id == HabitCompletion.habit_id) # TODO: stupid join?
+        #     .where(
+        #         Habit.user_id == self.user_id,
+        #         HabitCompletion.created_at >= start_utc,
+        #         HabitCompletion.created_at < end_utc,
+        #     )
+        # )
+        stmt = self._user_select(HabitCompletion).where(
+            HabitCompletion.completed_at >= start_utc,
+            HabitCompletion.completed_at < end_utc,
         )
         return list(self.session.execute(stmt).scalars().all())
 
@@ -162,8 +178,8 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             .join(Habit)
             .where(
                 Habit.user_id == self.user_id,
-                HabitCompletion.created_at >= start_utc,
-                HabitCompletion.created_at < end_utc,
+                HabitCompletion.completed_at >= start_utc,
+                HabitCompletion.completed_at < end_utc,
             )
             .group_by(Habit.name, Habit.target_frequency)
             .order_by(func.count(HabitCompletion.id).desc())
@@ -173,6 +189,22 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             {"name": row.name, "count": row.completion_count, "target_frequency": row.target_frequency }
             for row in result
         ]  # unwrap each SQLAlchemy Row into a list of dicts
+
+    def thing(self, habit_id: int, start_utc: datetime, end_utc: datetime) -> list[tuple[int, int]]:
+        # filter by habit_id and date range, group by (week, count)
+        stmt = (
+            select(
+                func.extract("week", HabitCompletion.completed_at),
+                func.count()
+            )
+            .where(
+                HabitCompletion.habit_id == habit_id,
+                HabitCompletion.completed_at >= start_utc,
+                HabitCompletion.completed_at < end_utc
+            )
+            .group_by(func.extract("week", HabitCompletion.completed_at))
+        )
+        return list(self.session.execute(stmt).all())
 
 
 class LeetCodeRecordRepository(BaseRepository[LeetCodeRecord]):
@@ -191,16 +223,8 @@ class LeetCodeRecordRepository(BaseRepository[LeetCodeRecord]):
             user_id=self.user_id,
             leetcode_id=leetcode_id,
             title=title,
-            difficulty=difficulty,  # Note: can pass the enum member itself, no need for .value
+            difficulty=difficulty,
             language=language,
             status=status,
         )
         return self.add(new_record)
-
-    def get_all_leetcoderecords_in_window(
-        self, start_utc: datetime, end_utc: datetime
-    ) -> list[LeetCodeRecord]:
-        stmt = self._user_select(LeetCodeRecord).where(
-            LeetCodeRecord.created_at >= start_utc, LeetCodeRecord.created_at < end_utc
-        )
-        return list(self.session.execute(stmt).scalars().all())

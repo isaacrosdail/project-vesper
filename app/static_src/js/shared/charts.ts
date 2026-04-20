@@ -21,8 +21,11 @@ export function getChartDimensions(
 ): ChartDimensions {
     const container = document.querySelector(containerSelector) as HTMLElement;
 
-    const width = container.clientWidth || 400;
-    const height = container.clientHeight || 400;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    if (width === 0 || height === 0) {
+        throw new Error('getChartDimensions: container height/width of 0')
+    }
 
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -54,7 +57,7 @@ export function hourMinsDisplay(total_minutes: number) {
     return str
 }
 
-export function applyXAxisRotation(axis: d3.Selection<SVGGElement, unknown, HTMLElement, any>): void {
+export function applyXAxisRotation(axis: d3.Selection<SVGGElement, unknown, HTMLElement, unknown>): void {
     axis.selectAll("text")
         .attr("transform", "rotate(-45)")
         .attr("text-anchor", "end")
@@ -77,7 +80,7 @@ export function getTickValues<T>(data: T[], range: number, xScale: d3.ScaleTime<
     return tickValues;
 }
 
-export function showEmptyChartMessage(container, message: string, width: number, height: number): void {
+export function showEmptyChartMessage(container: HTMLElement, message: string, width: number, height: number): void {
     container.selectAll("text.empty-message")
         .data([1])
         .join("text")
@@ -86,4 +89,28 @@ export function showEmptyChartMessage(container, message: string, width: number,
         .attr("x", width/2)
         .attr("y", height/2)
         .text(message)
+}
+
+export function initChartRangeButtons(
+    chartState: { range: number },
+    onRangeChange: () => Promise<void>,
+    defaultRange = 7
+): void {
+    const defaultBtn = document.querySelector(`[data-range="${defaultRange}"]`)
+    defaultBtn?.classList.add('active')
+
+    document.addEventListener('click', async (e) => {
+        const target = e.target as HTMLElement;
+        if (!target.matches('.chart-range')) {
+            return;
+        }
+
+        chartState.range = parseInt(target.dataset['range']!, 10)
+        document.querySelectorAll('.chart-range').forEach(btn => {
+            btn.classList.remove('active')
+        });
+        target.classList.add('active')
+
+        await onRangeChange();
+    })
 }

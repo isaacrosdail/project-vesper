@@ -3,11 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
     from app.modules.metrics.models import DailyMetrics
 
-
+from app.modules.auth.models import UnitSystemEnum
+from app.shared.utils import kg_to_lbs
 from app.shared.view_mixins import BasePresenter, BaseViewModel
 
 
@@ -33,29 +32,31 @@ class DailyMetricPresenter(BasePresenter):
 
 
 class DailyMetricViewModel(BaseViewModel):
-    entry_datetime: datetime
-    weight: int
-    steps: int
-    wake_datetime_local: datetime
-    sleep_datetime_local: datetime
-    calories: int | None
-    subtype: str
+    __slots__ = (
+        "calories",
+        "entry_datetime_local",
+        "id",
+        "sleep_datetime_local",
+        "sleep_duration_minutes",
+        "steps",
+        "subtype",
+        "units",
+        "wake_datetime_local",
+        "weight",
+    )
 
-    def __init__(self, metric: DailyMetrics, tz: str) -> None:
-        fields = {
-            "id",
-            "weight",
-            "steps",
-            "wake_datetime_local",
-            "sleep_datetime_local",
-            "calories",
-            "subtype",
-        }
-        for name in fields:
-            setattr(self, name, getattr(metric, name))
-
+    def __init__(self, metric: DailyMetrics, tz: str, units: UnitSystemEnum) -> None:
+        self.weight = metric.weight
+        self.steps = metric.steps
+        self.wake_datetime_local = metric.wake_datetime_local
+        self.sleep_datetime_local = metric.sleep_datetime_local
+        self.sleep_duration_minutes = metric.sleep_duration_minutes
+        self.calories = metric.calories
+        self.subtype = metric.subtype
         self.created_at_local = metric.entry_datetime_local
+        self.id = metric.id
         self._tz = tz
+        self.units = units
 
     @property
     def entry_datetime_label(self) -> str:
@@ -63,7 +64,12 @@ class DailyMetricViewModel(BaseViewModel):
 
     @property
     def weight_label(self) -> str:
-        return f"{self.weight:.2f}" if self.weight else "--"
+        if not self.weight:
+            return "--"
+        display = kg_to_lbs(self.weight) if self.units is UnitSystemEnum.IMPERIAL else self.weight
+        suffix = "lbs" if self.units is UnitSystemEnum.IMPERIAL else "kg"
+        return f"{display:.1f} {suffix}"
+
 
     @property
     def steps_label(self) -> str:

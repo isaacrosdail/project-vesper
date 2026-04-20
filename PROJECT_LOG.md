@@ -19,6 +19,40 @@
 - Whitelisted all local IPs for access from laptop/etc
 
 
+## Mon 4-20-26
+TODO: Finish lex string implementation, then polish buttons B1/B2.
+    - See "Session: Apr 19" bookmark group in Firefox for the tabs we had open
+
+## Sun 4-16-26
+1. Implemented gutter for tasks list's drag-to-reorder & toggle subtask list view buttons.
+    - Fixed gutter width, toggle subtask button is removed via JS if no subtasks for given task during population
+2. Task position in tasks list view:
+    - We'd like to implement drag-to-reorder via the HTML Drag API. For that, tasks need a position/key thing.
+    - Most naive solution is a simple int value representing position of a task, but this breaks
+    down quickly: We'd need to update/re-index up to N-1 tasks/positions EVERY time we reorder.
+    - Fractional indexing tries to solve this by instead assigning float values with "gaps":
+    A - 10
+    B - 20
+    C - 30
+    This way, if we'd reorder C to be between A and B, we don't need to touch A/B's indexes at all - we just find the "midpoint" of them, and assign that to C: 15.
+    And so on. Since they're floats, we can "extend" into the decimal places if need be as it goes on.
+
+    - A more robust solution, though, is using lex strings over floats:
+        - Floats have finite precision: In JS, numbers give you ~53bits of mantissa. If we keep
+        inserting at the same gap repeatedly, we halve the gap each time. After ~53 inserts in the same spot, we exhaust precision and need a rebalance job.
+        - With lex strings, we have infinite precision: "m" is just "m", and "mm", etc. We just keep subdividing, never needing rebalancing.
+
+## Tues 3-24-26
+1. Add lazy=selectin, lazy=joined, lazy=raise options to several relationships in groceries (WIP)
+2. Fix several N+1 queries, namely habit_info
+    - Add @log_queries decorator to surface query counts in dev mode
+
+## Mon 3-23-26
+1. Refactor tooltip to use anchor positioning
+2. Add completed_at on HabitCompletion, entry_datetime on LeetCodeRecord
+    - Also add composite indexes for several models
+3. Update seed data: is_done -> completed_at for tasks
+
 
 ## [Thurs 12.02.2026]
 1. Add instructions to README for how to run locally

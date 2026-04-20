@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
+
     from app.modules.habits.service import HabitsService
     from app.modules.time_tracking.service import TimeTrackingService
 
-import pandas as pd
 
 from app.modules.habits.service import create_habits_service
 from app.modules.time_tracking.service import create_time_tracking_service
@@ -28,7 +28,7 @@ class AnalyticsService:
         # how="outer" keeps all dates from both DataFrames
         # This means for dates with a completion but no time tracked => it'll just fill
         # duration_minutes in as 0
-        merged = pd.merge(completion_counts, time_totals, on="date", how="outer").fillna(0)
+        merged = completion_counts.merge(time_totals, on="date", how="outer").fillna(0)
         #corr = merged.corr()
         # merged.corr() computes full correlation matrix between every numeric column pair?
         #                   completion_count    duration_minutes
@@ -37,11 +37,7 @@ class AnalyticsService:
         # diagonal is always 1 (a col correlates perfectly with itself)
 
         # single num is cleaner for returning/displaying:
-        corr = merged["completion_count"].corr(merged["duration_minutes"])
-        import sys
-        print(merged, file=sys.stderr)
-
-        return corr
+        return merged["completion_count"].corr(merged["duration_minutes"])
 
 
 

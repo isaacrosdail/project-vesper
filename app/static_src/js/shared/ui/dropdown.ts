@@ -1,40 +1,14 @@
 
-const dropdowns = document.querySelectorAll('.dropdown');
-
-document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-
-    if (target.matches('.dropdown-toggle')) {
-        const dropdown = target.closest<HTMLDivElement>('.dropdown')!;
-        const wasOpen = dropdown.classList.contains('is-open');
-
-        dropdowns.forEach(el => el.classList.remove('is-open'));
-
-        if (!wasOpen) {
-            dropdown.classList.add('is-open')
-        }
-
-    } else if (target.closest('.dropdown-menu button')) {
-        const dropdown = target.closest<HTMLDivElement>('.dropdown')!;
-        dropdown.classList.remove('is-open');
-
-        // Only update label if dropdown is replaceable
-        if (dropdown.querySelector('.dropdown-toggle[data-replaceable]')) {
-            const toggle = dropdown.querySelector<HTMLSpanElement>('.dropdown-toggle .dropdown-toggle-label')!;
-            toggle.textContent = target.textContent!.trim();
-        }
-
-    } else {
-        dropdowns.forEach(el => {
-            el.classList.remove('is-open');
-        })
-    }
-});
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        dropdowns.forEach(el => {
-            el.classList.remove('is-open');
-        });
-    }
+// init dropdowns (using popover API + anchor positioning, this is just needed to "pair" via css properties)
+document.querySelectorAll('.dropdown-toggle').forEach(btn => {
+    const targetId = btn.getAttribute('popovertarget');
+    const menu = document.querySelector(`#${targetId}`);
+    if (!menu) return;
+    btn.style.setProperty('anchor-name', `--${targetId}`);
+    menu.style.setProperty('position-anchor', `--${targetId}`);
+    // For chevron flip
+    menu.addEventListener('toggle', (e: ToggleEvent) => {
+        const isOpen = e.newState === 'open';
+        btn.querySelector('.dropdown-toggle-chevron svg').classList.toggle('flip', isOpen);
+    });
 });

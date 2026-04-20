@@ -1,5 +1,8 @@
 {% extends "base.html" %}
+
 {% block title %}Welcome{% endblock %}
+
+{% block wrapper_mod %}wrapper--landing{% endblock %}
 {% block content %}
     <div class="landing-content">
         <h1>Welcome to Vesper</h1>
@@ -7,22 +10,26 @@
             Vesper is a personal "life OS" - starting as a routine tracker and evolving into a home OS + automation platform driven by data.
         </p>
         <div class="landing-actions">
-            <form action="{{ url_for("auth.init_demo") }}" method="post" data-form-type="action">
+            <form action="{{ url_for('auth.init_demo') }}" method="post" data-form-type="action">
                 <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                 <button type="submit"
                         class="btn btn-primary"
-                        data-tip="Sign as a guest & open dashboard.">Try the demo 🚀</button>
+                        data-tip="Sign as a guest & open dashboard.">
+                    Try the demo
+                    {{ ui.rocket_svg () }}
+                </button>
             </form>
-            <a href="{{ url_for("auth.login") }}"
+            <a href="{{ url_for('auth.login') }}"
                class="btn btn-secondary"
                data-tip="Go to the login page">Log in / Sign up</a>
         </div>
         {% if config.APP_ENV == 'dev' %}
-            <form action="{{ url_for("auth.init_owner") }}" method="post" data-form-type="action">
+            <form action="{{ url_for('auth.init_owner') }}" method="post" data-form-type="action">
                 <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                 <button type="submit" class="btn btn-primary">OWNER INIT</button>
             </form>
         {% endif %}
     </div>
 {% endblock %}
+
 {% block scripts %}{% endblock %}

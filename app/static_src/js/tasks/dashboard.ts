@@ -1,265 +1,437 @@
 
-import { formatToUserTimeString, getJSInstant } from "../shared/datetime";
-import { apiRequest, routes } from '../shared/services/api';
-import { contextMenu } from '../shared/ui/context-menu';
-import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager.js';
-import { makeToast } from '../shared/ui/toast';
-import { initValidation, makeValidator } from '../shared/validators';
 import { enableStats } from '../shared/charts';
+import { displayDate, getUserTodayDate, isoToUserDate } from '../shared/datetime';
+import { initTaskForm } from '../shared/forms';
+import { tasksStore } from '../shared/pubSub';
+import { api } from '../shared/services/api';
+import { contextMenu } from '../shared/ui/context-menu';
+import { initSidebar } from '../shared/ui/left-sidebar';
+import { confirmationManager, openModalForEdit } from '../shared/ui/modal-manager';
+import { makeToast } from '../shared/ui/toast';
+import { title } from '../shared/utils';
+import { FormDialog, Task } from '../types';
+
+// TODO:
+// 1. For due dates that are nearer, use "the day" (ex: Friday instead of Mar 20)
 
 
-function validateDueDate(dueDateString: string): string | null {
-    const isFrogCheckBox = document.querySelector<HTMLInputElement>('#is_frog');
-    const isFrog = isFrogCheckBox!.checked;
+// All elements for task list filtering/altering/etc
+function getTasksListElements() {
+    const els = {
+        tasksList: document.querySelector('.tasks-list'),
+        sidebar: document.querySelector('.left-sidebar'),
+        priorityBtn: document.querySelector('[data-action="cycle-priority"] use'),
+        taskLiTemplate: document.querySelector('#task-li-template'),
+        toggleCompletedCheckbox: document.querySelector('.toggle-completed')
+    };
+    return els;
+}
 
-    // duedate exists -> check in future
-    if (dueDateString) {
-        // check in future
-        const today = formatToUserTimeString(new Date(), {})
-        const valid = today < dueDateString;
-        return valid ? null : 'ERROR: Due date must be in the future';
+// All elements for showing a task's details popover/view
+function getTaskDetailPopoverElements() {
+    const els = {
+        taskDetailsPopover: document.querySelector('#task-details-popover'),
+        subtasksContainer: document.querySelector('.subtasks-container'),
+        subtaskTemplate: document.querySelector('#subtask-list-template'),
+    }
+    return els;
+}
+
+function getSearchElements() {
+    const els = {
+        searchPopover: document.querySelector('#search-popover'),
+        searchInput: document.querySelector('.task-search'),
+        resultsContainer: document.querySelector('.results-container'),
+    }
+    return els;
+}
+
+const tasksListEls = getTasksListElements();
+const taskDetailEls = getTaskDetailPopoverElements();
+const searchEls = getSearchElements();
+
+type PopoverState = {
+    activePopover: 'taskDetails' | 'search' | null
+};
+const popoverState: PopoverState = {
+    activePopover: null
+};
+
+function setPopoverState(thing: Partial<PopoverState>) {
+    // popoverState.activePopover = thing;
+    Object.assign(popoverState, thing);
+    renderPopover();
+}
+// const taskDetailsPopover = document.querySelector('.task-details-popover');
+// const searchPopover = document.querySelector('.search-popover');
+
+function renderPopover() {
+    if (popoverState.activePopover === 'taskDetails') {
+        taskDetailEls.taskDetailsPopover.showPopover();
     } else {
-        return isFrog ? 'Due date required for frog tasks' : null;
+        taskDetailEls.taskDetailsPopover.hidePopover();
+    }
+
+    if (popoverState.activePopover === 'search') {
+        searchEls.searchPopover.showPopover();
+    } else {
+        searchEls.searchPopover.hidePopover();
     }
 }
 
-// Validators
-const validateTaskName = makeValidator('name', {
-    maxLength: 3,
-});
+// Pure data shaping
+function deriveTaskView(task: Task) {
+    const subtasks = task.subtasks
+        .map(id => taskMap.get(id))
+        .filter(Boolean);
+    return {
+        name: task.name,
+        id: task.id,
+        priority: title(task.priority),
+        created_at: displayDate(task.created_at),
+        due_date: task.due_date !== null ? displayDate(task.due_date) : null,
+        pillars: task.pillars.map(p => p.name).join(' · '),
+        priorityHref: `#badge-priority-${task.priority}`,
+        subtasks: subtasks.map(st => ({
+            name: st.name,
+            is_done: st.is_done
+        })),
+        subtasksSummary: `${subtasks.filter(st => st.is_done).length}/${subtasks.length}`
+    };
+}
 
-// function validateSleepTimes() {
-//     const blech = document.querySelector<HTMLInputElement>('#wake_datetime');
-//     const blech2 = document.querySelector<HTMLInputElement>('#sleep_datetime');
+const taskMap = new Map<number, Task>();
 
-//     // ensure sleep is after wake?
+// pub/sub (tasksStore) handles reacting to changes, this fn handles making the changes
+function applyTaskUpdate(id: number, updated: Task) {
+    // update source of truth
+    const tasks = tasksStore.get();
+    const next = tasks.map(t => t.id === id ? updated : t);
+    tasksStore.set(next); // triggers all subscribers
+}
 
-// }
+function applyTaskDelete(id: number) {
+    const next = tasksStore.get().filter(t => t.id !== id);
+    tasksStore.set(next);
+}
 
-
-function toggleTaskComplete(
-    itemId: string,
-    isDone: boolean
-) {
-    const newIsDone = !isDone;
-    const completedAtUTC = getJSInstant();
-
-    const data = {
-        is_done: newIsDone,
-        completed_at: completedAtUTC
+async function setupTaskFormModal() {
+    const dialog = document.querySelector<FormDialog>('#tasks-entry-dashboard-modal');
+    if (!dialog) {
+        throw new Error('tasks dashboard: #tasks-entry-dashboard-modal not found');
     }
-    const url = routes.tasks.tasks.item(itemId);
+    const { selectTask, tasks } = await initTaskForm(dialog);
 
-    apiRequest('PATCH', url, data, {
-        onSuccess: () => {
-            const row = document.querySelector<HTMLElement>(`[data-item-id="${itemId}"]`);
-            if (!row) return;
-            const statusSpan = row.querySelector('.status-span');
-
-            if (newIsDone) {
-                row.dataset['isDone'] = 'True';
-            } else {
-                delete row.dataset['isDone'];
+    function onPopulatedCallback(data: Task) {
+        // data.subtasks = [8, 11] -- loop, make pills, hide cards
+        data.subtasks.forEach((id: number) => {
+            const task = tasks.find(t => t.element.dataset.id === String(id));
+            if (!task) {
+                console.warn(`onPopulated: no task card found for subtask id ${id}`, { tasksLength: tasks.length })
             }
-            statusSpan?.classList.toggle('is-done');
+            selectTask((String(id)), task.element.dataset.name)
+        })
+        data.pillars.forEach((p: {id: number}) => {
+            const cb = dialog.querySelector(`input[value="${p.id}"]`);
+            if (cb) cb.checked = true;
+        })
+        // also sync the hidden input
+        dialog.querySelector('#pillar_ids_hidden').value = data.pillars.map(p => p.id).join(',') ?? '';
+    }
 
-            makeToast('Task status updated', 'success')
+    return { dialog, populateEditModal: onPopulatedCallback };
+}
+
+// Make this dumb: No business logic, no .find, no .filter
+function renderTaskDetails(view, els: ReturnType<typeof getTaskDetailPopoverElements>) {
+    const root = els.taskDetailsPopover;
+
+    root.querySelector('.name').textContent = view.name;
+    root.querySelector('.priority').textContent = view.priority;
+    root.querySelector('.created_at').textContent = view.created_at;
+
+    const row = root.querySelector('.due-date-row')
+    const text = root.querySelector('.due_date')
+    if (view.due_date !== null) {
+        text.textContent = view.due_date;
+        row.classList.remove('hide');
+    } else {
+        row.classList.add('hide');
+    }
+
+    root.querySelector('.pillars').textContent = view.pillars;
+    root.querySelector('.priority-badge')
+        .setAttribute('href', view.priorityHref);
+
+    els.subtasksContainer.innerHTML = ''; // reset markup
+
+    if (view.subtasks.length !== 0) {
+        const header = document.createElement('div');
+        header.className = 'subtasks-header';
+        header.textContent = `Subtasks ${view.subtasksSummary}`;
+        els.subtasksContainer.appendChild(header);
+    }
+
+    view.subtasks.forEach(st => {
+        const clone = els.subtaskTemplate.content.cloneNode(true);
+        clone.querySelector('.subtask-name').textContent = st.name;
+        clone.querySelector('.subtask-checkbox').checked = st.is_done;
+        els.subtasksContainer.appendChild(clone);
+    });
+
+    // Set activeTaskId for delete/edit buttons:
+    // TODO: Put both on parent div instead for one spot
+    root.querySelector('.task-delete-btn').setAttribute('data-active-task-id', `${view.id}`);
+    root.querySelector('.task-edit-btn').setAttribute('data-active-task-id', `${view.id}`);
+}
+
+// Thin orchestrator
+function showTaskDetails(task: Task) {
+    const view = deriveTaskView(task);
+    renderTaskDetails(view, taskDetailEls);
+    setPopoverState({ activePopover: 'taskDetails' });
+}
+
+// Cache one li to be cloned?
+type Filter = 'all' | 'today' | 'upcoming';
+type Priority = 'all' | 'low' | 'medium' | 'high' | 'frog';
+
+type TaskListState = {
+    filter: Filter;
+    priority: Priority;
+}
+
+const state: TaskListState = { filter: 'all', priority: 'all' };
+function setTaskListState(patch: Partial<TaskListState>) {
+    Object.assign(state, patch);
+    // Update priority icon
+    if (state.priority === 'all') {
+        tasksListEls.priorityBtn.setAttribute('href', '#icon-funnel');
+    } else {
+        tasksListEls.priorityBtn.setAttribute('href', `#badge-priority-${state.priority}`);
+    }
+    const filterOptions = tasksListEls.sidebar.querySelectorAll('[data-filter]');
+    filterOptions.forEach(el => el.classList.remove('active'));
+    // query for THIS option's svg?
+    tasksListEls.sidebar.querySelector(`[data-filter="${state.filter}"]`)?.classList.add('active');
+    renderTaskList(deriveVisibleTasks());
+}
+
+function deriveVisibleTasks(): Task[] {
+    let result = tasksStore.get();
+    // Primary filter
+    if (state.filter === 'today') {
+        result = result.filter(t => t.due_date && isoToUserDate(t.due_date) === getUserTodayDate())
+    } else if (state.filter === 'upcoming') {
+        result = result.filter(t => t.due_date && isoToUserDate(t.due_date) > getUserTodayDate())
+    }
+
+    // Secondary filter
+    if (state.priority !== 'all') {
+        result = result.filter(t => t.priority === state.priority);
+    }
+    return result;
+}
+
+async function deleteTask(id: number) {
+    const confirmed = await confirmationManager.show('Are you sure?');
+    if (!confirmed) return;
+    await api.tasks.delete(String(id));
+    applyTaskDelete(id);
+    makeToast('Task deleted', 'success');
+}
+
+function renderTaskList(visibleTasks: Task[]) {
+    // builds ul content using arr
+    tasksListEls.tasksList.innerHTML = '';
+    visibleTasks.forEach(t => {
+        const clone = tasksListEls.taskLiTemplate.content.cloneNode(true);
+        clone.querySelector('li').dataset.id = t.id
+        clone.querySelector('.task-name').textContent = t.name;
+        clone.querySelector('.task-toggle').checked = t.is_done;
+        clone.querySelector('[data-priority]').dataset.priority = t.priority;
+        clone.querySelector('.priority-use').setAttribute('href', `#badge-priority-${t.priority}`);
+        if (t.due_date) {
+            clone.querySelector('.due_date').textContent = displayDate(t.due_date);
+        } else {
+            clone.querySelector('.task-due-date').remove();
+        }
+        if (t.subtasks.length) {
+            // populate subtask count text
+            const thing = clone.querySelector('.meta-subtasks-text');
+            // [icon] 0/1
+            const subtaskStr = `${t.subtasks.filter(st => st.is_done).length}/${t.subtasks.length}`
+            thing.textContent = subtaskStr;
+
+            // For tasks where 1+ subtask is yet to be completed?
+            // Add proper subtasks view for yet-to-complete subtasks of given task
+            clone.querySelector('.task-subtasks').textContent = t.name
+        } else {
+            clone.querySelector('.subtask-toggle').remove();
+            clone.querySelector('.meta-subtasks').remove();
+        }
+        clone.querySelector('.task-pillars').textContent = t.pillars.map(p => p.name).join(' · ');
+
+        tasksListEls.tasksList.appendChild(clone);
+    })
+}
+
+function setupSidebar() {
+    // Sidebar options
+    const priorities = ['all', 'low', 'medium', 'high', 'frog'] as const;
+
+    tasksListEls.sidebar.addEventListener('click', (e) => {
+        if (!(e.target instanceof Element)) return;
+        const target = e.target;
+        const btn = target.closest<HTMLElement>('.filter-btn');
+        if (btn?.dataset.filter && btn.dataset.filter !== state.filter) {
+            setTaskListState({ filter: btn.dataset.filter })
+        }
+        if (btn?.dataset.action === 'cycle-priority') {
+            const idx = priorities.indexOf(state.priority);
+            const next = priorities[(idx + 1) % priorities.length];
+            setTaskListState({ priority: next })
+        }
+        // Toggle completed tasks
+        if (target.matches('.toggle-completed')) {
+            tasksListEls.tasksList.classList.toggle('show-completed', tasksListEls.toggleCompletedCheckbox.checked)
         }
     });
 }
 
-// function enableStats() {
-//     document.querySelectorAll<HTMLDivElement>('.stats-ring').forEach(statsCircle => {
-//         const progress = Number(statsCircle.dataset.progress ?? 50); // we'll need to update this value to update the visual progress
+function setupContextMenu(e: MouseEvent, dialog: FormDialog, onPopulatedCallback) {
+    const taskLi = e.target.closest('.task');
+    const itemId: string = taskLi.dataset.id;
 
-//         statsCircle.setAttribute("role", "progressbar");
-//         statsCircle.setAttribute("aria-valuenow", progress); // this value is grabbed by our stats-progress
-//         // content to show the percentage/value
-//         statsCircle.style.setProperty('--progress', progress + "%"); // set visual ring val
-//         statsCircle.setAttribute("aria-live", "polite")
+    contextMenu.create({
+        position: { x: e.clientX, y: e.clientY },
+        items: [
+            {
+                label: 'Edit', action: () => openModalForEdit(itemId, dialog, 'Task', onPopulatedCallback)
+            },
+            { label: 'Delete', action: async () => deleteTask(Number(itemId))}
+        ]
+    })
+}
 
-//     })
-// }
+function setupTaskList() {
+    tasksListEls.tasksList.addEventListener('click', async (e) => {
+        const task = e.target.closest<HTMLLIElement>('.task');
+        if (!task) return;
+        const taskId = task.dataset.id;
+        if (e.target.matches('.task-toggle')) {
+            const checkbox = e.target;
+            const response = await api.tasks.toggleComplete(taskId, checkbox.checked);
+            applyTaskUpdate(response.data.id, response.data);
+        } else if (e.target.matches('.subtask-toggle')) {
+            console.log("clicked")
+            const taskLi = e.target.closest('.task') // parent li for this task ofc
+            const subtasksDiv = taskLi.querySelector('.task-subtasks');
+            subtasksDiv.hidden = !subtasksDiv.hidden;
+        } else {
+            const task = taskMap.get(Number(taskId));
+            showTaskDetails(task);
+        }
+    });
+}
 
-export function init() {
-    const isFrogCheckbox = document.querySelector<HTMLInputElement>('#is_frog');
-    const dueDateField = document.querySelector<HTMLInputElement>('#due_date');
-    const priorityField = document.querySelector<HTMLInputElement>('#priority');
-    if (!isFrogCheckbox || !dueDateField) return;
+function setupSearch() {
+    // Search input
+    searchEls.searchInput.addEventListener('input', () => {
+        // on input, filter by allTasks.include?
+        const query = searchEls.searchInput.value.toLowerCase();
+        const matches = tasksStore.get().filter(task => task.name.toLowerCase().includes(query));
 
-    isFrogCheckbox.addEventListener('change', () => {
-        dueDateField.required = isFrogCheckbox.checked;
-        priorityField.disabled = isFrogCheckbox.checked;
+        // use matches to populate container in search popover with matching tasks
+        searchEls.resultsContainer.innerHTML = '';
+        matches.forEach(t => {
+            const div = document.createElement('div');
+            div.textContent = t.name;
+            div.dataset.id = String(t.id);
+            searchEls.resultsContainer.appendChild(div);
+        });
     });
 
+    // Click search result to open details popover
+    searchEls.resultsContainer.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-id]');
+        if (!target) return;
+        const task = taskMap.get(Number(target.dataset.id));
+        searchEls.searchPopover.hidePopover();
+        showTaskDetails(task);
+    });
+}
+
+export async function init() {
+    tasksStore.subscribe((tasks) => {
+        console.log('store updated, task count: ', tasks.length)
+        taskMap.clear();
+        tasks.forEach(t => taskMap.set(t.id, t));
+        renderTaskList(deriveVisibleTasks());
+    })
+
+    const { data } = await api.tasks.getAll();
+    tasksStore.set(data); // subscriber fires, taskMap built automatically
+    console.log('tasksStore has:', tasksStore.get())
+
+    // 2. Modal (needed by popover + context menu)
+    const { dialog, populateEditModal } = await setupTaskFormModal();
+
+    initSidebar();
+    // =====================================================
+    // General sidebar setup (not tasks specific)
+    // TODO: This should prob end up in a new left-sidebar.ts handler/file after we're done sketching
+    // const sidebarToggle = document.querySelector('#sidebar-toggle');
+    // const wrapper = document.querySelector('.wrapper');
+    // if (!wrapper || !sidebarToggle) {
+    //     console.error('setupSidebar: missing sidebar-toggle/wrapper');
+    //     return;
+    // }
+    // // Toggle
+    // sidebarToggle.addEventListener('click', () => wrapper.classList.toggle('sidebar-open'));
+    // ======================================================
+
+    taskDetailEls.taskDetailsPopover.addEventListener('toggle', (e: ToggleEvent) => {
+        if (e.newState === 'closed') {
+            setPopoverState({ activePopover: null }) // redundant but harmless? calls
+        }
+    })
+
+    // Edit / Delete options for task details popover
+    taskDetailEls.taskDetailsPopover.addEventListener('click', async (e: MouseEvent) => {
+        if (e.target.matches('.task-delete-btn')) {
+            const activeTaskId: string = e.target.dataset.activeTaskId;
+            deleteTask(Number(activeTaskId));
+            setPopoverState({ activePopover: null });
+        } else if (e.target.matches('.task-edit-btn')) {
+            const activeTaskId = e.target.dataset.activeTaskId;
+            setPopoverState({ activePopover: null });
+            openModalForEdit(activeTaskId, dialog, 'Task', populateEditModal);
+        }
+    })
+
+    setupSidebar();  // Task sidebar buttons - filtering/show completed/etc
+    setupTaskList(); // Task list checkbox toggle
+
+    // Listener in 'capture' phase so that the first click while a popover is open closes it, but
+    // doesn't apply to whatever else was clicked
+    document.addEventListener('click', (e) => {
+        if (popoverState.activePopover === null) return;
+
+        // TODO: Using this means, when we open a popover then hit Esc, our next click is STILL captured
+        const target = e.target as HTMLElement;
+        if (!target.closest('.popover')) {
+            e.stopPropagation(); //
+            e.preventDefault(); // optional?
+            setPopoverState({ activePopover: null });
+        }
+    }, true);
+
+    setupSearch();
     enableStats(); // Circular progress/stats bar(s)
 
-    // Stuff for the tasks form search thing:
-    const taskForm = document.querySelector('#tasks-entry-dashboard-modal');
-    const taskCardTemplate = taskForm.querySelector('[data-task-template]');
-    const taskCardContainer = taskForm.querySelector('[data-task-card-container]');
-    const searchInput = taskForm.querySelector('[data-search]');
-    const pillTemplate = taskForm.querySelector('[data-pill-template]');
-    const pillContainer = taskForm.querySelector('.pill-container');
-    let tasks = [] // empty arr for hiding stuff?
-    let selectedTasks = [] // selected tasks from the input list
-
-    // Hook into modal:cleanup so we clear off pills and hidden
-    taskForm.addEventListener('modal:cleanup', () => {
-        selectedTasks = []
-        pillContainer.innerHTML = ''
-        searchInput.value = ''
-        tasks.forEach(task => task.element.classList.remove('hide'));
-        taskCardContainer.classList.add('hide');
-        document.querySelector('#subtask_ids_hidden').value = '';
-    })
-
-    searchInput.addEventListener('input', (e) => {
-        const value = e.target.value;
-        const normalizedValue = value.trim().toLowerCase();
-
-        tasks.forEach(task => {
-            const isSelected = selectedTasks.some(s => s.id === task.element.dataset.id);
-            if (isSelected) return;
-            const isVisible = task.name.toLowerCase().includes(normalizedValue);
-            task.element.classList.toggle("hide", !isVisible)
-        })
-    })
-
-    function selectTask(id: string, name: string) {
-        const card = tasks.find(t => t.element.dataset.id === id).element;
-
-        card.classList.add('hide'); // hide card
-        selectedTasks.push({ id, name }); // include in selectedTasks
-
-        // Render a pill for this task; clone pill, modify text, & append to container
-        const pill = pillTemplate.content.cloneNode(true).children[0];
-        pill.querySelector('.pill-name').textContent = name;
-        pill.dataset.id = id; // put ID on dataset for pill for removal
-        pillContainer.appendChild(pill);
-
-        // 4. append hidden input's .value for this task for submission
-        const hiddenTaskInput = document.querySelector('#subtask_ids_hidden');
-        // update value for hidden input (remember: this is a comma-separated list! "7,5,2" etc)
-        hiddenTaskInput.value = selectedTasks.map(task => task.id).join(',');
-    }
-
-    // event delegation events as closures, so we can keep refs
-    function handleSubtaskEntry(e) {
-        const clickedEl = e.target;
-        // Click on a card for a task within the "dropdown":
-        if (clickedEl.closest('.card')) {
-            const card = clickedEl.closest('.card');
-            const { id, name } = card.dataset;
-            selectTask(id, name);
-        }
-
-        if (clickedEl.matches('.pill-remove')) {
-            // 1. filter out of selectedTasks
-            const pill = clickedEl.closest('.my-pill');
-            const taskId = pill.dataset.id;
-            // want to keep only the task that dont match this id
-            selectedTasks = selectedTasks.filter(task => task.id !== taskId)
-
-            // find the card matching data-id in the dropdown and remove hide
-            const card = taskForm.querySelector(`[data-id="${taskId}"]`);
-            card.classList.remove('hide');
-
-            // remove pill & remove this task's id from our hidden input
-            const hiddenTaskInput = document.querySelector('#subtask_ids_hidden');
-            hiddenTaskInput.value = selectedTasks.map(task => task.id).join(',');
-            pill.remove();
-        }
-
-        // if clickedEl is search -> open dropdown
-        // remove hidden from the card container
-        else if (clickedEl.closest('[data-search-wrapper]')) {
-            const cardContainer = document.querySelector('[data-task-card-container]');
-            cardContainer.classList.remove('hide');
-
-            // Position under search bar input
-            const inputRect = searchInput.getBoundingClientRect();
-            cardContainer.style.top = `${inputRect.bottom}px`;
-            cardContainer.style.left = `${inputRect.left}px`;
-            cardContainer.style.width = `${inputRect.width}px`;
-        }
-        // Click outside search area -> hide 'dropdown'
-        else if (!(clickedEl.closest('[data-search-wrapper]'))) {
-            const cardContainer = document.querySelector('[data-task-card-container]');
-            cardContainer.classList.add('hide');
-        }
-    }
-
-    taskForm.addEventListener('click', handleSubtaskEntry);
-
-    const url = routes.tasks.tasks.collection;
-    const response = apiRequest('GET', url, null, {
-        onSuccess: (responseData) => {
-            tasks = responseData.data.map(task => {
-                const card = taskCardTemplate.content.cloneNode(true).children[0];
-                const header = card.querySelector("[data-header]")
-                const body = card.querySelector("[data-body]")
-                card.dataset.id = task.id;
-                card.dataset.name = task.name;
-                header.textContent = task.name;
-                body.textContent = task.priority;
-                taskCardContainer.append(card)
-                return { name: task.name, priority: task.priority, element: card }
-            })
-        }
-    })
-
-    const form = document.querySelector<HTMLFormElement>('#tasks-form')!;
-    initValidation(
-    form,
-        {
-        due_date: validateDueDate,
-        name: validateTaskName,
-    })
-
-    document.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        if (!(target.matches('.js-table-options'))) {
-            return;
-        }
-        const button = target.closest('.row-actions')!;
-        const row = target.closest('.table-row')!;
-        const { itemId } = row.dataset;
-        const url = routes.tasks.tasks.item(itemId);
-        const modal = document.querySelector('#tasks-entry-dashboard-modal');
-        const rect = button.getBoundingClientRect();
-
-        contextMenu.create({
-            position: { x: rect.left, y: rect.bottom },
-            items: [
-                {
-                    label: 'Edit',
-                    action: () => openModalForEdit(itemId, url, modal, 'Task',
-                        (data) => {
-                            // data.subtasks = [8, 11]
-                            // loop, make pills, hide cards
-                            data.subtasks.forEach((id: number) => {
-                                const task = tasks.find(t => t.element.dataset.id === String(id));
-                                if (task) {
-                                    selectTask((String(id)), task.element.dataset.name)
-                                }
-                            })
-                        }
-                    )
-                },
-                {
-                    label: 'Delete',
-                    action: () => handleDelete(itemId, url)
-                },
-                {
-                    label: 'Toggle task complete',
-                    action: () => {
-                        const isDone = row.dataset.isDone === 'True';
-                        toggleTaskComplete(itemId, isDone);
-                    }
-                }
-            ]
-        })
-        // }
+    tasksListEls.tasksList.addEventListener('contextmenu', (e: MouseEvent) => {
+        e.preventDefault();
+        setupContextMenu(e, dialog, populateEditModal);
     });
 }

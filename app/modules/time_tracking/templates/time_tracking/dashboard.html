@@ -4,15 +4,11 @@
 
 {% block content %}
 
-{{ forms.time_entry_modal(current_date=current_date) }}
+{{ forms.time_entry_modal(current_date=current_date, pillars=pillars) }}
 
 
 <div id="time-stats">
-    <div class="timeframe-selector">
-        <button class="chart-range" data-range="7">7d</button>
-        <button class="chart-range" data-range="30">30d</button>
-        <button class="chart-range" data-range="90">90d</button>
-    </div>
+    {{ ui.timeframe_pills("time_tracking-chart") }}
     <div id="time_tracking-chart-container"></div>
 </div>
 
@@ -21,7 +17,7 @@
         <h2>Time Entries</h2>
         {{ ui.plus_btn('time_entries-entry-dashboard-btn') }}
         Last
-        {% call ui.dropdown(time_entries_params['range']) %}
+        {% call ui.dropdown('ohhhh') %}
             <button class="table-range" data-range="1" data-table="time_entries">Today</button>
             <button class="table-range" data-range="7" data-table="time_entries">7d</button>
             <button class="table-range" data-range="30" data-table="time_entries">30d</button>
@@ -29,7 +25,7 @@
         days
     </div>
 
-    {% call(item, headers) ui.responsive_table('Time Entries', entry_headers, entries, 'time_tracking', 'time_entries', time_entries_params, sortable=True) %}
+    {% call(item, headers) ui.responsive_table('Time Entries', entry_headers, entries, 'time_tracking', 'time_entries') %}
     <td class="{{ headers[0].priority }}">{{ item.date_label }}</td>
     <td class="{{ headers[1].priority }}">{{ item.category }}</td>
     <td class="{{ headers[2].priority }} text-right">{{ item.time_window_label }}</td>

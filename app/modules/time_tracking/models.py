@@ -1,15 +1,15 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, Integer, String
+from sqlalchemy import CheckConstraint, DateTime, Integer, String, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
-from app.modules.time_tracking.validation_constants import (
-    CATEGORY_MAX_LENGTH,
-    DESCRIPTION_MAX_LENGTH,
-)
 from app.shared.datetime_.helpers import convert_to_timezone
+from app.shared.models import time_entry_pillars
 from app.shared.serialization import APISerializable
+
+CATEGORY_MAX_LENGTH = 50
+DESCRIPTION_MAX_LENGTH = 200
 
 
 class TimeEntry(Base, APISerializable):
@@ -21,6 +21,7 @@ class TimeEntry(Base, APISerializable):
         CheckConstraint(
             "length(category) > 0", name="ck_time_entry_category_non_empty"
         ),
+        Index("ix_time_entries_user_started_at", "user_id", "started_at"),
     )
 
     category: Mapped[str] = mapped_column(
@@ -28,7 +29,7 @@ class TimeEntry(Base, APISerializable):
         nullable=False,
     )
 
-    description: Mapped[str] = mapped_column(String(DESCRIPTION_MAX_LENGTH), nullable=True)
+    description: Mapped[str | None] = mapped_column(String(DESCRIPTION_MAX_LENGTH), nullable=True)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
@@ -37,6 +38,7 @@ class TimeEntry(Base, APISerializable):
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
 
     user = relationship("User", back_populates="time_entry")
+    pillars = relationship("Pillar", secondary=time_entry_pillars, back_populates="time_entries", lazy="selectin")
 
     @property
     def started_at_local(self) -> datetime:

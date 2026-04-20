@@ -2,6 +2,38 @@
 ## Sales pitch for this app: Every app tracks - we tell you what to do about it.
 
 
+### Areas to mature:
+- SQL/SQLAlchemy: window functions, CTEs, subqueries, hybrid_property.
+    The pillar scoring, streak calculations, and correlation analytics will push into real SQL.
+- Data modeling — the pillars feature is pushing into real relational design (join tables, aggregation across modules, time-series windowing). Lean into that.
+-- Writing tests first for the pillar scoring logic would force us to nail the interfaces.
+-- @hybrid_property (using now for is_done), also @hybrid_expression
+    - lets us write one property that works in both contexts? useful once we start doing pillar score
+        aggregation in queries?
+
+SQL/SQLAlchemy stuff:
+- 
+
+
+
+-- emit/on decorator pattern in hooks.py - literally event listening, could replace patch hooks?
+
+-- Type narrowing in validators:
+Our validators return tuple[dict, dict] — both untyped dicts. After validation, we know the shape of the data, but the type system doesn't. The next level: validators return a TypedDict or dataclass:
+
+class ValidatedTask(TypedDict):
+    name: str
+    priority: PriorityEnum | None
+    due_date: date | None
+    is_frog: bool
+    subtask_ids: list[int]
+    pillar_ids: list[int]
+
+Then save_task receives ValidatedTask instead of dict[str, Any].
+No more typed_data.get("priority") guessing — we know the keys
+exist and their types. The Any disappears from our service layer.
+
+
 ## Service / Repo / Controller pattern
 
 Problem:
@@ -31,7 +63,7 @@ Concrete example:
 ```python
 @tasks_bp.get("/dashboard")
 @login_plus_session
-def dashboard(session: "Session") -> tuple[str, int]:
+def dashboard(session: Session) -> tuple[str, int]:
     tasks_params = get_table_params("tasks", "due_date")
 
     tasks_service = create_tasks_service(
@@ -152,8 +184,8 @@ More relationships just means adding more entries to the table, rather than rede
 
 Built:
 - get_daily_completion_counts() on HabitsService, returns DataFrame of completions per day
-- get_daily_time_stuff() on TimeTrackingService — returns DataFrame of duration per day
-- AnalyticsService in shared/analytics.py — composes both services, 
+- get_daily_time_stuff() on TimeTrackingService - returns DataFrame of duration per day
+- AnalyticsService in shared/analytics.py - composes both services, 
     computes Pearson correlation with pandas merge + .corr()
 - create_analytics_service() factory
 - seed_rich_data() - Updated this to include 30 days of correlated habit/time data using productivity score
@@ -207,3 +239,132 @@ Time tracking:
 - Tasks service (defaulting to 7d in route calls)
     - calc_overdue_rate()
     - calc_frog_completion_rate()
+
+
+## Mar 9, 2026:
+Dataclass DTOs across all modules:
+- Tasks: ValidatedTask — replaced dict[str, Any] with typed dataclass
+- Habits: ValidatedHabit — same pattern
+- Groceries: ValidatedProduct, ValidatedTransaction, ValidatedShoppingList,
+ValidatedShoppingListItem, ValidatedRecipe
+- Metrics: ValidatedDailyEntry
+- Time Tracking: ValidatedTimeEntry
+- All validators now return tuple[Dataclass | None, ValidationErrors] instead of tuple[dict, dict]
+- All services accept typed dataclasses instead of dict[str, Any], use attribute access instead of
+dict access
+- Eliminated unsafe setattr loops over arbitrary dict keys — now either explicit field assignments or
+gated dataclasses.fields() loops
+
+Model simplifications:
+- Merged is_frog boolean into PriorityEnum.FROG — eliminated column, two check constraints, and
+cross-field validation dance
+- Dropped is_done column — hybrid_property from completed_at is the single source of truth
+- Dropped promotion_threshold column — moved to service constant (formula, not data)
+- Added WeightUnitsEnum + weight_units column — store raw weight + units instead of lossy conversion
+at write time
+- Tightened steps/calories constraints from >= 0 to > 0 (0 is meaningless, use null for missing)
+- Added ck_weight_requires_units constraint (weight and units are always paired)
+
+Naming convention cleanup:
+- Constraint names no longer manually prefixed with ck_ (naming convention handles it)
+
+Still pending (revision notes):
+1. Fix log_validator decorator generics
+2. Audit all Mapped[] annotations against nullable=
+3. Create shared/conversions.py for display-time unit conversion
+4. Remove dead code: debug prints, commented-out old dict code, _convert_weight, lbs_to_kg import
+5. Extract shared assign_pillars() helper
+6. Update ValidationResult type alias / deprecate it
+7. Rename remaining old-style constraint names across all models
+8. Frontend: remove frog checkbox, add FROG to priority dropdown
+9. Habit to_api_dict still references self.promotion_threshold — will error
+
+
+
+## March 10:
+
+  Backend cleanup:
+  - Reverted weight_units on metrics model — back to "always store
+  kg, convert on display"
+  - Traced the form submission flow confirming formToJSON picks up
+  all named inputs automatically
+  - Viewmodel weight_label property now converts based on
+  current_user.units
+  - Migration to drop weight_units column, constraint, and enum
+  type
+  - Fixed is_acyclic (was kahns) — return value was inverted,
+  rejecting every valid link
+  - Mapped annotation audit — added | None to nullable columns
+  across models
+  - Ruff linting pass — learned --ignore flags, raise from None
+  pattern, pathlib preference
+
+  Style reference page overhaul:
+  - Restructured from sprawling vertical sections into compact card
+   grid
+  - New sections: Design Tokens (swatch strips), Controls
+  (buttons), Input States, Input Types, Custom Controls, Feedback,
+  Drafts, Table
+  - Killed redundant demos, dead TODOs, duplicate sections
+
+  New components:
+  - Toggle switch — CSS-only with ::before (knob) and ::after (icon
+   via mask), color-mix() for theme-adaptive knob color, glow on
+  active state
+  - Radio tabs with glider — pure CSS using :has(:nth-child)
+  selectors, sliding animated glider
+  - Theme toggle — replaced dropdown select with binary toggle,
+  sun/moon SVG masks, simplified JS (no more
+  themeMap/reverseThemeMap)
+  - Drag and drop — native API on style reference cards, FLIP
+  animation technique learned
+
+  CSS/3D exploration:
+  - CSS 3D transforms — perspective, rotateX/Y/Z, translateZ,
+  transform-style: preserve-3d
+  - Built stacked layer prototype for future pillars radar chart
+  effect
+  - Mouse-tracking card tilt via mousemove + custom properties
+  - IntersectionObserver basics for scroll-triggered animations
+
+  Light mode tokens:
+  - Identified the core issue: surface range too narrow, accents
+  too light
+  - Introduced --active-bg / --active-text semantic tokens that
+  swap strategy between themes (glow in dark, weight in light)
+  - Started applying to timeframe pills and toggle
+
+
+
+## March 13: Starting to track nutrition/intake, as well as keeping proper tabs on product inventory
+
+Problem: The system records purchases, and now consumption per mealtime, but determining current stock requires
+repeatedly recomputing totals from multiple tables (transactions/purchases - consumption). That approach becomes messy
+as more actions will appear (recipes, waste, corrections) and makes "what changed when" difficult to reason about.
+
+Design goal:
+Represent inventory as a chronological sequence of immutable events so every change to our product stock is recorded
+explicitly and clearly. Current stock should also be cheap to read, while the history of inventory state and analytics should
+still be derivable.
+
+Plan:
+- InventoryEvent: append-only ledger entries with product_id, quantity_delta, event_type (ie, "purchase", "waste", "consumption"), and created_at.
+    - Inserts are the only write operation. If inventory needs correction, we'd insert another event (eg 'correction +50') instead of editing an old row.
+
+- Two new models:
+    1. InventoryLedger: Source of truth; append-only, every inventory change gets a row. Put a composite (product_id, created_at) index because our
+    primary access pattern is "all events for a given product in a given time range". Index pre-sorts by product_id first, then chronologically within
+    each product.
+    2. ProductInventory: Cache of the current state, derived from the ledger.
+
+
+# CSRF Stuff
+Server-side gen's csrf_token per session
+    - Checks on every POST/PATCH/DELETE
+    - Accepts from 3 srcs: form body, JSON body, or X-CSRFToken header
+    - Returns 403 if missing/mismatched
+Client-side:
+    - base.html sets window.csrfToken on page load
+    - api.ts every API request sends it via X-CSRFToken header
+    - Forms incl it as a hidden input
+    - Modal cleanup explicitly preserves the CSRF hidden input

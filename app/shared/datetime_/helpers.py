@@ -83,6 +83,14 @@ def parse_time_to_datetime(time_str: str, date: date, tz_str: str) -> datetime:
     return datetime(date.year, date.month, date.day, h, m, tzinfo=tz)
 
 
+def to_eod_datetime(date: date, tz_str: str) -> datetime:
+    """Convert a date to exclusive EOD datetime in given timezone."""
+    tz = ZoneInfo(tz_str)
+    start_of_day = datetime.combine(date, time.min, tzinfo=tz)
+    eod_midnight = start_of_day + timedelta(days=1)
+    return eod_midnight - timedelta(seconds=1)
+
+
 def is_same_local_date(dt: datetime, tz_str: str) -> bool:
     """Returns True if dt falls on today's date in the given timezone."""
     local_dt = dt.astimezone(ZoneInfo(tz_str))

@@ -22,11 +22,21 @@ window.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         if (!(e.target instanceof HTMLElement)) return;
 
-        // Profile button
-        if (profileModal) {
-            if (e.target.matches('.profile-btn')) profileModal.showModal();
-            if (e.target.matches('#close-profile-modal-btn')) profileModal.close();
-        }
+        // // Profile button MOVED TO profile-sidebar.ts
+        // if (profileModal) {
+        //     const profileSidebar = document.querySelector('.profile-sidebar');
+        //     const profileBackdrop = document.querySelector('.profile-sidebar-backdrop');
+        //     // if (e.target.matches('.profile-btn')) profileModal.showModal();
+        //     if (e.target.matches('.profile-btn')) {
+        //         profileSidebar.classList.add('open');
+        //         profileBackdrop.classList.add('open');
+        //     }
+        //     if (e.target.matches('.profile-sidebar-backdrop')) {
+        //         profileSidebar.classList.remove('open');
+        //         profileBackdrop.classList.remove('open');
+        //     }
+        //     // if (e.target.matches('#close-profile-modal-btn')) profileModal.close();
+        // }
 
         // Mobile nav
         if (!navMobileContainer || !hamburgerBtn) return;

@@ -33,6 +33,9 @@ from zoneinfo import ZoneInfo
 
 class BaseViewModel:
     """Adds datetime-related conversion & formatting methods to inheriting classes."""
+    # Needed. If a parent class doesn't define __slots__, then
+    # Python falls back to __dict__ and the protection here is gone
+    __slots__ = ("_tz", "created_at_local", "updated_at_local" )
 
     WEEK_CUTOFF = 7
     SOON_START = 2
@@ -40,7 +43,6 @@ class BaseViewModel:
     _tz: str
     created_at_local: datetime
     updated_at_local: datetime
-    due_date: datetime | None
 
     def format_created_at_label(self) -> str:
         today = datetime.now(ZoneInfo(self._tz)).date()
@@ -58,6 +60,7 @@ class BaseViewModel:
 
 
 class HasDueDateMixin:
+    __slots__ = ()
     WEEK_CUTOFF = 7
     SOON_START = 2
 
@@ -92,9 +95,7 @@ class BasePresenter:
         """
         Builds a list of column definitions for use as table headers.
 
-        Respects order defined in `VISIBLE_COLUMNS`.
-
-        Excludes fields not explicitly whitelisted.
+        Respects order defined in `VISIBLE_COLUMNS`. Excludes fields not explicitly whitelisted.
 
         Note: `sort_field` is optional: fall back to key in macro if sort_field is missing.
         """

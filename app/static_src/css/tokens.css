@@ -16,197 +16,206 @@
 
 /* stylelint-disable custom-property-empty-line-before */
 :root {
-    --font-family-primary: system-ui, "Segoe UI", roboto, helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    --font-weight-default: 400;
-    --font-weight-semibold: 600;
+  /* --font-family-primary: system-ui, "Segoe UI", roboto, helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; */
+  --font-weight-default: 400;
+  /* --font-family-primary: "DM Sans"; */
+  --font-family-primary: "Montserrat";
+  --font-weight-semibold: 600;
 
-    --font-size-sm: 0.875rem;
-    --font-size-md: 1rem;
-    --font-size-lg: 1.2rem;
-    --font-size-xl: 1.5rem;
-    --font-size-xxl: 2rem;
-    --line-height-default: 1.5rem;
-    --line-height-higher: 1.75rem;
-    --container-lg: 72rem;
-    --container-xl: 80rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.2rem;
+  --font-size-xl: 1.5rem;
+  --font-size-xxl: 2rem;
 
-    --border-default: 1px solid var(--border-color);
-    --border-radius: 0.5rem;
-    --border-radius-mild: 0.3rem;
-    --border-radius-top: 0.5rem 0.5rem 0 0;
+  /* TODO: Make line height = icon height/width */
+  --icon-size: 1.5rem;
+  --line-height-default: 1.5rem;
+  /* --icon-scale: 0.6; for button to SVG icon ratio sizing for btn-icon */
 
-    --gap-xs: 0.25rem;
-    --gap-sm: 0.5rem;
-    --gap-md: 1rem;
-    --gap-lg: 1.5rem;
 
-    --space-xs: 0.25rem;
-    --space-sm: 0.5rem;
-    --space-md: 1rem;
-    --space-lg: 1.5rem;
-    --space-xl: 2rem;
+  --container-lg: 72rem;
+  --container-xl: 80rem;
 
-    --transition-fade: 0.2s ease;
-    --transition-hover: 120ms ease;
+  --border-default: 1px solid var(--border-color);
+  --border-radius: 0.5rem;
+  --border-radius-mild: 0.3rem;
+  --border-radius-top: 0.5rem 0.5rem 0 0;
 
-    --hamburger-angle: 38deg;
-    --hamburger-scale: 1.27;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
 
-    --focus-ring: 2px solid var(--accent-subtle);
-    --focus-offset: 0px; /* TODO */
+  --transition-fade: 0.2s ease;
+  --transition-hover: 120ms ease;
 
-    --btn-size-sm: 1rem;
-    --btn-size-md: 2rem;
-    --btn-size-lg: 2.5rem;
+  --hamburger-angle: 38deg;
+  --hamburger-scale: 1.27;
 
-    --icon-scale: 0.6; /* for button to SVG icon ratio sizing for btn-icon */
+  --focus-ring: 2px solid var(--accent-subtle);
+  --focus-offset: 0px; /* TODO */
 
-    --progress-bar-bg: oklch(85% 0 0deg);
+  --btn-size-sm: 1.5rem;
+  --btn-size-md: 2rem;
+  --btn-size-lg: 2.5rem;
 
-    /* =============== LIGHT THEME DEFINITIONS ============== */
-    color-scheme: light;
 
-    /* Background Hierarchy */
-    --light-bg-dark: oklch(0.9104 0.0068 277.16);             /* Darkest: Main page/canvas background */
-    --light-bg: oklch(0.9321 0.0054 286.3);                  /* Moderate: Cards, modals, main content areas */
-    --light-bg-light: oklch(0.956 0.004 286.32);            /* Input fields, secondary button backgrounds, table rows  */
-    --light-bg-hover: oklch(100% 0 0deg);
+  --progress-bar-bg: oklch(85% 0 0deg);
 
-    /* Text Hierarchy */
-    --light-text: oklch(0.2411 0.0097 248.23);                  /* Headers, high contrast text */
-    --light-text-muted: oklch(0.5025 0.0136 264.44);           /* Body text, labels */ /* TODO: Make this more distinct */
-    --light-text-destructive: var(--light-clr-error);  /* Error states, delete buttons */
+  /* TODO: Fix, trying this out */
+  --light-bg-active: oklch(0.48 0.2 267);
+  --light-text-active: oklch(1.0 0 0);
+  --dark-bg-active: var(--dark-bg-light);
+  --dark-text-active: var(--dark-accent-subtle);
 
-    /* Borders */
-    --light-border-color: oklch(0.7938 0.0156 277.79);         /* General borders */
+  --radar-minimum: oklch(0.5611 0.1888 21.87);
+  --radar-baseline: oklch(0.7213 0.0698 205.29);
+  --radar-recent: var(--accent-subtle);
 
-    /* Accent Colors */
-    --light-accent-strong: oklch(0.5438 0.191 267.01);  /* Navigation, table headers (AND primary buttons?) */
-    --light-accent-subtle: oklch(0.9019 0.0471 269.62);  /* CTAs, highlights, subtler visual notes throughout app */
+  --min-navbar-height: 4rem;
+  --confetti-size-base: 0.375rem;
 
-    /* Selection TODO: Needs work obv / consider scrapping since we declare in base.css? OR actually scrap in base.css, keep here */
-    --light-bg-selection: oklch(68% 0.15 48deg);                  /* Selection background */
-    --light-text-selection: oklch(30% 0.15 250deg);                /* Selection text color */
+  /* D3 charts starting dimensions */
+  --chart-width: 400px;
+  --chart-height: 300px;
 
-    --light-clr-success: oklch(55% 0.15 150deg);
-    --light-clr-error: oklch(55% 0.22 25deg); /* OR: oklch(60% 0.2 25); */
+  --node-color: oklch(0.6493 0.11 251.78);
 
-    --light-progress-bar-fill: linear-gradient(
-        to right in oklch,
-        oklch(80% 0.12 145deg),
-        oklch(79% 0.13 145deg),
-        oklch(78% 0.19 150deg)
-    );
+  /* Shadows: light mode's are more subtle  */
+  --shadow-sm: light-dark(
+      0 1px 3px rgba(0,0,0,0.1),
+      0 1px 3px rgba(0,0,0,0.3)
+  );
+  --shadow-md: light-dark(
+      0 4px 12px rgba(0,0,0,0.15),
+      0 4px 12px rgba(0,0,0,0.4)
+  );
+  --shadow-lg: light-dark(
+      0 8px 24px rgba(0,0,0,0.2),
+      0 8px 24px rgba(0,0,0,0.5)
+  );
 
-    /* =============== DARK THEME DEFINITIONS =============== */
 
-    /* Background Hierarchy */
-    --dark-bg-dark: oklch(0.1785 0.0041 285.98); /* slate 1 */
-    --dark-bg: oklch(0.2521 0.0058 271.18); /* slate 4 */
-    --dark-bg-light: oklch(0.3118 0.0083 255.56); /* slate 5 */
-    --dark-bg-hover: oklch(40% 0 0deg);
+  /* =============== LIGHT THEME DEFINITIONS ============== */
+  color-scheme: light;
 
-    /* Text Hierarchy */
-    --dark-text: oklch(0.9489 0.0029 264.54);
-    --dark-text-muted: oklch(0.7686 0.0096 258.34);
-    --dark-text-destructive: var(--dark-clr-error);
+  /* Background Hierarchy */
+  --light-bg-dark: oklch(0.898 0.004 286);
 
-    /* Borders */
-    --dark-border-color: oklch(0.3993 0.0121 252.94); /* slate 7 */
+  --light-bg: oklch(0.965 0.001 286);
+  --light-bg-light: oklch(0.99 0 0);
+  --light-bg-hover: oklch(0.93 0.003 286);
 
-    /* Accent Colors */
-    --dark-accent-strong: oklch(0.6493 0.193 251.78); /* indigo 5 */
-    /* --dark-accent-strong: oklch(0.5438 0.191 267.01); indigo 9 */
-    --dark-accent-subtle: oklch(0.6493 0.14 251.78); /* indigo 5? */
-    /* --dark-accent-subtle: oklch(0.3671 0.1059 250.7); */
+  /* Text Hierarchy */
+  --light-text: oklch(0.2411 0.0097 248.23);
+  --light-text-muted: oklch(0.5025 0.0136 264.44);
+  --light-text-destructive: var(--light-clr-error);
 
-    /* Selection */
-    --dark-bg-selection: oklch(68% 0.15 48deg);
-    --dark-text-selection: oklch(30% 0.15 250deg);
+  /* Borders */
+  --light-border-color: oklch(0.82 0.01 265);
 
-    /* --dark-clr-success: oklch(45% 0.10 145deg); */
-    --dark-clr-success: oklch(0.6406 0.1329 157.68); /* Green 9 */
-    /* --dark-clr-error: oklch(55% 0.22 25deg);  OR: oklch(60% 0.2 25); */
-    --dark-clr-error: oklch(0.6256 0.1933 23.03);
+  /* Accent Colors */
+  --light-accent-strong: oklch(0.5438 0.191 267.01);
+  --light-accent-subtle: oklch(0.72 0.12 267);
 
-    --dark-progress-bar-fill: linear-gradient(
-        to right in oklch,
-        oklch(88% 0.11 145deg),
-        oklch(82% 0.12 145deg),
-        oklch(78% 0.19 150deg)
-    );
+  /* Selection TODO: Needs work obv / consider scrapping since we declare in base.css? OR actually scrap in base.css, keep here */
+  --light-bg-selection: oklch(68% 0.15 48deg);                  /* Selection background */
+  --light-text-selection: oklch(30% 0.15 250deg);                /* Selection text color */
 
-    /* === ACTIVE THEME MAPPINGS === */
+  --light-clr-success: oklch(0.6512 0.1468 147.39);
+  --light-clr-warning: oklch(0.8537 0.1572 84.13); /* TODO: For node task web "Med" priority currently  */
+  --light-clr-error: oklch(0.6256 0.1933 23.03);
 
-    /* Light Theme */
+  --light-progress-bar-fill: linear-gradient(
+      to right in oklch,
+      oklch(80% 0.12 145deg),
+      oklch(79% 0.13 145deg),
+      oklch(78% 0.19 150deg)
+  );
 
-    /* Background Hierarchy */
-    --bg-dark: var(--light-bg-dark);
-    --bg: var(--light-bg);
-    --bg-light: var(--light-bg-light);
-    --bg-hover: var(--light-bg-hover);
+  /* =============== DARK THEME DEFINITIONS =============== */
 
-    /* Text */
-    --text: var(--light-text);
-    --text-muted: var(--light-text-muted);
-    --text-destructive: var(--light-text-destructive);
-    --text-inverse: var(--dark-text);
+  /* Background Hierarchy */
+  --dark-bg-dark: oklch(0.1785 0.0041 285.98); /* slate 1 */
+  --dark-bg: oklch(0.2521 0.0058 271.18); /* slate 4 */
+  --dark-bg-light: oklch(0.3118 0.0083 255.56); /* slate 5 */
+  --dark-bg-hover: oklch(40% 0 0deg);
 
-    /* Borders */
-    --border-color: var(--light-border-color);
+  /* Text Hierarchy */
+  --dark-text: oklch(0.9489 0.0029 264.54);
+  --dark-text-muted: oklch(0.7686 0.0096 258.34);
+  --dark-text-destructive: var(--dark-clr-error);
 
-    /* Gradient */
-    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+  /* Borders */
+  --dark-border-color: oklch(0.3993 0.0121 252.94); /* slate 7 */
 
-    /* Accents */
-    --accent-strong: var(--light-accent-strong);
-    --accent-subtle: var(--light-accent-subtle);
+  /* Accent Colors */
+  --dark-accent-strong: oklch(0.6493 0.193 251.78); /* indigo 5 */
+  --dark-accent-subtle: oklch(0.6493 0.14 251.78); /* indigo 5? */
 
-    /* Selection */
-    --bg-selection: var(--light-bg-selection);
-    --text-selection: var(--light-text-selection);
+  /* Selection */
+  --dark-bg-selection: oklch(68% 0.15 48deg);
+  --dark-text-selection: oklch(30% 0.15 250deg);
 
-    --clr-success: var(--light-clr-success);
-    --clr-error: var(--light-clr-error);
+  --dark-clr-success: oklch(0.6406 0.1329 157.68); /* Green 9 */
+  --dark-clr-warning: oklch(0.8537 0.1572 84.13);
+  --dark-clr-error: oklch(0.6256 0.1933 23.03);
 
-    --progress-bar-fill: var(--light-progress-bar-fill);
-    
-    /* Dark Theme */
-    @media (prefers-color-scheme: dark) {
-        /* --theme: moon; */
-        color-scheme: dark;
+  --dark-progress-bar-fill: linear-gradient(
+      to right in oklch,
+      oklch(88% 0.11 145deg),
+      oklch(82% 0.12 145deg),
+      oklch(78% 0.19 150deg)
+  );
 
-        /* Background Hierarchy */
-        --bg-dark: var(--dark-bg-dark);
-        --bg: var(--dark-bg);
-        --bg-light: var(--dark-bg-light);
-        --bg-hover: var(--dark-bg-hover);
+  /* === ACTIVE THEME MAPPINGS === */
 
-        /* Text */
-        --text: var(--dark-text);
-        --text-muted: var(--dark-text-muted);
-        --text-destructive: var(--dark-text-destructive);
-        --text-inverse: var(--light-text);
+  /* Background Hierarchy */
+  --bg-dark: light-dark(var(--light-bg-dark), var(--dark-bg-dark));
+  --bg-light: light-dark(var(--light-bg-light), var(--dark-bg-light));
+  --bg: light-dark(var(--light-bg), var(--dark-bg));
+  --bg-hover: light-dark(var(--light-bg-hover), var(--dark-bg-hover));
+  --bg-active: light-dark(var(--light-bg-active), var(--dark-bg-active));
 
-        /* Borders */
-        --border-color: var(--dark-border-color);
+  /* Text */
+  --text: light-dark(var(--light-text), var(--dark-text));
+  --text-muted: light-dark(var(--light-text-muted), var(--dark-text-muted));
+  --text-destructive: light-dark(var(--light-text-destructive), var(--dark-text-destructive));
+  --text-inverse: light-dark(var(--dark-text), var(--light-text));
+  --text-active: light-dark(var(--light-text-active), var(--dark-text-active));
 
-        /* Gradient */
-        --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+  /* Borders */
+  --border-color: light-dark(var(--light-border-color), var(--dark-border-color));
 
-        /* Accents */
-        --accent-strong: var(--dark-accent-strong);
-        --accent-subtle: var(--dark-accent-subtle);
+  /* Gradient */
+  --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
-        /* Selection */
-        --bg-selection: var(--dark-bg-selection);
-        --text-selection: var(--dark-text-selection);
+  /* Accents */
+  --accent-strong: light-dark(var(--light-accent-strong), var(--dark-accent-strong));
+  --accent-subtle: light-dark(var(--light-accent-subtle), var(--dark-accent-subtle));
 
-        --clr-success: var(--dark-clr-success);
-        --clr-error: var(--dark-clr-error);
+  /* Selection */
+  --bg-selection: light-dark(var(--light-bg-selection), var(--dark-bg-selection));
+  --text-selection: light-dark(var(--light-text-selection), var(--dark-text-selection));
 
-        --progress-bar-fill: var(--dark-progress-bar-fill);
-    }
+  /* States */
+  --clr-success: light-dark(var(--light-clr-success), var(--dark-clr-success));
+  --clr-warning: light-dark(var(--light-clr-warning), var(--dark-clr-warning));
+  --clr-error: light-dark(var(--light-clr-error), var(--dark-clr-error));
+
+  --progress-bar-fill: var(--light-progress-bar-fill);
+
+  /* Dark Theme */
+  @media (prefers-color-scheme: dark) {
+      /* --theme: moon; */
+      color-scheme: dark;
+
+      --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+      --progress-bar-fill: var(--dark-progress-bar-fill);
+  }
 }
 
 /* User Override: Lets the user manually override the system preference with theme select buttons */
@@ -214,29 +223,7 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-dark: var(--light-bg-dark);
-  --bg: var(--light-bg);
-  --bg-light: var(--light-bg-light);
-  --bg-hover: var(--light-bg-hover);
-
-  --text: var(--light-text);
-  --text-muted: var(--light-text-muted);
-  --text-destructive: var(--light-text-destructive);
-  --text-inverse: var(--dark-text);
-
-  --border-color: var(--light-border-color);
-
   --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
-
-  --accent-strong: var(--light-accent-strong);
-  --accent-subtle: var(--light-accent-subtle);
-
-  --bg-selection: var(--light-bg-selection);
-  --text-selection: var(--light-text-selection);
-
-  --clr-success: var(--light-clr-success);
-  --clr-error: var(--light-clr-error);
-
   --progress-bar-fill: var(--light-progress-bar-fill);
 }
 
@@ -244,28 +231,6 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg-dark: var(--dark-bg-dark);
-  --bg: var(--dark-bg);
-  --bg-light: var(--dark-bg-light);
-  --bg-hover: var(--dark-bg-hover);
-
-  --text: var(--dark-text);
-  --text-muted: var(--dark-text-muted);
-  --text-destructive: var(--dark-text-destructive);
-  --text-inverse: var(--light-text);
-
-  --border-color: var(--dark-border-color);
-
   --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
-
-  --accent-strong: var(--dark-accent-strong);
-  --accent-subtle: var(--dark-accent-subtle);
-
-  --bg-selection: var(--dark-bg-selection);
-  --text-selection: var(--dark-text-selection);
-
-  --clr-success: var(--dark-clr-success);
-  --clr-error: var(--dark-clr-error);
-
   --progress-bar-fill: var(--dark-progress-bar-fill);
 }

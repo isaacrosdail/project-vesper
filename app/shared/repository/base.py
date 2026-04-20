@@ -3,12 +3,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from sqlalchemy import Select
     from sqlalchemy.orm import Session
 
 from sqlalchemy import func, select
 
 from app._infra.db_base import Base
+
+from app.shared.decorators_two import log_queries
 
 T = TypeVar("T", bound=Base)
 
@@ -35,8 +39,18 @@ class BaseRepository(Generic[T]):
     def _user_select(self, model_cls: type[T]) -> Select[tuple[T]]:
         return select(model_cls).where(model_cls.user_id == self.user_id)
 
+    @log_queries()
     def get_all(self) -> list[T]:
         stmt = select(self.model_cls).where(self.model_cls.user_id == self.user_id)
+        return list(self.session.execute(stmt).scalars().all())
+
+    @log_queries()
+    def get_all_in_window(self, start_utc: datetime, end_utc: datetime, *, date_col: str = "created_at") -> list[T]:
+        col = getattr(self.model_cls, date_col)
+        stmt = self._user_select(self.model_cls).where(
+            col >= start_utc,
+            col < end_utc
+        )
         return list(self.session.execute(stmt).scalars().all())
 
     def get_count_all(self) -> int:
@@ -51,3 +65,33 @@ class BaseRepository(Generic[T]):
             self.model_cls.user_id == self.user_id, self.model_cls.id == item_id
         )
         return self.session.execute(stmt).scalars().first()
+
+    def get_by_ids(self, ids: list[int]) -> list[T]:
+        stmt = select(self.model_cls).where(
+            self.model_cls.user_id == self.user_id,
+            self.model_cls.id.in_(ids)
+        )
+        return list(self.session.execute(stmt).scalars().all())
+
+
+from dataclasses import dataclass
+import math
+
+@dataclass(slots=True)
+class Page[T]:
+    items: list[T]
+    total: int
+    page: int
+    per_page: int
+
+    @property
+    def pages(self) -> int:
+        return math.ceil(self.total / self.per_page)
+
+    @property
+    def has_next(self) -> bool:
+        return self.page < self.pages
+
+    @property
+    def has_prev(self) -> bool:
+        return self.page > 1

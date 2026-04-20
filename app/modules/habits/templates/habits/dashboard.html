@@ -4,28 +4,24 @@
 
 {% block content %}
 
-{{ forms.habit_entry_modal() }}
-{{ forms.leetcode_entry_modal() }}
+{{ forms.habit_entry_modal(pillars=pillars) }}
+{{ forms.leetcode_entry_modal(languages=languages) }}
 
 <div id="habits-stats-container">
-    <div class="heatmap-group">HEATMAP</div>
+    <div class="heatmap-group">Completion Activity</div>
     <div class="tiles-group">
         {{ ui.stats_circle("Completed this week", 45,2,3) }}
-        {{ ui.stats_circle("Avg. last N days", 32,5,6) }}
-        {{ ui.stats_circle("Yolo", 78,8,9) }}
+        {{ ui.stats_info("Highest streak", highest_streak.days, highest_streak.name) }}
+        {{ ui.stats_info("Lowest streak", lowest_streak.days, lowest_streak.name) }}
     </div>
-    <div class="breakdown-group">
-        <div class="timeframe-selector">
-            <button class="chart-range" data-range="7">7d</button>
-            <button class="chart-range" data-range="30">30d</button>
-            <button class="chart-range" data-range="90">90d</button>
+    <details class="breakdown-group">
+        <summary>Completions by Habit</summary>
+        <div class="breakdown-content">
+            {{ ui.timeframe_pills("habits-chart") }}
+            <div id="habits-hbar-chart-container"></div>
         </div>
-        <div id="habits-hbar-chart-container"></div>
-    </div>
+    </details>
 </div>
-
-<!-- <div id="heatmap-container"></div> -->
-<!-- <div id="habits-chart-container"></div> -->
 
 <div class="card-dashboard">
     <div class="card-title">
@@ -34,7 +30,15 @@
     </div>
     
     {% call(item, headers) ui.responsive_table('Habits', habits_headers, habits, 'habits', 'habits') %}
-        <td class="{{ headers[0].priority}} editable-cell" data-item-id="{{ item.id }}" data-module="habits" data-subtype="habits" data-field="name" data-tip="Double-click to edit field.">{{ item.name }}</td>
+        <td class="{{ headers[0].priority}} editable-cell"
+            data-item-id="{{ item.id }}" data-module="habits" data-subtype="habits"
+            data-field="name" data-tip="Double-click to edit field."
+        >
+            <span>{{ item.name }}</span>
+            {% if item.status %}
+            <svg class="icon"><use href="#badge-{{ item.status }}"></use></svg>
+            {% endif %}
+        </td>
         <td class="{{ headers[1].priority}}">{{ item.status_label }}</td>
         <td class="{{ headers[2].priority}}">{{ item.created_at_label }}</td>
     {% endcall %}
@@ -45,7 +49,7 @@
         <h2>LeetCode Records</h2>
         {{ ui.plus_btn('leet_code_records-entry-dashboard-btn') }}
         Last 
-        {% call ui.dropdown(records_params['range']) %}
+        {% call ui.dropdown('ohh') %}
             <button class="table-range" data-range="1" data-table="leet_code_records">Today</button>
             <button class="table-range" data-range="7" data-table="leet_code_records">7d</button>
             <button class="table-range" data-range="30" data-table="leet_code_records">30d</button>
@@ -53,7 +57,7 @@
         days
     </div>
 
-    {% call(item, headers) ui.responsive_table('LC Records', lcrecords_headers, lcrecords, 'habits', 'leet_code_records', records_params, sortable=True) %}
+    {% call(item, headers) ui.responsive_table('LC Records', lcrecords_headers, lcrecords, 'habits', 'leet_code_records') %}
         <td class="{{ headers[0].priority }}">{{ item.leetcode_id_plus_title_label }}</td>
         <td class="{{ headers[1].priority }}">{{ item.difficulty_label }}</td>
         <td class="{{ headers[2].priority }}">{{ item.language_label }}</td>

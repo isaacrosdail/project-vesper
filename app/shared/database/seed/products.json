@@ -1,0 +1,156 @@
+{
+    "banana": {
+        "name": "Banana",
+        "category": "fruits",
+        "net_weight": 120,
+        "unit_type": "ea",
+        "calories_per_100g": 89
+    },
+    "apple": {
+        "name": "Apple",
+        "category": "fruits",
+        "net_weight": 182,
+        "unit_type": "ea",
+        "calories_per_100g": 52
+    },
+    "broccoli": {
+    "name": "Broccoli",
+    "category": "vegetables",
+    "net_weight": 350,
+    "unit_type": "g",
+    "calories_per_100g": 34
+    },
+    "spinach": {
+        "name": "Baby Spinach",
+        "category": "vegetables",
+        "net_weight": 142,
+        "unit_type": "g",
+        "calories_per_100g": 23
+    },
+    "bell_pepper": {
+        "name": "Bell Pepper (Red)",
+        "category": "vegetables",
+        "net_weight": 164,
+        "unit_type": "ea",
+        "calories_per_100g": 31
+    },
+    "carrot": {
+        "name": "Carrots (bag)",
+        "category": "vegetables",
+        "net_weight": 453,
+        "unit_type": "g",
+        "calories_per_100g": 41
+    },
+    "rice": {
+        "name": "White Rice",
+        "category": "grains",
+        "net_weight": 907,
+        "unit_type": "g",
+        "calories_per_100g": 365
+    },
+    "oats": {
+        "name": "Rolled Oats",
+        "category": "grains",
+        "net_weight": 453,
+        "unit_type": "g",
+        "calories_per_100g": 389
+    },
+    "bread": {
+        "name": "Whole Wheat Bread",
+        "category": "bakery",
+        "net_weight": 570,
+        "unit_type": "g",
+        "calories_per_100g": 247
+    },
+    "milk": {
+        "name": "Whole Milk (1 gal)",
+        "category": "dairy_eggs",
+        "net_weight": 3785,
+        "unit_type": "ml",
+        "calories_per_100g": 61
+    },
+    "yogurt": {
+        "name": "Greek Yogurt (plain)",
+        "category": "dairy_eggs",
+        "net_weight": 150,
+        "unit_type": "g",
+        "calories_per_100g": 59
+    },
+    "eggs": {
+        "name": "Eggs (12ct)",
+        "category": "dairy_eggs",
+        "net_weight": 12,
+        "unit_type": "ea",
+        "calories_per_100g": 155
+    },
+    "cheese": {
+        "name": "Cheddar Cheese",
+        "category": "dairy_eggs",
+        "net_weight": 226,
+        "unit_type": "g",
+        "calories_per_100g": 402
+    },
+    "chicken": {
+        "name": "Chicken Breast",
+        "category": "meats",
+        "net_weight": 680,
+        "unit_type": "g",
+        "calories_per_100g": 165
+    },
+    "ground_beef": {
+        "name": "Ground Beef (80/20)",
+        "category": "meats",
+        "net_weight": 454,
+        "unit_type": "g",
+        "calories_per_100g": 254
+    },
+    "olive_oil": {
+        "name": "Olive Oil",
+        "category": "fats_oils",
+        "net_weight": 473,
+        "unit_type": "ml",
+        "calories_per_100g": 884
+    },
+    "butter": {
+        "name": "Unsalted Butter",
+        "category": "fats_oils",
+        "net_weight": 454,
+        "unit_type": "g",
+        "calories_per_100g": 717
+    },
+    "black_beans": {
+        "name": "Black Beans (can)",
+        "category": "legumes",
+        "net_weight": 425,
+        "unit_type": "g",
+        "calories_per_100g": 91
+    },
+    "chickpeas": {
+        "name": "Chickpeas (can)",
+        "category": "legumes",
+        "net_weight": 400,
+        "unit_type": "g",
+        "calories_per_100g": 164
+    },
+    "soy_sauce": {
+        "name": "Soy Sauce",
+        "category": "condiments_sauces",
+        "net_weight": 300,
+        "unit_type": "ml",
+        "calories_per_100g": 60
+    },
+    "almonds": {
+        "name": "Almonds (raw)",
+        "category": "snacks",
+        "net_weight": 170,
+        "unit_type": "g",
+        "calories_per_100g": 579
+    },
+    "orange_juice": {
+        "name": "Orange Juice",
+        "category": "beverages",
+        "net_weight": 1890,
+        "unit_type": "ml",
+        "calories_per_100g": 45
+    }
+}

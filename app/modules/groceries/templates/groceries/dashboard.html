@@ -5,27 +5,213 @@
 
 {% block content %}
 
+{{ forms.product_entry_modal(categories=ProductCategoryEnum, units=UnitEnum) }}
+{{ forms.transaction_entry_modal(products_for_dropdown, categories=ProductCategoryEnum, units=UnitEnum) }}
+
+
 {# Recipes page: debug access button #}
 <a class="btn btn-primary" href="{{ url_for('groceries.recipes') }}">
     Recipes Page
 </a>
 
-{{ forms.product_entry_modal(list=l_category_options) }}
-{{ forms.transaction_entry_modal(l_products_for_dropdown, list=l_category_options) }}
+{# TODO: ugh #}
+<section class="groceries-grid">
+    <div class="card-groceries nutrition">
+        <div class="card-header">
+            <div class="tertiary another-pill">On track today</div>
+            <div class="tertiary card-link">full diary</div>
+        </div>
+        <div class="xofygoal">
+            <span class="cals-actual">{{ macros.calories.actual }} kcal</span>
+            <span class="cals-goal tertiary">of {{ macros.calories.target }} goal</span>
+        </div>
+        <div class="calsprog" data-prog="{{ macros.calories.pct / 100 }}">
+            <div class="mask"></div>
+        </div>
+        <div class="cals macro-card">
+            <div class="pct">{{ macros.calories.pct }}%</div>
+            <div class="tertiary">kcal</div>
+        </div>
+        <div class="protein macro-card">
+            <div class="pct">{{ macros.protein.pct }}%</div>
+            <div class="tertiary">protein</div>
+        </div>
+        <div class="carbs macro-card">
+            <div class="pct">{{ macros.carbs.pct }}%</div>
+            <div class="tertiary">carbs</div>
+        </div>
+        <div class="fat macro-card">
+            <div class="pct">{{ macros.fat.pct }}%</div>
+            <div class="tertiary">fat</div>
+        </div>
+        <div class="sparkline">
+            <div class="sparkline-chart">
+            </div>
+            <span class="days tertiary loading">7 days</span>
+            <span class="avg tertiary loading">avg 1,920 kcal</span>
+        </div>
+        <div class="meals tertiary">
+            {% for meal, cals in meals.items() %}
+            {{meal.title().replace("_", " ")}} {{ cals }} -
+            {% endfor %}
+        </div>
+    </div>
+    <div class="card-groceries logging">
+        <div class="card-header">
+            <div class="tertiary another-pill">3 meals logged</div>
+            <a class="tertiary card-link" href="{{ url_for('groceries.recipes') }}">all recipes</a>
+        </div>
+        <div class="quicklog">
+            <div class="quicklog-header">Quick Log</div>
+            {% for recipe in recipes %}
+            <div class="logentry list-row secondary">
+                <div class="logname">{{ recipe.name }} - {{ recipe.calories }}kcal</div>
+                <div class="loglink">Log -></div>
+            </div>
+            {% endfor %}
+            <!-- <div class="logentry list-row secondary">
+                <div class="logname">Overnight oats - 480kcal</div>
+                <div class="loglink">Log -></div>
+            </div>
+            <div class="logentry list-row secondary">
+                <div class="logname">Chicken stir fry - 620kcal</div>
+                <div class="loglink">Log -></div>
+            </div>
+            <div class="logentry list-row secondary">
+                <div class="logname">Yogurt bowl - 189kcal</div>
+                <div class="loglink">Log -></div>
+            </div> -->
+            <div class="logentry-add list-row secondary">
+                <div class="logname">+ Log dinner (1,011 kcal remaining)</div>
+            </div>
+        </div>
+        <div class="plan">
+            <div class="plan-header">Plan this week</div>
+            <div class="plan-thing secondary">4 recipes selected -> 2,200 kcal avg/day</div>
+        </div>
+        <div class="openplan card-link tertiary">Open meal planner</div>
+    </div>
+    <div class="card-groceries shoppinglist">
+        <div class="card-header">
+            <div class="tertiary another-pill">{{ shopping_list.items|length }} items needed</div>
+            <a class="tertiary card-link" href="{{ url_for('groceries.recipes') }}">full list</a>
+        </div>
+        <div class="listitems">
+            {% for item in shopping_list.items %}
+            <div class="listitem secondary">
+                <div class="left">
+                    <input type="checkbox" {{ "checked" if item.is_checked else "" }}>
+                    {{ item.product.name }} -
+                    {{ (item.product.net_weight * item.quantity_wanted)|round }}{{ item.product.unit_type }}
+                </div>
+                <div class="right">done</div>
+            </div>
+            {% endfor %}
+<!-- 
+            <div class="listitem secondary">
+                <div class="left">[x] Oats - 1.5kg</div>
+                <div class="right">done</div>
+            </div>
+            <div class="listitem secondary">
+                <div class="left">[x] Eggs - 18</div>
+                <div class="right">done</div>
+            </div>
+            <div class="listitem secondary">
+                <div class="left">[ ] Yogurt - 1kg</div>
+                <div class="right">[ add ]</div>
+            </div>
+            <div class="listitem secondary">
+                <div class="left">[ ] Chicken - 900g</div>
+                <div class="right">[ add ]</div>
+            </div>
+            <div class="listitem secondary">
+                <div class="left">[ ] Broccoli - 300g</div>
+                <div class="right">[ add ]</div>
+            </div> -->
+        </div>
+        <div class="cta">
+            <div class="generate btn-soft">Generate from recipes</div>
+            <div class="additem btn-soft">+ Add item</div>
+        </div>
+        <div class="lowstock tertiary">Low stock alerts: Yogurt - Oats</div>
+    </div>
+    <div class="card-groceries tables">
+        <div class="card-header">
+            <div class="tertiary another-pill">{{ transactions_for_table|length }} transactions</div>
+            <a class="tertiary card-link" href="{{ url_for('groceries.data') }}">data tools</a>
+        </div>
+        <div class="recentlyused">
+            <!-- Doing "most purchased" products via transactions for now -->
+            <div class="header">Most purchased products</div>
+            {#% for product, count in top_purchased %}
+                <div class="product secondary">{{ product }}</div>
+            {% endfor %#}
+            <div class="product secondary">{{ top_purchased|map(attribute=0)|join(' - ')}}</div>
+        </div>
+        {% if last_shopping_trip %}
+        <div class="lastbuy">
+            <div class="header">Last purchase</div>
+            <div class="purchase secondary">{{ last_shopping_trip.store_name }} - {{ last_shopping_trip.entry_datetime.strftime('%b %d') }}</div>
+            <div class="products secondary">
+                {{ last_shopping_trip.transactions|length }} item(s) -
+                {% for item in last_shopping_trip.transactions %}
+                <span class="purchase secondary">
+                    {{ item.product.name }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="csv-other">
+            <a class="csv btn-soft" href="{{ url_for('groceries.data') }}#products">Products + CSV</a>
+            <a class="txns btn-soft" href="{{ url_for('groceries.data') }}#transactions">Transactions</a>
+        </div>
+        <div class="info tertiary">
+            <span>{{ products_for_table|length }} products -</span>
+            <span>{{ transactions_for_table|length}} transactions</span>
+            <!-- 12 products - 8 transactions this month -->
+            this month
+        </div>
+    </div>
+</section>
 
-{# So JS can clone from template to append li's #}
-<template id="shoppinglist-item-template">
-    <li class="shoppinglist-item" data-product-id="" data-item-id="" data-quantity-wanted="">
-        <button class="btn-icon btn-round inline-delete" data-action="delete" aria-label="Remove shopping list item">{{ ui.x_svg() }}</button>
-        <span class="item-text"></span>
-        <span class="qty-controls">
-            <span>&nbsp;&nbsp;&nbsp;--</span>
-            <button data-action="decrement" aria-label="Decrement item quantity">{{ ui.minus_svg() }}</button>
-            <span class="item-qty-wrapper">
-                <span class="item-qty"></span><span></span>
-            </span>
-            <button data-action="increment" aria-label="Increment item quantity">{{ ui.plus_svg() }}</button>
-        </span>
+{# DEBUG: for macros totals and stuff #}
+<div>
+    <h2>Calories & Macros (daily avgs)</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem;">
+        <!-- TODO: Fix up; header, %, actual, total? -->
+        {{ ui.stats_circle('Calories', 45, macros.calories.total, macros.calories.target) }}
+        {{ ui.stats_circle('Protein', 50, 45, macros.protein.total) }}
+        {{ ui.stats_circle('Fat', 50, 45, macros.fat.total) }}
+        {{ ui.stats_circle('Carbs', 50, 45, macros.carbs.total) }}
+        {{ ui.stats_info('Sodium', macros.sodium.total)}}
+        {{ ui.stats_info('Potassium', macros.potassium.total)}}
+    </div>
+</div>
+
+{# DEBUG for CSV nutrition info #}
+<!-- enctype tells the browser to send the file as binary data rather than URL-encoded text -->
+<form method="POST" action="/groceries/nutrition_logs" enctype="multipart/form-data" data-form-type="action">
+    <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+    <input type="file" name="file" accept=".csv" autocomplete="off">
+    <button type="submit" class="btn btn-secondary">
+        Import CSV
+    </button>
+</form>
+
+{#
+<template id="shopping-list-item-template">
+    <li class="shopping-list-item" data-product-id="" data-item-id="">
+        <button class="btn-icon btn-round inline-delete" data-action="delete"
+            aria-label="Remove shopping list item"
+        >
+            {{ ui.x_svg() }}
+        </button>
+        <input type="number" min="1" value="" autocomplete="off">
+        <label>
+            <span class="item-name"></span>
+            <span class="item-detail"></span>
+        </label>
     </li>
 </template>
 
@@ -34,47 +220,44 @@
         <h2>Shopping List</h2>
     </div>
     <ul class="shopping-list">
-    {% if o_shopping_list.items %}
-        {% for o_item in o_shopping_list.items %}
-            <li class="shoppinglist-item" data-product-id="{{ o_item.product_id }}" data-item-id="{{ o_item.id }}" data-quantity-wanted="{{ o_item.quantity_wanted }}">
-                <button class="btn-icon btn-round inline-delete" data-action="delete" aria-label="Remove shopping list item">{{ ui.x_svg() }}</button>
-                <span class="item-text">{{ o_item.product.name }}</span>
-                <span class="qty-controls">
-                    <span>&nbsp;&nbsp;&nbsp;--</span>
-                    <button class="btn-icon" data-action="decrement" aria-label="Decrement item quantity">{{ ui.minus_svg() }}</button>
-                    <!-- Wrapper here so quantity+'x' remain one unit (ex: 3x instead of 3 x) -->
-                    <span class="item-qty-wrapper">
-                        <span class="item-qty">{{ o_item.quantity_wanted }}</span><span>x</span>
-                    </span>
-                    <button data-action="increment" aria-label="Increment item quantity">{{ ui.plus_svg() }}</button>
-                </span>
+    {%- if shopping_list.items -%}
+        {%- for item in shopping_list.items -%}
+            <li class="shopping-list-item" data-product-id="{{ item.product_id }}" data-item-id="{{ item.id }}">
+                <button class="btn-icon btn-round inline-delete" data-action="delete"
+                    aria-label="Remove shopping list item"
+                >
+                    {{ ui.x_svg() }}
+                </button>
+                <input type="number" min="1" value="{{ item.quantity_wanted }}" autocomplete="off">
+                <label>
+                    <span class="item-name">{{ item.product.name }}</span>
+                    <span class="item-detail">({{ item.product.net_weight|round }}{{ item.product.unit_type }})</span>
+                </label>
             </li>
-        {% endfor %}
+        {%- endfor -%}
+    {%- endif -%}
     </ul>
-    {% endif %}
-    {% if not o_shopping_list.items %}
-        <p id="list-empty">No items in your shopping list yet.</p>
-    {% endif %}
 </div>
+#}
 
-
+{#
 <div class="card-dashboard">
     <div class="card-title">
         <h2>Grocery - Recent Transactions</h2>
         {{ ui.plus_btn('transactions-entry-dashboard-btn') }}
         Last
-        {% call ui.dropdown(d_transactions_params['range']) %}
+        {% call ui.dropdown('ohhh') %}
             <button class="table-range" data-range="1" data-table="transactions">Today</button>
             <button class="table-range" data-range="7" data-table="transactions">7d</button>
             <button class="table-range" data-range="30" data-table="transactions">30d</button>
         {% endcall %}
         days
     </div>
-    {% call(o_item, l_headers) ui.responsive_table('Recent Transactions', l_transaction_headers, l_transactions_for_table, 'groceries', 'transactions', d_transactions_params, sortable=True) %}
-    <td class="{{ l_headers[0].priority }}">{{ o_item.product_name }}</td>
-    <td class="{{ l_headers[1].priority }} text-right">{{ o_item.price_label }}</td>
-    <td class="{{ l_headers[2].priority }} text-right">{{ o_item.price_per_100g_label }}</td>
-    <td class="{{ l_headers[3].priority }} text-right">{{ o_item.created_at_label }}</td>
+    {% call(item, headers) ui.responsive_table('Recent Transactions', transaction_headers, transactions_for_table, 'groceries', 'transactions') %}
+    <td class="{{ headers[0].priority }}">{{ item.product_name }}</td>
+    <td class="{{ headers[1].priority }} text-right">{{ item.price_label }}</td>
+    <td class="{{ headers[2].priority }} text-right">{{ item.price_per_100g_label }}</td>
+    <td class="{{ headers[3].priority }} text-right">{{ item.created_at_label }}</td>
     {% endcall %}
 </div>
 
@@ -83,21 +266,22 @@
         <h2>Product Catalog</h2>
         {{ ui.plus_btn('products-entry-dashboard-btn') }}
         Last
-        {% call ui.dropdown(d_products_params['range']) %}
+        {% call ui.dropdown('ohhh') %}
             <button class="table-range" data-range="1" data-table="products">Today</button>
             <button class="table-range" data-range="7" data-table="products">7d</button>
             <button class="table-range" data-range="30" data-table="products">30d</button>
         {% endcall %}
         days
     </div>
-    {% call(o_item, l_headers) ui.responsive_table('Product Catalog', l_product_headers, l_products_for_table, 'groceries', 'products', d_products_params, sortable=True) %}
-        <td class="{{ l_headers[0].priority }}">{{ o_item.barcode_label }}</td>
-        <td class="{{ l_headers[1].priority }}">{{ o_item.name }}</td>
-        <td class="{{ l_headers[2].priority }} text-right">{{ o_item.category_label }}</td>
-        <td class="{{ l_headers[3].priority }} text-right">{{ o_item.net_weight_label }}</td>
-        <td class="{{ l_headers[4].priority }} text-right">{{ o_item.calories_label }}</td>
+    {% call(item, headers) ui.responsive_table('Product Catalog', product_headers, products_for_table, 'groceries', 'products') %}
+        <td class="{{ headers[0].priority }}">{{ item.barcode_label }}</td>
+        <td class="{{ headers[1].priority }}">{{ item.name }}</td>
+        <td class="{{ headers[2].priority }} text-right">{{ item.category_label }}</td>
+        <td class="{{ headers[3].priority }} text-right">{{ item.net_weight_label }}</td>
+        <td class="{{ headers[4].priority }} text-right">{{ item.calories_label }}</td>
     {% endcall %}
 </div>
+#}
 {% endblock %}
 
 {% block scripts %}{% endblock %}

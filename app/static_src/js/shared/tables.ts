@@ -1,6 +1,7 @@
 // Bundler: Auto-runner => wires tables on DOMContentLoaded
-import { makeToast } from './ui/toast.js';
-import { apiRequest } from './services/api.js';
+import { api } from './services/api';
+import { makeToast } from './ui/toast';
+import { ENUM_SORT_ORDERS } from '../types';
 
 
 /**
@@ -12,7 +13,6 @@ export function removeTableRow(itemRow: HTMLElement): void {
     const tableBody = itemRow.closest('tbody');
     itemRow.remove();
 
-    // Insert "No items yet" placeholder if removing last itemRow
     if (tableBody && tableBody.children.length === 0) {
         const emptyRow = document.createElement('tr');
         const emptyCell = document.createElement('td');
@@ -61,26 +61,94 @@ export async function inlineEditElement(element: HTMLElement): Promise<string|nu
     });
 }
 
+// Cache table sort
+type SortState = { field: string; order: 'asc' | 'desc' } | undefined;
+const tableSorts = new Map<string, SortState>();
+
+const tableRanges = new Map<string, number>(); // Track table range: subtype -> current range
+
+function sortByField<T>(items: T[], field: keyof T, order: 'asc' | 'desc'): T[] {
+    const customOrder = ENUM_SORT_ORDERS[field as string];
+
+    return items.toSorted((a, b) => {
+        const valA = a[field]
+        const valB = b[field]
+
+        // Sort nulls last
+        if (valA === null && valB === null) return 0;
+        if (valA === null) return 1;
+        if (valB === null) return -1;
+
+        const result = customOrder
+            ? customOrder[valA as string] - customOrder[valB as string]
+            : typeof valA === 'string'
+                ? valA.localeCompare(valB as string)
+                : (valA as number) - (valB as number);
+        return order === 'asc' ? result : -result; // localeCompare returns -1/1/0 too, so we can use -result to flip order!! :D
+    })
+}
+
 /**
- * Handle table header clicks for column sorting.
- * Updates URL parameters & reloads page with new sort order.
+ * Handle client-side table sorting and range filtering via click events.
  */
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
     const target = e.target as HTMLElement;
-
-    if (target.matches('.sort-header')) {
-        const table = target.closest('table');
-        const subtype = table?.dataset['subtype'];
+    // TODO: other stuff:
+    // 1. Make it a no-op if new sorted would be identical to currently sorted OR if all fields are null anyway
+    // ALSO: Get this to treat null fields together cleanly like the python version did
+    if (target.closest('th[data-sortable]')) {
+        // TODO: Hacky patch, fix this up
+        const html = document.querySelector('html');
+        if (html.dataset.page === 'groceries.data') return;
+        const table = target.closest('table')!;
         const th = target.closest('th')!;
-        const field = th.dataset['column'];
-        const oldSortOrder = th.dataset['order'];
+        const tbody = table.querySelector('tbody')!;
+        const sortField = th.dataset.column;
+        const { module, subtype } = table.dataset;
 
-        const sortOrder = (oldSortOrder === 'asc') ? 'desc' : 'asc';
+        // Fetch all, since 0 will eval to Falsy (hacky, prob need to improve later)
+        const params = new URLSearchParams({ lastNDays: '0' })
+        const { data } = await api[subtype].getAll();
 
-        const url = new URL(window.location.href);
-        url.searchParams.set(`${subtype}_sort`, `${field}`);
-        url.searchParams.set(`${subtype}_order`, sortOrder);
-        window.location.href = url.toString();
+        // Sort
+        const current = tableSorts.get(subtype)
+        const newOrder = (current?.field === sortField && current?.order === 'asc')
+            ? 'desc'
+            : 'asc';
+        tableSorts.set(subtype, { field: sortField, order: newOrder })
+
+        // Clear prev chevron
+        const prevTh = table.querySelector('th[data-order]')
+        if (prevTh) prevTh.removeAttribute('data-order')
+        th.dataset.order = newOrder; // for CSS chevron flip
+
+        const sortedItems = sortByField(data, sortField, newOrder)
+        sortedItems.forEach(item => {
+            const row = tbody.querySelector(`tr[data-item-id="${item.id}"]`)
+            if (!row) {
+                console.warn(`tables sort: no row for id ${item.id}`)
+                return
+            }
+            tbody.append(row) // move to new pos
+        })
+    }
+    else if (target.matches('.table-range')) {
+        const card = target.closest<HTMLDivElement>('.card-dashboard')!
+        const table = card.querySelector('table')!
+        const tbody = table.querySelector('tbody')!
+        const { module, subtype } = table.dataset;
+
+        const newRange = target.dataset.range!; // set new range to what we just clicked
+        tableRanges.set(subtype, Number(newRange));
+
+        const params = new URLSearchParams({ lastNDays: newRange })
+        const { data } = await api[subtype].getAll(params);
+
+        // Show/hide rows based on what returned - match IDs to do "show those with ID in response.data"
+        const visibleIds = new Set(data.map(item => String(item.id)));
+        tbody.querySelectorAll('tr').forEach(row => {
+            row.classList.toggle('hide', !visibleIds.has(row.dataset.itemId))
+        })
     }
 });
 
@@ -117,12 +185,7 @@ document.addEventListener('dblclick', async (e) => {
             console.error('Missing data attribute');
             return;
         }
-        const url = `/${module}/${subtype}/${itemId}`;
-
-        apiRequest('PATCH', url, { [field]: newValue }, {
-            onSuccess: (responseData: { message: string }) => {
-                makeToast(responseData.message, 'success');
-            }
-        });
+        const response = await api[subtype].patch(itemId, { [field]: newValue });
+        makeToast(response.message, 'success');
     }
 });

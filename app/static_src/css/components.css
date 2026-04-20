@@ -2,14 +2,52 @@
     Reusable UI blocks (buttons, cards, tables)
 */
 
+/* TODO: Classes off the top of my head that are scattered/chaotic: is-open, completed, hide,  */
 
 /* =========================================
    Base button shapes/ergonomics
    ========================================= */
 
+/* TODO: Sketching the "plus_btn with label inside" styling: */
+/*.btn-with-label {
+  border: 1px solid red;
+  border-radius: var(--border-radius);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+
+  &:hover {
+    background: var(--bg-light);
+  }
+}*/
+
+.icon {
+  display: inline-block;
+  width: 1lh;
+  height: 1lh;
+  vertical-align: middle;
+  stroke: currentColor;
+  fill: none;
+}
+
+[data-priority] {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+[data-priority="low"] { color: var(--text-muted); opacity: 0.7; }
+[data-priority="medium"] { color: var(--clr-warning); opacity: 0.8; }
+[data-priority="high"] { color: var(--clr-error); }
+[data-priority="frog"] { color: var(--accent-strong); }
+.badges-svg-defs {
+  display: none;
+}
+
 .btn {
   display: inline-flex;       /* icons+text align */
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   align-items: center;        /* for icon+label vertical centering? */
   justify-content: center;    /* center text when full width */
   padding: var(--space-sm) var(--space-md);
@@ -26,6 +64,7 @@
   padding: 0;
 }
 
+
 /* =========================================
    Shared button states
    ========================================= */
@@ -41,9 +80,14 @@
 .btn[disabled],
 .btn-icon[disabled],
 .btn[aria-disabled="true"],
-.btn-icon[aria-disabled="true"] {
+.btn-icon[aria-disabled="true"],
+*[disabled] {
   cursor: not-allowed;
   opacity: 0.6;
+
+  & * {
+    cursor: not-allowed;
+  }
 }
 
 /* Pressed effect (only for text buttons & tabbed modal tabs) */
@@ -61,6 +105,10 @@
     background-color: var(--bg-hover);
     border-color: var(--accent-subtle);
   }
+  .btn-ghost:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
   .btn-destructive:hover {
     color: var(--bg-light);
     background-color: var(--text-destructive);
@@ -70,9 +118,158 @@
 /* =========================================
    Intent variants
    ========================================= */
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+}
+
 .btn-primary {
   background-color: var(--accent-strong);
+  color: var(--text);
 }
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@property --stop-pos {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+/* Container queries look up the tree to find nearest ancestor with container-type */
+@container (max-width: 40px) {
+  .task-sidebar .sidebar-label {
+    display: none;
+  }
+  .sidebar-option { width: 36px; }
+  .btn-primary--gradient1 {
+    width: 30px;
+    height: 30px;
+    
+    & .label {
+      display: none;
+    }
+  }
+  /* * {
+    outline: 2px solid red;
+  } */
+}
+/* Each "button > thing + span" pair in our left-sidebar */
+.sidebar-option {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  width: 100%;
+  height: 36px;
+  padding-left: 5px; /* centers icon position in sidebar in closed mode, stable in open */
+  /* width is natural/full in open mode ofc */
+}
+.btn-primary--gradient {
+  --angle: 135deg;
+  background-image: linear-gradient(
+    in oklch var(--angle),
+    color-mix(in oklch, white 35%, var(--accent-strong)),
+    var(--accent-strong)
+  );
+  color: var(--text);
+  transition: --angle 0.2s ease, filter 0.2s ease;
+
+  &:hover {
+    --angle: 160deg;
+    filter: brightness(1.1);
+  }
+}
+.btn-primary--gradient1 {
+  --angle: 135deg;
+  --stop-pos: 35%;
+  --lighter-clr: color-mix(in oklch, white var(--stop-pos), var(--accent-strong));
+  background-image: linear-gradient(
+    in oklch var(--angle),
+    var(--lighter-clr) 0%, var(--lighter-clr) 45%,
+    var(--accent-strong) 55%, var(--accent-strong) 100%
+  );
+  color: var(--text);
+  transition: --angle 0.2s ease-out, --stop-pos 0.2s ease,
+    filter 0.2s ease, background-position 0.2s ease;
+  background-size: 250% 100%;
+  background-position: left;
+
+  &:hover {
+    background-position: right;
+    /* --angle: 150deg; */
+    /* --stop-pos: 45%; */
+    /* filter: brightness(1.05); */
+  }
+}
+.btn-primary--gradient2 {
+  --angle: 135deg;
+  background-image: linear-gradient(
+    in oklch var(--angle),
+    color-mix(in oklch, white 35%, var(--accent-strong)),
+    var(--accent-strong)
+  );
+  color: var(--text);
+  transition: --angle 0.4s ease, filter 0.2s ease;
+
+  &:hover {
+    --angle: 150deg;
+    filter: brightness(1.1);
+  }
+}
+.btn-primary--gradient3 {
+  --angle: 135deg;
+  background-image: linear-gradient(
+    in oklch var(--angle),
+    color-mix(in oklch, white 35%, var(--accent-strong)),
+    var(--accent-strong)
+  );
+  color: var(--text);
+  transition: --angle 0.5s ease, filter 0.2s ease;
+
+  &:hover {
+    --angle: 150deg;
+    filter: brightness(1.1);
+  }
+}
+.btn-primary--gradient4 {
+  --angle: 135deg;
+  background-image: linear-gradient(
+    in oklch var(--angle),
+    color-mix(in oklch, white 35%, var(--accent-strong)),
+    var(--accent-strong)
+  );
+  color: var(--text);
+  transition: --angle 0.6s ease, filter 0.2s ease;
+
+  &:hover {
+    --angle: 150deg;
+    filter: brightness(1.1);
+  }
+}
+.btn-primary--gradient5 {
+  --angle: 135deg;
+  --stop-pos: 35%;
+  background-image: linear-gradient(
+    in oklch var(--angle),
+    red 0%, red 45%,
+    white 55%, white 100%
+  );
+  color: var(--text);
+  transition: background-position 2s ease;
+  background-size: 400% 100%;
+  background-position: left;
+
+  &:hover {
+    background-position: right;
+    /* --angle: 150deg; */
+    /* --stop-pos: 45%; */
+    /* filter: brightness(1.05); */
+  }
+}
+
 .btn-secondary {
   background-color: var(--bg-light);
   border: 1px solid transparent; /* prevent layout shift on hover */
@@ -106,20 +303,10 @@
    Size modifiers
    ========================================= */
 
-.btn-lg {
-  width: var(--btn-size-lg);
-  height: var(--btn-size-lg);
-
-  & svg {
-    width: calc(var(--btn-size-lg) * var(--icon-scale));
-    height: calc(var(--btn-size-lg) * var(--icon-scale));
-  }
-}
-
 .profile-modal[open] {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-md);
+  gap: var(--space-md);
 }
 dialog {
   width: clamp(20rem, 90vw, 30rem);
@@ -128,7 +315,8 @@ dialog {
   background-color: var(--bg);
   border: none;
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
+  /* box-shadow: 0 4px 20px rgb(0 0 0 / 30%); */
+  box-shadow: var(--shadow-lg);
 }
 .form-modal,
 .profile-modal,
@@ -140,7 +328,7 @@ dialog {
 dialog[open] {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 dialog[open] .modal-header {
   border-bottom: 2px solid var(--border-color);
@@ -150,6 +338,7 @@ dialog[open] .modal-body {
   min-height: 0;
   padding: var(--space-xs);
   overflow-y: auto;
+  container-type: inline-size; /* TODO: this declares containment for field-pair/--weighted container queries? */
 }
 dialog::backdrop {
   background-color: rgb(0 0 0 / 50%);
@@ -188,15 +377,24 @@ dialog::backdrop {
 .confirmation-actions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--gap-md);
+  gap: var(--space-md);
 }
 
+#tooltip {
+  position: fixed;
+  position-anchor: --tooltip-anchor;
+  /* Constrains the tooltip's inline size to the anchor's inline size? */
+  position-area: block-start center;
+  width: max-content;
+  position-try-fallbacks: flip-block;
+  margin: bottom;
+}
 
-.tooltip { 
-  position: relative; /* positioning context for ::after */
+#tooltip { 
+  /* position: relative; positioning context for ::after */
   max-width: 28ch;
   padding: 4px;
-  margin-bottom: 8px;
+  /* margin-bottom: 8px; */
   color: var(--bg); /* then use current bg as text for color parity */
   overflow-wrap: break-word;
   pointer-events: none;
@@ -204,7 +402,7 @@ dialog::backdrop {
   border: var(--border-default);
   border-radius: var(--border-radius);
 }
-.tooltip:not(#no-after)::after {
+#tooltip:not(#no-after)::after {
   content: "";
   position: absolute;
   bottom: -1rem;
@@ -218,15 +416,17 @@ dialog::backdrop {
 /* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
 .card-dashboard {
   position: relative; /* positioning context for .card-title */
+  container-type: inline-size; /* TODO: this declares containment for container queries on field-pair/weighted? */
   display: flex;
   flex-direction: column;
-  gap: var(--gap-md);
+  gap: var(--space-md);
   align-self: stretch;
   padding: var(--space-xl) var(--space-lg) var(--space-lg);
   background-color: var(--bg);
   border: var(--border-default);
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+  /* box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%); */
+  box-shadow: var(--shadow-sm);
 }
 
 /* =========================================
@@ -241,11 +441,11 @@ form :is(input, select, textarea).invalid {
 .form-column {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 
   /* Target divs at any depth which themselves directly contain a label 
-  For label+input groupings */
-  & div:has(> label) {
+  For label+input groupings (barring toggle-groups) */
+  & div:has(> label):not(.toggle-group) {
     display: grid;
     align-items: center;
   }
@@ -255,10 +455,11 @@ form :is(input, select, textarea).invalid {
 .form-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   align-self: start;
   justify-content: center;
-  width: clamp(5rem, 60vw, 15rem);
+  /* width: clamp(5rem, 60vw, 15rem); */
+  width: auto;
 
   & > * {
     flex: 1; /* size each button equally */
@@ -269,16 +470,17 @@ form :is(input, select, textarea).invalid {
 .field-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 .field-pair--weighted {
   grid-template-columns: 7fr 3fr;
 }
 
-.radio-fieldset {
+.radio-fieldset,
+.checkbox-fieldset {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   justify-content: center;
 
   & > div {
@@ -292,68 +494,307 @@ form :is(input, select, textarea).invalid {
   }
 }
 
+/* TODO: Draft toggle switch */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+:root {
+  --toggle-checkbox-size: 30px;
+}
+/* The "track" */
+.toggle {
+  position: relative;
+  display: inline-block;
+  outline: var(--border-default);
+  width: calc(var(--toggle-checkbox-size) * 2);
+  height: calc(var(--toggle-checkbox-size));
+  border-radius: var(--toggle-checkbox-size);
+  cursor: pointer;
+  background: var(--bg-light);
+  transition: background 0.2s ease;
+
+  /* flair? inset shadow? */
+  box-shadow: inset var(--shadow-md);
+}
+.toggle::before,
+.toggle::after {
+  --gap: 3px;
+  content: "";
+  position: absolute;
+  display: block;
+  width: calc(var(--toggle-checkbox-size) - var(--gap) * 2);
+  height: calc(var(--toggle-checkbox-size) - var(--gap) * 2);
+  border-radius: 200px;
+  margin: var(--gap);
+}
+/* Knob */
+.toggle::before {
+  background-color: color-mix(in oklch, var(--bg-hover) 70%, white);
+  box-shadow: inset 0 0 2px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease, background-image 0.4s ease;
+}
+/* Checkmark inside knob */
+.toggle::after {
+  opacity: 0;
+  /* background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path fill='currentColor' stroke-linecap='round' d='M6.1 11.3L2.8 8l1.4-1.4 1.9 1.9 5.7-5.7L13.2 4z'/></svg>"); */
+  /* Use a mask instead: SVG shape acts as a mask and we control the color via background-color! :P */
+  mask: url("data:image/svg+xml;utf8,<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path fill='currentColor' stroke-linecap='round' d='M6.1 11.3L2.8 8l1.4-1.4 1.9 1.9 5.7-5.7L13.2 4z'/></svg>");
+  background-color: var(--accent-strong);
+  transform: rotate(-90deg);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.toggle-input {
+  display: none;
+
+  &:checked + .toggle {
+    background: var(--accent-subtle);
+    filter: drop-shadow(0 0 6px var(--accent-subtle));
+  }
+  &:checked + .toggle::before {
+    background-color: color-mix(in oklch, var(--bg-hover) 10%, white);
+    transform: scale(1.1) translateX(var(--toggle-checkbox-size));
+  }
+  &:checked + .toggle::after {
+    transform: scale(1.1) translateX(var(--toggle-checkbox-size)) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Override styling for theme toggle specifically */
+.toggle--theme {
+
+  &::after {
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'><path fill-rule='evenodd' d='M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162Z' clip-rule='evenodd' /></svg>");
+    background-color: var(--text-muted);
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+}
+.toggle-input:checked + .toggle--theme::after {
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'><path d='M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z'/></svg>");
+}
+
+/* DRAFT/TODO: Multiple options checkbox counterpart to our above .toggle: Pills */
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border: none;
+  padding: 0;
+}
+.pill {
+  padding: 0.2rem;
+}
+.pill input {
+  position:absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.pill span {
+  position: relative; /* for ::before gradient border */
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid transparent; /* prevent border shift when checked */
+  border-radius: 999px;
+  background: var(--bg-light);
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pill input:checked + span {
+  background: var(--bg-active);
+  color: var(--text-active);
+}
+.pill input:checked + span {
+  background-color: var(--bg-active);
+  background-image: linear-gradient(135deg, var(--accent-strong), color-mix(in oklch, var(--accent-strong) 60%, white));
+    /* linear-gradient(135deg, var(--accent-strong), white) border-box; */
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  border: 1px solid transparent;
+  /* color: var(--text-active); */
+  color: white;
+}
+/* .pill input:checked + span::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent-strong),
+    color-mix(in oklch, var(--accent-strong) 60%, white));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+} */
+
+
+/* DRAFT: Tabbed styling for radio buttons */
+.radio-tabs { --count: 3; }
+.radio-tabs[data-count="2"] { --count: 2; }
+.radio-tabs[data-count="4"] { --count: 4; }
+.radio-tabs[data-count="5"] { --count: 5; }
+.radio-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  background-color: var(--bg-light);
+  border-radius: var(--border-radius);
+  border: var(--border-default);
+
+  & input { display: none; }
+
+  /* Actual "color pill" that moves to selected option */
+  & .glider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: calc(100% / var(--count));
+    transform: translateX(calc(var(--selected) * 100%));
+    border-radius: var(--border-radius);
+    z-index: 1;
+    transition:
+      /* transform 0.5s cubic-bezier(0.37, 1.95, 0.66, 0.56), */
+      transform 0.2s cubic-bezier(0.2, 1.9, 0.5, 0.56),
+      background 0.4s ease-in-out,
+      box-shadow 0.4s ease-in-out;
+    /* background: linear-gradient(135deg, #c0c0c055, #e0e0e0); */
+    /* TODO: Wtf to do with this? given the bg-active/text-active tokens now */
+    /* background: linear-gradient(135deg, var(--accent-subtle), var(--accent-strong)); */
+    background: linear-gradient(135deg, var(--accent-strong), color-mix(in oklch, var(--accent-strong) 70%, black));
+    box-shadow:
+      0 0 18px rgba(192, 192, 192, 0.5),
+      0 0 18px rgba(192, 192, 192, 0.5) inset;
+  }
+  /* Text itself for radio options */
+  & .radio-tab span {
+    z-index: 2;
+    cursor: pointer;
+  }
+  & .radio-tab input:checked + span {
+    color: var(--text-inverse);
+    font-weight: var(--font-weight-semibold);
+  }
+  .radio-tab:nth-of-type(1):has(input:checked) ~ .glider { --selected: 0; }
+  .radio-tab:nth-of-type(2):has(input:checked) ~ .glider { --selected: 1; }
+  .radio-tab:nth-of-type(3):has(input:checked) ~ .glider { --selected: 2; }
+  .radio-tab:nth-of-type(4):has(input:checked) ~ .glider { --selected: 3; }
+  .radio-tab:nth-of-type(5):has(input:checked) ~ .glider { --selected: 4; }
+}
+
+/* DRAFT: trying out anchor positioning */
+.trigger {
+  anchor-name: --my-trigger;
+  border: 1px solid cyan;
+  background: var(--bg);
+}
+/* thing that positions itself */
+.test-tip {
+  position: fixed;
+  position-anchor: --my-trigger;
+  /* place tooltip's top-center at triggers bottom-center */
+  top: anchor(bottom);
+  left: anchor(center);
+  /* translate: -50% 0; */
+}
+
+.radio-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: var(--border-radius);
+
+  & span {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--border-radius);
+  }
+}
+
 
 /* DEBUG/TODO: CLEANUP for task link stuff */
 [data-search] {
   position: relative;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
-.task-cards {
+/* When dropdown is visible, connect them */
+[data-search-wrapper].open input {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+
+[data-search-wrapper].open .subtask-dropdown {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+}
+.subtask-dropdown {
   position: fixed;
   z-index: 50;
   top: calc(100% + 6px);
   width: 100%;
   max-height: min(300px, 40vh);
   overflow-y: auto;
+  scrollbar-width: thin;
   background: var(--bg);
+  /* box-shadow: 0 4px 12px rgba(0,0,0,0.3); */
+  box-shadow: var(--shadow-md);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
-.card {
+.subtask-option {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  border: 1px solid var(--accent-subtle);
+  /* border: 1px solid var(--accent-subtle); */
   background: var(--bg-light);
-  padding: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
 
   &:hover {
     background: var(--bg-hover);
   }
 }
-.card + .card {
-  border-top: 1px solid var(--accent-subtle);
-}
-
-
-.hide {
-  display: none;
+.subtask-option + .subtask-option {
+  border-top: 1px solid var(--bg-dark);
 }
 
 /* wraps all pills */
-.pill-container {
+.subtask-chips {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 /* each pill as a whole (x_svg + name) */
-.my-pill {
+.subtask-chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   background: var(--bg-light);
   color: var(--accent-strong);
   border: 1px solid var(--accent-strong);
   border-radius: var(--border-radius);
   font-size: var(--font-size-sm);
 }
-.pill-remove {
+.subtask-chip-remove {
   opacity: 0.7;
   cursor: pointer;
 }
-.pill-remove:hover {
+.subtask-chip-remove:hover {
   opacity: 1;
   color: var(--clr-error);
 }
 /* wraps label + search input + dropdown */
-.search-wrapper:has(.task-cards:not(.hide)) input {
+.search-wrapper:has(.subtask-dropdown:not(.hide)) input {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -364,7 +805,7 @@ form :is(input, select, textarea).invalid {
    ========================================= */
 
 input, select, textarea {
-  padding: var(--space-sm) 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
   color: var(--text);
   accent-color: var(--accent-subtle);
   background-color: var(--bg-light);
@@ -375,7 +816,10 @@ input, select, textarea {
     cursor: not-allowed;
   }
 }
-
+select:has(option[value=""]:checked) {
+  color: var(--text-muted);
+  /* font-size: var(--font-size-sm); */
+}
 input:not([type="checkbox"], [type="radio"]) {
   width: 100%;
 }
@@ -398,7 +842,9 @@ input:not([type="checkbox"], [type="radio"]) {
    ========================================= */
 
 /* Needed higher specificity here to override so delete-cell properly blends in to card */
-
+td {
+  font-size: small;
+}
 /* TODO: BUG: Fix this & sort out why table-cell class is required for delete-btn's to style properly */
 .table-cell.delete-cell {
   width: 0; /* prevent us from consuming extra table width */
@@ -421,70 +867,70 @@ input:not([type="checkbox"], [type="radio"]) {
   border-collapse: collapse;
 
   & :is(th, td) {
-    padding: var(--space-sm);
+    padding: calc(0.9 * var(--space-sm));
     border: var(--border-default);
   }
 }
 
+.sort-chevron {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.sort-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  pointer-events: none;
+
+  & svg {
+    opacity: 0;
+    width: 1.5em;
+    height: 1.5em;
+    pointer-events: none;
+    transition: transform 0.1s ease;
+  }
+}
 .table-header {
   & th {
     font-weight: var(--font-weight-semibold);
     background-color: var(--bg);
     border-bottom: 2px solid var(--accent-strong);
     color: var(--accent-strong);
-  }
-  /* Rotate table header chevrons when sorted */
-  & th[data-order="asc"] svg {
-    transform: rotate(180deg);
-  }
-
-}
-
-.table-row {
-  transition: background-color 25ms ease-out;
-
-  & .row-actions { /* table context menu ellipsis */
-    visibility: hidden;
-  }
-  &:hover .row-actions {
-    visibility: visible;
-  }
-  &:nth-child(even) {
-    background-color: var(--bg-light);
-  }
-  &:hover {
-    background-color: var(--accent-subtle);
-  }
-}
-
-/* =========================================
-   Context Menu
-   ========================================= */
-.context-menu {
-  position: absolute;
-  z-index: 200;
-  max-width: 50%;
-  background-color: var(--bg);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-
-  & > li {
-    padding: var(--space-sm) var(--space-md);
-  }
-  & > li:hover {
     cursor: pointer;
-    background-color: var(--accent-subtle);
-  }
-  & > li:first-child:hover {
-    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
-  }
-  & > li:last-child:hover {
-    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
-  }
-  & > li:only-child:hover {
-    border-radius: var(--border-radius);
+
+    /* Sorting chevron */
+    &[data-order="asc"] svg {
+      transform: rotate(180deg);
+    }
+    &[data-order="asc"] svg,
+    &[data-order="desc"] svg {
+      opacity: 1;
+    }
   }
 }
+
+
+.table-body {
+  tr {
+    transition: background-color 25ms ease-out;
+
+    & .row-actions {
+      visibility: hidden;
+    }
+    &:hover .row-actions {
+      visibility: visible;
+    }
+    &:nth-child(even) {
+      background-color: var(--bg-light);
+    }
+    &:hover {
+      background-color: var(--accent-subtle);
+    }
+  }
+}
+
 
 /* =========================================
    Layout Components
@@ -496,7 +942,7 @@ input:not([type="checkbox"], [type="radio"]) {
   top: -0.9rem;
   left: 1rem;
   display: flex;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   align-items: center;
   padding: 0 0.05rem;
   background: linear-gradient(
@@ -508,7 +954,7 @@ input:not([type="checkbox"], [type="radio"]) {
   & h2 {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
-    line-height: var(--line-height-higher);
+    line-height: 1.75rem;
     pointer-events: none;
   }
 }
@@ -524,24 +970,66 @@ input:not([type="checkbox"], [type="radio"]) {
   z-index: 400;
   display: flex;
   flex-direction: column-reverse;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   border-radius: var(--border-radius-mild);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px 0 rgb(0 0 0 / 6%);
+}
+
+/* TODO: remove comment here - lets us interpolate this value? */
+@property --countdown {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+@keyframes countdown {
+  from { --countdown: 360deg; }
+  to { --countdown: 0deg; }
 }
 .toast {
-  padding: var(--gap-xs) var(--gap-sm);
+  padding: var(--space-xs) var(--space-sm);
   border: solid 1px transparent;
   border-radius: var(--border-radius-mild);
+  animation: slide-in 0.2s ease forwards;
+  position: relative;
+  box-shadow: var(--shadow-md);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toast-dismiss {
+  position: relative;
+  background: conic-gradient(var(--text-muted) var(--countdown, 360deg), transparent 0);
+  border-radius: 50%;
+  animation: countdown var(--toast-duration) linear forwards;
+  color: var(--text-muted);
+  stroke: var(--text-muted);
+  cursor: pointer;
+
+  & svg {
+    position: relative;
+    z-index: 1;
+  }
+}
+.toast-dismiss::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--toast-color) 30%, var(--bg));
+}
+.toast-exit {
+  animation: slide-out 0.2s ease forwards;
 }
 .toast-success {
-  color: var(--clr-success);
-  background-color: color-mix(in srgb, var(--clr-success) 10%, white); /* Derive from clr-success */
-  border-color: var(--clr-success);
+  --toast-color: var(--clr-success);
+  background-color: color-mix(in srgb, var(--clr-success) 30%, var(--bg)); /* Derive from clr-success */
+  border-color: color-mix(in srgb, var(--clr-success) 30%, var(--bg));
 }
 .toast-error {
-  color: var(--clr-error);
-  background-color: color-mix(in srgb, var(--clr-error) 10%, white);
-  border-color: var(--clr-error);
+  --toast-color: var(--clr-error);
+  background-color: color-mix(in srgb, var(--clr-error) 30%, var(--bg));
+  border-color: color-mix(in srgb, var(--clr-error) 30%, var(--bg));
 }
 
 /* =========================================
@@ -549,11 +1037,11 @@ input:not([type="checkbox"], [type="radio"]) {
    ========================================= */
 .item-list {
   display: grid;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 .item-row {
   display: flex;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   align-items: center;
 }
 .item.completed .item-title {
@@ -568,14 +1056,14 @@ input:not([type="checkbox"], [type="radio"]) {
 .tab-group {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--gap-xs);
+  gap: var(--space-xs);
   padding: var(--space-xs);
   background-color: var(--bg-light);
   border-radius: var(--border-radius);
 }
 .tab {
   display: flex;
-  gap: var(--gap-xs);
+  gap: var(--space-xs);
   align-items: center;     /* centers icons vertically */
   justify-content: center; /* centers icon+text buttons horizontally */
   padding: var(--space-sm);
@@ -595,72 +1083,15 @@ input:not([type="checkbox"], [type="radio"]) {
     transform: translateY(1px);
   }
   &.active {
-    background-color: var(--accent-subtle);
+    background-color: var(--bg-active);
+    color: var(--text-active);
+    border: 1px solid var(--accent-strong);
     filter: brightness(1.2);
     transform: translateY(1px);
   }
 }
 
 
-/* =========================================
-   Dropdown Menu
-   ========================================= */
-.dropdown {
-  position: relative;
-}
-.dropdown.is-open svg {
-  transform: rotate(180deg);
-}
-.dropdown.is-open .dropdown-menu {
-  display: flex;
-}
-
-.dropdown-toggle {
-  display: inline-flex;
-  gap: var(--gap-sm);
-  align-items: center;
-  padding: var(--space-xs) var(--space-sm);
-  white-space: nowrap;
-  background-color: var(--bg-light);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-}
-.dropdown-toggle-chevron,
-.dropdown-toggle-label {
-    pointer-events: none;
-}
-.dropdown-toggle-chevron svg {
-  width: 1em;
-  height: 1em;
-  transition: transform 0.2s ease;
-}
-.dropdown-menu {
-  position: absolute;
-  z-index: 200;
-  display: none;
-  flex-direction: column;
-  background-color: var(--bg-light);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
-
-  & > button {
-    padding: var(--space-sm) var(--space-md);
-    text-align: left;
-  }
-  & > button:hover {
-    background-color: var(--accent-subtle);
-  }
-  & > button:first-child:hover {
-    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
-  }
-  & > button:last-child:hover {
-    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
-  }
-  & > button:only-child:hover {
-    border-radius: var(--border-radius);
-  }
-}
 
 
 
@@ -685,10 +1116,17 @@ input:not([type="checkbox"], [type="radio"]) {
     &:hover {
       background: var(--bg-hover);
     }
+    /* TODO: trying it out */
+    &.active {
+      color: var(--text-active);
+      background: var(--bg-active);
+    }
+
+/* 
     &.active {
       color: var(--accent-subtle);
       background: var(--bg-light);
-    }
+    } */
     &:first-child {
       border-top-left-radius: var(--border-radius);
       border-bottom-left-radius: var(--border-radius);
@@ -710,30 +1148,31 @@ input:not([type="checkbox"], [type="radio"]) {
   grid-template-columns: auto 1fr; /* makes header portion "left-aligned to end of ring"? */
   grid-template-rows: auto 1fr; /* ??? */
   grid-template-areas:
-    "ring header"
-    "ring n-of-k";
+    "visual header"
+    "visual subtitle";
 /*
 [      ][ header ]
 [ ring ][ header ]
 [      ][ n-of-k ]
 */
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   width: clamp(150px, 30vw, 200px);
   padding: var(--space-xs);
   background-color: var(--bg);
   border: var(--border-default);
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%);
+  /* box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%); */
+  box-shadow: var(--shadow-sm);
 }
 
 .stats-header {
   grid-area: header;
   font-size: var(--font-size-sm);
 }
-.n-of-k {
+.stats-subtitle {
   font-size: var(--font-size-md);
   color: var(--accent-strong);
-  grid-area: n-of-k;
+  grid-area: subtitle;
   place-self: end; /* put at...end? bottom? */
 }
 
@@ -743,12 +1182,24 @@ input:not([type="checkbox"], [type="radio"]) {
   initial-value: 0%;
 }
 
+.stats-info {
+  grid-area: visual;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 70px;
+  height: 70px;
+  font-weight: 600;
+  font-size: var(--font-size-xl);
+  color: var(--accent-strong);
+}
+
 /* Ring for progress */
 .stats-ring {
   --size: 70px;
   --bar-width: 20px;
 
-  grid-area: ring;
+  grid-area: visual;
   position: relative;
   display: grid;
   place-items: center;
@@ -795,5 +1246,89 @@ input:not([type="checkbox"], [type="radio"]) {
   & .percentage {
     font-weight: 600;
     font-size: var(--font-size-lg);
+  }
+}
+
+
+
+/* =========================================
+   Dropdown Menu
+   ========================================= */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  anchor-name: --dropdown;
+  display: inline-flex;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-xs) var(--space-sm);
+  white-space: nowrap;
+  background-color: var(--bg-light);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+}
+.dropdown-toggle-chevron,
+.dropdown-toggle-label {
+    pointer-events: none;
+}
+.dropdown-toggle-chevron svg {
+  transition: transform 0.2s ease;
+
+  &.flip { transform: rotate(180deg); }
+}
+.dropdown-menu {
+  position-anchor: --dropdown;
+  width: anchor-size(width); /* reads anchor el's width and applies it */
+  /* also anchor-size(height) if we need it! */
+  top: anchor(bottom);
+  left: anchor(left);
+  position: fixed; /* required for anchor positioning */
+    /* Popover handles show/hide and top-layer */
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-light);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+
+  & > button {
+    display: block;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+  }
+  & > button:hover {
+    background-color: var(--accent-subtle);
+  }
+}
+
+/* =========================================
+   Context Menu
+   ========================================= */
+.context-menu {
+  position: fixed;
+  z-index: 200;
+  max-width: 50%;
+  background-color: var(--bg);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+
+  & > li {
+    padding: var(--space-sm) var(--space-md);
+  }
+  & > li:hover {
+    cursor: pointer;
+    background-color: var(--accent-subtle);
+  }
+  & > li:first-child:hover {
+    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
+  }
+  & > li:last-child:hover {
+    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
+  }
+  & > li:only-child:hover {
+    border-radius: var(--border-radius);
   }
 }

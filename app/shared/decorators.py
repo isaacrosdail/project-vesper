@@ -1,4 +1,5 @@
 import logging
+import os
 from collections.abc import Callable
 from functools import wraps
 from typing import Any, Concatenate, ParamSpec, TypeVar
@@ -13,7 +14,7 @@ R = TypeVar("R")
 
 type Data = dict[str, Any]
 type Errors = dict[str, list[str]]
-type Validator = Callable[[Data], tuple[Data, Errors]]
+type Validator[T] = Callable[[dict[str, Any]], tuple[T | None, Errors]]
 
 
 def login_plus_session(
@@ -34,19 +35,24 @@ def login_plus_session(
     return decorated_function
 
 
-def log_validator(func: Validator) -> Validator:
-    """Logs validation attempts and errors"""
+# # TODO: Doublecheck - changing to align with dataclasses for validated results changes
+# T = TypeVar("T")
+# def log_validator(
+#     func: Callable[P, tuple[T | None, Errors]]
+# ) -> Callable[P, tuple[T | None, Errors]]:
+#     """Logs validation attempts and errors"""
 
-    @wraps(func)
-    def wrapper(data: Data) -> tuple[Data, Errors]:
-        logger = logging.getLogger(func.__module__)
-        logger.debug("%s validating: %s", func.__name__, data)
+#     @wraps(func)
+#     def wrapper(*args: P.args, **kwargs: P.kwargs) -> tuple[T | None, Errors]:
+#         logger = logging.getLogger(func.__module__)
+#         logger.debug("%s validating: %s", func.__name__, args[0] if args else None)
 
-        typed_data, errors = func(data)
-        if errors:
-            logger.warning("%s validation failed: %s", func.__name__, errors)
-        else:
-            logger.debug("%s validation passed: %s", func.__name__, typed_data)
-        return typed_data, errors
+#         result, errors = func(*args, **kwargs)
+#         if errors:
+#             logger.warning("%s validation failed: %s", func.__name__, errors)
+#         else:
+#             logger.debug("%s validation passed: %s", func.__name__, result)
+#         return result, errors
 
-    return wrapper
+#     return wrapper
+

@@ -1,15 +1,23 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
+    from app.modules.time_tracking.models import TimeEntry
+    from app.modules.time_tracking.schemas import TimeEntryCreate, TimeEntryPatch
+
+
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
+
 import pandas as pd
 
-from app.api.responses import service_response
-from app.modules.time_tracking.repository import TimeEntryRepository
 import app.shared.datetime_.helpers as dth
+from app.modules.time_tracking.repository import TimeEntryRepository
+from app.shared.exceptions import ServiceError
+from app.shared.repository.pillar import PillarRepository
 
 
 class TimeTrackingService:
@@ -18,101 +26,102 @@ class TimeTrackingService:
         session: Session,
         user_tz: str,
         time_entry_repo: TimeEntryRepository,
+        pillar_repo: PillarRepository
     ) -> None:
         self.session = session
         self.time_entry_repo = time_entry_repo
         self.user_tz = user_tz
+        self.pillar_repo = pillar_repo
 
-    def save_time_entry(
-        self, typed_data: dict[str, Any], entry_id: int | None
-    ) -> dict[str, Any]:
-        # Derived field values
-        entry_date = typed_data["entry_date"]
-        started_at = dth.parse_time_to_datetime(
-            typed_data["started_at"], entry_date, self.user_tz
-        )
-        ended_at = dth.parse_time_to_datetime(
-            typed_data["ended_at"], entry_date, self.user_tz
-        )
 
-        if ended_at < started_at:
-            return service_response(
-                success=False,
-                message="Error: ended_at cannot be earlier than started_at",
+    def create_time_entry(self, validated: TimeEntryCreate) -> TimeEntry:
+        started, ended, duration = self._parse_and_validate_times(
+            validated.entry_date, validated.started_at, validated.ended_at
+        )
+        time_entry = self.time_entry_repo.create_time_entry(
+            category=validated.category,
+            description=validated.description,
+            started_at=started,
+            ended_at=ended,
+            duration_minutes=duration,
+        )
+        self._sync_pillars(time_entry, validated.pillar_ids)
+        return time_entry
+
+    def _parse_and_validate_times(
+            self,
+            entry_date: date,
+            started_at: time,
+            ended_at: time,
+            exclude_id: int | None = None
+        ) -> tuple[datetime, datetime, int]:
+        """Parse times, check ordering, check for overlap."""
+        start_dt = datetime.combine(entry_date, started_at, tzinfo=ZoneInfo(self.user_tz))
+        end_dt = datetime.combine(entry_date, ended_at, tzinfo=ZoneInfo(self.user_tz))
+
+        if end_dt < start_dt:
+            end_dt += timedelta(days=1)
+
+        if (end_dt - start_dt).total_seconds() > 24 * 3600:
+            raise ServiceError("Time entry cannot exceed 24 hours")
+
+        duration = int((end_dt - start_dt).total_seconds() / 60)
+
+        existing = self.time_entry_repo.get_overlapping_entries(start_dt, end_dt, exclude_id)
+        if existing:
+            raise ServiceError("Time entry overlap")
+
+        return start_dt, end_dt, duration
+
+
+    def _sync_pillars(self, time_entry: TimeEntry, pillar_ids: list[int]) -> None:
+        time_entry.pillars = self.pillar_repo.get_by_ids(pillar_ids)
+
+
+    def update_time_entry(self, entry_id: int, validated: TimeEntryPatch) -> TimeEntry:
+        entry = self.time_entry_repo.get_by_id(entry_id)
+        if not entry:
+            raise ServiceError("Time entry not found", 404)
+
+        TIME_FIELDS = {"entry_date", "started_at", "ended_at"}
+        if TIME_FIELDS & validated.model_fields_set:
+            entry_date = validated.entry_date if "entry_date" in validated.model_fields_set else entry.started_at.astimezone(ZoneInfo(self.user_tz)).date()
+            started_at = validated.started_at if "started_at" in validated.model_fields_set else entry.started_at.astimezone(ZoneInfo(self.user_tz)).time()
+            ended_at = validated.ended_at if "ended_at" in validated.model_fields_set else entry.ended_at.astimezone(ZoneInfo(self.user_tz)).time()
+
+            started, ended, duration_minutes = self._parse_and_validate_times(entry_date, started_at, ended_at,
+                exclude_id=entry_id
             )
-        typed_data["started_at"] = started_at
-        typed_data["ended_at"] = ended_at
+            entry.started_at = started
+            entry.ended_at = ended
+            entry.duration_minutes = duration_minutes
 
-        duration = (ended_at - started_at).total_seconds() / 60
-        typed_data["duration_minutes"] = int(duration)
+        for field in validated.model_fields_set:
+            if field == "pillar_ids":
+                self._sync_pillars(entry, validated.pillar_ids)
+            elif field in TIME_FIELDS:
+                pass  # handled above
+            else:
+                setattr(entry, field, getattr(validated, field))
 
-        # Reject overlapping time entries
-        start_utc, end_utc = day_range_utc(entry_date, self.user_tz)
-        existing_entries = self.time_entry_repo.get_all_time_entries_in_window(
-            start_utc, end_utc
-        )
-        for entry in existing_entries:
-            if entry_id and entry.id == entry_id:  # skip checking against self
-                continue
-            # Allow entries that touch at endpoints (eg, 11:00-12:00 then 12:00-13:00)
-            if (
-                typed_data["started_at"] < entry.ended_at
-                and typed_data["ended_at"] > entry.started_at
-            ):
-                return service_response(
-                    success=False, message="Time entry overlap detected"
-                )
+        return entry
 
-        #  UPDATE/PUT
-        if entry_id:
-            existing_entry = self.time_entry_repo.get_by_id(entry_id)
-            if not existing_entry:
-                return service_response(
-                    success=False, message="Existing entry to be updated was not found"
-                )
-
-            for field, value in typed_data.items():
-                setattr(existing_entry, field, value)
-
-            return service_response(
-                success=True,
-                message="Time entry updated",
-                data={"entry": existing_entry},
-            )
-
-        # CREATE
-        else:
-            entry = self.time_entry_repo.create_time_entry(
-                category=typed_data["category"],
-                description=typed_data.get("description"),
-                started_at=typed_data["started_at"],
-                ended_at=typed_data["ended_at"],
-                duration_minutes=typed_data["duration_minutes"],
-            )
-
-        return service_response(
-            success=True, message="Time entry added", data={"entry": entry}
-        )
 
     def get_time_stuff(self) -> pd.DataFrame:
-        # fetch all time entries
         time_entries = self.time_entry_repo.get_all()
 
-        import sys
-
         # build df
-        df = pd.DataFrame([{
-            "date": dth.convert_to_timezone(self.user_tz, entry.started_at).date(),
-            "duration_minutes": entry.duration_minutes
-        }
-        for entry in time_entries
-        ])
+        rows = [
+            {
+                "date": dth.convert_to_timezone(self.user_tz, entry.started_at).date(),
+                "duration_minutes": entry.duration_minutes
+            }
+            for entry in time_entries
+        ]
+        df = pd.DataFrame(rows)
         # we don't use name= here in reset_index because ["duration_minutes"].sum() produces
         # a Series already named "duration_minutes" (inherits the column name)
-        df = df.groupby("date")["duration_minutes"].sum().reset_index() # sum duration_mins col per date?
-        print(df, file=sys.stderr)
-
-        return df
+        return df.groupby("date")["duration_minutes"].sum().reset_index() # sum duration_mins col per date?
 
 
 def create_time_tracking_service(
@@ -123,4 +132,5 @@ def create_time_tracking_service(
         session=session,
         user_tz=user_tz,
         time_entry_repo=TimeEntryRepository(session, user_id),
+        pillar_repo=PillarRepository(session, user_id)
     )

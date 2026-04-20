@@ -27,7 +27,10 @@ NEVER_DELETE = {
     "alembic_version",
 }
 # Skip sequence reset for association tables
-NO_SEQ = {"habit_tags", "task_tags", "task_links"}
+NO_SEQ = {
+    "habit_tags", "task_tags", "task_links",
+    "habit_pillars", "task_pillars", "time_entry_pillars"
+}
 
 
 def _delete_rows(

@@ -24,6 +24,7 @@ const cssOptions = {
     minify: isProd,
     metafile: true,
     logLevel: 'warning',
+    external: ['/static/*'],
 };
 
 const jsContext = await esbuild.context(jsOptions);

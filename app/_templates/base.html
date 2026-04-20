@@ -31,26 +31,33 @@
             } else if (cookie.includes('theme=dark')) {
                 document.documentElement.setAttribute('data-theme', 'dark');
             } else {
-                document.documentElement.setAttribute('data-theme', 'system');
+                // no cookie
             }
         })();
     </script>
 </head>
 {# Backend set_toast() pushes messsage + type here, which JS reads on page load #}
 <body data-toast='{{ session.pop("toast", None) | tojson | safe }}'>
-    <div class="wrapper">
-        <header>
+    <!-- <div class="wrapper sidebar-open"> -->
+    <div class="wrapper {% block wrapper_mod %}{% endblock %}">
+        <header class="header">
             {% include '_partials/_navbar.html' with context %}
         </header>
 
+        <div popover="manual" id="tooltip"></div>
         {{ ui.confirmation_modal() }}
         {{ ui.toast_container() }}
+        {{ ui.badges_svgs() }}
 
+        {% block sidebar_left %}{% endblock %}
+        {% block sidebar_right %}
+        {% include '_partials/_profile_sidebar.html' %}
+        {% endblock %}
         <main class="content {% block content_mod %}{% endblock %}">
             {% block content %}{% endblock %}
         </main>
 
-        <footer>
+        <footer class="footer">
             &copy; 2025
         </footer>
     </div>

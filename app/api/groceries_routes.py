@@ -8,150 +8,161 @@ if TYPE_CHECKING:
 from flask import Response, request
 from flask_login import current_user
 
+import app.shared.datetime_.helpers as dth
 from app.api import api_bp
-from app.api.responses import api_response, validation_failed
+from app.api.responses import api_response
+from app.modules.groceries.schemas import (
+    ProductCreate,
+    ProductPatch,
+    RecipeCreate,
+    RecipePatch,
+    ShoppingListItemCreate,
+    ShoppingListItemPatch,
+    TransactionPatch,
+)
 from app.modules.groceries.service import create_groceries_service
-from app.modules.groceries.validators import validate_product, validate_transaction
 from app.shared.decorators import login_plus_session
 
 
 @api_bp.post("/groceries/products")
-@api_bp.put("/groceries/products/<int:product_id>")
 @login_plus_session
-def products(session: Session, product_id: int | None = None) -> tuple[Response, int]:
-    typed_data, errors = validate_product(request.json)
-    if errors:
-        return validation_failed(errors), 400
+def post_product(session: Session) -> tuple[Response, int]:
+    validated = ProductCreate(**request.json)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    product = groceries_service.create_product(validated)
+    return api_response(success=True, message="Product created", data=product.to_api_dict()), 201
 
-    groceries_service = create_groceries_service(
-        session, current_user.id, current_user.timezone
-    )
-    result = groceries_service.save_product(typed_data, product_id)
 
-    if not result["success"]:
-        return api_response(
-            success=False, message=result["message"], errors=result["errors"]
-        ), 400
+@api_bp.patch("/groceries/products/<int:product_id>")
+@login_plus_session
+def patch_product(session: Session, product_id: int) -> tuple[Response, int]:
+    validated = ProductPatch(**request.json)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    product = groceries_service.update_product(validated, product_id)
+    return api_response(success=True, message="Product updated", data=product.to_api_dict()), 200
 
-    product = result["data"]["product"]
 
-    status_code = 201 if request.method == "POST" else 200
-    return api_response(
-        success=True, message=result["message"], data=product.to_api_dict()
-    ), status_code
 
+@api_bp.get("/groceries/products")
+@login_plus_session
+def products_list(session: Session) -> tuple[Response, int]:
+    last_n_days = request.args.get("lastNDays", type=int)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+
+    if last_n_days:
+        start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
+        results = groceries_service.product_repo.get_all_in_window(start_utc, end_utc)
+    else:
+        results = groceries_service.product_repo.get_all()
+    data = [t.to_api_dict() for t in results]
+
+    return api_response(success=True, message=f"Retrieved {len(results)} transactions", data=data), 200
+
+
+@api_bp.patch("/groceries/transactions/<int:transaction_id>")
+@login_plus_session
+def patch_transaction(session: Session, transaction_id: int) -> tuple[Response, int]:
+    validated = TransactionPatch(**request.json)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    transaction = groceries_service.update_transaction(validated, transaction_id)
+    return api_response(success=True, message="Transaction updated", data=transaction.to_api_dict()), 200
 
 @api_bp.post("/groceries/transactions")
-@api_bp.put("/groceries/transactions/<int:transaction_id>")
 @login_plus_session
-def transactions(
-    session: Session, transaction_id: int | None = None
-) -> tuple[Response, int]:
-    groceries_service = create_groceries_service(
-        session, current_user.id, current_user.timezone
-    )
+def create_transaction(session: Session) -> tuple[Response, int]:
+    data = request.json
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    transaction = groceries_service.create_transaction(data)
+    return api_response(success=True, message="Transaction created", data=transaction.to_api_dict()), 201
 
-    form_data = request.json
-    product_id_input = form_data["product_id"]
 
-    # Case A: Create new product first
-    if product_id_input == "__new__":
-        # 1. Validate product
-        typed_product_data, product_errors = validate_product(request.json)
-        if product_errors:
-            return validation_failed(product_errors), 400
+@api_bp.get("/groceries/transactions")
+@login_plus_session
+def transactions_list(session: Session) -> tuple[Response, int]:
+    last_n_days = request.args.get("lastNDays", type=int)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
 
-        # 3. Call service to create product, use its id for below transaction add
-        result = groceries_service.save_product(typed_product_data, product_id=None)
-
-        if not result["success"]:
-            return api_response(
-                success=False,
-                message="Failed to create product",
-                errors=result.get("errors"),
-            ), 400
-
-        product_id = result["data"]["product"].id
+    if last_n_days:
+        start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
+        results = groceries_service.transaction_repo.get_all_in_window(start_utc, end_utc)
     else:
-        product_id = int(product_id_input)
+        results = groceries_service.transaction_repo.get_all()
+    data = [t.to_api_dict() for t in results]
 
-    # Case B (fall through): Use existing product, create transaction only
-    # 1. Validate transaction
-    typed_transaction_data, transaction_errors = validate_transaction(
-        request.json
-    )
-    if transaction_errors:
-        return validation_failed(transaction_errors), 400
-
-    result = groceries_service.save_transaction(
-        product_id,
-        typed_transaction_data,
-        transaction_id,  # None -> POST, else PUT
-    )
-
-    transaction = result["data"]["transaction"]
-
-    status_code = 201 if request.method == "POST" else 200
-    return api_response(
-        success=True, message=result["message"], data=transaction.to_api_dict()
-    ), status_code
+    return api_response(success=True, message=f"Retrieved {len(results)} transactions", data=data), 200
 
 
 @api_bp.post("/groceries/shopping_list_items")
 @login_plus_session
-def add_shoppinglist_item(session: Session) -> tuple[Response, int]:
-    groceries_service = create_groceries_service(
-        session, current_user.id, current_user.timezone
-    )
+def post_shoppinglist_item(session: Session) -> tuple[Response, int]:
+    validated = ShoppingListItemCreate(**request.json)
 
-    data = request.json
-    product_id = data.get("product_id")
-    quantity_wanted = data.get("quantity_wanted")
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    item = groceries_service.add_item_to_shoppinglist(validated.product_id, validated.quantity_wanted)
+    return api_response(success=True, message="Item added to shopping list", data=item.to_api_dict()), 201
 
-    result = groceries_service.add_item_to_shoppinglist(product_id, quantity_wanted)
-    item = result["data"]["item"]
-    return api_response(
-        success=True, message=result["message"], data=item.to_api_dict()
-    ), 201
-
-@api_bp.post("/groceries/recipes/")
+@api_bp.patch("/groceries/shopping_list_items/<int:item_id>")
 @login_plus_session
-def recipes(session: Session) -> tuple[Response, int]:
-    data = request.json
-    import sys
-    from pprint import pprint
-    pprint(data, stream=sys.stderr)
+def patch_shoppinglist_item(session: Session, item_id: int) -> tuple[Response, int]:
+    validated = ShoppingListItemPatch(**request.json)
 
-    # typed_data, errors = validate_recipe(pass)
-    groceries_service = create_groceries_service(
-        session, current_user.id, current_user.timezone
-    )
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    item = groceries_service.update_shopping_list_item(item_id, validated)
+    return api_response(success=True, message="Item updated", data=item.to_api_dict()), 200
 
-    item = groceries_service.create_recipe_with_ingredients(
-        data['recipe_name'], data['yields'], data['yields_units'], data['ingredients']
-    )
 
-    ## TODO: Return the actual item.to_api_dict()
-    return api_response(
-        success=True, message="noice", data= { "heck": 2 }
-    ), 201
 
-@api_bp.get("/groceries/recipes/<int:recipe_id>/details")
+@api_bp.post("/groceries/recipes")
+@login_plus_session
+def post_recipe(session: Session) -> tuple[Response, int]:
+    validated = RecipeCreate(**request.json)
+
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    recipe = groceries_service.create_recipe(validated)
+    return api_response(success=True, message="Recipe created", data=recipe.to_api_dict()), 201
+
+
+@api_bp.patch("/groceries/recipes/<int:recipe_id>")
+@login_plus_session
+def patch_recipe(session: Session, recipe_id: int) -> tuple[Response, int]:
+    validated = RecipePatch(**request.json)
+
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    recipe = groceries_service.update_recipe(recipe_id, validated)
+    return api_response(success=True, message="Recipe updated", data=recipe.to_api_dict()), 200
+
+
+@api_bp.get("/groceries/recipes/<int:recipe_id>")
 @login_plus_session
 def get_recipe_detail(session: Session, recipe_id: int) -> tuple[Response, int]:
     groceries_service = create_groceries_service(
         session, current_user.id, current_user.timezone
     )
-
     recipe = groceries_service.recipe_repo.get_recipe_with_ingredients(recipe_id)
     if not recipe:
-        return api_response(
-            success=False,
-            message="Recipe not found :(",
-        ), 404
+        return api_response(success=False, message="Recipe not found"), 404
 
-    return api_response(
-        success=True,
-        message="yolo",
-        data=recipe.to_api_dict(include_relations=True)
+    return api_response(success=True, message="Retrieved recipe", data=recipe.to_api_dict(include_relations=True)
     ), 200
+
+
+# @api_bp.patch("/groceries/recipes/<int:item_id>")
+# @login_plus_session
+# def update_recipe(session: Session, item_id: int) -> tuple[Response, int]:
+#     data = request.get_json()
+#     service = create_groceries_service(session, current_user.id, current_user.timezone)
+#     recipe = service.update_recipe(item_id, data)
+#     session.commit()
+#     return api_response(success=True, message="Recipe updated", data=recipe.to_api_dict()), 200
+
+
+# TODO: Rough, fix
+@api_bp.get("/groceries/nutrition_logs/daily_totals")
+@login_plus_session
+def daily_totals(session: Session) -> tuple[Response, int]:
+    last_n_days = request.args.get("lastNDays", type=int)
+    service = create_groceries_service(session, current_user.id, current_user.timezone)
+    start, end = dth.last_n_days_range(last_n_days, current_user.timezone)
+    results = service.nutrition_log_repo.get_daily_calorie_totals(start, end)
+
+    return api_response(success=True, message="gotcha", data=results), 200

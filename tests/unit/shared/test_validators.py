@@ -53,7 +53,7 @@ def test_validate_string_enforces_max_length():
 
 def test_validate_enum_accepts_case_insensitive():
     value, errors = validate_enum("a", TestEnum, "err")
-    assert value == TestEnum.A
+    assert value is TestEnum.A
     assert errors == []
 
 

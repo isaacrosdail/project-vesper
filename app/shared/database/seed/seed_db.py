@@ -8,27 +8,32 @@ if TYPE_CHECKING:
 
     from app.modules.auth.models import User
 
+import json
 import random
 from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
-
-from app.modules.habits.models import Habit, HabitCompletion
-from app.modules.metrics.models import DailyMetrics
-from app.modules.tasks.models import PriorityEnum, Task
-from app.modules.time_tracking.models import TimeEntry
-from app.shared.models import Tag
 
 from app.modules.groceries.models import (
     Product,
     ProductCategoryEnum,
-    UnitEnum,
-    Transaction,
-    ShoppingList,
-    ShoppingListItem,
     Recipe,
     RecipeIngredient,
+    ShoppingList,
+    ShoppingListItem,
+    Transaction,
+    UnitEnum,
 )
+from app.modules.habits.models import Habit, HabitCompletion
+from app.modules.metrics.models import DailyMetrics
+from app.modules.tasks.models import PriorityEnum, Task
+from app.modules.time_tracking.models import TimeEntry
+from app.shared.models import Pillar, Tag
 
+SEED_DIR = Path(__file__).parent
+
+PRODUCTIVITY_HIGH = 0.7
+PRODUCTIVITY_MED = 0.55
 
 # Seed appropriate datasets for user type
 def seed_data_for(session: Session, user: User) -> None:
@@ -53,7 +58,7 @@ def seed_demo_data(session: Session, user_id: int) -> None:
     task1 = Task(
         name="Review job applications",
         priority=PriorityEnum.HIGH,
-        is_done=False,
+        completed_at=now,
         user_id=user_id,
     )
     task1.tags.append(work_tag)
@@ -61,14 +66,14 @@ def seed_demo_data(session: Session, user_id: int) -> None:
     task2 = Task(
         name="Update portfolio README",
         priority=PriorityEnum.MEDIUM,
-        is_done=False,
+        completed_at=now,
         due_date=now + timedelta(days=3),
         user_id=user_id,
     )
     task2.tags.append(work_tag)
 
     task3 = Task(
-        name="Morning workout", priority=PriorityEnum.LOW, is_done=True, user_id=user_id
+        name="Morning workout", priority=PriorityEnum.LOW, completed_at=now, user_id=user_id
     )
     task3.tags.append(health_tag)
 
@@ -150,27 +155,107 @@ def seed_demo_data(session: Session, user_id: int) -> None:
         user_id=user_id,
         created_at=now,
     )
-
-    # Add everything
     session.add_all(
         [
-            demo_tag,
-            health_tag,
-            work_tag,
-            task1,
-            task2,
-            task3,
-            habit1,
-            habit2,
-            habit3,
-            time1,
-            time2,
-            time3,
-            metric1,
-            metric2,
+            demo_tag, health_tag, work_tag,
+            task1, task2, task3, habit1,
+            habit2, habit3, time1, time2,
+            time3, metric1, metric2,
         ]
     )
 
+
+def create_time_entries(day: datetime, score: float, pillars: dict[str, Pillar], user_id: int) -> list[TimeEntry]:
+    category_to_pillars = {
+        "Programming": [pillars["Career"]],
+        "Walk": [pillars["Health"]],
+        "Tennis": [pillars["Health"], pillars["Relationships"]],
+        "Mario party with friends": [pillars["Relationships"]],
+        "Read": [pillars["Career"]],
+        "Journaling": [pillars["Purpose"]],
+        "Weightlifting": [pillars["Health"]],
+        "Cooking": [pillars["Health"]],
+        "Gaming": [pillars["Rest"]]
+    }
+    # weighted_categories = [
+    #     ("Programming", 8),
+    #     ("Walk", 5),
+    #     ("Weightlifting", 4),
+    #     ("Cooking", 3),
+    #     ("Reading", 3),
+    #     ("Journaling", 2),
+    #     ("Tennis", 2),
+    #     ("Mario party with friends", 1),
+    #     ("Gaming", 1),
+    # ]
+    n_entries = 3 if score > PRODUCTIVITY_HIGH else 2 if score > PRODUCTIVITY_MED else 1
+    categories = random.sample(list(category_to_pillars.keys()), n_entries)
+
+    entries = []
+    current_time = day.replace(hour=random.randint(6, 10), minute=0, second=0, microsecond=0)
+
+    for category in categories:
+        duration = random.randint(30, 90)
+        ended_at = current_time + timedelta(minutes=duration)
+
+        entry = TimeEntry(
+            category=category,
+            started_at=current_time,
+            ended_at=ended_at,
+            duration_minutes=duration,
+            user_id=user_id
+        )
+        entry.pillars = category_to_pillars.get(category, [])
+        entries.append(entry)
+
+        # Gap before next entry
+        current_time = ended_at + timedelta(minutes=random.randint(15, 60))
+    return entries
+
+
+def create_daily_metrics(day: datetime, score: float, user_id: int) -> DailyMetrics:
+    # TODO: Need to tweak the ranges here to be realistic
+    wake_hour  = random.randint(6, 8)   if score > PRODUCTIVITY_HIGH else random.randint(7, 9)
+    sleep_hour = random.randint(22, 24) if score > PRODUCTIVITY_HIGH else random.randint(21, 24)
+
+    wake_datetime = day.replace(
+        hour=wake_hour % 24, minute=random.randint(0, 59), second=0, microsecond=0
+    )
+    sleep_datetime = (day - timedelta(days=1)).replace(
+        hour=sleep_hour % 24, minute=random.randint(0, 59), second=0, microsecond=0
+    )
+    sleep_duration_minutes = int(
+        (wake_datetime - sleep_datetime).total_seconds() // 60
+    )
+
+    steps = (
+        random.randint(8000, 12000)
+        if score > PRODUCTIVITY_HIGH
+        else random.randint(3000, 8000)
+        if score > PRODUCTIVITY_MED
+        else random.randint(500, 3000)
+    )
+
+    return DailyMetrics(
+        entry_datetime=day.replace(hour=12, minute=0, second=0, microsecond=0),
+        weight=round(75 + random.uniform(-0.5, 0.5), 1),
+        steps=steps,
+        calories=random.randint(1800, 2600),
+        wake_datetime=wake_datetime,
+        sleep_datetime=sleep_datetime,
+        sleep_duration_minutes=sleep_duration_minutes,
+        user_id=user_id,
+    )
+
+
+def create_habit_completions(day: datetime, score: float, habits: list[Habit], user_id: int) -> list[HabitCompletion]:
+    n = random.randint(3, 5) if score > PRODUCTIVITY_HIGH else random.randint(1, 3) if score > PRODUCTIVITY_MED else random.randint(0, 2)
+    hour = random.randint(6, 22)
+    created_at = day.replace(hour=hour, minute=0, second=0, microsecond=0)
+    return [
+        HabitCompletion(habit_id=h.id, created_at=created_at, user_id=user_id)
+        for h in random.sample(habits, n)
+    ]
 
 # Comprehensive dataset for development
 ### TO be added: Recipes, Products, Transactions,
@@ -180,360 +265,105 @@ def seed_rich_data(session: Session, user_id: int) -> None:
     # high = 3-4 completions, 90-180mins tracked
     # med  = 1-2 completions, 30-90mins
     # low  = 0-1 completions, 0-30mins
-    # Create habits
-    habit_names = ["walk", "eat", "talk", "sleep", "think", "move", "drink"]
-    # Fields needed: name, target_frequency
+
+    # Grab Pillars
+    pillars = {p.name: p for p in session.query(Pillar).filter_by(user_id=user_id).all()}
+
+    # HABITS
+    habit_names = ["Morning Walk", "30m Coding Drills", "Tidy workspace", "Journal 5mins", "Review weekly goals", "Jogging"]
     habits = [
         Habit(name=name, user_id=user_id, target_frequency=random.randint(1, 7))
         for name in habit_names
     ]
+    habit_to_pillars = {
+        "Morning Walk": [pillars["Health"]],
+        "30m Coding Drills": [pillars["Career"]],
+        "Tidy workspace": [],
+        "Journal 5mins": [pillars["Purpose"]],
+        "Review weekly goals": [pillars["Purpose"]],
+        "Jogging": [pillars["Health"]]
+    }
+    for habit in habits:
+        habit.pillars = habit_to_pillars.get(habit.name, [])
     session.add_all(habits)
     session.flush()
-
-    time_entries_categories = ["Programming", "Walk", "Baseball huh?", "Social", "Read"]
 
     ### TASKS: name, is_done, is_frog OR priority (enum), due_date (mix: some needed for frogs, some optional for tasks)
     ## ~12-15 tasks total
     now = datetime.now(ZoneInfo("UTC"))
-    tasks = create_tasks(now, user_id)
+    tasks = create_tasks(now, user_id, pillars)
     session.add_all(tasks)
+    session.flush()
 
     for day_offset in range(1, 31):
         day = datetime.now(ZoneInfo("UTC")) - timedelta(days=day_offset)
-        hour = random.randint(6, 22)
-        score = random.random()
+        # Bias recent days (1-14) toward higher productivity, older days tend lower
+        base_score = random.random()
+        if day_offset <= 14:
+            score = min(base_score + 0.3, 1.0) # crushing it recently
+        elif day_offset <= 21:
+            score = base_score
+        else:
+            score = max(base_score - 0.25, 1.0) # was slacking before
+        # score = random.random()
 
-        if score > 0.7:  # high productivity
-            n_completions = random.randint(3, 5)
-            duration_minutes = random.randint(90, 180)
-        elif score > 0.55:  # med productivity
-            n_completions = random.randint(1, 3)
-            duration_minutes = random.randint(30, 90)
-        else:  # low productivity
-            n_completions = random.randint(0, 2)
-            duration_minutes = random.randint(0, 30)
-
-        habits_done = random.sample(habits, n_completions)
-
-        created_at = day.replace(hour=hour, minute=0, second=0, microsecond=0)
-
-        for habit in habits_done:
-            completion = HabitCompletion(
-                habit_id=habit.id, created_at=created_at, user_id=user_id
-            )
-            session.add(completion)
-
-        if duration_minutes != 0:
-            ended_at = created_at + timedelta(minutes=duration_minutes)
-            category = random.choice(time_entries_categories)
-            time_entry = TimeEntry(
-                category=category,
-                started_at=created_at,
-                ended_at=ended_at,
-                duration_minutes=duration_minutes,
-                user_id=user_id,
-            )
-            session.add(time_entry)
-
-        ## METRICS:
-        # TODO: Need to tweak the ranges here to be realistic
-        wake_hour = random.randint(6, 8) if score > 0.7 else random.randint(7, 9)
-        sleep_hour = random.randint(22, 24) if score > 0.7 else random.randint(21, 24)
-
-        wake_datetime = day.replace(
-            hour=wake_hour % 24, minute=random.randint(0, 59), second=0, microsecond=0
-        )
-        sleep_datetime = (day - timedelta(days=1)).replace(
-            hour=sleep_hour % 24, minute=random.randint(0, 59), second=0, microsecond=0
-        )
-        sleep_duration_minutes = int(
-            (wake_datetime - sleep_datetime).total_seconds() // 60
-        )
-
-        steps = (
-            random.randint(8000, 12000)
-            if score > 0.7
-            else random.randint(3000, 8000)
-            if score > 0.55
-            else random.randint(500, 3000)
-        )
-
-        metric = DailyMetrics(
-            entry_datetime=day.replace(hour=12, minute=0, second=0, microsecond=0),
-            weight=round(75 + random.uniform(-0.5, 0.5), 1),
-            steps=steps,
-            calories=random.randint(1800, 2600),
-            wake_datetime=wake_datetime,
-            sleep_datetime=sleep_datetime,
-            sleep_duration_minutes=sleep_duration_minutes,
-            user_id=user_id,
-        )
-        session.add(metric)
+        # HABIT COMPLETIONS
+        session.add_all(create_habit_completions(day, score, habits, user_id))
+        # TIME ENTRIES
+        session.add_all(create_time_entries(day, score, pillars, user_id))
+        # METRICS
+        session.add(create_daily_metrics(day, score, user_id))
 
     seed_groceries(session, user_id)
 
 
-def create_tasks(now: datetime, user_id: int) -> list[Task]:
-    # Past 7 days — feeds overdue + frog stats
-    tasks = [
-        Task(
-            name="Fix login bug",
-            priority=PriorityEnum.HIGH,
-            is_frog=False,
-            is_done=False,
-            due_date=now - timedelta(days=2),
+def create_tasks(now: datetime, user_id: int, pillars: dict[str, Pillar]) -> list[Task]:
+    # Past 7 days - feeds overdue + frog stats
+    # with open(f"{SEED_DIR}/tasks.json") as f:
+    with Path(f"{SEED_DIR}/tasks.json").open() as f: # better? modern/OS-agnostic path handling
+        data = json.load(f)
+    # Could also do:
+    # data = json.loads(Path(f"{SEED_DIR}/tasks.json").read_text())
+
+    tasks = []
+    task_lookup = {}
+    for t in data:
+        task = (Task(
+            name=t["name"],
+            priority=PriorityEnum(t["priority"]),
+            completed_at=now + timedelta(days=t["completed_at_offset"]) if t["completed_at_offset"] is not None else None,
+            due_date=now + timedelta(days=t["due_date_offset"]) if t["due_date_offset"] is not None else None,
             user_id=user_id,
-        ),
-        Task(
-            name="Write tests",
-            priority=PriorityEnum.MEDIUM,
-            is_frog=False,
-            is_done=True,
-            due_date=now - timedelta(days=4),
-            user_id=user_id,
-        ),
-        Task(
-            name="Update resume",
-            priority=PriorityEnum.LOW,
-            is_frog=False,
-            is_done=False,
-            due_date=now - timedelta(days=1),
-            user_id=user_id,
-        ),
-        # Frogs in window
-        Task(
-            name="Deploy to prod",
-            is_frog=True,
-            priority=None,
-            is_done=True,
-            due_date=now - timedelta(days=3),
-            user_id=user_id,
-        ),
-        Task(
-            name="Client call prep",
-            is_frog=True,
-            priority=None,
-            is_done=False,
-            due_date=now - timedelta(days=5),
-            user_id=user_id,
-        ),
-        # Upcoming
-        Task(
-            name="Code review",
-            priority=PriorityEnum.MEDIUM,
-            is_frog=False,
-            is_done=False,
-            due_date=now + timedelta(days=2),
-            user_id=user_id,
-        ),
-        Task(
-            name="Weekly review",
-            is_frog=True,
-            priority=None,
-            is_done=False,
-            due_date=now + timedelta(days=1),
-            user_id=user_id,
-        ),
-        # Undated backlog
-        Task(
-            name="Refactor auth module",
-            priority=PriorityEnum.LOW,
-            is_frog=False,
-            is_done=False,
-            user_id=user_id,
-        ),
-        Task(
-            name="Read SICP",
-            priority=PriorityEnum.LOW,
-            is_frog=False,
-            is_done=False,
-            user_id=user_id,
-        ),
-    ]
+            created_at=now - timedelta(days=14)
+        ))
+        task.pillars = [pillars[name] for name in t.get("pillars", [])]
+        tasks.append(task)
+        task_lookup[t["name"]] = task
+
+    # Pass 2: Links for sub/supertasks
+    for t in data:
+        for subtask_name in t.get("subtasks", []):
+            task_lookup[t["name"]].subtasks.append(task_lookup[subtask_name])
     return tasks
 
 
 def seed_groceries(session: Session, user_id: int) -> None:
     now = datetime.now(ZoneInfo("UTC"))
 
-    p = {
-        "banana": Product(
-            name="Banana",
-            category=ProductCategoryEnum.FRUITS,
-            net_weight=120,
-            unit_type=UnitEnum.EA,
-            calories_per_100g=89,
-            user_id=user_id,
-        ),
-        "apple": Product(
-            name="Apple (Gala)",
-            category=ProductCategoryEnum.FRUITS,
-            net_weight=182,
-            unit_type=UnitEnum.EA,
-            calories_per_100g=52,
-            user_id=user_id,
-        ),
-        "broccoli": Product(
-            name="Broccoli",
-            category=ProductCategoryEnum.VEGETABLES,
-            net_weight=350,
-            unit_type=UnitEnum.G,
-            calories_per_100g=34,
-            user_id=user_id,
-        ),
-        "spinach": Product(
-            name="Baby Spinach",
-            category=ProductCategoryEnum.VEGETABLES,
-            net_weight=142,
-            unit_type=UnitEnum.G,
-            calories_per_100g=23,
-            user_id=user_id,
-        ),
-        "bell_pepper": Product(
-            name="Bell Pepper (Red)",
-            category=ProductCategoryEnum.VEGETABLES,
-            net_weight=164,
-            unit_type=UnitEnum.EA,
-            calories_per_100g=31,
-            user_id=user_id,
-        ),
-        "carrot": Product(
-            name="Carrots (bag)",
-            category=ProductCategoryEnum.VEGETABLES,
-            net_weight=453,
-            unit_type=UnitEnum.G,
-            calories_per_100g=41,
-            user_id=user_id,
-        ),
-        "rice": Product(
-            name="White Rice",
-            category=ProductCategoryEnum.GRAINS,
-            net_weight=907,
-            unit_type=UnitEnum.G,
-            calories_per_100g=365,
-            user_id=user_id,
-        ),
-        "oats": Product(
-            name="Rolled Oats",
-            category=ProductCategoryEnum.GRAINS,
-            net_weight=453,
-            unit_type=UnitEnum.G,
-            calories_per_100g=389,
-            user_id=user_id,
-        ),
-        "bread": Product(
-            name="Whole Wheat Bread",
-            category=ProductCategoryEnum.BAKERY,
-            net_weight=570,
-            unit_type=UnitEnum.G,
-            calories_per_100g=247,
-            user_id=user_id,
-        ),
-        "milk": Product(
-            name="Whole Milk (1 gal)",
-            category=ProductCategoryEnum.DAIRY_EGGS,
-            net_weight=3785,
-            unit_type=UnitEnum.ML,
-            calories_per_100g=61,
-            user_id=user_id,
-        ),
-        "yogurt": Product(
-            name="Greek Yogurt (plain)",
-            category=ProductCategoryEnum.DAIRY_EGGS,
-            net_weight=150,
-            unit_type=UnitEnum.G,
-            calories_per_100g=59,
-            user_id=user_id,
-        ),
-        "eggs": Product(
-            name="Eggs (12ct)",
-            category=ProductCategoryEnum.DAIRY_EGGS,
-            net_weight=12,
-            unit_type=UnitEnum.EA,
-            calories_per_100g=155,
-            user_id=user_id,
-        ),
-        "cheese": Product(
-            name="Cheddar Cheese",
-            category=ProductCategoryEnum.DAIRY_EGGS,
-            net_weight=226,
-            unit_type=UnitEnum.G,
-            calories_per_100g=402,
-            user_id=user_id,
-        ),
-        "chicken": Product(
-            name="Chicken Breast",
-            category=ProductCategoryEnum.MEATS,
-            net_weight=680,
-            unit_type=UnitEnum.G,
-            calories_per_100g=165,
-            user_id=user_id,
-        ),
-        "ground_beef": Product(
-            name="Ground Beef (80/20)",
-            category=ProductCategoryEnum.MEATS,
-            net_weight=454,
-            unit_type=UnitEnum.G,
-            calories_per_100g=254,
-            user_id=user_id,
-        ),
-        "olive_oil": Product(
-            name="Olive Oil",
-            category=ProductCategoryEnum.FATS_OILS,
-            net_weight=473,
-            unit_type=UnitEnum.ML,
-            calories_per_100g=884,
-            user_id=user_id,
-        ),
-        "butter": Product(
-            name="Unsalted Butter",
-            category=ProductCategoryEnum.FATS_OILS,
-            net_weight=454,
-            unit_type=UnitEnum.G,
-            calories_per_100g=717,
-            user_id=user_id,
-        ),
-        "black_beans": Product(
-            name="Black Beans (can)",
-            category=ProductCategoryEnum.LEGUMES,
-            net_weight=425,
-            unit_type=UnitEnum.G,
-            calories_per_100g=91,
-            user_id=user_id,
-        ),
-        "chickpeas": Product(
-            name="Chickpeas (can)",
-            category=ProductCategoryEnum.LEGUMES,
-            net_weight=400,
-            unit_type=UnitEnum.G,
-            calories_per_100g=164,
-            user_id=user_id,
-        ),
-        "soy_sauce": Product(
-            name="Soy Sauce",
-            category=ProductCategoryEnum.CONDIMENTS_SAUCES,
-            net_weight=300,
-            unit_type=UnitEnum.ML,
-            calories_per_100g=60,
-            user_id=user_id,
-        ),
-        "almonds": Product(
-            name="Almonds (raw)",
-            category=ProductCategoryEnum.SNACKS,
-            net_weight=170,
-            unit_type=UnitEnum.G,
-            calories_per_100g=579,
-            user_id=user_id,
-        ),
-        "orange_juice": Product(
-            name="Orange Juice",
-            category=ProductCategoryEnum.BEVERAGES,
-            net_weight=1890,
-            unit_type=UnitEnum.ML,
-            calories_per_100g=45,
-            user_id=user_id,
-        ),
-    }
+    # with open(f"{SEED_DIR}/products.json") as f:
+    with Path(f"{SEED_DIR}/products.json").open() as f:
+        data = json.load(f)
+
+    p = {}
+    for key, attrs in data.items():
+        p[key] = Product(
+            name=attrs["name"],
+            category=ProductCategoryEnum(attrs["category"]),
+            net_weight=attrs["net_weight"],
+            unit_type=UnitEnum(attrs["unit_type"]),
+            calories_per_100g=attrs["calories_per_100g"],
+            user_id=user_id
+        )
     session.add_all(p.values())
     session.flush()
 
@@ -658,145 +488,44 @@ def seed_groceries(session: Session, user_id: int) -> None:
     session.add_all([r_stir_fry, r_oatmeal, r_eggs, r_beef_bowl, r_salad])
     session.flush()
 
-    session.add_all(
-        [
-            # Chicken Stir Fry
-            RecipeIngredient(
-                recipe_id=r_stir_fry.id,
-                product_id=p["chicken"].id,
-                amount_value=500,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_stir_fry.id,
-                product_id=p["broccoli"].id,
-                amount_value=200,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_stir_fry.id,
-                product_id=p["bell_pepper"].id,
-                amount_value=150,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_stir_fry.id,
-                product_id=p["soy_sauce"].id,
-                amount_value=30,
-                amount_units=UnitEnum.ML,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_stir_fry.id,
-                product_id=p["olive_oil"].id,
-                amount_value=20,
-                amount_units=UnitEnum.ML,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_stir_fry.id,
-                product_id=p["rice"].id,
-                amount_value=300,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            # Morning Oatmeal
-            RecipeIngredient(
-                recipe_id=r_oatmeal.id,
-                product_id=p["oats"].id,
-                amount_value=80,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_oatmeal.id,
-                product_id=p["banana"].id,
-                amount_value=1,
-                amount_units=UnitEnum.EA,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_oatmeal.id,
-                product_id=p["milk"].id,
-                amount_value=240,
-                amount_units=UnitEnum.ML,
-                user_id=user_id,
-            ),
-            # Scrambled Eggs
-            RecipeIngredient(
-                recipe_id=r_eggs.id,
-                product_id=p["eggs"].id,
-                amount_value=3,
-                amount_units=UnitEnum.EA,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_eggs.id,
-                product_id=p["butter"].id,
-                amount_value=15,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_eggs.id,
-                product_id=p["milk"].id,
-                amount_value=30,
-                amount_units=UnitEnum.ML,
-                user_id=user_id,
-            ),
-            # Beef Rice Bowl
-            RecipeIngredient(
-                recipe_id=r_beef_bowl.id,
-                product_id=p["ground_beef"].id,
-                amount_value=300,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_beef_bowl.id,
-                product_id=p["rice"].id,
-                amount_value=200,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_beef_bowl.id,
-                product_id=p["carrot"].id,
-                amount_value=100,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_beef_bowl.id,
-                product_id=p["soy_sauce"].id,
-                amount_value=20,
-                amount_units=UnitEnum.ML,
-                user_id=user_id,
-            ),
-            # Spinach Salad
-            RecipeIngredient(
-                recipe_id=r_salad.id,
-                product_id=p["spinach"].id,
-                amount_value=100,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_salad.id,
-                product_id=p["bell_pepper"].id,
-                amount_value=80,
-                amount_units=UnitEnum.G,
-                user_id=user_id,
-            ),
-            RecipeIngredient(
-                recipe_id=r_salad.id,
-                product_id=p["olive_oil"].id,
-                amount_value=15,
-                amount_units=UnitEnum.ML,
-                user_id=user_id,
-            ),
+    recipe_ingredients = {
+        r_stir_fry: [
+            ("chicken", 500, "g"),
+            ("broccoli", 200, "g"),
+            ("bell_pepper", 150, "g"),
+            ("soy_sauce", 30, "ml"),
+            ("olive_oil", 20, "ml"),
+            ("rice", 300, "g"),
+        ],
+        r_oatmeal: [
+            ("oats", 80, "g"),
+            ("banana", 1, "ea"),
+            ("milk", 240, "ml"),
+        ],
+        r_eggs: [
+            ("eggs", 3, "ea"),
+            ("butter", 15, "g"),
+            ("milk", 30, "ml"),
+        ],
+        r_beef_bowl: [
+            ("ground_beef", 300, "g"),
+            ("rice", 200, "g"),
+            ("carrot", 100, "g"),
+            ("soy_sauce", 20, "ml")
+        ],
+        r_salad: [
+            ("spinach", 100, "g"),
+            ("bell_pepper", 80, "g"),
+            ("olive_oil", 15, "ml")
         ]
-    )
+    }
+
+    for recipe, ingredients in recipe_ingredients.items():
+        for product_key, amount, units in ingredients:
+            session.add(RecipeIngredient(
+                recipe_id=recipe.id,
+                product_id=p[product_key].id,
+                amount_value=amount,
+                amount_units=UnitEnum(units),
+                user_id=user_id,
+            ))

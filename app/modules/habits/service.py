@@ -7,25 +7,33 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from datetime import date
     from sqlalchemy.orm import Session
 
+    from app.modules.habits.models import Habit, HabitCompletion
+    from app.modules.habits.schemas import Habit as HabitCreate
+    from app.modules.habits.schemas import HabitPatch as HabitUpdate
+    from app.shared.models import Pillar
 
-from datetime import datetime
+from collections import defaultdict
+from datetime import date, datetime
 from itertools import pairwise
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 
 import app.shared.datetime_.helpers as dth
-from app.api.responses import service_response
+from app.modules.habits.models import StatusEnum
 from app.modules.habits.repository import (
     HabitCompletionRepository,
     HabitRepository,
     LeetCodeRecordRepository,
 )
+from app.shared.exceptions import ServiceError
 
-STREAK_GRACE_DAYS = 2  # Allow yesterday or today to continue streak
+# from app.shared.models import Pillar
+from app.shared.repository.pillar import PillarRepository
+
+STREAK_GRACE_DAYS = 2  # Allow yesterday or today to continue streak TODO: formalize/save this somewhere better
 
 
 class HabitsService:
@@ -36,37 +44,79 @@ class HabitsService:
         habit_repo: HabitRepository,
         completion_repo: HabitCompletionRepository,
         leetcode_repo: LeetCodeRecordRepository,
+        pillar_repo: PillarRepository
     ) -> None:
         self.session = session
         self.user_tz = user_tz
         self.habit_repo = habit_repo
         self.completion_repo = completion_repo
         self.leetcode_repo = leetcode_repo
+        self.pillar_repo = pillar_repo
+        self.streak_calc = StreakCalculator(today=datetime.now(ZoneInfo(user_tz)).date())
 
-    def save_habit(self, typed_data: dict[str, Any], habit_id: int | None) -> Any:
-        # UPDATE
-        if habit_id:
-            habit = self.habit_repo.get_by_id(habit_id)
-            if not habit:
-                return service_response(success=False, message="Habit not found")
+    def update_habit(self, validated: HabitUpdate, habit_id: int) -> Habit:
+        habit = self.habit_repo.get_by_id(habit_id)
+        if not habit:
+            raise ServiceError("Habit not found", 404)
 
-            for field, value in typed_data.items():
-                setattr(habit, field, value)
+        for field in validated.model_fields_set:
+            if field == "pillar_ids":
+                continue
+            setattr(habit, field, getattr(validated, field))
 
-            return service_response(
-                success=True, message="Habit updated", data={"habit": habit}
-            )
+        if "pillar_ids" in validated.model_fields_set:
+            pillars = self.pillar_repo.get_by_ids(validated.pillar_ids)
+            habit.pillars = pillars
 
+        return habit
+
+    def create_habit(self, validated: HabitCreate) -> Habit:
+        # do the is_promotable thing
+        status = self._resolve_status(validated.is_promotable)
+
+        habit = self.habit_repo.create_habit(
+            name=validated.name,
+            status=status,
+            target_frequency=validated.target_frequency,
+            pillar_ids=validated.pillar_ids,
+        )
+        self.session.flush()
+        return habit
+
+    def _resolve_status(self, is_promotable: bool) -> StatusEnum | None:
+        return StatusEnum.EXPERIMENTAL if is_promotable else None
+
+    def _resolve_pillars(self, pillar_ids: list[int]) -> list[Pillar]:
+        return self.pillar_repo.get_by_ids(pillar_ids)
+
+
+    def save_completion(self, habit_id: int, completed_at: datetime) -> tuple[HabitCompletion, dict[str, Any]]:
+        habit = self.habit_repo.get_by_id(habit_id)
+        if not habit:
+            raise ServiceError("Habit not found", 404)
+
+        completion = self.completion_repo.create_habit_completion(habit.id, completed_at)
+        self.session.flush()
+
+        self.check_promotion(habit)
+        progress = self.calculate_all_habits_percentage_this_week()
+        return completion, progress
+
+    def delete_completion(self, habit_id: int, date_str: str) -> dict[str, Any]:
+        if date_str == "today":
+            start_utc, end_utc = dth.today_range_utc(self.user_tz)
         else:
-            habit = self.habit_repo.create_habit(
-                name=typed_data["name"],
-                status=typed_data.get("status"),
-                promotion_threshold=typed_data.get("promotion_threshold"),
-                target_frequency=typed_data["target_frequency"],
-            )
-            return service_response(
-                success=True, message="Habit added", data={"habit": habit}
-            )
+            parsed_date = date.fromisoformat(date_str)
+            start_utc, end_utc = dth.day_range_utc(parsed_date, self.user_tz)
+
+        completion = self.completion_repo.get_habit_completion_in_window(habit_id, start_utc, end_utc)
+        if not completion:
+            raise ServiceError("No completion found", 404)
+
+        self.completion_repo.delete(completion)
+        # self.check_promotion(habit) # would we un-promote a habit?
+        return self.calculate_all_habits_percentage_this_week()
+
 
     # Streak calc: scan completion dates looking for consecutive days
     #  Similar pattern to LC#121 (Best Time to Buy/Sell Stock) - one-pass scan with invariant
@@ -75,35 +125,92 @@ class HabitsService:
     # max_profit <-> streak length
     def calculate_habit_streak(self, habit_id: int) -> int:
         """Calculate current streak for given habit."""
-        habit_completions = self.completion_repo.get_all_habit_completions(
+        completions = self.completion_repo.get_all_habit_completions(
             habit_id, order_desc=True
         )
+        tz = ZoneInfo(self.user_tz)
+        dates = [c.completed_at.astimezone(tz).date() for c in completions]
+        return self.streak_calc.current_streak(dates)
 
-        if not habit_completions:
-            return 0
+        # if not habit_completions:
+        #     return 0
 
-        # Convert to user timezone for calendar day logic
-        user_timezone = ZoneInfo(self.user_tz)
-        today_date = datetime.now(user_timezone).date()
-        local_completion_dates = [
-            c.created_at.astimezone(user_timezone).date() for c in habit_completions
-        ]
+        # # Convert to user timezone for calendar day logic
+        # user_timezone = ZoneInfo(self.user_tz)
+        # today_date = datetime.now(user_timezone).date()
+        # local_completion_dates = [
+        #     c.created_at.astimezone(user_timezone).date() for c in habit_completions
+        # ]
 
-        # Check if streak exists (must be within 2 days of today)
-        if (today_date - local_completion_dates[0]).days >= STREAK_GRACE_DAYS:
-            return 0
+        # if (today_date - local_completion_dates[0]).days >= STREAK_GRACE_DAYS:
+        #     return 0
+        # streak = 1
+        # for curr_date, prev_date in pairwise(local_completion_dates):
+        #     if (curr_date - prev_date).days == 1:
+        #         streak += 1
+        #     else:
+        #         break
 
-        # Count consecutive days using pairwise()
-        # pairwise() = lazy iterator, no list allocation: O(n) time, O(1) extra space
-        # Stil O(n) like zip(seq, seq[1:]) would be
-        streak = 1
-        for curr_date, prev_date in pairwise(local_completion_dates):
-            if (curr_date - prev_date).days == 1:
-                streak += 1
-            else:
-                break
+        # return streak
 
-        return streak
+    # TODO: De-dupe? idk
+    def get_all_streaks(self) -> dict[int, int]:
+        completions = self.completion_repo.get_all()
+
+        # user_timezone = ZoneInfo(self.user_tz)
+        # today_date = datetime.now(user_timezone).date()
+
+        # Group by habit_id
+        by_habit = defaultdict(list)
+        tz = ZoneInfo(self.user_tz)
+        for c in completions:
+            # local_date = c.created_at_local.date()
+            by_habit[c.habit_id].append(c.completed_at.astimezone(tz).date())
+
+        return {
+            habit_id: self.streak_calc.current_streak(sorted(dates, reverse=True))
+            for habit_id, dates in by_habit.items()
+        }
+        # streaks = {}
+        # for habit_id, dates in by_habit.items():
+        #     dates.sort(reverse=True)
+        #     if (today_date - dates[0]).days >= STREAK_GRACE_DAYS:
+        #         streaks[habit_id] = 0
+        #         continue
+        #     streak = 1
+        #     for curr, prev in pairwise(dates):
+        #         if (curr - prev).days == 1:
+        #             streak += 1
+        #         else:
+        #             break
+        #     streaks[habit_id] = streak
+
+        # return streaks
+
+    def check_promotion(self, habit: Habit) -> Any:
+        ## Over the last N weeks, what % of the target did user actually hit?
+        # range for completions, fetch records for this habit_id
+        # DEBUG: Testing emit/on system actually fires:
+        start_utc, end_utc = dth.last_n_days_range(days_ago=63, tz_str=self.user_tz)
+        completions = self.completion_repo.thing(habit.id, start_utc, end_utc)
+
+        # target = this habit's target_freq * 63
+        # habit = self.habit_repo.get_by_id(habit_id)
+        target = habit.target_frequency
+        PROMOTION_THRESHOLD = 0.7
+        # For each week, we wanna ask:
+        # is num_completions >= this_habit.target_frequency?
+        # if yes -> success, else -> subpar week
+        successful_weeks = 0
+        for week, count in completions:
+            if count >= target:
+                successful_weeks += 1
+
+        # We now have both num_weeks and successful_weeks
+        # rate = successful_weeks / 9
+        rate = successful_weeks / 9
+        if rate >= PROMOTION_THRESHOLD: # if we hit wkly target in at least 70% of the last 9 weeks, promote
+            habit.status = StatusEnum.ESTABLISHED
 
 
     def check_if_completed_today(self, habit_id: int) -> bool:
@@ -117,6 +224,7 @@ class HabitsService:
         return completion is not None
 
     # NOTE: "Percent completion habits this week" - Mon to Sun
+    # TODO: Fix this up
     def calculate_all_habits_percentage_this_week(self) -> dict[str, Any]:
         """
         Calculate aggregate habit completion progress for the current week.
@@ -156,35 +264,26 @@ class HabitsService:
             "total": expected_completions,
             "percent": percent_completed,
         }
-    
+
     def get_daily_completion_counts(self) -> pd.DataFrame:
         # fetches all completion records for user
         completion_records = self.completion_repo.get_all()
 
-        # convert each created_at to local date, so we'll just have
-        # a list of completion counts per date
+        # convert completed_at's to local date -> list of completion counts per date
         completion_records_local = [
-            dth.convert_to_timezone(self.user_tz, entry.created_at).date()
+            dth.convert_to_timezone(self.user_tz, entry.completed_at).date()
             for entry in completion_records
         ]
-        import sys
-        print(completion_records_local, file=sys.stderr)
 
-        # group by local date + count completions per day
-
-        # creating dataframe from a list:
+        # group by local date + count completions per day, make dataframe from list:
         df = pd.DataFrame({ "date": completion_records_local })
-        print(df, file=sys.stderr)
 
         # count occurrences of each val in a col:
         # groupby("date") groups rows by unique date values
         # size() counts how many rows are in each group
         # .reset_index(name="completion_count") turns it back into a clean two-col DataFrame:
         # date and completion_count
-        df = df.groupby("date").size().reset_index(name="completion_count")
-        print(df, file=sys.stderr)
-
-        return df
+        return df.groupby("date").size().reset_index(name="completion_count")
 
 
 def create_habits_service(
@@ -197,4 +296,31 @@ def create_habits_service(
         habit_repo=HabitRepository(session, user_id),
         completion_repo=HabitCompletionRepository(session, user_id),
         leetcode_repo=LeetCodeRecordRepository(session, user_id),
+        pillar_repo=PillarRepository(session, user_id)
     )
+
+class StreakCalculator:
+    GRACE_DAYS = 2
+
+    def __init__(self, today: date):
+        self.today = today
+
+    def current_streak(self, dates: list[date]) -> int:
+        """Dates must be in descending order"""
+        if not dates:
+            return 0
+
+        # Check if streak exists (must be within 2 days of today)
+        if (self.today - dates[0]).days >= self.GRACE_DAYS:
+            return 0
+
+        # Count consecutive days using pairwise()
+        # pairwise() = lazy iterator, no list allocation: O(n) time, O(1) extra space
+        # Stil O(n) like zip(seq, seq[1:]) would be
+        streak = 1
+        for curr, prev in pairwise(dates):
+            if (curr - prev).days == 1:
+                streak += 1
+            else:
+                break
+        return streak

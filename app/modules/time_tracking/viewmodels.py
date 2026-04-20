@@ -7,8 +7,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
     from app.modules.time_tracking.models import TimeEntry
 
 
@@ -16,25 +14,25 @@ from app.shared.view_mixins import BasePresenter, BaseViewModel
 
 
 class TimeEntryViewModel(BaseViewModel):
-    category: str
-    duration_minutes: int
-    description: str
-    started_at_local: datetime
-    ended_at_local: datetime
+    __slots__ = (
+        "category",
+        "description",
+        "description",
+        "duration_minutes",
+        "ended_at_local",
+        "id",
+        "started_at_local",
+        "subtype",
+    )
 
     def __init__(self, entry: TimeEntry, tz: str) -> None:
-        fields = {
-            "id",
-            "category",
-            "duration_minutes",
-            "description",
-            "started_at_local",
-            "ended_at_local",
-            "subtype",
-        }
-        for name in fields:
-            setattr(self, name, getattr(entry, name))
-
+        self.category = entry.category
+        self.duration_minutes = entry.duration_minutes
+        self.started_at_local = entry.started_at_local
+        self.ended_at_local = entry.ended_at_local
+        self.subtype = entry.subtype
+        self.description = entry.description
+        self.id = entry.id
         self._tz = tz
 
     @property

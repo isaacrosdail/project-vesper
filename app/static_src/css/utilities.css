@@ -3,36 +3,36 @@
 .stack-md {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-md);
+  gap: var(--space-md);
 }
 
 .stack-lg {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-lg);
+  gap: var(--space-lg);
 }
 
 .grid-2col-7030 {
   display: grid;
   grid-template-columns: 7fr 3fr;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 
 .grid-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 
 .inline-flex-sm {
   display: inline-flex;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   align-items: center;
 }
 
 .inline-flex-md {
   display: inline-flex;
-  gap: var(--gap-md);
+  gap: var(--space-md);
   align-items: center;
 }
 

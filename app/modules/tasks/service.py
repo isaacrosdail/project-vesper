@@ -6,14 +6,22 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
     from app.modules.auth.models import User
+    from app.modules.tasks.models import Task
+    from app.modules.tasks.schemas import Task as TaskCreate
+    from app.modules.tasks.schemas import TaskPatch
+
 
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 import app.shared.datetime_.helpers as dth
-from app.api.responses import service_response
+from app.modules.tasks.models import PriorityEnum
 from app.modules.tasks.repository import TaskRepository
+from app.shared.exceptions import ServiceError
 from app.shared.hooks import register_patch_hook
+from app.shared.repository.pillar import PillarRepository
+from app.shared.utils import is_acyclic
+import app.shared.datetime_.helpers as dth
 
 
 class TasksService:
@@ -22,118 +30,138 @@ class TasksService:
         session: Session,
         user_tz: str,
         task_repo: TaskRepository,
+        pillar_repo: PillarRepository
     ) -> None:
         self.session = session
         self.task_repo = task_repo
         self.user_tz = user_tz
+        self.pillar_repo = pillar_repo
 
-    def save_task(
-        self, typed_data: dict[str, Any], task_id: int | None
-    ) -> dict[str, Any]:
-        # Attach due_date datetime
-        typed_data["due_date"] = self.to_eod_datetime(
-            typed_data.get("due_date"), self.user_tz
+    def create_task(self, validated: TaskCreate) -> Task:
+        due_datetime = dth.to_eod_datetime(validated.due_date, self.user_tz)
+
+        self._validate_frog_rule(validated)
+
+        task = self.task_repo.create_task(
+            name=validated.name,
+            priority=validated.priority,
+            due_date=due_datetime,
+        )
+        self._sync_pillars(task, validated.pillar_ids)
+        self._sync_subtasks(task, validated.subtask_ids)
+        return task
+
+    def update_task(self, task_id: int, validated: TaskPatch) -> Task:
+        task = self.task_repo.get_by_id(task_id)
+        if not task:
+            raise ServiceError("Task not found", 404)
+
+        # Cross-field validation
+        new_priority = validated.priority if "priority" in validated.model_fields_set else task.priority
+        new_due_date = validated.due_date if "due_date" in validated.model_fields_set else task.due_date
+        if new_due_date is not None and "due_date" in validated.model_fields_set:
+            new_due_date = dth.to_eod_datetime(new_due_date, self.user_tz)
+
+        self._validate_frog_rule_for_values(
+            priority=new_priority,
+            due_date=new_due_date,
+            current_task_id=task.id,
         )
 
-        # Check for existing frog task
-        if typed_data["is_frog"]:
-            start_utc, end_utc = dth.day_range_utc(
-                typed_data["due_date"].date(), self.user_tz
+        for field in validated.model_fields_set:
+            if field in {"pillar_ids", "subtask_ids"}:
+                continue
+            value = getattr(validated, field)
+            if field == "due_date" and value is not None:
+                value = dth.to_eod_datetime(value, self.user_tz)
+            setattr(task, field, value)
+
+        if "pillar_ids" in validated.model_fields_set:
+            self._sync_pillars(task, validated.pillar_ids)
+        if "subtask_ids" in validated.model_fields_set:
+            self._sync_subtasks(task, validated.subtask_ids)
+
+        return task
+
+
+    def _validate_frog_rule(self, validated: TaskCreate | TaskPatch) -> None:
+            self._validate_frog_rule_for_values(
+                priority=validated.priority,
+                due_date=validated.due_date,
+                current_task_id=None,
             )
 
-            existing_frog = self.task_repo.get_frog_task_in_window(start_utc, end_utc)
-            if existing_frog:
-                frog_date = typed_data["due_date"].date().isoformat()
-                return service_response(
-                    success=False,
-                    message="Error: Duplicate frog task",
-                    errors={
-                        "frog_task": [f"You already have a 'frog' task for {frog_date}"]
-                    },
-                )
+    def _validate_frog_rule_for_values(
+        self,
+        *,
+        priority: PriorityEnum | None,
+        due_date: datetime,
+        current_task_id: int | None,
+    ) -> None:
+        if priority is not PriorityEnum.FROG or due_date is None:
+            return
 
-        ### UPDATE
-        if task_id:
-            task = self.task_repo.get_by_id(task_id)
-            if not task:
-                return service_response(success=False, message="Task not found")
+        start_utc, end_utc = dth.day_range_utc(due_date.date(), self.user_tz)
+        existing_frog = self.task_repo.get_frog_task_in_window(start_utc, end_utc)
 
-            # Handling our subtask IDs
-            incoming_ids = set(typed_data.pop('subtask_ids', []))
-            current_ids = set(s.id for s in task.subtasks)
+        if existing_frog and existing_frog.id != current_task_id:
+            frog_date = due_date.date().isoformat()
+            raise ServiceError(f"Pre-existing 'frog' task for {frog_date}")
 
-            for subtask_id in incoming_ids - current_ids:
-                subtask = self.task_repo.get_by_id(subtask_id)
-                if subtask:
-                    task.subtasks.append(subtask)
 
-            for subtask_id in current_ids - incoming_ids:
-                subtask = self.task_repo.get_by_id(subtask_id)
-                if subtask:
-                    task.subtasks.remove(subtask)
+    def _sync_subtasks(self, task: Task, subtask_ids: list[int]) -> None:
+        incoming_ids = set(subtask_ids)
+        current_ids = {s.id for s in task.subtasks}
 
-            for field, value in typed_data.items():
-                setattr(task, field, value)
+        for subtask_id in incoming_ids - current_ids:
+            self.save_link(subtask_id, task.id)
+        for subtask_id in current_ids - incoming_ids:
+            self.delete_link(subtask_id, task.id)
 
-            return service_response(
-                success=True, message="Task updated", data={"task": task}
-            )
-        # CREATE
-        else:
-            task = self.task_repo.create_task(
-                name=typed_data["name"],
-                priority=typed_data.get("priority"),
-                due_date=typed_data.get("due_date"),
-                is_frog=typed_data["is_frog"],
-            )
-            # Add subtasks, if any
-            for subtask_id in typed_data.get('subtask_ids', []):
-                subtask = self.task_repo.get_by_id(subtask_id)
-                if subtask:
-                    # leverages our relationship to "reach into" subtasks links, setting the (subtask_id, supertask_id) entry
-                    task.subtasks.append(subtask)
+    def _sync_pillars(self, task: Task, pillar_ids: list[int]) -> None:
+        # return self.pillar_repo.get_by_ids(pillar_ids)
+        task.pillars = self.pillar_repo.get_by_ids(pillar_ids)
 
-            return service_response(
-                success=True, message="Task added", data={"task": task}
-            )
 
-    def save_link(self, subtask_id: int, supertask_id: int) -> dict[str, Any]:
+    def save_link(self, subtask_id: int, supertask_id: int) -> None:
         subtask = self.task_repo.get_by_id(subtask_id)
         supertask = self.task_repo.get_by_id(supertask_id)
         if not subtask or not supertask:
-            return service_response(success=False, message="Task not found")
-        if subtask in supertask.subtasks:
-            return service_response(success=False, message="Link already exists")
+            raise ServiceError("Task not found", 404)
+        if subtask in supertask.subtasks or supertask in subtask.subtasks:
+            raise ServiceError("Link already exists")
 
+        links = self.task_repo.get_all_links()
+        links.append((subtask_id, supertask_id))
+        if not is_acyclic(links):
+            raise ServiceError("Cycle in links! Rejecting link add", 400)
         supertask.subtasks.append(subtask)
-        return service_response(success=True, message="Link created")
-    
-    def delete_link(self, subtask_id: int, supertask_id: int) -> dict[str, Any]:
+
+
+    def delete_link(self, subtask_id: int, supertask_id: int) -> None:
         subtask = self.task_repo.get_by_id(subtask_id)
         supertask = self.task_repo.get_by_id(supertask_id)
         if not subtask or not supertask:
-            return service_response(success=False, message="Tasks not found for link")
+            raise ServiceError("Task not found", 404)
         if subtask not in supertask.subtasks:
-            return service_response(success=False, message="Link not found")
-        
+            raise ServiceError("Link not found", 404)
         supertask.subtasks.remove(subtask)
-        return service_response(success=True, message="Link deleted")
 
-    def to_eod_datetime(self, date: date | None, tz_str: str) -> datetime | None:
-        """Convert a date to exclusive EOD datetime in given timezone."""
-        if not date:
-            return None
-        tz = ZoneInfo(tz_str)
-        start_of_day = datetime.combine(date, time.min, tzinfo=tz)
-        eod_midnight = start_of_day + timedelta(days=1)
-        return eod_midnight - timedelta(seconds=1)
+    # def to_eod_datetime(self, date: date | None, tz_str: str) -> datetime | None:
+    #     """Convert a date to exclusive EOD datetime in given timezone."""
+    #     if not date:
+    #         return None
+    #     tz = ZoneInfo(tz_str)
+    #     start_of_day = datetime.combine(date, time.min, tzinfo=tz)
+    #     eod_midnight = start_of_day + timedelta(days=1)
+    #     return eod_midnight - timedelta(seconds=1)
 
+    # TODO: we could use created_at_local :/
     def calculate_tasks_progress_today(self) -> dict[str, Any]:
         all_tasks = self.task_repo.get_all()
 
         # Count completed vs expected for today
-        num_completed = 0
-        num_expected = 0
+        num_completed, num_expected = 0, 0
 
         for task in all_tasks:
             due_today = task.due_date and dth.is_same_local_date(
@@ -162,7 +190,8 @@ class TasksService:
             "total": num_expected,
             "percent": percent_complete,
         }
-    
+
+    # TODO: make sure this is even right
     def calc_overdue_rate(self, *, days: int) -> dict[str, int]:
         """Takes int val for days 'into the past' to check against, and returns """
         ## take all tasks where due_date != None and falls within last N days
@@ -171,7 +200,7 @@ class TasksService:
         now = dth.now_utc()
         start = now - timedelta(days=days)
 
-        tasks_in_window = self.task_repo.get_all_tasks_in_window(start, now)
+        tasks_in_window = self.task_repo.get_all_in_window(start, now, date_col="due_date")
         total = len(tasks_in_window)
         if total == 0:
             return { "rate": 0, "overdue": 0, "total": 0 }
@@ -179,12 +208,12 @@ class TasksService:
         rate = round((overdue/total) * 100)
 
         return { "rate": rate, "overdue": overdue, "total": total }
-    
+
     def calc_frog_completion_rate(self, *, days: int) -> dict[str, int]:
         now = dth.now_utc()
         start = now - timedelta(days=days)
 
-        tasks = self.task_repo.get_all_tasks_in_window(start, now)
+        tasks = self.task_repo.get_all_in_window(start, now, date_col="due_date")
         frogs = [t for t in tasks if t.is_frog]
         total = len(frogs)
         if total == 0:
@@ -202,16 +231,82 @@ def create_tasks_service(session: Session, user_id: int, user_tz: str) -> TasksS
         session=session,
         user_tz=user_tz,
         task_repo=TaskRepository(session, user_id),
+        pillar_repo=PillarRepository(session, user_id)
     )
 
 
-@register_patch_hook("tasks")
-def tasks_patch_hook(
-    item: Any, data: Any, session: Session, current_user: User   # noqa: ANN401,ARG001
-) -> dict[str, Any]:
-    """Invoked by generalized PATCH route to re-calculate tasks progress upon changes."""
-    tasks_service = create_tasks_service(
-        session, current_user.id, current_user.timezone
-    )
-    progress = tasks_service.calculate_tasks_progress_today()
-    return {"progress": progress}
+class TaskAnalytics:
+
+    def __init__(self, task_repo: TaskRepository, user_tz: str) -> None:
+        self.task_repo = task_repo
+        self.user_tz = user_tz
+
+    def calc_progress(self, *, days: int) -> dict[str, Any]:
+        start_utc, end_utc = dth.last_n_days_range(days, self.user_tz)
+        tasks = self.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
+        total = len(tasks)
+        done = len([t for t in tasks if t.is_done])
+        pct = round((done / total) * 100) if total > 0 else 0
+
+        return { "completed": done, "total": total, "percent": pct }
+        # # Count completed vs expected for today
+        # num_completed, num_expected = 0, 0
+
+        # for t in tasks:
+        #     due_today = t.due_date and dth.is_same_local_date(t.due_date, self.user_tz)
+        #     completed_today = t.completed_at and dth.is_same_local_date(t.completed_at, self.user_tz)
+
+        #     if due_today:
+        #         num_expected += 1
+        #         if completed_today:
+        #             num_completed += 1
+
+        #     # elif completed_today and t.due_date is None:
+        #     #     # "Spontaneous task", completed today w/o a due date
+        #     #     num_completed += 1
+        #     #     num_expected += 1
+
+        # pct_complete = (
+        #     (num_completed / num_expected * 100) if num_expected > 0 else 0
+        # )
+        # return { "completed": num_completed, "total": num_expected, "percent": pct_complete }
+
+    def calc_overdue_rate(self, *, days: int) -> dict[str, int]:
+        start_utc, end_utc = dth.last_n_days_range(days, self.user_tz)
+
+        tasks = self.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
+        total = len(tasks)
+        if total == 0:
+            return { "rate": 0, "overdue": 0, "total": 0 }
+
+        overdue = len([t for t in tasks if not t.is_done])
+        rate = round((overdue / total) * 100)
+
+        return { "rate": rate, "overdue": overdue, "total": total }
+
+    def calc_frog_completion_rate(self, *, days: int) -> dict[str, int]:
+        start_utc, end_utc = dth.last_n_days_range(days, self.user_tz)
+
+        frogs = [
+            t for t in self.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
+            if t.is_frog
+        ]
+        total = len(frogs)
+        if total == 0:
+            return { "rate": 0, "done": 0, "total": 0 }
+
+        done = len([t for t in frogs if t.is_done])
+        rate = round((done / total) * 100)
+
+        return { "rate": rate, "done": done, "total": total }
+
+# @register_patch_hook("tasks")
+# def tasks_patch_hook(
+#     item: Any, data: Any, session: Session, current_user: User   # noqa: ANN401,ARG001
+# ) -> dict[str, Any]:
+#     """Invoked by generalized PATCH route to re-calculate tasks progress upon changes."""
+#     tasks_service = create_tasks_service(
+#         session, current_user.id, current_user.timezone
+#     )
+#     progress = tasks_service.calculate_tasks_progress_today()
+#     return {"progress": progress}

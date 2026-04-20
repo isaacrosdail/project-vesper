@@ -1,137 +1,188 @@
-import { apiRequest } from '../shared/services/api';
-import { confirmationManager } from '../shared/ui/modal-manager';
+import { initRecipeForm } from '../shared/forms';
+import { api } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
-import { openModalForEdit } from '../shared/ui/modal-manager';
+import { initSidebar } from '../shared/ui/left-sidebar';
+import { confirmationManager, openModalForEdit } from '../shared/ui/modal-manager';
+import { makeToast } from '../shared/ui/toast';
+import { FormDialog, Recipe } from '../types';
 
-function addIngredientRow(name = '', amount = '', unit = '') {
-    const container = document.querySelector('#ingredients-container')
-}
 
-function setupRecipeForm() {
-    const addIngredientButton = document.querySelector<HTMLDivElement>('#add-ingredient')!;
-    const removeIngredientButton = document.querySelector('.js-remove-ingredient');
-    const ingredientsContainer = document.querySelector('#ingredients-container')!; // div! so label+select
-    const firstIngredientRow = ingredientsContainer.querySelector('.ingredient-row')!;
+/**
+ * Adds product to shopping list or increments quantity if already present.
+ */
+export async function handleAddToShoppingList(
+    productId: string,
+) {
+    const response = await api.shopping_list.addItem(productId);
+    const { id, product_id, product_name, unit_type, net_weight } = response.data;
 
-    // store initial state of first row for modal cleanup
-    const cleanIngredientRow = firstIngredientRow.cloneNode(true);
+    const existingLi = document.querySelector<HTMLLIElement>(`li[data-product-id="${productId}"]`);
+    if (existingLi) {
+        const input = existingLi.querySelector('input');
+        // const qty = input.value;
+        const newQty = String(Number(input.value) + 1);
+        input.value = newQty
+        makeToast(`Updated ${product_name} quantity to ${newQty}`, 'success');
+        return;
+    }
 
-    const recipesModal = document.querySelector('#recipes-entry-dashboard-modal')!;
-
-    recipesModal.addEventListener('modal:cleanup', () => {
-        // clear ingredientsContainer
-        ingredientsContainer.innerHTML = '';
-        // add back 1 original row
-        ingredientsContainer.appendChild(cleanIngredientRow);
-    });
-
-    addIngredientButton.addEventListener('click', (e) => {
-        const newIdx = ingredientsContainer.querySelectorAll('.ingredient-row').length;
-
-        const clone = firstIngredientRow.cloneNode(true) as HTMLSelectElement;
-        clone.removeAttribute('id');
-
-        // get html as str, replace all [0] with [currIdx]
-        const html = clone.outerHTML.replace(/\[0\]/g, `[${newIdx}]`);
-
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
-        const updatedClone = temp.firstElementChild as HTMLElement;
-
-        // clear vals
-        updatedClone.querySelectorAll('input').forEach(input => input.value = '');
-        updatedClone.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
-
-        // Update label text
-        const ingredientNumberSpan = updatedClone.querySelector('.ingredient-number-span');
-        ingredientNumberSpan.textContent = `${newIdx + 1}`;
-
-        updatedClone.dataset.index = newIdx;
-
-        ingredientsContainer.appendChild(updatedClone);
-    });
+    const detailStr = `(${Math.round(net_weight)}${unit_type})`;
+    addShoppingListItemToDOM(id, product_id, product_name, detailStr);
+    makeToast(`Added ${product_name} to shopping list`, 'success');
 
 }
 
-const myEvent = new CustomEvent('dodo', {
-    detail: {},
-    bubbles: true,
-    cancelable: true,
-    composed: false,
-});
-// document.querySelector('my-el').dispatchEvent(myEvent);
+function initRecipeDetailsModal(modal: FormDialog) {
+    console.log(modal)
+    const els = {
+        modal: modal,
+        header: modal.querySelector('.recipe-header'),
+        metadata: modal.querySelector('.recipe-metadata'),
+        ingredientsList: modal.querySelector('ul')
+    };
+    console.log(els)
+    return els;
+}
 
-async function openRecipeModal(recipeId: string) {
-    // fetch full details for given recipe using id
-    // populate modal with said info
-
-    // TODO: Un-hardcode this, add to model
+function deriveRecipeView(recipe: Recipe) {
     const cookTime = 30;
-
-    const recipe = await apiRequest('GET', `/groceries/recipes/${recipeId}/details`);
-    console.table(recipe);
-    const ingredients = recipe.data.ingredients;
-    const {name: recipe_name, yields, yields_units} = recipe.data;
-
-    // open the modal and sub in THIS recipe's info
-    const modal = document.querySelector<HTMLDialogElement>('#recipe-detail-modal')!;
-
-    const modalHeader = modal.querySelector('.recipe-header')!;
-    modalHeader.textContent = recipe_name;
-
-    const modalMetadata = modal.querySelector('.recipe-metadata')!;
-    modalMetadata.textContent = `Makes: ${yields} ${yields_units.toLowerCase()} | ~${cookTime} min`;
-
-    // for each ingredient, append an li to the ul, and make its textContent = ingredient.name?
-    const ulEl = modal.querySelector('ul')!;
-    ulEl.innerHTML = ''; // nuke current list
-    console.log(ulEl)
-    ingredients.forEach(ing => {
-        const liEl = document.createElement('li');
-        liEl.textContent = `${ing.amount_value}${ing.amount_units.toLowerCase()} - ${ing.product_name}`;
-        console.log(ing.product_name)
-        ulEl.appendChild(liEl);
-    });
-
-    modal.showModal();
+    return {
+        title: recipe.name,
+        metadata: `Makes: ${recipe.yields} ${recipe.yields_units.toLowerCase()} | ~${cookTime} min`,
+        ingredients: recipe.ingredients.map(ing =>
+            `${ing.amount_value}${ing.amount_units.toLowerCase()} - ${ing.product_name}`
+        )
+    };
 }
 
-// NOTE: We still need to add the "remove" for if we add an ingredient div for entry but change our mind
-// Also, we'll need to sort out the form reset cleanup for this
-// We could loop to remove all divs that don't have the id of original-dropdown
-export async function init() {
+function renderRecipeModal(view, ui) {
+    ui.header.textContent = view.title;
+    ui.metadata.textContent = view.metadata;
+    ui.ingredientsList.replaceChildren(
+        ...view.ingredients.map(text => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            return li;
+        })
+    );
+}
 
-    setupRecipeForm();
+function populateRecipeForm(modal: FormDialog, data) {
+    const container = modal.querySelector('#ingredients-container');
+    const addBtn = modal.querySelector('#add-ingredient');
+
+    data.ingredients.forEach((ing, i) => {
+        // get or create the i-th row
+        // set product select to ing.product_id
+        // set amount to ing.amount_value
+        // set units to ing.amount_units
+        // TODO: Hacky
+        if (i > 0) addBtn.click();
+        const row = container.querySelector(`[data-index="${i}"]`);
+        if (!row) return;
+
+        row.querySelector(`[name="ingredients[${i}][product_id]"]`).value = String(ing.product_id);
+        row.querySelector(`[name="ingredients[${i}][amount_value]"]`).value = String(ing.amount_value);
+        row.querySelector(`[name="ingredients[${i}][amount_units]"]`).value = ing.amount_units;
+
+        // if (productSelect) productSelect.value 
+        // if (amountInput) amountInput.value 
+        // if (unitsSelect) unitsSelect.value 
+    });
+}
+
+async function openRecipeModal(recipeId: string, recipeModalEls) {
+    // const cookTime = 30; // TODO: Un-hardcode this, add to model
+
+    const { data: recipe } = await api.recipes.getById(recipeId);
+    renderRecipeModal(deriveRecipeView(recipe), recipeModalEls);
+    // const { name: recipe_name, yields, yields_units, ingredients } = recipe.data;
+
+    // // open the modal and sub in THIS recipe's info
+    // const modal = document.querySelector<HTMLDialogElement>('#recipe-detail-modal');
+    // const modalHeader = modal.querySelector('.recipe-header');
+    // const modalMetadata = modal.querySelector('.recipe-metadata');
+    // modalHeader.textContent = recipe_name;
+    // modalMetadata.textContent = `Makes: ${yields} ${yields_units.toLowerCase()} | ~${cookTime} min`;
+
+    // // for each ingredient, append an li to the ul, and make its textContent = ingredient.name?
+    // const ulEl = modal.querySelector('ul')!;
+    // ulEl.innerHTML = ''; // nuke current list
+
+    // ingredients.forEach(ing => {
+    //     const liEl = document.createElement('li');
+    //     liEl.textContent = `${ing.amount_value}${ing.amount_units.toLowerCase()} - ${ing.product_name}`;
+    //     ulEl.appendChild(liEl);
+    // });
+
+    recipeModalEls.modal.showModal();
+}
+
+export async function init() {
+    initSidebar();
+    
+    const dialog = document.querySelector<FormDialog>('#recipes-entry-dashboard-modal')
+    if (!dialog) {
+        console.warn('recipes dashboard: #recipes-entry-dashboard-modal not found')
+        return
+    }
+    initRecipeForm(dialog)
+
+    const detailsDialog = document.querySelector('#recipe-detail-modal');
+    const recipeModalEls = initRecipeDetailsModal(detailsDialog);
+    console.log(recipeModalEls)
+
+    const shoppingList = document.querySelector('.shopping-list');
+
+    // Fires on blur/enter
+    shoppingList.addEventListener('change', async (e) => {
+        const inputVal = e.target.value;
+        // walk up to nearest li, get data-item-id
+        const li = e.target.closest('li');
+        const { itemId } = li.dataset;
+        // patch with new qty, log to confirm
+        const response = await api.shopping_list.updateItem(itemId, { quantity_wanted: inputVal });
+        makeToast(response.message, 'success');
+    })
+
+    shoppingList.addEventListener('click', async (e) => {
+        if (e.target.matches('.inline-delete')) {
+            const li = e.target.closest('li'); // for data-item-id
+            const { itemId } = li.dataset;
+
+            const confirmed = await confirmationManager.show(
+                "Are you sure you want to delete this item?"
+            );
+            if (!confirmed) return;
+
+            await api.shopping_list.deleteItem(itemId);
+            li.remove();
+
+            return;
+        }
+    })
+
 
     // DRAFTING: recipe page thing
     const recipeGrid = document.querySelector('#recipes-grid')!;
-
     recipeGrid.addEventListener('click', async (e) => {
-        if (e.target.closest('.js-recipe-options')) {
-            const button = e.target.closest('.js-recipe-options');
-            const card = e.target.closest('.recipe-card');
-            const recipeId = card.dataset.recipeId;
+        const target = e.target as HTMLElement;
+        if (target.closest('.js-recipe-options')) {
+            const button = target.closest('.js-recipe-options');
+            const card = target.closest('.recipe-card');
+            const { recipeId } = card.dataset;
 
-            // get button dims for {x, y} pos
-            const rect = button.getBoundingClientRect();
-
-            console.log("creating menu...")
+            const rect = button.getBoundingClientRect(); // dims for pos
             contextMenu.create({
                 position: { x: rect.left, y: rect.bottom },
                 items: [
                     {
                         label: 'Edit',
                         action: () => {
-                            console.log('Edit recipe:', recipeId);
                             const modal = document.querySelector('#recipes-entry-dashboard-modal')!;
-                            console.log(modal)
-
-                            openModalForEdit(
-                                recipeId,
-                                `/groceries/recipes/${recipeId}`,
-                                modal,
-                                'Recipe'
-                            )
+                            openModalForEdit(recipeId, modal, 'Recipe', (data) => {
+                                populateRecipeForm(modal, data);
+                            });
                         }
                     },
                     {
@@ -142,11 +193,8 @@ export async function init() {
                             );
                             if (!confirmed) return;
 
-                            apiRequest('DELETE', `/groceries/recipes/${recipeId}`, null, {
-                                onSuccess: (responseData) => {
-                                    card.remove();
-                                }
-                            });
+                            await api.recipes.delete(recipeId)
+                            card.remove()
                         }
                     }
                 ]
@@ -154,63 +202,20 @@ export async function init() {
             return;
         }
 
-        const card = e.target.closest('.recipe-card');
+        const card = target.closest<HTMLDivElement>('.recipe-card');
         if (card) {
             const recipeId = card.dataset.recipeId;
-            openRecipeModal(recipeId);
+            console.log(recipeModalEls)
+            openRecipeModal(recipeId, recipeModalEls);
         }
     });
 
     // close modal via X button
     document.addEventListener('click', (e) => {
-        if (e.target.closest('#recipe-detail-modal-close-btn')) {
-            const modal = e.target.closest('#recipe-detail-modal');
-            console.log(modal)
-            modal.close();
-        }
-
-        else if (e.target.matches('.js-remove-ingredient')) {
-            const thisIngredientRow = e.target.closest('.ingredient-row');
-            thisIngredientRow.remove();
-
-            // Then re-index all remaining rows
-            const ingredientsContainer = document.querySelector('#ingredients-container')!;
-            const allRows = ingredientsContainer.querySelectorAll('.ingredient-row')!;
-            allRows.forEach((row, newIdx) => {
-                // row = curr ingredientRow el
-                // newIdx = idx of curr item in arr
-
-                // 1. update data-index to new index
-                row.dataset.index = newIdx;
-
-                // 2. replace all [oldIndex] with [newIndex] in the names
-                // so replace all [N] with [${newIdx}]
-                // before getting outerHTML, sync curr values to attributes
-                row.querySelectorAll('input').forEach(input => {
-                    input.setAttribute('value', input.value);
-                });
-                row.querySelectorAll('select').forEach(select => {
-                    const selectedOption = select.options[select.selectedIndex];
-                    // mark selected option in HTML
-                    // Array.from(select.options).forEach(opt => opt.removeAttribute)
-                    selectedOption?.setAttribute('selected', '');
-                });
-                const html = row.outerHTML.replace(
-                    new RegExp('\\[\\d+\\]', 'g'),
-                    `[${newIdx}]`
-                );
-                const temp = document.createElement('div');
-                temp.innerHTML = html;
-                const updatedRow = temp.firstElementChild as HTMLElement;
-
-                // replace old row with updated one
-                row.replaceWith(updatedRow)
-
-                // update display number
-                const numberSpan = updatedRow.querySelector('.ingredient-number-span');
-                console.log(numberSpan);
-                if (numberSpan) numberSpan.textContent = String(newIdx + 1);
-            })
+        const target = e.target as HTMLElement;
+        if (target.closest('#recipe-detail-modal-close-btn')) {
+            const modal = target.closest<HTMLDialogElement>('#recipe-detail-modal');
+            modal!.close();
         }
     });
 }

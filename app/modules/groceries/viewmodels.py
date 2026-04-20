@@ -6,8 +6,6 @@ if TYPE_CHECKING:
     from app.modules.groceries.models import Product, Transaction
 
 
-from app.modules.groceries.models import ProductCategoryEnum as Category
-from app.modules.groceries.models import UnitEnum as UnitType
 from app.shared.view_mixins import BasePresenter, BaseViewModel
 
 
@@ -29,28 +27,28 @@ class TransactionPresenter(BasePresenter):
 
 
 class TransactionViewModel(BaseViewModel):
-    product_id: int
-    product_name: str
-    barcode: int
-    price_at_scan: float
-    quantity: int
-    price_per_100g: float
+    __slots__ = (
+        "_tz",
+        "barcode",
+        "id",
+        "price_at_scan",
+        "price_per_100g",
+        "product_id",
+        "product_name",
+        "quantity",
+        "subtype",
+    )
 
     def __init__(self, txn: Transaction, tz: str) -> None:
-        fields = {
-            "id",
-            "product_id",
-            "price_at_scan",
-            "quantity",
-            "created_at_local",
-            "price_per_100g",
-            "subtype",
-        }
-        for name in fields:
-            setattr(self, name, getattr(txn, name))
-
+        self.created_at_local = txn.created_at_local
+        self.product_id = txn.product_id
         self.product_name = txn.product.name
         self.barcode = txn.product.barcode
+        self.price_at_scan = txn.price_at_scan
+        self.quantity = txn.quantity
+        self.price_per_100g = txn.price_per_100g
+        self.subtype = txn.subtype
+        self.id = txn.id
         self._tz = tz
 
     @property
@@ -92,33 +90,17 @@ class ProductPresenter(BasePresenter):
 
 
 class ProductViewModel(BaseViewModel):
-    CATEGORY_LABELS: ClassVar[dict[Category, str]] = {
-        Category.FRUITS: "Fruits",
-        Category.VEGETABLES: "Vegetables",
-        Category.LEGUMES: "Legumes",
-        Category.GRAINS: "Grains",
-        Category.BAKERY: "Bakery",
-        Category.DAIRY_EGGS: "Dairy & Eggs",
-        Category.MEATS: "Meats",
-        Category.SEAFOOD: "Seafood",
-        Category.FATS_OILS: "Fats/Oils",
-        Category.SNACKS: "Snacks",
-        Category.SWEETS: "Sweets",
-        Category.BEVERAGES: "Beverages",
-        Category.CONDIMENTS_SAUCES: "Condiments & Sauces",
-        Category.PROCESSED_CONVENIENCE: "Processed & Convenience",
-        Category.SUPPLEMENTS: "Supplements",
-    }
-    UNIT_TYPE_LABELS: ClassVar[dict[UnitType, str]] = {
-        UnitType.G: "g",
-        UnitType.KG: "kg",
-        UnitType.OZ: "oz",
-        UnitType.LB: "lb",
-        UnitType.ML: "ml",
-        UnitType.L: "l",
-        UnitType.FL_OZ: "fl oz",
-        UnitType.EA: "ea.",
-    }
+    __slots__ = (
+        "_tz",
+        "barcode",
+        "calories_per_100g",
+        "category",
+        "id",
+        "name",
+        "net_weight",
+        "subtype",
+        "unit_type"
+    )
 
     def __init__(self, product: Product, tz: str) -> None:
         self.id = product.id
@@ -137,14 +119,14 @@ class ProductViewModel(BaseViewModel):
 
     @property
     def category_label(self) -> str:
-        return ProductViewModel.CATEGORY_LABELS[self.category]
+        return self.category.label
 
     @property
     def net_weight_label(self) -> str:
-        return f"{self.net_weight:.2f} ({ProductViewModel.UNIT_TYPE_LABELS[self.unit_type]})"
+        return f"{self.net_weight:.2f} ({self.unit_type.label})"
 
     @property
     def calories_label(self) -> str:
-        if self.calories_per_100g:
+        if not self.calories_per_100g:
             return "--"
         return str(round(self.calories_per_100g))

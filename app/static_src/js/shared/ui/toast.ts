@@ -6,17 +6,29 @@ class Toast {
     message: string;
     type: ToastType;
     element: HTMLElement | null;
+    duration: number;
 
-    constructor(message: string, type: ToastType = 'info') {
+    constructor(message: string, duration, type: ToastType = 'info') {
         this.message = message;
         this.type = type;
         this.element = null;
+        this.duration = duration
     }
 
     createElement(): HTMLElement {
         this.element = document.createElement('div');
         this.element.classList.add('toast', `toast-${this.type}`);
-        this.element.textContent = this.message;
+
+        const msg = document.createElement('span');
+        msg.textContent = this.message;
+
+        const dismissBtn = document.createElement('button');
+        dismissBtn.classList.add('toast-dismiss');
+        dismissBtn.innerHTML = '<svg class="icon"><use href="#icon-x"></use></svg>'
+        dismissBtn.addEventListener('click', () => this.hide());
+
+        this.element.append(msg, dismissBtn);
+        this.element.style.setProperty('--toast-duration', `${this.duration}ms`)
         return this.element;
     }
 
@@ -31,14 +43,17 @@ class Toast {
             throw new Error('Toast container not found in DOM');
         }
         container.appendChild(this.element!);
-        return this; // for chaining?
+        return this;
     }
 
     // Handle hiding/tidying up
     hide(): Toast {
         if (this.element) {
-            this.element.remove();
-            this.element = null;
+            this.element.classList.add('toast-exit');
+            this.element.addEventListener('animationend', () => {
+                this.element?.remove();
+                this.element = null;
+            }, { once: true });
         }
         return this;
     }
@@ -54,8 +69,8 @@ class Toast {
  * const toast = makeToast("Working..", "info", 0);
  * setTimeout(() => toast.hide(), 5000);
  */
-export function makeToast(message: string, type: ToastType = 'info', duration: number = 1000): Toast {
-    const toast = new Toast(message, type).show();
+export function makeToast(message: string, type: ToastType = 'info', duration: number = 2000): Toast {
+    const toast = new Toast(message, duration, type).show();
     setTimeout(() => toast.hide(), duration); // auto-hide/fade
     return toast; // so the caller can do something with it if desired
 }

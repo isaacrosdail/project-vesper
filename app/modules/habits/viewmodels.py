@@ -28,19 +28,28 @@ class HabitPresenter(BasePresenter):
 
 
 class HabitViewModel(BaseViewModel):
+    __slots__ = (
+        "established_date",
+        "id",
+        "name",
+        # "promotion_threshold",
+        "status",
+        "subtype"
+    )
+
     def __init__(self, habit: Habit, tz: str) -> None:
         self.id = habit.id
         self.name = habit.name
         self.status = habit.status
         self.established_date = habit.established_date
-        self.promotion_threshold = habit.promotion_threshold
+        # self.promotion_threshold = habit.promotion_threshold
         self.created_at_local = habit.created_at_local
         self.subtype = habit.subtype
         self._tz = tz
 
     @property
     def status_label(self) -> str:
-        return f"{self.status.value.title()}"
+        return f"{self.status.title()}" if self.status else ""
 
     @property
     def created_at_label(self) -> str:
@@ -88,12 +97,12 @@ class LCRecordViewModel(BaseViewModel):
 
     @property
     def difficulty_label(self) -> str:
-        return f"{self.difficulty.value.title()}"
+        return f"{self.difficulty.title()}"
 
     @property
     def language_label(self) -> str:
-        return f"{self.language.value.title()}"
+        return f"{self.language.title()}"
 
     @property
     def status_label(self) -> str:
-        return f"{self.status.value.title()}"
+        return f"{self.status.title()}"

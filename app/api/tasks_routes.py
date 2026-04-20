@@ -1,66 +1,79 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-from flask import Response, request, abort
+from flask import Response, request
 from flask_login import current_user
 
+import app.shared.datetime_.helpers as dth
 from app.api import api_bp
-from app.api.responses import api_response, validation_failed
+from app.api.responses import api_response
+from app.modules.tasks.schemas import Task, TaskPatch
 from app.modules.tasks.service import create_tasks_service
-from app.modules.tasks.validators import validate_task
 from app.shared.decorators import login_plus_session
+from app.shared.exceptions import ServiceError
 
 
-@api_bp.route("/tasks/tasks", methods = ["GET", "POST"])
-@api_bp.put("/tasks/tasks/<int:task_id>")
+@api_bp.post("/tasks/tasks")
 @login_plus_session
-def tasks(session: Session, task_id: int | None = None) -> tuple[Response, int]:
-    """Create or update a task (POST for new, PUT for edit). Or GET for the collection."""
+def create_task(session: Session) -> tuple[Response, int]:
+    validated = Task(**request.json)
+
+    tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
+
+    task = tasks_service.create_task(validated)
+    session.commit()
+    progress = tasks_service.calculate_tasks_progress_today()
+
+    return api_response(success=True, message="Task created",
+        data=task.to_api_dict() | {"progress": progress}
+    ), 201
+
+@api_bp.patch("/tasks/tasks/<int:task_id>")
+@login_plus_session
+def patch_task(session: Session, task_id: int) -> tuple[Response, int]:
+    validated = TaskPatch(**request.json)
+
+    tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
+    task = tasks_service.update_task(task_id, validated)
+    session.commit()
+    progress = tasks_service.calculate_tasks_progress_today()
+
+    return api_response(success=True, message="Task updated",
+        data=task.to_api_dict() | {"progress": progress}
+    ), 200
+
+
+@api_bp.get("/tasks/tasks")
+@login_plus_session
+def tasks_list(session: Session) -> tuple[Response, int]:
+    include_links = request.args.get("include_links", "false") == "true"
+    last_n_days = request.args.get("lastNDays", type=int)
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone
     )
 
-    if request.method == "GET":
+    if include_links:
         tasks = tasks_service.task_repo.get_all_tasks_with_links()
-        return api_response(
-            success=True, message="Got em",
-            data = [ t.to_api_dict() for t in tasks ]
-        ), 200
-
-    typed_data, errors = validate_task(request.json)
-    if errors:
-        return validation_failed(errors), 400
-
-    result = tasks_service.save_task(typed_data, task_id)  # None -> POST, else -> PUT
-
-    if not result["success"]:
-        return api_response(
-            success=False, message=result["message"], errors=result["errors"]
-        ), 400
-
-    tasks_service.session.flush()
-    progress = tasks_service.calculate_tasks_progress_today()
-
-    task = result["data"]["task"]
-    status_code = 201 if request.method == "POST" else 200
+    elif last_n_days:
+        start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
+        tasks = tasks_service.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
+    else:
+        tasks = tasks_service.task_repo.get_all()
 
     return api_response(
         success=True,
-        message=result["message"],
-        data=task.to_api_dict() | {"progress": progress},
-    ), status_code
+        message=f"Retrieved {len(tasks)} tasks",
+        data = [ t.to_api_dict() for t in tasks ]
+    ), 200
 
 
 @api_bp.route("/tasks/task_links", methods = ["POST", "DELETE"])
 @login_plus_session
 def task_links(session: Session) -> tuple[Response, int]:
-    tasks_service = create_tasks_service(
-        session, current_user.id, current_user.timezone
-    )
-
     data = request.json
     try:
         sub_id = int(data.get("subtask_id"))
@@ -68,23 +81,19 @@ def task_links(session: Session) -> tuple[Response, int]:
     except (TypeError, ValueError):
         return api_response(success=False, message="IDs must be integers"), 400
 
-    if request.method == "POST":
-        result = tasks_service.save_link(sub_id, super_id)
-        if not result["success"]:
-            return api_response(success=False, message=result["message"]), 404
+    tasks_service = create_tasks_service(
+        session, current_user.id, current_user.timezone
+    )
+    try:
+        if request.method == "POST":
+            tasks_service.save_link(sub_id, super_id)
+            return api_response(
+                success=True,
+                message="Link created",
+                data={ "subtask_id": sub_id, "supertask_id": super_id }
+            ), 201
 
-        return api_response(
-            success=True,
-            message=result["message"],
-            data={ "subtask_id": sub_id, "supertask_id": super_id }
-        ), 201
-
-    # DELETE
-    result = tasks_service.delete_link(sub_id, super_id)
-    if not result["success"]:
-        return api_response(success=False, message=result["message"]), 404
-
-    return api_response(
-        success=True,
-        message="done",
-    ), 200
+        tasks_service.delete_link(sub_id, super_id)
+        return api_response(success=True, message="Link deleted"), 200
+    except ServiceError as e:
+        return api_response(success=False, message=e.message), e.status_code

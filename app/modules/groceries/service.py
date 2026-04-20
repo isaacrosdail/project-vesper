@@ -7,20 +7,49 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    import io
+
     from sqlalchemy.orm import Session
 
-    from app.modules.groceries.models import Product, UnitEnum
+    from app.modules.groceries.models import (
+        Product,
+        ShoppingList,
+        ShoppingListItem,
+        Transaction,
+    )
 
-from app.api.responses import service_response
+import csv
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+import app.shared.datetime_.helpers as dth
+from app.modules.groceries.models import (
+    MEAL_TIMES,
+    NUMERIC_MAPPINGS,
+    MealEnum,
+    NutritionLog,
+    Recipe,
+)
 from app.modules.groceries.repository import (
+    NutritionLogRepository,
     ProductRepository,
+    RecipeIngredientRepository,
+    RecipeRepository,
     ShoppingListItemRepository,
     ShoppingListRepository,
+    ShoppingTripRepository,
     TransactionRepository,
-    RecipeRepository,
-    RecipeIngredientRepository,
 )
-from app.shared.datetime_.helpers import today_range_utc
+from app.modules.groceries.schemas import (
+    ProductCreate,
+    ProductPatch,
+    RecipeCreate,
+    RecipePatch,
+    ShoppingListItemPatch,
+    TransactionCreate,
+    TransactionPatch,
+)
+from app.shared.exceptions import ServiceError
 
 
 class GroceriesService:
@@ -34,6 +63,8 @@ class GroceriesService:
         shopping_list_item_repo: ShoppingListItemRepository,
         recipe_repo: RecipeRepository,
         recipe_ingredient_repo: RecipeIngredientRepository,
+        nutrition_log_repo: NutritionLogRepository,
+        shopping_trip_repo: ShoppingTripRepository,
     ) -> None:
         self.session = session
         self.product_repo = product_repo
@@ -42,88 +73,80 @@ class GroceriesService:
         self.shopping_list_item_repo = shopping_list_item_repo
         self.recipe_repo = recipe_repo
         self.recipe_ingredient_repo = recipe_ingredient_repo
+        self.nutrition_log_repo = nutrition_log_repo
+        self.shopping_trip_repo = shopping_trip_repo
         self.user_tz = user_tz
 
-    def save_product(self, typed_data: dict[str, Any], product_id: int | None) -> Any:
-        if product_id:
-            product = self.product_repo.get_by_id(product_id)
-            if not product:
-                return service_response(success=False, message="Product not found")
 
-            # Update fields
-            for field, value in typed_data.items():
-                setattr(product, field, value)
+    def create_product(self, validated: ProductCreate) -> Product:
+        product = self.product_repo.create_product(
+            barcode=validated.barcode,
+            name=validated.name,
+            category=validated.category,
+            net_weight=validated.net_weight,
+            unit_type=validated.unit_type,
+            calories_per_100g=validated.calories_per_100g,
+        )
+        # TODO: Cleanup? sloppy?
+        self.session.flush()
+        return product
 
-            return service_response(
-                success=True, message="Product updated", data={"product": product}
-            )
-
-        else:
-            # CREATE
-            product = self.product_repo.create_product(
-                barcode=typed_data.get("barcode"),
-                name=typed_data["name"],
-                category=typed_data["category"],
-                net_weight=typed_data["net_weight"],
-                unit_type=typed_data["unit_type"],
-                calories_per_100g=typed_data.get("calories_per_100g"),
-            )
-            self.session.flush()
-
-            return service_response(
-                success=True, message="Product created", data={"product": product}
-            )
-
-    def save_transaction(
-        self,
-        product_id: int,
-        typed_data: dict[str, Any],
-        transaction_id: int | None = None,
-    ) -> Any:
-        """Process transaction form submission."""
-
-        ### UPDATE
-        if transaction_id:
-            transaction = self.transaction_repo.get_by_id(transaction_id)
-            if not transaction:
-                return service_response(success=False, message="Transaction not found")
-
-            for field, value in typed_data.items():
-                setattr(transaction, field, value)
-
-            return service_response(
-                success=True,
-                message="Transaction updated",
-                data={"transaction": transaction},
-            )
-
-        # CREATE / INCREMENT
+    def update_product(self, validated: ProductPatch, product_id: int) -> Product:
         product = self.product_repo.get_by_id(product_id)
         if not product:
-            return service_response(success=False, message="Product not found")
-        start_utc, end_utc = today_range_utc(self.user_tz)
+            raise ServiceError("Product not found", 404)
+        for field in validated.model_fields_set:
+            setattr(product, field, getattr(validated, field))
+        return product
+
+
+    def update_transaction(self, validated: TransactionPatch, transaction_id: int) -> Transaction:
+        transaction = self.transaction_repo.get_by_id(transaction_id)
+        if not transaction:
+            raise ServiceError("Transaction not found", 404)
+        transaction.price_at_scan = validated.price_at_scan
+        transaction.quantity = validated.quantity
+        return transaction
+
+    def create_transaction(self, data: dict[str, Any]) -> Transaction:
+        product_id = data["product_id"]
+
+        # Resolve product id
+        if product_id == "__new__":
+            validated_product = ProductCreate(**data)
+            product = self.create_product(validated_product)
+            product_id = product.id
+        else:
+            product_id = int(product_id)
+
+        validated = TransactionCreate(
+            product_id=product_id,
+            price_at_scan=data["price_at_scan"],
+            quantity=data["quantity"]
+        )
+
+        # Increment quantity if existing txn exists for same day at same price
+        start_utc, end_utc = dth.today_range_utc(self.user_tz)
         existing_transaction = self.transaction_repo.get_transaction_in_window(
-            product.id, start_utc, end_utc
+            product_id, start_utc, end_utc
         )
 
         if existing_transaction and (
-            existing_transaction.price_at_scan == typed_data["price_at_scan"]
+            existing_transaction.price_at_scan == validated.price_at_scan
         ):
-            existing_transaction.quantity += typed_data["quantity"]
-            transaction = existing_transaction
-        else:
-            transaction = self.transaction_repo.create_transaction(
-                product, **typed_data
-            )
-            self.session.flush()
+            existing_transaction.quantity += validated.quantity
+            return existing_transaction
 
-        return service_response(
-            success=True, message="Transaction added", data={"transaction": transaction}
+        transaction = self.transaction_repo.create_transaction(
+            product_id, price_at_scan=validated.price_at_scan, quantity=validated.quantity
         )
+        self.session.flush()
+        return transaction
+
 
     def add_item_to_shoppinglist(
-        self, product_id: int, quantity_wanted: int
-    ) -> dict[str, Any]:
+        self, product_id: int, quantity_wanted: int = 1
+    ) -> ShoppingListItem:
         """Add product to shopping list, incrementing if already exists."""
         shopping_list, _ = self.get_or_create_shoppinglist()
 
@@ -132,23 +155,26 @@ class GroceriesService:
         )
 
         if existing_item:
-            existing_item.quantity_wanted += 1  # NOTE: Take qty as parameter
+            existing_item.quantity_wanted += quantity_wanted
             self.shopping_list_item_repo.session.flush()
-            return service_response(
-                success=True,
-                message="Quantity updated in shopping list",
-                data={"item": existing_item},
-            )
-        else:
-            item = self.shopping_list_item_repo.create_shopping_list_item(
-                shopping_list.id, product_id, quantity_wanted
-            )
-            self.shopping_list_item_repo.session.flush()
-            return service_response(
-                success=True, message="Item added to shopping list", data={"item": item}
-            )
+            return existing_item
 
-    def get_or_create_shoppinglist(self) -> tuple[Any, Any]:
+        item = self.shopping_list_item_repo.create_shopping_list_item(
+            shopping_list.id, product_id, quantity_wanted
+        )
+        self.shopping_list_item_repo.session.flush()
+        return item
+
+    def update_shopping_list_item(self, item_id: int, validated: ShoppingListItemPatch) -> ShoppingListItem:
+        item = self.shopping_list_item_repo.get_by_id(item_id)
+        if not item:
+            raise ServiceError("Shopping list item not found", 404)
+        for field in validated.model_fields_set:
+            setattr(item, field, getattr(validated, field))
+        return item
+
+
+    def get_or_create_shoppinglist(self) -> tuple[ShoppingList, bool]:
         """Return ShoppingList from database, else create new and return that."""
         shopping_list = self.shopping_list_repo.get_shopping_list()
 
@@ -166,30 +192,100 @@ class GroceriesService:
             return product, False
         return self.product_repo.create_product(**typed_product_data), True
 
-    def create_recipe_with_ingredients(
+    def create_recipe(
             self,
-            name: str,
-            yields: float,
-            yields_units: UnitEnum,
-            ingredients: list[dict[str, Any]]
-    ) -> dict[str, Any]:
-        recipe = self.recipe_repo.create_recipe(name, yields, yields_units)
+            # name: str,
+            # yields: float,
+            # yields_units: UnitEnum,
+            # ingredients: list[ValidatedIngredient]
+            validated: RecipeCreate
+    ) -> Recipe:
+        recipe = self.recipe_repo.create_recipe(validated.name, validated.yields, validated.yields_units)
         self.recipe_repo.session.flush()
-
-        # ingredients
-        for ingredient in ingredients:
+        for ingredient in validated.ingredients:
             self.recipe_ingredient_repo.create_recipe_ingredient(
                 recipe_id=recipe.id,
-                product_id=ingredient['product_id'],
-                amount_value=ingredient['amount_value'],
-                amount_units=ingredient['amount_units'],
+                product_id=ingredient.product_id,
+                amount_value=ingredient.amount_value,
+                amount_units=ingredient.amount_units,
+            )
+        return recipe
+
+    def update_recipe(self, recipe_id: int, validated: RecipePatch) -> Recipe:
+        recipe = self.recipe_repo.get_by_id(recipe_id)
+        if not recipe:
+            raise ServiceError("Recipe not found", 404)
+
+        for field in validated.model_fields_set:
+            if field == "ingredients":
+                recipe.ingredients.clear()
+                for ing in validated.ingredients:
+                    self.recipe_ingredient_repo.create_recipe_ingredient(
+                    recipe_id=recipe.id,
+                    product_id=ing.product_id,
+                    amount_value=ing.amount_value,
+                    amount_units=ing.amount_units,
+                )
+            else:
+                setattr(recipe, field, getattr(validated, field))
+        return recipe
+
+
+    def import_nutrition_csv(self, file_stream: io.TextIOWrapper) -> int:
+        """Parses incoming nutrition log CSV file stream and bulk inserts. Returns length of persisted entries."""
+        reader = csv.DictReader(file_stream)
+
+        # Query all entries to prevent repeats
+        existing = {(log.entry_datetime, log.meal) for log in self.nutrition_log_repo.get_all()}
+        entries = []
+        for row in reader:
+            meal_enum = MealEnum.from_label(row["Meal"])
+            meal_time = MEAL_TIMES[meal_enum]
+            entry_datetime = (
+                datetime.strptime(row["Date"], "%Y-%m-%d")
+                .replace(hour=meal_time.hour, minute=meal_time.minute, tzinfo=ZoneInfo(self.user_tz))
             )
 
-        return {
-            "success": True,
-            "message": "Recipe created",
-            "data": { "recipe": recipe }
-        }
+            # Skip entries we already have - set lookup is O(1)
+            if (entry_datetime, meal_enum) in existing:
+                continue
+
+            nutrients = {db_col: float(row[csv_col] or 0) for csv_col, db_col in NUMERIC_MAPPINGS.items()}
+            entry = NutritionLog(
+                entry_datetime=entry_datetime,
+                meal=meal_enum,
+                user_id=self.nutrition_log_repo.user_id,
+                **nutrients
+            )
+            entries.append(entry)
+        self.nutrition_log_repo.session.add_all(entries)
+        return len(entries)
+
+    def macros_summary(self, targets: dict[str, str]) -> dict[str, float]:
+        # query today's nutrition logs and sum protein/fat/carbs
+        start_utc, end_utc = dth.last_n_days_range(days_ago=1, tz_str=self.user_tz) # TODO: change to 1 again
+        logs = self.nutrition_log_repo.get_all_in_window(start_utc, end_utc, date_col="entry_datetime")
+        fields = ["calories", "protein", "carbs", "fat", "sodium", "potassium"]
+        # For each of the fields, get {field}_target from our targets dict, cast to ints
+        # TODO: Need to fix this: using 0's will of course bork avg calculations
+        targets_dict = {field: int(targets.get(f"{field}_target", 0)) for field in fields}
+        result = {}
+        for field in fields:
+            vals = [getattr(log, field) for log in logs if getattr(log, field)]
+            actual = sum(vals)
+            target = targets_dict[field]
+            result[field] = {
+                "actual": round(actual),
+                "target": target,
+                "pct": round(actual / target * 100) if target else 0,
+            }
+        meals = {}
+        for log in logs:
+            meals.setdefault(log.meal, 0)
+            meals[log.meal] += log.calories or 0
+
+        return result, meals
+
 
 def create_groceries_service(
     session: Session, user_id: int, user_tz: str
@@ -203,5 +299,7 @@ def create_groceries_service(
         shopping_list_repo=ShoppingListRepository(session, user_id),
         shopping_list_item_repo=ShoppingListItemRepository(session, user_id),
         recipe_repo=RecipeRepository(session, user_id),
-        recipe_ingredient_repo=RecipeIngredientRepository(session, user_id)
+        recipe_ingredient_repo=RecipeIngredientRepository(session, user_id),
+        nutrition_log_repo=NutritionLogRepository(session, user_id),
+        shopping_trip_repo=ShoppingTripRepository(session, user_id)
     )

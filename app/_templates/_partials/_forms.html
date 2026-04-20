@@ -1,6 +1,26 @@
 
 {% import '_partials/_ui.html' as ui %}
 
+{% macro radio_tabs(name, options, count=None, title=True, classes='', data={}) %}
+<fieldset
+    class="radio-tabs {{ classes }}"
+    data-count="{{ count or options|length }}"
+    id="{{ name }}-fieldset"
+    {% for k,v in data.items() %}data-{{ k }}="{{ v }}"{% endfor %}
+    >
+    {% if title %}
+        <legend>{{ name|title }}:</legend>
+    {% endif %}
+    {% for opt in options %}
+    <label class="radio-tab">
+        <input type="radio" name="{{ name }}" id="{{ name }}-{{ opt }}" value="{{ opt }}">
+        <span>{{ opt|title if title else opt }}</span>
+    </label>
+    {% endfor %}
+    <div class="glider"></div>
+</fieldset>
+{% endmacro %}
+
 {# Form Modals - Specific Ones #}
 
 {% macro metric_entry_modal(id='daily_metrics-entry-dashboard', title='Add Metric', entry_date=None) %}
@@ -33,8 +53,8 @@
           <div>
               <label for="weight_units">Units:</label>
               <select name="weight_units" id="weight_units">
-                <option value="kg" {{ 'selected' if current_user.units.value == 'metric' }}>kg</option>
-                <option value="lbs" {{ 'selected' if current_user.units.value == 'imperial' }}>lbs</option>
+                <option value="kg" {{ 'selected' if current_user.units == 'metric' }}>kg</option>
+                <option value="lbs" {{ 'selected' if current_user.units == 'imperial' }}>lbs</option>
               </select>
               <!-- To stabilize grid cell height in this field-pair -->
               <small class="error-inline-UNUSED"></small>
@@ -48,14 +68,12 @@
       <div role="tabpanel" class="tab-content" id="tab-sleep" hidden>
         <div>
           <label for="wake_datetime">Wake Time:</label>
-          <input type="datetime-local" id="wake_datetime" name="wake_datetime"
-            {% if entry_date %}value="{{entry_date}}T00:00"{% endif %}>
+          <input type="datetime-local" id="wake_datetime" name="wake_datetime">
           <small class="error-inline"></small>
         </div>
         <div>
           <label for="sleep_datetime">Sleep Time:</label>
-          <input type="datetime-local" id="sleep_datetime" name="sleep_datetime"
-            {% if entry_date %}value="{{entry_date}}T00:00"{% endif %}>
+          <input type="datetime-local" id="sleep_datetime" name="sleep_datetime">
           <small class="error-inline"></small>
         </div>
       </div>
@@ -63,7 +81,7 @@
 {% endmacro %}
 
 
-{% macro time_entry_modal(id='time_entries-entry-dashboard', title='Add Time Entry', current_date=None) %}
+{% macro time_entry_modal(id='time_entries-entry-dashboard', title='Add Time Entry', current_date=None, pillars=None) %}
   {% call ui.modal('time_tracking', 'time_entries', id, title) %}
     <div>
         <label for="entry_date">Date:</label>
@@ -88,6 +106,19 @@
         <input type="text" id="category" name="category" required placeholder="Project Work">
         <small class="error-inline"></small>
     </div>
+
+    <!-- TODO: Pillars -->
+    <fieldset class="pill-group" id="pillar-fieldset">
+        <legend>Pillars:</legend>
+        {% for pillar in pillars %}
+        <label class="pill">
+            <input type="checkbox" name="pillar_checkbox" id="pillar-{{ pillar.id }}" value="{{ pillar.id }}">
+            <span>{{ pillar.name }}</span>
+        </label>
+        {% endfor %}
+    </fieldset>
+    <input type="hidden" id="pillar_ids_hidden" name="pillar_ids[]" value="">
+
     <div>
         <label for="description">Description (Optional):</label>
          <textarea id="description" name="description" rows="5" cols="5"
@@ -97,7 +128,7 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro task_entry_modal(id='tasks-entry-dashboard', title='Add Task') %}
+{% macro task_entry_modal(id='tasks-entry-dashboard', title='Add Task', pillars=None) %}
   {% call ui.modal('tasks', 'tasks', id, title) %}
     <div>
       <label for="name">Task:</label>
@@ -105,7 +136,7 @@
       <small class="error-inline"></small>
     </div>
     <div>
-        <fieldset class="radio-fieldset">
+        <!-- <fieldset class="radio-fieldset" id="priority-fieldset">
             <legend>Priority:</legend>
             <div>
                 <input type="radio" name="priority" id="priority-low" value="low">
@@ -119,8 +150,35 @@
                 <input type="radio" name="priority" id="priority-high" value="high">
                 <label for="priority-high">High</label>
             </div>
-            <small class="error-inline"></small>
-        </fieldset>
+            <div>
+                <input type="radio" name="priority" id="priority-frog" value="frog">
+                <label for="priority-frog">Frog</label>
+            </div>
+            <small class="error-inline"></small>  stupid?
+        </fieldset> -->
+        {{ radio_tabs('priority', ['low', 'medium', 'high', 'frog'], 4) }}
+        {#<fieldset class="radio-tabs" data-count="4" id="priority-fieldset">
+            <legend>Priority:</legend>
+            <label class="radio-tab">
+                <input type="radio" name="priority" id="priority-low" value="low" required>
+                <span>Low</span>
+            </label>
+            <label class="radio-tab">
+                <input type="radio" name="priority" id="priority-medium" value="medium" required>
+                <span>Medium</span>
+            </label>
+            <label class="radio-tab">
+                <input type="radio" name="priority" id="priority-high" value="high" required>
+                <span>High</span>
+            </label>
+            <label class="radio-tab">
+                <input type="radio" name="priority" id="priority-frog" value="frog" required>
+                <span>Frog</span>
+            </label>
+            <div class="glider"></div>
+        </fieldset>#}
+        <small class="error-inline"></small>
+
     </div>
     {#<div>
       <label for="priority">Priority</label>
@@ -132,56 +190,66 @@
       </select>
       <small class="error-inline"></small>
     </div>#}
-    <div>
+    {#<div>
       <input type="checkbox" id="is_frog" name="is_frog">
       <label for="is_frog">"Daily Frog" Task?</label>
       <small class="error-inline"></small>
-    </div>
+    </div>#}
     <div>
       <label for="due_date">Due Date:</label>
       <input type="date" id="due_date" name="due_date">
       <small class="error-inline"></small>
     </div>
 
-    <!-- DRAFT: New search-to-filter for subtasks/supertasks -->
-    <template data-task-template>
-        <div class="card">
-            <div class="header" data-header>My Task</div>
-            <div class="body" data-body>Priority: Like literally rn, bruh</div>
+    <!-- TODO: Pillars -->
+    <fieldset class="pill-group" id="pillar-fieldset">
+        <legend>Pillars:</legend>
+        {% for pillar in pillars %}
+        <label class="pill">
+            <input type="checkbox" name="pillar_checkbox" id="pillar-{{ pillar.id }}" value="{{ pillar.id }}">
+            <span>{{ pillar.name }}</span>
+        </label>
+        {% endfor %}
+    </fieldset>
+    <input type="hidden" id="pillar_ids_hidden" name="pillar_ids[]" value="">
+
+    <!-- TODO/Tidy: New search-to-filter for subtasks/supertasks -->
+    <template data-subtask-template>
+        <div class="subtask-option">
+            <div class="subtask-name" data-header></div>
+            <div class="subtask-priority" data-body></div>
         </div>
     </template>
 
-    <template data-pill-template>
-        <div class="my-pill">
+    <template data-subtask-chip-template>
+        <div class="subtask-chip">
             <button
                 type="button"
-                class="btn-icon btn-round pill-remove"
+                class="btn-icon btn-round subtask-chip-remove"
                 aria-label="Remove subtask"
             >
                 {{ ui.x_svg() }}
             </button>
-            <span class="pill-name"></span>
+            <span class="subtask-chip-name"></span>
         </div>
     </template>
 
-    <div class="pill-container">
-
-    </div>
+    <div class="subtask-chips"></div>
 
     <!-- hidden input to store subtask ids as a comma-separated list in .value -->
-    <input type="hidden" id="subtask_ids_hidden" name="subtask_ids">
+    <input type="hidden" id="subtask_ids_hidden" name="subtask_ids[]">
 
     <div class="search-wrapper" data-search-wrapper>
         <label for="search">Search for subtasks:</label>
         <input type="search" id="search" data-search placeholder="Search tasks">
-        <div class="task-cards" data-task-card-container>
+        <div class="subtask-dropdown" data-subtask-dropdown>
 
         </div>
     </div>
   {% endcall %}
 {% endmacro %}
 
-{% macro habit_entry_modal(id='habits-entry-dashboard', title='Add Habit') %}
+{% macro habit_entry_modal(id='habits-entry-dashboard', title='Add Habit', pillars=pillars) %}
     {% call ui.modal('habits', 'habits', id, title) %}
         <div>
             <label for="name" data-tip="ndh">Habit:</label>
@@ -189,20 +257,32 @@
             <small class="error-inline"></small>
         </div>
         <div>
-            <label for="target_frequency" data-tip="yes">Target (per wk):</label>
+            <label for="target_frequency">Target (per wk):</label>
             <input type="text" id="target_frequency" name="target_frequency" required
                 inputmode="numeric" data-type-int>
             <small class="error-inline"></small>
         </div>
-        <div>
+        <div class="toggle-group">
             <label for="is_promotable">Promotion-based?</label>
-            <input type="checkbox" id="is_promotable" name="is_promotable">
-            <small class="error-inline"></small>
+            <input type="checkbox" class="toggle-input" id="is_promotable" name="is_promotable">
+            <label for="is_promotable" class="toggle"></label>
         </div>
+
+        <!-- TODO: Pillars -->
+        <fieldset class="pill-group" id="pillar-fieldset">
+            <legend>Pillars:</legend>
+            {% for pillar in pillars %}
+            <label class="pill">
+                <input type="checkbox" name="pillar_checkbox" id="pillar-{{ pillar.id }}" value="{{ pillar.id }}">
+                <span>{{ pillar.name }}</span>
+            </label>
+            {% endfor %}
+        </fieldset>
+        <input type="hidden" id="pillar_ids_hidden" name="pillar_ids[]" value="">
     {% endcall %}
 {% endmacro %}
 
-{% macro leetcode_entry_modal(id='leet_code_records-entry-dashboard', title='Add LeetCode record') %}
+{% macro leetcode_entry_modal(id='leet_code_records-entry-dashboard', title='Add LeetCode record', languages=None) %}
     {% call ui.modal('habits', 'leetcode_records', id, title) %}
     <div class="field-pair field-pair--weighted">
         <div>
@@ -217,11 +297,15 @@
 
     <div>
         <label for="language">Language:</label>
-        <select name="language" id="language">
-            <option value="Python">Python</option>
-            <option value="JavaScript">JavaScript</option>
-            <option value="C">C</option>
-            <option value="C++">C++</option>
+        <select name="language" id="language" required>
+            <option value="" selected>--</option>
+            {% for lang in languages %}
+                <option value="{{ lang }}">{{ lang.label }}</option>
+            {% endfor %}
+            {#<option value="python">Python</option>
+            <option value="js">JavaScript</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>#}
         </select>
     </div>
 
@@ -259,7 +343,7 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro product_entry_modal(id='products-entry-dashboard', title='Add Product', list=category_options) %}
+{% macro product_entry_modal(id='products-entry-dashboard', title='Add Product', categories=None, units=None) %}
     {% call ui.modal('groceries', 'products', id, title) %}
         <div>
             <label for="name">Product Name:</label>
@@ -278,8 +362,8 @@
             <label for="category">Category</label>
             <select name="category" id="category" required>
                 <option value="" disabled selected hidden data-initial-disabled>--</option>
-                {% for category in list %}
-                    <option value="{{ category.value }}">{{ category.text.title() }}</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category.label }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -297,14 +381,17 @@
             <div>
                 <label for="unit_type">Units:</label>
                 <select name="unit_type" id="unit_type" required>
-                    <option value="" disabled selected>--</option>
-                    <option value="g">g (grams)</option>
+                    <option value="" selected>--</option>
+                    {% for unit in units %}
+                    <option value="{{ unit }}">{{ unit.label }}</option>
+                    {% endfor %}
+                    <!-- <option value="g">g (grams)</option>
                     <option value="kg">kg (kilograms)</option>
                     <option value="oz">oz (ounces)</option>
                     <option value="lb">lb (pounds)</option>
                     <option value="ml">ml (milliliters)</option>
                     <option value="l">l (liters)</option>
-                    <option value="fl_oz">fl oz (fluid ounces)</option>
+                    <option value="fl_oz">fl oz (fluid ounces)</option> -->
                 </select>
                 <!-- To stabilize grid cell height in this field-pair -->
                 <small class="error-inline-UNUSED"></small>
@@ -313,12 +400,12 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro transaction_entry_modal(products, id='transactions-entry-dashboard', title='Add Transaction', list=category_options) %}
+{% macro transaction_entry_modal(products, id='transactions-entry-dashboard', title='Add Transaction', categories=None, units=None) %}
     {% call ui.modal('groceries', 'transactions', id, title) %}
         <div>
             <label for="product_id">Select Product: </label>
             <select name="product_id" id="product_id" required>
-                <option value="">--</option>
+                <option value="" selected>--</option>
                 {% for product in products %}
                     <option value="{{ product.id }}">{{ product.name }}{% if product.deleted_at %} (deleted){% endif %}</option>
                 {% endfor %}
@@ -360,8 +447,8 @@
             <label for="category">Category</label>
             <select name="category" id="category" disabled required data-initial-disabled>
                 <option value="" disabled selected hidden data-initial-disabled>--</option>
-                {% for category in list %}
-                    <option value="{{ category.value }}">{{ category.text.title() }}</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category.label }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -379,14 +466,10 @@
             <div class="product-field" hidden>
                 <label for="unit_type">Units:</label>
                 <select name="unit_type" id="unit_type" disabled required data-initial-disabled>
-                    <option value="" disabled selected>-- Units --</option>
-                    <option value="g">g (grams)</option>
-                    <option value="kg">kg (kilograms)</option>
-                    <option value="oz">oz (ounces)</option>
-                    <option value="lb">lb (pounds)</option>
-                    <option value="ml">ml (milliliters)</option>
-                    <option value="l">l (liters)</option>
-                    <option value="fl_oz">fl oz (fluid ounces)</option>
+                    <option value="" disabled selected>--</option>
+                    {% for unit in units %}
+                    <option value="{{ unit }}">{{ unit.label }}</option>
+                    {% endfor %}
                 </select>
                 <!-- To stabilize grid cell height in this field-pair -->
                 <small class="error-inline-UNUSED"></small>
@@ -395,11 +478,11 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro recipe_entry_modal(products, id='recipes-entry-dashboard', title='Add Recipe') %}
+{% macro recipe_entry_modal(products, id='recipes-entry-dashboard', title='Add Recipe', units=None) %}
     {% call ui.modal('groceries', 'recipes', id, title) %}
         <div>
-            <label for="recipe_name">Recipe Name:</label>
-            <input type="text" name="recipe_name" id="recipe_name" required>
+            <label for="name">Recipe Name:</label>
+            <input type="text" name="name" id="name" required>
         </div>
         <div class="field-pair field-pair--weighted">
             <div>
@@ -409,42 +492,49 @@
             <div>
                 <label for="yields_units">Units:</label>
                 <select name="yields_units" id="yields_units" required>
-                    <option value="G" selected>g (grams)</option>
+                    <option value="" selected>--</option>
+                    {% for unit in units %}
+                    <option value="{{ unit }}">{{ unit.label }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
-        <h3>Ingredients: </h3>
+        <h3 class="ingredients-header">Ingredients:</h3>
         <div id="ingredients-container">
 
             <div class="ingredient-row" data-index="0">
-                <label for="ingredients[0][product_id]">
-                    Select Ingredient #<span class="ingredient-number-span">1</span>:
-                </label>
-                <select name="ingredients[0][product_id]" required>
-                    <option value="">--</option>
-                    {% for product in products %}
-                    <option value="{{ product.id }}">{{ product.name }}</option>
-                    {% endfor %}
-                </select>
+                <div>
+                    <!-- <label for="ingredients[0][product_id]">
+                        Ingredient
+                    </label> -->
+                    <select name="ingredients[0][product_id]" required>
+                        <option value="" class="placeholder">Product</option>
+                        {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 
-                <div class="field-pair field-pair--weighted">
+                <!-- <div class="field-pair field-pair--weighted"> -->
                     <div>
-                        <label for="ingredients[0][amount_value]">Amount:</label>
-                        <input type="text" inputmode="decimal" data-type-float data-step="0.1" name="ingredients[0][amount_value]" required>
+                        <!-- <label for="ingredients[0][amount_value]">Amount:</label> -->
+                        <input aria-label="Amount" type="text" inputmode="decimal" data-type-float data-step="0.1" name="ingredients[0][amount_value]" placeholder="35" required>
                     </div>
                     
                     <div>
-                        <label for="ingredients[0][amount_units]">Units:</label>
-                        <select name="ingredients[0][amount_units]" required>
-                            <option value="G">G</option>
-                            <option value="other options">toImplement</option>
+                        <!-- <label for="ingredients[0][amount_units]">Units:</label> -->
+                        <select aria-label="Units" name="ingredients[0][amount_units]" required>
+                            <option value="" selected>Units</option>
+                            {% for unit in units %}
+                            <option value="{{ unit }}">{{ unit.label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-                </div>
+                <!-- </div> -->
 
-                <!-- Remove button, hide on first row -->
+                {# Remove button, hide on first row #}
                 <button 
-                    class="btn-icon btn-square btn-lg btn-remove-ingredient js-remove-ingredient"
+                    class="btn-icon btn-square btn-remove-ingredient js-remove-ingredient"
                     >
                     {{ ui.delete_btn() }}
                 </button>
@@ -452,8 +542,8 @@
 
         </div>
 
-        <div class="btn btn-primary" id="add-ingredient">
+        <button type="button" class="btn btn-ghost" id="add-ingredient">
             + Ingredient
-        </div>
+        </button>
     {% endcall %}
 {% endmacro %}

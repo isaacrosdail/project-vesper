@@ -28,27 +28,25 @@
  * 1000    - Tooltips
 */
 
-:root {
-  --min-navbar-height: 4rem;
-  --confetti-size-base: 0.375rem;
-
-  /* D3 charts starting dimensions */
-  --chart-width: 400px;
-  --chart-height: 300px;
+.hide {
+  display: none !important;
 }
+
 ::selection {
-    background-color: var(--bg-selection);
+  background-color: var(--bg-selection);
 }
 
-fieldset {
+fieldset:not(.radio-tabs) {
   border: 0;
+}
+fieldset {
   padding: 0;
   margin: 0;
   min-inline-size: 0;
 
   & legend {
     padding: 0;
-    margin-bottom: var(--gap-sm);
+    margin-bottom: var(--space-sm);
   }
 }
 
@@ -67,7 +65,7 @@ h2 {
 h3 {
   font-size: var(--font-size-lg);
 }
-label,
+
 fieldset legend {
   font-weight: var(--font-weight-semibold);
 }
@@ -81,8 +79,46 @@ footer {
   text-align: center;
 }
 
-@media (width <= 600px) {
-    /* TODO: Overriding utility class used for form modals mostly */
+/* currently just on habits dashboard for the "completions by habit" chart */
+details {
+  padding: var(--space-md);
+  position: relative;
+
+  &:not([open]) span {
+  }
+
+  & summary {
+    cursor: pointer;
+  }
+}
+
+/* summary::marker {
+  color: var(--accent-strong);
+} */
+
+/* details[open] > summary {
+  font-weight: 600;
+} */
+details::after {
+  position: absolute;
+  content: "";
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: var(--accent-strong);
+  transition: width 0.1s ease;
+}
+
+
+/* @media (width <= 600px) {
+  .field-pair,
+  .field-pair--weighted {
+      grid-template-columns: 1fr;
+  }
+} */
+@container (width <= 400px) {
+  /* Containers: card-dashboard, modal-body */
   .field-pair,
   .field-pair--weighted {
       grid-template-columns: 1fr;
@@ -91,46 +127,14 @@ footer {
 
 /* ==== MEDIA QUERIES ==== */
 @media (width <= 768px) {
-    .nav-desktop {
-        display: none;
-    }
-
-    /* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
-       Let's us easily "condense" our tables for mobile */
-    .desktop-only {
-        display: none;
-    }
-
-    /* Suppress underline effect on mobile nav, use bg again */
-    .nav-link {
-
-      &:after {
-        display: none;
-      }
-      &:hover, &[aria-current="page"] {
-        border-radius: var(--border-radius);
-      }
-      &:hover {
-        background-color: var(--accent-subtle);
-      }
-      &[aria-current="page"] {
-        background-color: color-mix(in oklch, var(--accent-subtle) 85%, grey);
-      }
-    }
-}
-@media (width > 768px) {
-    .hamburger-btn { display: none; }
-    .nav-mobile-container { display: none; }
-
-    .nav-link:hover::after,
-    .nav-link[aria-current="page"]::after {
-        width: 100%;
-    }
+  /* Viewmodels' COLUMN_CONFIGs dictate which table columns per table are 'essential' or 'desktop-only'
+      Let's us easily "condense" our tables for mobile */
+  .desktop-only {
+      display: none;
+  }
 }
 
-/* TODO: Tune this later as we add some basic animations/transitions */
 @media (prefers-reduced-motion: reduce) {
-    .nav-desktop { transition: none; }
     .icon-wiggle {
         transition: none;
         animation: none;
@@ -149,53 +153,237 @@ footer {
 /* ===================================
     PAGE-SPECIFIC: Tasks Dashboard
    =================================== */
-td .status-span > svg {
-    display: none;
+
+/* TODO: Sketching conversion for tasks from table to ul */
+#tasks-dashboard-list-view {
+  border: 1px solid red;
 }
-td .status-span.is-done > svg {
-    display: block;
-    stroke: var(--clr-success);
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+/* Let a showCompleted toggle control visibility for tasks: */
+.tasks-list:not(.show-completed) .task:has(input:checked) {
+  display: none;
+}
+/* Have completed tasks recede visually */
+.task:has(input:checked) {
+
+  & .task-name {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  & input:checked { opacity: 0.5; }
+}
+
+.task {
+  border: 1px solid blue;
+  /* display: flex; */
+  /* flex-direction: column; */
+  display: grid;
+  grid-template-columns: [gutter] 3rem [content] 1fr;
+  cursor: pointer;
+  & .task-main, & .task-meta, & .task-subtasks {
+    grid-column: content;
+  }
+
+  /* Gutter: fixed lane so rows never jitter, opacity fades in on hover/focus */
+  & .task-list-actions-gutter {
+    grid-column: gutter;
+    grid-row: 1; /* aligns with .task-main row, not full height? */
+    display: flex;
+    gap: var(--space-xs);
+    /* flex: 0 0 auto;          never shrink, never grow */
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  &:hover .task-list-actions-gutter,
+  &:focus-within .task-list-actions-gutter {
+    opacity: 1;
+  }
+  & .task-list-actions-gutter > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;   /* 28px hit target — bump to 2.75rem if you want touch-first */
+    height: 1.75rem;
+    padding: 0;
+    gap: var(--space-sm);
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  & .task-list-actions-gutter > button:hover {
+    background: var(--bg-hover);
+  }
+
+  & .task-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  & .task-due-date {
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    color: var(--clr-error);
+  }
+  & .task-meta {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+
+    & .task-pillars { grid-column: 2; }
+
+    /* Separator between pillars: span + span = "a span that immediately follows another span"
+    so NOT the first one
+    */
+    & .task-pillars > span + span::before {
+      content: " · ";
+      color: var(--text-muted);
+    }
+  }
+}
+
+
+/* TODO: Search popover */
+/* .search-popover:popover-open, */
+.popover:popover-open {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  margin: auto;
+  inset: 0;
+  top: -30%; /* pull up from center of view */
+  width: clamp(300px, 60vw, 450px);
+  /* height: 300px; */
+  max-height: min(70vh, 500px);
+
+  background: var(--bg-light);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius);
+}
+
+/* TODO: remove/clean up */
+#icon-pillars {
+  fill: red;
+}
+.task-details-popover {
+  padding: var(--space-lg);
+  gap: var(--space-lg); /* bigger gap between sections */
+
+  & .task-details__header { display: inline-flex; gap: var(--space-sm); }
+
+  & .pillars-row { display: inline-flex; color: var(--text-muted); font-size: var(--font-size-sm); }
+}
+
+.task-details__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  & .task-details__actions { display: flex; gap: var(--space-xs); }
+}
+
+.task-details__props {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  row-gap: var(--space-xs);
+  column-gap: var(--space-sm);
+  align-items: center;
+  font-size: var(--font-size-sm);
+
+  & .label {
+    color: var(--text-muted);
+  }
+  & .value {
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+}
+
+.subtasks-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+
+  & .subtask-group { display: inline-flex; gap: var(--space-sm); }
+
+  & .subtask-group {
+    padding-left: var(--space-md);
+  }
+}
+
+.results-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+
+/* TODO: replacing above, scrap checkmark svg, just strikethrough/opacity dip completed tasks */
+tr[data-is-done="True"] .name-span {
+  text-decoration: line-through;
+  opacity: 0.4;
 }
 
 .progress {
   display: flex;
-  gap: var(--gap-lg);
+  gap: var(--space-lg);
 }
 
-/* ===================================
-    PAGE-SPECIFIC: Tasks Web
-   =================================== */
-
-/* node, link */
-/* D3 drag handlers cover changing from grab -> grabbing -> grab */
-.node:hover {
-  cursor: grab;
-}
 
 /* ===================================
     PAGE-SPECIFIC: Groceries Dashboard
    =================================== */
-#list-empty {
-  font-style: italic;
-  color: var(--text-muted);
+
+/* NEW: */
+.shopping-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  position: relative;
+
+  & input {
+    width: 7ch;
+    padding: 0 var(--space-xs);
+    border-radius: 0;
+  }
+  & span {
+    font-weight: 400;
+  }
+  & .item-detail {
+    opacity: 0.7;
+  }
+
+  & .inline-delete {
+    position: absolute;
+    right: -1rem;
+
+  }
+  &:hover .inline-delete {
+    opacity: 1;
+  }
 }
 .shopping-list {
   display: flex;
   flex-direction: column;
+  gap: var(--space-xs);
 }
-
-/* Position our "x" button "outside"/"to the side of" the inline content */
-.shoppinglist-item {
-  position: relative; /* positioning context for inline-delete */
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-self: start;
-
-  & svg {
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
+.shopping-list:empty::after {
+  content: "No items yet.";
+  font-style: italic;
+  color: var(--text-muted);
 }
 
 .inline-delete {
@@ -213,29 +401,6 @@ td .status-span.is-done > svg {
   transition: opacity var(--transition-fade);
 }
 
-.qty-controls {
-  display: flex;
-  gap: var(--gap-sm);
-  align-items: center;
-
-  & button {
-    width: 20px;
-    height: 20px;
-    color: var(--accent-subtle);
-    background: transparent;
-    border: 1px solid var(--accent-subtle);
-    border-radius: 50%;
-    opacity: 0;
-    transition: opacity var(--transition-fade);
-  }
-}
-
-/* Show hidden controls on hover */
-.shoppinglist-item:hover .inline-delete,
-.shoppinglist-item:hover .qty-controls button {
-    opacity: 1;
-}
-
 /* ===================================
     PAGE-SPECIFIC: Recipes Page
    =================================== */
@@ -244,39 +409,55 @@ td .status-span.is-done > svg {
 #ingredients-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
+
 .ingredient-row {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--gap-sm);
-  border: 1px solid var(--border-default);
+  grid-template-columns: 2fr 1fr auto;
+  gap: var(--space-sm);
+  border-left: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  background: var(--bg-hover);
+  /* background: var(--bg-hover); */
   padding: var(--space-md);
-}
-.ingredient-row:has(.btn-remove-ingredient:hover, .btn-remove-ingredient:focus-visible) {
-  outline: thin solid var(--clr-error);
-  box-shadow: 0px 0px 5px var(--clr-error);
-}
-.btn-remove-ingredient {
-  position: absolute;
-  top: 0;
-  right: 10px;
-  color: var(--clr-error);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: transparent;
-  transition: background-color 120ms ease, box-shadow 120ms ease;
+  align-items: end;
 
-  &:hover, &:focus-visible {
-    background: color-mix(in srgb, red 12%, transparent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, red 40%, transparent);
+  &:only-of-type .js-remove-ingredient {
+    display: none;
   }
 }
-
+/* .ingredient-row:only-of-type .js-remove-ingredient {
+  display: none;
+} */
+/* .ingredient-row:has(.btn-remove-ingredient:hover, .btn-remove-ingredient:focus-visible) {
+  outline: thin solid var(--clr-error);
+  box-shadow: 0px 0px 5px var(--clr-error);
+} */
+.btn-remove-ingredient {
+  position: absolute;
+  /* top: 0; */
+  right: -20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ingredient-row:hover .btn-remove-ingredient {
+  opacity: 1;
+}
+.btn-remove-ingredient:hover {
+  color: var(--clr-error);
+  border-color: var(--clr-error);
+}
 
 /* ====== ACTUAL RECIPES PAGE STUFF BELOW ======  */
 .all-recipes-grid {
@@ -284,7 +465,7 @@ td .status-span.is-done > svg {
   /* grid-template-columns: 1fr 1fr; */
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   padding: var(--space-lg);
-  gap: var(--gap-md);
+  gap: var(--space-md);
 }
 .all-recipes-header {
   grid-column: 1 / -1;
@@ -328,7 +509,7 @@ td .status-span.is-done > svg {
   display: grid;
   grid-template-columns: 1fr 2fr; /* ingr: directions = 1:2 */
   grid-template-rows: 1fr 2fr;    /* top : bottom = 1:2 */
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
   width: clamp(300px, 80vw, 700px);
   height: 80vh;
 }
@@ -336,7 +517,7 @@ td .status-span.is-done > svg {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
-  gap: var(--gap-xs);
+  gap: var(--space-xs);
 }
 
 .ingredients-col {
@@ -368,7 +549,7 @@ td .status-span.is-done > svg {
     /* flex container all our li's */
     display: flex;
     flex-direction: column;
-    gap: var(--gap-sm);
+    gap: var(--space-sm);
 
     counter-reset: li-counter;
     padding: var(--space-sm);
@@ -376,7 +557,7 @@ td .status-span.is-done > svg {
     & li {
       /* flex container for EACH li (circle + text) */
       display: flex;
-      gap: var(--gap-md);
+      gap: var(--space-md);
       align-items: flex-start; /* Aligns number to top if text wraps */
       counter-increment: li-counter;
     }
@@ -403,8 +584,76 @@ td .status-span.is-done > svg {
 }
 
 /* ===================================
+PAGE-SPECIFIC: Tasks Web
+=================================== */
+
+body:has(#web) {
+  overflow: hidden;
+
+  & footer {
+    display: none;
+  }
+}
+/* #web {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+} */
+
+/* node, link */
+/* D3 drag handlers cover changing from grab -> grabbing -> grab */
+.node:hover {
+  cursor: grab;
+}
+
+.node-details {
+  fill: var(--text-muted);
+  text-anchor: start;
+  pointer-events: none;
+}
+[class^="node-"] {
+  border: 11px solid red;
+}
+.node-default {
+  fill: oklch(0.6493 0.11 251.78);
+  /* opacity: 1; */
+}
+.node-dimmed {
+  opacity: 0.5;
+}
+.node-highlighted {
+  fill: var(--accent-strong);
+  opacity: 1;
+}
+
+
+.node-label,
+.node-label-full,
+.node-details {
+  transition: opacity 0.2s ease;
+}
+
+.node-hover-dim .node-circle,
+.node-hover-dim .node-label {
+  opacity: 0.5;
+}
+.node-hover-dim .node-label-full {
+  opacity: 0;
+}
+.node-done .node-circle,
+.node-done .node-label,
+.node-done .node-badge-priority { opacity: 0.4; }
+
+.node-focused .node-label { opacity: 0; }
+.node-focused .node-label-full { opacity: 1; }
+
+/* Shows details + swaps truncated/full labels */
+.node-zoomed .node-label { opacity: 0; }
+.node-zoomed .node-label-full { opacity: 0; }
+.node-zoomed .node-details { opacity: 1; }
+/* ===================================
     D3 Charts: Habits, Metrics, Time Tracking
-   =================================== */
+  =================================== */
 
 /* habits page drafting */
 #habits-stats-container {
@@ -448,10 +697,31 @@ td .status-span.is-done > svg {
 .breakdown-group {
   grid-area: breakdown;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 200px;
   padding: var(--space-sm);
+
+  & summary {
+    grid-area: details;
+    white-space: nowrap;
+  }
+
+  & .timeframe-selector {
+    grid-area: controls;
+    justify-self: end;
+  }
+
+  & #habits-hbar-chart-container {
+    grid-area: chart;
+    /* width: 600px; */
+    width: clamp(350px, 70vw, 600px);
+    height: 400px;
+  }
+}
+.breakdown-content {
+  display: grid;
+  grid-template-areas:
+    "details controls"
+    "chart chart";
+  grid-template-columns: auto 1fr;
 }
 /* END HABITS PAGE DRAFTING */
 
@@ -459,16 +729,19 @@ td .status-span.is-done > svg {
 .chart-controls {
   display: flex;
   align-items: center;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 
 #time-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
   align-self: center;
-  border: 1px solid red;
+  
 }
 
 /* styling "1" tick for multi-line chart */
-.thing {
+.multi-line-one-tick {
   fill: var(--accent-strong);
   stroke: var(--accent-strong);
 }
@@ -490,22 +763,57 @@ path.line {
   stroke: var(--accent-strong);
   stroke-width: 2;
 }
+svg text {
+  fill: var(--text);
+}
 
 
 /* TODO: Refine / refactor */
+
+/* temp debug */
+.chart-title { outline: 1px solid red; }
+.axis-x { outline: 1px solid green; }
+.axis-y { outline: 1px solid blue; }
+.gLines, .chart { outline: 1px solid yellow; }
+
+#time_tracking-chart-container {
+  width: 400px;
+  height: 300px;
+}
+
+
+#metrics-stats {
+  /* align-self: center; */
+}
+/* #metrics-multi-chart-container {
+  width: 600px;
+  height: 300px;
+} */
+
+.multi-chart-legend:hover {
+  opacity: 0.5;
+}
+
+#metrics-multi-chart-container,
+#metrics-bar-chart-container,
+#metrics-line-chart-container {
+  width: 500px;
+  height: 300px;
+}
 
 /* Target lines: bmr-target-line & sleep-target-line */
 [class$="-target-line"] {
   fill: red;
 }
 
+/* TODO: Figure this out. Removed broad 'text' selector because our pillars chart should have axes with red/green text */
 .chart-title,
-.chart-legend-text,
-text {
+.chart-legend-text {
   fill: var(--text);
 }
 .bisect-label {
   font-size: var(--font-size-md);
+  pointer-events: none;
 }
 .bisect-line {
   stroke: var(--text-muted); /* TODO: make blue? */
@@ -538,11 +846,11 @@ svg {
   overflow: visible; /* for hovering pie chart slices */
 }
 
-/* Gonna centrally size our D3 charts here as well to prevent pop-in/down on render */
+/* TODO: Gonna centrally size our D3 charts here as well to prevent pop-in/down on render */
 [id$="chart-container"] {
-    align-self: center;
-    width: var(--chart-width);
-    height: var(--chart-height);
+  align-self: center;
+  /* width: var(--chart-width);
+  height: var(--chart-height); */
 }
 
 /* ===================================
@@ -552,30 +860,330 @@ svg {
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
 
 /* Flex container for header/content/footer */
-.wrapper {
+/* .wrapper {
   display: flex;
   flex-direction: column;
-  gap: calc(1.5 * var(--gap-lg));
+  gap: calc(1.5 * var(--space-lg));
   min-height: 100vh;
   background-color: var(--bg-dark);
+} */
+
+.wrapper {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "left content right"
+    "footer footer footer";
+  --sidebar-collapsed-width: 40px;
+  /* Lets us make the sidebar opening reflow/push content in */
+  grid-template-columns: var(--sidebar-width, var(--sidebar-collapsed-width)) 1fr auto;
+  transition: grid-template-columns 0.2s ease;
+  /* grid-template-columns: auto 1fr auto; */
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  gap: calc(1.5 * var(--space-lg));
+  background-color: var(--bg-dark);
+
+  &.sidebar-open {
+    --sidebar-width: 250px;
+  }
+}
+.wrapper--landing {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background:
+    linear-gradient(hsl(0 0% 0% / 0.3)),
+    url('/static/img/space.jpg') no-repeat center / cover;
+
+  & .btn-primary {
+    box-shadow: 0 0 20px rgba(100, 140, 255, 0.3);
+  }
+
+  & nav { background: transparent; }
+  & .nav-right { display: none; }
 }
 
 /* Main content area: fills remaining viewport space below navbar */
 .content {
+  grid-area: content;
   display: flex;
   flex: 1 0 auto;                        /* only grow vertically */
   flex-direction: column;
-  gap: var(--gap-lg);
+  gap: var(--space-lg);
   width: 100%;                           /* take full width by default */
   max-width: clamp(35rem, 90vw, 90rem);  /* cap width responsively */
   padding-inline: clamp(1rem, 4vw, 2rem);
   margin-inline: auto;                   /* center horizontally */
+}
+.content--landing {
+  max-width: none;
+  padding-inline: 0;
 }
 
 /* For pages using our content_mod Jinja block to provide narrower styling for content */
 .content--narrow {
   max-width: clamp(35rem, 90vw, 50rem);
 }
+
+/* TODO: Refine further / purge annotations: */
+/* sidebar-container + left-sidebar + sidebar-toggle -> in-grid collapsible sidebar used on tasks (and groceries data page)
+ * profile-sidebar -> right sidebar, profile
+ * data-sidebar    -> right sidebar, groceries data page; should prob extend/reuse parts of task-sidebar or share a common base with it to de-dupe.
+ * .sidebar -> generic fixed overlay sidebar (same pattern as profile-sidebar but on the left)
+ */
+/* Left sidebar sketching for tasks page. But we should keep this as a "generic, collapsible left sidebar" design */
+.sidebar-toggle {
+  /* position: sticky; */
+  position: absolute;
+  align-self: start;
+  top: var(--space-md);
+  right: 0;
+  translate: 100% 0;
+  background: var(--bg-light);
+  cursor: pointer;
+  /* overflow: visible auto; */
+}
+
+.task-sidebar {
+  align-items: start;
+  justify-content: start;
+
+  & span {
+    transition:
+      opacity 3s ease allow-discrete,
+      display 1s ease 0.2s allow-discrete;
+    /* transition-behavior: allow-discrete; */
+
+    /* @starting-style {
+      opacity: 0;
+    } */
+  }
+
+  /* to show active color for currently selected primary filter */
+  & [data-filter].active {
+    color: var(--accent-strong);
+    fill: var(--accent-strong);
+  }
+}
+
+.sidebar-container {
+  grid-area: left;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+}
+.left-sidebar {
+  container-type: inline-size; /* creates a containment context */
+  /* means the element can no longer size itself according to its children's intrinsic width */
+  background: var(--bg-light);
+  transition: transform 0.2s ease;
+  text-wrap: whitespace;
+  height: 100%;
+  overflow-y: auto;
+
+  /* Moved in from tasks sidebar */
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
+
+.header {
+  grid-area: header;
+}
+.footer {
+  grid-area: footer;
+}
+
+/* Override to fit text */
+#units-fieldset {
+  width: 150px;
+}
+/* Override to not be sooo big */
+#default-timeframe {
+  width: 50px;
+}
+
+.sidebar-edit-plus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.timezone-group select {
+  width: 180px;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-sm);
+
+  & > :last-child {
+    justify-self: end;
+    font-size: var(--font-size-sm);
+  }
+  & input, & select {
+    margin: 0; padding: var(--space-xs);
+    width: 70px; height: 30px;
+  }
+}
+
+/* For each group in sidebar ofc */
+.sidebar-section {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+/* TODO: move elsewhere? */
+.devtools-section {
+  & .my-grid {
+    display: grid;
+    grid-template-areas:
+      "links links"
+      "reset reset";
+    gap: var(--space-sm);
+  }
+  & .reset { grid-area: reset; }
+  & .links {
+    grid-area: links;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+  }
+  & a, & button {
+    font-size: var(--font-size-sm);
+    height: 40px;
+  }
+}
+
+.logout {
+  justify-self: end;
+}
+
+/* RIGHT SIDEBAR: For profile/user settings/global config */
+.profile-sidebar {
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  z-index: 1000;
+  height: 100dvh;
+  /* dvh = dynamic viewport height. it account for mobile browser
+  chrome (the URL bar that appears/disappears on scroll). identical on desktop ofc */
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  transform: translateX(100%);
+  transition: transform 0.2s ease;
+
+  &.open { transform: translateX(0); }
+}
+
+.profile-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+
+  &.open { display: block; }
+}
+
+
+/* TODO: Drafting for groceries/data page sidebar */
+.data-sidebar {
+  align-items: start;
+  justify-content: start;
+  height: 100dvh;
+  /* background: var(--bg); */
+
+  /* collapsed, just enough for icons */
+  transition: width 0.2s ease, visibility 0.2s ease;
+
+  /* Collapsed: hide all, show icons
+  &:not(.open) * { visibility: hidden; }
+  &:not(.open) .icon,
+  &:not(.open) .icon * { visibility: visible; } */
+
+  & svg {
+    width: 40px; height: 1.3em;
+    display: inline;
+  }
+
+  & .search-group { padding: 0; }
+}
+
+[data-table] {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+[data-table]:hover {
+    background: var(--bg-hover);
+}
+[data-table].active {
+    background: var(--bg-active);
+    color: var(--text-active);
+}
+
+.table-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+}
+
+
+/* Other pages: toggle-able sidebar */
+.sidebar {
+  grid-area: left;
+  width: 280px;
+  top: 0;
+  left: 0;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+
+  /* DEBUG: */
+  position: fixed;
+  height: 100dvh; /* dvh = dynamic viewport height. it account for mobile browser
+  chrome (the URL bar that appears/disappears on scroll). identical on desktop ofc */
+  background: var(--bg);
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+}
+.sidebar.open {
+  transform: translateX(0);
+}
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+
+  &.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+
 .card--narrower {
   align-self: center;
   width: clamp(15rem, 90vw, 25rem);
@@ -597,10 +1205,10 @@ svg {
 
 /* For drafting the frontend validation stuff for username on register */
 [class^="error-inline"] {
-    min-height: var(--line-height-default);
-    visibility: hidden;
-    color: var(--clr-error);
-    /* background: rgb(219 149 149); */
+  min-height: var(--line-height-default);
+  visibility: hidden;
+  color: var(--clr-error);
+  /* background: rgb(219 149 149); */
 }
 
 
@@ -608,31 +1216,87 @@ svg {
     PAGE-SPECIFIC: Homepage
    =================================== */
 
+@keyframes flicker {
+    0%, 100% { transform: scaleY(1) scaleX(1); }
+    25% { transform: scaleY(1.05) scaleX(0.95); }
+    50% { transform: scaleY(0.95) scaleX(1.05); }
+    75% { transform: scaleY(1.03) scaleX(0.97); }
+}
+/* Completion flare */
+@keyframes flare {
+    0% { transform: scale(1); filter: brightness(1); }
+    30% { transform: scale(1.6); filter: brightness(1.5); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+.streak-icon.flare {
+    animation: flare 0.4s ease-out forwards, flicker 2s ease-in-out infinite 0.4s;
+}
+/* TODO: Fix up, for fire thing :/ */
+.habit-streak {
+  display: inline-flex;
+  align-items: center;
+
+  &.completed .streak-icon { display: none; }
+  &:has(.streak-count:empty) .streak-icon { display: none; }
+
+  & .streak-icon {
+    transition: transform 0.1s ease;
+    fill: orange;
+    color: orange;
+    width: 1em;
+    height: 1em;
+    transform-origin: bottom center;
+    animation: flicker 1.5s ease-in-out infinite;
+
+    &.pop {
+      transform: scale(1.4);
+    }
+  }
+}
+
+
 #greeting-card {
   position: relative;
   height: clamp(150px, 15vh, 300px);
+
+  & canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+  }
+
+  & .greeting-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    /* width: 100%; */
+  }
+
+  & .weather-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  & .weather-temp {
+    display: flex;
+    align-items: center;
+  }
 }
-#sky-canvas {
+
+#greeting-card::before {
+  content: '';
   position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-}
-.greeting-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-.weather-info {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  place-items: end;
-  justify-content: right;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--celestial-color, gold);
+  left: var(--celestial-x, 50%);
+  bottom: var(--celestial-y, 50%);
+  box-shadow: 0 0 20px var(--celestial-color, gold);
+  transition: left 1s ease, bottom 1s ease;
 }
 
 /* Styling for text of today's frog / LeetCode to subtly emphasize them */
@@ -675,7 +1339,7 @@ svg {
   transform-origin: left; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
   transition: transform 0.2s ease-in-out;
 
-  &:after {
+  &::after {
     content: "";
     position: absolute;
     top: 0;
@@ -686,7 +1350,7 @@ svg {
   &.surging {
     animation: pulse 1.5s ease-in-out infinite;
 
-    &:after {
+    &::after {
       background: linear-gradient(
           to right,
           transparent,
@@ -770,7 +1434,7 @@ svg {
 
 label[for="remember_user"] {
     display: inline-flex;
-    gap: var(--gap-sm);
+    gap: var(--space-sm);
     align-items: center;
 }
 
@@ -817,12 +1481,15 @@ label[for="remember_user"] {
 
 /* Container for landing page content */
 .landing-content {
+  position: relative;
+  /* min-height: 100dvh; */
   display: flex;
   flex-direction: column;
-  gap: var(--gap-lg);
+  gap: var(--space-lg);
   align-items: center;
+  justify-content: center;
   padding: var(--space-xl) var(--space-md);
-  overflow: hidden;
+  /* overflow: hidden; */
 
   & p {
     max-width: 60ch;
@@ -841,9 +1508,40 @@ label[for="remember_user"] {
 .landing-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap-sm);
+  gap: var(--space-sm);
 }
 
+.landing-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+      radial-gradient(1px 1px at 20% 30%, white, transparent),
+      radial-gradient(1px 1px at 50% 60%, white, transparent),
+      radial-gradient(1px 1px at 80% 10%, white, transparent),
+      radial-gradient(1px 1px at 10% 80%, white, transparent);
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@property --glow-size {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 40%;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+@keyframes pulse-glow {
+  0%, 100% { --glow-size: 40%; }
+  50% { --glow-size: 45%; }
+}
+@keyframes breathe {
+  0%, 100% { background: radial-gradient(circle, var(--star-main) 40%, var(--star-middle) 50%, transparent 70%); }
+  50% { background: radial-gradient(circle, var(--star-main) 40%, var(--star-middle) 45%, transparent 73%); }
+}
 /* ===================================
     PAGE-SPECIFIC: Error Page(s)
    =================================== */
@@ -852,7 +1550,7 @@ label[for="remember_user"] {
 .error-page {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-md);
+  gap: var(--space-md);
   align-items: center;
   text-align: center;
 
@@ -871,22 +1569,99 @@ label[for="remember_user"] {
     PAGE-SPECIFIC: Style-reference Page
    =================================== */
 
+.dragover-target {
+  outline: thin solid cyan;
+}
+
+.component-catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Token swatches */
+.swatch-strip {
+  display: flex;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  border: var(--border-default);
+}
+
+.swatch {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--space-sm);
+}
+
+.swatch-sm {
+  padding: var(--space-sm);
+  border-radius: var(--border-radius-mild);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  border: var(--border-default);
+}
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.control-row--spaced {
+  gap: var(--space-lg);
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+}
+
+.control-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.confirmation-confined {
+    max-width: 400px;
+    background: var(--bg);
+    border: var(--border-default);
+    border-radius: var(--border-radius);
+    padding: var(--space-md);
+}
+
+
 /* Override stylng to position dummy context menu */
 .context-menu-positioning {
     position: relative;
 }
 
 /* Override btn-icon styling to show borders for debug/tuning */
-html[data-page="devtools.style_reference"] .btn-icon {
+html[data-page="devtools.style_reference"] {
+
+  & .btn-icon {
     border: 1px solid red;
+  }
+  & .radio-tabs {
+    min-width: 250px;
+  }
 }
 
 /* Base grid styles, shared by all demo containers */
 .demo-section,
 .demo-subsection,
 .demo-grid-container {
-    display: grid;
-    gap: var(--gap-md);
+  display: grid;
+  gap: var(--space-md);
 }
 
 /* Overall section-level grids */
@@ -960,4 +1735,426 @@ html[data-page="devtools.style_reference"] .btn-icon {
   background: var(--progress-bar-fill);
   border: var(--border-default);
   border-radius: var(--border-radius);
+}
+
+
+/* PILLARS DRAFTING */
+#radar-chart-container {
+  padding: var(--space-md);
+  border: 2px solid red;
+  width: 400px;
+  height: 400px;
+}
+
+html[data-page="main.pillars"] li {
+  list-style: numeric;
+  list-style-position: inside;
+}
+
+/* TRYING STUFF OUT */
+.radar-container {
+  perspective: 800px;
+}
+#radar-chart-container {
+  transform: rotateX(20deg);
+  transition: transform 0.4s ease;
+
+  &:hover {
+    transform: rotateX(0deg);
+  }
+}
+
+.layer1 { background: rgba(255, 0, 0, 0.3); border: 2px solid red; }
+.layer2 { background: rgba(0, 255, 0, 0.3); border: 2px solid green; }
+.layer3 { background: rgba(0, 100, 255, 0.3); border: 2px solid blue; }
+
+.layer1, .layer2, .layer3 {
+  width: 200px;
+  height: 200px;
+  transition: transform 0.7s ease;
+}
+
+:root {
+  --layer-w: 200px;
+}
+
+.layer1 {
+  /* transform: translateY(var(--layer-w)); */
+  transform: translateZ(0px);
+}
+.layer2 {
+  transform: translateZ(80px);
+}
+.layer3 {
+  /* transform: translateY(calc(-1 * var(--layer-w))); */
+  transform: translateZ(160px);
+}
+
+/* TWO: */
+.draft-container {
+  width: 500px;
+  height: 500px;
+  border: 1px solid cyan;
+  align-self: center;
+  perspective: 400px;
+  transform-style: preserve-3d;
+  transition: transform 0.7s ease;
+  /* transform: rotateX(45deg); */
+  --rotate-x-amt: 60deg;
+  --rotate-y-amt: 0deg;
+  transform: translateZ(0px)
+    rotateX(var(--rotate-x-amt))
+    rotateZ(-45deg)
+    rotateY(var(--rotate-y-amt));
+
+  &:hover {
+    transform: rotateX(0deg) rotateZ(0deg);
+
+    & .layer1, & .layer2, & .layer3 {
+      transform: translateZ(0);
+    }
+    & .layer1 { transform: translateY(var(--layer-w)); }
+    & .layer3 { transform: translateY(calc(-1 * var(--layer-w))); }
+  }
+}
+
+/* intersection observer toying around */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+
+/* TODO: Groceries 2x2 grid mockup */
+/* style="width: 500px; height: 500px;" */
+.card-groceries {
+  background: var(--bg);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  padding: var(--space-sm);
+  align-content: start;
+  gap: var(--space-sm);
+}
+
+.tertiary { /* links, labels, metadata */
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+.secondary {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+.btn-soft {
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
+}
+/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+</svg> */
+
+.card-link {
+  cursor: pointer;
+  position: relative;
+  /* transition: text-decoration 0.2s ease; */
+}
+.card-link::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+.card-link:hover::before {
+  /* text-decoration: underline; */
+  transform: scaleX(1);
+}
+.card-link::after {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-left: var(--space-xs);
+  background: currentColor;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3' /></svg>");
+  /* transition: transform 0.2s ease; */
+}
+.another-pill {
+  border: var(--border-default);
+  /* border-radius: var(--border-radius); */
+  border-radius: 999px;
+  background: var(--clr-success);
+  padding: 0.01rem var(--space-sm);
+  color: var(--text-inverse);
+}
+.card-header {
+  grid-area: card-header;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.groceries-grid {
+  width: 600px;
+  height: 800px;
+  display: grid;
+  grid-template-areas:
+  "nutrition logging"
+  "shoppinglist tables";
+  gap: var(--space-sm);
+    /* By default, grid cells stretch to fit their
+  row height (align-items: stretch)
+  to make this, and the other "pills" take up less
+  vert space, we ned to constraint the alignment,
+  NOT the height:
+  */
+  /* & > * { align-items: start; } */
+}
+.nutrition {
+  grid-area: nutrition;
+  display: grid;
+  grid-template-areas:
+    "card-header card-header card-header card-header"
+    "xofygoal xofygoal xofygoal xofygoal"
+    "calsprog  calsprog  calsprog  calsprog"
+    "cals     protein  carbs    fat"
+    "sparkline sparkline sparkline sparkline"
+    "meals    meals    meals    meals";
+
+    & .macro-card {
+      text-align: center;
+      border: var(--border-default);
+      border-radius: var(--border-radius);
+
+      & .pct {
+        font-weight: 600;
+      }
+    }
+    & .xofygoal {
+      grid-area: xofygoal;
+      justify-self: center;
+      align-self: end;
+      
+      display: flex;
+      flex-direction: column;
+    }
+
+    & .calsprog {
+      --prog: 1;
+      grid-area: calsprog;
+      height: 15px;
+      background: var(--clr-success); /* try a gradient? */
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      transform: scaleX(1.005); /* compensating for ?? */
+      /* transform: scaleX(var(--prog));
+      transform-origin: left;
+      transition: transform 0.2s ease; */
+
+      & .mask {
+        background: var(--bg-light);
+        transform: scaleX(var(--prog));
+        transform-origin: right;
+        height: 100%;
+        width: calc(100% + 1px); /* sub-pixel rendering */
+        /* transition: transform 0.2s ease; */
+        animation: reveal 3s linear forwards;
+      }
+    }
+
+    & .cals {
+      grid-area: cals;
+    }
+    & .protein {
+      grid-area: protein;
+    }
+    & .carbs {
+      grid-area: carbs;
+    }
+    & .fat {
+      grid-area: fat;
+    }
+    & .sparkline {
+      grid-area: sparkline;
+      display: grid;
+      grid-template-areas:
+        "sparkline-chart sparkline-chart"
+        "sparkline-chart sparkline-chart"
+        "days avg";
+      /* justify-content: space-between; */
+      /* justify-items: space-between; */
+
+      & .sparkline-chart {
+        grid-area: sparkline-chart;
+        border: 1px solid red;
+        height: 40px;
+        min-width: 0;
+
+        &:empty {
+          height: 40px;
+          /* background: linear-gradient(90deg, var(--bg-light) 25%, var(--bg-hover) 50%, var(--bg-light) 75%); */
+          background: linear-gradient(90deg, blue 25%, red 50%, var(--bg-light) 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: var(--border-radius);
+        }
+      }
+      & .days {
+        grid-area: days;
+        justify-self: start;
+      }
+      & .avg {
+        grid-area: avg;
+        justify-self: end;
+      }
+    }
+    & .meals {
+      grid-area: meals;
+    }
+}
+
+/* todo: for our loading text we swap in when d3 sparkline renders */
+.loading {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--bg-light);
+    background-image: linear-gradient(
+        90deg,
+        var(--bg-light) 0%,
+        var(--bg-hover) 50%,
+        var(--bg-light) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--border-radius);
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0 }
+  to { background-position: -200% 0 }
+}
+
+@keyframes reveal {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* TODO: move this as we go */
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.logging {
+  grid-area: logging;
+  display: grid;
+  grid-template-areas:
+    "card-header card-header"
+    "quicklog quicklog"
+    "plan plan"
+    "openplan openplan";
+
+  & .quicklog {
+    grid-area: quicklog;
+    display: flex;
+    flex-direction: column;
+
+    & .logentry {
+      font-size: small;
+    }
+    & .logentry-add {
+      font-size: small;
+      align-self: center;
+      width: 100%;
+      border-style: dashed;
+    }
+  }
+  & .plan {
+    grid-area: plan;
+    display: flex;
+    flex-direction: column;
+  }
+  & .openplan { grid-area: openplan; }
+}
+.shoppinglist {
+  grid-area: shoppinglist;
+  display: grid;
+  grid-template-areas:
+    "card-header card-header"
+    "listitems listitems"
+    "cta cta"
+    "lowstock lowstock";
+
+  & .listitems {
+    grid-area: listitems;
+
+    & .listitem {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+  & .cta {
+    grid-area: cta;
+    display: flex;
+    gap: var(--space-sm);
+  }
+  & .lowstock {
+    grid-area: lowstock;
+  }
+}
+.tables {
+  grid-area: tables;
+  display: grid;
+  grid-template-areas:
+    "card-header card-header"
+    "recentlyused recentlyused"
+    "lastbuy lastbuy"
+    "csv-other csv-other"
+    "info info";
+
+  & .txns {
+    grid-area: txns;
+  }
+  & .linkto {
+    grid-area: linkto;
+  }
+  & .recentlyused {
+    grid-area: recentlyused;
+  }
+  & .lastbuy { grid-area: lastbuy; }
+  & .csv-other {
+    grid-area: csv-other;
+    display: flex;
+    gap: var(--space-sm);
+  }
+  & .info { grid-area: info; }
 }
