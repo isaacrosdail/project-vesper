@@ -171,15 +171,27 @@ class TasksService:
                 task.completed_at, self.user_tz
             )
 
-            if due_today:
-                num_expected += 1
-                if completed_today:
-                    num_completed += 1
+            # TODO: Old, scrap once match/case variant is confirmed fine
+            # if due_today:
+            #     num_expected += 1
+            #     if completed_today:
+            #         num_completed += 1
 
-            elif completed_today and task.due_date is None:
-                # "spontaneous" task, completed today without a due date
-                num_completed += 1
-                num_expected += 1
+            # elif completed_today and task.due_date is None:
+            #     # "spontaneous" task, completed today without a due date
+            #     num_completed += 1
+            #     num_expected += 1
+
+            # Match/case here makes the truth table visible?
+            match (bool(due_today), bool(completed_today), task.due_date is None):
+                case (True, True, _):
+                    num_expected += 1
+                    num_completed += 1
+                case (True, False, _):
+                    num_expected += 1
+                case (False, True, True):
+                    num_expected += 1
+                    num_completed += 1
 
         percent_complete = (
             (num_completed / num_expected * 100) if num_expected > 0 else 0

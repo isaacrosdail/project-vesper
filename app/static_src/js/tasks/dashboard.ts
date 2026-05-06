@@ -10,6 +10,7 @@ import { confirmationManager, openModalForEdit } from '../shared/ui/modal-manage
 import { makeToast } from '../shared/ui/toast';
 import { title } from '../shared/utils';
 import { FormDialog, Task } from '../types';
+import { generateKeyBetween, generateNKeysBetween } from '../shared/fractional_indexing';
 
 // TODO:
 // 1. For due dates that are nearer, use "the day" (ex: Friday instead of Mar 20)
@@ -217,6 +218,7 @@ function setTaskListState(patch: Partial<TaskListState>) {
     renderTaskList(deriveVisibleTasks());
 }
 
+// Also now sorts by sort_key (fractional index) so the list respects stored order
 function deriveVisibleTasks(): Task[] {
     let result = tasksStore.get();
     // Primary filter
@@ -230,7 +232,7 @@ function deriveVisibleTasks(): Task[] {
     if (state.priority !== 'all') {
         result = result.filter(t => t.priority === state.priority);
     }
-    return result;
+    return result.toSorted((a, b) => a.sort_key.localeCompare(b.sort_key));
 }
 
 async function deleteTask(id: number) {
@@ -363,6 +365,85 @@ function setupSearch() {
 }
 
 export async function init() {
+
+    // TODO: Clean up; for drag task li stuff
+    const taskList = document.querySelector('.tasks-list');
+
+    // Enables draggable for drag-n-drop: This way, only the button starts this, NOT "anywhere in the taskli"
+    taskList.addEventListener('mousedown', (e) => {
+        if (e.target.matches('.task-drag')) {
+            const taskLi = e.target.closest<HTMLDivElement>('.task');
+            taskLi.setAttribute('draggable', 'true')
+        }
+    })
+    // TODO: Note: dragstart/dragend fire on the element that has draggable="true"
+    // dragend - clean up state/classes regardless of whether a drop happened
+    // Currently...."not working"?
+    taskList.addEventListener('dragend', (e) => {
+        if (e.target.matches('.task')) {
+            e.target.setAttribute('draggable', 'false');
+        }
+    })
+
+    // let sourceRef = null; // dragged task
+    // let targetRef = null; // "dragged-over" task
+    // let position: 'before' | 'after' | null = null; // top-half vs bottom half
+    type DragState = { sourceRef: any, targetRef: any, position: 'before' | 'after' | null };
+    const dragState: DragState = { sourceRef: null, targetRef: null, position: null };
+    taskList.addEventListener('dragstart', (e) => {
+        if (e.target.matches('.task')) {
+            dragState.sourceRef = e.target;
+        }
+    })
+    // dragover - get "current" task we're over, so drop can apply it accordingly
+    // Need two things:
+    // 1. Which task are we over? -> targetRef
+    // 2. Top half or bottom half
+    taskList.addEventListener('dragover', (e) => {
+        e.preventDefault(); // opt in to being a drop target
+        const taskLi = e.target.closest('.task');
+        if (taskLi) {
+            const taskName = taskLi.querySelector('.task-name');
+            console.log(`dragover: ${taskName.textContent}`);
+            dragState.targetRef = taskLi;
+
+            // top half or bottom half calc
+            const rect = taskLi.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            dragState.position = e.clientY < midpoint ? 'before' : 'after';
+            console.log(`dragState.position: ${dragState.position}`)
+        }
+    })
+    const keyOf = (el) => el ? taskMap.get(Number(el.dataset.id)).sort_key : null;
+    // drop - fires once on the drop target when user releases
+    taskList.addEventListener('drop', (e) => {
+        if (e.target.closest('.task')) {
+            const taskId = dragState.targetRef.dataset.id;
+            const task = taskMap.get(Number(taskId));
+            console.log(`task: ${task.name}, taskId: ${taskId}`)
+
+            // Decide neighbors: 
+            let prev, next;
+            if (dragState.position === 'before') {
+                prev = dragState.targetRef.previousElementSibling;
+                next = dragState.targetRef;
+            } else {
+                prev = dragState.targetRef;
+                next = dragState.targetRef.nextElementSibling;
+            }
+            // Generate a key between prev and next:
+            const key = generateKeyBetween(keyOf(prev), keyOf(next));
+
+            // Update data for sourceRef task:
+            const sourceTaskId = dragState.sourceRef.dataset.id;
+            const sourceTask = taskMap.get(Number(sourceTaskId));
+            sourceTask.sort_key = key
+            applyTaskUpdate(Number(dragState.sourceRef.dataset.id), sourceTask);
+
+            // Reset state:
+            Object.keys(dragState).forEach(key => delete dragState[key]);
+        }
+    })
     tasksStore.subscribe((tasks) => {
         console.log('store updated, task count: ', tasks.length)
         taskMap.clear();
@@ -371,6 +452,11 @@ export async function init() {
     })
 
     const { data } = await api.tasks.getAll();
+    // TODO: Temporarily mock fractional index on frontend-only:
+    const keys = generateNKeysBetween(null, null, data.length);
+    data.forEach((t: Task, i: number) => t.sort_key = keys[i]);
+    console.log(`Keys generated!`)
+    // console.log(data)
     tasksStore.set(data); // subscriber fires, taskMap built automatically
     console.log('tasksStore has:', tasksStore.get())
 

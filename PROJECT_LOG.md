@@ -18,15 +18,19 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+## Tues 4-21-26
+- Implementing task sorting logic
 
 ## Mon 4-20-26
 TODO: Finish lex string implementation, then polish buttons B1/B2.
     - See "Session: Apr 19" bookmark group in Firefox for the tabs we had open
+-  
+
 
 ## Sun 4-16-26
-1. Implemented gutter for tasks list's drag-to-reorder & toggle subtask list view buttons.
+-  Implemented gutter for tasks list's drag-to-reorder & toggle subtask list view buttons.
     - Fixed gutter width, toggle subtask button is removed via JS if no subtasks for given task during population
-2. Task position in tasks list view:
+- Task position in tasks list view:
     - We'd like to implement drag-to-reorder via the HTML Drag API. For that, tasks need a position/key thing.
     - Most naive solution is a simple int value representing position of a task, but this breaks
     down quickly: We'd need to update/re-index up to N-1 tasks/positions EVERY time we reorder.
@@ -43,19 +47,19 @@ TODO: Finish lex string implementation, then polish buttons B1/B2.
         - With lex strings, we have infinite precision: "m" is just "m", and "mm", etc. We just keep subdividing, never needing rebalancing.
 
 ## Tues 3-24-26
-1. Add lazy=selectin, lazy=joined, lazy=raise options to several relationships in groceries (WIP)
-2. Fix several N+1 queries, namely habit_info
+-  Add lazy=selectin, lazy=joined, lazy=raise options to several relationships in groceries (WIP)
+- Fix several N+1 queries, namely habit_info
     - Add @log_queries decorator to surface query counts in dev mode
 
 ## Mon 3-23-26
-1. Refactor tooltip to use anchor positioning
-2. Add completed_at on HabitCompletion, entry_datetime on LeetCodeRecord
+-  Refactor tooltip to use anchor positioning
+- Add completed_at on HabitCompletion, entry_datetime on LeetCodeRecord
     - Also add composite indexes for several models
-3. Update seed data: is_done -> completed_at for tasks
+- Update seed data: is_done -> completed_at for tasks
 
 
 ## [Thurs 12.02.2026]
-1. Add instructions to README for how to run locally
+-  Add instructions to README for how to run locally
     - Add .env.example
 
 
@@ -63,76 +67,76 @@ TODO: Finish lex string implementation, then polish buttons B1/B2.
 
 TODO: Add "clean up / dedupe dialog stylings for confirmation vs form-modal" to checklist somewhere
 
-1. Commit contextMenu changes
-2. URLs:
+-  Commit contextMenu changes
+- URLs:
     - api.ts: Add routes mapping const thing
     - MORE STUFF
-3. Style improvements:
-    1. Ingredients row in form: Gave more visual distinctness & positioned delete svg in top right,
+- Style improvements:
+    -  Ingredients row in form: Gave more visual distinctness & positioned delete svg in top right,
         with hover effects to make it clear what it references
             - ALSO: Un-wrapped delete_btn SVG from button inside macro, just svg now. Need to update name & remove commented part
-    2. Confirmation modal styling:
+    - Confirmation modal styling:
         - Switch from using form-actions to new confirmation-actions (kinda sloppy but works)
         - 
 
 ## [Tues 03.02.26]
-1. Recipe feature
+-  Recipe feature
     - Add Recipe, RecipeIngredient models & revision
     - Add RecipeRepository
     
 
 ## [Thurs 21.01.26]
-1. Finish updating parsers.py
-2. Switched wake_time/sleep_time fields to using datetime-local
+- Finish updating parsers.py
+- Switched wake_time/sleep_time fields to using datetime-local
     - Then removed the weird sleep_time logic since it's now unambiguous
 
 ## [Wed 20.01.26]
-1. Further JS-side validation stuff
-2. Start fixing up `parsers.py` & updating call sites
-3. Start adding datetime-local to metrics form for wake/sleep fields
+- Further JS-side validation stuff
+- Start fixing up `parsers.py` & updating call sites
+- Start adding datetime-local to metrics form for wake/sleep fields
 
 MISC:
 - Updated calculate_habit_streak to use `pairwise()`
 - Renamed datetime/ to datetime_/ to avoid shadowing stdlib
 
 ## [Tues 19.01.26]
-1. 
+- 
 
 ## [Mon 18.01.26]
-1. Implement frontend validation for register.html
-2. Refactor modal-manager.ts so form submission logic is in forms.ts, not mixed in with modal-manager.
+- Implement frontend validation for register.html
+- Refactor modal-manager.ts so form submission logic is in forms.ts, not mixed in with modal-manager.
     - Added `form-type` data attribute to distinguish between modal, full-page, and "single action" forms. Added to all form tags (I think)
 
 
 ## [Sat 17.01.26]
-1. Learn proxies, do some frontend validation setup (just login page atm)
-2. Tweak LeetCode record table to condense - batch LC_ID and Title together into one cell
-3. Add thorough documentation to view_mixins.py for the whole "viewmodels/presenters" system.
-4. Add border-left & increase stroke-width on password toggle eye SVG so it's more visible.
+- Learn proxies, do some frontend validation setup (just login page atm)
+- Tweak LeetCode record table to condense - batch LC_ID and Title together into one cell
+- Add thorough documentation to view_mixins.py for the whole "viewmodels/presenters" system.
+- Add border-left & increase stroke-width on password toggle eye SVG so it's more visible.
 
 ## [Sun 15.01.26]
-1. CSRF Token implementation
+- CSRF Token implementation
     - 
-2. Viewmodels (most): 
+- Viewmodels (most): 
     - Split TimestampedViewModel into BaseViewModel & HasDueDateMixin
     - Cut timezone conversions from here, instead using model properties now
 
-3. Model changes (ORM-side, not Postgres-side)
+- Model changes (ORM-side, not Postgres-side)
     - Added `*_local` properties for all applicable model fields involving datetimes
     - Added proper relationships between User <-> (models) class defs
 
 ## [Sat 14.01.26]
-1. Mostly learning/drills - generators, sets, comprehensions
+- Mostly learning/drills - generators, sets, comprehensions
 
 ## [Thurs 08.01.26]
-1. Move to custom script on prod
+- Move to custom script on prod
     - ./scripts/deploy.sh
-2. 
+- 
 
 ## [Sun 04.01.26]
 **Log:**
-1. Fix up HTTP status codes throughout
-2. Actually implement the units field thing
+- Fix up HTTP status codes throughout
+- Actually implement the units field thing
     - User model already had units: UnitSystemEnum (imperial/metric)
     - DailyMetrics stores in master units (kg)
     - Convert inbound data at service, outbound weight in generic GET route
@@ -144,26 +148,26 @@ LEFT OFF: ruff check codebase-wide, working on pruning debug terminal output
 
 ## [Sat 03.01.26]
 **Log:**
-1. Purge 'Any' typing from most, if not all, functions/view functions
+- Purge 'Any' typing from most, if not all, functions/view functions
 
 Misc. Replace manual query parameter handling with native options (JavaScript's `URLSearchParams`, Python's `request`)
 
 ## [Fri 02.01.26]
 **Log:**
-1. Refactoring Service/Repository
+- Refactoring Service/Repository
     - Moving to one repository (class) per model (Applied to all modules, although only a few needed real splitting-up here as not all even have 2+ models to them.)
     - Removed `user_tz` from BaseRepository since, duh, only services need timezone.
     - Services hold session, pruned/rethought parameters/args passed into services and repositories
     - Add factory functions for convenience
-2. Ripped out ABTests/Trials 'feature' entirely.
+- Ripped out ABTests/Trials 'feature' entirely.
     - This was half-baked, and doesn't really fit with what I wanna do here anyway?
-3. Naming consistency: DailyMetrics
+- Naming consistency: DailyMetrics
     - Renamed model to DailyMetrics for clarity (better fits 'composite metrics')
     - Since we auto-gen table names, and this is the only one which is already plural, our auto-gen added another 's' mistakenly. So we just explicitly set the tablename for dailymetrics as a (likely) one-time exception case.
 
 ## [Thurs 01.01.26]
 **Log:**
-1. `apiRequest` improvements
+- `apiRequest` improvements
     - Added `onFailure` callback for failure handling
         - Both `onSuccess` and `onFailure` callbacks are optional (destructuring options obj with default {})
     - Tightened `data` parameter typing to prevent passing functions as data
@@ -179,16 +183,16 @@ Misc. Replace manual query parameter handling with native options (JavaScript's 
 
 
 ## [Wed 31.12.25]
-1. Wrap up tooltip.ts fixing
+- Wrap up tooltip.ts fixing
     - Fixed bug. Cause: getBoundingClientRect needed to be re-invoked in the else clause AFTER we did style.top and style.left. I think this is because we needed a fresh layout calculation since it seemed the bug was it not updating the width of the tooltip box AFTER we add text. Meaning a tooltip with text of 'h' and another with text of 'Hey there this is a long msg omg hahahahaha' would both be equal, which is of course wrong.
-2. Fix: page-gating wasn't working for landing_page since it's also part of main.home route. So in base.html, added exception for main.home but not logged in for data-page="main.landing_page". Left userStore auth guard the same since auth guarding obv is the right play there.
-3. Navbar Work
+- Fix: page-gating wasn't working for landing_page since it's also part of main.home route. So in base.html, added exception for main.home but not logged in for data-page="main.landing_page". Left userStore auth guard the same since auth guarding obv is the right play there.
+- Navbar Work
     - CSS: added missing bg styling for mobile nav-links on hover/active. Scrapped .active class here (where'd that get set anyway?).
         - Also: Moved nav-link active/hover styling to media queries. (<=768) for mobile bg-color, (>768) for desktop underline
-4. Frog Task display in My Day:
+- Frog Task display in My Day:
     - Added accent border + bg-light for emphasis
     - Add tasks-section grid container for vertical spacing
-5. Style/MIsc/Cleanup:
+- Style/MIsc/Cleanup:
     - Made .context-menu position absolute so it scrolls with page. This doesn't "fix" the resize weirdness where it floats detached, but.
     - tables.ts: removeTableRow takes element instead of itemId, caller does query, export closeMenu()
     - context-menu.ts: Clean up addShoppingListItemToDOM naming
@@ -199,21 +203,21 @@ Misc. Replace manual query parameter handling with native options (JavaScript's 
 
 ## [Tues 30.12.25]
 **Log:**
-1. Fix: Sleep/wake time calculation in metrics service
+- Fix: Sleep/wake time calculation in metrics service
     - Previously assumed sleep_time was always from previous day, which...doesn't quite work (eg, sleep 14:00 -> wake 15:00 = 25 hours of sleep!)
     - We now auto-adjust sleep_time to previous day only when sleep_time >= wake_time
     - Added tooltip to sleep_time form group explaining the auto-adjustment behavior
-2. Fix: Tooltip positioning in dialog modals
+- Fix: Tooltip positioning in dialog modals
     - Problem: Dialogs create their own stacking context, causing our tooltips to render beneath them
     - We now detect parent dialog via `.closest('dialog')` & append tooltip as ITS child (with absolute positioning)
     - Non-dialog tooltips still append to document body (with fixed positioning)
     - Also: cleaned up JSDocs, fixed typos and learned a new word (carrot -> caret)
-3. In hell: tooltip is being a NIGHTMARE. LEFT OFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF========================================32423423=================================
+- In hell: tooltip is being a NIGHTMARE. LEFT OFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF========================================32423423=================================
 
 
 ## [Sun 28.12.25]
 **Log:**
-1. Cleanup:
+- Cleanup:
     - tasks/dashboard.html: Add "Is Frog?" column to table + frog_label property to viewmodels.py to indicate which tasks are frog tasks
     - D3 charts:
         - Addressing D3 charts' "pop-down" on load due to JS setting size: Made/Extracted code into `getChartDimensions()` to handle setting/getting margins, height/width, & innerHeight/innerWidth (also set fallbacks for height/width and moved height/width values/setting to CSS vars)
@@ -230,7 +234,7 @@ Misc. Replace manual query parameter handling with native options (JavaScript's 
 
 ## [Wed 24.12.25]
 **Log:**
-1. Bun test stuff
+- Bun test stuff
     - Got happydom for DOM-related Bun testing. For happydom we needed to install it, then added happydom.ts to inject DOM APIs stuff as well as add bunfing.toml to preload happydom.ts to run before tests.
 MISC:
 	- Updated node/npm (updated .nvmrc)
@@ -239,7 +243,7 @@ MISC:
 
 ## [ 21.12.25]
 **Log:**
-1. Forms continuation
+- Forms continuation
 	- Refreshed all form stylings. field-pairs now show horizontally inline, form is a grid column now with .form-column
 	- Groceries forms fixing:
 		- Fixed bug in transaction add form where clicking new, filling out fields, then instead selecting a product (therefore re-hiding the product fields) does NOT wipe field values.
@@ -252,14 +256,14 @@ MISC:
 
 ## [Sat 20.12.25] - Continue Cleanup
 **Log:**
-1. Extend ... changes to all other form modals/modules
+- Extend ... changes to all other form modals/modules
 	A. Tasks:
-		1. Rearrange form / add grid(s) if needed
-		2. Toggle "show completed tasks" in table
+		- Rearrange form / add grid(s) if needed
+		- Toggle "show completed tasks" in table
 			A. Add checkbox with JS to ......something something...
 			B. Set display none if completed I guess?
-2. CSS Tweaks/cleanup alongside
-3. Linting/Formatting tooling additions/changes:
+- CSS Tweaks/cleanup alongside
+- Linting/Formatting tooling additions/changes:
 	- ALL: Rolled configs for mypy, pytest, Ruff, and djLint into a new `pyproject.toml` to better unify configs.
 	- Stylelint (CSS): Config is `stylelint.config.mjs`
 		Steps: `npm create styelint@latest`, `npm install -D stylelint-config-recess-order` (latter just for chosen config)
@@ -273,7 +277,7 @@ MISC:
 
 
 ## [Fri 19.12.25]
-1. Form tweaks
+- Form tweaks
     - Changed time_entries description input field to `<textarea>`
     - Added justify-content: center; to .tab stylings so the icon+text groupings are horizontally centered in their button elements.
     - Changed from inline-flex to flex for some elements
@@ -281,12 +285,12 @@ MISC:
 
 ## [Wed 17.12.25]
 **Log:**
-1. Login/Register page styling
+- Login/Register page styling
 	- Cleaned up checkbox jank
 	- Made "Log in" & "Sign up" link texts visually distinct
 	- Made card narrower, added spacing
 	- Updated placeholder texts
-2. Frontend validation basics
+- Frontend validation basics
 	- Created shared/validators.ts
 	- Validaton on blur (only when non-empty)
 	- Adding/removing in/valid classes (moving away from using native user-in/valid pseudo)
@@ -295,7 +299,7 @@ MISC:
 
 ## [Tues 16.12.25]
 **Log:**
-1. Misc cleanup to start :D
+- Misc cleanup to start :D
 	- Purged split_hamburger_svg() (remove from _ui.html & usage in navbar)
 	- Added Register link when not logged in (looks weird with just login lmao)
 	- Change + move owner template user password to .env
@@ -310,7 +314,7 @@ MISC:
 
 ## [Sun 14.12.25]
 **Log:**
-1. Bug fixing: Transactions 'edit' modal issues
+- Bug fixing: Transactions 'edit' modal issues
     - Problem: In edit mode for transactions, we disable `select#product_id`, which of course broke submission. Also,
     (soft-)deleted products' names wouldn't show since they weren't in the Jinja-populated options.
     - Fix:
@@ -322,13 +326,13 @@ MISC:
 
 ## [Sat 13.12.25]
 **Log:**
-1. Habits dashboard:
+- Habits dashboard:
 	- Fix refreshChart() function to also clear axis labels
 	- Removed dropdown from Habits (doesn't make sense for Habits)
 	- Added timeframe selection to leetcoderecords
 	- Moved dropdown inline with card-title => looks a lot slicker tbh
 	- Minor: fix spacing issue with card-title
-2. Improving "labels for (module) subtypes" dilemma in TS:
+- Improving "labels for (module) subtypes" dilemma in TS:
 	- `types.ts`:
 		- Added Subtype type (mirrors what we have in backend :D)
 		- Added SubtypeLables type (singular vs plural)
@@ -336,12 +340,12 @@ MISC:
 
 ## [Thurs 11.12.25]
 **Log:**
-1. Fixing shopping list bug
+- Fixing shopping list bug
 	Problems:
-		1. Typo where we referenced shopping list item ID as data.item_id
+		- Typo where we referenced shopping list item ID as data.item_id
 			- This also broke our delete shopping list item functionality since that does .remove() on success of DELETE
 			FIX: change to data.id
-		2. IDs transaction vs product shit: PROBLEM?
+		- IDs transaction vs product shit: PROBLEM?
 			- Added data-product-id to <tr> when subtype is transactions
 			- Ternary in JS assigns productId -> productId if subtype is transactions, itemId otherwise
 			- Added productId to menuContext object & roped its collection in for context menu + dots-btn
@@ -350,7 +354,7 @@ MISC.
 
 ## [Wed 10.12.25]
 **Log:**
-1. theme-manager.ts revisions
+- theme-manager.ts revisions
     - Rewrote getCookie() to use split() instead of between() for exact substring matching
         - **Why:** Old approach found the first "=" in entire cookie string, causing false matches
         - EX: `user_theme=magenta; theme=light` would return "magenta" for getCookie('theme')
@@ -358,11 +362,11 @@ MISC.
     - Added dispatchEvent to ensure cookie gets written on first load
     - `base.html`: Added `else` to fix lack of covering "system" case
     - Added JSDocs
-2. 
+- 
 
 ## [Tues 9.12.25]
 **Log:**
-1. Context menu was extracting `name` using `td:nth-child(2)` which is obviously terrible. This breaks on any changes, and relies on specific ordering. It's a remnant of my not grasping how to tack on product_name efficiently to our api_dict.
+- Context menu was extracting `name` using `td:nth-child(2)` which is obviously terrible. This breaks on any changes, and relies on specific ordering. It's a remnant of my not grasping how to tack on product_name efficiently to our api_dict.
 `Name` was thus far only used for groceries to display toasts related to the shopping list feature.
 Cleanup:
     - Removed `name` entirely
@@ -371,25 +375,25 @@ Cleanup:
 
 ## [Sat 6.12.25]
 **Log:**
-1. Wrapped up toggling Task completion via table context menu
+- Wrapped up toggling Task completion via table context menu
 	- Merged name+status into one column
     - Added checkmark_svg() macro+attributions
     - Tidied up TS as I went, namely context-menu.ts and tables.ts
-2. 
+- 
 MISC. Refactor index.ts: add JSDocs, refactor some pieces for clarity/simplicity
 
 ## [Fri 5.12.25]
 **Log:**
-1. DevOps: Docker/Compose cleanup
+- DevOps: Docker/Compose cleanup
     - Fix broken Pi deployment
     - Cleaned up all compose files (dev/prod/pi)
         - Standardize service naming (db/flask)
         - Removed `environment` blocks with just `env_file`
-2. Bug Fix: Dev Tools showing to non-owners in prod
+- Bug Fix: Dev Tools showing to non-owners in prod
     - Template was checking has_dev_tools (the function obj) instead of g.has_dev_tools
     - Moved APP_ENV check to has_dev_tools() itself (permissive for dev, owner-only for prod)
     - Removed nested template logic
-3. Trying to wrap up `markComplete()` for Task table context menu
+- Trying to wrap up `markComplete()` for Task table context menu
     - Renamed to `toggleTaskComplete()` so we can avoid conditional/dynamic menu options / text
     - NEXT: Finish implementation in apiRequest callback, need to rethink icon/symbol to use for status and/or Status column generally
 Misc. Updated seed_db.py to work again after model/schema changes
@@ -397,8 +401,8 @@ Misc. Updated seed_db.py to work again after model/schema changes
 
 ## [Wed 12.11.25]
 **Log:**
-1. Metrics: Add timeframe filtering to table & separate type/timeframe dropdowns for chart
-2. Habits:
+- Metrics: Add timeframe filtering to table & separate type/timeframe dropdowns for chart
+- Habits:
     - Apply similar timeframe filtering (today/7d/30d) dropdown
     - Fixes:
         - Oversight where bar height was not updated for chart, leading to it not adjusting when dataset updates
@@ -407,44 +411,44 @@ MISC. Fix: Dropdown bug where multiple could stay open when clicking a new one
 
 ## [Thurs 13.11.25]
 **Log:**
-1. Refine some D3 charts / brought them in line more
-2. Habits: adding target_frequency to model + progress calcs
+- Refine some D3 charts / brought them in line more
+- Habits: adding target_frequency to model + progress calcs
 	- Required, represents target completion rate per week
 	
 	
 ## [Fri 14.11.25]
 **Log:**
-1. Fix linter warnings
-2. Bug fix: Fix remove button on shopping list display not working
+- Fix linter warnings
+- Bug fix: Fix remove button on shopping list display not working
 
 ## [Wed 5.11.25]
 **Log:**
-1. Adding user config stuff to User model + userStore
+- Adding user config stuff to User model + userStore
 	- Fields for city, country (ISO), units (metric vs imperial). Created UnitSystemEnum
 	- Default to Chicago, US + imperial
 	- Expanded profile/me route and userStore.ts to incl new fields
 	- index.ts: Removed hardcoded city/units/country. Passing now to function:
 		fetchWeatherData(city, country, units);
-2. Converting to TS
+- Converting to TS
 	- index.ts, 
 	- Dashboards for: habits, metrics
 
 ## [Tues 4.11.25]
 **Log:**
-1. Converting to TS:
+- Converting to TS:
 	- modal-manager.js, dropdown.js
 
 ## [Mon 3.11.25]
 **Log:**
-1. Polishing D3 charts-related stuff for habits, metrics, & time_tracking
-2. Converting JS files to TS:
+- Polishing D3 charts-related stuff for habits, metrics, & time_tracking
+- Converting JS files to TS:
 	- tables.js, toast.js, api.js, forms.js, navbar.js, tooltip.js, userStore.js, canvas.js
 	- dashboard.js for: tasks
 
 ## [Sun 2.11.25]
 **Log:**
-1. Drafting ABTesting functionality
+- Drafting ABTesting functionality
 	- Add ABTest, ABVariant models (to Metrics for now)
 		- ABTest will serve as the test model itself, while ABVariant serves as the record for each individual trial
 	- For each, add: form modal, POST route, parser
-2. Added some basic logging
+- Added some basic logging

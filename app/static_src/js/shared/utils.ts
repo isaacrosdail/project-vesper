@@ -198,25 +198,3 @@ export function parseFormData(formData: FormData): Record<string, unknown> {
     }
     return result;
 }
-
-// TODO: implemented this for task list view reordering
-export const BASE_62_DIGITS =
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-function midpoint(a: string, b: string, digits: string) {
-    const zero = digits[0];
-    // b != null -> no upper bound - caller wants a key that sorts after a with no ceiling
-    // ie, "at the end" or?
-    if (b != null && a >= b) {
-        throw new Error(a + " >= " + b);
-    }
-    // a.slice(-1) -> last char of the string a, not "the char at index a"
-    // so: "if the last char of a is the zero-digit, OR if b exists and its last char is the zero-digit, throw"
-    // Trailing zeroes break a key invariant:
-    // In fractional base-62, two strings can represent the same numeric value if one has a trailing zero:
-    // "U" -> 0.U in base-62?
-    // "U" -> O.U0 = same value
-    if (a.slice(-1) === zero || (b && b.slice(-1) === zero)) {
-        throw new Error('trailing zero');
-    }
-}
