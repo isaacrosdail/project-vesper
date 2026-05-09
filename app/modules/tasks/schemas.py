@@ -10,7 +10,7 @@ from app.modules.tasks.models import TASK_NAME_MAX_LENGTH, PriorityEnum
 class Task(BaseModel):
     name: str = Field(max_length=TASK_NAME_MAX_LENGTH)
     priority: PriorityEnum
-    due_date: date | None = None
+    due_date: datetime | None = None
     subtask_ids: list[int] = []
     supertask_ids: list[int] = []
     pillar_ids: list[int] = []
@@ -24,8 +24,9 @@ class Task(BaseModel):
 class TaskPatch(BaseModel):
     name: str | None = Field(default=None, max_length=TASK_NAME_MAX_LENGTH)
     priority: PriorityEnum | None = None
-    due_date: date | None = None
+    due_date: datetime | None = None
     subtask_ids: list[int] | None = None
     supertask_ids: list[int] | None = None
     pillar_ids: list[int] | None = None
     completed_at: datetime | None = None
+    sort_key: str | None = None

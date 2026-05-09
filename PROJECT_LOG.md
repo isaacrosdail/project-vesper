@@ -18,6 +18,17 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+
+## Sat 5-9-26
+Files for committing: add_sort_key_to_task_model_for_.py, dashboard.ts, models.py
+Also: shared/fractional_indexing.py (vendored)
+- Make tasks reordering persist to DB
+    - Add `sort_key` column to task model. Alembic migration applied fractional_indexing keys to existing tasks.
+TODO:
+    - Decide on due_date being either date or datetime and align schemas.py <-> models.py accordingly
+    - Then ensure reordering persists properly
+    - Once done, delete the commented-out lines (463-468) in dashboard.ts (the ones applying sort_key on frontend, leftover from before persisting to DB)
+
 ## Tues 4-21-26
 - Implementing task sorting logic
 

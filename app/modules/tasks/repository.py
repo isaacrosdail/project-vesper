@@ -29,6 +29,7 @@ class TaskRepository(BaseRepository[Task]):
         priority: PriorityEnum | None,
         due_date: datetime | None = None,
         pillar_ids: list[int] | None = None,
+        sort_key: str
     ) -> Task:
         """Create & add a new task. Returns said task."""
         task = Task(
@@ -36,6 +37,7 @@ class TaskRepository(BaseRepository[Task]):
             name=name,
             priority=priority,
             due_date=due_date,
+            sort_key=sort_key
         )
         return self.add(task)
 
@@ -73,3 +75,15 @@ class TaskRepository(BaseRepository[Task]):
             Task.due_date < end_utc
         )
         return self.session.execute(stmt).scalars().first()
+
+    def get_max_sort_key(self) -> str | None:
+        stmt = (
+            select(Task.sort_key)
+            .where(Task.user_id == self.user_id)
+            .order_by(Task.sort_key.desc())
+            .limit(1)
+        )
+        import sys
+        result = self.session.execute(stmt).scalar_one_or_none()
+        print(result, file=sys.stderr)
+        return result

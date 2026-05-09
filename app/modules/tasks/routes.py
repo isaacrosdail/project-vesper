@@ -37,6 +37,10 @@ def dashboard(session: Session) -> tuple[str, int]:
     # TODO: Pillars
     pillars = session.query(Pillar).filter_by(user_id=current_user.id).all()
 
+    # TODO: Test
+    tasks_service.task_repo.get_max_sort_key()
+
+
     ctx = {
         "task_headers": TaskPresenter.build_columns(),
         "tasks": viewmodel,

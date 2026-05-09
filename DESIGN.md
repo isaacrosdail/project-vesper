@@ -1,6 +1,70 @@
 
 ## Sales pitch for this app: Every app tracks - we tell you what to do about it.
+This is the load-bearing idea, and Pillars, as well as pandas-driven insight throughout dashboards/pages, are what makes it true.
 
+## OVERVIEW notes to self:
+
+Modules:
+
+1. Tasks
+    NOW:
+        - Track tasks: priority, Frog, subtasks relationships, drag-n-drop list re-ordering, tasks web visualizer.
+    AIMING TOWARD:
+        - ?? Polished tasks view page for now.
+2. Habits
+    NOW:
+        - Can list recurring habits, set how often per wk, and mark them done. It tracks your streak.
+    AIMING TOWARD:
+        - Something that doesn't just count, but rewards you visibly for consistency, warns you when
+        you're about to break a streak, and shows your "best ever" so you can chase it.
+3. Metrics
+    NOW:
+        - Can track daily weight, steps, sleep time/duration, calories. Charts show how those move over time.
+    AIMING TOWARD:
+        - Trustworthy daily diary of our body's numbers that other parts of the app can use/feed to tell us bigger-picture stuff (Pillars)
+4. Time Tracking
+    NOW:
+        - You can log "I spent 90 minutes on work, 30 minutes on exercise" etc., and a donut chart shows
+        where your time went.
+    AIMING TOWARD:
+        - An honest mirror of how you actually spent your hours, so the app can tell you whether
+        your time matches your intentions.
+5. Groceries
+    NOW:
+        - You can track what you bought, what's on your shopping list, what recipes you have, and keep an accurate count of what's actually in our kitchen right now by recording every purchase, consumption, and waste event.
+    Aiming toward:
+        - A kitchen that knows itself — what's in stock, what you ate this week, and (eventually)
+        whether what you ate was actually good for you.
+6. Auth / Accounts:
+    NOW:
+        - Can sign up / log in, set city/country, unit preferences, theme. Multi-tenant.
+7. Pillars
+    NOW:
+        - Not much. Draft page still very much a WIP. We've wired things up so a task/habit/time entry can be tagged with which "life area" it belongs to (Health, Career, Relationships, Rest, Purpose)
+    AIMING TOWARD:
+        - A single picture: a five-pointed shape that tells us at a glance whether our life is in balance. If any pillar is shrinking, the shape goes lopsided. If we've ignored a pillar for 3 weeks, it warns us. Pitch: Trackers usually just track stuff and tell you data, this one should tell you what to do about it.
+8. Analytics
+    NOW:
+        - Still experimenting, can notice "on days you complete more habits, you also tend to log more deep-work time". Not visible to user yet.
+    AIMING TOWARD:
+        - Sentences in plain English like "you seem happiest when your time splits roughly 40%
+        career, 25% relationships, 35% health." The app reading patterns back to you.
+
+
+### Sooo... 'insight'. How do we tackle that?
+
+Rung 1: Mirror. Don't interpret yet, just expose data back to the user.
+Rung 2: Threshold. ???
+Rung 3: Notice. Add the neglect callout - "Health has been below threshold for 12 days". Now the app is pointing instead of just displaying.
+Rung 4: Context. Compare recent to baseline. "Health is 30% below your usual". Not just "below standard" - below OUR standard.
+Rung 5: Cascade. "Health dropping usually shows up in Rest within two weeks". Now we're making predictions based on current behavior/recent history to inform what the user should do/correct.
+Rung 6: Suggestion. "Your Health drop is mostly driven by sleep, not steps".
+
+
+## Find a home for these notes:
+- Pillars:
+    - Score history isn't queryable as data (since we haven't given Pillars a proper backend yet)
+    - neglect detection / cascade warning logic from TODOs also has nowhere natural to live since we haven't wired those into a backend thing yet either.
 
 ### Areas to mature:
 - SQL/SQLAlchemy: window functions, CTEs, subqueries, hybrid_property.
@@ -21,6 +85,7 @@ SQL/SQLAlchemy stuff:
 -- Type narrowing in validators:
 Our validators return tuple[dict, dict] — both untyped dicts. After validation, we know the shape of the data, but the type system doesn't. The next level: validators return a TypedDict or dataclass:
 
+```py
 class ValidatedTask(TypedDict):
     name: str
     priority: PriorityEnum | None
@@ -28,156 +93,16 @@ class ValidatedTask(TypedDict):
     is_frog: bool
     subtask_ids: list[int]
     pillar_ids: list[int]
+```
 
 Then save_task receives ValidatedTask instead of dict[str, Any].
 No more typed_data.get("priority") guessing — we know the keys
 exist and their types. The Any disappears from our service layer.
 
 
-## Service / Repo / Controller pattern
-
-Problem:
-- Routes mixing orchestration, business logic, and data access seemed like a problem to me before they became a problem:
-    1. Parsing route code as an 'overview' of what's going on becomes difficult.
-    2. Maintaining said code requires such parsing, and in turn also becomes more difficult and error-prone.
-    3. Core logic that's reused in multiple routes is not able to be reused effectively unless extracted to helpers which live elsewhere.
-    4. Testing becomes difficult:
-        - Rather than having piecewise functionality extracted into single-responsibility, more tightly-scoped helpers, tests would need to mock (and therefore take into consideration) each piece of what's occurring throughout the entire route.
-
-Decision:
-- Routes should contain only the "synopsis-view" of what's happening, handling specific routing (I mean it's in the name!), delegating actual logic to helpers.
-- This is in accordance with the MVC Model-View-Controller pattern: Models (Repository), View (Templates), Controller (Routes).
-    1. That means repository access ought to be relegated to its own wing, likewise for service/business logic.
-
-Why it was right:
-- This keeps routes as tidy and legible as possible, where helper functions can "read as English".
-    1. Helper functions can also then be streamlined to fit their specific overarching needs, which means fixing/altering them fixes/alters them EVERYWHERE - no "did I get em all?"
-    2. Ensures that logic can be "handled once, handled everywhere". This is especially important when handling timezones, as they're easy to get wrong.
-    3. Massive reduction in boilerplate for common operations. Rather than inlining it, we can extract and re-invoke with different parameters.
-    4. Even though this approach does incur more work upfront, and more files, it keeps responsibilities more cleanly partitioned, especially in the long-term.
-    5. The repository layer is able to be "dumb", assuming UTC for timezone, and delegating the responsibility to managing whether the timezone we use is correct to the service layer.
-        - This makes sense, as the service layer's role is to sort out the business/domain logic.
-
-Concrete example:
-- Take our route for the tasks dashboard:
-```python
-@tasks_bp.get("/dashboard")
-@login_plus_session
-def dashboard(session: Session) -> tuple[str, int]:
-    tasks_params = get_table_params("tasks", "due_date")
-
-    tasks_service = create_tasks_service(
-        session, current_user.id, current_user.timezone
-    )
-    tasks = tasks_service.task_repo.get_all()
-    tasks = sort_by_field(tasks, tasks_params["sort_by"], tasks_params["order"])
-
-    viewmodel = [TaskViewModel(t, current_user.timezone) for t in tasks]
-
-    ctx = {
-        "tasks_params": tasks_params,
-        "task_headers": TaskPresenter.build_columns(),
-        "tasks": viewmodel,
-    }
-    return render_template("tasks/dashboard.html", **ctx), 200
-```
-Here, we do a handful of concrete, distinct steps:
-1. Parse/get the table parameters from the request's query parameters.
-2. Initialize our tasks service, which itself contains the necessary repository instantiations for our operations.
-3. Via service's access to the repository, we fetch all tasks.
-4. Then sort by field.
-5. We run all of our tasks through our TaskViewModel, which does the final processing to ensure our data is formatted as desired for display in the template.
-6. Finally, we build the context (ctx) for our template and render it.
-
-If all of this were to be in the route itself, it would be much, much more difficult to parse, and even harder to test its components to ensure they work.
-With functionality extracted into helpers, we're able to moreso declare what we wish to happen in the route (sort_by_field, get_table_params, etc) and focus on the higher-level overview of what needs to happen, rather than be in the trenches inlining that ourselves.
-
----
-
-## Viewmodels
-
-Problem: Nothing really catches our mistakes in Markup/Jinja. As such, we want minimal modulation/handling to live in our templates.
-    - There are no hints nor any enforcements from either our IDE or "baked in" to the language itself: HTML is too forgiving to flag issues, and Jinja doesn't provide hints.
-    - If I made a mistake, which is inevitable, nothing is there to catch me or flag that I did.
-
-Decision:
-- Create a viewmodels layer whose job it is to modulate data for display. This sits in between our routes which call it, and our templates whose fields it feeds.
-
-Why it was right:
-- With a viewmodels.py for each module, we can handle this instead in an environment where such issues DON'T go unflagged:
-    - Types and mismatches will be caught and flagged by Mypy.
-    - Runtime errors will catch `getattr` mismatches for fields we're roping in.
-    - We'll receive hints from IDE/editor
-
-Example:
-This is an issue I still have with macros:
-```html
-{% call(item, headers) ui.responsive_table('Tasks', task_headers, tasks, 'tasks', 'tasks', tasks_params, sortable=True) %}
-        <td class="{{ headers[0].priority }}" data-item-id="{{ item.id }}" data-module="tasks" data-subtype="tasks" data-field="name"
-```
-For example, here: Did we pass in the correct parameters, of the right types? Is the function name misspelled? Who knows! Better go check the macro definition for that!
-Contrast that with the below:
-```python
-# We can leverage Mypy, enforcing the types these ought to be:
-class TransactionViewModel(BaseViewModel):
-    product_id: int
-    price_at_scan: float
-    quantity: int
-
-    # If any field is missing or there's a typo, we'll receive actual runtime errors:
-    def __init__(self, txn: Transaction, tz: str) -> None:
-        fields = { "product_id", "price_at_scan", "quantity" }
-        for name in fields:
-            setattr(self, name, getattr(txn, name))
-
-    # And we can combine multiple fields to be displayed as one cell in our table, including
-    # basic manipulation to display total price:
-    @property
-    def price_label(self) -> str:
-        total_price = self.price_at_scan * self.quantity
-        return f"${total_price:.2f} ({self.quantity}x)"
-```
-At multiple points, our IDE/Mypy/etc will expose mismatches and potential issues that markup/Jinja will silently ignore.
-
 ---
 
 
-## Tasks Web Visualizer
-
-### Why this Feature Exists
-
-1. Normal, flat lists can't express relationships between tasks.
-2. With a web visualization, we can express actual hierarchy, at multiple depths at a time, of tasks and their subtasks.
-    This context expression buys us more than just visual hierarchy though:
-        1. Priority is encoded into the actual color of the nodes themselves
-        2. (PLANNED) Facilitates performing calculations for cumulative time for a task, meaning:
-            - Make bed (10mins) + Eat breakfast (10mins) -- both required for --> Get ready for school
-            - This way, we can display (Est: 20mins) for the last task there, enabling compression of context in a natural, visual way
-
-
-### Why an association table for task relationships/dependencies?
-
-Using self-referential FKeys on our Tasks table alone doesn't work for the potentially many-to-many relationships that we can have with subtasks <-> supertasks.
-This is because one column in our table only holds one value per row => subtask_id/supertask_id.
-
-Association tables CAN handle this many-to-many relationship because each relationship can be represented as its own distinct entry of:
-(subtask_id, supertask_id)
-More relationships just means adding more entries to the table, rather than redesigning the Tasks model itself.
-
-
-### Why D3? Why not Canvas?
-1. Manual SVG manipulation:
-    - With canvas, there's difficulty in managing click events. The "thing" (each node, link, etc) doesn't exist anymore:
-        1. I'd have to manipulate raw pixel values, rather than working with SVG elements and groups in the DOM.
-        2. We'd need to do manual hit detection: checking if the click coordinates were within the bounds of each thing we rendered on screen. There would be no elements to simply attach listeners to.
-2. A note on the performance difference:
-    - Canvas IS undoubtedly faster, but that comes at the cost of the above: It's faster precisely because once the image is rendered, that's it. There's no "memory" of what each "thing"
-    is anymore.
-    - D3 performance issues, to my understanding, seem to arrive in the "thousands of objects/elements" territory. I can't imagine a user having thousands of active tasks! Therefore, the performance tradeoff feels, in my use case, not in the realm of concern.
-
-
-#### Stuff to iron out:
-- zoom, panning limits, "web as a whole page" idea from Obsidian to fix that.
 
 
 ## Feb 19: Taking a stab at analytics
@@ -335,36 +260,3 @@ Still pending (revision notes):
   - Started applying to timeframe pills and toggle
 
 
-
-## March 13: Starting to track nutrition/intake, as well as keeping proper tabs on product inventory
-
-Problem: The system records purchases, and now consumption per mealtime, but determining current stock requires
-repeatedly recomputing totals from multiple tables (transactions/purchases - consumption). That approach becomes messy
-as more actions will appear (recipes, waste, corrections) and makes "what changed when" difficult to reason about.
-
-Design goal:
-Represent inventory as a chronological sequence of immutable events so every change to our product stock is recorded
-explicitly and clearly. Current stock should also be cheap to read, while the history of inventory state and analytics should
-still be derivable.
-
-Plan:
-- InventoryEvent: append-only ledger entries with product_id, quantity_delta, event_type (ie, "purchase", "waste", "consumption"), and created_at.
-    - Inserts are the only write operation. If inventory needs correction, we'd insert another event (eg 'correction +50') instead of editing an old row.
-
-- Two new models:
-    1. InventoryLedger: Source of truth; append-only, every inventory change gets a row. Put a composite (product_id, created_at) index because our
-    primary access pattern is "all events for a given product in a given time range". Index pre-sorts by product_id first, then chronologically within
-    each product.
-    2. ProductInventory: Cache of the current state, derived from the ledger.
-
-
-# CSRF Stuff
-Server-side gen's csrf_token per session
-    - Checks on every POST/PATCH/DELETE
-    - Accepts from 3 srcs: form body, JSON body, or X-CSRFToken header
-    - Returns 403 if missing/mismatched
-Client-side:
-    - base.html sets window.csrfToken on page load
-    - api.ts every API request sends it via X-CSRFToken header
-    - Forms incl it as a hidden input
-    - Modal cleanup explicitly preserves the CSRF hidden input

@@ -22,6 +22,7 @@ from app.shared.hooks import register_patch_hook
 from app.shared.repository.pillar import PillarRepository
 from app.shared.utils import is_acyclic
 import app.shared.datetime_.helpers as dth
+from app.shared.fractional_indexing import generate_key_between
 
 
 class TasksService:
@@ -42,10 +43,14 @@ class TasksService:
 
         self._validate_frog_rule(validated)
 
+        # Generate fractional indexing key as last in list:
+        new_key = generate_key_between(self.task_repo.get_max_sort_key(), None)
+
         task = self.task_repo.create_task(
             name=validated.name,
             priority=validated.priority,
             due_date=due_datetime,
+            sort_key=new_key
         )
         self._sync_pillars(task, validated.pillar_ids)
         self._sync_subtasks(task, validated.subtask_ids)

@@ -42,7 +42,7 @@ class BaseRepository(Generic[T]):
     @log_queries()
     def get_all(self) -> list[T]:
         stmt = select(self.model_cls).where(self.model_cls.user_id == self.user_id)
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     @log_queries()
     def get_all_in_window(self, start_utc: datetime, end_utc: datetime, *, date_col: str = "created_at") -> list[T]:
@@ -51,7 +51,7 @@ class BaseRepository(Generic[T]):
             col >= start_utc,
             col < end_utc
         )
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_count_all(self) -> int:
         """Returns count."""
@@ -71,12 +71,13 @@ class BaseRepository(Generic[T]):
             self.model_cls.user_id == self.user_id,
             self.model_cls.id.in_(ids)
         )
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
 
 from dataclasses import dataclass
 import math
 
+# TODO: Starting on pagination for tasks page? or groceries, idk
 @dataclass(slots=True)
 class Page[T]:
     items: list[T]
@@ -86,7 +87,7 @@ class Page[T]:
 
     @property
     def pages(self) -> int:
-        return math.ceil(self.total / self.per_page)
+        return (self.total + self.per_page - 1) // self.per_page
 
     @property
     def has_next(self) -> bool:

@@ -26,6 +26,7 @@ export type Task = BaseEntity & {
     subtasks: number[];
     pillars: Pillar[];
     subtype: Extract<Subtype, 'tasks'>;
+    sort_key: string;
 }
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'frog';

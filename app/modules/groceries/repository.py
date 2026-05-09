@@ -143,7 +143,8 @@ class ShoppingListRepository(BaseRepository[ShoppingList]):
         """Get shopping list for user. One list per user."""
         stmt = (
             self._user_select(ShoppingList)
-            .options(selectinload(ShoppingList.items).joinedload(ShoppingListItem.product))
+            .options(selectinload(ShoppingList.items)
+            .joinedload(ShoppingListItem.product))
         )
         return self.session.execute(stmt).scalars().first()
 
@@ -170,7 +171,7 @@ class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):
             ShoppingListItem.shopping_list_id == shopping_list_id,
             ShoppingListItem.product_id == product_id,
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).one_or_none()
 
 class RecipeRepository(BaseRepository[Recipe]):
     def __init__(self, session: Session, user_id: int) -> None:
@@ -246,6 +247,7 @@ class ShoppingTripRepository(BaseRepository[ShoppingTrip]):
         stmt = (
             self._user_select(ShoppingTrip)
             .options(selectinload(ShoppingTrip.transactions))
-            .order_by(ShoppingTrip.entry_datetime.desc()).limit(1)
+            .order_by(ShoppingTrip.entry_datetime.desc())
+            .limit(1)
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).first()

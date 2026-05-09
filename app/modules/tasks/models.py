@@ -70,6 +70,11 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
 
     due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    # collation="C" ensures sort_key comparisons/sorting always use C collation rules by Postgres/DB.
+    # collate("C") so postgres uses bytewise collation (to align with JS)
+    # No index due to scale; if large N, add composite (user_id, sort_key), inherits C from the column.
+    sort_key: Mapped[str] = mapped_column(String(collation="C"), nullable=False)
+
     # Facilitates relationships to multiple super/subtasks
     supertasks = relationship(
         "Task",

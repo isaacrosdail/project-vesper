@@ -232,7 +232,14 @@ function deriveVisibleTasks(): Task[] {
     if (state.priority !== 'all') {
         result = result.filter(t => t.priority === state.priority);
     }
-    return result.toSorted((a, b) => a.sort_key.localeCompare(b.sort_key));
+    // return result.toSorted((a, b) => a.sort_key.localeCompare(b.sort_key));
+    return result.toSorted((a, b) => {
+        // negative = a goes first
+        // positive = b goes first
+        // 0 = tie
+        // Return negative when a < b?
+        return a.sort_key < b.sort_key ? -1 : a.sort_key > b.sort_key ? 1 : 0
+    })
 }
 
 async function deleteTask(id: number) {
@@ -416,7 +423,7 @@ export async function init() {
     })
     const keyOf = (el) => el ? taskMap.get(Number(el.dataset.id)).sort_key : null;
     // drop - fires once on the drop target when user releases
-    taskList.addEventListener('drop', (e) => {
+    taskList.addEventListener('drop', async (e) => {
         if (e.target.closest('.task')) {
             const taskId = dragState.targetRef.dataset.id;
             const task = taskMap.get(Number(taskId));
@@ -437,11 +444,18 @@ export async function init() {
             // Update data for sourceRef task:
             const sourceTaskId = dragState.sourceRef.dataset.id;
             const sourceTask = taskMap.get(Number(sourceTaskId));
-            sourceTask.sort_key = key
+            sourceTask.sort_key = key;
+
+            // In-mem update, then persist sort_key via PATCH
+            // TODO: This fails since Pydantic model uses due_date: date NOT datetime and rejects the time portion
+            // Should decide whether to make due_dates JUST dates in both schema.py AND models.py or keep datetimes?
             applyTaskUpdate(Number(dragState.sourceRef.dataset.id), sourceTask);
+            const response = await api.tasks.patch(sourceTaskId, { sort_key: key }); // Update ONLY sort_key
+            console.log(response.data)
 
             // Reset state:
             Object.keys(dragState).forEach(key => delete dragState[key]);
+            
         }
     })
     tasksStore.subscribe((tasks) => {
@@ -452,11 +466,15 @@ export async function init() {
     })
 
     const { data } = await api.tasks.getAll();
+
+    // --------------------------
     // TODO: Temporarily mock fractional index on frontend-only:
-    const keys = generateNKeysBetween(null, null, data.length);
-    data.forEach((t: Task, i: number) => t.sort_key = keys[i]);
-    console.log(`Keys generated!`)
-    // console.log(data)
+    // const keys = generateNKeysBetween(null, null, data.length);
+    // data.forEach((t: Task, i: number) => t.sort_key = keys[i]);
+    // console.log(`Keys generated!`)
+    // --------------------------
+    console.log(data)
+
     tasksStore.set(data); // subscriber fires, taskMap built automatically
     console.log('tasksStore has:', tasksStore.get())
 
