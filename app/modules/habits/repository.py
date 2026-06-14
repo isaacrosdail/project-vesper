@@ -190,7 +190,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             for row in result
         ]  # unwrap each SQLAlchemy Row into a list of dicts
 
-    def thing(self, habit_id: int, start_utc: datetime, end_utc: datetime) -> list[tuple[int, int]]:
+    def get_completion_counts_by_week_in_window(self, habit_id: int, start_utc: datetime, end_utc: datetime) -> list[tuple[int, int]]:
         # filter by habit_id and date range, group by (week, count)
         stmt = (
             select(

@@ -37,23 +37,12 @@ def dashboard(session: Session) -> tuple[str, int]:
         LCRecordViewModel(r, current_user.timezone) for r in records
     ]
 
-    ## DRAFTING: Habits page's other two cards
-    streaks = habits_service.get_all_streaks()
-    highest_streak = {"name": "--", "days": "--"}
-    lowest_streak = {"name": "--", "days": "--"}
-    habit_map = {h.id: h for h in habits}
-    if streaks:
-        best_id, best_days = max(streaks.items(), key=lambda x: x[1])
-        worst_id, worst_days = min(streaks.items(), key=lambda x: x[1])
-        # best_habit = next(h for h in habits if h.id == best_id)
-        # worst_habit = next(h for h in habits if h.id == worst_id)
-        best_habit = habit_map[best_id]
-        worst_habit = habit_map[worst_id]
-        highest_streak = {"name": best_habit.name, "days": best_days}
-        lowest_streak = {"name": worst_habit.name, "days": worst_days}
+    ## TODO: DRAFTING: Habits page's other two cards
+    streaks = habits_service.get_streak_summary()
+    EMPTY_STREAK = {"name": "--", "days": "--"}
 
     # TODO: Pillars
-    pillars = session.query(Pillar).filter_by(user_id=current_user.id).all()
+    pillars = habits_service.pillar_repo.get_all()
 
     ctx = {
         "habits_headers": HabitPresenter.build_columns(),
@@ -61,8 +50,8 @@ def dashboard(session: Session) -> tuple[str, int]:
         "habits": habits_viewmodels,
         "lcrecords": lcrecords_viewmodels,
         "languages": LanguageEnum,
-        "highest_streak": highest_streak,
-        "lowest_streak": lowest_streak,
+        "highest_streak": streaks["highest"] or EMPTY_STREAK,
+        "lowest_streak":streaks["lowest"] or EMPTY_STREAK,
         "pillars": pillars,
     }
     return render_template("habits/dashboard.html", **ctx), 200

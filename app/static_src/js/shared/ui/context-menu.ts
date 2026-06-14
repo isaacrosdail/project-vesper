@@ -65,7 +65,7 @@ class ContextMenu {
         menu.classList.add('context-menu');
 
         // Build menu items & append to DOM
-        config.items.map(item => {
+        config.items.forEach(item => {
             const li = document.createElement('li');
             li.textContent = item.label;
 

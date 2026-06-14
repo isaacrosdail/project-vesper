@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import selectinload
 
 from app.modules.time_tracking.models import TimeEntry
 from app.shared.models import Pillar, time_entry_pillars
@@ -49,13 +48,6 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
             result = list(self.session.execute(stmt).scalars().all())
             time_entry.pillars = result
         return self.add(time_entry)
-
-    # def get_all(self) -> list[TimeEntry]:
-    #     stmt = (
-    #         self._user_select(TimeEntry)
-    #         .options(selectinload(TimeEntry.pillars))
-    #     )
-    #     return list(self.session.execute(stmt).scalars().all())
 
     def get_all_time_entries_in_window(
         self, start_utc: datetime, end_utc: datetime

@@ -73,7 +73,7 @@ def typed_login_required(
 
 
 def check_item_ownership[T: Base](item: T, user_id: int) -> None:
-    """Ensure item belongs to given user. Triggers abort(403) if not."""
+    """Ensure item belongs to given user. Triggers abort(404) if not."""
     if hasattr(item, "user_id") and item.user_id != user_id:
         abort(404)
 

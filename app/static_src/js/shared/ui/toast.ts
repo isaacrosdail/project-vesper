@@ -8,7 +8,7 @@ class Toast {
     element: HTMLElement | null;
     duration: number;
 
-    constructor(message: string, duration, type: ToastType = 'info') {
+    constructor(message: string, duration: number, type: ToastType = 'info') {
         this.message = message;
         this.type = type;
         this.element = null;

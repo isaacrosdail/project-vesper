@@ -35,7 +35,7 @@ def dashboard(session: Session) -> tuple[str, int]:
     frog_stat = tasks_service.calc_frog_adherence_rate(days=7)
 
     # TODO: Pillars
-    pillars = session.query(Pillar).filter_by(user_id=current_user.id).all()
+    pillars = tasks_service.pillar_repo.get_all()
 
     # TODO: Test
     tasks_service.task_repo.get_max_sort_key()

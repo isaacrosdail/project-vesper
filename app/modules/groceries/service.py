@@ -192,14 +192,7 @@ class GroceriesService:
             return product, False
         return self.product_repo.create_product(**typed_product_data), True
 
-    def create_recipe(
-            self,
-            # name: str,
-            # yields: float,
-            # yields_units: UnitEnum,
-            # ingredients: list[ValidatedIngredient]
-            validated: RecipeCreate
-    ) -> Recipe:
+    def create_recipe(self, validated: RecipeCreate) -> Recipe:
         recipe = self.recipe_repo.create_recipe(validated.name, validated.yields, validated.yields_units)
         self.recipe_repo.session.flush()
         for ingredient in validated.ingredients:

@@ -2,6 +2,7 @@
 import { enableStats } from '../shared/charts';
 import { displayDate, getUserTodayDate, isoToUserDate } from '../shared/datetime';
 import { initTaskForm } from '../shared/forms';
+import { generateKeyBetween } from '../shared/fractional_indexing';
 import { tasksStore } from '../shared/pubSub';
 import { api } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
@@ -9,14 +10,14 @@ import { initSidebar } from '../shared/ui/left-sidebar';
 import { confirmationManager, openModalForEdit } from '../shared/ui/modal-manager';
 import { makeToast } from '../shared/ui/toast';
 import { title } from '../shared/utils';
-import { FormDialog, Task } from '../types';
-import { generateKeyBetween, generateNKeysBetween } from '../shared/fractional_indexing';
+import { FormDialog, Task, TaskPriority } from '../types';
 
 // TODO:
 // 1. For due dates that are nearer, use "the day" (ex: Friday instead of Mar 20)
 
 
 // All elements for task list filtering/altering/etc
+//#region QuerySelects
 function getTasksListElements() {
     const els = {
         tasksList: document.querySelector('.tasks-list'),
@@ -50,6 +51,8 @@ function getSearchElements() {
 const tasksListEls = getTasksListElements();
 const taskDetailEls = getTaskDetailPopoverElements();
 const searchEls = getSearchElements();
+//#endregion
+
 
 type PopoverState = {
     activePopover: 'taskDetails' | 'search' | null
@@ -58,13 +61,12 @@ const popoverState: PopoverState = {
     activePopover: null
 };
 
+const taskMap = new Map<number, Task>();
+
 function setPopoverState(thing: Partial<PopoverState>) {
-    // popoverState.activePopover = thing;
     Object.assign(popoverState, thing);
     renderPopover();
 }
-// const taskDetailsPopover = document.querySelector('.task-details-popover');
-// const searchPopover = document.querySelector('.search-popover');
 
 function renderPopover() {
     if (popoverState.activePopover === 'taskDetails') {
@@ -100,8 +102,6 @@ function deriveTaskView(task: Task) {
         subtasksSummary: `${subtasks.filter(st => st.is_done).length}/${subtasks.length}`
     };
 }
-
-const taskMap = new Map<number, Task>();
 
 // pub/sub (tasksStore) handles reacting to changes, this fn handles making the changes
 function applyTaskUpdate(id: number, updated: Task) {
@@ -195,14 +195,14 @@ function showTaskDetails(task: Task) {
 
 // Cache one li to be cloned?
 type Filter = 'all' | 'today' | 'upcoming';
-type Priority = 'all' | 'low' | 'medium' | 'high' | 'frog';
 
 type TaskListState = {
     filter: Filter;
-    priority: Priority;
+    priority: TaskPriority | 'all';
 }
 
 const state: TaskListState = { filter: 'all', priority: 'all' };
+
 function setTaskListState(patch: Partial<TaskListState>) {
     Object.assign(state, patch);
     // Update priority icon
@@ -232,11 +232,8 @@ function deriveVisibleTasks(): Task[] {
     if (state.priority !== 'all') {
         result = result.filter(t => t.priority === state.priority);
     }
-    // return result.toSorted((a, b) => a.sort_key.localeCompare(b.sort_key));
     return result.toSorted((a, b) => {
-        // negative = a goes first
-        // positive = b goes first
-        // 0 = tie
+        // negative = a goes first, positive = b goes first, 0 = tie
         // Return negative when a < b?
         return a.sort_key < b.sort_key ? -1 : a.sort_key > b.sort_key ? 1 : 0
     })
@@ -371,11 +368,7 @@ function setupSearch() {
     });
 }
 
-export async function init() {
-
-    // TODO: Clean up; for drag task li stuff
-    const taskList = document.querySelector('.tasks-list');
-
+function setupDragDrop(taskList: HTMLDivElement) {
     // Enables draggable for drag-n-drop: This way, only the button starts this, NOT "anywhere in the taskli"
     taskList.addEventListener('mousedown', (e) => {
         if (e.target.matches('.task-drag')) {
@@ -385,17 +378,16 @@ export async function init() {
     })
     // TODO: Note: dragstart/dragend fire on the element that has draggable="true"
     // dragend - clean up state/classes regardless of whether a drop happened
-    // Currently...."not working"?
+    // TODO: Currently...."not working"?
     taskList.addEventListener('dragend', (e) => {
         if (e.target.matches('.task')) {
             e.target.setAttribute('draggable', 'false');
         }
     })
 
-    // let sourceRef = null; // dragged task
-    // let targetRef = null; // "dragged-over" task
-    // let position: 'before' | 'after' | null = null; // top-half vs bottom half
-    type DragState = { sourceRef: any, targetRef: any, position: 'before' | 'after' | null };
+    type DragState = { sourceRef: any, targetRef: any,
+        position: 'before' | 'after' | null   // drag to top-half vs bottom half of another task
+    };
     const dragState: DragState = { sourceRef: null, targetRef: null, position: null };
     taskList.addEventListener('dragstart', (e) => {
         if (e.target.matches('.task')) {
@@ -406,20 +398,19 @@ export async function init() {
     // Need two things:
     // 1. Which task are we over? -> targetRef
     // 2. Top half or bottom half
-    taskList.addEventListener('dragover', (e) => {
+    taskList.addEventListener('dragover', (e: DragEvent) => {
         e.preventDefault(); // opt in to being a drop target
         const taskLi = e.target.closest('.task');
-        if (taskLi) {
-            const taskName = taskLi.querySelector('.task-name');
-            console.log(`dragover: ${taskName.textContent}`);
-            dragState.targetRef = taskLi;
-
-            // top half or bottom half calc
-            const rect = taskLi.getBoundingClientRect();
-            const midpoint = rect.top + rect.height / 2;
-            dragState.position = e.clientY < midpoint ? 'before' : 'after';
-            console.log(`dragState.position: ${dragState.position}`)
+        if (!taskLi) {
+            return;
         }
+        const taskName = taskLi.querySelector('.task-name');
+        dragState.targetRef = taskLi;
+
+        // top half or bottom half calc
+        const rect = taskLi.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        dragState.position = e.clientY < midpoint ? 'before' : 'after';
     })
     const keyOf = (el) => el ? taskMap.get(Number(el.dataset.id)).sort_key : null;
     // drop - fires once on the drop target when user releases
@@ -451,49 +442,31 @@ export async function init() {
             // Should decide whether to make due_dates JUST dates in both schema.py AND models.py or keep datetimes?
             applyTaskUpdate(Number(dragState.sourceRef.dataset.id), sourceTask);
             const response = await api.tasks.patch(sourceTaskId, { sort_key: key }); // Update ONLY sort_key
-            console.log(response.data)
 
-            // Reset state:
-            Object.keys(dragState).forEach(key => delete dragState[key]);
-            
+            Object.keys(dragState).forEach(key => delete dragState[key]); // reset state
         }
     })
+}
+
+export async function init() {
+
+    // TODO: Clean up; for drag task li stuff
+    const taskList = document.querySelector<HTMLDivElement>('.tasks-list');
+    setupDragDrop(taskList);
+
     tasksStore.subscribe((tasks) => {
-        console.log('store updated, task count: ', tasks.length)
         taskMap.clear();
         tasks.forEach(t => taskMap.set(t.id, t));
         renderTaskList(deriveVisibleTasks());
     })
 
     const { data } = await api.tasks.getAll();
-
-    // --------------------------
-    // TODO: Temporarily mock fractional index on frontend-only:
-    // const keys = generateNKeysBetween(null, null, data.length);
-    // data.forEach((t: Task, i: number) => t.sort_key = keys[i]);
-    // console.log(`Keys generated!`)
-    // --------------------------
-    console.log(data)
-
     tasksStore.set(data); // subscriber fires, taskMap built automatically
-    console.log('tasksStore has:', tasksStore.get())
 
     // 2. Modal (needed by popover + context menu)
     const { dialog, populateEditModal } = await setupTaskFormModal();
 
     initSidebar();
-    // =====================================================
-    // General sidebar setup (not tasks specific)
-    // TODO: This should prob end up in a new left-sidebar.ts handler/file after we're done sketching
-    // const sidebarToggle = document.querySelector('#sidebar-toggle');
-    // const wrapper = document.querySelector('.wrapper');
-    // if (!wrapper || !sidebarToggle) {
-    //     console.error('setupSidebar: missing sidebar-toggle/wrapper');
-    //     return;
-    // }
-    // // Toggle
-    // sidebarToggle.addEventListener('click', () => wrapper.classList.toggle('sidebar-open'));
-    // ======================================================
 
     taskDetailEls.taskDetailsPopover.addEventListener('toggle', (e: ToggleEvent) => {
         if (e.newState === 'closed') {

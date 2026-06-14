@@ -9,7 +9,7 @@ import app.shared.datetime_.helpers as dth
 from app._infra.database import database_connection
 from app.modules.habits.models import LanguageEnum
 from app.modules.habits.service import create_habits_service
-from app.modules.tasks.service import create_tasks_service, TaskAnalytics
+from app.modules.tasks.service import create_tasks_service
 from app.shared.analytics import create_analytics_service
 from app.shared.models import Pillar
 
@@ -72,7 +72,7 @@ def home() -> tuple[str, int]:
         # completions = habits_service.get_daily_completion_counts()
 
         # TODO: pillars
-        pillars = session.query(Pillar).filter_by(user_id=current_user.id).all()
+        pillars = habits_service.pillar_repo.get_all()
 
         ctx = {
             "tasks_progress": tasks_progress,

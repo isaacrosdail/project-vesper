@@ -16,6 +16,8 @@ from app.shared.repository.base import BaseRepository
 P = ParamSpec("P")
 
 class DailyMetricsRepository(BaseRepository[DailyMetrics]):
+    FILTERABLE_COLS = {"weight", "steps", "calories", "sleep_duration_minutes"}
+
     def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=DailyMetrics)
 
@@ -63,9 +65,7 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
         if end:
             stmt = stmt.where(DailyMetrics.entry_datetime < end)
         if metric:
-            FILTERABLE_COLS = {"weight", "steps", "calories", "sleep_duration_minutes"}
-            # if metric not in self.FILTERABLE_COLS:
-            if metric not in FILTERABLE_COLS:
+            if metric not in self.FILTERABLE_COLS:
                 raise ValueError(f"Unknown metric: {metric}")
             stmt = stmt.where(getattr(DailyMetrics, metric).isnot(None))
 
@@ -94,9 +94,8 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
             DailyMetrics.entry_datetime < end_utc,
         )
 
-        FILTERABLE_COLS = {"weight", "steps", "calories", "sleep_duration_minutes"}
         if metric_type:
-            if metric_type not in FILTERABLE_COLS:
+            if metric_type not in self.FILTERABLE_COLS:
                 raise ValueError(f"Unknown metric type: {metric_type}")
             column_obj = getattr(DailyMetrics, metric_type)
             stmt = stmt.where(column_obj.isnot(None))

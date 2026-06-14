@@ -25,6 +25,7 @@ from app.shared.serialization import APISerializable
 HABIT_NAME_MAX_LENGTH = 100
 LC_TITLE_MAX_LENGTH = 200
 
+PROMOTION_THRESHOLD = 0.7 ## TODO: lives here for time being
 
 class StatusEnum(StrEnum):
     EXPERIMENTAL = auto()
@@ -82,9 +83,6 @@ class Habit(Base, APISerializable):
     established_date: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-
-    PROMOTION_THRESHOLD = 0.7 ## TODO: lives here for time being
-    # promotion_threshold: Mapped[float] = mapped_column(Float, nullable=True)
 
     # Represents target completion rate per week
     target_frequency: Mapped[int] = mapped_column(Integer, nullable=False)

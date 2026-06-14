@@ -128,7 +128,7 @@ async function markHabitComplete(checkbox: HTMLInputElement, habitId: string): P
         streakCountSpan.textContent = (streakCount > 0) ? String(streakCount) : '';
     } catch (error) {
         makeToast('Failed to update habit status', 'error');
-        checkbox.checked != checkbox.checked;
+        checkbox.checked = !checkbox.checked;
     }
 }
 
@@ -367,7 +367,7 @@ function initWeatherSection() {
         updateSky();
 
         setInterval(getWeatherInfo, 1*60*60*1000);  // Update weather every hour
-        setInterval(updateSky, /*5 * 60 * 1000*/6000); // Update sun from weatherInfo every 5 mins => 5*60*1000
+        setInterval(updateSky, 5*60*1000); // Update sun from weatherInfo every 5 mins => 5*60*1000
 
         // // TODO: ResizeObserver!!
         // window.addEventListener('resize', () => {

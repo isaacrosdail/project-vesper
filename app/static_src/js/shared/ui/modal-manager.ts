@@ -77,7 +77,7 @@ function setupModal(modal: FormDialog, button: HTMLButtonElement): void {
     modal.addEventListener('close', () => {
         // Reset all hidden fields - somehow, JS considers these to be different than non-hidden
         // Retain csrf_token
-        document.querySelectorAll('input[type="hidden"]:not([name="csrf_token"])')
+        modal.querySelectorAll('input[type="hidden"]:not([name="csrf_token"])')
             .forEach(el => el.value = '');
         form.reset();
         delete modal.dataset.mode;

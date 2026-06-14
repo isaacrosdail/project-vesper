@@ -84,16 +84,15 @@ def task_links(session: Session) -> tuple[Response, int]:
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone
     )
-    try:
-        if request.method == "POST":
-            tasks_service.save_link(sub_id, super_id)
-            return api_response(
-                success=True,
-                message="Link created",
-                data={ "subtask_id": sub_id, "supertask_id": super_id }
-            ), 201
 
-        tasks_service.delete_link(sub_id, super_id)
-        return api_response(success=True, message="Link deleted"), 200
-    except ServiceError as e:
-        return api_response(success=False, message=e.message), e.status_code
+    if request.method == "POST":
+        tasks_service.save_link(sub_id, super_id)
+        return api_response(
+            success=True,
+            message="Link created",
+            data={ "subtask_id": sub_id, "supertask_id": super_id }
+        ), 201
+
+    tasks_service.delete_link(sub_id, super_id)
+    return api_response(success=True, message="Link deleted"), 200
+

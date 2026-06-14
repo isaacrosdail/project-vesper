@@ -122,7 +122,6 @@ class TasksService:
             self.delete_link(subtask_id, task.id)
 
     def _sync_pillars(self, task: Task, pillar_ids: list[int]) -> None:
-        # return self.pillar_repo.get_by_ids(pillar_ids)
         task.pillars = self.pillar_repo.get_by_ids(pillar_ids)
 
 

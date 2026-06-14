@@ -56,7 +56,7 @@ def products_list(session: Session) -> tuple[Response, int]:
         results = groceries_service.product_repo.get_all()
     data = [t.to_api_dict() for t in results]
 
-    return api_response(success=True, message=f"Retrieved {len(results)} transactions", data=data), 200
+    return api_response(success=True, message=f"Retrieved {len(results)} products", data=data), 200
 
 
 @api_bp.patch("/groceries/transactions/<int:transaction_id>")
@@ -144,16 +144,6 @@ def get_recipe_detail(session: Session, recipe_id: int) -> tuple[Response, int]:
 
     return api_response(success=True, message="Retrieved recipe", data=recipe.to_api_dict(include_relations=True)
     ), 200
-
-
-# @api_bp.patch("/groceries/recipes/<int:item_id>")
-# @login_plus_session
-# def update_recipe(session: Session, item_id: int) -> tuple[Response, int]:
-#     data = request.get_json()
-#     service = create_groceries_service(session, current_user.id, current_user.timezone)
-#     recipe = service.update_recipe(item_id, data)
-#     session.commit()
-#     return api_response(success=True, message="Recipe updated", data=recipe.to_api_dict()), 200
 
 
 # TODO: Rough, fix

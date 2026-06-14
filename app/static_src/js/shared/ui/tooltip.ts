@@ -13,7 +13,7 @@
  * Styling via `.tooltip` class, behavior via `data-tip` attribute
  */
 
-const tooltip = document.querySelector('#tooltip');
+const tooltip = document.querySelector<HTMLElement>('#tooltip');
 
 export function createTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: string): void {
     const text = tooltipText || targetEl.getAttribute('data-tip');

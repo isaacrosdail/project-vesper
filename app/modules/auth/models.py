@@ -32,7 +32,7 @@ TIMEZONE_MAX_LENGTH = 50
 SUPPORTED_LOCATIONS = {
     "US": ["New York", "Chicago", "Denver", "Miami", "Los Angeles"],
     "GB": ["London", "Manchester"],
-    "AU": ["Syndey", "Melbourne", "Brisbane"],
+    "AU": ["Sydney", "Melbourne", "Brisbane"],
     "CA": ["Toronto", "Vancouver"],
     "DE": ["Berlin", "Munich"],
     "IT": ["Rome", "Naples"],

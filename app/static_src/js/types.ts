@@ -199,7 +199,9 @@ export const SUBTYPE_LABELS: Record<Subtype, SubtypeLabels> = {
     products: { singular: 'Product', plural: 'Products' },
     transactions: { singular: 'Transaction', plural: 'Transactions' },
     shopping_list_items: { singular: 'Shopping List Item', plural: 'Shopping List Items' },
-    daily_metrics: { singular: 'Daily Metrics entry', plural: 'Daily Metrics Entries'}
+    daily_metrics: { singular: 'Daily Metrics entry', plural: 'Daily Metrics Entries'},
+    recipes: { singular: 'Recipe', plural: 'Recipes' },
+    recipe_ingredients: { singular: 'Recipe Ingredient', plural: 'Recipe Ingredients' }
 } as const;
 
 /**

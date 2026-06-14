@@ -35,7 +35,7 @@ def dashboard(session: Session) -> tuple[str, int]:
     # time_entries_debug = time_service.get_time_stuff()
 
     # TODO: Pillars
-    pillars = session.query(Pillar).filter_by(user_id=current_user.id).all()
+    pillars = time_service.pillar_repo.get_all()
 
     ctx = {
         "entry_headers": TimeEntryPresenter.build_columns(),

@@ -82,7 +82,7 @@ export function swapToText(el: HTMLElement, value: string) {
 const SUPPORTED_LOCATIONS = {
     "US": ["New York", "Chicago", "Denver", "Miami", "Los Angeles"],
     "GB": ["London", "Manchester"],
-    "AU": ["Syndey", "Melbourne", "Brisbane"],
+    "AU": ["Sydney", "Melbourne", "Brisbane"],
     "CA": ["Toronto", "Vancouver"],
     "DE": ["Berlin", "Munich"],
     "IT": ["Rome", "Naples"],

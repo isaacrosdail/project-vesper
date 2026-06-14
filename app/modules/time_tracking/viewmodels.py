@@ -17,7 +17,6 @@ class TimeEntryViewModel(BaseViewModel):
     __slots__ = (
         "category",
         "description",
-        "description",
         "duration_minutes",
         "ended_at_local",
         "id",

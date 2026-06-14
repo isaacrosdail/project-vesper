@@ -54,33 +54,9 @@ class APISerializable:
                 continue
             result[col.name] = getattr(self, col.name)
 
-            # value = getattr(self, col.name)
-
-            # # Adjustments for specific types
-            # # if isinstance(value, Enum):
-            # #     result[col.name] = value.value
-            # if isinstance(value, datetime):
-            #     user_tz = ZoneInfo(tz)
-            #     result[col.name] = value.astimezone(user_tz).isoformat(timespec='seconds')
-            # elif isinstance(value, Decimal):
-            #     result[col.name] = round(float(value), 2)
-            # else:
-            #     result[col.name] = value
-
         # Include declared properties (from `__api_properties__` lists in each model)
         for prop_name in getattr(self, "__api_properties__", []):
             result[prop_name] = getattr(self, prop_name)
-
-            # value = getattr(self, prop_name)
-            # # if isinstance(value, Enum):
-            # #     result[prop_name] = value.value
-            # if isinstance(value, datetime):
-            #     user_tz = ZoneInfo(tz)
-            #     result[prop_name] = value.astimezone(user_tz).isoformat(timespec='seconds')
-            # elif isinstance(value, Decimal):
-            #     result[prop_name] = round(float(value), 2)
-            # else:
-            #     result[prop_name] = value
 
         result["subtype"] = self.__tablename__  # type: ignore[attr-defined]
 

@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 @api_bp.post("/time_tracking/time_entries")
-# @api_bp.put("/time_tracking/time_entries/<int:entry_id>")
 @login_plus_session
 def post_time_entry(session: Session) -> tuple[Response, int]:
     validated = TimeEntryCreate(**request.json)
@@ -31,19 +30,14 @@ def post_time_entry(session: Session) -> tuple[Response, int]:
     return api_response(success=True, message="Time entry created", data=time_entry.to_api_dict()), 201
 
 
-# @api_bp.post("/time_tracking/time_entries")
 @api_bp.patch("/time_tracking/time_entries/<int:entry_id>")
 @login_plus_session
-def time_entries(session: Session, entry_id: int) -> tuple[Response, int]:
+def patch_time_entry(session: Session, entry_id: int) -> tuple[Response, int]:
     validated = TimeEntryPatch(**request.json)
 
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_entry = time_service.update_time_entry(entry_id, validated)
-
-    status_code = 201 if request.method == "POST" else 200
-    message = "Time entry created" if request.method == "POST" else "Time entry updated"
-    return api_response(success=True, message=message, data=time_entry.to_api_dict()), status_code
-
+    return api_response(success=True, message="Time entry updated", data=time_entry.to_api_dict()), 200
 
 
 @api_bp.get("/time_tracking/time_entries")

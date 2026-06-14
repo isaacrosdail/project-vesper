@@ -22,7 +22,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 import app.shared.datetime_.helpers as dth
-from app.modules.habits.models import StatusEnum
+from app.modules.habits.models import StatusEnum, PROMOTION_THRESHOLD
 from app.modules.habits.repository import (
     HabitCompletionRepository,
     HabitRepository,
@@ -32,9 +32,6 @@ from app.shared.exceptions import ServiceError
 
 # from app.shared.models import Pillar
 from app.shared.repository.pillar import PillarRepository
-
-STREAK_GRACE_DAYS = 2  # Allow yesterday or today to continue streak TODO: formalize/save this somewhere better
-
 
 class HabitsService:
     def __init__(
@@ -187,17 +184,36 @@ class HabitsService:
 
         # return streaks
 
+    def get_streak_summary(self) -> dict[str, dict[str, Any] | None]:
+        """Highest and lowest current streaks across user's habits.
+
+        Each value is {"name": str, "days": int}, or None when no habit has any
+        completions yet (nothing to compare).
+        """
+        streaks = self.get_all_streaks()
+        if not streaks:
+            return {"highest": None, "lowest": None}
+
+        names = {h.id: h.name for h in self.habit_repo.get_all_habits_and_tags()}
+        best_id, best_days = max(streaks.items(), key=lambda kv: kv[1])
+        worst_id, worst_days = min(streaks.items(), key=lambda kv: kv[1])
+
+        return {
+            "highest": {"name": names[best_id], "days": best_days},
+            "lowest": {"name": names[worst_id], "days": worst_days},
+        }
+
     def check_promotion(self, habit: Habit) -> Any:
         ## Over the last N weeks, what % of the target did user actually hit?
         # range for completions, fetch records for this habit_id
         # DEBUG: Testing emit/on system actually fires:
         start_utc, end_utc = dth.last_n_days_range(days_ago=63, tz_str=self.user_tz)
-        completions = self.completion_repo.thing(habit.id, start_utc, end_utc)
+        completions = self.completion_repo.get_completion_counts_by_week_in_window(habit.id, start_utc, end_utc)
 
         # target = this habit's target_freq * 63
         # habit = self.habit_repo.get_by_id(habit_id)
         target = habit.target_frequency
-        PROMOTION_THRESHOLD = 0.7
+
         # For each week, we wanna ask:
         # is num_completions >= this_habit.target_frequency?
         # if yes -> success, else -> subpar week
@@ -266,7 +282,7 @@ class HabitsService:
         }
 
     def get_daily_completion_counts(self) -> pd.DataFrame:
-        # fetches all completion records for user
+        # TODO: fetches all completion records for user
         completion_records = self.completion_repo.get_all()
 
         # convert completed_at's to local date -> list of completion counts per date
