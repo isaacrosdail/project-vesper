@@ -61,7 +61,7 @@ MODEL_CLASSES: dict[ModelKey, type[Base]] = {
     ModelKey("tasks", "tasks"): Task,
     ModelKey("habits", "habits"): Habit,
     ModelKey("habits", "habit_completions"): HabitCompletion,
-    ModelKey("habits", "leet_code_records"): LeetCodeRecord,
+    ModelKey("habits", "leetcode_records"): LeetCodeRecord,
     ModelKey("metrics", "daily_metrics"): DailyMetrics,
     ModelKey("time_tracking", "time_entries"): TimeEntry,
 }

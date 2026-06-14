@@ -142,6 +142,20 @@ export type DailyMetrics = BaseEntity & {
     subtype: Extract<Subtype, 'daily_metrics'>;
 }
 
+export type Difficulty = 'easy' | 'medium' | 'hard';
+export type LCLanguage = 'python' | 'js' | 'c' | 'cpp' | 'go';
+export type LCStatus = 'solved' | 'attempted' | 'reviewed';
+
+export type LCRecord = BaseEntity & {
+    entry_datetime: string;
+    leetcode_id: number;
+    title: string;
+    difficulty: Difficulty;
+    language: LCLanguage;
+    status: LCStatus;
+    subtype: Extract<Subtype, 'leetcode_records'>;
+}
+
 export const UNITS = {
     G: 'g',
     KG: 'kg',
@@ -160,7 +174,7 @@ export type Unit = typeof UNITS[keyof typeof UNITS];
  * List of valid module subtypes used for runtime subtype checks.
  */
 const SUBTYPES = [
-    'time_entries', 'leet_code_records', 'habits', 'tasks', 'products',
+    'time_entries', 'leetcode_records', 'habits', 'tasks', 'products',
     'transactions', 'shopping_list_items', 'daily_metrics', 'recipes', 'recipe_ingredients'
 ] as const;
 
@@ -193,7 +207,7 @@ export function isSubtype(x: string): x is Subtype {
  */
 export const SUBTYPE_LABELS: Record<Subtype, SubtypeLabels> = {
     time_entries: { singular: 'Time Entry', plural: 'Time Entries' },
-    leet_code_records: { singular: 'LeetCode Record', plural: 'LeetCode Records' },
+    leetcode_records: { singular: 'LeetCode Record', plural: 'LeetCode Records' },
     habits: { singular: 'Habit', plural: 'Habits' },
     tasks: { singular: 'Task', plural: 'Tasks' },
     products: { singular: 'Product', plural: 'Products' },

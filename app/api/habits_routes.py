@@ -149,9 +149,9 @@ def leetcode_records(session: Session) -> tuple[Response, int]:
     ), 201
 
 
-@api_bp.get("/habits/leet_code_records")
+@api_bp.get("/habits/leetcode_records")
 @login_plus_session
-def leet_code_records_list(session: Session) -> tuple[Response, int]:
+def leetcode_records_list(session: Session) -> tuple[Response, int]:
     last_n_days = request.args.get("lastNDays", type=int)
     habits_service = create_habits_service(session, current_user.id, current_user.timezone)
 

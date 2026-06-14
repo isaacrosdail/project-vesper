@@ -1,7 +1,7 @@
 // For commonly-reused API-related functions, fetch for now
 import { getJSInstant } from "../datetime";
 import { userStore } from "./userStore";
-import { Task, Habit, HabitCompletion, DailyMetrics, TimeEntry, Transaction, Product, ShoppingListItem, Recipe } from '../../types';
+import { Task, Habit, HabitCompletion, DailyMetrics, TimeEntry, Transaction, Product, ShoppingListItem, Recipe, LCRecord } from '../../types';
 import { makeToast } from "../ui/toast";
 
 

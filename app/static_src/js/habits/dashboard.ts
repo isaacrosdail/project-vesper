@@ -428,8 +428,8 @@ export async function init() {
                     }
                 ]
             });
-        } else if (subtype === 'leet_code_records') {
-            const modal = document.querySelector<HTMLDialogElement>('#leet_code_records-entry-dashboard-modal');
+        } else if (subtype === 'leetcode_records') {
+            const modal = document.querySelector<HTMLDialogElement>('#leetcode_records-entry-dashboard-modal');
             contextMenu.create({
                 position: { x: rect.left, y: rect.bottom },
                 items: [

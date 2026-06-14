@@ -133,6 +133,7 @@ class HabitCompletion(Base, APISerializable):
 
 
 class LeetCodeRecord(Base, APISerializable):
+    __tablename__ = "leetcode_records"
 
     entry_datetime: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -158,7 +159,7 @@ class LeetCodeRecord(Base, APISerializable):
         nullable=False
     )
 
-    user = relationship("User", back_populates="leet_code_record")
+    user = relationship("User", back_populates="leetcode_record")
 
     def __repr__(self) -> str:
         return f"<LeetCodeRecord id={self.id} title='{self.title}'>"

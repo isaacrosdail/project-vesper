@@ -401,6 +401,6 @@ export function init() {
     initMetricsForm(metricDialog)
 
     // TODO: Need to add?
-    // const leetCodeRecordsDialog = document.querySelector('#leet_code_records-entry-homepage-modal');
+    // const leetCodeRecordsDialog = document.querySelector('#leetcode_records-entry-homepage-modal');
     // initLeetCodeRecordForm(leetCodeRecordsDialog);
 }
