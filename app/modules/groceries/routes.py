@@ -47,7 +47,7 @@ def dashboard(session: Session) -> tuple[str, int]:
         ProductViewModel(p, current_user.timezone) for p in products
     ]
 
-    shopping_list, _ = groceries_service.get_or_create_shoppinglist()
+    shopping_list, _ = groceries_service.get_or_create_shopping_list()
 
     # TODO: For nutrition card, dbl check
     macros, meals = groceries_service.macros_summary(targets=current_user.prefs)
@@ -92,7 +92,7 @@ def recipes(session: Session) -> tuple[str, int]:
     groceries_service = create_groceries_service(
         session, current_user.id, current_user.timezone
     )
-    shopping_list, _ = groceries_service.get_or_create_shoppinglist()
+    shopping_list, _ = groceries_service.get_or_create_shopping_list()
     recipes = groceries_service.recipe_repo.get_all()
     products = groceries_service.product_repo.get_all_products()
 

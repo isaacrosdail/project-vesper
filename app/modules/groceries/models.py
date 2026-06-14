@@ -206,6 +206,10 @@ class Transaction(Base, APISerializable):
 class ShoppingList(Base, APISerializable):
     """Provides entrypoint for working with shoppinglistitems for a given list."""
 
+    __table_args__ = (
+        UniqueConstraint("user_id", name="uq_user_shopping_list"),
+    )
+
     name: Mapped[str] = mapped_column(
         String(SHOPPING_LIST_NAME_MAX_LENGTH), default="Current List"
     )

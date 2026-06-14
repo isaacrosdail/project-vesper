@@ -94,16 +94,16 @@ def transactions_list(session: Session) -> tuple[Response, int]:
 
 @api_bp.post("/groceries/shopping_list_items")
 @login_plus_session
-def post_shoppinglist_item(session: Session) -> tuple[Response, int]:
+def post_shopping_list_item(session: Session) -> tuple[Response, int]:
     validated = ShoppingListItemCreate(**request.json)
 
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
-    item = groceries_service.add_item_to_shoppinglist(validated.product_id, validated.quantity_wanted)
+    item = groceries_service.add_item_to_shopping_list(validated.product_id, validated.quantity_wanted)
     return api_response(success=True, message="Item added to shopping list", data=item.to_api_dict()), 201
 
 @api_bp.patch("/groceries/shopping_list_items/<int:item_id>")
 @login_plus_session
-def patch_shoppinglist_item(session: Session, item_id: int) -> tuple[Response, int]:
+def patch_shopping_list_item(session: Session, item_id: int) -> tuple[Response, int]:
     validated = ShoppingListItemPatch(**request.json)
 
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)

@@ -135,8 +135,8 @@ class ShoppingListRepository(BaseRepository[ShoppingList]):
     def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=ShoppingList)
 
-    def create_shoppinglist(self, name: str = "DefaultListName") -> ShoppingList:
-        shopping_list = ShoppingList(user_id=self.user_id, name=name)
+    def create_shopping_list(self) -> ShoppingList:
+        shopping_list = ShoppingList(user_id=self.user_id)
         return self.add(shopping_list)
 
     def get_shopping_list(self) -> ShoppingList | None:
@@ -146,7 +146,7 @@ class ShoppingListRepository(BaseRepository[ShoppingList]):
             .options(selectinload(ShoppingList.items)
             .joinedload(ShoppingListItem.product))
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.execute(stmt).scalars().one_or_none()
 
 
 class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):

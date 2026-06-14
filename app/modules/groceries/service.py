@@ -144,11 +144,11 @@ class GroceriesService:
         return transaction
 
 
-    def add_item_to_shoppinglist(
+    def add_item_to_shopping_list(
         self, product_id: int, quantity_wanted: int = 1
     ) -> ShoppingListItem:
         """Add product to shopping list, incrementing if already exists."""
-        shopping_list, _ = self.get_or_create_shoppinglist()
+        shopping_list, _ = self.get_or_create_shopping_list()
 
         existing_item = self.shopping_list_item_repo.get_shopping_list_item(
             shopping_list.id, product_id
@@ -174,13 +174,13 @@ class GroceriesService:
         return item
 
 
-    def get_or_create_shoppinglist(self) -> tuple[ShoppingList, bool]:
+    def get_or_create_shopping_list(self) -> tuple[ShoppingList, bool]:
         """Return ShoppingList from database, else create new and return that."""
         shopping_list = self.shopping_list_repo.get_shopping_list()
 
         if shopping_list:
             return shopping_list, False
-        return self.shopping_list_repo.create_shoppinglist(), True
+        return self.shopping_list_repo.create_shopping_list(), True
 
     def get_or_create_product(
         self, typed_product_data: dict[str, Any]
