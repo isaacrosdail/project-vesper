@@ -18,11 +18,9 @@ import app.shared.datetime_.helpers as dth
 from app.modules.tasks.models import PriorityEnum
 from app.modules.tasks.repository import TaskRepository
 from app.shared.exceptions import ServiceError
-from app.shared.hooks import register_patch_hook
+from app.shared.fractional_indexing import generate_key_between
 from app.shared.repository.pillar import PillarRepository
 from app.shared.utils import is_acyclic
-import app.shared.datetime_.helpers as dth
-from app.shared.fractional_indexing import generate_key_between
 
 
 class TasksService:
@@ -252,74 +250,9 @@ def create_tasks_service(session: Session, user_id: int, user_tz: str) -> TasksS
     )
 
 
-class TaskAnalytics:
-
-    def __init__(self, task_repo: TaskRepository, user_tz: str) -> None:
-        self.task_repo = task_repo
-        self.user_tz = user_tz
-
-    def calc_progress(self, *, days: int) -> dict[str, Any]:
-        start_utc, end_utc = dth.last_n_days_range(days, self.user_tz)
-        tasks = self.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
-        total = len(tasks)
-        done = len([t for t in tasks if t.is_done])
-        pct = round((done / total) * 100) if total > 0 else 0
-
-        return { "completed": done, "total": total, "percent": pct }
-        # # Count completed vs expected for today
-        # num_completed, num_expected = 0, 0
-
-        # for t in tasks:
-        #     due_today = t.due_date and dth.is_same_local_date(t.due_date, self.user_tz)
-        #     completed_today = t.completed_at and dth.is_same_local_date(t.completed_at, self.user_tz)
-
-        #     if due_today:
-        #         num_expected += 1
-        #         if completed_today:
-        #             num_completed += 1
-
-        #     # elif completed_today and t.due_date is None:
-        #     #     # "Spontaneous task", completed today w/o a due date
-        #     #     num_completed += 1
-        #     #     num_expected += 1
-
-        # pct_complete = (
-        #     (num_completed / num_expected * 100) if num_expected > 0 else 0
-        # )
-        # return { "completed": num_completed, "total": num_expected, "percent": pct_complete }
-
-    def calc_overdue_rate(self, *, days: int) -> dict[str, int]:
-        start_utc, end_utc = dth.last_n_days_range(days, self.user_tz)
-
-        tasks = self.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
-        total = len(tasks)
-        if total == 0:
-            return { "rate": 0, "overdue": 0, "total": 0 }
-
-        overdue = len([t for t in tasks if not t.is_done])
-        rate = round((overdue / total) * 100)
-
-        return { "rate": rate, "overdue": overdue, "total": total }
-
-    def calc_frog_completion_rate(self, *, days: int) -> dict[str, int]:
-        start_utc, end_utc = dth.last_n_days_range(days, self.user_tz)
-
-        frogs = [
-            t for t in self.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
-            if t.is_frog
-        ]
-        total = len(frogs)
-        if total == 0:
-            return { "rate": 0, "done": 0, "total": 0 }
-
-        done = len([t for t in frogs if t.is_done])
-        rate = round((done / total) * 100)
-
-        return { "rate": rate, "done": done, "total": total }
-
 # @register_patch_hook("tasks")
 # def tasks_patch_hook(
-#     item: Any, data: Any, session: Session, current_user: User   # noqa: ANN401,ARG001
+#     item: Any, data: Any, session: Session, current_user: User
 # ) -> dict[str, Any]:
 #     """Invoked by generalized PATCH route to re-calculate tasks progress upon changes."""
 #     tasks_service = create_tasks_service(
