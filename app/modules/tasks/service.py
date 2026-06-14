@@ -3,16 +3,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from sqlalchemy.orm import Session
 
-    from app.modules.auth.models import User
     from app.modules.tasks.models import Task
     from app.modules.tasks.schemas import Task as TaskCreate
     from app.modules.tasks.schemas import TaskPatch
 
 
-from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from datetime import datetime
 
 import app.shared.datetime_.helpers as dth
 from app.modules.tasks.models import PriorityEnum
@@ -150,94 +150,75 @@ class TasksService:
             raise ServiceError("Link not found", 404)
         supertask.subtasks.remove(subtask)
 
-    # def to_eod_datetime(self, date: date | None, tz_str: str) -> datetime | None:
-    #     """Convert a date to exclusive EOD datetime in given timezone."""
-    #     if not date:
-    #         return None
-    #     tz = ZoneInfo(tz_str)
-    #     start_of_day = datetime.combine(date, time.min, tzinfo=tz)
-    #     eod_midnight = start_of_day + timedelta(days=1)
-    #     return eod_midnight - timedelta(seconds=1)
+
+    def _rate(self, tasks: list[Task], predicate: Callable[[Task], bool], *, subset_key: str) -> dict[str, Any]:
+        total = len(tasks)
+        subset = sum(1 for t in tasks if predicate(t))
+        rate = round((subset / total) * 100) if total > 0 else 0
+        return { "rate": rate, subset_key: subset, "total": total }
 
     # TODO: we could use created_at_local :/
-    def calculate_tasks_progress_today(self) -> dict[str, Any]:
+    def calculate_tasks_progress_today(self) -> dict[str, int]:
+        """Completion progress over today's pile of tasks.
+
+        The pile (denominator) is every task that:
+        - tasks due today, done or not.
+        - overdue and still open tasks.
+        - completed today, whatever due date it was (or wasn't)
+        
+        Completed (numerator) is the pile tasks that are done.
+
+        Returns {"completed", "total", "percent"}.
+        """
         all_tasks = self.task_repo.get_all()
+        now = dth.now_utc()
 
-        # Count completed vs expected for today
-        num_completed, num_expected = 0, 0
+        def in_pile(t: Task) -> bool:
+            due_today = t.due_date and dth.is_same_local_date(t.due_date, self.user_tz)
+            completed_today = t.completed_at and dth.is_same_local_date(t.completed_at, self.user_tz)
+            return bool(due_today or t.is_overdue(now) or completed_today)
 
-        for task in all_tasks:
-            due_today = task.due_date and dth.is_same_local_date(
-                task.due_date, self.user_tz
-            )
-            completed_today = task.completed_at and dth.is_same_local_date(
-                task.completed_at, self.user_tz
-            )
+        pile = [t for t in all_tasks if in_pile(t)]
+        total = len(pile)
+        completed = sum(1 for t in pile if t.is_done)
 
-            # TODO: Old, scrap once match/case variant is confirmed fine
-            # if due_today:
-            #     num_expected += 1
-            #     if completed_today:
-            #         num_completed += 1
-
-            # elif completed_today and task.due_date is None:
-            #     # "spontaneous" task, completed today without a due date
-            #     num_completed += 1
-            #     num_expected += 1
-
-            # Match/case here makes the truth table visible?
-            match (bool(due_today), bool(completed_today), task.due_date is None):
-                case (True, True, _):
-                    num_expected += 1
-                    num_completed += 1
-                case (True, False, _):
-                    num_expected += 1
-                case (False, True, True):
-                    num_expected += 1
-                    num_completed += 1
-
-        percent_complete = (
-            (num_completed / num_expected * 100) if num_expected > 0 else 0
+        pct_complete = (
+            (completed / total * 100) if total > 0 else 0
         )
+        return { "completed": completed, "total": total, "percent": int(pct_complete) }
 
-        return {
-            "completed": num_completed,
-            "total": num_expected,
-            "percent": percent_complete,
-        }
 
-    # TODO: make sure this is even right
     def calc_overdue_rate(self, *, days: int) -> dict[str, int]:
-        """Takes int val for days 'into the past' to check against, and returns """
-        ## take all tasks where due_date != None and falls within last N days
-        ## of those - count where is_done = False, those are the ones overdue
-        ## Rate = overdue / total as percentage
+        """Overdue rate over the last N days.
+        
+        Of tasks whose due date falls in the window and has already
+        passed (due_date < now), the fraction still not done. Tasks due
+        later today are not yet overdue and are excluded.
+        """
         now = dth.now_utc()
-        start = now - timedelta(days=days)
+        start_utc, _ = dth.last_n_days_range(days, self.user_tz)
+        tasks = self.task_repo.get_all_in_window(start_utc, now, date_col="due_date")
+        return self._rate(tasks, lambda t: t.is_overdue(now), subset_key="overdue")
 
-        tasks_in_window = self.task_repo.get_all_in_window(start, now, date_col="due_date")
-        total = len(tasks_in_window)
-        if total == 0:
-            return { "rate": 0, "overdue": 0, "total": 0 }
-        overdue = len([t for t in tasks_in_window if not t.is_done])
-        rate = round((overdue/total) * 100)
 
-        return { "rate": rate, "overdue": overdue, "total": total }
-
-    def calc_frog_completion_rate(self, *, days: int) -> dict[str, int]:
+    def calc_frog_adherence_rate(self, *, days: int) -> dict[str, int]:
+        """Frog adherence rate over the last N days.
+        
+        Of frogs whose due day has finished (due_date < now), the fraction
+        completed on or before their due date. Today's frog is excluded
+        until its day ends, and late completions do not count.
+        """
         now = dth.now_utc()
-        start = now - timedelta(days=days)
-
-        tasks = self.task_repo.get_all_in_window(start, now, date_col="due_date")
-        frogs = [t for t in tasks if t.is_frog]
-        total = len(frogs)
-        if total == 0:
-            return { "rate": 0, "done": 0, "total": 0 }
-
-        done = len([t for t in frogs if t.is_done])
-        rate = round((done / total) * 100)
-
-        return { "rate": rate, "done": done, "total": total }
+        start_utc, _ = dth.last_n_days_range(days, self.user_tz)
+        frogs = [
+            t for t in self.task_repo.get_all_in_window(start_utc, now, date_col="due_date")
+            if t.is_frog
+        ]
+        return self._rate(
+            frogs,
+            lambda t: t.completed_at is not None and t.completed_at <= t.due_date,
+            subset_key="done"
+        )
 
 
 def create_tasks_service(session: Session, user_id: int, user_tz: str) -> TasksService:

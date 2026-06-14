@@ -116,6 +116,9 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
     user = relationship("User", back_populates="tasks")
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
+    def is_overdue(self, now: datetime) -> bool:
+        return self.due_date is not None and self.due_date < now and not self.is_done
+
     def __str__(self) -> str:
         return str(self.name)
 

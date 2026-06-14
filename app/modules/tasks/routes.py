@@ -32,7 +32,7 @@ def dashboard(session: Session) -> tuple[str, int]:
 
     ## WIP: Overdue rate calc
     overdue_stat = tasks_service.calc_overdue_rate(days=7)
-    frog_stat = tasks_service.calc_frog_completion_rate(days=7)
+    frog_stat = tasks_service.calc_frog_adherence_rate(days=7)
 
     # TODO: Pillars
     pillars = session.query(Pillar).filter_by(user_id=current_user.id).all()
