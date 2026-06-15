@@ -52,6 +52,7 @@ class TasksService:
         )
         self._sync_pillars(task, validated.pillar_ids)
         self._sync_subtasks(task, validated.subtask_ids)
+        self.task_repo.session.flush()
         return task
 
     def update_task(self, task_id: int, validated: TaskPatch) -> Task:
@@ -86,6 +87,18 @@ class TasksService:
 
         return task
 
+    def delete_task(self, task_id: int) -> Task:
+        task = self.task_repo.get_by_id(task_id)
+        if task is None:
+            raise ServiceError("Task not found", 404)
+        self.task_repo.delete(task)
+        return task
+    
+    def get_task(self, task_id: int) -> Task:
+        task = self.task_repo.get_by_id(task_id)
+        if task is None:
+            raise ServiceError("Task not found", 404)
+        return task
 
     def _validate_frog_rule(self, validated: TaskCreate | TaskPatch) -> None:
             self._validate_frog_rule_for_values(

@@ -98,7 +98,29 @@ class GroceriesService:
         for field in validated.model_fields_set:
             setattr(product, field, getattr(validated, field))
         return product
+    
+    def delete_product(self, product_id: int) -> Product:
+        """Soft-deletes a Product and removes its ShoppingListItem rows."""
+        product = self.product_repo.get_active_by_id(product_id)
+        if product is None:
+            raise ServiceError("Error: product not found", 404)
+        # purge product's shoppinglistitem rows
+        self.shopping_list_item_repo.delete_by_product_id(product_id)
 
+        product.deleted_at = dth.now_utc()
+        return product
+    
+    def get_product(self, product_id: int) -> Product:
+        product = self.product_repo.get_by_id(product_id)
+        if product is None:
+            raise ServiceError("Product not found", 404)
+        return product
+    
+    def get_transaction(self, transaction_id: int) -> Transaction:
+        txn = self.transaction_repo.get_by_id(transaction_id)
+        if txn is None:
+            raise ServiceError("Transaction not found", 404)
+        return txn
 
     def update_transaction(self, validated: TransactionPatch, transaction_id: int) -> Transaction:
         transaction = self.transaction_repo.get_by_id(transaction_id)
@@ -142,6 +164,13 @@ class GroceriesService:
         )
         self.session.flush()
         return transaction
+
+    def delete_transaction(self, transaction_id: int) -> Transaction:
+        txn = self.transaction_repo.get_by_id(transaction_id)
+        if txn is None:
+            raise ServiceError("Transaction not found", 404)
+        self.transaction_repo.delete(txn)
+        return txn
 
 
     def add_item_to_shopping_list(
@@ -221,6 +250,14 @@ class GroceriesService:
                 )
             else:
                 setattr(recipe, field, getattr(validated, field))
+        return recipe
+
+    def delete_recipe(self, recipe_id: int) -> Recipe:
+        """Deletes Recipe. Eager-loads with ingredients, as those cascade delete."""
+        recipe = self.recipe_repo.get_recipe_with_ingredients(recipe_id)
+        if recipe is None:
+            raise ServiceError("Recipe not found", 404)
+        self.recipe_repo.delete(recipe)
         return recipe
 
 

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from sqlalchemy.orm import Session
 
-from sqlalchemy import Date, cast, func, select
+from sqlalchemy import Date, cast, func, select, delete
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.modules.groceries.models import (
@@ -74,6 +74,15 @@ class ProductRepository(BaseRepository[Product]):
         if not include_soft_deleted:
             stmt = stmt.where(Product.deleted_at.is_(None))
         return list(self.session.execute(stmt).scalars().all())
+    
+    # Predicate to filter soft-deleted Products in queries
+    def _active(self):
+        return self._user_select(Product).where(Product.deleted_at.is_(None))
+    
+    def get_active_by_id(self, product_id: int) -> Product | None:
+        return self.session.execute(
+            self._active().where(Product.id == product_id)
+        ).scalar_one_or_none()
 
     def get_product_by_barcode(self, barcode: str) -> Product | None:
         stmt = self._user_select(Product).where(
@@ -172,6 +181,13 @@ class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):
             ShoppingListItem.product_id == product_id,
         )
         return self.session.scalars(stmt).one_or_none()
+    
+    def delete_by_product_id(self, product_id: int) -> None:
+        stmt = delete(ShoppingListItem).where(
+            ShoppingListItem.user_id == self.user_id,
+            ShoppingListItem.product_id == product_id
+        )
+        self.session.execute(stmt)
 
 class RecipeRepository(BaseRepository[Recipe]):
     def __init__(self, session: Session, user_id: int) -> None:

@@ -88,23 +88,6 @@ def delete_user_data(session: Session, table: Table, user_id: int) -> None:
     logger.debug("Deleted user %s data from: %s", user_id, table)
 
 
-def safe_delete[T](session: Session, item: T) -> T:
-    """
-    Soft-delete if `deleted_at` column exists, else hard-delete. Returns the item.
-    """
-    if isinstance(item, Product):
-        # Clean up shopping list items
-        session.query(ShoppingListItem).filter(
-            ShoppingListItem.product_id == item.id
-        ).delete()
-    if hasattr(item, "deleted_at"):
-        if item.deleted_at is None:
-            item.deleted_at = datetime.now(timezone.utc)
-        return item
-    session.delete(item)
-    return item
-
-
 def _get_sequence_name(session: Session, table_name: str) -> str | None:
     """Get actual sequence name for a table's id column."""
     result = session.execute(

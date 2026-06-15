@@ -56,6 +56,22 @@ def time_entries_list(session: Session) -> tuple[Response, int]:
     return api_response(success=True, message=f"Retrieved {len(results)} time_entries", data=data), 200
 
 
+@api_bp.get("/time_tracking/time_entries/<int:time_entry_id>")
+@login_plus_session
+def get_time_entry(session: Session, time_entry_id: int) -> tuple[Response, int]:
+    time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
+    time_entry = time_service.get_time_entry(time_entry_id)
+    return api_response(success=True, message="Time entry retrieved", data=time_entry.to_api_dict()), 200
+
+
+@api_bp.delete("/time_tracking/time_entries/<int:time_entry_id>")
+@login_plus_session
+def delete_time_entry(session: Session, time_entry_id: int) -> tuple[Response, int]:
+    time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
+    time_service.delete_time_entry(time_entry_id)
+    return api_response(success=True, message="Time entry deleted"), 200
+
+
 @api_bp.get("/time_tracking/time_entries/summary")
 @login_plus_session
 def time_entries_summary(session: Session) -> tuple[Response, int]:

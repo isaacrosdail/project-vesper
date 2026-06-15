@@ -13,10 +13,12 @@ from flask_login import current_user
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response
+from app.modules.auth.models import UnitSystemEnum
 from app.modules.metrics.models import MetricType
 from app.modules.metrics.schemas import DailyMetricsCreate
 from app.modules.metrics.service import create_metrics_service
 from app.shared.decorators import login_plus_session
+from app.shared.utils import kg_to_lbs
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +65,30 @@ def daily_metrics_list(session: Session) -> tuple[Response, int]:
         message=f"Retrieved {len(results)} entries",
         data=results,
     ), 200
+
+
+@api_bp.get("/metrics/daily_metrics/<int:entry_id>")
+@login_plus_session
+def get_daily_metrics_entry(session: Session, entry_id: int) -> tuple[Response, int]:
+    metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
+    entry = metrics_service.get_daily_metrics_entry(entry_id)
+    data = entry.to_api_dict()
+
+    if data.get("weight") is not None and current_user.units is UnitSystemEnum.IMPERIAL:
+        data["weight"] = kg_to_lbs(data["weight"])
+        data["weight_units"] = "lbs"
+    elif "weight" in data:
+        data["weight_units"] = "kg"
+
+    return api_response(success=True, message="Daily metrics retrieved", data=data), 200
+
+
+@api_bp.delete("/metrics/daily_metrics/<int:daily_metrics_id>")
+@login_plus_session
+def delete_daily_metrics(session: Session, daily_metrics_id: int) -> tuple[Response, int]:
+    metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
+    metrics_service.delete_daily_metrics(daily_metrics_id)
+    return api_response(success=True, message="Daily metrics entry deleted"), 200
 
 
 @api_bp.get("/metrics/daily_metrics/aggregate")

@@ -106,6 +106,18 @@ class TimeTrackingService:
 
         return entry
 
+    def delete_time_entry(self, time_entry_id: int) -> TimeEntry:
+        time_entry = self.time_entry_repo.get_by_id(time_entry_id)
+        if time_entry is None:
+            raise ServiceError("Time entry not found", 404)
+        self.time_entry_repo.delete(time_entry)
+        return time_entry
+
+    def get_time_entry(self, time_entry_id: int) -> TimeEntry:
+        entry = self.time_entry_repo.get_by_id(time_entry_id)
+        if entry is None:
+            raise ServiceError("Time entry not found", 404)
+        return entry
 
     def get_time_stuff(self) -> pd.DataFrame:
         time_entries = self.time_entry_repo.get_all()

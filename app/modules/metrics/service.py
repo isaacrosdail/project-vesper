@@ -113,6 +113,19 @@ class MetricsService:
             ]
         return [e.to_api_dict() for e in entries]
 
+    def get_daily_metrics_entry(self, entry_id: int) -> DailyMetrics:
+        entry = self.daily_metrics_repo.get_by_id(entry_id)
+        if entry is None:
+            raise ServiceError("Daily metrics not found", 404)
+        return entry
+    
+    def delete_daily_metrics(self, daily_metrics_id: int) -> DailyMetrics:
+        daily_metrics = self.daily_metrics_repo.get_by_id(daily_metrics_id)
+        if daily_metrics is None:
+            raise ServiceError("Daily metrics entry not found", 404)
+        self.daily_metrics_repo.delete(daily_metrics)
+        return daily_metrics
+
 
 def create_metrics_service(
     session: Session, user_id: int, user_tz: str

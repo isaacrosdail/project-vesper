@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-    from app.modules.habits.models import Habit, HabitCompletion
+    from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
     from app.modules.habits.schemas import Habit as HabitCreate
     from app.modules.habits.schemas import HabitPatch as HabitUpdate
     from app.shared.models import Pillar
@@ -79,6 +79,19 @@ class HabitsService:
         )
         self.session.flush()
         return habit
+    
+    def delete_habit(self, habit_id: int) -> Habit:
+        habit = self.habit_repo.get_by_id(habit_id)
+        if habit is None:
+            raise ServiceError("Habit not found", 404)
+        self.habit_repo.delete(habit)
+        return habit
+
+    def get_habit(self, habit_id: int) -> Habit:
+        habit = self.habit_repo.get_by_id(habit_id)
+        if habit is None:
+            raise ServiceError("Habit not found", 404)
+        return habit
 
     def _resolve_status(self, is_promotable: bool) -> StatusEnum | None:
         return StatusEnum.EXPERIMENTAL if is_promotable else None
@@ -113,6 +126,13 @@ class HabitsService:
         self.completion_repo.delete(completion)
         # self.check_promotion(habit) # would we un-promote a habit?
         return self.calculate_all_habits_percentage_this_week()
+    
+    def delete_leetcode_record(self, leetcode_record_id: int) -> LeetCodeRecord:
+        leetcode_record = self.leetcode_repo.get_by_id(leetcode_record_id)
+        if leetcode_record is None:
+            raise ServiceError("Leetcode record not found", 404)
+        self.leetcode_repo.delete(leetcode_record)
+        return leetcode_record
 
 
     # Streak calc: scan completion dates looking for consecutive days

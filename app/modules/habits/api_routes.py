@@ -54,6 +54,22 @@ def habits_list(session: Session) -> tuple[Response, int]:
     return api_response(success=True, message=f"Retrieved {len(results)} habits", data=data), 200
 
 
+@api_bp.get("/habits/habits/<int:habit_id>")
+@login_plus_session
+def get_habit(session: Session, habit_id: int) -> tuple[Response, int]:
+    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
+    habit = habits_service.get_habit(habit_id)
+    return api_response(success=True, message="Habit retrieved", data=habit.to_api_dict()), 200
+
+
+@api_bp.delete("/habits/habits/<int:habit_id>")
+@login_plus_session
+def delete_habit(session: Session, habit_id: int) -> tuple[Response, int]:
+    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
+    habits_service.delete_habit(habit_id)
+    return api_response(success=True, message="Habit deleted"), 200
+
+
 @api_bp.post("/habits/<int:habit_id>/completions")
 @login_plus_session
 def add_completion(session: Session, habit_id: int) -> tuple[Response, int]:
@@ -147,6 +163,13 @@ def leetcode_records(session: Session) -> tuple[Response, int]:
     return api_response(
         success=True, message="LeetCode record added", data=record.to_api_dict()
     ), 201
+
+@api_bp.delete("/habits/leetcode_records/<int:leetcode_record_id>")
+@login_plus_session
+def delete_leetcode_record(session: Session, leetcode_record_id: int) -> tuple[Response, int]:
+    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
+    habits_service.delete_leetcode_record(leetcode_record_id)
+    return api_response(success=True, message="Leetcode record deleted"), 200
 
 
 @api_bp.get("/habits/leetcode_records")

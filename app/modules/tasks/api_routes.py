@@ -71,6 +71,22 @@ def tasks_list(session: Session) -> tuple[Response, int]:
     ), 200
 
 
+@api_bp.get("/tasks/tasks/<int:task_id>")
+@login_plus_session
+def get_task(session: Session, task_id: int) -> tuple[Response, int]:
+    tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
+    task = tasks_service.get_task(task_id)
+    return api_response(success=True, message="Task retrieved", data=task.to_api_dict()), 200
+
+
+@api_bp.delete("/tasks/tasks/<int:task_id>")
+@login_plus_session
+def delete_task(session: Session, task_id: int) -> tuple[Response, int]:
+    tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
+    tasks_service.delete_task(task_id)
+    return api_response(success=True, message="Task deleted"), 200
+
+
 @api_bp.route("/tasks/task_links", methods = ["POST", "DELETE"])
 @login_plus_session
 def task_links(session: Session) -> tuple[Response, int]:

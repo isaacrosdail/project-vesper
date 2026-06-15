@@ -42,13 +42,11 @@ def patch_product(session: Session, product_id: int) -> tuple[Response, int]:
     return api_response(success=True, message="Product updated", data=product.to_api_dict()), 200
 
 
-
 @api_bp.get("/groceries/products")
 @login_plus_session
 def products_list(session: Session) -> tuple[Response, int]:
-    last_n_days = request.args.get("lastNDays", type=int)
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
-
+    last_n_days = request.args.get("lastNDays", type=int)
     if last_n_days:
         start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
         results = groceries_service.product_repo.get_all_in_window(start_utc, end_utc)
@@ -57,6 +55,21 @@ def products_list(session: Session) -> tuple[Response, int]:
     data = [t.to_api_dict() for t in results]
 
     return api_response(success=True, message=f"Retrieved {len(results)} products", data=data), 200
+
+@api_bp.get("/groceries/products/<int:product_id>")
+@login_plus_session
+def get_product(session: Session, product_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    product = groceries_service.get_product(product_id)
+    return api_response(success=True, message="Product retrieved", data=product.to_api_dict()), 200
+
+
+@api_bp.delete("/groceries/products/<int:product_id>")
+@login_plus_session
+def delete_product(session: Session, product_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    groceries_service.delete_product(product_id)
+    return api_response(success=True, message="Product deleted"), 200
 
 
 @api_bp.patch("/groceries/transactions/<int:transaction_id>")
@@ -90,6 +103,23 @@ def transactions_list(session: Session) -> tuple[Response, int]:
     data = [t.to_api_dict() for t in results]
 
     return api_response(success=True, message=f"Retrieved {len(results)} transactions", data=data), 200
+
+
+@api_bp.get("/groceries/transactions/<int:transaction_id>")
+@login_plus_session
+def get_transaction(session: Session, transaction_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    transaction = groceries_service.get_transaction(transaction_id)
+    return api_response(success=True, message="Transaction retrieved", data=transaction.to_api_dict()), 200
+
+
+
+@api_bp.delete("/groceries/transactions/<int:transaction_id>")
+@login_plus_session
+def delete_transaction(session: Session, transaction_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    groceries_service.delete_transaction(transaction_id)
+    return api_response(success=True, message="Transaction deleted"), 200
 
 
 @api_bp.post("/groceries/shopping_list_items")
@@ -144,6 +174,13 @@ def get_recipe_detail(session: Session, recipe_id: int) -> tuple[Response, int]:
 
     return api_response(success=True, message="Retrieved recipe", data=recipe.to_api_dict(include_relations=True)
     ), 200
+
+@api_bp.delete("/groceries/recipes/<int:recipe_id>")
+@login_plus_session
+def delete_recipe(session: Session, recipe_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    groceries_service.delete_recipe(recipe_id)
+    return api_response(success=True, message="Recipe deleted"), 200
 
 
 # TODO: Rough, fix
