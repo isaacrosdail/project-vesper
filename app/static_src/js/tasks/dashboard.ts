@@ -121,9 +121,10 @@ async function setupTaskFormModal() {
     if (!dialog) {
         throw new Error('tasks dashboard: #tasks-entry-dashboard-modal not found');
     }
-    const { selectTask, tasks } = await initTaskForm(dialog);
+    const { selectTask, setExcludeId, tasks } = await initTaskForm(dialog);
 
     function onPopulatedCallback(data: Task) {
+        setExcludeId(String(data.id)); // self can't be its own subtask
         // data.subtasks = [8, 11] -- loop, make pills, hide cards
         data.subtasks.forEach((id: number) => {
             const task = tasks.find(t => t.element.dataset.id === String(id));

@@ -215,12 +215,14 @@ export async function initTaskForm(dialog: FormDialog) {
     type TaskCard = { name: string; priority: TaskPriority; element: HTMLElement; }
     const tasks: TaskCard[] = []
     const selectedTasks: { id: string; name: string; }[] = []
+    let excludeId: string | null = null;
 
     // Hook into modal:cleanup so we clear off pills and hidden
     dialog.addEventListener('modal:cleanup', () => {
         selectedTasks.length = 0
         pillContainer.innerHTML = ''
         searchInput.value = ''
+        excludeId = null; // To exclude the currently-editing task's option from the subtask dropdown
         tasks.forEach(task => task.element.classList.remove('hide'));
         taskCardContainer.classList.add('hide');
     })
@@ -230,12 +232,24 @@ export async function initTaskForm(dialog: FormDialog) {
         const normalizedValue = value.trim().toLowerCase();
 
         tasks.forEach(task => {
-            const isSelected = selectedTasks.some(s => s.id === task.element.dataset.id);
-            if (isSelected) return;
+            const id = task.element.dataset.id;
+            const isSelected = selectedTasks.some(s => s.id === id);
+            if (isSelected || id === excludeId) return; // self-card stays hidden (ie, during edit)
             const isVisible = task.name.toLowerCase().includes(normalizedValue);
             task.element.classList.toggle("hide", !isVisible)
         })
     })
+
+    // Passed to dashboard.ts to enable hiding 'this' card from subtasks list?
+    function setExcludeId(id: string) {
+        excludeId = id;
+        const card = tasks.find(t => t.element.dataset.id === id)?.element;
+        if (!card) {
+            console.warn(`setExcludeId: no card for task id ${id}`);
+            return;
+        }
+        card.classList.add('hide');
+    }
 
     /**
      * Find the card in the tasks array by ID
@@ -351,7 +365,7 @@ export async function initTaskForm(dialog: FormDialog) {
     const validateTaskName = makeValidator('name', { maxLength: 150 });
     initValidation(form, { due_date: validateDueDate, name: validateTaskName })
 
-    return { selectTask, tasks }; // Return these so Edit context menu in dashboard has them
+    return { selectTask, setExcludeId, tasks }; // Return these so Edit context menu in dashboard has them
 }
 
 export function initHabitForm(dialog: FormDialog) {
