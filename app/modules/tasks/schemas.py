@@ -30,3 +30,8 @@ class TaskPatch(BaseModel):
     pillar_ids: list[int] | None = None
     completed_at: datetime | None = None
     sort_key: str | None = None
+
+
+class TaskLink(BaseModel):
+    subtask_id: int
+    supertask_id: int

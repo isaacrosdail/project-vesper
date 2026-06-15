@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 import logging
 
-from flask import Response, abort, request
+from flask import Response, request
 from flask_login import current_user
 
 import app.shared.datetime_.helpers as dth
@@ -16,6 +16,7 @@ from app.api.responses import api_response
 from app.modules.time_tracking.schemas import TimeEntryCreate, TimeEntryPatch
 from app.modules.time_tracking.service import create_time_tracking_service
 from app.shared.decorators import login_plus_session
+from app.shared.exceptions import ServiceError
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ def delete_time_entry(session: Session, time_entry_id: int) -> tuple[Response, i
 def time_entries_summary(session: Session) -> tuple[Response, int]:
     last_n_days = request.args.get("lastNDays", type=int)
     if last_n_days is None:
-        abort(400, description="Query parameter 'lastNDays' is required and must be an integer.")
+        raise ServiceError("lastNDays is required")
 
     time_service = create_time_tracking_service(
         session, current_user.id, current_user.timezone
@@ -98,7 +99,7 @@ def time_entries_summary(session: Session) -> tuple[Response, int]:
 def time_entries_aggregate(session: Session) -> tuple[Response, int]:
     last_n_days = request.args.get("lastNDays", type=int)
     if not last_n_days:
-        return api_response(success=False, message="last_n_days missing in query params"), 400
+        raise ServiceError("lastNDays is required")
 
     time_service = create_time_tracking_service(
         session, current_user.id, current_user.timezone

@@ -11,10 +11,9 @@ from flask_login import current_user
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response
-from app.modules.tasks.schemas import Task, TaskPatch
+from app.modules.tasks.schemas import Task, TaskLink, TaskPatch
 from app.modules.tasks.service import create_tasks_service
 from app.shared.decorators import login_plus_session
-from app.shared.exceptions import ServiceError
 
 
 @api_bp.post("/tasks/tasks")
@@ -87,28 +86,24 @@ def delete_task(session: Session, task_id: int) -> tuple[Response, int]:
     return api_response(success=True, message="Task deleted"), 200
 
 
-@api_bp.route("/tasks/task_links", methods = ["POST", "DELETE"])
+@api_bp.post("/tasks/task_links")
 @login_plus_session
-def task_links(session: Session) -> tuple[Response, int]:
-    data = request.json
-    try:
-        sub_id = int(data.get("subtask_id"))
-        super_id = int(data.get("supertask_id"))
-    except (TypeError, ValueError):
-        return api_response(success=False, message="IDs must be integers"), 400
-
+def create_task_link(session: Session) -> tuple[Response, int]:
+    link = TaskLink.model_validate(request.json or {})
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone
     )
+    tasks_service.save_link(link.subtask_id, link.supertask_id)
+    return api_response(success=True, message="Link created",
+        data={ "subtask_id": link.subtask_id, "supertask_id": link.supertask_id }), 201
 
-    if request.method == "POST":
-        tasks_service.save_link(sub_id, super_id)
-        return api_response(
-            success=True,
-            message="Link created",
-            data={ "subtask_id": sub_id, "supertask_id": super_id }
-        ), 201
 
-    tasks_service.delete_link(sub_id, super_id)
+@api_bp.delete("/tasks/task_links")
+@login_plus_session
+def delete_task_link(session: Session) -> tuple[Response, int]:
+    link = TaskLink.model_validate(request.json or {})
+    tasks_service = create_tasks_service(
+        session, current_user.id, current_user.timezone
+    )
+    tasks_service.delete_link(link.subtask_id, link.supertask_id)
     return api_response(success=True, message="Link deleted"), 200
-

@@ -18,6 +18,7 @@ from app.modules.metrics.models import MetricType
 from app.modules.metrics.schemas import DailyMetricsCreate
 from app.modules.metrics.service import create_metrics_service
 from app.shared.decorators import login_plus_session
+from app.shared.exceptions import ServiceError
 from app.shared.utils import kg_to_lbs
 
 logger = logging.getLogger(__name__)
@@ -42,10 +43,9 @@ def daily_metrics(session: Session, entry_id: int | None = None) -> tuple[Respon
 @api_bp.get("/metrics/daily_metrics")
 @login_plus_session
 def daily_metrics_list(session: Session) -> tuple[Response, int]:
-    # VALID_METRIC_TYPES = {"weight", "steps", "calories", "sleep_duration_minutes"}
     metric_type = request.args.get("metric_type")
     if metric_type and metric_type not in get_args(MetricType):
-        return api_response(success=False, message="Invalid metric type"), 400
+        raise ServiceError("Invalid metric type")
     last_n_days = request.args.get("lastNDays", type=int)
     limit = request.args.get("limit", type=int)
 
@@ -96,7 +96,7 @@ def delete_daily_metrics(session: Session, daily_metrics_id: int) -> tuple[Respo
 def daily_metrics_aggregate(session: Session) -> tuple[Response, int]:
     last_n_days = request.args.get("lastNDays", type=int)
     if not last_n_days:
-        return api_response(success=False, message="last_n_days missing in query params"), 400
+        raise ServiceError("lastNDays is required")
     num_buckets = request.args.get("numBuckets", type=int)
     metrics_service = create_metrics_service(
         session, current_user.id, current_user.timezone
@@ -108,10 +108,5 @@ def daily_metrics_aggregate(session: Session) -> tuple[Response, int]:
     else:
         data = metrics_service.daily_metrics_repo.get_aggregates_in_window(start_utc, end_utc)
     if not data:
-        return api_response(success=False, message="No matches?"), 404
-
-    return api_response(
-        success=True,
-        message="Retrieved aggregate",
-        data=data,
-    ), 200
+        return api_response(success=True, message="No data for this window", data=[]), 200
+    return api_response(success=True, message=f"Retrieved {len(data)} buckets", data=data), 200

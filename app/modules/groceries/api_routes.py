@@ -22,7 +22,7 @@ from app.modules.groceries.schemas import (
 )
 from app.modules.groceries.service import create_groceries_service
 from app.shared.decorators import login_plus_session
-
+from app.shared.exceptions import ServiceError
 
 @api_bp.post("/groceries/products")
 @login_plus_session
@@ -170,9 +170,12 @@ def get_recipe_detail(session: Session, recipe_id: int) -> tuple[Response, int]:
     )
     recipe = groceries_service.recipe_repo.get_recipe_with_ingredients(recipe_id)
     if not recipe:
-        return api_response(success=False, message="Recipe not found"), 404
+        raise ServiceError("Recipe not found", 404)
 
-    return api_response(success=True, message="Retrieved recipe", data=recipe.to_api_dict(include_relations=True)
+    return api_response(
+        success=True,
+        message="Retrieved recipe",
+        data=recipe.to_api_dict(include_relations=True)
     ), 200
 
 @api_bp.delete("/groceries/recipes/<int:recipe_id>")
