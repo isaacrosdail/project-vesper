@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
     from app.modules.habits.schemas import Habit as HabitCreate
     from app.modules.habits.schemas import HabitPatch as HabitUpdate
-    from app.shared.models import Pillar
 
 from collections import defaultdict
 from datetime import date, datetime
@@ -22,16 +21,15 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 import app.shared.datetime_.helpers as dth
-from app.modules.habits.models import StatusEnum, PROMOTION_THRESHOLD
+from app.modules.habits.models import PROMOTION_THRESHOLD, StatusEnum
 from app.modules.habits.repository import (
     HabitCompletionRepository,
     HabitRepository,
     LeetCodeRecordRepository,
 )
 from app.shared.exceptions import ServiceError
-
-# from app.shared.models import Pillar
 from app.shared.repository.pillar import PillarRepository
+
 
 class HabitsService:
     def __init__(
@@ -62,8 +60,7 @@ class HabitsService:
             setattr(habit, field, getattr(validated, field))
 
         if "pillar_ids" in validated.model_fields_set:
-            pillars = self.pillar_repo.get_by_ids(validated.pillar_ids)
-            habit.pillars = pillars
+            self._sync_pillars(habit, validated.pillar_ids)
 
         return habit
 
@@ -75,11 +72,11 @@ class HabitsService:
             name=validated.name,
             status=status,
             target_frequency=validated.target_frequency,
-            pillar_ids=validated.pillar_ids,
         )
+        self._sync_pillars(habit, validated.pillar_ids)
         self.session.flush()
         return habit
-    
+
     def delete_habit(self, habit_id: int) -> Habit:
         habit = self.habit_repo.get_by_id(habit_id)
         if habit is None:
@@ -96,8 +93,8 @@ class HabitsService:
     def _resolve_status(self, is_promotable: bool) -> StatusEnum | None:
         return StatusEnum.EXPERIMENTAL if is_promotable else None
 
-    def _resolve_pillars(self, pillar_ids: list[int]) -> list[Pillar]:
-        return self.pillar_repo.get_by_ids(pillar_ids)
+    def _sync_pillars(self, habit: Habit, pillar_ids: list[int]) -> None:
+        habit.pillars = self.pillar_repo.get_by_ids(pillar_ids)
 
 
     def save_completion(self, habit_id: int, completed_at: datetime) -> tuple[HabitCompletion, dict[str, Any]]:
@@ -126,7 +123,7 @@ class HabitsService:
         self.completion_repo.delete(completion)
         # self.check_promotion(habit) # would we un-promote a habit?
         return self.calculate_all_habits_percentage_this_week()
-    
+
     def delete_leetcode_record(self, leetcode_record_id: int) -> LeetCodeRecord:
         leetcode_record = self.leetcode_repo.get_by_id(leetcode_record_id)
         if leetcode_record is None:

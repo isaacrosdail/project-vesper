@@ -28,7 +28,6 @@ class TaskRepository(BaseRepository[Task]):
         name: str,
         priority: PriorityEnum | None,
         due_date: datetime | None = None,
-        pillar_ids: list[int] | None = None,
         sort_key: str
     ) -> Task:
         """Create & add a new task. Returns said task."""

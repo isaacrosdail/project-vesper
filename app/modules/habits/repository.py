@@ -23,7 +23,6 @@ from app.modules.habits.models import (
     LeetCodeRecord,
     StatusEnum,
 )
-from app.shared.models import Pillar
 from app.shared.repository.base import BaseRepository
 
 
@@ -36,7 +35,6 @@ class HabitRepository(BaseRepository[Habit]):
         name: str,
         status: StatusEnum | None,
         target_frequency: int,
-        pillar_ids: list[int] | None = None
     ) -> Habit:
         habit = Habit(
             user_id=self.user_id,
@@ -44,14 +42,6 @@ class HabitRepository(BaseRepository[Habit]):
             status=status,
             target_frequency=target_frequency,
         )
-        # TODO: fixup
-        if pillar_ids:
-            stmt = select(Pillar).where(
-                Pillar.id.in_(pillar_ids),
-                Pillar.user_id == self.user_id
-            )
-            result = list(self.session.scalars(stmt).all())
-            habit.pillars = result
         return self.add(habit)
 
     def get_all_habits_and_tags(self) -> list[Habit]:

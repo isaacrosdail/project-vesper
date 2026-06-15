@@ -93,7 +93,7 @@ class TasksService:
             raise ServiceError("Task not found", 404)
         self.task_repo.delete(task)
         return task
-    
+
     def get_task(self, task_id: int) -> Task:
         task = self.task_repo.get_by_id(task_id)
         if task is None:

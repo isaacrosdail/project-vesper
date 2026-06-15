@@ -29,7 +29,6 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
         ended_at: datetime,
         duration_minutes: float,
         description: str | None = None,
-        pillar_ids: list[int] | None = None,
     ) -> TimeEntry:
         time_entry = TimeEntry(
             user_id=self.user_id,
@@ -39,14 +38,6 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
             ended_at=ended_at,
             description=description,
         )
-        # TODO: fixup
-        if pillar_ids:
-            stmt = select(Pillar).where(
-                Pillar.id.in_(pillar_ids),
-                Pillar.user_id == self.user_id
-            )
-            result = list(self.session.scalars(stmt).all())
-            time_entry.pillars = result
         return self.add(time_entry)
 
     def get_all_time_entries_in_window(
