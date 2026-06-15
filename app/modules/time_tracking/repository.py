@@ -45,7 +45,7 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
                 Pillar.id.in_(pillar_ids),
                 Pillar.user_id == self.user_id
             )
-            result = list(self.session.execute(stmt).scalars().all())
+            result = list(self.session.scalars(stmt).all())
             time_entry.pillars = result
         return self.add(time_entry)
 
@@ -60,7 +60,7 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
                 TimeEntry.ended_at < end_utc,
             )
         )
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_overlapping_entries(self, start_utc: datetime, end_utc: datetime, exclude_id: int | None = None) -> list[TimeEntry]:
         stmt = self._user_select(TimeEntry).where(
@@ -69,7 +69,7 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
         )
         if exclude_id is not None:
             stmt = stmt.where(TimeEntry.id != exclude_id)
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_entries_by_category_in_window(
         self,
@@ -87,7 +87,7 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
         )
         if order_desc:
             stmt = stmt.order_by(TimeEntry.started_at.desc())
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_aggregates_in_window(self, start_utc: datetime) -> dict[str, float] | None:
         """Get average values for each metric field since the given datetime.
@@ -108,6 +108,6 @@ class TimeEntryRepository(BaseRepository[TimeEntry]):
             .group_by(Pillar.name)
         )
         rows = self.session.execute(stmt).all()
-        if rows is None:
+        if not rows:
             return None
         return {name: float(total) for name, total in rows}

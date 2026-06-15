@@ -17,6 +17,7 @@ P = ParamSpec("P")
 
 class DailyMetricsRepository(BaseRepository[DailyMetrics]):
     FILTERABLE_COLS = {"weight", "steps", "calories", "sleep_duration_minutes"}
+    ORDERABLE_COLS = {"entry_datetime", "weight", "steps", "calories", "sleep_duration_minutes"}
 
     def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=DailyMetrics)
@@ -69,13 +70,15 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
                 raise ValueError(f"Unknown metric: {metric}")
             stmt = stmt.where(getattr(DailyMetrics, metric).isnot(None))
 
+        if order_by not in self.ORDERABLE_COLS:
+            raise ValueError(f"Unknown order_by: {order_by}")
         col = getattr(DailyMetrics, order_by)
         stmt = stmt.order_by(col.asc() if order == "asc" else col.desc())
 
         if limit:
             stmt = stmt.limit(limit)
 
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
 
     def get_latest_daily_metrics_entry(self) -> DailyMetrics | None:
@@ -100,7 +103,7 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
             column_obj = getattr(DailyMetrics, metric_type)
             stmt = stmt.where(column_obj.isnot(None))
         stmt = stmt.order_by(DailyMetrics.entry_datetime.asc())
-        result = self.session.execute(stmt).scalars().all()
+        result = self.session.scalars(stmt).all()
         return list(result)
 
     def get_aggregates_in_window(self, start_utc: datetime, end_utc: datetime) -> dict[str, float] | None:
@@ -126,7 +129,7 @@ class DailyMetricsRepository(BaseRepository[DailyMetrics]):
         return {k: float(v) for k, v in result._asdict().items()}
 
     # TODO: Study
-    def get_bucketed_aggregates(self, start_utc: datetime, end_utc: datetime, num_buckets: int) -> list[dict[str, float]]:
+    def get_bucketed_aggregates(self, start_utc: datetime, end_utc: datetime, num_buckets: int) -> list[dict[str, float] | None]:
         ## compute boundaries
         # call get_aggregates_in_window once per bucket
         # return list of results

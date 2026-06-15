@@ -64,7 +64,7 @@ class BaseRepository(Generic[T]):
         stmt = select(self.model_cls).where(
             self.model_cls.user_id == self.user_id, self.model_cls.id == item_id
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).first()
 
     def get_by_ids(self, ids: list[int]) -> list[T]:
         stmt = select(self.model_cls).where(

@@ -44,7 +44,7 @@ class TaskRepository(BaseRepository[Task]):
     def get_all_regular_tasks(self) -> list[Task]:
         # stmt = self._user_select(Task).where(~Task.is_frog)
         stmt = self._user_select(Task).where(Task.priority != PriorityEnum.FROG)
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_all_tasks_with_links(self) -> list[Task]:
         """TODO: For tasks web visualization. Prune comments here"""
@@ -56,7 +56,7 @@ class TaskRepository(BaseRepository[Task]):
         # .unique() = With joinedload + many-to-many, it can produce duplicate
         # rows (task is there once for each link it's part of)
         # unique just de-dupes these back into unique Task objs
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_all_links(self) -> list[tuple[int, int]]:
         return [
@@ -74,7 +74,7 @@ class TaskRepository(BaseRepository[Task]):
             Task.due_date >= start_utc,
             Task.due_date < end_utc
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).first()
 
     def get_max_sort_key(self) -> str | None:
         stmt = (
@@ -83,7 +83,4 @@ class TaskRepository(BaseRepository[Task]):
             .order_by(Task.sort_key.desc())
             .limit(1)
         )
-        import sys
-        result = self.session.execute(stmt).scalar_one_or_none()
-        print(result, file=sys.stderr)
-        return result
+        return self.session.execute(stmt).scalar_one_or_none()

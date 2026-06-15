@@ -51,7 +51,7 @@ class UserPreferenceRepository(BaseRepository[UserPreference]):
         stmt = (
             self._user_select(UserPreference).where(UserPreference.key == key)
         )
-        existing = self.session.execute(stmt).scalars().first()
+        existing = self.session.scalars(stmt).first()
         if existing:
             existing.value = value
             return existing

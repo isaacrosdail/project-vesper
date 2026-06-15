@@ -50,14 +50,14 @@ class HabitRepository(BaseRepository[Habit]):
                 Pillar.id.in_(pillar_ids),
                 Pillar.user_id == self.user_id
             )
-            result = list(self.session.execute(stmt).scalars().all())
+            result = list(self.session.scalars(stmt).all())
             habit.pillars = result
         return self.add(habit)
 
     def get_all_habits_and_tags(self) -> list[Habit]:
         """Return all habits, eager-loading their tags, too."""
         stmt = self._user_select(Habit).options(selectinload(Habit.tags))
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_all_habits_and_tags_in_window(
         self, start_utc: datetime, end_utc: datetime
@@ -70,7 +70,7 @@ class HabitRepository(BaseRepository[Habit]):
             )
             .options(selectinload(Habit.tags))
         )
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
 
 class HabitCompletionRepository(BaseRepository[HabitCompletion]):
@@ -95,7 +95,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
         )
         if order_desc:
             stmt = stmt.order_by(HabitCompletion.completed_at.desc())
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_habit_completion_in_window(
         self, habit_id: int, start_utc: datetime, end_utc: datetime
@@ -111,7 +111,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
                 Habit.user_id == self.user_id,
             )
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).first()
 
     def get_completion_counts_in_window(self, start_utc: datetime, end_utc: datetime) -> list[dict[str, Any]]:
         stmt = (
@@ -140,7 +140,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
                 HabitCompletion.completed_at < end_utc,
             )
         )
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     ## ALL habits in general
     ## TODO: Even necessary? or should use the generic in window now?
@@ -160,7 +160,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             HabitCompletion.completed_at >= start_utc,
             HabitCompletion.completed_at < end_utc,
         )
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_completion_counts_by_habit_in_window(
         self, start_utc: datetime, end_utc: datetime
@@ -198,6 +198,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
                 func.count()
             )
             .where(
+                HabitCompletion.user_id == self.user_id,
                 HabitCompletion.habit_id == habit_id,
                 HabitCompletion.completed_at >= start_utc,
                 HabitCompletion.completed_at < end_utc

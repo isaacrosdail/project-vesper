@@ -58,7 +58,7 @@ class ProductRepository(BaseRepository[Product]):
         stmt = self._user_select(Product)
         if not include_soft_deleted:
             stmt = stmt.where(Product.deleted_at.is_(None))
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
 
     def get_all_products_in_window(
         self,
@@ -73,7 +73,7 @@ class ProductRepository(BaseRepository[Product]):
         )
         if not include_soft_deleted:
             stmt = stmt.where(Product.deleted_at.is_(None))
-        return list(self.session.execute(stmt).scalars().all())
+        return list(self.session.scalars(stmt).all())
     
     # Predicate to filter soft-deleted Products in queries
     def _active(self):
@@ -88,13 +88,13 @@ class ProductRepository(BaseRepository[Product]):
         stmt = self._user_select(Product).where(
             Product.barcode == barcode, Product.deleted_at.is_(None)
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).first()
 
     def get_product_by_name(self, name: str) -> Product | None:
         stmt = self._user_select(Product).where(
             Product.name == name, Product.deleted_at.is_(None)
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).first()
 
 
 class TransactionRepository(BaseRepository[Transaction]):
@@ -137,7 +137,7 @@ class TransactionRepository(BaseRepository[Transaction]):
             Transaction.created_at >= start_utc,
             Transaction.created_at < end_utc,
         )
-        return self.session.execute(stmt).scalars().first()
+        return self.session.scalars(stmt).first()
 
 
 class ShoppingListRepository(BaseRepository[ShoppingList]):
@@ -155,7 +155,7 @@ class ShoppingListRepository(BaseRepository[ShoppingList]):
             .options(selectinload(ShoppingList.items)
             .joinedload(ShoppingListItem.product))
         )
-        return self.session.execute(stmt).scalars().one_or_none()
+        return self.session.scalars(stmt).one_or_none()
 
 
 class ShoppingListItemRepository(BaseRepository[ShoppingListItem]):
@@ -213,7 +213,7 @@ class RecipeRepository(BaseRepository[Recipe]):
             .where(Recipe.id==recipe_id)
             .options(selectinload(Recipe.ingredients))
         )
-        return self.session.execute(stmt).scalars().one_or_none()
+        return self.session.scalars(stmt).one_or_none()
 
 
 class RecipeIngredientRepository(BaseRepository[RecipeIngredient]):
