@@ -28,6 +28,7 @@ from app.modules.habits.models import Habit, HabitCompletion
 from app.modules.metrics.models import DailyMetrics
 from app.modules.tasks.models import PriorityEnum, Task
 from app.modules.time_tracking.models import TimeEntry
+from app.shared.fractional_indexing import generate_key_between
 from app.shared.models import Pillar, Tag
 
 SEED_DIR = Path(__file__).parent
@@ -327,14 +328,19 @@ def create_tasks(now: datetime, user_id: int, pillars: dict[str, Pillar]) -> lis
 
     tasks = []
     task_lookup = {}
+    prev_key = None
     for t in data:
+        sort_key = generate_key_between(prev_key, None)
+        prev_key = sort_key
+
         task = (Task(
             name=t["name"],
             priority=PriorityEnum(t["priority"]),
             completed_at=now + timedelta(days=t["completed_at_offset"]) if t["completed_at_offset"] is not None else None,
             due_date=now + timedelta(days=t["due_date_offset"]) if t["due_date_offset"] is not None else None,
             user_id=user_id,
-            created_at=now - timedelta(days=14)
+            created_at=now - timedelta(days=14),
+            sort_key=sort_key
         ))
         task.pillars = [pillars[name] for name in t.get("pillars", [])]
         tasks.append(task)
