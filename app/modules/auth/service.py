@@ -1,21 +1,15 @@
 from __future__ import annotations
 
 import os
-from functools import wraps
-from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any
 from zoneinfo import available_timezones
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
 
-    from flask.typing import ResponseReturnValue
     from sqlalchemy.orm import Session
 
-    from app._infra.db_base import Base
     from app.modules.auth.repository import UsersRepository
 
-from flask import abort, current_app, request
-from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 
 from app.modules.auth.models import UnitSystemEnum, User, UserLangEnum, UserRoleEnum
@@ -23,53 +17,6 @@ from app.modules.auth.repository import UserPreferenceRepository, UsersRepositor
 from app.shared.database.seed.seed_db import seed_data_for
 from app.shared.exceptions import ServiceError
 from app.shared.models import Pillar
-
-P = ParamSpec("P")
-R = TypeVar("R")
-
-EXEMPT_METHODS = {"OPTIONS"}  # copied from Flask-Login's source
-
-
-def owner_required(
-    func: Callable[P, ResponseReturnValue],
-) -> Callable[P, ResponseReturnValue]:
-    """
-    Decorator that ensures current_user is authenticaed and has OWNER role.
-
-    Returns 403 Forbidden if user lacks owner permissions.
-    """
-
-    @wraps(func)
-    @typed_login_required
-    def decorated_view(*args: P.args, **kwargs: P.kwargs) -> ResponseReturnValue:
-        if not current_user.is_owner:
-            return abort(403, description="Owner privileges required")
-        return func(*args, **kwargs)
-
-    return decorated_view
-
-
-def typed_login_required(
-    func: Callable[P, ResponseReturnValue],
-) -> Callable[P, ResponseReturnValue]:
-    """
-    Typed version of Flask-Login's `login_required`.
-    """
-
-    @wraps(func)
-    def decorated_view(*args: P.args, **kwargs: P.kwargs) -> ResponseReturnValue:
-        if request.method in EXEMPT_METHODS or current_app.config.get("LOGIN_DISABLED"):
-            pass
-        elif not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()  # type: ignore[no-any-return, attr-defined]
-
-        # flask 1.x compatibility
-        # current_app.ensure_sync is only available in Flask >= 2.0
-        if callable(getattr(current_app, "ensure_sync", None)):
-            return current_app.ensure_sync(func)(*args, **kwargs)  # type: ignore[no-any-return]
-        return func(*args, **kwargs)
-
-    return decorated_view
 
 
 class AuthService:

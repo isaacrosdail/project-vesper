@@ -23,8 +23,8 @@ from app.api import api_bp
 from app.api.rate_limiter import release_slot, reserve_slot
 from app.api.responses import api_response
 from app.modules.auth.repository import UserPreferenceRepository
-from app.modules.auth.service import create_auth_service, typed_login_required
-from app.shared.decorators import login_plus_session
+from app.modules.auth.service import create_auth_service
+from app.shared.decorators import login_plus_session, typed_login_required
 
 logger = logging.getLogger(__name__)
 

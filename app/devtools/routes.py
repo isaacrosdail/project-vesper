@@ -8,7 +8,7 @@ import os
 
 from flask import Blueprint, current_app, render_template
 
-from app.modules.auth.service import owner_required, typed_login_required
+from app.shared.decorators import owner_required, typed_login_required
 
 devtools_bp = Blueprint(
     "devtools", __name__, url_prefix="/devtools", template_folder="templates"

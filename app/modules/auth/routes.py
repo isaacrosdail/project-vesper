@@ -14,8 +14,9 @@ from pydantic import ValidationError
 from app._infra.database import database_connection, with_db_session
 from app.modules.auth.repository import UsersRepository
 from app.modules.auth.schemas import UserRegister
-from app.modules.auth.service import AuthService, owner_required, typed_login_required
+from app.modules.auth.service import AuthService
 from app.shared.database.helpers import delete_all_db_data
+from app.shared.decorators import owner_required, typed_login_required
 from app.shared.exceptions import ServiceError
 from app.shared.utils import set_toast
 

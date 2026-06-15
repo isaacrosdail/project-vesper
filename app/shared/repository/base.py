@@ -12,7 +12,7 @@ from sqlalchemy import func, select
 
 from app._infra.db_base import Base
 
-from app.shared.decorators_two import log_queries
+from app.shared.decorators import log_queries
 
 T = TypeVar("T", bound=Base)
 
