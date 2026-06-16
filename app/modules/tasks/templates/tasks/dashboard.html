@@ -59,7 +59,7 @@
 
 <div popover id="task-details-popover" class="task-details-popover popover">
     <div class="task-details__header">
-        <input type="checkbox">
+        <input type="checkbox" class="task-details__done-toggle">
         <h2 class="name task-details__name"></h2>
     </div>
 
@@ -101,7 +101,7 @@
 <!-- For the generation of subtask list in task details popover view -->
 <template id="subtask-list-template">
     <div class="subtask-group">
-        <input type="checkbox" class="subtask-checkbox">
+        <input type="checkbox" class="subtask-checkbox task-details__subtask-checkbox">
         <div class="subtask-name"></div>
     </div>
 </template>

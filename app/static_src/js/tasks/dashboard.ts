@@ -53,34 +53,8 @@ const taskDetailEls = getTaskDetailPopoverElements();
 const searchEls = getSearchElements();
 //#endregion
 
-
-type PopoverState = {
-    activePopover: 'taskDetails' | 'search' | null
-};
-const popoverState: PopoverState = {
-    activePopover: null
-};
-
 const taskMap = new Map<number, Task>();
 
-function setPopoverState(thing: Partial<PopoverState>) {
-    Object.assign(popoverState, thing);
-    renderPopover();
-}
-
-function renderPopover() {
-    if (popoverState.activePopover === 'taskDetails') {
-        taskDetailEls.taskDetailsPopover.showPopover();
-    } else {
-        taskDetailEls.taskDetailsPopover.hidePopover();
-    }
-
-    if (popoverState.activePopover === 'search') {
-        searchEls.searchPopover.showPopover();
-    } else {
-        searchEls.searchPopover.hidePopover();
-    }
-}
 
 // Pure data shaping
 function deriveTaskView(task: Task) {
@@ -90,6 +64,7 @@ function deriveTaskView(task: Task) {
     return {
         name: task.name,
         id: task.id,
+        is_done: task.is_done,
         priority: title(task.priority),
         created_at: displayDate(task.created_at),
         due_date: task.due_date !== null ? displayDate(task.due_date) : null,
@@ -97,6 +72,7 @@ function deriveTaskView(task: Task) {
         priorityHref: `#badge-priority-${task.priority}`,
         subtasks: subtasks.map(st => ({
             name: st.name,
+            id: st.id,
             is_done: st.is_done
         })),
         subtasksSummary: `${subtasks.filter(st => st.is_done).length}/${subtasks.length}`
@@ -177,21 +153,14 @@ function renderTaskDetails(view, els: ReturnType<typeof getTaskDetailPopoverElem
     view.subtasks.forEach(st => {
         const clone = els.subtaskTemplate.content.cloneNode(true);
         clone.querySelector('.subtask-name').textContent = st.name;
-        clone.querySelector('.subtask-checkbox').checked = st.is_done;
+        const checkbox = clone.querySelector('.subtask-checkbox');
+        checkbox.checked = st.is_done;
+        checkbox.setAttribute('data-id', st.id);
         els.subtasksContainer.appendChild(clone);
     });
 
-    // Set activeTaskId for delete/edit buttons:
-    // TODO: Put both on parent div instead for one spot
-    root.querySelector('.task-delete-btn').setAttribute('data-active-task-id', `${view.id}`);
-    root.querySelector('.task-edit-btn').setAttribute('data-active-task-id', `${view.id}`);
-}
-
-// Thin orchestrator
-function showTaskDetails(task: Task) {
-    const view = deriveTaskView(task);
-    renderTaskDetails(view, taskDetailEls);
-    setPopoverState({ activePopover: 'taskDetails' });
+    const doneToggle = root.querySelector('.task-details__done-toggle');
+    doneToggle.checked = view.is_done;
 }
 
 // Cache one li to be cloned?
@@ -337,7 +306,7 @@ function setupTaskList() {
             subtasksDiv.hidden = !subtasksDiv.hidden;
         } else {
             const task = taskMap.get(Number(taskId));
-            showTaskDetails(task);
+            taskDetailsPopover.open(task);
         }
     });
 }
@@ -364,8 +333,7 @@ function setupSearch() {
         const target = e.target.closest('[data-id]');
         if (!target) return;
         const task = taskMap.get(Number(target.dataset.id));
-        searchEls.searchPopover.hidePopover();
-        showTaskDetails(task);
+        taskDetailsPopover.open(task);
     });
 }
 
@@ -449,6 +417,45 @@ function setupDragDrop(taskList: HTMLDivElement) {
     })
 }
 
+// Functional core, impure shell?
+class TaskDetailsPopover {
+    #activeTaskId: number | null = null;
+    #els = getTaskDetailPopoverElements();
+    #unsubscribe: (() => void) | null = null;
+
+    get activeTaskId(): number | null {
+        // return this.#activeTask?.id ?? null;
+        return this.#activeTaskId;
+    }
+
+    open(task: Task) {
+        this.#activeTaskId = task.id;
+        this.#render();
+        this.#els.taskDetailsPopover.showPopover();
+        this.#unsubscribe = tasksStore.subscribe(() => this.#render());
+    }
+    close() {
+        this.#activeTaskId = null;
+        this.#unsubscribe?.();
+        this.#unsubscribe = null;
+    }
+    #render() {
+        if (this.#activeTaskId === null) return;
+        const task = taskMap.get(this.#activeTaskId);
+        if (!task) return;
+        console.log("hit render")
+        renderTaskDetails(deriveTaskView(task), this.#els);
+    }
+}
+const taskDetailsPopover = new TaskDetailsPopover(); // Popover singleton, module-level
+class SearchPopover {
+    #els = getSearchElements();
+
+    open() {
+        this.#els.searchPopover.showPopover();
+    }
+}
+
 export async function init() {
 
     // TODO: Clean up; for drag task li stuff
@@ -470,41 +477,37 @@ export async function init() {
     initSidebar();
 
     taskDetailEls.taskDetailsPopover.addEventListener('toggle', (e: ToggleEvent) => {
+        if (e.newState === 'closed') taskDetailsPopover.close();
+    });
+    searchEls.searchPopover.addEventListener('toggle', (e: ToggleEvent) => {
         if (e.newState === 'closed') {
-            setPopoverState({ activePopover: null }) // redundant but harmless? calls
+            searchEls.resultsContainer.innerHTML = '';
+            searchEls.searchInput.value = '';
         }
-    })
+    });
 
     // Edit / Delete options for task details popover
     taskDetailEls.taskDetailsPopover.addEventListener('click', async (e: MouseEvent) => {
-        if (e.target.matches('.task-delete-btn')) {
-            const activeTaskId: string = e.target.dataset.activeTaskId;
-            deleteTask(Number(activeTaskId));
-            setPopoverState({ activePopover: null });
-        } else if (e.target.matches('.task-edit-btn')) {
-            const activeTaskId = e.target.dataset.activeTaskId;
-            setPopoverState({ activePopover: null });
-            openModalForEdit(activeTaskId, dialog, 'Task', populateEditModal);
+        const id = taskDetailsPopover.activeTaskId; // from JS state, not the DOM now
+        if (id === null) return;
+        const target = e.target as HTMLElement;
+
+        if (target.matches('.task-delete-btn')) deleteTask(id);
+        else if (target.matches('.task-edit-btn')) openModalForEdit(String(id), dialog, 'Task', populateEditModal);
+        else if (target.matches('.js-add-subtask')) {
+            console.log('add subtask clicked', id);
+        } else if (target.matches('.task-details__done-toggle')) {
+            const res = await api.tasks.toggleComplete(String(id), target.checked);
+            applyTaskUpdate(res.data.id, res.data);
+        } else if (target.matches('.task-details__subtask-checkbox')) {
+            const subtaskId = target.dataset.id;
+            const res = await api.tasks.toggleComplete(subtaskId, target.checked);
+            applyTaskUpdate(res.data.id, res.data);
         }
     })
 
     setupSidebar();  // Task sidebar buttons - filtering/show completed/etc
     setupTaskList(); // Task list checkbox toggle
-
-    // Listener in 'capture' phase so that the first click while a popover is open closes it, but
-    // doesn't apply to whatever else was clicked
-    document.addEventListener('click', (e) => {
-        if (popoverState.activePopover === null) return;
-
-        // TODO: Using this means, when we open a popover then hit Esc, our next click is STILL captured
-        const target = e.target as HTMLElement;
-        if (!target.closest('.popover')) {
-            e.stopPropagation(); //
-            e.preventDefault(); // optional?
-            setPopoverState({ activePopover: null });
-        }
-    }, true);
-
     setupSearch();
     enableStats(); // Circular progress/stats bar(s)
 
