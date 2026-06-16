@@ -117,6 +117,8 @@ export async function handleModalFormSubmit(submittedForm: HTMLFormElement, moda
         makeToast(response.message, 'success') // TODO: Should make it be success or error appropriately?
         submittedForm.reset();
         modal.close();
+
+        modal.dispatchEvent(new CustomEvent('modal:success', { detail: { data: response.data, isEdit } }));
     } catch (error) {
         makeToast(error.message || 'Something went wrong', 'error');
     }

@@ -474,6 +474,15 @@ export async function init() {
     // 2. Modal (needed by popover + context menu)
     const { dialog, populateEditModal } = await setupTaskFormModal();
 
+    // Listen on emitted modal:success to update live after any submits/changes posted to API:
+    dialog.addEventListener('modal:success', async (e: CustomEvent) => {
+        if (e.detail.isEdit) taskUpsert(e.detail.data.id, e.detail.data);
+        else {
+            const { data } = await api.tasks.getAll();
+            tasksStore.set(new Map(data.map(t => [t.id, t])));
+        }
+    })
+
     initSidebar();
 
     taskDetailEls.taskDetailsPopover.addEventListener('toggle', (e: ToggleEvent) => {
@@ -495,7 +504,10 @@ export async function init() {
         if (target.matches('.task-delete-btn')) deleteTask(id);
         else if (target.matches('.task-edit-btn')) openModalForEdit(String(id), dialog, 'Task', populateEditModal);
         else if (target.matches('.js-add-subtask')) {
-            console.log('add subtask clicked', id);
+            // Seed hidden supertask_ids input for submission
+            const supertaskIdsInput = dialog.querySelector<HTMLInputElement>('#supertask_ids_hidden')!;
+            supertaskIdsInput.value = String(id);
+            dialog.showModal();
         } else if (target.matches('.task-details__done-toggle')) {
             const res = await api.tasks.toggleComplete(String(id), target.checked);
             taskUpsert(res.data.id, res.data);
