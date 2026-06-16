@@ -31,7 +31,7 @@ function createStore<T>(initial: T) {
     return { set, get, subscribe, unsubscribe };
 }
 
-export const tasksStore = createStore<Task[]>([]);
+export const tasksStore = createStore<Map<number, Task>>(new Map());
 
 // // Usage:
 // const counter = createStore(0);

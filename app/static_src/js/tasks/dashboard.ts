@@ -53,13 +53,11 @@ const taskDetailEls = getTaskDetailPopoverElements();
 const searchEls = getSearchElements();
 //#endregion
 
-const taskMap = new Map<number, Task>();
-
 
 // Pure data shaping
 function deriveTaskView(task: Task) {
     const subtasks = task.subtasks
-        .map(id => taskMap.get(id))
+        .map(id => tasksStore.get().get(id))
         .filter(Boolean);
     return {
         name: task.name,
@@ -80,15 +78,16 @@ function deriveTaskView(task: Task) {
 }
 
 // pub/sub (tasksStore) handles reacting to changes, this fn handles making the changes
-function applyTaskUpdate(id: number, updated: Task) {
+function taskUpsert(id: number, updated: Task) {
     // update source of truth
-    const tasks = tasksStore.get();
-    const next = tasks.map(t => t.id === id ? updated : t);
+    const next = new Map(tasksStore.get()); // same O(n) cost as the old .map, but keeping fresh references
+    next.set(id, updated);
     tasksStore.set(next); // triggers all subscribers
 }
 
 function applyTaskDelete(id: number) {
-    const next = tasksStore.get().filter(t => t.id !== id);
+    const next = new Map(tasksStore.get())
+    next.delete(id)
     tasksStore.set(next);
 }
 
@@ -190,7 +189,7 @@ function setTaskListState(patch: Partial<TaskListState>) {
 
 // Also now sorts by sort_key (fractional index) so the list respects stored order
 function deriveVisibleTasks(): Task[] {
-    let result = tasksStore.get();
+    let result = [...tasksStore.get().values()]; // get map contents as arr for filter
     // Primary filter
     if (state.filter === 'today') {
         result = result.filter(t => t.due_date && isoToUserDate(t.due_date) === getUserTodayDate())
@@ -298,14 +297,14 @@ function setupTaskList() {
         if (e.target.matches('.task-toggle')) {
             const checkbox = e.target;
             const response = await api.tasks.toggleComplete(taskId, checkbox.checked);
-            applyTaskUpdate(response.data.id, response.data);
+            taskUpsert(response.data.id, response.data);
         } else if (e.target.matches('.subtask-toggle')) {
             console.log("clicked")
             const taskLi = e.target.closest('.task') // parent li for this task ofc
             const subtasksDiv = taskLi.querySelector('.task-subtasks');
             subtasksDiv.hidden = !subtasksDiv.hidden;
         } else {
-            const task = taskMap.get(Number(taskId));
+            const task = tasksStore.get().get(Number(taskId));
             taskDetailsPopover.open(task);
         }
     });
@@ -316,7 +315,7 @@ function setupSearch() {
     searchEls.searchInput.addEventListener('input', () => {
         // on input, filter by allTasks.include?
         const query = searchEls.searchInput.value.toLowerCase();
-        const matches = tasksStore.get().filter(task => task.name.toLowerCase().includes(query));
+        const matches = [...tasksStore.get().values()].filter(task => task.name.toLowerCase().includes(query));
 
         // use matches to populate container in search popover with matching tasks
         searchEls.resultsContainer.innerHTML = '';
@@ -332,7 +331,7 @@ function setupSearch() {
     searchEls.resultsContainer.addEventListener('click', (e) => {
         const target = e.target.closest('[data-id]');
         if (!target) return;
-        const task = taskMap.get(Number(target.dataset.id));
+        const task = tasksStore.get().get(Number(target.dataset.id));
         taskDetailsPopover.open(task);
     });
 }
@@ -381,12 +380,12 @@ function setupDragDrop(taskList: HTMLDivElement) {
         const midpoint = rect.top + rect.height / 2;
         dragState.position = e.clientY < midpoint ? 'before' : 'after';
     })
-    const keyOf = (el) => el ? taskMap.get(Number(el.dataset.id)).sort_key : null;
+    const keyOf = (el) => el ? tasksStore.get().get(Number(el.dataset.id)).sort_key : null;
     // drop - fires once on the drop target when user releases
     taskList.addEventListener('drop', async (e) => {
         if (e.target.closest('.task')) {
             const taskId = dragState.targetRef.dataset.id;
-            const task = taskMap.get(Number(taskId));
+            const task = tasksStore.get().get(Number(taskId));
             console.log(`task: ${task.name}, taskId: ${taskId}`)
 
             // Decide neighbors: 
@@ -403,13 +402,13 @@ function setupDragDrop(taskList: HTMLDivElement) {
 
             // Update data for sourceRef task:
             const sourceTaskId = dragState.sourceRef.dataset.id;
-            const sourceTask = taskMap.get(Number(sourceTaskId));
+            const sourceTask = tasksStore.get().get(Number(sourceTaskId));
             sourceTask.sort_key = key;
 
             // In-mem update, then persist sort_key via PATCH
             // TODO: This fails since Pydantic model uses due_date: date NOT datetime and rejects the time portion
             // Should decide whether to make due_dates JUST dates in both schema.py AND models.py or keep datetimes?
-            applyTaskUpdate(Number(dragState.sourceRef.dataset.id), sourceTask);
+            taskUpsert(Number(dragState.sourceRef.dataset.id), sourceTask);
             const response = await api.tasks.patch(sourceTaskId, { sort_key: key }); // Update ONLY sort_key
 
             Object.keys(dragState).forEach(key => delete dragState[key]); // reset state
@@ -441,7 +440,7 @@ class TaskDetailsPopover {
     }
     #render() {
         if (this.#activeTaskId === null) return;
-        const task = taskMap.get(this.#activeTaskId);
+        const task = tasksStore.get().get(this.#activeTaskId);
         if (!task) return;
         console.log("hit render")
         renderTaskDetails(deriveTaskView(task), this.#els);
@@ -462,14 +461,15 @@ export async function init() {
     const taskList = document.querySelector<HTMLDivElement>('.tasks-list');
     setupDragDrop(taskList);
 
-    tasksStore.subscribe((tasks) => {
-        taskMap.clear();
-        tasks.forEach(t => taskMap.set(t.id, t));
+    tasksStore.subscribe(() => {
+        // taskMap.clear();
+        // tasks.forEach(t => taskMap.set(t.id, t));
         renderTaskList(deriveVisibleTasks());
     })
 
     const { data } = await api.tasks.getAll();
-    tasksStore.set(data); // subscriber fires, taskMap built automatically
+    const next = new Map(data.map(t => [t.id, t]));
+    tasksStore.set(next); // subscriber fires, taskMap built automatically
 
     // 2. Modal (needed by popover + context menu)
     const { dialog, populateEditModal } = await setupTaskFormModal();
@@ -498,11 +498,11 @@ export async function init() {
             console.log('add subtask clicked', id);
         } else if (target.matches('.task-details__done-toggle')) {
             const res = await api.tasks.toggleComplete(String(id), target.checked);
-            applyTaskUpdate(res.data.id, res.data);
+            taskUpsert(res.data.id, res.data);
         } else if (target.matches('.task-details__subtask-checkbox')) {
             const subtaskId = target.dataset.id;
             const res = await api.tasks.toggleComplete(subtaskId, target.checked);
-            applyTaskUpdate(res.data.id, res.data);
+            taskUpsert(res.data.id, res.data);
         }
     })
 
