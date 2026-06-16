@@ -1,4 +1,3 @@
-import { Task } from "../types";
 
 // https://www.youtube.com/watch?v=HYqlmp8vh04
 // Video for comparison of approach.
@@ -6,7 +5,7 @@ import { Task } from "../types";
 type Listener<T> = (data: T) => void;
 
 // Pub/Sub-style store for resources (tasks, habits, etc.)
-function createStore<T>(initial: T) {
+export function createStore<T>(initial: T) {
     let state = initial;
     const listeners = new Set<Listener<T>>();
 
@@ -34,8 +33,6 @@ function createStore<T>(initial: T) {
 
     return { set, get, subscribe, unsubscribe };
 }
-
-export const tasksStore = createStore<Map<number, Task>>(new Map());
 
 // // Usage:
 // const counter = createStore(0);

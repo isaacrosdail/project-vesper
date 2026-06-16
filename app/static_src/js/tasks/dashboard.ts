@@ -2,14 +2,14 @@
 import { enableStats } from '../shared/charts';
 import { displayDate, getUserTodayDate, isoToUserDate } from '../shared/datetime';
 import { initTaskForm } from '../shared/forms';
-import { generateKeyBetween } from '../shared/fractional_indexing';
-import { tasksStore } from '../shared/pubSub';
 import { api } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
 import { initSidebar } from '../shared/ui/left-sidebar';
 import { confirmationManager, openModalForEdit } from '../shared/ui/modal-manager';
 import { makeToast } from '../shared/ui/toast';
 import { title } from '../shared/utils';
+import { setupDragDrop } from '../tasks/drag_n_drop';
+import { applyTaskDelete, tasksStore, taskUpsert } from '../tasks/store';
 import { FormDialog, Task, TaskPriority } from '../types';
 
 // TODO:
@@ -77,19 +77,6 @@ function deriveTaskView(task: Task) {
     };
 }
 
-// pub/sub (tasksStore) handles reacting to changes, this fn handles making the changes
-function taskUpsert(id: number, updated: Task) {
-    // update source of truth
-    const next = new Map(tasksStore.get()); // same O(n) cost as the old .map, but keeping fresh references
-    next.set(id, updated);
-    tasksStore.set(next); // triggers all subscribers
-}
-
-function applyTaskDelete(id: number) {
-    const next = new Map(tasksStore.get())
-    next.delete(id)
-    tasksStore.set(next);
-}
 
 async function setupTaskFormModal() {
     const dialog = document.querySelector<FormDialog>('#tasks-entry-dashboard-modal');
@@ -336,85 +323,7 @@ function setupSearch() {
     });
 }
 
-function setupDragDrop(taskList: HTMLDivElement) {
-    // Enables draggable for drag-n-drop: This way, only the button starts this, NOT "anywhere in the taskli"
-    taskList.addEventListener('mousedown', (e) => {
-        if (e.target.matches('.task-drag')) {
-            const taskLi = e.target.closest<HTMLDivElement>('.task');
-            taskLi.setAttribute('draggable', 'true')
-        }
-    })
-    // TODO: Note: dragstart/dragend fire on the element that has draggable="true"
-    // dragend - clean up state/classes regardless of whether a drop happened
-    // TODO: Currently...."not working"?
-    taskList.addEventListener('dragend', (e) => {
-        if (e.target.matches('.task')) {
-            e.target.setAttribute('draggable', 'false');
-        }
-    })
 
-    type DragState = { sourceRef: any, targetRef: any,
-        position: 'before' | 'after' | null   // drag to top-half vs bottom half of another task
-    };
-    const dragState: DragState = { sourceRef: null, targetRef: null, position: null };
-    taskList.addEventListener('dragstart', (e) => {
-        if (e.target.matches('.task')) {
-            dragState.sourceRef = e.target;
-        }
-    })
-    // dragover - get "current" task we're over, so drop can apply it accordingly
-    // Need two things:
-    // 1. Which task are we over? -> targetRef
-    // 2. Top half or bottom half
-    taskList.addEventListener('dragover', (e: DragEvent) => {
-        e.preventDefault(); // opt in to being a drop target
-        const taskLi = e.target.closest('.task');
-        if (!taskLi) {
-            return;
-        }
-        const taskName = taskLi.querySelector('.task-name');
-        dragState.targetRef = taskLi;
-
-        // top half or bottom half calc
-        const rect = taskLi.getBoundingClientRect();
-        const midpoint = rect.top + rect.height / 2;
-        dragState.position = e.clientY < midpoint ? 'before' : 'after';
-    })
-    const keyOf = (el) => el ? tasksStore.get().get(Number(el.dataset.id)).sort_key : null;
-    // drop - fires once on the drop target when user releases
-    taskList.addEventListener('drop', async (e) => {
-        if (e.target.closest('.task')) {
-            const taskId = dragState.targetRef.dataset.id;
-            const task = tasksStore.get().get(Number(taskId));
-            console.log(`task: ${task.name}, taskId: ${taskId}`)
-
-            // Decide neighbors: 
-            let prev, next;
-            if (dragState.position === 'before') {
-                prev = dragState.targetRef.previousElementSibling;
-                next = dragState.targetRef;
-            } else {
-                prev = dragState.targetRef;
-                next = dragState.targetRef.nextElementSibling;
-            }
-            // Generate a key between prev and next:
-            const key = generateKeyBetween(keyOf(prev), keyOf(next));
-
-            // Update data for sourceRef task:
-            const sourceTaskId = dragState.sourceRef.dataset.id;
-            const sourceTask = tasksStore.get().get(Number(sourceTaskId));
-            sourceTask.sort_key = key;
-
-            // In-mem update, then persist sort_key via PATCH
-            // TODO: This fails since Pydantic model uses due_date: date NOT datetime and rejects the time portion
-            // Should decide whether to make due_dates JUST dates in both schema.py AND models.py or keep datetimes?
-            taskUpsert(Number(dragState.sourceRef.dataset.id), sourceTask);
-            const response = await api.tasks.patch(sourceTaskId, { sort_key: key }); // Update ONLY sort_key
-
-            Object.keys(dragState).forEach(key => delete dragState[key]); // reset state
-        }
-    })
-}
 
 // Functional core, impure shell?
 class TaskDetailsPopover {
