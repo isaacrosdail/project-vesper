@@ -4,7 +4,7 @@ import { api } from '../shared/services/api';
 import { handleModalFormSubmit } from '../shared/ui/modal-manager';
 import { handleErrorMessages, initValidation, makeValidator } from '../shared/validators';
 import { FormDialog, Task, TaskPriority, Unit } from '../types';
-
+import { visibleSubtaskIds } from "../tasks/subtask_dropdown";
 
 type UnitGroupKey = 'weight' | 'volume';
 
@@ -212,7 +212,7 @@ export async function initTaskForm(dialog: FormDialog) {
     initPillarCheckboxes(dialog);
 
     // Stuff for the tasks form search thing:
-    type TaskCard = { name: string; priority: TaskPriority; element: HTMLElement; }
+    type TaskCard = { id: number; name: string; priority: TaskPriority; element: HTMLElement; }
     const tasks: TaskCard[] = []
     const selectedTasks: { id: string; name: string; }[] = []
     let excludeId: string | null = null;
@@ -223,32 +223,28 @@ export async function initTaskForm(dialog: FormDialog) {
         pillContainer.innerHTML = ''
         searchInput.value = ''
         excludeId = null; // To exclude the currently-editing task's option from the subtask dropdown
-        tasks.forEach(task => task.element.classList.remove('hide'));
-        taskCardContainer.classList.add('hide');
+        renderDropdownVisibility();
     })
 
-    searchInput.addEventListener('input', (e) => {
-        const value = (e.target as HTMLInputElement).value;
-        const normalizedValue = value.trim().toLowerCase();
+    // Closure to declaratively re-render subtask dropdown visibility based off JS-side state?
+    function renderDropdownVisibility() {
+        const visible = visibleSubtaskIds({
+            tasks: tasks.map(t => ({ id: t.id, name: t.name })),
+            selectedIds: new Set(selectedTasks.map(s => Number(s.id))),
+            excludeId: excludeId !== null ? Number(excludeId) : null,
+            searchTerm: searchInput.value,
+        });
+        tasks.forEach(t => t.element.classList.toggle('hide', !visible.has(t.id)));
+    }
 
-        tasks.forEach(task => {
-            const id = task.element.dataset.id;
-            const isSelected = selectedTasks.some(s => s.id === id);
-            if (isSelected || id === excludeId) return; // self-card stays hidden (ie, during edit)
-            const isVisible = task.name.toLowerCase().includes(normalizedValue);
-            task.element.classList.toggle("hide", !isVisible)
-        })
+    searchInput.addEventListener('input', () => {
+        renderDropdownVisibility();
     })
 
-    // Passed to dashboard.ts to enable hiding 'this' card from subtasks list?
+    // Passed to dashboard.ts to enable hiding 'this' card from subtasks list
     function setExcludeId(id: string) {
         excludeId = id;
-        const card = tasks.find(t => t.element.dataset.id === id)?.element;
-        if (!card) {
-            console.warn(`setExcludeId: no card for task id ${id}`);
-            return;
-        }
-        card.classList.add('hide');
+        renderDropdownVisibility();
     }
 
     /**
@@ -263,14 +259,14 @@ export async function initTaskForm(dialog: FormDialog) {
      * @returns 
      */
     function selectTask(id: string, name: string) {
-        const card = tasks.find(t => t.element.dataset.id === id)?.element;
+        const card = tasks.find(t => t.id === Number(id))?.element;
         if (!card) {
             console.warn(`selectTask: no card for task id ${id}`);
             return;
         };
 
-        card.classList.add('hide'); // hide card
         selectedTasks.push({ id, name }); // include in selectedTasks
+        renderDropdownVisibility();
 
         // Render a pill for this task; clone pill, modify text, & append to container
         const pill = pillTemplate.content.cloneNode(true).children[0] as HTMLElement;
@@ -300,10 +296,7 @@ export async function initTaskForm(dialog: FormDialog) {
             // filter out of selectedTasks: keep only the tasks that dont match this id
             const idx = selectedTasks.findIndex(task => task.id === taskId);
             if (idx !== -1) selectedTasks.splice(idx, 1);
-
-            // find the card matching data-id in the dropdown and remove hide
-            const taskCard = dialog.querySelector<HTMLDivElement>(`[data-id="${taskId}"]`);
-            taskCard.classList.remove('hide');
+            renderDropdownVisibility();
 
             // remove pill & remove this task's id from our hidden input
             hiddenTaskInput.value = selectedTasks.map(task => task.id).join(',');
@@ -346,7 +339,7 @@ export async function initTaskForm(dialog: FormDialog) {
             </svg>
         `;
         taskCardContainer.append(card)
-        tasks.push({ name, priority, element: card })
+        tasks.push({ id, name, priority, element: card })
     });
 
     function validateDueDate(dueDateString: string): string | null {
