@@ -21,6 +21,10 @@ function createStore<T>(initial: T) {
     }
     function subscribe(fn: Listener<T>) {
         listeners.add(fn);
+        // Return this fn's teardown so the caller can detach it later.
+        // Without it, subscribe returns nothing -> caller can't remove.
+        // its listener -> subscriptions accumulate
+        return () => listeners.delete(fn);
     }
 
     function unsubscribe(fn: Listener<T>) {
