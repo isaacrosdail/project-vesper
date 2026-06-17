@@ -18,6 +18,61 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+## Tues 6-16-26 - Wiring 'Add Subtask'
+1. Update tasksStore to itself be a Map<taskId, Task>
+2. handleModalFormSubmit: For success case, added a new DispatchEvent for 'modal:success' to facilitate live-updates for task views when editing/creating/etc a task.
+
+## Mon 6-15-26
+1. aligning repo method returns? namely the session.execute(stmt) -> session.scalar(stmt) stuff
+2. Collapse decorators_two.py into decorators.py and fully type log_queries decorator.
+3. Tasks Page cleanup/fixing
+    1. Edit mode: hide the task's own card from the subtask dropdown (can't be its own subtask)
+
+## Sun 6-14-26 - 
+1. Align all leet_code_records references to leetcode_records
+    - Add LCRecord type to types.ts (along with supporting Difficulty/LCStatus/LCLanguage union types)
+2. ShoppingList -> move to "singleton" setup (there can only be one per user)
+    - UniqueConstraint for user_id -> shopping list, killed name field in repository method
+    - 
+3. TEST THOROUGHLY: Scrapped generic_routes.py + safe_delete/check_item_ownership helpers -> each api_routes.py now has its own bespoke "get-single" methods
+    - Moved kg_to_lbs logic into Metrics' get-single -> will need to test and also apply this to the collections one too. 
+
+## Sat 6-13-26 - Tasks Service Refactoring
+1. Consolidated TaskAnalytics into TasksService - it was a half-baked extraction that didn't justify itself.
+2. Collapsed the 6 near-identical "count -> percent over a window" bodies into one `_rate(tasks, predicate, *, subset_key)` helper.
+    - Takes a list + predicate and returns {rate, subset_key, total}
+3. Removed the "rolling 24h window" calc methods (now_utc - timedelta) in lieu of "last N calendar days" ones (last_n_days_range).
+    - Day boundaries in the user's tz, not a sliding 168h clock.
+4. Pinned down the actual definitions:
+    1. Overdue: due_date past AND not done. Added `Task.is_overdue(now)`. Rate = of tasks due in the window
+        and already past due (window ends at 'now'), the fraction not done. "Completed late" is deliberately its own future category.
+    2. Frog adherence: Of frogs whose day has finished, fraction complete on/before their due_date (on-time, not just "done at all").
+        Uses same "finished days" framing: today's frog isn't scored until the day ends. Follow-through, not coverage.
+    3. Progress today: pile (denominator) = due today (done or not) OR overdue-pending OR completed-today.
+        Completed (numerator) = pile members that are done. The completed-today group is what gives credit for clearing
+            overdue tasks and spontaneous task completions.
+
+
+## Tue 5-26-26 - Tasks Page
+1. Migration for task.sort_key to have C collation too
+2. Reviewed tasks/dashboard.ts & started extracting logic (setupDragDrop(), etc)
+
+## Sat 5-16-26
+NOTE: For reference regarding the collation stuff, see: https://www.solberg.is/fractional-indexing-gotcha
+
+Working on Task sorting feature.
+Drag reorder PATCHes the wrong task, and we found out Postgres collation and JS didn't match up.
+- Task.sort_key -> column-level String(collation="C") (model). Not yet migrated. This makes all comparisons/sorting done by Postgres on the sort_key field's string use C collation to match JS/Py.
+- New get_max_sort_key() repo method returns current "last" sort key, so new Tasks can be given a sort_key placing them at the end of the list.
+    - create_task service now assigns the key server-side: generate_key_between(get_max_sort_key(), None) -> new tasks append to end.
+- TaskPatch schema: added sort_key: str | None = None. Deliberately NOT on the create schema. NOTE: Must add validate_sort_key?
+- Frontend: reorder now PATCHes only { sort_key } instead of the whole task object; list comparator switched from localeCompare to codepoint </> using ternary.
+
+1. Column-level collation over per-query .collate("C") - Per-query fixes one query, but the column makes every comparison + any future index byte-ordered by construction.
+2. Create has no client positional intent (always "append") -> server owns key generation. Reorder has explicit client positional intent (the drop target) -> client computes the key, server validates it.
+
+Open Question:
+1. How to handle EOD vs time for Task's now that we will use full datetimes + times instead of always assuming "Due 15th" means "Due 15th EOD". This allows for "Due 15th at 5pm" of course.
 
 ## Sat 5-9-26
 Files for committing: add_sort_key_to_task_model_for_.py, dashboard.ts, models.py
