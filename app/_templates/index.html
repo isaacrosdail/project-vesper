@@ -45,7 +45,7 @@
     <div class="card-title">
         <h2>My Day</h2>
         {{ ui.plus_btn('tasks-entry-homepage-btn', 'Add Task') }}
-        {% call ui.dropdown_new('Quick Add', 'thing', replaceable=False) %}
+        {% call ui.dropdown('Quick Add', 'thing', replaceable=False) %}
             <button id="time_entries-entry-homepage-btn">Time Entry</button>
             <button id="daily_metrics-entry-homepage-btn">Metric Entry</button>
             <button id="leetcode_records-entry-homepage-btn">LeetCode Record</button>

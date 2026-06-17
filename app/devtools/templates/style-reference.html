@@ -278,13 +278,13 @@ positioning">Hover me</button>
     {# Dropdown #}
     <h3>Dropdown</h3>
     <div class="control-row">
-        {% call ui.dropdown_new('Dropdown', 'my-dropdown-id') %}
+        {% call ui.dropdown('Dropdown', 'my-dropdown-id') %}
             <button>1</button>
             <button>2</button>
             <button>3</button>
         {% endcall %}
 
-        {% call ui.dropdown_new('Dropdown 2', 'my-dropdown-id-2') %}
+        {% call ui.dropdown('Dropdown 2', 'my-dropdown-id-2') %}
             <button>uno</button>
             <button>dos</button>
             <button>tres</button>

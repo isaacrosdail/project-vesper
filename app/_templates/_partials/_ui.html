@@ -37,19 +37,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 
 
-{# Dropdown #}
-{% macro dropdown(text, replaceable=True) %}
-<div class="dropdown">
-    <button class="dropdown-toggle"{% if replaceable %}data-replaceable{% endif %}>
-        <span class="dropdown-toggle-label">{{ text }}</span>
-        <span class="dropdown-toggle-chevron">{{ chevron_svg() }}</span></button>
-    <div class="dropdown-menu">
-        {{ caller() }}
-    </div>
-</div>
-{% endmacro %}
-
-{% macro dropdown_new(text, id, replaceable=True) %}
+{% macro dropdown(text, id, replaceable=True) %}
 <button class="dropdown-toggle" popovertarget="{{ id }}"
     {% if replaceable %}data-replaceable{% endif %}>
     <span class="dropdown-toggle-label">{{ text }}</span>
@@ -57,7 +45,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
         <svg class="icon"><use href="#icon-chevron"></use></svg>
     </span>
 </button>
-<div popover id="{{ id }}" class="dropdown-menu popover">
+<div popover id="{{ id }}" class="dropdown-menu">
     {{ caller() }}
 </div>
 {% endmacro %}

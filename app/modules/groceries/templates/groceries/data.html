@@ -76,7 +76,7 @@
         <h2>Grocery - Recent Transactions</h2>
         {{ ui.plus_btn('transactions-entry-dashboard-btn') }}
         Last
-        {% call ui.dropdown('ohhh') %}
+        {% call ui.dropdown('ohhh', 'oh') %}
             <button class="table-range" data-range="1" data-table="transactions">Today</button>
             <button class="table-range" data-range="7" data-table="transactions">7d</button>
             <button class="table-range" data-range="30" data-table="transactions">30d</button>
@@ -96,7 +96,7 @@
         <h2>Product Catalog</h2>
         {{ ui.plus_btn('products-entry-dashboard-btn') }}
         Last
-        {% call ui.dropdown('ohhh') %}
+        {% call ui.dropdown('ohhh', 'ohh') %}
             <button class="table-range" data-range="1" data-table="products">Today</button>
             <button class="table-range" data-range="7" data-table="products">7d</button>
             <button class="table-range" data-range="30" data-table="products">30d</button>

@@ -101,3 +101,10 @@ a {
 [hidden] {
     display: none !important;
 }
+
+[popover] {
+  margin: 0;
+  inset: auto;
+  border: 0;
+  padding: 0;
+}
