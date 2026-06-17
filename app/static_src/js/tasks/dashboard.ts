@@ -10,7 +10,8 @@ import { makeToast } from '../shared/ui/toast';
 import { title } from '../shared/utils';
 import { setupDragDrop } from '../tasks/drag_n_drop';
 import { applyTaskDelete, tasksStore, taskUpsert } from '../tasks/store';
-import { FormDialog, Task, TaskPriority } from '../types';
+import { ENUM_SORT_ORDERS, FormDialog, Task, TaskPriority } from '../types';
+import { sortByField } from '../shared/tables';
 
 // TODO:
 // 1. For due dates that are nearer, use "the day" (ex: Friday instead of Mar 20)
@@ -152,26 +153,50 @@ function renderTaskDetails(view, els: ReturnType<typeof getTaskDetailPopoverElem
 // Cache one li to be cloned?
 type Filter = 'all' | 'today' | 'upcoming';
 
+const SORT_VALUES = ['manual', 'due_date', 'priority', 'name'] as const;
+type SortValue = typeof SORT_VALUES[number];
+
+// runtime guard that narrows e.detail.value -> SortValue?
+function isSortValue(v: unknown): v is SortValue {
+    return SORT_VALUES.includes(v as SortValue);
+}
+
 type TaskListState = {
     filter: Filter;
     priority: TaskPriority | 'all';
+    sort: 'manual' | 'due_date' | 'priority' | 'name';
+    order: 'asc' | 'desc';
 }
 
-const state: TaskListState = { filter: 'all', priority: 'all' };
+const state: TaskListState = { filter: 'all', priority: 'all', sort: 'manual', order: 'asc'};
 
 function setTaskListState(patch: Partial<TaskListState>) {
     Object.assign(state, patch);
-    // Update priority icon
-    if (state.priority === 'all') {
-        tasksListEls.priorityBtn.setAttribute('href', '#icon-funnel');
-    } else {
-        tasksListEls.priorityBtn.setAttribute('href', `#badge-priority-${state.priority}`);
-    }
-    const filterOptions = tasksListEls.sidebar.querySelectorAll('[data-filter]');
-    filterOptions.forEach(el => el.classList.remove('active'));
-    // query for THIS option's svg?
-    tasksListEls.sidebar.querySelector(`[data-filter="${state.filter}"]`)?.classList.add('active');
+    syncControls();
     renderTaskList(deriveVisibleTasks());
+}
+
+// Visually syncs controls from state declaratively?
+function syncControls() {
+    // 1. Update priority icon
+    const priorityIconHref = state.priority === 'all' ? '#icon-funnel' : `#badge-priority-${state.priority}`;
+    tasksListEls.priorityBtn.setAttribute('href', priorityIconHref);
+    
+    // 2. Set the checked radio from state.filter
+    const timeWindow = document.querySelector('.time-window');
+    const leRadio = timeWindow.querySelector(`#${state.filter}`);
+    leRadio.checked = true;
+
+    // 3a. Make toggle show state.sort's display text
+    const sortLabel = document.querySelector('[popovertarget="sort-by"] .dropdown-toggle-label');
+    const activeOpt = document.querySelector(`#sort-by [data-value="${state.sort}"]`);
+    if (sortLabel && activeOpt) sortLabel.textContent = activeOpt.textContent;
+    document.querySelectorAll('#sort-by [data-value]').forEach(opt =>
+        opt.classList.toggle('active', opt.dataset.value === state.sort));
+    // 3b. Flip sort asc/desc chevron accordingly
+    const sortDir = document.querySelector('.sort-order-toggle');
+    sortDir.classList.toggle('flip', state.order === 'asc');
+    sortDir.toggleAttribute('disabled', state.sort === 'manual');
 }
 
 // Also now sorts by sort_key (fractional index) so the list respects stored order
@@ -188,11 +213,15 @@ function deriveVisibleTasks(): Task[] {
     if (state.priority !== 'all') {
         result = result.filter(t => t.priority === state.priority);
     }
-    return result.toSorted((a, b) => {
-        // negative = a goes first, positive = b goes first, 0 = tie
-        // Return negative when a < b?
-        return a.sort_key < b.sort_key ? -1 : a.sort_key > b.sort_key ? 1 : 0
-    })
+
+    if (state.sort === 'manual') {
+        // Negative = a goes first, positive = b goes first
+        result = result.toSorted((a, b) => a.sort_key < b.sort_key ? -1 : a.sort_key > b.sort_key ? 1 : 0)
+    } else {
+        result = sortByField(result, state.sort, state.order)
+    }
+
+    return result;
 }
 
 async function deleteTask(id: number) {
@@ -259,6 +288,46 @@ function setupSidebar() {
             tasksListEls.tasksList.classList.toggle('show-completed', tasksListEls.toggleCompletedCheckbox.checked)
         }
     });
+}
+
+function setupListControls() {
+    // Sidebar options
+    const priorities = ['all', 'low', 'medium', 'high', 'frog'] as const;
+    const sorts = ['manual', 'due_date', 'priority', 'name'] as const;
+
+    document.addEventListener('click', (e) => {
+        if (!(e.target instanceof Element)) return;
+        const target = e.target;
+        const btn = target.closest<HTMLElement>('.filter-btn');
+        if (btn?.dataset.filter && btn.dataset.filter !== state.filter) {
+            setTaskListState({ filter: btn.dataset.filter })
+        }
+        if (btn?.dataset.action === 'cycle-priority') {
+            const idx = priorities.indexOf(state.priority);
+            const next = priorities[(idx + 1) % priorities.length];
+            setTaskListState({ priority: next })
+        }
+        if (e.target.matches('.show-completed')) {
+            console.log("hit meeee")
+            tasksListEls.tasksList.classList.toggle('show-completed', !tasksListEls.toggleCompletedCheckbox.checked)
+        }
+        if (e.target.matches('.sort-order-toggle')) {
+            console.log("hit")
+            setTaskListState({ order: state.order === 'asc' ? 'desc' : 'asc' });
+        }
+        // if (e.target.matches('.sort-by')) {
+        //     const idx = sorts.indexOf(state.sort);
+        //     const next = sorts[(idx+1) % sorts.length];
+        //     console.log(`sorting by: ${next}`)
+        //     setTaskListState({ sort: next })
+        // }
+    })
+    const sortSelect = document.querySelector('#sort-by');
+    sortSelect.addEventListener('dropdown:change', (e) => {
+        const { value } = (e as CustomEvent).detail;
+        if (!isSortValue(value)) return;
+        setTaskListState({ sort: value });
+    })
 }
 
 function setupContextMenu(e: MouseEvent, dialog: FormDialog, onPopulatedCallback) {
@@ -428,6 +497,8 @@ export async function init() {
     })
 
     setupSidebar();  // Task sidebar buttons - filtering/show completed/etc
+    // TODO: currently wip - transition sidebar list controls to being atop list itself
+    setupListControls();
     setupTaskList(); // Task list checkbox toggle
     setupSearch();
     enableStats(); // Circular progress/stats bar(s)

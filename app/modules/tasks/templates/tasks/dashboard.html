@@ -20,29 +20,6 @@
             <button class="sidebar-option" popovertarget="search-popover">
                 <svg class="icon"><use href="#icon-search"></use></svg>
                 <span class="sidebar-label">Search</span>
-            </button>
-            <button class="sidebar-option filter-btn" data-filter="all" data-tip="Show all">
-                <svg class="icon "><use href="#icon-calendar"></use></svg>
-                <span class="sidebar-label">All</span>
-            </button>
-            <button class="sidebar-option filter-btn" data-filter="today">
-                <svg class="icon" data-urgent><use href="#icon-calendar"></use></svg>
-                <span class="sidebar-label">Today</span>
-            </button>
-            <button class="sidebar-option filter-btn" data-filter="upcoming">
-                <svg class="icon calendar-warning"><use href="#icon-calendar"></use></svg>
-                <span class="sidebar-label">Upcoming</span>
-            </button>
-            <button class="sidebar-option filter-btn" data-action="cycle-priority">
-                <svg class="icon"><use href="#icon-funnel"></use></svg>
-                <span class="sidebar-label">Filter by priority</span>
-            </button>
-            <div class="sidebar-option">
-                <input type="checkbox" class="toggle-completed" autocomplete="off">
-                <span class="sidebar-label">Show completed tasks</span>
-            </div>
-    
-            <!-- <button class="sidebar-option" popovertarget="task-details-popover">TEST Details Popover</button> -->
         </div>
     </aside>
 </div>
@@ -52,12 +29,12 @@
 
 {{ forms.task_entry_modal(pillars=pillars) }}
 
-<div popover id="search-popover" class="search-popover popover">
+<div popover id="search-popover" class="search-popover popover-overlay">
     <input type="search" class="task-search" placeholder="Search for a task">
     <div class="results-container"></div>
 </div>
 
-<div popover id="task-details-popover" class="task-details-popover popover">
+<div popover id="task-details-popover" class="task-details-popover popover-overlay">
     <div class="task-details__header">
         <input type="checkbox" class="task-details__done-toggle">
         <h2 class="name task-details__name"></h2>
@@ -143,6 +120,40 @@
 </template>
 
 <section id="tasks-dashboard-list-view">
+    <div class="tasks-list-filters">
+        <div class="filters-left">
+            <h2 class="header">Active Tasks</h2>
+            <label class="show-completed secondary">
+                Show completed?
+                <input type="checkbox" class="toggle-completed" autocomplete="off">
+            </label>
+        </div>
+        <div class="filters-right">
+            <div class="time-window">
+                <div><input type="radio" id="all" name="time-window" value="all" checked>
+                    <label for="all">All</label></div>
+                <div><input type="radio" id="today" name="time-window" value="today">
+                    <label for="today">Today</label></div>
+                <div><input type="radio" id="upcoming" name="time-window" value="upcoming">
+                    <label for="upcoming">Upcoming</label></div>
+            </div>
+            <button class="filter-btn" data-action="cycle-priority">
+                <svg class="icon"><use href="#icon-funnel"></use></svg>
+                <span>Filter (Priority)</span>
+            </button>
+            {% call ui.dropdown('Sort By', 'sort-by') %}
+                <button data-value="manual">Manual</button>
+                <button data-value="due_date">Due Date</button>
+                <button data-value="priority">Priority</button>
+                <button data-value="name">Name</button>
+            {% endcall %}
+            <button class="sort-order-toggle">
+                <svg class="icon"><use href="#icon-chevron"></use></svg>
+            </button>
+        </div>
+    </div>
+
+
     <ul class="tasks-list">
         {#% for t in tasks_raw %}
         <li class="task" data-id="{{ t.id }}">

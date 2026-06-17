@@ -67,7 +67,7 @@ const tableSorts = new Map<string, SortState>();
 
 const tableRanges = new Map<string, number>(); // Track table range: subtype -> current range
 
-function sortByField<T>(items: T[], field: keyof T, order: 'asc' | 'desc'): T[] {
+export function sortByField<T>(items: T[], field: keyof T, order: 'asc' | 'desc'): T[] {
     const customOrder = ENUM_SORT_ORDERS[field as string];
 
     return items.toSorted((a, b) => {

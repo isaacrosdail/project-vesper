@@ -154,10 +154,50 @@ details::after {
     PAGE-SPECIFIC: Tasks Dashboard
    =================================== */
 
-/* TODO: Sketching conversion for tasks from table to ul */
-#tasks-dashboard-list-view {
-  border: 1px solid red;
+.task.drop-above {
+  border-top: 3px solid red;
+  margin-top: -1px;
+  box-shadow: 0 -3px 0 0 var(--accent);
 }
+.task.drop-below {
+  border-bottom: 3px solid red;
+  margin-bottom: -1px;
+  box-shadow: 0 3px 0 0 var(--accent);
+}
+
+.tasks-list-filters {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+
+  & .filters-left, & .filters-right {
+    display: flex;
+    gap: var(--space-sm);
+  }
+}
+
+.filters-right .time-window {
+  display: flex;
+
+  & input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  & input:checked + label {
+    background: var(--accent-subtle);
+  }
+}
+
+.sort-order-toggle.flip {
+  transform: rotate(180deg);
+}
+/* for dropdown */
+#sort-by .active {
+  background: var(--accent-subtle);
+}
+
+/* TODO: Sketching conversion for tasks from table to ul */
 .tasks-list {
   display: flex;
   flex-direction: column;
@@ -178,7 +218,14 @@ details::after {
 }
 
 .task {
-  border: 1px solid blue;
+  background: var(--bg-light);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  padding: var(--space-xs);
+
+  &:hover {
+    background: var(--accent-subtle);
+  }
   /* display: flex; */
   /* flex-direction: column; */
   display: grid;
@@ -252,9 +299,8 @@ details::after {
 }
 
 
-/* TODO: Search popover */
-/* .search-popover:popover-open, */
-.popover:popover-open {
+/* For search popover & task details popover */
+.popover-overlay:popover-open {
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -268,6 +314,10 @@ details::after {
   background: var(--bg-light);
   padding: var(--space-sm);
   border-radius: var(--border-radius);
+  border: 2px solid var(--accent-subtle);
+}
+.popover-overlay::backdrop {
+  background: rgb(0 0 0 / 0.4);
 }
 
 /* TODO: remove/clean up */
