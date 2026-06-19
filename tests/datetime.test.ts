@@ -1,7 +1,7 @@
-import { beforeEach, test, expect } from 'bun:test';
+import { beforeEach, expect, setSystemTime, test } from 'bun:test';
 // Note: Use extensionless paths when testing here (no .ts, .js) - Bun + TS will resolve it
+import { formatToUserTimeString, isoDaysAgo } from '../app/static_src/js/shared/datetime';
 import { userStore } from '../app/static_src/js/shared/services/userStore';
-import { formatToUserTimeString } from '../app/static_src/js/shared/datetime';
 
 
 beforeEach(() => {
@@ -34,4 +34,11 @@ test.each([
   
   const result = formatToUserTimeString(new Date("2025-10-07T12:00:00Z"));
   expect(result).toBe("12:00");
+});
+
+
+test('isoDaysAgo returns n days back as YYYY-MM-DD', () => {
+    setSystemTime(new Date('2026-06-18T12:00:00'));
+    expect(isoDaysAgo(7)).toBe('2026-06-11');
+    setSystemTime(); // reset system time
 });

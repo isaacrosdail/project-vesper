@@ -1,13 +1,15 @@
-import * as d3 from 'd3';
 
-import { D3_TRANSITION_DURATION_MS, getChartDimensions, hourMinsDisplay, initChartRangeButtons } from '../shared/charts';
-import { isoToUserDate } from '../shared/datetime';
+import { isoDaysAgo, isoToUserDate } from '../shared/datetime';
 import { initTimeEntryForm } from '../shared/forms';
 import { api } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager';
-import { createTooltip, removeTooltip } from '../shared/ui/tooltip';
+import { required } from '../shared/utils';
 import { FormDialog, TimeEntry } from '../types';
+import type { PieDatum } from './chart';
+import { TimeEntriesChart } from './chart';
+import type { StatsEntry } from './stats';
+import { deriveStatsView, toStatsShape, totalsBy } from './stats';
 
 /**
  * Thoughts:
@@ -17,279 +19,8 @@ import { FormDialog, TimeEntry } from '../types';
  * - Trends: Is activity A going up or down over the given window?
  */
 
-type PieDatum = {
-    category: string;
-    value: number;
-};
 
-type ApiPieData = {
-    category: string;
-    duration_minutes: number;
-};
-
-interface ArcPathElement extends SVGPathElement {
-    _current?: d3.PieArcDatum<PieDatum>;
-}
-
-const chartState = {
-    range: 7,
-}
-
-async function getData(lastNDays: number): Promise<PieDatum[]> {
-    const params = new URLSearchParams({ lastNDays: lastNDays.toString() })
-    const response = await api.time_entries.summary(params)
-    const entries: ApiPieData[] = response.data;
-    
-    if(Array.isArray(entries) && entries.length === 0) {
-        return [];
-    }
-    // const rollup = d3.rollup(data, reducerFn, keyFn);
-    const rollupMap = d3.rollup(
-        entries,
-        v => d3.sum(v, d => d.duration_minutes),
-        d => d.category
-    );
-    const arr: PieDatum[] = [...rollupMap].map(([k, v]) => ({category: k, value: v}));
-    return arr;
-}
-
-
-class TimeEntriesChart {
-    private dims; radius;
-    private pie; arc;
-    private color;
-    private gRoot; gChart; gLegend;
-    private centerLabel; totalMins; highest; countOther; idleTimeout;
-
-    constructor(containerSelector: string) {
-        this.dims = getChartDimensions(containerSelector, { top: 20, right: 20, bottom: 20, left: 20 });
-
-        this.radius = Math.min(this.dims.innerWidth, this.dims.innerHeight) / 2;
-
-        const legendHeight = 40;
-        const gap = 12;
-        const chartAreaHeight = this.dims.innerHeight - legendHeight - gap;
-
-        const svg = d3.select(containerSelector).append("svg")
-            .attr("width", this.dims.width)
-            .attr("height", this.dims.height);
-
-        this.gRoot = svg.append("g")
-            .attr("transform", `translate(${this.dims.margin.left}, ${this.dims.margin.top})`);
-
-        this.gChart = this.gRoot.append("g")
-                .attr("transform", `translate(${this.dims.innerWidth/2}, ${chartAreaHeight / 2})`)
-
-        this.centerLabel = this.gChart.append("text")
-            .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "middle")
-            .attr("class", "donut-center-label")
-
-        this.gLegend = this.gRoot.append("g")
-            .attr("class", "legend")
-            .attr("transform", `translate(0, ${chartAreaHeight + gap + legendHeight})`) // moving legend to bottom "row"
-
-        this.pie = d3.pie<PieDatum>().value(d => d.value); // calc angles from array
-        this.arc = d3.arc<d3.PieArcDatum<PieDatum>>() // draw curved slice shapes from angles
-            .innerRadius(this.radius * 0.7) // prime real estate
-            .outerRadius(this.radius);
-
-        this.color = d3.scaleOrdinal(d3.schemeTableau10);
-    }
-
-    showEmptyChart() {
-        this.gLegend.selectAll('g.legend-item').remove();
-        this.gChart.selectAll('g.slice').remove();
-
-        const _emptyMessage = this.gChart.selectAll('text.empty-message')
-            .data([1])
-            .join("text")
-            .attr("class", "empty-message")
-            .attr("text-anchor", "middle")
-            .attr("x", 0)
-            .attr("y", 0)
-            .text(`No time entry data for this period.`)
-    }
-
-    async refreshPieChart() {
-        const data = await getData(chartState.range);
-        if (data.length === 0) {
-            this.showEmptyChart();
-            return;
-        }
-        this.updatePieChart(data);
-    }
-
-    // Adjust text label positions for each slice to show at appropriate locations
-    private labelTransform(d): string {
-        const mid = (d.startAngle + d.endAngle) / 2;
-        const [x, y] = this.arc.centroid(d);
-        const xOffset = mid < Math.PI ? 15 : -15;
-        const yOffsetSign = Math.sign(Math.sin(mid - Math.PI / 2));
-        const yOffset = yOffsetSign * 20;
-        return `translate(${x + xOffset}, ${y + yOffset})`
-    }
-
-    private showIdleSummary() {
-        this.centerLabel.selectAll("tspan").remove();
-        // const highest = data.reduce((a, b) => a.value > b.value ? a : b)
-        // const totalMins = data.reduce((a, b) => a + b.value, 0)
-        this.centerLabel.selectAll("tspan").remove();
-        this.centerLabel
-            .append("tspan")
-            .attr("x", 0)
-            .attr("dy", "0em")
-            .text(`Total: ${hourMinsDisplay(this.totalMins)}`)
-
-        this.centerLabel
-            .append("tspan")
-            .attr("x", 0)
-            .attr("dy", "1.6em")
-            .attr("font-size", "0.8rem")
-            .text(`Top: ${this.highest.category}`)
-
-        // find count of "other":
-        this.centerLabel
-            .append("tspan")
-            .attr("x", 0)
-            .attr("dy", "3em")
-            .attr("font-size", "0.8rem")
-            .text(`+${this.countOther} more`)
-    }
-
-    private showSliceDetail(datum: PieDatum) {
-        this.centerLabel.selectAll("tspan").remove();
-
-        this.centerLabel
-            .append("tspan")
-            .attr("x", 0)
-            .attr("dy", "0em")
-            .text(`${datum.category}`)
-
-        const percentTotal = (datum.value / this.totalMins) * 100;
-        this.centerLabel
-            .append("tspan")
-            .attr("x", 0)
-            .attr("dy", "1.6em")
-            .attr("font-size", "0.8rem")
-            .text(`${hourMinsDisplay(datum.value)} (${percentTotal.toFixed(0)}%)`)
-    }
-
-    updatePieChart(data: PieDatum[]) {
-        this.gRoot.selectAll('.empty-message').remove();
-
-        const sorted = [...data].toSorted((a, b) => b.value - a.value);
-        const pieData = this.pie(sorted);
-
-        // Re-calc totalMins and highest for center label
-        this.totalMins = data.reduce((a, b) => a + b.value, 0);
-        this.highest = data.reduce((a, b) => a.value > b.value ? a : b);
-        this.countOther = data.length > 1 ? data.length - 1 : null;
-
-        const groups = this.gChart.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
-            .data(pieData, d => d.data.category)
-            .join(
-                enter => {
-                    const g = enter.append("g")
-                        .attr("class", "slice");
-
-                    g.append('path') // slice
-                        .attr("class", "pie")
-                        .attr("fill", d => this.color(d.data.category))
-                        .each(function(this: ArcPathElement, d) {
-                            this._current = d;
-                        })
-                        .attr("d", this.arc);
-
-                    // g.append("text") // thing?
-                    //     .attr("transform", d => this.labelTransform(d))
-                    //     .attr("class", "slice-label")
-                    //     .attr("opacity", 1) // TODO: RETURN TO 0 WHEN DONE DEBUGGING
-                    //     .attr("pointer-events", "none")
-                    //     .attr("stroke", d => this.color(d.data.category))
-                    //     .attr("text-anchor", d => {
-                    //         const mid = (d.startAngle + d.endAngle) / 2;
-                    //         const isRight = mid < Math.PI;
-                    //         return isRight ? "start" : "end"
-                    //     })
-                    //     .text(d => {
-                    //         return `${hourMinsDisplay(d.data.value)} - 50%` // TODO fix
-                    //     })
-
-                    return g;
-                },
-                update => {
-                    const arc = this.arc; // Capture TimeEntriesChart's arc before .attrTween hijacks 'this'
-
-                    update.select("path")
-                        .transition().duration(500)
-                        // D3 needs prev state to interpolate from, and we need to store
-                        // it ourselves bc join() is stateless?
-                        .attrTween("d", function(d) {
-                            const el = this as ArcPathElement;        // 'this' = DOM element
-                            const i = d3.interpolate(el._current, d);
-                            el._current = i(1);
-                            return t => arc(i(t)) ?? "";
-                        });
-
-                    return update;
-                },
-                exit => exit.remove()
-            );
-
-        this.showIdleSummary()
-
-        groups.on('mouseenter', (_event, d) => {
-            // Skip hover effect if slice is > 75% of circle (since 2pi is full circle, so here we do 1.5pi)
-            const sliceAngle = (d.endAngle - d.startAngle);
-            if (sliceAngle > Math.PI * 1.5) {
-                return;
-            }
-            // Calc midpoint (angle)
-            const rawMidpoint = (d.startAngle + d.endAngle) / 2;
-            const midpoint = rawMidpoint - (Math.PI / 2);
-            const dist = radius / 10;
-
-            // Calc x, y offsets for transform
-            const x = Math.cos(midpoint) * dist;
-            const y = Math.sin(midpoint) * dist;
-
-            // Transform slice
-            d3.select(_event.currentTarget)
-                .transition().duration(D3_TRANSITION_DURATION_MS)
-                .attr("transform", `translate(${x}, ${y})`);
-
-            // Show slice label
-            clearTimeout(this.idleTimeout)
-            this.showSliceDetail(d.data)
-        })
-        .on('mouseleave', (event) => {
-            d3.select(event.currentTarget)
-                .transition().duration(D3_TRANSITION_DURATION_MS)
-                .attr("transform", "translate(0, 0)");
-
-            this.idleTimeout = setTimeout(() => this.showIdleSummary(), 120);
-            // this.showIdleSummary();
-        })
-        const radius = this.radius; // Capture outside callback
-    }
-}
-
-export async function init() {
-    const dialog = document.querySelector<FormDialog>('#time_entries-entry-dashboard-modal')
-    if (!dialog) {
-        console.warn('time_tracking dashboard: #time_entries-entry-dashboard-modal not found')
-        return
-    }
-    initTimeEntryForm(dialog)
-
-    const timeEntriesChart = new TimeEntriesChart('#time_tracking-chart-container');
-    await timeEntriesChart.refreshPieChart();
-
-    const btn = document.querySelector('[data-range="7"]');
-    btn.classList.add('active');
-
-    initChartRangeButtons(chartState, () => timeEntriesChart.refreshPieChart())
+function setupContextMenu() {
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
         // Handle table ellipsis options click
@@ -328,5 +59,97 @@ export async function init() {
             ]
         })
     });
+}
+
+function getRenderStatsEls() {
+    return {
+        totalLabel: required(document.querySelector('.js-stat-total'), '.js-stat-total'),
+        avgLabel: required(document.querySelector('.js-stat-daily-avg'), '.js-stat-daily-avg'),
+        activeDaysLabel: required(document.querySelector('.js-stat-daily-avg-across-n-days'), '.js-stat-daily-avg-across-n-days'),
+        topCategory: required(document.querySelector('.js-stat-top-cat'), '.js-stat-top-cat'),
+        topCatLabel: required(document.querySelector('.js-stat-top-cat-time'), '.js-stat-top-cat-time'),
+        mostActiveDay: required(document.querySelector('.js-stat-most-active-day'), '.js-stat-most-active-day'),
+        totalDelta: required(document.querySelector('.js-stat-total-comparison'), '.js-stat-total-comparison'),
+        mostActiveTime: required(document.querySelector('.js-stat-most-active-day-time'), '.js-stat-most-active-day-time'),
+    }
+}
+
+function renderStats(vm: ReturnType<typeof deriveStatsView>) {
+    const renderStatsEls = getRenderStatsEls();
+    renderStatsEls.totalLabel.textContent = vm.totalLabel;
+    renderStatsEls.avgLabel.textContent = vm.avgLabel;
+    renderStatsEls.activeDaysLabel.textContent = vm.activeDaysLabel;
+    renderStatsEls.topCategory.textContent = vm.topCategory;
+
+    renderStatsEls.topCatLabel.textContent = vm.topCatLabel;
+    renderStatsEls.mostActiveDay.textContent = vm.mostActiveDay;
+    renderStatsEls.mostActiveTime.textContent = vm.mostActiveLabel;
+    renderStatsEls.totalDelta.textContent = vm.totalDelta;
+}
+
+
+async function fetchEntries(range: number): Promise<TimeEntry[]> {
+    const params = new URLSearchParams({ lastNDays: range.toString() })
+    const response = await api.time_entries.summary(params)
+    return response.data;
+}
+
+function toPieData(entries: StatsEntry[]): PieDatum[] {
+    const totals = totalsBy(entries, e => e.category);
+    return Object.entries(totals).map(([category, value]) => ({ category, value }));
+}
+
+class TimeTrackingDashboard {
+    #chart: TimeEntriesChart;
+    #range = 7;
+
+    async loadRange(range: number) {
+        const raw = await fetchEntries(range * 2);
+        const entries = raw.map(toStatsShape);
+        const cutoff = isoDaysAgo(range);
+        const current = entries.filter(e => e.date >= cutoff);
+        const prior = entries.filter(e => e.date < cutoff);
+        renderStats(deriveStatsView(current, prior));
+        this.#chart.updatePieChart(toPieData(current));
+        // TODO: renderTable/List(entries)
+    }
+
+    async init() {
+        this.#chart = new TimeEntriesChart('#time_tracking-chart-container');
+        this.#setupRangeButtons();
+        this.#syncActiveButton();
+        await this.loadRange(this.#range);
+    }
+
+    #setupRangeButtons() {
+        const pillsContainer = required(document.querySelector('.timeframe-selector'), '.timeframe-selector');
+        pillsContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest<HTMLButtonElement>('[data-range]');
+            if (!btn) return;
+            const range = Number(btn.dataset.range);
+            this.#range = range;
+            this.#syncActiveButton();
+            this.loadRange(range);
+        })
+    }
+    #syncActiveButton() {
+        document.querySelectorAll('[data-range]').forEach(pill => 
+            pill.classList.toggle('active', Number(pill.dataset.range) === this.#range)
+        );
+    }
+}
+
+export async function init() {
+    // Pipeline: fetch -> TimeEntry[] -> .map(toStatsShape)
+    //     -> StatsEntry[] -> deriveStatsView -> renderStats 
+    await new TimeTrackingDashboard().init();
+
+    const dialog = required(
+        document.querySelector<FormDialog>('#time_entries-entry-dashboard-modal'),
+        '#time_entries-entry-dashboard-modal'
+    )
+    initTimeEntryForm(dialog)
+
+    setupContextMenu();
 }
 

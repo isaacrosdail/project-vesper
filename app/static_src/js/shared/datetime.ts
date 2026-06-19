@@ -20,6 +20,15 @@ export function isoToUserDate(iso: string): string {
     });
 }
 
+export function isoDaysAgo(n: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() - n); // NOTE: local date math
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 // UTC ISO string -> display "Mar 18"
 export function displayDate(iso: string) {
     return formatToUserTimeString(new Date(iso), {
