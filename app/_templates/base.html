@@ -16,7 +16,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vesper{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/favicon.png') }}">
     {# Set data-theme value so CSS can apply theme from cookie #}
     {# Waiting on JS elsewhere results in "flash" of incorrect theme on page load #}
@@ -63,7 +63,7 @@
     </div>
 
     {# Site-wide scripts BEFORE the script block -> run everywhere #}
-    <script type="module" src="{{ url_for('static', filename = 'js/bundle.js') }}"></script>
+    <script type="module" src="{{ asset('js/app' )}}"></script>
     {% block scripts %}{% endblock %}
     
 </body>

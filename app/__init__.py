@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import json
 import logging
 import secrets
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from flask import Response
 
 from alembic.config import Config as AlembicConfig
-from flask import Flask, abort, current_app, g, request
+from flask import Flask, abort, current_app, g, request, url_for
 from flask import session as fsession
 from flask_caching import Cache
 from flask_login import LoginManager, current_user
@@ -48,11 +50,34 @@ def create_app(config_name: str | None = None) -> Flask:
     if app.config.get("DEBUG"):
         setup_dev_debugging(app)
     _setup_extensions(app)
+    _load_asset_manifest(app)
     _setup_request_hooks(app)
+    _setup_jinja(app)
     _setup_database(app)
     _register_blueprints(app)
 
+
     return app
+
+def _read_manifest(app: Flask) -> dict[str, str]:
+    path = Path(app.static_folder) / "manifest.json"
+    try:
+        return json.loads(path.read_text())
+    except FileNotFoundError:
+        return {}
+
+
+def _load_asset_manifest(app: Flask) -> None:
+    manifest = _read_manifest(app)
+    app.config["ASSET_MANIFEST"] = manifest
+    app.config["HASHED_ASSETS"] = frozenset(manifest.values())
+
+
+def _setup_jinja(app: Flask) -> None:
+    @app.template_global()
+    def asset(name: str) -> str:
+        manifest = app.config["ASSET_MANIFEST"] # cached dict at boot
+        return url_for("static", filename=manifest.get(name, name))
 
 
 def _setup_database(app: Flask) -> None:
@@ -177,6 +202,16 @@ def _setup_request_hooks(app: Flask) -> None:
         }
 
     # Apply CSP headers
+    @app.after_request
+    def set_cache_headers(response: Response) -> Response:
+        if app.config["APP_ENV"] == "dev":
+            return response
+        if request.endpoint == "static":
+            filename = (request.view_args or {}).get("filename", "")
+            if filename in app.config["HASHED_ASSETS"]:
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
     @app.after_request
     def apply_csp(response: Response) -> Response:
         if request.endpoint in {"devtools.style_reference", "static"}:
