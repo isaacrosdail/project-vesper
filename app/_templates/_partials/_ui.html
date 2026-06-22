@@ -50,6 +50,21 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 </div>
 {% endmacro %}
 
+<!-- options as [(value, label)] -->
+{% macro segmented(name, options, label=None) %}
+<fieldset class="segmented" id="{{ name }}-fieldset" data-count="{{ options|length }}">
+    <legend class="sr-only">{{ label or name|replace("_", " ")|title }}</legend>
+    {% for val, opt_label in options %}
+    <label class="segment">
+        <input type="radio" name="{{ name }}" value="{{ val }}"
+            {% if loop.first %}checked{% endif %} autocomplete="off">
+        <span>{{ opt_label }}</span>
+    </label>
+    {% endfor %}
+    <div class="s-glider"></div>
+</fieldset>
+{% endmacro %}
+
 {# Responsive Tables #}
 
 {# Breadcrumbs on sortable headers

@@ -476,7 +476,6 @@ form :is(input, select, textarea).invalid {
   grid-template-columns: 7fr 3fr;
 }
 
-.radio-fieldset,
 .checkbox-fieldset {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -632,60 +631,7 @@ form :is(input, select, textarea).invalid {
 } */
 
 
-/* DRAFT: Tabbed styling for radio buttons */
-.radio-tabs { --count: 3; }
-.radio-tabs[data-count="2"] { --count: 2; }
-.radio-tabs[data-count="4"] { --count: 4; }
-.radio-tabs[data-count="5"] { --count: 5; }
-.radio-tabs {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: var(--space-xs);
-  padding: var(--space-xs);
-  background-color: var(--bg-light);
-  border-radius: var(--border-radius);
-  border: var(--border-default);
 
-  & input { display: none; }
-
-  /* Actual "color pill" that moves to selected option */
-  & .glider {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: calc(100% / var(--count));
-    transform: translateX(calc(var(--selected) * 100%));
-    border-radius: var(--border-radius);
-    z-index: 1;
-    transition:
-      /* transform 0.5s cubic-bezier(0.37, 1.95, 0.66, 0.56), */
-      transform 0.2s cubic-bezier(0.2, 1.9, 0.5, 0.56),
-      background 0.4s ease-in-out,
-      box-shadow 0.4s ease-in-out;
-    /* background: linear-gradient(135deg, #c0c0c055, #e0e0e0); */
-    /* TODO: Wtf to do with this? given the bg-active/text-active tokens now */
-    /* background: linear-gradient(135deg, var(--accent-subtle), var(--accent-strong)); */
-    background: linear-gradient(135deg, var(--accent-strong), color-mix(in oklch, var(--accent-strong) 70%, black));
-    box-shadow:
-      0 0 18px rgba(192, 192, 192, 0.5),
-      0 0 18px rgba(192, 192, 192, 0.5) inset;
-  }
-  /* Text itself for radio options */
-  & .radio-tab span {
-    z-index: 2;
-    cursor: pointer;
-  }
-  & .radio-tab input:checked + span {
-    color: var(--text-inverse);
-    font-weight: var(--font-weight-semibold);
-  }
-  .radio-tab:nth-of-type(1):has(input:checked) ~ .glider { --selected: 0; }
-  .radio-tab:nth-of-type(2):has(input:checked) ~ .glider { --selected: 1; }
-  .radio-tab:nth-of-type(3):has(input:checked) ~ .glider { --selected: 2; }
-  .radio-tab:nth-of-type(4):has(input:checked) ~ .glider { --selected: 3; }
-  .radio-tab:nth-of-type(5):has(input:checked) ~ .glider { --selected: 4; }
-}
 
 /* DRAFT: trying out anchor positioning */
 .trigger {
@@ -703,23 +649,6 @@ form :is(input, select, textarea).invalid {
   /* translate: -50% 0; */
 }
 
-.radio-tab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  border-radius: var(--border-radius);
-
-  & span {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-xs) var(--space-md);
-    border-radius: var(--border-radius);
-  }
-}
 
 
 /* DEBUG/TODO: CLEANUP for task link stuff */
@@ -1331,4 +1260,54 @@ td {
   & > li:only-child:hover {
     border-radius: var(--border-radius);
   }
+}
+
+.segmented { --count: 3; }
+.segmented[data-count="2"] { --count: 2; }
+.segmented[data-count="4"] { --count: 4; }
+.segmented[data-count="5"] { --count: 5; }
+.segmented {
+  position: relative; /* 1. glider's anchor */
+  display: grid;
+  grid-template-columns: repeat(var(--count), 1fr);
+  padding: var(--space-xs);
+  background-color: var(--bg-light);
+  border-radius: var(--border-radius);
+  & input { display: none; }  /* hide the radios */
+}
+.segment:nth-of-type(1):has(input:checked) ~ .s-glider { --selected: 0; }
+.segment:nth-of-type(2):has(input:checked) ~ .s-glider { --selected: 1; }
+.segment:nth-of-type(3):has(input:checked) ~ .s-glider { --selected: 2; }
+.segment:nth-of-type(4):has(input:checked) ~ .s-glider { --selected: 3; }
+.segment:nth-of-type(5):has(input:checked) ~ .s-glider { --selected: 4; }
+
+.segment {
+  display: flex;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-hover);
+  }
+}
+
+.segment span {
+  position: relative; /* makes z-index actually apply */
+  z-index: 2;
+  text-align: center;
+  padding: var(--space-xs);
+}
+.segment input:checked + span { color: var(--accent-strong); }
+
+.s-glider {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: calc(100% / var(--count)); /* 2. one cell wide */
+  transform: translateX(calc(var(--selected) * 100%));  /* 3. Slide to selected */
+  z-index: 1;
+  background-color: var(--bg-active);
+  border: 1px solid var(--accent-strong);
+  border-radius: var(--border-radius);
+  transition: transform 0.2s cubic-bezier(0.2, 1.9, 0.5, 0.56);
 }

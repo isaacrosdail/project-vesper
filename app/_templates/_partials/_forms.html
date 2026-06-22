@@ -1,25 +1,6 @@
 
 {% import '_partials/_ui.html' as ui %}
 
-{% macro radio_tabs(name, options, count=None, title=True, classes='', data={}) %}
-<fieldset
-    class="radio-tabs {{ classes }}"
-    data-count="{{ count or options|length }}"
-    id="{{ name }}-fieldset"
-    {% for k,v in data.items() %}data-{{ k }}="{{ v }}"{% endfor %}
-    >
-    {% if title %}
-        <legend>{{ name|title }}:</legend>
-    {% endif %}
-    {% for opt in options %}
-    <label class="radio-tab">
-        <input type="radio" name="{{ name }}" id="{{ name }}-{{ opt }}" value="{{ opt }}">
-        <span>{{ opt|title if title else opt }}</span>
-    </label>
-    {% endfor %}
-    <div class="glider"></div>
-</fieldset>
-{% endmacro %}
 
 {# Form Modals - Specific Ones #}
 
@@ -136,65 +117,10 @@
       <small class="error-inline"></small>
     </div>
     <div>
-        <!-- <fieldset class="radio-fieldset" id="priority-fieldset">
-            <legend>Priority:</legend>
-            <div>
-                <input type="radio" name="priority" id="priority-low" value="low">
-                <label for="priority-low">Low</label>
-            </div>
-            <div>
-                <input type="radio" name="priority" id="priority-medium" value="medium">
-                <label for="priority-medium">Medium</label>
-            </div>
-            <div>
-                <input type="radio" name="priority" id="priority-high" value="high">
-                <label for="priority-high">High</label>
-            </div>
-            <div>
-                <input type="radio" name="priority" id="priority-frog" value="frog">
-                <label for="priority-frog">Frog</label>
-            </div>
-            <small class="error-inline"></small>  stupid?
-        </fieldset> -->
-        {{ radio_tabs('priority', ['low', 'medium', 'high', 'frog'], 4) }}
-        {#<fieldset class="radio-tabs" data-count="4" id="priority-fieldset">
-            <legend>Priority:</legend>
-            <label class="radio-tab">
-                <input type="radio" name="priority" id="priority-low" value="low" required>
-                <span>Low</span>
-            </label>
-            <label class="radio-tab">
-                <input type="radio" name="priority" id="priority-medium" value="medium" required>
-                <span>Medium</span>
-            </label>
-            <label class="radio-tab">
-                <input type="radio" name="priority" id="priority-high" value="high" required>
-                <span>High</span>
-            </label>
-            <label class="radio-tab">
-                <input type="radio" name="priority" id="priority-frog" value="frog" required>
-                <span>Frog</span>
-            </label>
-            <div class="glider"></div>
-        </fieldset>#}
+        <label>Priority:</label>
+        {{ ui.segmented('priority', [('low','Low'),('medium','Medium'),('high','High'),('frog','Frog')]) }}
         <small class="error-inline"></small>
-
     </div>
-    {#<div>
-      <label for="priority">Priority</label>
-      <select name="priority" id="priority" required>
-        <option value="">--</option>
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </select>
-      <small class="error-inline"></small>
-    </div>#}
-    {#<div>
-      <input type="checkbox" id="is_frog" name="is_frog">
-      <label for="is_frog">"Daily Frog" Task?</label>
-      <small class="error-inline"></small>
-    </div>#}
     <div>
       <label for="due_date">Due Date:</label>
       <input type="date" id="due_date" name="due_date">
@@ -312,37 +238,17 @@
         </select>
     </div>
 
-    <fieldset class="radio-fieldset">
-        <legend>Difficulty:</legend>
-        <div>
-            <input type="radio" id="easy" name="difficulty" value="easy" checked>
-            <label for="easy">Easy</label>
-        </div>
-        <div>
-            <input type="radio" id="medium" name="difficulty" value="medium">
-            <label for="medium">Medium</label>
-        </div>
-        <div>
-            <input type="radio" id="hard" name="difficulty" value="hard">
-            <label for="hard">Hard</label>
-        </div>
-    </fieldset>
+    <div>
+        <label>Difficulty:</label>
+        {{ ui.segmented('difficulty', [('easy','Easy'),('medium','Medium'),('hard','Hard')]) }}
+        <small class="error-inline"></small>
+    </div>
 
-    <fieldset class="radio-fieldset">
-        <legend>Status:</legend>
-        <div>
-            <input type="radio" id="solved" name="status" value="solved" checked>
-            <label for="solved">Solved</label>
-        </div>
-        <div>
-            <input type="radio" id="attempted" name="status" value="attempted">
-            <label for="attempted">Attempted</label>
-        </div>
-        <div>
-            <input type="radio" id="reviewed" name="status" value="reviewed">
-            <label for="reviewed">Reviewed</label>
-        </div>
-    </fieldset>
+    <div>
+        <label>Status:</label>
+        {{ ui.segmented('status', [('solved','Solved'),('attempted','Attempted'),('reviewed','Reviewed')]) }}
+        <small class="error-inline"></small>
+    </div>
     {% endcall %}
 {% endmacro %}
 
