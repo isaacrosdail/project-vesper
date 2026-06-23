@@ -3,16 +3,22 @@
 
 {% block title %}Groceries{% endblock %}
 
+{% block sidebar_left %}
+    {% call ui.left_sidebar() %}
+        <div class="sidebar-section">
+            <a class="btn btn-primary" href="{{ url_for('groceries.recipes') }}">
+                Recipes Page
+            </a>
+            <a class="btn btn-ghost" href="{{ url_for('groceries.data') }}">Data</a>
+        </div>
+    {% endcall %}
+{% endblock %}
+
 {% block content %}
 
 {{ forms.product_entry_modal(categories=ProductCategoryEnum, units=UnitEnum) }}
 {{ forms.transaction_entry_modal(products_for_dropdown, categories=ProductCategoryEnum, units=UnitEnum) }}
 
-
-{# Recipes page: debug access button #}
-<a class="btn btn-primary" href="{{ url_for('groceries.recipes') }}">
-    Recipes Page
-</a>
 
 {# TODO: ugh #}
 <section class="groceries-grid">

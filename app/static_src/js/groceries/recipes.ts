@@ -1,7 +1,6 @@
 import { initRecipeForm } from '../shared/forms';
 import { api } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
-import { initSidebar } from '../shared/ui/left-sidebar';
 import { confirmationManager, openModalForEdit } from '../shared/ui/modal-manager';
 import { makeToast } from '../shared/ui/toast';
 import { FormDialog, Recipe } from '../types';
@@ -119,7 +118,6 @@ async function openRecipeModal(recipeId: string, recipeModalEls) {
 }
 
 export async function init() {
-    initSidebar();
     
     const dialog = document.querySelector<FormDialog>('#recipes-entry-dashboard-modal')
     if (!dialog) {

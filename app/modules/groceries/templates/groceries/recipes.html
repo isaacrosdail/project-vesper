@@ -5,11 +5,7 @@
 {% block title %}Groceries - Recipes{% endblock %}
 
 {% block sidebar_left %}
-<div class="sidebar-container">
-    <div class="sidebar-toggle" id="sidebar-toggle" data-tip="Open/close sidebar">
-        <svg class="icon"><use href="#icon-sidebar"></use></svg>
-    </div>
-    <aside class="left-sidebar">
+    {% call ui.left_sidebar() %}
         <div class="sidebar-section">
             <a href="{{ url_for('groceries.recipes') }}" class="sidebar-option">Recipes</a>
             <button class="sidebar-option">
@@ -25,8 +21,7 @@
                 <span class="sidebar-label">Meals</span>
             </button>
         </div>
-    </aside>
-</div>
+    {% endcall %}
 {% endblock %}
 
 {% block content %}

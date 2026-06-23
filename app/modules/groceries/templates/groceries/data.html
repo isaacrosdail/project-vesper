@@ -5,29 +5,14 @@
 
 
 {% block sidebar_left %}
-<div class="sidebar-container">
-    <div class="sidebar-toggle" id="sidebar-toggle" data-tip="Open/close sidebar">
-        <svg class="icon"><use href="#icon-sidebar"></use></svg>
-    </div>
-    <aside class="left-sidebar">
-        <div class="data-sidebar">
-            <div class="sidebar-section table-select">
-                <h3>Select Table</h3>
-                <button data-table="products">Products</button>
-                <button data-table="transactions">Transactions</button>
-                <button data-table="inventory">Inventory</button>
-                <button data-table="ledger">Ledger</button>
-            </div>
-            <div class="sidebar-section defaults">
-                <h3>Defaults:</h3>
-                <div class="setting-row">
-                    <p class="secondary">Table timeframe:</p>
-                    <input type="number" min="1" max="365" value="30" id="default-timeframe">
-                </div>
-            </div>
+    {% call ui.left_sidebar('left-sidebar--data') %}
+        <div class="sidebar-section">
+            <a class="btn btn-ghost" href="{{ url_for('groceries.dashboard') }}">Dashboard</a>
+            <a class="btn btn-primary" href="{{ url_for('groceries.recipes') }}">
+                Recipes Page
+            </a>
         </div>
-    </aside>
-</div>
+    {% endcall %}
 {% endblock %}
 
 <!-- TODO: Move/add to the dropdown in table controls -->

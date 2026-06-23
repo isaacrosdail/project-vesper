@@ -30,6 +30,7 @@ import { init as initRecipesPage } from './groceries/recipes';
 import { init as initTasksWebPage } from './tasks_web';
 import { init as initPillarsPage } from './pillars';
 import { init as initProfileSidebar } from './shared/ui/profile-sidebar';
+import { initLeftSidebar } from './shared/ui/left-sidebar';
 
 
 const initRegistry = {
@@ -60,6 +61,7 @@ export async function initMain() {
 
     // Sidebar outright (depends on userStore)
     initProfileSidebar();
+    initLeftSidebar();
 }
 
 async function initUserStore() {

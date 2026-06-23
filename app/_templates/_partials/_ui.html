@@ -65,6 +65,19 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 </fieldset>
 {% endmacro %}
 
+
+{% macro left_sidebar(classes='') %}
+<div class="sidebar-container">
+    <div class="sidebar-toggle" id="sidebar-toggle" data-tip="Open/close sidebar">
+        <svg class="icon"><use href="#icon-sidebar"></use></svg>
+    </div>
+    <aside class="left-sidebar {{ classes }}">
+        {{ caller() }}
+    </aside>
+</div>
+{% endmacro %}
+
+
 {# Responsive Tables #}
 
 {# Breadcrumbs on sortable headers

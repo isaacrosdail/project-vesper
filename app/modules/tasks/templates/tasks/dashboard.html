@@ -4,25 +4,21 @@
 
 
 {% block sidebar_left %}
-<div class="sidebar-container">
-    <div class="sidebar-toggle" id="sidebar-toggle" data-tip="Open/close sidebar">
-        <svg class="icon"><use href="#icon-sidebar"></use></svg>
-    </div>
-    <aside class="left-sidebar">
-        <div class="task-sidebar">
-            {#{ ui.plus_btn_with_label('tasks-entry-dashboard-btn', label='Add Task') }#}
-            {# TODO: Temp location, should pivot later to a "List | Web" view toggle in tasks dashboard itself #}
+    {% call ui.left_sidebar('left-sidebar--tasks') %}
+        <div class="sidebar-section">
+        {# Setup: Add Task, then Search -> Then navigation within Tasks module pages (Web, etc) #}
+        {# TODO: Temp location, should pivot later to a "List | Web" view toggle in tasks dashboard itself #}
+        <button class="btn btn-primary--gradient1 sidebar-option" id="tasks-entry-dashboard-btn">
+            <svg class="icon"><use href="#icon-plus"></use></svg>
+            <span class="sidebar-label">Add Task</span>
+        </button>
+        <button class="sidebar-option" popovertarget="search-popover">
+            <svg class="icon"><use href="#icon-search"></use></svg>
+            <span class="sidebar-label">Search</span>
+        </button>
             <a class="btn btn-primary" href="{{ url_for('main.tasks_web')}}">Tasks Web</a>
-            <button class="btn btn-primary--gradient1 sidebar-option" id="tasks-entry-dashboard-btn">
-                <svg class="icon"><use href="#icon-plus"></use></svg>
-                <span class="sidebar-label">Add Task</span>
-            </button>
-            <button class="sidebar-option" popovertarget="search-popover">
-                <svg class="icon"><use href="#icon-search"></use></svg>
-                <span class="sidebar-label">Search</span>
         </div>
-    </aside>
-</div>
+    {% endcall %}
 {% endblock %}
 
 {% block content %}

@@ -141,7 +141,7 @@
 }
 /* Container queries look up the tree to find nearest ancestor with container-type */
 @container (max-width: 40px) {
-  .task-sidebar .sidebar-label {
+  .left-sidebar .sidebar-label {
     display: none;
   }
   .sidebar-option { width: 36px; }
@@ -153,9 +153,6 @@
       display: none;
     }
   }
-  /* * {
-    outline: 2px solid red;
-  } */
 }
 /* Each "button > thing + span" pair in our left-sidebar */
 .sidebar-option {
@@ -427,6 +424,134 @@ dialog::backdrop {
   border-radius: var(--border-radius);
   /* box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%); */
   box-shadow: var(--shadow-sm);
+}
+
+/* =========================================
+   Sidebar Variants
+   ========================================= */
+
+/* RIGHT SIDEBAR:
+    For profile/user settings/global config
+    Overlay/backdrop style
+*/
+.profile-sidebar {
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  z-index: 1000;
+  height: 100%;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  transform: translateX(100%);
+  transition: transform 0.2s ease;
+
+  &.open { transform: translateX(0); }
+
+  & .logout { justify-self: end; }
+
+/* TODO: move elsewhere? */
+& .devtools-section {
+    & .my-grid {
+      display: grid;
+      grid-template-areas:
+        "links links"
+        "reset reset";
+      gap: var(--space-sm);
+    }
+    & .reset { grid-area: reset; }
+    & .links {
+      grid-area: links;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+    }
+    & a, & button {
+      font-size: var(--font-size-sm);
+      height: 40px;
+    }
+  }
+}
+.sidebar-edit-plus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.profile-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+
+  &.open { display: block; }
+}
+
+/* LEFT SIDEBAR (Base) */
+/* Grid placement + sticky full height */
+.sidebar-container {
+  grid-area: left;
+  position: sticky;
+  top: 0;
+  height: 100%;
+
+  & .sidebar-toggle {
+    position: absolute;
+    align-self: start;
+    top: var(--space-md);
+    right: 0;
+    translate: 100% 0;
+    background: var(--bg-light);
+    cursor: pointer;
+  }
+}
+
+/* The shell: bg, overflow-y, collapse-to-rail container-type thing, slide transition */
+.left-sidebar {
+  /* Creates a containment context: means el can no longer size itself according to its children's
+    intrinsic width
+  */
+  container-type: inline-size;
+  background: var(--bg-light);
+  transition: transform 0.2s ease;
+  text-wrap: whitespace;
+  height: 100%;
+  overflow-y: auto;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
+
+.left-sidebar--tasks {
+  & span {
+    transition:
+      opacity 3s ease allow-discrete,
+      display 1s ease 0.2s allow-discrete;
+  }
+  /* to show active color for currently selected primary filter */
+  & [data-filter].active {
+    color: var(--accent-strong);
+    fill: var(--accent-strong);
+  }
+}
+
+
+/* Groceries: Data page sidebar */
+.left-sidebar--data {
+  & svg {
+    width: 40px; height: 1.3em;
+    display: inline;
+  }
 }
 
 /* =========================================

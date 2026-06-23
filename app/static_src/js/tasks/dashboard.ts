@@ -4,7 +4,6 @@ import { displayDate, getUserTodayDate, isoToUserDate } from '../shared/datetime
 import { initTaskForm } from '../shared/forms';
 import { api } from '../shared/services/api';
 import { contextMenu } from '../shared/ui/context-menu';
-import { initSidebar } from '../shared/ui/left-sidebar';
 import { confirmationManager, openModalForEdit } from '../shared/ui/modal-manager';
 import { makeToast } from '../shared/ui/toast';
 import { title } from '../shared/utils';
@@ -461,8 +460,6 @@ export async function init() {
         }
     })
 
-    initSidebar();
-
     taskDetailEls.taskDetailsPopover.addEventListener('toggle', (e: ToggleEvent) => {
         if (e.newState === 'closed') taskDetailsPopover.close();
     });
@@ -496,7 +493,6 @@ export async function init() {
         }
     })
 
-    setupSidebar();  // Task sidebar buttons - filtering/show completed/etc
     // TODO: currently wip - transition sidebar list controls to being atop list itself
     setupListControls();
     setupTaskList(); // Task list checkbox toggle

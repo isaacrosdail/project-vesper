@@ -4,7 +4,6 @@ import { initProductForm, initTransactionForm } from '../shared/forms';
 import { api } from '../shared/services/api';
 import { userStore } from '../shared/services/userStore';
 import { contextMenu } from '../shared/ui/context-menu';
-import { initSidebar } from '../shared/ui/left-sidebar';
 import { handleDelete, openModalForEdit } from '../shared/ui/modal-manager';
 import { makeToast } from '../shared/ui/toast';
 import { title } from '../shared/utils';
@@ -182,7 +181,6 @@ function renderTbody(config: { cols: ColumnConfig[] }, data: Record<string, unkn
 
 export async function init() {
     loadDefaults();
-    initSidebar();
     console.log(`Default table read in as: ${selected}`)
 
     // Fetch & cache
