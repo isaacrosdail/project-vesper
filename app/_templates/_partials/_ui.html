@@ -13,7 +13,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 {# For stats/analytics "progress circle cards" #}
 {% macro stats_circle(header, rate, numerator, denominator) %}
-<div class="card-stats">
+<div class="card-stats surface">
     <div class="stats-ring" data-progress="{{ rate }}">
         <div class="stats-center">
             <span class="percentage">{{ rate }}%</span>
@@ -26,7 +26,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 
 {% macro stats_info(header, value, subtitle="") %}
-<div class="card-stats">
+<div class="card-stats surface">
     <span class="stats-header">{{ header }}</span>
     <span class="stats-info">{{ value }}</span>
     {% if subtitle %}
@@ -38,14 +38,14 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 
 
 {% macro dropdown(text, id, replaceable=True) %}
-<button class="dropdown-toggle" popovertarget="{{ id }}"
+<button class="dropdown-toggle surface" popovertarget="{{ id }}"
     {% if replaceable %}data-replaceable{% endif %}>
     <span class="dropdown-toggle-label">{{ text }}</span>
     <span class="dropdown-toggle-chevron">
         <svg class="icon"><use href="#icon-chevron"></use></svg>
     </span>
 </button>
-<div popover id="{{ id }}" class="dropdown-menu">
+<div popover id="{{ id }}" class="dropdown-menu surface">
     {{ caller() }}
 </div>
 {% endmacro %}
@@ -211,7 +211,7 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {# === BUTTON COMPONENTS === #}
 
 {% macro timeframe_pills(name, ranges=[7, 30, 90]) %}
-<div class="timeframe-selector" data-timeframe="{{ name }}">
+<div class="timeframe-selector surface" data-timeframe="{{ name }}">
     {% for days in ranges %}
     <button class="chart-range" data-range="{{ days }}">{{ days }}d</button>
     {% endfor %}

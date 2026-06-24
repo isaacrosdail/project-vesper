@@ -12,7 +12,7 @@
     <div class="chart-controls">
         {{ ui.timeframe_pills("daily_metrics-chart") }}
         <!-- TODO: rename class, keep styling tho -->
-        <div class="timeframe-selector">
+        <div class="timeframe-selector surface">
             <button class="chart-type" data-type="all">All</button>
             <button class="chart-type" data-type="weight">Weight</button>
             <button class="chart-type" data-type="steps">Steps</button>
@@ -26,7 +26,7 @@
     <div id="metrics-multi-chart-container"></div>
 </div>
 
-<section id="metrics-dashboard-table" class="card-dashboard">
+<section id="metrics-dashboard-table" class="card-dashboard surface">
     <div class="card-title">
         <h2>Daily Metric Entries</h2>
         {{ ui.plus_btn('daily_metrics-entry-dashboard-btn') }}

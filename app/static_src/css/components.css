@@ -419,10 +419,6 @@ dialog::backdrop {
   gap: var(--space-md);
   align-self: stretch;
   padding: var(--space-xl) var(--space-lg) var(--space-lg);
-  background-color: var(--bg);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-  /* box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%); */
   box-shadow: var(--shadow-sm);
 }
 
@@ -1157,9 +1153,6 @@ td {
   display: inline-flex;
   flex-direction: row;
   align-self: flex-start;
-  background: var(--bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
 
   & > button {
     padding: var(--space-xs) var(--space-md);
@@ -1212,10 +1205,6 @@ td {
   gap: var(--space-sm);
   width: clamp(150px, 30vw, 200px);
   padding: var(--space-xs);
-  background-color: var(--bg);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-  /* box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%); */
   box-shadow: var(--shadow-sm);
 }
 
@@ -1342,9 +1331,6 @@ td {
     /* Popover handles show/hide and top-layer */
   margin: 0;
   padding: 0;
-  background-color: var(--bg-light);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
   box-shadow: var(--shadow-md);
 
   & > button {

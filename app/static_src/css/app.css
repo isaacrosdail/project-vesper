@@ -1723,9 +1723,6 @@ html[data-page="main.pillars"] li {
 /* TODO: Groceries 2x2 grid mockup */
 /* style="width: 500px; height: 500px;" */
 .card-groceries {
-  background: var(--bg);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
   padding: var(--space-sm);
   align-content: start;
   gap: var(--space-sm);
@@ -2045,4 +2042,12 @@ html[data-page="main.pillars"] li {
     gap: var(--space-sm);
   }
   & .info { grid-area: info; }
+}
+
+
+/* WIP area: */
+.surface {
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+  background: var(--bg);
 }

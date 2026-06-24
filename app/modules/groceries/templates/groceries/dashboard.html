@@ -22,7 +22,7 @@
 
 {# TODO: ugh #}
 <section class="groceries-grid">
-    <div class="card-groceries nutrition">
+    <div class="card-groceries surface nutrition">
         <div class="card-header">
             <div class="tertiary another-pill">On track today</div>
             <div class="tertiary card-link">full diary</div>
@@ -62,7 +62,7 @@
             {% endfor %}
         </div>
     </div>
-    <div class="card-groceries logging">
+    <div class="card-groceries surface logging">
         <div class="card-header">
             <div class="tertiary another-pill">3 meals logged</div>
             <a class="tertiary card-link" href="{{ url_for('groceries.recipes') }}">all recipes</a>
@@ -97,7 +97,7 @@
         </div>
         <div class="openplan card-link tertiary">Open meal planner</div>
     </div>
-    <div class="card-groceries shoppinglist">
+    <div class="card-groceries surface shoppinglist">
         <div class="card-header">
             <div class="tertiary another-pill">{{ shopping_list.items|length }} items needed</div>
             <a class="tertiary card-link" href="{{ url_for('groceries.recipes') }}">full list</a>
@@ -141,7 +141,7 @@
         </div>
         <div class="lowstock tertiary">Low stock alerts: Yogurt - Oats</div>
     </div>
-    <div class="card-groceries tables">
+    <div class="card-groceries surface tables">
         <div class="card-header">
             <div class="tertiary another-pill">{{ transactions_for_table|length }} transactions</div>
             <a class="tertiary card-link" href="{{ url_for('groceries.data') }}">data tools</a>
@@ -221,7 +221,7 @@
     </li>
 </template>
 
-<div class="card-dashboard">
+<div class="card-dashboard surface">
     <div class="card-title">
         <h2>Shopping List</h2>
     </div>
@@ -247,7 +247,7 @@
 #}
 
 {#
-<div class="card-dashboard">
+<div class="card-dashboard surface">
     <div class="card-title">
         <h2>Grocery - Recent Transactions</h2>
         {{ ui.plus_btn('transactions-entry-dashboard-btn') }}
@@ -267,7 +267,7 @@
     {% endcall %}
 </div>
 
-<div class="card-dashboard">
+<div class="card-dashboard surface">
     <div class="card-title">
         <h2>Product Catalog</h2>
         {{ ui.plus_btn('products-entry-dashboard-btn') }}
