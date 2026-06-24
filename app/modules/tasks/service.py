@@ -37,7 +37,9 @@ class TasksService:
         self.pillar_repo = pillar_repo
 
     def create_task(self, validated: TaskCreate) -> Task:
-        due_datetime = dth.to_eod_datetime(validated.due_date, self.user_tz)
+        due_datetime = None
+        if validated.due_date is not None:
+            due_datetime = dth.to_eod_datetime(validated.due_date, self.user_tz)
 
         self._validate_frog_rule(validated)
 
@@ -52,6 +54,7 @@ class TasksService:
         )
         self._sync_pillars(task, validated.pillar_ids)
         self._sync_subtasks(task, validated.subtask_ids)
+        self._sync_supertasks(task, validated.supertask_ids)
         self.task_repo.session.flush()
         return task
 
@@ -73,7 +76,7 @@ class TasksService:
         )
 
         for field in validated.model_fields_set:
-            if field in {"pillar_ids", "subtask_ids"}:
+            if field in {"pillar_ids", "subtask_ids", "supertask_ids"}:
                 continue
             value = getattr(validated, field)
             if field == "due_date" and value is not None:
@@ -84,6 +87,8 @@ class TasksService:
             self._sync_pillars(task, validated.pillar_ids)
         if "subtask_ids" in validated.model_fields_set:
             self._sync_subtasks(task, validated.subtask_ids)
+        if "supertask_ids" in validated.model_fields_set:
+            self._sync_supertasks(task, validated.supertask_ids)
 
         return task
 
@@ -133,6 +138,16 @@ class TasksService:
             self.save_link(subtask_id, task.id)
         for subtask_id in current_ids - incoming_ids:
             self.delete_link(subtask_id, task.id)
+
+    def _sync_supertasks(self, task: Task, supertask_ids: list[int]) -> None:
+        incoming = set(supertask_ids)
+        current = {s.id for s in task.supertasks}
+
+        for supertask_id in incoming - current:
+            self.save_link(task.id, supertask_id)
+        for supertask_id in current - incoming:
+            self.delete_link(task.id, supertask_id)
+
 
     def _sync_pillars(self, task: Task, pillar_ids: list[int]) -> None:
         task.pillars = self.pillar_repo.get_by_ids(pillar_ids)

@@ -54,8 +54,11 @@
         </div>
     </div>
 
-    <div class="subtasks-container"></div>
-    <button class="btn btn-ghost js-add-subtask add-subtask">+ Add Subtask</button>
+    <div class="subtasks-plus-add">
+        <div class="subtasks-header hide">Subtasks <span class="subtasks-summary"></span></div>
+        <div class="subtasks-container"></div>
+        <button class="btn btn-ghost js-add-subtask add-subtask secondary">+ Add Subtask</button>
+    </div>
 
     <div class="task-details__footer">
         <div class="task-details__created">
@@ -63,8 +66,11 @@
             <span class="created_at secondary"></span>
         </div>
         <div class="task-details__actions">
-            <button class="btn btn-ghost task-edit-btn">Edit</button>
-            <button class="btn btn-destructive task-delete-btn">{{ ui.delete_btn() }}</button>
+            <button class="btn btn-ghost js-task-edit">Edit</button>
+            {#<button class="btn btn-destructive js-task-delete">{{ ui.delete_btn() }}</button>#}
+            <button class="btn btn-destructive js-task-delete">
+                <svg class="icon"><use href="#icon-trash"></use></svg>
+            </button>
         </div>
     </div>
 </div>
@@ -74,7 +80,7 @@
 {{ ui.stats_circle("Frog Completion (Last 7 days)", frog_stat.rate, frog_stat.done, frog_stat.total) }}
 </div>
 
-<!-- For the generation of subtask list in task details popover view -->
+{# For the generation of subtask list in task details popover view #}
 <template id="subtask-list-template">
     <div class="subtask-group">
         <input type="checkbox" class="subtask-checkbox task-details__subtask-checkbox">
@@ -82,63 +88,56 @@
     </div>
 </template>
 
-<!-- Each task entry in dashboard list view -->
+{# Each task entry in dashboard list view #}
 <template id="task-li-template">
     <li class="task" data-id="" draggable="false">
-        <div class="task-list-actions-gutter">
-            <button class="task-drag">B1</button>
-            <button class="subtask-toggle">B2</button>
+        <div class="task__gutter">
+            <button class="task__drag-handle">B1</button>
+            <button class="task__expander">B2</button>
         </div>
-        <div class="task-main">
-            <input type="checkbox" class="task-toggle">
-            <span class="task-name"></span>
-            <span class="task-priority">
+        <div class="task__main">
+            <input type="checkbox" class="task__done-toggle">
+            <span class="task__name"></span>
+            <span class="task__priority">
                 <svg class="icon" data-priority=""><use class="priority-use" href=""></use></svg>
             </span>
         </div>
-        <div class="task-meta">
-            <span class="meta-subtasks">
-                <span class="meta-subtasks-icon">
+        <div class="task__meta">
+            <span class="task__subtask-count">
+                <span class="task__subtask-count-icon">
                     <!-- TODO: Obv update the icon here -->
                     <svg class="icon"><use href="#icon-calendar"></use></svg>
                 </span>
-                <span class="meta-subtasks-text">0/1</span>
+                <span class="task__subtask-count-text">0/1</span>
             </span>
-            <span class="task-due-date">
+            <span class="task__due-date">
                 <span class="meta-icon">
                     <svg class="icon"><use href="#icon-calendar"></use></svg>
                 </span>
                 <span class="due_date"></span>
             </span>
 
-            <span class="task-pillars"></span>
+            <span class="task__pillars"></span>
         </div>
-        <div class="task-subtasks" hidden>
+        <div class="task__subtasks" hidden>
         </div>
     </li>
 </template>
 
 <section id="tasks-dashboard-list-view">
-    <div class="tasks-list-filters">
-        <div class="filters-left">
+    <div class="task-list-controls">
+        <div class="controls-left">
             <h2 class="header">Active Tasks</h2>
             <label class="show-completed secondary">
-                Show completed?
                 <input type="checkbox" class="toggle-completed" autocomplete="off">
+                Show completed
             </label>
         </div>
-        <div class="filters-right">
-            <div class="time-window">
-                <div><input type="radio" id="all" name="time-window" value="all" checked>
-                    <label for="all">All</label></div>
-                <div><input type="radio" id="today" name="time-window" value="today">
-                    <label for="today">Today</label></div>
-                <div><input type="radio" id="upcoming" name="time-window" value="upcoming">
-                    <label for="upcoming">Upcoming</label></div>
-            </div>
-            <button class="filter-btn" data-action="cycle-priority">
+        <div class="controls-right">
+            {{ ui.segmented('time-window', [('all','All'), ('today', 'Today'), ('upcoming', 'Upcoming')]) }}
+            <button class="js-filter-btn btn" data-action="cycle-priority">
                 <svg class="icon"><use href="#icon-funnel"></use></svg>
-                <span>Filter (Priority)</span>
+                <span class="secondary">Priority</span>
             </button>
             {% call ui.dropdown('Sort By', 'sort-by') %}
                 <button data-value="manual">Manual</button>
@@ -146,30 +145,30 @@
                 <button data-value="priority">Priority</button>
                 <button data-value="name">Name</button>
             {% endcall %}
-            <button class="sort-order-toggle">
+            <button class="sort-order-toggle" aria-label="Toggle sort order">
                 <svg class="icon"><use href="#icon-chevron"></use></svg>
             </button>
         </div>
     </div>
 
 
-    <ul class="tasks-list">
+    <ul class="task-list">
         {#% for t in tasks_raw %}
         <li class="task" data-id="{{ t.id }}">
-            <div class="task-main">
-                <input type="checkbox" class="task-toggle"
+            <div class="task__main">
+                <input type="checkbox" class="task__done-toggle"
                     {% if t.is_done %}checked{% endif %}
                     >
-                <span class="task-name">{{ t.name }}</span>
-                <span class="task-priority">
+                <span class="task__name">{{ t.name }}</span>
+                <span class="task__priority">
                     <svg class="icon" data-priority="{{ t.priority }}"><use href="#badge-priority-{{ t.priority }}"></use></svg>
                 </span>
             </div>
-            <div class="task-meta">
+            <div class="task__meta">
                 {% if t.pillars %}
-                <span class="task-pillars">hhhh</span>
+                <span class="task__pillars">hhhh</span>
                 {% endif %}
-                <span class="task-due-date">
+                <span class="task__due-date">
                    {% if t.due_date_local %}
                         <span class="meta-icon">
                             <svg class="icon"><use class="due_date-use" href="#icon-calendar"></use></svg>
@@ -179,7 +178,7 @@
                 </span>
 
                 {% if t.pillars %}
-                    <span class="task-pillars">
+                    <span class="task__pillars">
                         {% for pillar in t.pillars %}
                             <span>{{ pillar.name }}</span>
                         {% endfor %}

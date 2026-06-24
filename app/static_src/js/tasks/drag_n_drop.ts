@@ -10,11 +10,13 @@ type DragState = {
     position: 'before' | 'after' | null   // drag to top-half vs bottom half of another task
 };
 
-export function setupDragDrop(taskList: HTMLDivElement) {
+export function setupDragDrop(taskList: HTMLUListElement) {
     // Enables draggable for drag-n-drop: This way, only the button starts this, NOT "anywhere in the taskli"
     taskList.addEventListener('mousedown', (e) => {
-        if (e.target.matches('.task-drag')) {
-            const taskLi = e.target.closest<HTMLDivElement>('.task');
+        // To avoid drag-n-drop when task list is sorted by anything
+        // other than manual, we'll gate on the 'sortable' class as a DOM flag
+        if (e.target.matches('.task__drag-handle') && taskList.classList.contains('sortable')) {
+            const taskLi = e.target.closest<HTMLLIElement>('.task');
             if (!taskLi) return;
             taskLi.setAttribute('draggable', 'true')
         }
@@ -57,7 +59,7 @@ export function setupDragDrop(taskList: HTMLDivElement) {
         dragState.position = side === 'above' ? 'before' : 'after';
 
         // Apply class for affordance
-        if (marked?.el === taskLi && marked.side === side) return; // unchanged -> skip
+        if (marked?.el === taskLi && marked && marked.side === side) return; // unchanged -> skip
         marked?.el.classList.remove('drop-above', 'drop-below');
         taskLi.classList.add(`drop-${side}`);
         marked = { el: taskLi, side }

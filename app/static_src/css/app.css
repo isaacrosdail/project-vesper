@@ -155,42 +155,52 @@ details::after {
    =================================== */
 
 .task.drop-above {
-  border-top: 3px solid red;
+  border-top: 3px solid var(--accent-subtle);
   margin-top: -1px;
-  box-shadow: 0 -3px 0 0 var(--accent);
+  box-shadow: 0 -3px 0 0 var(--accent-subtle);
 }
 .task.drop-below {
-  border-bottom: 3px solid red;
+  border-bottom: 3px solid var(--accent-subtle);
   margin-bottom: -1px;
-  box-shadow: 0 3px 0 0 var(--accent);
+  box-shadow: 0 3px 0 0 var(--accent-subtle);
 }
 
-.tasks-list-filters {
+/* Unify list controls styling */
+.time-window,
+.js-filter-btn,
+#sort-by,
+.sort-order-toggle {
+  background: var(--bg-light);
+  border: var(--border-default);
+  border-radius: var(--border-radius);
+}
+
+.task-list-controls {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
 
-  & .filters-left, & .filters-right {
+  & .controls-left,
+  & .controls-right {
     display: flex;
     gap: var(--space-sm);
   }
-}
 
-.filters-right .time-window {
-  display: flex;
-
-  & input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-  & input:checked + label {
-    background: var(--accent-subtle);
+  & button:hover {
+    background: var(--bg-hover);
   }
 }
 
-.sort-order-toggle.flip {
-  transform: rotate(180deg);
+.sort-order-toggle {
+  & svg {
+    transition: transform 0.2s ease;
+  }
+
+  &.flip svg {
+    transform: rotate(180deg);
+  }
 }
 /* for dropdown */
 #sort-by .active {
@@ -198,19 +208,24 @@ details::after {
 }
 
 /* TODO: Sketching conversion for tasks from table to ul */
-.tasks-list {
+.task-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
 }
 /* Let a showCompleted toggle control visibility for tasks: */
-.tasks-list:not(.show-completed) .task:has(input:checked) {
+.task-list:not(.show-completed) .task:has(input:checked) {
   display: none;
+}
+/* Disallow drag-n-drop when 'sortable' class is active */
+.task-list:not(.sortable) .task__drag-handle {
+  cursor: default;
+  opacity: 0;
 }
 /* Have completed tasks recede visually */
 .task:has(input:checked) {
 
-  & .task-name {
+  & .task__name {
     text-decoration: line-through;
     opacity: 0.5;
   }
@@ -226,34 +241,31 @@ details::after {
   &:hover {
     background: var(--accent-subtle);
   }
-  /* display: flex; */
-  /* flex-direction: column; */
   display: grid;
   grid-template-columns: [gutter] 3rem [content] 1fr;
   cursor: pointer;
-  & .task-main, & .task-meta, & .task-subtasks {
+  & .task__main, & .task__meta, & .task__subtask-count {
     grid-column: content;
   }
 
   /* Gutter: fixed lane so rows never jitter, opacity fades in on hover/focus */
-  & .task-list-actions-gutter {
+  & .task__gutter {
     grid-column: gutter;
-    grid-row: 1; /* aligns with .task-main row, not full height? */
+    grid-row: 1; /* aligns with .task__main row, not full height? */
     display: flex;
     gap: var(--space-xs);
-    /* flex: 0 0 auto;          never shrink, never grow */
     opacity: 0;
     transition: opacity 120ms ease;
   }
-  &:hover .task-list-actions-gutter,
-  &:focus-within .task-list-actions-gutter {
+  &:hover .task__gutter,
+  &:focus-within .task__gutter {
     opacity: 1;
   }
-  & .task-list-actions-gutter > button {
+  & .task__gutter > button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;   /* 28px hit target — bump to 2.75rem if you want touch-first */
+    width: 1.75rem;
     height: 1.75rem;
     padding: 0;
     gap: var(--space-sm);
@@ -261,37 +273,36 @@ details::after {
     border: none;
     border-radius: var(--border-radius);
     color: var(--text-muted);
-    cursor: pointer;
-  }
-  & .task-list-actions-gutter > button:hover {
-    background: var(--bg-hover);
+
+    &:hover {
+      background: var(--bg-hover);
+    }
   }
 
-  & .task-main {
+  & .task__main {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
   }
 
-  & .task-due-date {
+  & .task__due-date {
     grid-column: 1;
     display: flex;
     align-items: center;
+    gap: var(--space-xs);
     color: var(--clr-error);
   }
-  & .task-meta {
+  & .task__meta {
     display: flex;
     gap: var(--space-sm);
     align-items: center;
     font-size: var(--font-size-sm);
     color: var(--text-muted);
 
-    & .task-pillars { grid-column: 2; }
+    & .task__pillars { grid-column: 2; }
 
-    /* Separator between pillars: span + span = "a span that immediately follows another span"
-    so NOT the first one
-    */
-    & .task-pillars > span + span::before {
+    /* Separator between pillars */
+    & .task__pillars > span + span::before {
       content: " · ";
       color: var(--text-muted);
     }
@@ -325,7 +336,10 @@ details::after {
   fill: red;
 }
 .task-details-popover {
-  padding: var(--space-lg);
+  & > * {
+    outline: dashed red;
+  }
+  padding: var(--space-md);
   gap: var(--space-lg); /* bigger gap between sections */
 
   & .task-details__header { display: inline-flex; gap: var(--space-sm); }
@@ -342,12 +356,12 @@ details::after {
 }
 
 .task-details__props {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  row-gap: var(--space-xs);
-  column-gap: var(--space-sm);
+  display: flex;
+  gap: var(--space-md);
+  /* flex-wrap: wrap; */
+  /* column-gap: var(--space-sm); */
   align-items: center;
-  font-size: var(--font-size-sm);
+  /* font-size: var(--font-size-sm); */
 
   & .label {
     color: var(--text-muted);
@@ -360,10 +374,23 @@ details::after {
   }
 }
 
+.subtasks-plus-add {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+
+  & .add-subtask {
+    justify-content: start;
+    padding-block: var(--space-xs);
+  }
+}
+
 .subtasks-container {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+
+  &:empty { display: none; }
 
   & .subtask-group { display: inline-flex; gap: var(--space-sm); }
 
