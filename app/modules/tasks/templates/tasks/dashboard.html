@@ -16,7 +16,10 @@
             <svg class="icon"><use href="#icon-search"></use></svg>
             <span class="sidebar-label">Search</span>
         </button>
-            <a class="btn btn-primary" href="{{ url_for('main.tasks_web')}}">Tasks Web</a>
+        <a class="sidebar-option" href="{{ url_for('main.tasks_web')}}">
+            <svg class="icon"><use href="#icon-web"></use></svg>
+            <span class="sidebar-label">Tasks Web</span>
+        </a>
         </div>
     {% endcall %}
 {% endblock %}
