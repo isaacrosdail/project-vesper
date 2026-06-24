@@ -6,11 +6,12 @@
         "moduleResolution": "node",         // Resolve node_modules-style imports (eg, import ... from 'd3')
         "outDir": "./app/static/js",        // compiled JS destination
         "rootDir": "./app/static_src/js",   // TS source files location
+        "moduleDetection": "force",         // will consider everything to be a module
         "strict": true,                     // enables all the strict type checks: null checks, implicit any, etc.?
         "esModuleInterop": true,            // lets us import CommonJS modules ('require') with ES-style import?
-        "noUnusedLocals": false,            // True = compiler errors on unused local variables (leaving as False while learning)
+        "noUnusedLocals": true,             // True = compiler errors on unused local variables
         "skipLibCheck": true,               // Don't type-check .d.ts files from libraries
-        "noUnusedParameters": true,          // True = errors when function params aren't used
+        "noUnusedParameters": true,         // True = errors when function params aren't used
         "alwaysStrict": true,
         "useUnknownInCatchVariables": true,
         "strictFunctionTypes": true,
