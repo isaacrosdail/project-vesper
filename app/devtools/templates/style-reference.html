@@ -115,28 +115,6 @@
     </div>
 </section>
 
-<section draggable="true" class="card-dashboard token-container">
-    {# Input states — one input type, multiple states #}
-    <h3>Input States</h3>
-    <form class="control-grid" novalidate>
-        <div>
-            <label class="control-label">Default</label>
-            <input type="text" placeholder="Default">
-        </div>
-        <div>
-            <label class="control-label">Focused</label>
-            <input type="text" placeholder="Click to focus">
-        </div>
-        <div>
-            <label class="control-label">Invalid</label>
-            <input type="text" class="invalid" value="Bad value">
-        </div>
-        <div>
-            <label class="control-label">Disabled</label>
-            <input type="text" disabled value="Disabled">
-        </div>
-    </form>
-</section>
 
 <section draggable="true" class="card-dashboard token-container">
     {# Custom controls — get their own visual space #}
@@ -147,29 +125,7 @@
             <input type="checkbox" class="toggle-input" id="demo-toggle">
             <label for="demo-toggle" class="toggle"></label>
         </div>
-        <div class="timeframe-selector">
-            <button>7d</button>
-            <button class="active">30d</button>
-            <button>90d</button>
-        </div>
-        <div>
-            <label class="control-label">Segmented</label>
-            <fieldset class="radio-tabs" data-count="3">
-                <label class="radio-tab">
-                    <input id="low" type="radio" name="demo-priority" value="low" checked>
-                    <span>Low</span>
-                </label>
-                <label class="radio-tab">
-                    <input id="med" type="radio" name="demo-priority" value="medium">
-                    <span>Medium</span>
-                </label>
-                <label class="radio-tab">
-                    <input id="high" type="radio" name="demo-priority" value="high">
-                    <span>High</span>
-                </label>
-                <div class="glider"></div>
-            </fieldset>
-        </div>
+        {{ ui.timeframe_pills("style-ref") }}
     </div>
 
     <h3>Pill Group (multi-select checkboxes)</h3>
@@ -195,7 +151,24 @@
             <span>Relationships</span>
         </label>
     </fieldset>
+    
+    <div class="tertiary another-pill">On track today</div>
 
+    <div>
+        <label class="control-label">Segmented</label>
+        {{ ui.segmented(
+            'test',
+            [('one', 'One'), ('two', 'Two'), ('three', 'Three')],
+            'Test segmented'
+        ) }}
+    </div>
+
+    <div class="tab-group segmented" role="tablist">
+        <button type="button" role="tab" data-tab="steps" class="tab">{{ ui.steps_svg() }} Steps</button>
+        <button type="button" role="tab" data-tab="weight" class="tab">{{ ui.scale_svg() }} Weight</button>
+        <button type="button" role="tab" data-tab="sleep" class="tab">{{ ui.sleep_svg() }} Sleep</button>
+        <button type="button" role="tab" data-tab="calories" class="tab">{{ ui.calories_svg() }} Calories</button>
+      </div>
 </section>
 
 <section draggable="true" class="card-dashboard token-container">
@@ -233,10 +206,27 @@
         </div>
     </div>
 
+    {# Input states — one input type, multiple states #}
+    <h3>Input States</h3>
+    <form class="control-grid" novalidate>
+        <div>
+            <label class="control-label">Default</label>
+            <input type="text" placeholder="Default">
+        </div>
+        <div>
+            <label class="control-label">Invalid</label>
+            <input type="text" class="invalid" value="Bad value">
+        </div>
+        <div>
+            <label class="control-label">Disabled</label>
+            <input type="text" disabled value="Disabled">
+        </div>
+    </form>
+
 </section>
 
 
-<section draggable="true" class="card-dashboard">
+<section draggable="true" class="card-dashboard surface">
     <h2>Feedback</h2>
 
     {# Dialogs — modal + confirmation on one row #}
@@ -247,17 +237,6 @@
             <p>This is the demo modal body.</p>
         {% endcall %}
         <button id="default" class="btn btn-primary">Confirmation</button>
-    </div>
-
-    {# Static preview for styling #}
-    <div class="confirmation-confined">
-        <div class="confirmation-content">
-            <p class="confirmation-message">Are you sure?</p>
-            <div class="confirmation-actions">
-                <button class="btn btn-secondary">Cancel</button>
-                <button class="btn btn-primary">OK</button>
-            </div>
-        </div>
     </div>
 
     {# Toasts — single row #}
@@ -279,43 +258,15 @@ positioning">Hover me</button>
     <h3>Dropdown</h3>
     <div class="control-row">
         {% call ui.dropdown('Dropdown', 'my-dropdown-id') %}
-            <button>1</button>
-            <button>2</button>
-            <button>3</button>
+            <button>Opt 1</button>
+            <button>Opt 2</button>
+            <button>Opt 3</button>
         {% endcall %}
-
-        {% call ui.dropdown('Dropdown 2', 'my-dropdown-id-2') %}
-            <button>uno</button>
-            <button>dos</button>
-            <button>tres</button>
-        {% endcall %}
-        {#<div class="dropdown">
-            <button class="dropdown-toggle">
-                Dropdown
-                <span class="dropdown-toggle-chevron">{{ ui.chevron_svg() }}</span>
-            </button>
-            <div class="dropdown-menu">
-                <button>Option 1</button>
-                <button>Option 2</button>
-                <button>Option 3</button>
-            </div>
-        </div>#}
     </div>
 </section>
 
 
-<section draggable="true" class="card-dashboard">
-    <h2>Drafts</h2>
-    <h3>Anchor Positioning</h3>
-    <div class="control-row">
-        <div class="trigger">Trigger</div>
-        <div class="test-tip">Tip</div>
-    </div>
-</section>
-
-
-
-<section draggable="true" class="demo-section card-dashboard">
+<section draggable="true" class="demo-section card-dashboard surface">
     <h2>Table Demo (using macro)</h2>
     {% call(item, headers) ui.responsive_table(
         caption="Demo Table",
