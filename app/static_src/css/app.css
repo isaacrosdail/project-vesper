@@ -419,6 +419,64 @@ tr[data-is-done="True"] .name-span {
   gap: var(--space-lg);
 }
 
+/* ===================================
+    PAGE-SPECIFIC: Time Tracking Dashboard
+   =================================== */
+
+.pagination-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+
+  & .count { align-self: center; }
+}
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+
+  & .page-buttons {
+    /* width: 50px; */
+  }
+
+  & .active {
+    background: var(--accent-strong);
+    color: var(--text-inverse);
+  }
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+
+.stats-row {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+  justify-content: space-between;
+
+  & > * {
+    padding: var(--space-sm);
+  }
+}
+.charts-row {
+  display: flex;
+  justify-content: space-between;
+
+  & .chart-categories {
+    display: grid;
+    grid-template-areas:
+      "header header"
+      "chart breakdown";
+
+    & .chart-categories__header { grid-area: header; }
+    & .chart { grid-area: chart; }
+    & .breakdown { grid-area: breakdown; }
+  }
+}
+
 
 /* ===================================
     PAGE-SPECIFIC: Groceries Dashboard

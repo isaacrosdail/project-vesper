@@ -29,6 +29,18 @@ export function isoDaysAgo(n: number): string {
     return `${y}-${m}-${day}`;
 }
 
+// Rolling [today - (rangeDays - 1), today]
+export function rangeLabel(rangeDays: number): string {
+    const tz = userStore.data.timezone;
+    const [end, start] = [new Date(), new Date()];
+    start.setDate(start.getDate() - (rangeDays - 1));
+
+    const md = (d: Date) => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', timeZone: tz }).format(d);
+    const year = new Intl.DateTimeFormat(undefined, { year: 'numeric', timeZone: tz }).format(end);
+
+    return `${md(start)} - ${md(end)}, ${year}`;
+}
+
 // UTC ISO string -> display "Mar 18"
 export function displayDate(iso: string) {
     return formatToUserTimeString(new Date(iso), {

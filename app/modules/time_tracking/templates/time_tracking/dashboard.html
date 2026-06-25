@@ -8,8 +8,8 @@
 
 <div class="page-header">
     <div>
-        <h2>Week of:</h2>
-        <div class="secondary">Jun 8 - Jun 14, 2026</div>
+        <h2 class="page-h2">WEEK_OF</h2>
+        <div class="timeframe-label secondary">Jun 8__Jun 14,_2026</div>
     </div>
     <div>
         {{ ui.timeframe_pills("time_tracking-chart") }}
@@ -21,41 +21,89 @@
     {{ ui.stats_info('TOP CATEGORY', 'blank', 'blank') }}
     {{ ui.stats_info('MOST ACTIVE DAY', 'blank', 'blank') }}
 </div>
-<div class="mid-row">
-    <div class="left surface">
-        <div class="header">Where your time goes</div>
+<div class="charts-row">
+    <div class="chart-categories surface">
+        <div class="chart-categories__header">Where your time goes</div>
         <div class="chart" id="time-stats">
             <div id="time_tracking-chart-container"></div>
         </div>
+        {# TODO(ui): per-category breakdown list (legend + time + %) #}
         <div class="breakdown">BREAKDOWN RIGHT</div>
     </div>
-    <div class="right surface">
+    {# TODO(ui): daily bar chart - the "OTHER CHART" panel #}
+    <div class="chart-daily surface">
         OTHER CHART
     </div>
 </div>
-<!-- 
-<div id="time-stats">
-    <div id="time_tracking-chart-container"></div>
-</div> -->
 
-<section id="activity-log-card" class="card-dashboard surface">
+
+<template id="time-row-template">
+    <tr data-item-id="" data-module="time_tracking" data-subtype="time_entries">
+        <td class="date"></td>
+        <td class="category"></td>
+        <td class="time text-right"></td>
+        <td class="duration_minutes text-right"></td>
+        <td class="description text-right"></td>
+        <td class="table-cell delete-cell">
+            <button class="js-table-options row-actions dots-btn btn-icon btn-square" data-item-id="">{{ ui.ellipsis_svg() }}</button>
+        </td>
+    </tr>
+</template>
+
+<section class="card-dashboard surface">
     <div class="card-title">
         <h2>Time Entries</h2>
         {{ ui.plus_btn('time_entries-entry-dashboard-btn') }}
-        Last
-        {% call ui.dropdown('ohhhh', 'ohhhhhh') %}
-            <button class="table-range" data-range="1" data-table="time_entries">Today</button>
-            <button class="table-range" data-range="7" data-table="time_entries">7d</button>
-            <button class="table-range" data-range="30" data-table="time_entries">30d</button>
-        {% endcall %}
-        days
     </div>
+    <table class="mytable table-standard" id="time_entries-table"
+        data-module="time_tracking"
+        data-subtype="time_entries">
+        <caption class="sr-only">Time Entries</caption>
+        <thead class="mythead table-header">
+            <tr>
+                <th data-column="started_at">
+                    <span class="sort-label">
+                        Date
+                        {{ ui.chevron_svg() }}
+                    </span>
+                </th>
+                <th data-column="category">
+                    <span class="sort-label">
+                        Category
+                        {{ ui.chevron_svg() }}
+                    </span>
+                </th>
+                <th data-column="started_at">
+                    <span class="sort-label">
+                        Time
+                        {{ ui.chevron_svg() }}
+                    </span>
+                </th>
+                <th data-column="duration_minutes">
+                    <span class="sort-label">
+                        Duration
+                        {{ ui.chevron_svg() }}
+                    </span>
+                </th>
+                <th data-column="description">
+                    <span class="sort-label">
+                        Desc.
+                        {{ ui.chevron_svg() }}
+                    </span>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="mytbody table-body">
 
-    {% call(item, headers) ui.responsive_table('Time Entries', entry_headers, entries, 'time_tracking', 'time_entries') %}
-    <td class="{{ headers[0].priority }}">{{ item.date_label }}</td>
-    <td class="{{ headers[1].priority }}">{{ item.category }}</td>
-    <td class="{{ headers[2].priority }} text-right">{{ item.time_window_label }}</td>
-    <td class="{{ headers[3].priority }}">{{ item.desc_label }}</td>
-    {% endcall %}
+        </tbody>
+    </table>
+    <div class="pagination-section">
+        <div class="pagination-controls">
+            <button class="btn btn-secondary back" data-delta="-1">Back</button>
+            <div class="page-buttons"></div>
+            <button class="btn btn-secondary next" data-delta="1">Next</button>
+        </div>
+        <div class="count secondary"></div>
+    </div>
 </section>
 {% endblock %}

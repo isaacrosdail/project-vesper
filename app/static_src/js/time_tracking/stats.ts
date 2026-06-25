@@ -4,7 +4,12 @@ import type { TimeEntry } from "../types";
 
 
 export type StatsEntry = { date: string; category: string; duration: number };
-// Anti-corruption layer? So if db-side naming changes, this is the only place we need to change
+
+type StatCard = { value: string; detail: string; statProgress?: number; };
+export type StatsView = Record<'total_tracked' | 'daily_average' | 'top_category' | 'most_active_day', StatCard>;
+
+type Ranked = { key: string; total: number }
+
 export function toStatsShape(t: TimeEntry): StatsEntry {
     return {
         date: t.started_at.split('T')[0],
@@ -13,9 +18,9 @@ export function toStatsShape(t: TimeEntry): StatsEntry {
     }
 }
 
-function topCategoryLabel(topCat: Ranked, total: number) {
+function topCategoryLabel(topCat: Ranked, grandTotalMins: number) {
     const part1 = hourMinsDisplay(topCat.total);
-    const pct = Math.round(topCat.total / total * 100);
+    const pct = Math.round(topCat.total / grandTotalMins * 100);
     return `${part1} · ${pct}% of time`;
 }
 
@@ -29,18 +34,16 @@ export function totalsBy(entries: StatsEntry[], keyFn: (e: StatsEntry) => string
     return obj;
 }
 
-type Ranked = { key: string | null; total: number }
-export function topEntry(totals: Record<string, number>): Ranked {
-    return Object.entries(totals).reduce(
-        (best, [key, total]) => total > best.total ? { key, total } : best,
-        { key: null, total: -Infinity }
-    );
+export function topEntry(totals: Record<string, number>): Ranked | null {
+    let best: Ranked | null = null;
+    for (const [key, total] of Object.entries(totals)) {
+        if (!best || total > best.total) best = { key, total };
+    }
+    return best;
 }
 
 const sumDur = (entries: StatsEntry[]) => entries.reduce((acc, e) => acc + e.duration, 0);
 
-// avg:
-// final date - start date / num days obv
 function dailyAverage(entries: StatsEntry[]) {
     const totalMins = sumDur(entries);
     const dayDelta = daySpan(entries);
@@ -69,7 +72,7 @@ export function deltaLabel(current: number, prev: number): string {
 
 export function mostActiveDayView(entries: StatsEntry[]) {
     const top = topEntry(totalsBy(entries, e => e.date));
-    if (top.key === null) return { day: "—", label: "" };
+    if (!top) return { day: "-", label: "-" };
 
     const d = new Date(top.key + 'T00:00:00');  // local midnight, no UTC shift
     return {
@@ -78,19 +81,16 @@ export function mostActiveDayView(entries: StatsEntry[]) {
     };
 }
 
-export function deriveStatsView(entries: StatsEntry[], prior: StatsEntry[]) {
+export function deriveStatsView(entries: StatsEntry[], prior: StatsEntry[]): StatsView {
     const categoryTotals = totalsBy(entries, e => e.category);
     const sumDurations = sumDur(entries);
     const activeDay = mostActiveDayView(entries);
+    const topCat = topEntry(categoryTotals);
 
     return {
-        totalLabel: hourMinsDisplay(sumDurations),
-        avgLabel: dailyAverage(entries),    // Daily Average
-        activeDaysLabel: `across ${numActiveDays(entries)} active days`,
-        topCategory: topEntry(categoryTotals).key,
-        topCatLabel: topCategoryLabel(topEntry(categoryTotals), sumDurations), // "2h36m · 34%"
-        mostActiveDay: activeDay.day,
-        mostActiveLabel: activeDay.label,    // "1h45m logged Jun 11"
-        totalDelta: deltaLabel(sumDurations, sumDur(prior)),   // "▲ 24%" — deferred, needs the prior window
+        total_tracked: { value: hourMinsDisplay(sumDurations), detail: deltaLabel(sumDurations, sumDur(prior)) },
+        daily_average: { value: dailyAverage(entries), detail: `across ${numActiveDays(entries)} active days` },
+        top_category: { value: topCat?.key ?? '-', detail: topCat ? topCategoryLabel(topCat, sumDurations) : ''},
+        most_active_day: { value: activeDay.day, detail: activeDay.label },
     };
 }
