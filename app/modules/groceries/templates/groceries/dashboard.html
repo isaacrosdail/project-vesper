@@ -186,10 +186,10 @@
     <h2>Calories & Macros (daily avgs)</h2>
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem;">
         <!-- TODO: Fix up; header, %, actual, total? -->
-        {{ ui.stats_circle('Calories', 45, macros.calories.total, macros.calories.target) }}
-        {{ ui.stats_circle('Protein', 50, 45, macros.protein.total) }}
-        {{ ui.stats_circle('Fat', 50, 45, macros.fat.total) }}
-        {{ ui.stats_circle('Carbs', 50, 45, macros.carbs.total) }}
+        {{ ui.stats_info('Calories', 45, macros.calories.total, macros.calories.target) }}
+        {{ ui.stats_info('Protein', 50, 45, macros.protein.total) }}
+        {{ ui.stats_info('Fat', 50, 45, macros.fat.total) }}
+        {{ ui.stats_info('Carbs', 50, 45, macros.carbs.total) }}
         {{ ui.stats_info('Sodium', macros.sodium.total)}}
         {{ ui.stats_info('Potassium', macros.potassium.total)}}
     </div>

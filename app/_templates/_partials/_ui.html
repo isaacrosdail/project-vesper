@@ -11,30 +11,17 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
     Notes for custom modals: Keyboard nav, aria-label param,
 #}
 
-{# For stats/analytics "progress circle cards" #}
-{% macro stats_circle(header, rate, numerator, denominator) %}
-<div class="card-stats surface">
-    <div class="stats-ring" data-progress="{{ rate }}">
-        <div class="stats-center">
-            <span class="percentage">{{ rate }}%</span>
-        </div>
+
+{% macro stats_info(label, value, detail, key, stat_progress=none) %}
+<div class="card-stats surface" id="{{ label|replace(' ', '_')|lower }}">
+    <span class="stats-label secondary">{{ label }}</span>
+    <span class="stats-value">{{ value }}</span>
+    <span class="stats-detail secondary">{{ detail }}</span>
+    <div class="stat-progress">
+        <div class="stat-progress__fill"></div>
     </div>
-    <div class="stats-header">{{ header }}</div>
-    <span class="stats-subtitle">{{ numerator }} / {{ denominator }}</span>
 </div>
 {% endmacro %}
-
-
-{% macro stats_info(header, value, subtitle="") %}
-<div class="card-stats surface">
-    <span class="stats-header">{{ header }}</span>
-    <span class="stats-info">{{ value }}</span>
-    {% if subtitle %}
-    <span class="stats-subtitle">{{ subtitle }}</span>
-    {% endif %}
-</div>
-{% endmacro %}
-
 
 
 {% macro dropdown(text, id, replaceable=True) %}

@@ -15,27 +15,11 @@
         {{ ui.timeframe_pills("time_tracking-chart") }}
     </div>
 </div>
-<div class="top-row">
-    <div class="surface">
-        <div class="secondary">TOTAL TRACKED</div>
-        <div class="js-stat-total">7h41m</div>
-        <div class="js-stat-total-comparison">^ 24% vs last wk</div>
-    </div>
-    <div class="surface">
-        <div class="secondary">DAILY AVERAGE</div>
-        <div class="js-stat-daily-avg">1h6m</div>
-        <div class="js-stat-daily-avg-across-n-days secondary">Across 4 active days</div>
-    </div>
-    <div class="surface">
-        <div class="secondary">TOP CATEGORY</div>
-        <div class="js-stat-top-cat">Mario Party</div>
-        <div class="js-stat-top-cat-time secondary">2h35m - 34% of time</div>
-    </div>
-    <div class="surface">
-        <div class="secondary">MOST ACTIVE DAY</div>
-        <div class="js-stat-most-active-day">Wed</div>
-        <div class="js-stat-most-active-day-time secondary">1h34m logged Jun 11</div>
-    </div>
+<div class="stats-row">
+    {{ ui.stats_info('TOTAL TRACKED', 'blank', 'blank')}}
+    {{ ui.stats_info('DAILY AVERAGE', 'blank', 'blank') }}    
+    {{ ui.stats_info('TOP CATEGORY', 'blank', 'blank') }}
+    {{ ui.stats_info('MOST ACTIVE DAY', 'blank', 'blank') }}
 </div>
 <div class="mid-row">
     <div class="left surface">

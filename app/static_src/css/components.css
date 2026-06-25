@@ -1186,32 +1186,9 @@ td {
 }
 
 /* =========================================
-   Stats "pills"/circles/etc
+   Stats Info Card
    ========================================= */
 
-.card-stats {
-  position: relative; /* context for ?? */
-  display: grid;
-  grid-template-columns: auto 1fr; /* makes header portion "left-aligned to end of ring"? */
-  grid-template-rows: auto 1fr; /* ??? */
-  grid-template-areas:
-    "visual header"
-    "visual subtitle";
-/*
-[      ][ header ]
-[ ring ][ header ]
-[      ][ n-of-k ]
-*/
-  gap: var(--space-sm);
-  width: clamp(150px, 30vw, 200px);
-  padding: var(--space-xs);
-  box-shadow: var(--shadow-sm);
-}
-
-.stats-header {
-  grid-area: header;
-  font-size: var(--font-size-sm);
-}
 .stats-subtitle {
   font-size: var(--font-size-md);
   color: var(--accent-strong);
@@ -1225,73 +1202,31 @@ td {
   initial-value: 0%;
 }
 
-.stats-info {
-  grid-area: visual;
-  display: grid;
-  place-items: center;
-  align-self: center;
-  width: 70px;
-  height: 70px;
-  font-weight: 600;
-  font-size: var(--font-size-xl);
-  color: var(--accent-strong);
-}
-
-/* Ring for progress */
-.stats-ring {
-  --size: 70px;
-  --bar-width: 20px;
-
-  grid-area: visual;
-  position: relative;
-  display: grid;
-  place-items: center;
-  align-self: center; /* vertically center ring */
-
-  width: var(--size);
-  height: var(--size);
-  
-  /* This creates the actual progress ring around,
-    with --progress being the percentage progress
-  */
-  background: conic-gradient(
-    var(--accent-strong) var(--progress, 0),
-    var(--bg-light) 0%
-  );
-  border-radius: 50%;
-  color: var(--accent-strong);
-  transition: --progress 500ms linear;
-}
-
-/* Donut hole punchout */
-.stats-ring::after {
-  /* with content, we can actually take any attr that's on that element, take the value that's on it,
-  and use it here? */
-  /* content: attr(aria-valuenow) "%"; "50 %" since val is pulled from JS, % hardcoded ofc */
-  content: "";
-  width: calc(100% - var(--bar-width));
-  aspect-ratio: 1 / 1;
-
-  background: var(--bg);
-  border-radius: inherit;
-}
-
-/* Text inside the donut hole punchout */
-.stats-center {
-  position: absolute;
-  z-index: 1;
+.card-stats {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  inset: 0;
+  position: relative; /* so stat-progress bar takes full width */
+  /* Pct bar across bottom of card */
+  .stat-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: rgba(255,255,255,.07);
+    overflow: hidden;
+    --p: 0;
 
-  & .percentage {
-    font-weight: 600;
-    font-size: var(--font-size-lg);
+    & .stat-progress__fill {
+      height: 100%;
+      width: 100%;
+      transform: scaleX(var(--p));
+      transform-origin: left center;
+      background: var(--accent-strong);
+      transition: transform 0.2s cubic-bezier(.22,.61,.36,1);
+    }
   }
 }
-
 
 
 /* =========================================
