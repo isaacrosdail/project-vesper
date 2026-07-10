@@ -211,46 +211,6 @@
     {% endcall %}
 {% endmacro %}
 
-{% macro leetcode_entry_modal(id='leetcode_records-entry-dashboard', title='Add LeetCode record', languages=None) %}
-    {% call ui.modal('habits', 'leetcode_records', id, title) %}
-    <div class="field-pair field-pair--weighted">
-        <div>
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title">
-        </div>
-        <div>
-            <label for="leetcode_id">Problem ID:</label>
-            <input type="text" inputmode="numeric" data-type-int id="leetcode_id" name="leetcode_id" required>
-        </div>
-    </div>
-
-    <div>
-        <label for="language">Language:</label>
-        <select name="language" id="language" required>
-            <option value="" selected>--</option>
-            {% for lang in languages %}
-                <option value="{{ lang }}">{{ lang.label }}</option>
-            {% endfor %}
-            {#<option value="python">Python</option>
-            <option value="js">JavaScript</option>
-            <option value="c">C</option>
-            <option value="cpp">C++</option>#}
-        </select>
-    </div>
-
-    <div>
-        <label>Difficulty:</label>
-        {{ ui.segmented('difficulty', [('easy','Easy'),('medium','Medium'),('hard','Hard')]) }}
-        <small class="error-inline"></small>
-    </div>
-
-    <div>
-        <label>Status:</label>
-        {{ ui.segmented('status', [('solved','Solved'),('attempted','Attempted'),('reviewed','Reviewed')]) }}
-        <small class="error-inline"></small>
-    </div>
-    {% endcall %}
-{% endmacro %}
 
 {% macro product_entry_modal(id='products-entry-dashboard', title='Add Product', categories=None, units=None) %}
     {% call ui.modal('groceries', 'products', id, title) %}

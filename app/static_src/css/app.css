@@ -1245,7 +1245,7 @@ svg {
   transition: left 1s ease, bottom 1s ease;
 }
 
-/* Styling for text of today's frog / LeetCode to subtly emphasize them */
+/* Styling for text of today's frog to subtly emphasize them */
 .highlight-label { 
   font-weight: var(--font-weight-semibold);
 }

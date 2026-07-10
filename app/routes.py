@@ -7,7 +7,6 @@ from flask_login import current_user
 
 import app.shared.datetime_.helpers as dth
 from app._infra.database import database_connection
-from app.modules.habits.models import LanguageEnum
 from app.modules.habits.service import create_habits_service
 from app.modules.tasks.service import create_tasks_service
 from app.shared.analytics import create_analytics_service
@@ -47,8 +46,6 @@ def home() -> tuple[str, int]:
             if (t.due_date is None) or dth.is_same_local_date(t.due_date, user_tz)
         ]
 
-        leetcode_records = habits_service.leetcode_repo.get_all_in_window(start_utc, end_utc)
-
         todays_completions = habits_service.completion_repo.get_all_in_window(start_utc, end_utc)
         completed_today_ids = {c.habit_id for c in todays_completions}
         all_streaks = habits_service.get_all_streaks()
@@ -79,13 +76,11 @@ def home() -> tuple[str, int]:
             "habits_progress": habits_progress,
             "filtered_tasks": filtered_tasks,
             "habits": habits,
-            "leetcode_records": leetcode_records,
             "today_frog": today_frog,
             "habit_info": habit_info,
             "now": now,
             "greeting": greeting,
             "completions": result,
-            "languages": LanguageEnum,
             "pillars": pillars,
         }
         return render_template("index.html", **ctx), 200

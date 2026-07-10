@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
 
-    from app.modules.habits.models import Habit, LeetCodeRecord
+    from app.modules.habits.models import Habit
 
 
 from app.shared.view_mixins import BasePresenter, BaseViewModel
@@ -55,54 +55,3 @@ class HabitViewModel(BaseViewModel):
     def created_at_label(self) -> str:
         return self.format_created_at_label()
 
-
-class LCRecordPresenter(BasePresenter):
-    VISIBLE_COLUMNS: ClassVar[list[str]] = [
-        "leetcode_id_plus_title",
-        "difficulty",
-        "language",
-        "status",
-    ]
-
-    COLUMN_CONFIG: ClassVar[dict[str, dict[str, str]]] = {
-        "id": {"label": "ID", "priority": "essential"},
-        "leetcode_id": {"label": "Leetcode ID", "priority": "essential"},
-        "title": {"label": "Title", "priority": "essential"},
-        "difficulty": {"label": "Difficulty", "priority": "essential"},
-        "language": {"label": "Language", "priority": "essential"},
-        "status": {"label": "Status", "priority": "essential"},
-        "leetcode_id_plus_title": {
-            "label": "ID (Title)",
-            "priority": "essential",
-            "sort_field": "leetcode_id"
-        }
-    }
-
-
-class LCRecordViewModel(BaseViewModel):
-    def __init__(self, record: LeetCodeRecord, tz: str) -> None:
-        self.id = record.id
-        self.leetcode_id = record.leetcode_id
-        self.title = record.title
-        self.difficulty = record.difficulty
-        self.language = record.language
-        self.status = record.status
-        self.subtype = record.subtype
-        self._tz = tz
-
-    @property
-    def leetcode_id_plus_title_label(self) -> str:
-        title = f"({self.title})" if self.title else ""
-        return f"{self.leetcode_id} {title}"
-
-    @property
-    def difficulty_label(self) -> str:
-        return f"{self.difficulty.title()}"
-
-    @property
-    def language_label(self) -> str:
-        return f"{self.language.title()}"
-
-    @property
-    def status_label(self) -> str:
-        return f"{self.status.title()}"

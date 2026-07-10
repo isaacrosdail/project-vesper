@@ -13,7 +13,7 @@ from flask_login import current_user
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response
-from app.modules.habits.schemas import Habit, HabitPatch, LCRecord
+from app.modules.habits.schemas import HabitCreate, HabitRead, HabitPatch
 from app.modules.habits.service import create_habits_service
 from app.shared.decorators import login_plus_session
 from app.shared.exceptions import ServiceError
@@ -144,45 +144,3 @@ def completions_heatmap(session: Session) -> tuple[Response, int]:
         data=heatmap_data
     ), 200
 
-
-@api_bp.post("/habits/leetcode_records")
-@login_plus_session
-def leetcode_records(session: Session) -> tuple[Response, int]:
-    validated = LCRecord(**request.json)
-
-    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
-
-    record = habits_service.leetcode_repo.create_leetcoderecord(
-        leetcode_id=validated.leetcode_id,
-        title=validated.title,
-        difficulty=validated.difficulty,
-        language=validated.language,
-        status=validated.status,
-    )
-
-    return api_response(
-        success=True, message="LeetCode record added", data=record.to_api_dict()
-    ), 201
-
-@api_bp.delete("/habits/leetcode_records/<int:leetcode_record_id>")
-@login_plus_session
-def delete_leetcode_record(session: Session, leetcode_record_id: int) -> tuple[Response, int]:
-    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
-    habits_service.delete_leetcode_record(leetcode_record_id)
-    return api_response(success=True, message="Leetcode record deleted"), 200
-
-
-@api_bp.get("/habits/leetcode_records")
-@login_plus_session
-def leetcode_records_list(session: Session) -> tuple[Response, int]:
-    last_n_days = request.args.get("lastNDays", type=int)
-    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
-
-    if last_n_days:
-        start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
-        results = habits_service.leetcode_repo.get_all_in_window(start_utc, end_utc)
-    else:
-        results = habits_service.leetcode_repo.get_all()
-    data = [t.to_api_dict() for t in results]
-
-    return api_response(success=True, message=f"Retrieved {len(results)} Leetcode records", data=data), 200

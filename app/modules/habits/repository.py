@@ -15,12 +15,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.modules.habits.models import (
-    DifficultyEnum,
     Habit,
     HabitCompletion,
-    LanguageEnum,
-    LCStatusEnum,
-    LeetCodeRecord,
     StatusEnum,
 )
 from app.shared.repository.base import BaseRepository
@@ -196,26 +192,3 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             .group_by(func.extract("week", HabitCompletion.completed_at))
         )
         return list(self.session.execute(stmt).all())
-
-
-class LeetCodeRecordRepository(BaseRepository[LeetCodeRecord]):
-    def __init__(self, session: Session, user_id: int) -> None:
-        super().__init__(session, user_id, model_cls=LeetCodeRecord)
-
-    def create_leetcoderecord(
-        self,
-        leetcode_id: int,
-        difficulty: DifficultyEnum,
-        language: LanguageEnum,
-        status: LCStatusEnum,
-        title: str | None,
-    ) -> LeetCodeRecord:
-        new_record = LeetCodeRecord(
-            user_id=self.user_id,
-            leetcode_id=leetcode_id,
-            title=title,
-            difficulty=difficulty,
-            language=language,
-            status=status,
-        )
-        return self.add(new_record)

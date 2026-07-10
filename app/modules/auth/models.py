@@ -119,7 +119,6 @@ class User(Base, UserMixin):  # type: ignore[misc]
     recipes = relationship("Recipe", back_populates="user")
     time_entry = relationship("TimeEntry", back_populates="user")
     habit_completion = relationship("HabitCompletion", back_populates="user")
-    leetcode_record = relationship("LeetCodeRecord", back_populates="user")
     preferences: Mapped[list["UserPreference"]] = relationship("UserPreference", back_populates="user")
 
     def __repr__(self) -> str:

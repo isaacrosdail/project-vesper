@@ -8,13 +8,10 @@ if TYPE_CHECKING:
 from flask import Blueprint, render_template
 from flask_login import current_user
 
-from app.modules.habits.models import LanguageEnum
 from app.modules.habits.service import create_habits_service
 from app.modules.habits.viewmodels import (
     HabitPresenter,
     HabitViewModel,
-    LCRecordPresenter,
-    LCRecordViewModel,
 )
 from app.shared.decorators import login_plus_session
 from app.shared.models import Pillar
@@ -31,11 +28,7 @@ def dashboard(session: Session) -> tuple[str, int]:
         session, current_user.id, current_user.timezone
     )
     habits = habits_service.habit_repo.get_all_habits_and_tags()
-    records = habits_service.leetcode_repo.get_all()
     habits_viewmodels = [HabitViewModel(h, current_user.timezone) for h in habits]
-    lcrecords_viewmodels = [
-        LCRecordViewModel(r, current_user.timezone) for r in records
-    ]
 
     ## TODO: DRAFTING: Habits page's other two cards
     streaks = habits_service.get_streak_summary()
@@ -46,10 +39,7 @@ def dashboard(session: Session) -> tuple[str, int]:
 
     ctx = {
         "habits_headers": HabitPresenter.build_columns(),
-        "lcrecords_headers": LCRecordPresenter.build_columns(),
         "habits": habits_viewmodels,
-        "lcrecords": lcrecords_viewmodels,
-        "languages": LanguageEnum,
         "highest_streak": streaks["highest"] or EMPTY_STREAK,
         "lowest_streak":streaks["lowest"] or EMPTY_STREAK,
         "pillars": pillars,

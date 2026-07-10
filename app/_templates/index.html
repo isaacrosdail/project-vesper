@@ -13,7 +13,6 @@
 {{ forms.habit_entry_modal('habits-entry-homepage', 'Add Habit', pillars=pillars) }}
 {{ forms.metric_entry_modal('daily_metrics-entry-homepage', 'Add Daily Metrics Entry', entry_date=now.date().isoformat()) }}
 {{ forms.time_entry_modal('time_entries-entry-homepage', 'Add Time Entry', current_date=current_date, pillars=pillars) }}
-{{ forms.leetcode_entry_modal('leetcode_records-entry-homepage', languages=languages) }}
 
 <div id="confetti-layer"></div>
 
@@ -48,7 +47,6 @@
         {% call ui.dropdown('Quick Add', 'thing', replaceable=False) %}
             <button id="time_entries-entry-homepage-btn">Time Entry</button>
             <button id="daily_metrics-entry-homepage-btn">Metric Entry</button>
-            <button id="leetcode_records-entry-homepage-btn">LeetCode Record</button>
         {% endcall %}
     </div>
 

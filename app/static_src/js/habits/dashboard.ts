@@ -428,21 +428,6 @@ export async function init() {
                     }
                 ]
             });
-        } else if (subtype === 'leetcode_records') {
-            const modal = document.querySelector<HTMLDialogElement>('#leetcode_records-entry-dashboard-modal');
-            contextMenu.create({
-                position: { x: rect.left, y: rect.bottom },
-                items: [
-                    {
-                        label: 'Edit',
-                        action: () => openModalForEdit(itemId, modal, 'lcrecord')
-                    },
-                    {
-                        label: 'Delete',
-                        action: () => handleDelete(itemId, subtype)
-                    }
-                ]
-            });
         }
     });
 

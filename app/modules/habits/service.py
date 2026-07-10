@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-    from app.modules.habits.models import Habit, HabitCompletion, LeetCodeRecord
-    from app.modules.habits.schemas import Habit as HabitCreate
+    from app.modules.habits.models import Habit, HabitCompletion
+    from app.modules.habits.schemas import HabitCreate
     from app.modules.habits.schemas import HabitPatch as HabitUpdate
 
 from collections import defaultdict
@@ -25,7 +25,6 @@ from app.modules.habits.models import PROMOTION_THRESHOLD, StatusEnum
 from app.modules.habits.repository import (
     HabitCompletionRepository,
     HabitRepository,
-    LeetCodeRecordRepository,
 )
 from app.shared.exceptions import ServiceError
 from app.shared.repository.pillar import PillarRepository
@@ -38,14 +37,12 @@ class HabitsService:
         user_tz: str,
         habit_repo: HabitRepository,
         completion_repo: HabitCompletionRepository,
-        leetcode_repo: LeetCodeRecordRepository,
         pillar_repo: PillarRepository
     ) -> None:
         self.session = session
         self.user_tz = user_tz
         self.habit_repo = habit_repo
         self.completion_repo = completion_repo
-        self.leetcode_repo = leetcode_repo
         self.pillar_repo = pillar_repo
         self.streak_calc = StreakCalculator(today=datetime.now(ZoneInfo(user_tz)).date())
 
@@ -123,13 +120,6 @@ class HabitsService:
         self.completion_repo.delete(completion)
         # self.check_promotion(habit) # would we un-promote a habit?
         return self.calculate_all_habits_percentage_this_week()
-
-    def delete_leetcode_record(self, leetcode_record_id: int) -> LeetCodeRecord:
-        leetcode_record = self.leetcode_repo.get_by_id(leetcode_record_id)
-        if leetcode_record is None:
-            raise ServiceError("Leetcode record not found", 404)
-        self.leetcode_repo.delete(leetcode_record)
-        return leetcode_record
 
 
     # Streak calc: scan completion dates looking for consecutive days
@@ -328,7 +318,6 @@ def create_habits_service(
         user_tz=user_tz,
         habit_repo=HabitRepository(session, user_id),
         completion_repo=HabitCompletionRepository(session, user_id),
-        leetcode_repo=LeetCodeRecordRepository(session, user_id),
         pillar_repo=PillarRepository(session, user_id)
     )
 

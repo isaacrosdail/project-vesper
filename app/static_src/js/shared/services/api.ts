@@ -181,9 +181,6 @@ class ApiClient {
         summary: (params: URLSearchParams) => this.request('GET', `/groceries/nutrition_logs/daily_totals?${params}`)
     }
 
-    leetcode_records = {
-        ...this.resource<LCRecord>('/habits/leetcode_records')
-    }
 }
 
 export const api = new ApiClient();

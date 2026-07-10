@@ -400,7 +400,4 @@ export function init() {
     initHabitForm(habitDialog)
     initMetricsForm(metricDialog)
 
-    // TODO: Need to add?
-    // const leetCodeRecordsDialog = document.querySelector('#leetcode_records-entry-homepage-modal');
-    // initLeetCodeRecordForm(leetCodeRecordsDialog);
 }

@@ -32,35 +32,6 @@ class StatusEnum(StrEnum):
     ESTABLISHED = auto()
 
 
-class LCStatusEnum(StrEnum):
-    SOLVED = auto()
-    ATTEMPTED = auto()
-    REVIEWED = auto()
-
-
-class DifficultyEnum(StrEnum):
-    EASY = auto()
-    MEDIUM = auto()
-    HARD = auto()
-
-    def __lt__(self, other: str) -> bool:
-        order = list(DifficultyEnum)
-        return order.index(self) < order.index(DifficultyEnum(other))
-
-
-class LanguageEnum(StrEnum):
-    PYTHON = auto()
-    JS = auto()
-    CPP = auto()
-    C = auto()
-    GO = auto()
-
-    @property
-    def label(self) -> str:
-        labels = {"python": "Python", "js": "JavaScript", "c": "C", "cpp": "C++", "go": "Go"}
-        return labels.get(self, self.name.title())
-
-
 class Habit(Base, APISerializable):
     __api_exclude__: ClassVar[list[str]] = []
 
@@ -131,35 +102,3 @@ class HabitCompletion(Base, APISerializable):
     def __repr__(self) -> str:
         return f"<HabitCompletion id={self.id} habit_id={self.habit_id}>"
 
-
-class LeetCodeRecord(Base, APISerializable):
-    __tablename__ = "leetcode_records"
-
-    entry_datetime: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False
-    )
-
-    leetcode_id: Mapped[int] = mapped_column(Integer, nullable=False)
-
-    title: Mapped[str | None] = mapped_column(String(LC_TITLE_MAX_LENGTH), nullable=True)
-
-    difficulty: Mapped[DifficultyEnum] = mapped_column(
-        SAEnum(DifficultyEnum, name="difficulty_enum", values_callable=lambda x: [e.value for e in x]),
-        nullable=False
-    )
-
-    language: Mapped[LanguageEnum] = mapped_column(
-        SAEnum(LanguageEnum, name="language_enum", values_callable=lambda x: [e.value for e in x]),
-        nullable=False
-    )
-
-    status: Mapped[LCStatusEnum] = mapped_column(
-        SAEnum(LCStatusEnum, name="lcstatus_enum", values_callable=lambda x: [e.value for e in x]),
-        nullable=False
-    )
-
-    user = relationship("User", back_populates="leetcode_record")
-
-    def __repr__(self) -> str:
-        return f"<LeetCodeRecord id={self.id} title='{self.title}'>"
