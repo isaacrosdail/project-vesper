@@ -1,5 +1,5 @@
 alembic==1.18.2
-attrs==25.4.0
+annotated-types==0.7.0
 blinker==1.9.0
 cachelib==0.13.0
 certifi==2026.1.4
@@ -14,7 +14,6 @@ Flask-Caching==2.3.1
 Flask-Login==0.6.3
 greenlet==3.3.1
 gunicorn==24.1.1
-hypothesis==6.151.3
 idna==3.11
 iniconfig==2.3.0
 itsdangerous==2.2.0
@@ -45,7 +44,6 @@ regex==2026.1.15
 requests==2.32.5
 ruff==0.14.14
 six==1.17.0
-sortedcontainers==2.4.0
 SQLAlchemy==2.0.46
 time-machine==3.2.0
 tqdm==4.67.1
