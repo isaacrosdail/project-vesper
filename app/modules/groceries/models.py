@@ -102,13 +102,19 @@ class ProductCategoryEnum(StrEnum):
     def label(self) -> str:
         return self.name.replace("_", " & ").title()
 
+_NUTRITION_FIELDS = ("calories", "protein", "fat", "carbs", "fat_mono", "fat_poly", "fat_sat",
+        "carbs_fiber", "carbs_sugar", "sodium", "potassium")
+
+def _non_negative_sql(cols: tuple[str, ...]) -> str:
+    return " AND ".join(f"({c} IS NULL OR {c} >= 0)" for c in cols)
 
 class Product(Base, APISerializable):
     """Acts as a catalog of 'known' products and includes the more 'static' data about the product."""
 
     __table_args__ = (
         CheckConstraint(
-            "calories_per_100g >= 0", name="ck_product_calories_non_negative"
+            _non_negative_sql(tuple(f"{f}_per_100g" for f in _NUTRITION_FIELDS)),
+            name="nutrition_non_negative",
         ),
         CheckConstraint(
             "net_weight > 0", name="ck_product_net_weight_positive",
@@ -169,6 +175,10 @@ class Product(Base, APISerializable):
 
 class ShoppingTrip(Base):
     """Cluster of transactions"""
+
+    __table_args__ = (
+        CheckConstraint("total_price >= 0", name="total_price_non_negative"),
+    )
     # date, store_name, total_price?
     entry_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
@@ -304,7 +314,7 @@ class Recipe(Base, APISerializable):
     )
 
     name: Mapped[str] = mapped_column(
-        String, nullable=False
+        String(RECIPE_NAME_MAX_LENGTH), nullable=False
     )
 
     yields: Mapped[Decimal] = mapped_column(
@@ -332,6 +342,7 @@ class RecipeIngredient(Base, APISerializable):
     """Represents single ingredient in a given Recipe (list)"""
 
     __table_args__ = (
+        UniqueConstraint("recipe_id", "product_id", name="uq_recipe_ingredient_recipe_product"),
         CheckConstraint(
             "amount_value > 0", name="ck_recipe_ingredient_amount_value_positive"
         ),
@@ -424,6 +435,9 @@ NUMERIC_MAPPINGS = {
 class NutritionLog(Base, APISerializable):
 
     __table_args__ = (
+        CheckConstraint(
+            _non_negative_sql(_NUTRITION_FIELDS), name="nutrition_non_negative",
+        ),
         Index("ix_nutrition_logs_user_entry_datetime", "user_id", "entry_datetime"),
     )
 

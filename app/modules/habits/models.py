@@ -7,6 +7,7 @@ from enum import StrEnum, auto
 from typing import Any, ClassVar
 
 from sqlalchemy import (
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Integer,
@@ -42,6 +43,10 @@ class Habit(Base, APISerializable):
 
     __table_args__ = (
         UniqueConstraint("user_id", "name", name="uq_user_habit_name"),
+        CheckConstraint(
+            "established_date IS NULL OR status = 'established'",
+            name="established_requires_established_status",
+        ),
     )
 
     name: Mapped[str] = mapped_column(String(HABIT_NAME_MAX_LENGTH), nullable=False)

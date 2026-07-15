@@ -27,12 +27,8 @@ class DailyMetrics(Base, APISerializable):
 
     __table_args__ = (
         CheckConstraint("weight > 0", name="weight_positive"),
-        CheckConstraint("steps > 0", name="steps_non_negative"),
-        CheckConstraint("calories > 0", name="calories_non_negative"),
-        # CheckConstraint(
-        #     "(weight IS NULL AND weight_units IS NULL) OR (weight IS NOT NULL AND weight_units IS NOT NULL)",
-        #     name="weight_requires_units"
-        # ),
+        CheckConstraint("steps >= 0", name="steps_non_negative"),
+        CheckConstraint("calories >= 0", name="calories_non_negative"),
         Index("ix_user_entry_datetime", "user_id", "entry_datetime"),
     )
 
