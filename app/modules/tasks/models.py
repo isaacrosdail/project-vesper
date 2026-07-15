@@ -10,11 +10,11 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
-    Index,
     Table,
-    UniqueConstraint,
+    text,
 )
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -57,7 +57,12 @@ class Task(Base, CustomBaseTaskMixin, APISerializable):
         CheckConstraint(
             "priority != 'frog' OR due_date IS NOT NULL", name="frog_requires_due_date"
         ),
-        UniqueConstraint("user_id", "name", name="uq_user_task_name"),
+        Index(
+            "uq_user_task_name",
+            "user_id", "name",
+            unique=True,
+            postgresql_where=text("completed_at IS NULL"),
+        ),
         Index("ix_tasks_user_due_date", "user_id", "due_date"),
     )
 
