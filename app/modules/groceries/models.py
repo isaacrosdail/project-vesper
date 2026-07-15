@@ -29,12 +29,19 @@ BARCODE_MAX_LENGTH = 32
 BARCODE_REGEX = rf"^[A-Za-z0-9]{{{BARCODE_MIN_LENGTH},{BARCODE_MAX_LENGTH}}}$"
 NET_WEIGHT_PRECISION = 7
 NET_WEIGHT_SCALE = 3
+QTY_PRECISION = 12
+QTY_SCALE = 3
 PRICE_PRECISION = 7
 PRICE_SCALE = 2
 PRODUCT_NAME_MAX_LENGTH = 80
 SHOPPING_LIST_NAME_MAX_LENGTH = 64
 RECIPE_NAME_MAX_LENGTH = 100
 
+
+class DimensionEnum(StrEnum):
+    MASS = auto()
+    VOLUME = auto()
+    COUNT = auto()
 
 class UnitEnum(StrEnum):
     G = auto()
@@ -50,6 +57,29 @@ class UnitEnum(StrEnum):
     def label(self) -> str:
         return self.replace("_", " ")
 
+    @property
+    def factor(self) -> Decimal:
+        """Defines the conversion factor to multiply by to reach the unit's base unit.
+        'g' for MASS units, 'ml' for volume units.
+        """
+        return _FACTOR_MAPPINGS[self]
+
+    @property
+    def dimension(self) -> DimensionEnum:
+        return _UNIT_DIMENSION[self]
+
+_FACTOR_MAPPINGS = {
+    UnitEnum.G: Decimal(1), UnitEnum.KG: Decimal(1000), UnitEnum.OZ: Decimal("28.3495"), UnitEnum.LB: Decimal("453.592"),
+    UnitEnum.ML: Decimal(1), UnitEnum.L: Decimal(1000), UnitEnum.FL_OZ: Decimal("29.5735"), UnitEnum.EA: Decimal(1)
+}
+
+_DIMENSION_GROUPS = {
+    DimensionEnum.MASS: { UnitEnum.G, UnitEnum.KG, UnitEnum.OZ, UnitEnum.LB },
+    DimensionEnum.VOLUME: { UnitEnum.ML, UnitEnum.L, UnitEnum.FL_OZ },
+    DimensionEnum.COUNT: { UnitEnum.EA },
+}
+_UNIT_DIMENSION = {unit: dim for dim, units in _DIMENSION_GROUPS.items() for unit in units }
+assert _UNIT_DIMENSION.keys() == set(UnitEnum)
 
 class ProductCategoryEnum(StrEnum):
     FRUITS = auto()
@@ -79,6 +109,9 @@ class Product(Base, APISerializable):
     __table_args__ = (
         CheckConstraint(
             "calories_per_100g >= 0", name="ck_product_calories_non_negative"
+        ),
+        CheckConstraint(
+            "net_weight > 0", name="ck_product_net_weight_positive",
         ),
         UniqueConstraint("user_id", "name", name="uq_user_product_name"),
         UniqueConstraint("user_id", "barcode", name="uq_user_product_barcode"),
@@ -274,8 +307,8 @@ class Recipe(Base, APISerializable):
         String, nullable=False
     )
 
-    yields: Mapped[float] = mapped_column(
-        Float, nullable=False
+    yields: Mapped[Decimal] = mapped_column(
+        Numeric(12, 3), nullable=False
     )
 
     yields_units: Mapped[UnitEnum] = mapped_column(
@@ -312,8 +345,8 @@ class RecipeIngredient(Base, APISerializable):
         Integer, ForeignKey("products.id"), nullable=False
     )
 
-    amount_value: Mapped[float] = mapped_column(
-        Float, nullable=False
+    amount_value: Mapped[Decimal] = mapped_column(
+        Numeric(12, 3), nullable=False
     )
 
     amount_units: Mapped[UnitEnum] = mapped_column(
@@ -327,6 +360,19 @@ class RecipeIngredient(Base, APISerializable):
 
     recipe = relationship("Recipe", back_populates="ingredients")
     product = relationship("Product", lazy="joined")
+
+    @property
+    def grams(self) -> Decimal:
+        return self.amount_value * self.amount_units.factor
+
+    @property
+    def nutrition_contribution(self) -> dict[str, Decimal]:
+        per_100 = self.grams / 100
+        # return dict of "calories": VAL, etc for NutritionLog to consume?
+        return {
+            name: per_100 * Decimal(str(getattr(self.product, f"{name}_per_100g") or 0))
+            for name in _NUTRITION_FIELDS
+        }
 
 
 class MealEnum(StrEnum):
@@ -381,6 +427,11 @@ class NutritionLog(Base, APISerializable):
         Index("ix_nutrition_logs_user_entry_datetime", "user_id", "entry_datetime"),
     )
 
+    # Optionally tied to a given recipe, for "cooking" meals
+    # ondelete:  NutritionLogs don't depend on Recipes in the same way that Transactions do Products
+    # recipe_id is simply lineage, so SET NULL should work here
+    recipe_id: Mapped[int | None] = mapped_column(ForeignKey("recipes.id", ondelete="SET NULL"), nullable=True)
+
     entry_datetime: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
@@ -405,7 +456,8 @@ class NutritionLog(Base, APISerializable):
     sodium: Mapped[float | None] = mapped_column(Float, nullable=True)
     potassium: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-
+    def __repr__(self) -> str:
+        return f"<NutritionLog id={self.id} entry={self.entry_datetime} calories={self.calories} meal={self.meal}"
 
 class InventoryLedgerEventTypeEnum(StrEnum):
     PURCHASE = auto()    # logging a txn
@@ -417,13 +469,35 @@ class InventoryLedgerEventTypeEnum(StrEnum):
 class InventoryLedger(Base):
 
     __table_args__ = (
-        Index("ix_inventory_ledger_product_created", "product_id", "created_at"),
+        # Index("ix_inventory_ledger_product_created", "product_id", "created_at"),
+        Index("ix_inventory_ledger_user_product_entry", "user_id", "product_id", "entry_datetime"),
+        CheckConstraint(
+        # Purchase          -> delta must be positive
+        # Consumption/Waste -> delta must be negative
+        # Corrections must be != 0
+            f"(event_type = '{InventoryLedgerEventTypeEnum.PURCHASE}' AND qty_delta > 0) OR "
+            f"(event_type IN ('{InventoryLedgerEventTypeEnum.CONSUMPTION}', '{InventoryLedgerEventTypeEnum.WASTE}') AND qty_delta < 0) OR "
+            f"(event_type = '{InventoryLedgerEventTypeEnum.CORRECTION}' AND qty_delta != 0)",
+            name="ck_inventory_ledger_delta_sign"
+        ),
     )
+
+    entry_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    # TODO:
+    # set null, bc the moment delete_txn tries to delete a txn that has linked ledger rows,
+    #    the db would refuse with an FK violation?
+    # ondelete="SET NULL" = "when the ref'ed txns row is deleted, set this col to NULL on every
+    #   row that pointed at it."
+    transaction_id: Mapped[int | None] = mapped_column(ForeignKey("transactions.id", ondelete="SET NULL"), nullable=True)
     # product_id fkey
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
-    product: Mapped["Product"] = relationship(back_populates="ledger_entries", lazy="joined")
+    product: Mapped[Product] = relationship(back_populates="ledger_entries", lazy="joined")
     # qty_delta (negative for consumption)
-    qty_delta: Mapped[int] = mapped_column(Integer, nullable=False)
+    # This now becomes a Decimal - we're storing qty_delta in master base units
+    #  of the given product (either g or ml) (changing net_weight on products later then
+    # wouldn't invalidate the ledger values)
+    qty_delta: Mapped[Decimal] = mapped_column(Numeric(QTY_PRECISION, QTY_SCALE), nullable=False)
     # event_type (enum: purchase, correction, waste, consumption)
     event_type: Mapped[InventoryLedgerEventTypeEnum] = mapped_column(
         SAEnum(
@@ -437,8 +511,15 @@ class InventoryLedger(Base):
 
 class ProductInventory(Base):
     # Cached current inventory state
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "product_id", name="uq_product_inventory_user_product"),
+    )
     # product_id fkkey, unique per user
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False, unique=True) # unique so each product has ONE inventory record ofc
-    product: Mapped["Product"] = relationship(back_populates="inventory", lazy="joined") # one-to-one, sqlalchemy infers cardinality from the type annotation: thing vs list[thing]
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False) # unique so each product has ONE inventory record ofc
+    product: Mapped[Product] = relationship(back_populates="inventory", lazy="joined") # one-to-one, sqlalchemy infers cardinality from the type annotation: thing vs list[thing]
     # qty_on_hand (current stock ofc)
-    qty_on_hand: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Needs to mirror InventoryLedger's qty_delta being in "200g" form, NOT count
+    # So this'll become a Numeric, same at InventoryLedger's qty_delta,
+    #  as it is to be a cached SUM(qty_delta)
+    qty_on_hand: Mapped[Decimal] = mapped_column(Numeric(QTY_PRECISION, QTY_SCALE), nullable=False)
