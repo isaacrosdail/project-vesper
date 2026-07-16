@@ -13,16 +13,16 @@ TAG_SCOPE_MAX_LENGTH = 20
 task_tags = Table(
     "task_tags",
     Base.metadata,
-    Column("task_id", ForeignKey("tasks.id"), primary_key=True),
-    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
+    Column("task_id", ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
 # Habits association table
 habit_tags = Table(
     "habit_tags",
     Base.metadata,
-    Column("habit_id", ForeignKey("habits.id"), primary_key=True),
-    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
+    Column("habit_id", ForeignKey("habits.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
@@ -49,22 +49,22 @@ class Tag(Base):
 habit_pillars = Table(
     "habit_pillars",
     Base.metadata,
-    Column("habit_id", ForeignKey("habits.id"), primary_key=True),
-    Column("pillar_id", ForeignKey("pillars.id"), primary_key=True)
+    Column("habit_id", ForeignKey("habits.id", ondelete="CASCADE"), primary_key=True),
+    Column("pillar_id", ForeignKey("pillars.id", ondelete="CASCADE"), primary_key=True)
 )
 
 task_pillars = Table(
     "task_pillars",
     Base.metadata,
-    Column("task_id", ForeignKey("tasks.id"), primary_key=True),
-    Column("pillar_id", ForeignKey("pillars.id"), primary_key=True)
+    Column("task_id", ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
+    Column("pillar_id", ForeignKey("pillars.id", ondelete="CASCADE"), primary_key=True)
 )
 
 time_entry_pillars = Table(
     "time_entry_pillars",
     Base.metadata,
-    Column("time_entry_id", ForeignKey("time_entries.id"), primary_key=True),
-    Column("pillar_id", ForeignKey("pillars.id"), primary_key=True)
+    Column("time_entry_id", ForeignKey("time_entries.id", ondelete="CASCADE"), primary_key=True),
+    Column("pillar_id", ForeignKey("pillars.id", ondelete="CASCADE"), primary_key=True)
 )
 
 class Pillar(Base):
