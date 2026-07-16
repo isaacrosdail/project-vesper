@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
 from app.shared.datetime_.helpers import convert_to_timezone
-from app.shared.serialization import APISerializable
 
 
 class WeightUnitsEnum(StrEnum):
@@ -20,7 +19,7 @@ from typing import Literal
 MetricType = Literal["weight", "steps", "calories", "sleep_duration_minutes"]
 
 
-class DailyMetrics(Base, APISerializable):
+class DailyMetrics(Base):
     """Stores everything in "master" units (kg, count, kcal)."""
 
     __tablename__ = "daily_metrics"

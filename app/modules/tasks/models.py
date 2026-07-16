@@ -1,9 +1,11 @@
 """
 Database models for the Tasks module.
 """
+
+from __future__ import annotations
+
 from datetime import datetime
 from enum import StrEnum, auto
-from typing import ClassVar
 
 from sqlalchemy import (
     CheckConstraint,
@@ -23,7 +25,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app._infra.db_base import Base, CustomBaseTaskMixin
 from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.models import task_pillars, task_tags
-from app.shared.serialization import APISerializable
 
 TASK_NAME_MAX_LENGTH = 150
 
@@ -49,9 +50,7 @@ class PriorityEnum(StrEnum):
         return order.index(self) < order.index(PriorityEnum(other))
 
 
-class Task(Base, CustomBaseTaskMixin, APISerializable):
-    __api_exclude__: ClassVar[list[str]] = []
-    __api_properties__: ClassVar[list[str]] = ["is_done"]
+class Task(Base, CustomBaseTaskMixin):
 
     __table_args__ = (
         CheckConstraint(

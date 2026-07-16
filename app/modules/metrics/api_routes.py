@@ -36,7 +36,7 @@ def daily_metrics(session: Session, entry_id: int | None = None) -> tuple[Respon
     message = "created" if is_new else "updated"
 
     return api_response(
-        success=True, message=f"Daily metrics entry {message}", data=metrics.to_api_dict()), status_code
+        success=True, message=f"Daily metrics entry {message}", data=DailyMetricsRead.dump(metrics)), status_code
 
 
 
@@ -56,14 +56,22 @@ def daily_metrics_list(session: Session) -> tuple[Response, int]:
     start_utc, end_utc = None, None
     if last_n_days:
         start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
-    results = metrics_service.get_daily_metrics(
+    entries = metrics_service.get_daily_metrics(
         start=start_utc, end=end_utc, metric=metric_type, limit=limit
     )
 
+    if metric_type:
+        data = [
+            DailyMetricsPointRead(date=e.entry_datetime, value=getattr(e, metric_type)).model_dump(mode="json")
+            for e in entries
+        ]
+    else:
+        data = [DailyMetricsRead.dump(e) for e in entries]
+
     return api_response(
         success=True,
-        message=f"Retrieved {len(results)} entries",
-        data=results,
+        message=f"Retrieved {len(data)} entries",
+        data=data,
     ), 200
 
 
@@ -72,15 +80,7 @@ def daily_metrics_list(session: Session) -> tuple[Response, int]:
 def get_daily_metrics_entry(session: Session, entry_id: int) -> tuple[Response, int]:
     metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
     entry = metrics_service.get_daily_metrics_entry(entry_id)
-    data = entry.to_api_dict()
-
-    if data.get("weight") is not None and current_user.units is UnitSystemEnum.IMPERIAL:
-        data["weight"] = kg_to_lbs(data["weight"])
-        data["weight_units"] = "lbs"
-    elif "weight" in data:
-        data["weight_units"] = "kg"
-
-    return api_response(success=True, message="Daily metrics retrieved", data=data), 200
+    return api_response(success=True, message="Daily metrics retrieved", data=DailyMetricsRead.dump(entry)), 200
 
 
 @api_bp.delete("/metrics/daily_metrics/<int:daily_metrics_id>")

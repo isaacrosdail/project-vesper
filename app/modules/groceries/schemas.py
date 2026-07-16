@@ -1,8 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Self
+from typing import Literal, Self, cast
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 
 from app.modules.groceries.models import (
     BARCODE_REGEX,
@@ -14,13 +14,14 @@ from app.modules.groceries.models import (
     ProductCategoryEnum,
     UnitEnum,
 )
+from app.shared.schemas import APIReadSchema, APISchema
 
 
-class ProductCreate(BaseModel):
+class ProductCreate(APISchema):
     name: str = Field(max_length=PRODUCT_NAME_MAX_LENGTH)
     category: ProductCategoryEnum
     barcode: str | None = Field(default=None, pattern=BARCODE_REGEX)
-    net_weight: float = Field(ge= 0)
+    net_weight: Decimal = Field(gt=0)
     unit_type: UnitEnum
     calories_per_100g: float | None = Field(default=None, ge=0)
     protein_per_100g: float | None = Field(default=None, ge=0)
@@ -55,11 +56,11 @@ class ProductCreate(BaseModel):
 
         return self
 
-class ProductPatch(BaseModel):
+class ProductPatch(APISchema):
     name: str | None = Field(default=None, max_length=PRODUCT_NAME_MAX_LENGTH)
     category: ProductCategoryEnum | None = None
     barcode: str | None = Field(default=None, pattern=BARCODE_REGEX)
-    net_weight: float | None = Field(default=None, ge=0)
+    net_weight: Decimal | None = Field(default=None, gt=0)
     unit_type: UnitEnum | None = None
     calories_per_100g: float | None = Field(default=None, ge=0)
     protein_per_100g: float | None = Field(default=None, ge=0)
@@ -74,52 +75,121 @@ class ProductPatch(BaseModel):
     potassium_per_100g: float | None = Field(default=None, ge=0)
 
 
-class TransactionCreate(BaseModel):
+class ProductRead(APIReadSchema):
+    id: int
+    name: str
+    category: ProductCategoryEnum
+    barcode: str | None
+    net_weight: float
+    unit_type: UnitEnum
+    calories_per_100g: float | None
+    protein_per_100g: float | None
+    fat_per_100g: float | None
+    carbs_per_100g: float | None
+    fat_mono_per_100g: float | None
+    fat_poly_per_100g: float | None
+    fat_sat_per_100g: float | None
+    carbs_fiber_per_100g: float | None
+    carbs_sugar_per_100g: float | None
+    sodium_per_100g: float | None
+    potassium_per_100g: float | None
+    created_at: datetime
+    subtype: Literal['products']
+
+### TODO: gonna be a bit messier to implement route-side
+class TransactionCreate(APISchema):
+    product_id: int | None = None
+    product: ProductCreate | None = None
+    price_at_scan: Decimal = Field(gt=0, decimal_places=2)
+    quantity: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def exactly_one_product_source(self) -> Self:
+        if (self.product_id is None) == (self.product is None):
+            raise ValueError("Provide exactly one of product_id or product")
+        return self
+
+
+class TransactionPatch(APISchema):
+    price_at_scan: Decimal | None = Field(None, gt=0, decimal_places=2)
+    quantity: int | None = Field(None, gt=0)
+
+
+class TransactionRead(APIReadSchema):
+    id: int
     product_id: int
-    price_at_scan: Decimal = Field(gt=0, decimal_places=2)
-    quantity: int = Field(gt=0)
+    product_name: str | None
+    shopping_trip_id: int | None
+    price_at_scan: float
+    quantity: int
+    price_per_100g: float
+    net_weight: float
+    unit_type: UnitEnum
+    created_at: datetime
+    subtype: Literal['transactions']
 
 
-class TransactionPatch(BaseModel):
-    price_at_scan: Decimal = Field(gt=0, decimal_places=2)
-    quantity: int = Field(gt=0)
-
-
-class ShoppingListCreate(BaseModel):
+class ShoppingListCreate(APISchema):
     name: str = Field(max_length=SHOPPING_LIST_NAME_MAX_LENGTH)
 
 
-class ShoppingListItemCreate(BaseModel):
+class ShoppingListItemCreate(APISchema):
     product_id: int
     quantity_wanted: int = Field(gt=0)
 
-class ShoppingListItemPatch(BaseModel):
+class ShoppingListItemPatch(APISchema):
     quantity_wanted: int | None = Field(default=None, gt=0)
     is_checked: bool | None = None
 
-class RecipeIngredientCreate(BaseModel):
+class ShoppingListItemRead(APIReadSchema):
+    id: int
+    shopping_list_id: int
     product_id: int
-    amount_value: float = Field(gt=0)
+    product_name: str | None
+    quantity_wanted: int
+    is_checked: bool
+    net_weight: float
+    unit_type: UnitEnum
+    created_at: datetime
+    subtype: Literal['shopping_list_items']
+
+
+class RecipeIngredientCreate(APISchema):
+    product_id: int
+    amount_value: Decimal = Field(gt=0)
+    amount_units: UnitEnum
+
+class RecipeIngredientRead(APIReadSchema):
+    product_id: int
+    product_name: str | None
+    amount_value: float
     amount_units: UnitEnum
 
 
-class RecipeCreate(BaseModel):
+class RecipeCreate(APISchema):
     name: str = Field(max_length=RECIPE_NAME_MAX_LENGTH)
-    yields: float = Field(gt=0)
+    yields: Decimal = Field(gt=0)
     yields_units: UnitEnum
     ingredients: list[RecipeIngredientCreate] = []
 
 
-class RecipePatch(BaseModel):
+class RecipePatch(APISchema):
     name: str | None = Field(default=None, max_length=RECIPE_NAME_MAX_LENGTH)
-    yields: float | None = Field(default=None, gt=0)
+    yields: Decimal | None = Field(default=None, gt=0)
     yields_units: UnitEnum | None = None
     ingredients: list[RecipeIngredientCreate] | None = None
 
+class RecipeRead(APIReadSchema):
+    id: int
+    name: str
+    yields: float
+    yields_units: UnitEnum
+    ingredients: list[RecipeIngredientRead]
+    created_at: datetime
+    subtype: Literal['recipes']
 
 
-
-class NutritionLogCreate(BaseModel):
+class NutritionLogCreate(APISchema):
     entry_datetime: datetime
     meal: MealEnum
     calories: float | None = Field(default=None, ge=0)
@@ -135,11 +205,16 @@ class NutritionLogCreate(BaseModel):
     sodium: float | None = Field(default=None, ge=0)
     potassium: float | None = Field(default=None, ge=0)
 
-class InventoryLedgerCreate(BaseModel):
+class InventoryLedgerCreate(APISchema):
     # product_id: int
     qty_delta: int
     event_type: InventoryLedgerEventTypeEnum
     note: str | None = Field(default=None, max_length=500) # TODO: Make a var
 
-class ProductInventoryCreate(BaseModel):
+class ProductInventoryCreate(APISchema):
     qty_on_hand: int = Field(ge=0)
+
+
+class CookRequest(APISchema):
+    meal: MealEnum
+    entry_datetime: datetime

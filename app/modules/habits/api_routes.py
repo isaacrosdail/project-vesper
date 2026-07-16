@@ -13,20 +13,24 @@ from flask_login import current_user
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response
-from app.modules.habits.schemas import HabitCreate, HabitRead, HabitPatch
+from app.modules.habits.schemas import (
+    HabitCompletionProgressRead,
+    HabitCompletionRead,
+    HabitCreate,
+    HabitPatch,
+    HabitRead,
+)
 from app.modules.habits.service import create_habits_service
 from app.shared.decorators import login_plus_session
-from app.shared.exceptions import ServiceError
 
 
 @api_bp.post("/habits/habits")
 @login_plus_session
 def habits(session: Session) -> tuple[Response, int]:
-    validated = Habit(**request.json)
-
+    validated = HabitCreate(**request.json)
     habits_service = create_habits_service(session, current_user.id, current_user.timezone)
     habit = habits_service.create_habit(validated)
-    return api_response(success=True, message="Habit created", data=habit.to_api_dict()), 201
+    return api_response(success=True, message="Habit created", data=HabitRead.dump(habit)), 201
 
 
 @api_bp.patch("/habits/habits/<int:habit_id>")
@@ -35,7 +39,7 @@ def patch_habit(session: Session, habit_id: int) -> tuple[Response, int]:
     validated = HabitPatch(**request.json)
     habit_svc = create_habits_service(session, current_user.id, current_user.timezone)
     habit = habit_svc.update_habit(validated, habit_id)
-    return api_response(success=True, message="Habit updated", data=habit.to_api_dict()), 200
+    return api_response(success=True, message="Habit updated", data=HabitRead.dump(habit)), 200
 
 
 @api_bp.get("/habits/habits")
@@ -49,7 +53,7 @@ def habits_list(session: Session) -> tuple[Response, int]:
         results = habits_service.habit_repo.get_all_habits_and_tags_in_window(start_utc, end_utc)
     else:
         results = habits_service.habit_repo.get_all()
-    data = [t.to_api_dict() for t in results]
+    data = [HabitRead.dump(h) for h in results]
 
     return api_response(success=True, message=f"Retrieved {len(results)} habits", data=data), 200
 
@@ -59,7 +63,7 @@ def habits_list(session: Session) -> tuple[Response, int]:
 def get_habit(session: Session, habit_id: int) -> tuple[Response, int]:
     habits_service = create_habits_service(session, current_user.id, current_user.timezone)
     habit = habits_service.get_habit(habit_id)
-    return api_response(success=True, message="Habit retrieved", data=habit.to_api_dict()), 200
+    return api_response(success=True, message="Habit retrieved", data=HabitRead.dump(habit)), 200
 
 
 @api_bp.delete("/habits/habits/<int:habit_id>")
@@ -82,7 +86,8 @@ def add_completion(session: Session, habit_id: int) -> tuple[Response, int]:
     return api_response(
         success=True,
         message="Habit marked complete",
-        data=completion.to_api_dict() | {"progress": progress},
+        data = HabitCompletionRead.dump(completion)
+            | { "progress": HabitCompletionProgressRead.dump(progress) }
     ), 201
 
 
@@ -98,7 +103,7 @@ def delete_completion(session: Session, habit_id: int) -> tuple[Response, int]:
     return api_response(
         success=True,
         message="Habit unmarked as complete",
-        data={"progress": progress},
+        data={ "progress": HabitCompletionProgressRead.dump(progress) },
     ), 200
 
 

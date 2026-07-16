@@ -20,7 +20,6 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
-from app.shared.serialization import APISerializable
 
 BARCODE_MIN_LENGTH = 8
 BARCODE_MAX_LENGTH = 32
@@ -108,7 +107,7 @@ _NUTRITION_FIELDS = ("calories", "protein", "fat", "carbs", "fat_mono", "fat_pol
 def _non_negative_sql(cols: tuple[str, ...]) -> str:
     return " AND ".join(f"({c} IS NULL OR {c} >= 0)" for c in cols)
 
-class Product(Base, APISerializable):
+class Product(Base):
     """Acts as a catalog of 'known' products and includes the more 'static' data about the product."""
 
     __table_args__ = (
@@ -191,17 +190,8 @@ class ShoppingTrip(Base):
     transactions: Mapped[list["Transaction"]] = relationship(back_populates="shopping_trip")
 
 
-class Transaction(Base, APISerializable):
+class Transaction(Base):
     """Acts as 'instance of buying a given item'."""
-
-    __api_exclude__: ClassVar[list[str]] = []
-
-    __api_properties__: ClassVar[list[str]] = ["price_per_100g"]
-
-    def to_api_dict(self, *, include_relations: bool = False) -> dict[str, Any]:
-        result = super().to_api_dict(include_relations=include_relations)
-        result["product_name"] = self.product.name
-        return result
 
     __table_args__ = (
         CheckConstraint("price_at_scan >= 0", name="ck_transaction_price_non_negative"),
@@ -246,7 +236,7 @@ class Transaction(Base, APISerializable):
         return f"<Transaction id={self.id} product_id={self.product_id}>"
 
 
-class ShoppingList(Base, APISerializable):
+class ShoppingList(Base):
     """Provides entrypoint for working with shoppinglistitems for a given list."""
 
     __table_args__ = (
@@ -264,15 +254,8 @@ class ShoppingList(Base, APISerializable):
         return f"<ShoppingList id={self.id} name={self.name} items_count={len(self.items)}>"
 
 
-class ShoppingListItem(Base, APISerializable):
+class ShoppingListItem(Base):
     """Items in the list. Effectively acts as a pointer to the actual product item itself."""
-
-    __api_exclude__: ClassVar[list[str]] = []
-
-    def to_api_dict(self, *, include_relations: bool = False) -> dict[str, Any]:
-        result = super().to_api_dict(include_relations=include_relations)
-        result["product_name"] = self.product.name
-        return result
 
     __table_args__ = (
         CheckConstraint(
@@ -304,7 +287,7 @@ class ShoppingListItem(Base, APISerializable):
         return f"<ShoppingListItem id={self.id} product={self.product.name!r} qty={self.quantity_wanted}>"
 
 
-class Recipe(Base, APISerializable):
+class Recipe(Base):
     """Represents individual recipe, itself consisting of ????"""
 
     __table_args__ = (
@@ -338,7 +321,7 @@ class Recipe(Base, APISerializable):
         lazy="raise"
     )
 
-class RecipeIngredient(Base, APISerializable):
+class RecipeIngredient(Base):
     """Represents single ingredient in a given Recipe (list)"""
 
     __table_args__ = (
@@ -432,7 +415,7 @@ NUMERIC_MAPPINGS = {
     "Protein (g)": "protein",
 }
 
-class NutritionLog(Base, APISerializable):
+class NutritionLog(Base):
 
     __table_args__ = (
         CheckConstraint(

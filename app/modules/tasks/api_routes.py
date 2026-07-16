@@ -11,7 +11,13 @@ from flask_login import current_user
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response
-from app.modules.tasks.schemas import Task, TaskLink, TaskPatch
+from app.modules.tasks.schemas import (
+    TaskCreate,
+    TaskLink,
+    TaskPatch,
+    TaskProgressRead,
+    TaskRead,
+)
 from app.modules.tasks.service import create_tasks_service
 from app.shared.decorators import login_plus_session
 
@@ -19,7 +25,7 @@ from app.shared.decorators import login_plus_session
 @api_bp.post("/tasks/tasks")
 @login_plus_session
 def create_task(session: Session) -> tuple[Response, int]:
-    validated = Task(**request.json)
+    validated = TaskCreate(**request.json)
 
     tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
 
@@ -28,7 +34,8 @@ def create_task(session: Session) -> tuple[Response, int]:
     progress = tasks_service.calculate_tasks_progress_today()
 
     return api_response(success=True, message="Task created",
-        data=task.to_api_dict() | {"progress": progress}
+        data=TaskRead.dump(task)
+            | { "progress": TaskProgressRead.dump(progress) }
     ), 201
 
 @api_bp.patch("/tasks/tasks/<int:task_id>")
@@ -42,7 +49,8 @@ def patch_task(session: Session, task_id: int) -> tuple[Response, int]:
     progress = tasks_service.calculate_tasks_progress_today()
 
     return api_response(success=True, message="Task updated",
-        data=task.to_api_dict() | {"progress": progress}
+        data=TaskRead.dump(task)
+            | { "progress": TaskProgressRead.dump(progress) }
     ), 200
 
 
@@ -66,7 +74,7 @@ def tasks_list(session: Session) -> tuple[Response, int]:
     return api_response(
         success=True,
         message=f"Retrieved {len(tasks)} tasks",
-        data = [ t.to_api_dict() for t in tasks ]
+        data = [ TaskRead.dump(t) for t in tasks ]
     ), 200
 
 
@@ -75,7 +83,7 @@ def tasks_list(session: Session) -> tuple[Response, int]:
 def get_task(session: Session, task_id: int) -> tuple[Response, int]:
     tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
     task = tasks_service.get_task(task_id)
-    return api_response(success=True, message="Task retrieved", data=task.to_api_dict()), 200
+    return api_response(success=True, message="Task retrieved", data=TaskRead.dump(task)), 200
 
 
 @api_bp.delete("/tasks/tasks/<int:task_id>")

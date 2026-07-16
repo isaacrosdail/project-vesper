@@ -13,7 +13,11 @@ from flask_login import current_user
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response
-from app.modules.time_tracking.schemas import TimeEntryCreate, TimeEntryPatch
+from app.modules.time_tracking.schemas import (
+    TimeEntryCreate,
+    TimeEntryPatch,
+    TimeEntryRead,
+)
 from app.modules.time_tracking.service import create_time_tracking_service
 from app.shared.decorators import login_plus_session
 from app.shared.exceptions import ServiceError
@@ -28,7 +32,7 @@ def post_time_entry(session: Session) -> tuple[Response, int]:
 
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_entry = time_service.create_time_entry(validated)
-    return api_response(success=True, message="Time entry created", data=time_entry.to_api_dict()), 201
+    return api_response(success=True, message="Time entry created", data=TimeEntryRead.dump(time_entry)), 201
 
 
 @api_bp.patch("/time_tracking/time_entries/<int:entry_id>")
@@ -38,7 +42,7 @@ def patch_time_entry(session: Session, entry_id: int) -> tuple[Response, int]:
 
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_entry = time_service.update_time_entry(entry_id, validated)
-    return api_response(success=True, message="Time entry updated", data=time_entry.to_api_dict()), 200
+    return api_response(success=True, message="Time entry updated", data=TimeEntryRead.dump(time_entry)), 200
 
 
 @api_bp.get("/time_tracking/time_entries")
@@ -52,7 +56,7 @@ def time_entries_list(session: Session) -> tuple[Response, int]:
         results = time_service.time_entry_repo.get_all_time_entries_in_window(start_utc, end_utc)
     else:
         results = time_service.time_entry_repo.get_all()
-    data = [t.to_api_dict() for t in results]
+    data = [TimeEntryRead.dump(e) for e in results]
 
     return api_response(success=True, message=f"Retrieved {len(results)} time_entries", data=data), 200
 
@@ -62,7 +66,7 @@ def time_entries_list(session: Session) -> tuple[Response, int]:
 def get_time_entry(session: Session, time_entry_id: int) -> tuple[Response, int]:
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_entry = time_service.get_time_entry(time_entry_id)
-    return api_response(success=True, message="Time entry retrieved", data=time_entry.to_api_dict()), 200
+    return api_response(success=True, message="Time entry retrieved", data=TimeEntryRead.dump(time_entry)), 200
 
 
 @api_bp.delete("/time_tracking/time_entries/<int:time_entry_id>")
@@ -91,7 +95,7 @@ def time_entries_summary(session: Session) -> tuple[Response, int]:
     return api_response(
         success=True,
         message=f"Retrieved {len(results)} time entries",
-        data=[entry.to_api_dict() for entry in results],
+        data=[TimeEntryRead.dump(entry) for entry in results],
     ), 200
 
 @api_bp.get("/time_tracking/time_entries/aggregate")

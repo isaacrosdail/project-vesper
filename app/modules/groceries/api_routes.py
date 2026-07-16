@@ -12,17 +12,23 @@ import app.shared.datetime_.helpers as dth
 from app.api import api_bp
 from app.api.responses import api_response
 from app.modules.groceries.schemas import (
+    CookRequest,
     ProductCreate,
     ProductPatch,
+    ProductRead,
     RecipeCreate,
     RecipePatch,
+    RecipeRead,
     ShoppingListItemCreate,
     ShoppingListItemPatch,
+    ShoppingListItemRead,
     TransactionPatch,
+    TransactionRead,
 )
 from app.modules.groceries.service import create_groceries_service
 from app.shared.decorators import login_plus_session
 from app.shared.exceptions import ServiceError
+
 
 @api_bp.post("/groceries/products")
 @login_plus_session
@@ -30,7 +36,7 @@ def post_product(session: Session) -> tuple[Response, int]:
     validated = ProductCreate(**request.json)
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     product = groceries_service.create_product(validated)
-    return api_response(success=True, message="Product created", data=product.to_api_dict()), 201
+    return api_response(success=True, message="Product created", data=ProductRead.dump(product)), 201
 
 
 @api_bp.patch("/groceries/products/<int:product_id>")
@@ -39,7 +45,7 @@ def patch_product(session: Session, product_id: int) -> tuple[Response, int]:
     validated = ProductPatch(**request.json)
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     product = groceries_service.update_product(validated, product_id)
-    return api_response(success=True, message="Product updated", data=product.to_api_dict()), 200
+    return api_response(success=True, message="Product updated", data=ProductRead.dump(product)), 200
 
 
 @api_bp.get("/groceries/products")
@@ -52,16 +58,18 @@ def products_list(session: Session) -> tuple[Response, int]:
         results = groceries_service.product_repo.get_all_in_window(start_utc, end_utc)
     else:
         results = groceries_service.product_repo.get_all()
-    data = [t.to_api_dict() for t in results]
+    return api_response(
+        success=True, message=f"Retrieved {len(results)} products",
+        data=[ProductRead.dump(p) for p in results]
+    ), 200
 
-    return api_response(success=True, message=f"Retrieved {len(results)} products", data=data), 200
 
 @api_bp.get("/groceries/products/<int:product_id>")
 @login_plus_session
 def get_product(session: Session, product_id: int) -> tuple[Response, int]:
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     product = groceries_service.get_product(product_id)
-    return api_response(success=True, message="Product retrieved", data=product.to_api_dict()), 200
+    return api_response(success=True, message="Product retrieved", data=ProductRead.dump(product)), 200
 
 
 @api_bp.delete("/groceries/products/<int:product_id>")
@@ -78,7 +86,7 @@ def patch_transaction(session: Session, transaction_id: int) -> tuple[Response, 
     validated = TransactionPatch(**request.json)
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     transaction = groceries_service.update_transaction(validated, transaction_id)
-    return api_response(success=True, message="Transaction updated", data=transaction.to_api_dict()), 200
+    return api_response(success=True, message="Transaction updated", data=TransactionRead.dump(transaction)), 200
 
 @api_bp.post("/groceries/transactions")
 @login_plus_session
@@ -86,7 +94,7 @@ def create_transaction(session: Session) -> tuple[Response, int]:
     data = request.json
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     transaction = groceries_service.create_transaction(data)
-    return api_response(success=True, message="Transaction created", data=transaction.to_api_dict()), 201
+    return api_response(success=True, message="Transaction created", data=TransactionRead.dump(transaction)), 201
 
 
 @api_bp.get("/groceries/transactions")
@@ -100,9 +108,10 @@ def transactions_list(session: Session) -> tuple[Response, int]:
         results = groceries_service.transaction_repo.get_all_in_window(start_utc, end_utc)
     else:
         results = groceries_service.transaction_repo.get_all()
-    data = [t.to_api_dict() for t in results]
-
-    return api_response(success=True, message=f"Retrieved {len(results)} transactions", data=data), 200
+    return api_response(
+        success=True, message=f"Retrieved {len(results)} transactions",
+        data=[TransactionRead.dump(t) for t in results]
+    ), 200
 
 
 @api_bp.get("/groceries/transactions/<int:transaction_id>")
@@ -110,7 +119,7 @@ def transactions_list(session: Session) -> tuple[Response, int]:
 def get_transaction(session: Session, transaction_id: int) -> tuple[Response, int]:
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     transaction = groceries_service.get_transaction(transaction_id)
-    return api_response(success=True, message="Transaction retrieved", data=transaction.to_api_dict()), 200
+    return api_response(success=True, message="Transaction retrieved", data=TransactionRead.dump(transaction)), 200
 
 
 
@@ -129,7 +138,7 @@ def post_shopping_list_item(session: Session) -> tuple[Response, int]:
 
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     item = groceries_service.add_item_to_shopping_list(validated.product_id, validated.quantity_wanted)
-    return api_response(success=True, message="Item added to shopping list", data=item.to_api_dict()), 201
+    return api_response(success=True, message="Item added to shopping list", data=ShoppingListItemRead.dump(item)), 201
 
 @api_bp.patch("/groceries/shopping_list_items/<int:item_id>")
 @login_plus_session
@@ -138,7 +147,7 @@ def patch_shopping_list_item(session: Session, item_id: int) -> tuple[Response, 
 
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     item = groceries_service.update_shopping_list_item(item_id, validated)
-    return api_response(success=True, message="Item updated", data=item.to_api_dict()), 200
+    return api_response(success=True, message="Item updated", data=ShoppingListItemRead.dump(item)), 200
 
 
 
@@ -149,7 +158,7 @@ def post_recipe(session: Session) -> tuple[Response, int]:
 
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     recipe = groceries_service.create_recipe(validated)
-    return api_response(success=True, message="Recipe created", data=recipe.to_api_dict()), 201
+    return api_response(success=True, message="Recipe created", data=RecipeRead.dump(recipe)), 201
 
 
 @api_bp.patch("/groceries/recipes/<int:recipe_id>")
@@ -159,7 +168,7 @@ def patch_recipe(session: Session, recipe_id: int) -> tuple[Response, int]:
 
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     recipe = groceries_service.update_recipe(recipe_id, validated)
-    return api_response(success=True, message="Recipe updated", data=recipe.to_api_dict()), 200
+    return api_response(success=True, message="Recipe updated", data=RecipeRead.dump(recipe)), 200
 
 
 @api_bp.get("/groceries/recipes/<int:recipe_id>")
@@ -175,7 +184,7 @@ def get_recipe_detail(session: Session, recipe_id: int) -> tuple[Response, int]:
     return api_response(
         success=True,
         message="Retrieved recipe",
-        data=recipe.to_api_dict(include_relations=True)
+        data=RecipeRead.dump(recipe)
     ), 200
 
 @api_bp.delete("/groceries/recipes/<int:recipe_id>")

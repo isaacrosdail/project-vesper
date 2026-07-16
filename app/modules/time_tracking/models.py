@@ -5,14 +5,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
 from app.shared.datetime_.helpers import convert_to_timezone
-from app.shared.models import time_entry_pillars
-from app.shared.serialization import APISerializable
+from app.shared.models import Pillar, time_entry_pillars
 
 CATEGORY_MAX_LENGTH = 50
 DESCRIPTION_MAX_LENGTH = 200
 
 
-class TimeEntry(Base, APISerializable):
+class TimeEntry(Base):
     """Individual time entries for our time_tracking module (activity log)."""
 
     __table_args__ = (

@@ -4,7 +4,6 @@ Model definitions for Habits module.
 
 from datetime import datetime, timezone
 from enum import StrEnum, auto
-from typing import Any, ClassVar
 
 from sqlalchemy import (
     CheckConstraint,
@@ -20,8 +19,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
 from app.shared.datetime_.helpers import convert_to_timezone
-from app.shared.models import habit_pillars, habit_tags
-from app.shared.serialization import APISerializable
+from app.shared.models import Pillar, habit_pillars, habit_tags
 
 HABIT_NAME_MAX_LENGTH = 100
 LC_TITLE_MAX_LENGTH = 200
@@ -33,13 +31,7 @@ class StatusEnum(StrEnum):
     ESTABLISHED = auto()
 
 
-class Habit(Base, APISerializable):
-    __api_exclude__: ClassVar[list[str]] = []
-
-    def to_api_dict(self, *, include_relations: bool = True) -> dict[str, Any]:
-        result = super().to_api_dict(include_relations=include_relations)
-        result["is_promotable"] = self.status is not None
-        return result
+class Habit(Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", "name", name="uq_user_habit_name"),
@@ -85,7 +77,7 @@ class Habit(Base, APISerializable):
         return f"<Habit id={self.id} name='{self.name}'>"
 
 
-class HabitCompletion(Base, APISerializable):
+class HabitCompletion(Base):
     """Stores each completion as a new entry, enabling better analytics."""
 
     __table_args__ = (
