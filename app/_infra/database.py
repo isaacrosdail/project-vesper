@@ -27,7 +27,7 @@ R = TypeVar("R")
 logger = logging.getLogger(__name__)
 
 # Global _engine (singleton across app)
-_engine = None  # Global connection cache
+_engine: Engine | None = None  # Global connection cache
 
 
 # Ensures all sessions/metadata bind to the same underlying connection
