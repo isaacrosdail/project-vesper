@@ -6,6 +6,7 @@ belong to any single model/repository/service.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -13,12 +14,10 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 import logging
-from datetime import datetime, timezone
 
 from sqlalchemy import delete, text
 
 from app._infra.db_base import Base
-from app.modules.groceries.models import Product, ShoppingListItem
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +31,10 @@ NO_SEQ = {
     "habit_pillars", "task_pillars", "time_entry_pillars"
 }
 
+def user_scoped_tables() -> Iterator[Table]:
+    for t in reversed(Base.metadata.sorted_tables):
+        if "user_id" in t.c:
+            yield t
 
 def _delete_rows(
     session: Session, table: Table, where_clause: ColumnElement[bool] | None = None
@@ -67,7 +70,7 @@ def delete_all_db_data(
             continue
 
         # skip user-scoped tables if flag is False
-        if not include_users and "user_id" in table.c:
+        if not include_users and table.name == "users":
             continue
 
         _delete_rows(session, table)
@@ -81,12 +84,18 @@ def delete_all_db_data(
                     logger.debug("Sequence %s reset", seq_name)
 
 
-def delete_user_data(session: Session, table: Table, user_id: int) -> None:
-    """Delete data for a specific user from a single table."""
-    stmt = delete(table).where(table.c.user_id == user_id)
-    session.execute(stmt)
-    logger.debug("Deleted user %s data from: %s", user_id, table)
+def delete_user_activity_data(session: Session, user_id: int) -> None:
+    # Core-table DELETE (delete(table) here)
+    session.flush() # reconcile session -> DB so pending work is processed
+    for table in user_scoped_tables():
+        if table.name in {"user_goals", "user_profiles"}:
+            continue
+        # delete_user_data(session, table, user_id)
+        stmt = delete(table).where(table.c.user_id == user_id)
+        session.execute(stmt)
+        logger.debug("Deleted user %s data from: %s", user_id, table)
 
+    session.expire_all() # reconcile DB -> session: loaded state ORM-side is now invalidated
 
 def _get_sequence_name(session: Session, table_name: str) -> str | None:
     """Get actual sequence name for a table's id column."""
