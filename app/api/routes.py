@@ -22,52 +22,11 @@ from app._infra.database import with_db_session
 from app.api import api_bp
 from app.api.rate_limiter import release_slot, reserve_slot
 from app.api.responses import api_response
-from app.modules.auth.repository import UserPreferenceRepository
+# from app.modules.auth.repository import UserPreferenceRepository
 from app.modules.auth.service import create_auth_service
-from app.shared.decorators import login_plus_session, typed_login_required
+from app.shared.decorators import login_plus_session
 
 logger = logging.getLogger(__name__)
-
-
-
-
-@api_bp.patch("/user_preferences/user_preference")
-@login_plus_session
-def update_preferences(session: Session) -> tuple[Response, int]:
-    preference_repo = UserPreferenceRepository(session, current_user.id)
-    data = request.get_json()
-    for key, value in data.items():
-        preference_repo.upsert(key, str(value))
-    session.commit()
-    return jsonify({"success": True, "message": "Added/updated preference"}), 200
-
-
-@api_bp.patch("/profile/me")
-@login_plus_session
-def update_profile(session: Session) -> tuple[Response, int]:
-    data = request.get_json()
-    auth_service = create_auth_service(session, current_user.id)
-    auth_service.update_profile(current_user, data) ## TODO: fix
-    session.commit()
-    return jsonify({"success": True, "message": "nice"}), 200
-
-
-@api_bp.get("/profile/me")
-@typed_login_required
-@with_db_session
-def get_my_profile(session: Session) -> Response:
-    """Internal API for fetching profile information used in JS."""
-    preference_repo = UserPreferenceRepository(session, current_user.id)
-    prefs = preference_repo.get_all()
-    return jsonify(
-        {
-            "timezone": current_user.timezone,
-            "units": current_user.units,
-            "city": current_user.city,
-            "country": current_user.country,
-            "preferences": {p.key: p.value for p in prefs}
-        }
-    )
 
 
 @api_bp.get("/weather/<city>/<country>/<units>")
