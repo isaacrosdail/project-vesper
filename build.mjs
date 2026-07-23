@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-
+import sveltePlugin from 'esbuild-svelte';
 import { readFileSync, writeFileSync, rmSync } from 'fs';
 
 const isWatch = process.argv.includes('--watch');
@@ -27,6 +27,9 @@ const manifestPlugin = {
             .replace(/^app\/static_src\//, '')   // app/static_src/js/app.ts -> js/app.ts
             .replace(/\.[^.]+$/, '');            //                          -> js/app
             manifest[key] = outPath.replace(/^app\/static\//, '');  // app/static/js/app-HASH.js -> js/app-HASH.js
+            if (meta.cssBundle) {
+                manifest[key + '.css'] = meta.cssBundle.replace(/^app\/static\//, '');
+            }
         }
         writeFileSync(file, JSON.stringify(manifest, null, 2));
         });
@@ -44,7 +47,7 @@ const jsOptions = {
   format: 'esm',
   metafile: true,
   logLevel: 'warning',
-  plugins: [manifestPlugin],
+  plugins: [manifestPlugin, sveltePlugin()],
 };
 
 // Build CSS
@@ -58,7 +61,7 @@ const cssOptions = {
     metafile: true,
     logLevel: 'warning',
     external: ['/static/*'],
-    plugins: [manifestPlugin],
+    plugins: [manifestPlugin, sveltePlugin()],
 };
 
 const jsContext = await esbuild.context(jsOptions);

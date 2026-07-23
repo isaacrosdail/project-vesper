@@ -16,13 +16,17 @@
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "globals": "^17.2.0",
+    "esbuild-svelte": "^0.9.5",
     "happy-dom": "^20.8.4",
     "husky": "^9.1.7",
+    "inquirer": "^14.0.2",
     "stylelint": "^17.0.0",
     "stylelint-config-recess-order": "^7.6.0",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0",
+    "svelte": "^5.56.7",
+    "svelte-check": "^4.7.3",
     "wait-on": "^9.0.3"
   },
   "scripts": {
