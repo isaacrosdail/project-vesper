@@ -29,7 +29,6 @@ class UserRegister(BaseModel):
     password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
     name: str | None = Field(default=None, max_length=NAME_MAX_LENGTH, pattern=NAME_REGEX)
     timezone: str # from JS resolvedOptions()
-    csrf_token: str
 
     @field_validator("timezone")
     @classmethod

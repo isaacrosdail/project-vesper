@@ -1,0 +1,56 @@
+[
+    {
+        "name": "Chicken Stir Fry",
+        "yields": 4,
+        "yields_units": "ea",
+        "ingredients": [
+            { "product": "chicken", "amount": 500, "units": "g" },
+            { "product": "broccoli", "amount": 200, "units": "g" },
+            { "product": "bell_pepper", "amount": 150, "units": "g" },
+            { "product": "soy_sauce", "amount": 30, "units": "ml" },
+            { "product": "olive_oil", "amount": 20, "units": "ml" },
+            { "product": "rice", "amount": 300, "units": "g" }
+        ]
+    },
+    {
+        "name": "Morning Oatmeal Bowl",
+        "yields": 1,
+        "yields_units": "ea",
+        "ingredients": [
+            { "product": "oats", "amount": 80, "units": "g" },
+            { "product": "banana", "amount": 1, "units": "ea" },
+            { "product": "milk", "amount": 240, "units": "ml" }
+        ]
+    },
+    {
+        "name": "Scrambled Eggs",
+        "yields": 1,
+        "yields_units": "ea",
+        "ingredients": [
+            { "product": "eggs", "amount": 3, "units": "ea" },
+            { "product": "butter", "amount": 15, "units": "g" },
+            { "product": "milk", "amount": 30, "units": "ml" }
+        ]
+    },
+    {
+        "name": "Beef Rice Bowl",
+        "yields": 2,
+        "yields_units": "ea",
+        "ingredients": [
+            { "product": "ground_beef", "amount": 300, "units": "g" },
+            { "product": "rice", "amount": 200, "units": "g" },
+            { "product": "carrot", "amount": 100, "units": "g" },
+            { "product": "soy_sauce", "amount": 20, "units": "ml" }
+        ]
+    },
+    {
+        "name": "Simple Spinach Salad",
+        "yields": 1,
+        "yields_units": "ea",
+        "ingredients": [
+            { "product": "spinach", "amount": 100, "units": "g" },
+            { "product": "bell_pepper", "amount": 80, "units": "g" },
+            { "product": "olive_oil", "amount": 15, "units": "ml" }
+        ]
+    }
+]

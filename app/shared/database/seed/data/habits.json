@@ -1,0 +1,8 @@
+[
+    { "name": "Morning Walk", "pillars": ["Health"] },
+    { "name": "30m Coding Drills", "pillars": ["Career"] },
+    { "name": "Tidy workspace", "pillars": [] },
+    { "name": "Journal 5mins", "pillars": ["Purpose"] },
+    { "name": "Review weekly goals", "pillars": ["Purpose"] },
+    { "name": "Jogging", "pillars": ["Health"] }
+]

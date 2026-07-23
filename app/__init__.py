@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 import json
 import logging
 import secrets
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-
+import os
+import click
+from sqlalchemy.orm import Session
+from app.shared.datetime_ import helpers as dth
+from app.modules.auth.models import User
+from app.modules.auth.repository import UsersRepository
+from app.modules.auth.schemas import UserRegister
+from app.modules.auth.service import AuthService
+from app.shared.database.helpers import delete_all_db_data
+from app.shared.database.seed.seed_db import Level, Performance
+from app.shared.exceptions import ServiceError
+from sqlalchemy.exc import IntegrityError
 if TYPE_CHECKING:
     from flask import Response
 
@@ -17,7 +29,7 @@ from flask_login import LoginManager, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from alembic import command
-from app._infra.database import db_session, init_db
+from app._infra.database import database_connection, db_session, init_db, with_db_session
 from app.config import get_config
 from app.extensions import _setup_extensions
 from app.shared.debug import setup_dev_debugging
@@ -55,7 +67,7 @@ def create_app(config_name: str | None = None) -> Flask:
     _setup_jinja(app)
     _setup_database(app)
     _register_blueprints(app)
-
+    _register_cli(app)
 
     return app
 
@@ -246,3 +258,58 @@ def _setup_request_hooks(app: Flask) -> None:
                 "upgrade-insecure-requests;" # force HTTPS for HTTP responses
             )
         return response
+
+def _register_cli(app: Flask) -> None:
+
+    @app.cli.command("init-owner")
+    def init_owner() -> None:
+        with database_connection() as session:
+            from app.modules.auth.models import UserRoleEnum
+            owner_password = os.environ.get("OWNER_PASSWORD")
+            if not owner_password:
+                raise click.ClickException("OWNER_PASSWORD not set")
+            validated = UserRegister(
+                username="owner", password=owner_password, name="Owner", timezone="America/Chicago"
+            )
+            service = AuthService(session, user_repo=UsersRepository(session))
+            try:
+                user = service.register_user(validated, role=UserRoleEnum.OWNER)
+            except ServiceError:
+                raise click.ClickException("User already exists")
+            click.echo(f"Owner user ready: {user.username}")
+
+    @app.cli.command("reset-dev")
+    @click.confirmation_option(prompt="Delete ALL data?")
+    def reset_users() -> None:
+        if current_app.config["APP_ENV"] == "prod":
+            raise click.ClickException("Operation not allowed")
+        with database_connection() as session:
+            delete_all_db_data(session, include_users=True, reset_sequences=True)
+            click.echo("Users reset!")
+
+
+    @app.cli.command("seed")
+    @click.option("--user-id", type=int, required=True)
+    @click.option("--lvl", type=click.Choice(Level, case_sensitive=False), default=Level.MED, required=False)
+    @click.option("--perf", type=click.Choice(Performance, case_sensitive=False), default=Performance.AVERAGE, required=False)
+    def seed(user_id: int, lvl: Level, perf: Performance) -> None:
+        """Seed activity data for a user at a given depth and performance profile."""
+        with database_connection() as session:
+            from app.shared.database.seed.seed_db import seed_data
+            user = session.get(User, user_id)
+            if user is None:
+                raise click.ClickException(f"No user with id {user_id}")
+            try:
+                count = seed_data(session, user_id, lvl, perf)
+            except IntegrityError as e:
+                raise click.ClickException(f"Seed failed on constraint: {e.orig}") from e
+            click.echo(f"Seeded {count} records for {user.username}")
+
+    @app.cli.command("reap")
+    @click.option("--cutoff", type=int, required=True)
+    @with_db_session
+    def reap(session: Session, cutoff: datetime) -> None:
+        dt = dth.now_utc() - timedelta(days=cutoff)
+        repo = UsersRepository(session)
+        count = repo.delete_stale_demo_users(dt)
+        click.echo(f"Reaped {count} demo users!")

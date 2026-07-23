@@ -4,153 +4,197 @@
         "category": "fruits",
         "net_weight": 120,
         "unit_type": "ea",
-        "calories_per_100g": 89
+        "calories_per_100g": 89,
+        "base_price": 0.49,
+        "frequency_weight": 4
     },
     "apple": {
         "name": "Apple",
         "category": "fruits",
         "net_weight": 182,
         "unit_type": "ea",
-        "calories_per_100g": 52
+        "calories_per_100g": 52,
+        "base_price": 1.49,
+        "frequency_weight": 4
     },
     "broccoli": {
-    "name": "Broccoli",
-    "category": "vegetables",
-    "net_weight": 350,
-    "unit_type": "g",
-    "calories_per_100g": 34
+        "name": "Broccoli",
+        "category": "vegetables",
+        "net_weight": 350,
+        "unit_type": "g",
+        "calories_per_100g": 34,
+        "base_price": 1.99,
+        "frequency_weight": 5
     },
     "spinach": {
         "name": "Baby Spinach",
         "category": "vegetables",
         "net_weight": 142,
         "unit_type": "g",
-        "calories_per_100g": 23
+        "calories_per_100g": 23,
+        "base_price": 3.29,
+        "frequency_weight": 5
     },
     "bell_pepper": {
         "name": "Bell Pepper (Red)",
         "category": "vegetables",
         "net_weight": 164,
         "unit_type": "ea",
-        "calories_per_100g": 31
+        "calories_per_100g": 31,
+        "base_price": 1.69,
+        "frequency_weight": 3
     },
     "carrot": {
         "name": "Carrots (bag)",
         "category": "vegetables",
         "net_weight": 453,
         "unit_type": "g",
-        "calories_per_100g": 41
+        "calories_per_100g": 41,
+        "base_price": 1.29,
+        "frequency_weight": 3
     },
     "rice": {
         "name": "White Rice",
         "category": "grains",
         "net_weight": 907,
         "unit_type": "g",
-        "calories_per_100g": 365
+        "calories_per_100g": 365,
+        "base_price": 2.99,
+        "frequency_weight": 2
     },
     "oats": {
         "name": "Rolled Oats",
         "category": "grains",
         "net_weight": 453,
         "unit_type": "g",
-        "calories_per_100g": 389
+        "calories_per_100g": 389,
+        "base_price": 3.99,
+        "frequency_weight": 2
     },
     "bread": {
         "name": "Whole Wheat Bread",
         "category": "bakery",
         "net_weight": 570,
         "unit_type": "g",
-        "calories_per_100g": 247
+        "calories_per_100g": 247,
+        "base_price": 3.49,
+        "frequency_weight": 3
     },
     "milk": {
         "name": "Whole Milk (1 gal)",
         "category": "dairy_eggs",
         "net_weight": 3785,
         "unit_type": "ml",
-        "calories_per_100g": 61
+        "calories_per_100g": 61,
+        "base_price": 3.99,
+        "frequency_weight": 8
     },
     "yogurt": {
         "name": "Greek Yogurt (plain)",
         "category": "dairy_eggs",
         "net_weight": 150,
         "unit_type": "g",
-        "calories_per_100g": 59
+        "calories_per_100g": 59,
+        "base_price": 1.29,
+        "frequency_weight": 5
     },
     "eggs": {
         "name": "Eggs (12ct)",
         "category": "dairy_eggs",
         "net_weight": 12,
         "unit_type": "ea",
-        "calories_per_100g": 155
+        "calories_per_100g": 155,
+        "base_price": 4.49,
+        "frequency_weight": 7
     },
     "cheese": {
         "name": "Cheddar Cheese",
         "category": "dairy_eggs",
         "net_weight": 226,
         "unit_type": "g",
-        "calories_per_100g": 402
+        "calories_per_100g": 402,
+        "base_price": 4.99,
+        "frequency_weight": 2
     },
     "chicken": {
         "name": "Chicken Breast",
         "category": "meats",
         "net_weight": 680,
         "unit_type": "g",
-        "calories_per_100g": 165
+        "calories_per_100g": 165,
+        "base_price": 7.99,
+        "frequency_weight": 6
     },
     "ground_beef": {
         "name": "Ground Beef (80/20)",
         "category": "meats",
         "net_weight": 454,
         "unit_type": "g",
-        "calories_per_100g": 254
+        "calories_per_100g": 254,
+        "base_price": 6.49,
+        "frequency_weight": 3
     },
     "olive_oil": {
         "name": "Olive Oil",
         "category": "fats_oils",
         "net_weight": 473,
         "unit_type": "ml",
-        "calories_per_100g": 884
+        "calories_per_100g": 884,
+        "base_price": 10.99,
+        "frequency_weight": 1
     },
     "butter": {
         "name": "Unsalted Butter",
         "category": "fats_oils",
         "net_weight": 454,
         "unit_type": "g",
-        "calories_per_100g": 717
+        "calories_per_100g": 717,
+        "base_price": 4.49,
+        "frequency_weight": 1
     },
     "black_beans": {
         "name": "Black Beans (can)",
         "category": "legumes",
         "net_weight": 425,
         "unit_type": "g",
-        "calories_per_100g": 91
+        "calories_per_100g": 91,
+        "base_price": 1.09,
+        "frequency_weight": 2
     },
     "chickpeas": {
         "name": "Chickpeas (can)",
         "category": "legumes",
         "net_weight": 400,
         "unit_type": "g",
-        "calories_per_100g": 164
+        "calories_per_100g": 164,
+        "base_price": 1.09,
+        "frequency_weight": 2
     },
     "soy_sauce": {
         "name": "Soy Sauce",
         "category": "condiments_sauces",
         "net_weight": 300,
         "unit_type": "ml",
-        "calories_per_100g": 60
+        "calories_per_100g": 60,
+        "base_price": 3.49,
+        "frequency_weight": 1
     },
     "almonds": {
         "name": "Almonds (raw)",
         "category": "snacks",
         "net_weight": 170,
         "unit_type": "g",
-        "calories_per_100g": 579
+        "calories_per_100g": 579,
+        "base_price": 7.99,
+        "frequency_weight": 1
     },
     "orange_juice": {
         "name": "Orange Juice",
         "category": "beverages",
         "net_weight": 1890,
         "unit_type": "ml",
-        "calories_per_100g": 45
+        "calories_per_100g": 45,
+        "base_price": 4.99,
+        "frequency_weight": 1
     }
 }

@@ -35,6 +35,7 @@ class UserRoleEnum(StrEnum):
     OWNER = auto()
     ADMIN = auto()
     USER = auto()
+    DEMO = auto()
 
 class UnitSystemEnum(StrEnum):
     METRIC = auto()
@@ -76,8 +77,14 @@ class User(Base, UserMixin):  # type: ignore[misc]
         self.password_hash = generate_password_hash(plaintext, salt_length=16)
 
     def check_password(self, provided_password: str) -> bool:
-        """Returns True if provided_password matches stored hash."""
+        if self.password_hash == self.UNUSABLE_PASSWORD:
+            return False
         return check_password_hash(self.password_hash, provided_password)
+
+    UNUSABLE_PASSWORD = "!"
+
+    def set_unusable_password(self) -> None:
+        self.password_hash = self.UNUSABLE_PASSWORD
 
     @property
     def is_owner(self) -> bool:

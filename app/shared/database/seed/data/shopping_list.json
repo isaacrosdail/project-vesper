@@ -1,0 +1,13 @@
+{
+    "name": "Weekly Groceries",
+    "items": [
+        { "product": "milk", "quantity": 1 },
+        { "product": "eggs", "quantity": 2 },
+        { "product": "chicken", "quantity": 2 },
+        { "product": "spinach", "quantity": 1 },
+        { "product": "broccoli", "quantity": 1 },
+        { "product": "yogurt", "quantity": 3 },
+        { "product": "oats", "quantity": 1 },
+        { "product": "almonds", "quantity": 1 }
+    ]
+}
