@@ -20,6 +20,7 @@
     "happy-dom": "^20.8.4",
     "husky": "^9.1.7",
     "inquirer": "^14.0.2",
+    "json-schema-to-typescript": "^15.0.4",
     "stylelint": "^17.0.0",
     "stylelint-config-recess-order": "^7.6.0",
     "stylelint-config-standard": "^40.0.0",
@@ -45,7 +46,8 @@
     "prepare": "husky",
     "test": "bun test && pytest",
     "test:ts": "bun test",
-    "test:python": "pytest"
+    "test:python": "pytest",
+    "gen-types": "PYTHONPATH=. pydantic2ts --module ./app/api/schemas.py --exclude APISchema --exclude APIReadSchema --output ./app/static_src/js/apiTypes.ts"
   },
   "dependencies": {
     "d3": "^7.9.0"

@@ -39,7 +39,10 @@ lint.ignore = [
     "N806",      # silly rule for silly people
     "S311",      # pseudo-random generators not suitable for crypto purposes
 ]
-extend-exclude=["app/api/__init__.py"]
+extend-exclude=[
+    "app/api/__init__.py",
+    "app/api/schemas.py"
+]
 
 [tool.ruff.lint.per-file-ignores]
 "app/api/generic_routes.py" = ["D103", "C901", "PLR0912"]
