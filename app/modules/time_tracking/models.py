@@ -36,8 +36,6 @@ class TimeEntry(Base):
 
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    user = relationship("User", back_populates="time_entry")
-    pillars = relationship("Pillar", secondary=time_entry_pillars, back_populates="time_entries", lazy="selectin")
 
     @property
     def started_at_local(self) -> datetime:
@@ -46,6 +44,7 @@ class TimeEntry(Base):
     @property
     def ended_at_local(self) -> datetime:
         return convert_to_timezone(self.user.timezone, self.ended_at)
+    pillars: Mapped[list[Pillar]] = relationship("Pillar", secondary=time_entry_pillars, back_populates="time_entries", lazy="selectin")
 
     def __repr__(self) -> str:
         return f"<TimeEntry id={self.id} category='{self.category}' started_at={self.started_at}>"

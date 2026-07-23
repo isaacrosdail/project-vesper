@@ -1,25 +1,27 @@
 """
 Model definitions for Habits module.
 """
+from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime  # noqa: TC003
 from enum import StrEnum, auto
 
 from sqlalchemy import (
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
     Index,
     String,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy import Enum as SAEnum, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
-from app.shared.datetime_.helpers import convert_to_timezone
-from app.shared.models import Pillar, habit_pillars, habit_tags
+from app.shared.models import Pillar, Tag, habit_pillars, habit_tags
 
 HABIT_NAME_MAX_LENGTH = 100
 LC_TITLE_MAX_LENGTH = 200
@@ -55,20 +57,19 @@ class Habit(Base):
     # Represents target completion rate per week
     target_frequency: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    @property
-    def established_date_local(self) -> datetime | None:
-        return (
-            convert_to_timezone(self.user.timezone, self.established_date)
-            if self.established_date
-            else None
-        )
 
-    user = relationship("User", back_populates="habits")
-    tags = relationship("Tag", secondary=habit_tags, back_populates="habits")
-    pillars = relationship("Pillar", secondary=habit_pillars, back_populates="habits", lazy="selectin")
-    habit_completions = relationship(
-        "HabitCompletion", back_populates="habit", cascade="all, delete-orphan"
+    tags: Mapped[list[Tag]] = relationship("Tag", secondary=habit_tags, back_populates="habits", lazy="selectin")
+    pillars: Mapped[list[Pillar]] = relationship(
+        "Pillar", secondary=habit_pillars, back_populates="habits", lazy="selectin"
     )
+    completions: Mapped[list[HabitCompletion]] = relationship(
+        "HabitCompletion", back_populates="habit", cascade="all, delete-orphan", lazy="raise",
+        passive_deletes=True
+    )
+
+    @property
+    def is_promotable(self) -> bool:
+        return self.status is not None
 
     def __str__(self) -> str:
         return self.name

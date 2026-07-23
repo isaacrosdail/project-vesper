@@ -117,7 +117,6 @@ class Task(Base, CustomBaseTaskMixin):
             else None
         )
 
-    user = relationship("User", back_populates="tasks")
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
     def is_overdue(self, now: datetime) -> bool:

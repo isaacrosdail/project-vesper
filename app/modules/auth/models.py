@@ -65,19 +65,8 @@ class User(Base, UserMixin):  # type: ignore[misc]
         String(TIMEZONE_MAX_LENGTH), nullable=False
     )
 
-    profile: Mapped[UserProfile] = relationship("UserProfile", back_populates="user", lazy="joined")
-    goals: Mapped[UserGoals] = relationship("UserGoals", back_populates="user", lazy="joined")
-
-    habits = relationship("Habit", back_populates="user")
-    tasks = relationship("Task", back_populates="user")
-    daily_metrics = relationship("DailyMetrics", back_populates="user")
-    products = relationship("Product", back_populates="user")
-    transactions = relationship("Transaction", back_populates="user")
-    shopping_list = relationship("ShoppingList", back_populates="user")
-    shopping_list_item = relationship("ShoppingListItem", back_populates="user")
-    recipes = relationship("Recipe", back_populates="user")
-    time_entry = relationship("TimeEntry", back_populates="user")
-    habit_completion = relationship("HabitCompletion", back_populates="user")
+    profile: Mapped[UserProfile] = relationship("UserProfile", back_populates="user", lazy="joined", cascade="all, delete-orphan")
+    goals: Mapped[UserGoals] = relationship("UserGoals", back_populates="user", lazy="joined", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<User id={self.id} username: {self.username} role={self.role}>"

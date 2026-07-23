@@ -72,7 +72,6 @@ class DailyMetrics(Base):
             else None
         )
 
-    user = relationship("User", back_populates="daily_metrics")
 
     def __repr__(self) -> str:
         return f"<DailyMetrics id={self.id} created_at={self.created_at}>"

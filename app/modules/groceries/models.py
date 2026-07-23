@@ -1,4 +1,6 @@
 # Handles DB models for grocery module
+from __future__ import annotations
+
 from datetime import datetime, time
 from decimal import Decimal
 from enum import StrEnum, auto
@@ -161,15 +163,14 @@ class Product(Base):
 
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    user = relationship("User", back_populates="products")
-    inventory: Mapped["ProductInventory"] = relationship(back_populates="product")
-    ledger_entries: Mapped[list["InventoryLedger"]] = relationship(back_populates="product")
 
-    def __str__(self) -> str:
-        return f"{self.name} ({self.barcode})"
+    inventory: Mapped[ProductInventory] = relationship(back_populates="product")
 
     def __repr__(self) -> str:
         return f"<Product id={self.id} name='{self.name}' barcode='{self.barcode}'>"
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.barcode})"
 
 
 class ShoppingTrip(Base):
@@ -199,41 +200,40 @@ class Transaction(Base):
         Index("ix_transactions_user_created_at", "user_id", "created_at"),
     )
 
-    product_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("products.id"), nullable=False
-    )
-
-    shopping_trip_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("shopping_trips.id"), nullable=True
-    )
-
     price_at_scan: Mapped[Decimal] = mapped_column(
         Numeric(PRICE_PRECISION, PRICE_SCALE), nullable=False
     )
-
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    user = relationship("User", back_populates="transactions")
-    product = relationship("Product", lazy="joined")
-    shopping_trip: Mapped["ShoppingTrip | None"] = relationship(back_populates="transactions")
+
+    product_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("products.id"), nullable=False
+    )
+    shopping_trip_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("shopping_trips.id", ondelete="SET NULL"), nullable=True
+    )
+
+    product: Mapped[Product] = relationship("Product", lazy="joined")
+    shopping_trip: Mapped[ShoppingTrip | None] = relationship(back_populates="transactions")
 
     @property
-    def product_name(self) -> str | None:
-        return self.product.name if self.product else None
+    def product_name(self) -> str:
+        return self.product.name
+
+    @property
+    def net_weight(self) -> Decimal:
+        return self.product.net_weight
+
+    @property
+    def unit_type(self) -> UnitEnum:
+        return self.product.unit_type
 
     @property
     def price_per_100g(self) -> Decimal:
-        weight_decimal = Decimal(str(self.product.net_weight))
-        return (self.price_at_scan / weight_decimal) * 100
-
-    def __str__(self) -> str:
-        product_name = (
-            self.product.name if self.product else f"Product #{self.product_id}"
-        )
-        return f"Transaction:{self.id}: {self.quantity}x {product_name} @ {self.price_at_scan}"
+        return (self.price_at_scan / self.product.net_weight) * 100
 
     def __repr__(self) -> str:
-        return f"<Transaction id={self.id} product_id={self.product_id}>"
+        return f"<Transaction id={self.id} product_id={self.product_id} qty={self.quantity} @ {self.price_at_scan}>"
 
 
 class ShoppingList(Base):
@@ -247,11 +247,13 @@ class ShoppingList(Base):
         String(SHOPPING_LIST_NAME_MAX_LENGTH), default="Current List"
     )
 
-    user = relationship("User", back_populates="shopping_list")
-    items = relationship("ShoppingListItem", back_populates="shopping_list", lazy="raise")
+    items: Mapped[list[ShoppingListItem]] = relationship(
+        "ShoppingListItem", back_populates="shopping_list", lazy="raise",
+        cascade="all, delete-orphan", passive_deletes=True,
+    )
 
     def __repr__(self) -> str:
-        return f"<ShoppingList id={self.id} name={self.name} items_count={len(self.items)}>"
+        return f"<ShoppingList id={self.id} name={self.name}>"
 
 
 class ShoppingListItem(Base):
@@ -272,19 +274,30 @@ class ShoppingListItem(Base):
     is_checked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
 
     shopping_list_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("shopping_lists.id"), nullable=False
+        Integer, ForeignKey("shopping_lists.id", ondelete="CASCADE"), nullable=False
     )
 
     product_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("products.id"), nullable=False
     )
 
-    user = relationship("User", back_populates="shopping_list_item")
-    shopping_list = relationship("ShoppingList", back_populates="items")
-    product = relationship("Product", lazy="joined")
+    shopping_list: Mapped[ShoppingList] = relationship("ShoppingList", back_populates="items")
+    product: Mapped[Product] = relationship("Product", lazy="joined")
+
+    @property
+    def product_name(self) -> str:
+        return self.product.name
+
+    @property
+    def net_weight(self) -> Decimal:
+        return self.product.net_weight
+
+    @property
+    def unit_type(self) -> UnitEnum:
+        return self.product.unit_type
 
     def __repr__(self) -> str:
-        return f"<ShoppingListItem id={self.id} product={self.product.name!r} qty={self.quantity_wanted}>"
+        return f"<ShoppingListItem id={self.id} product_id={self.product_id} qty={self.quantity_wanted}>"
 
 
 class Recipe(Base):
@@ -313,13 +326,14 @@ class Recipe(Base):
         server_default="g"
     )
 
-    user = relationship("User", back_populates="recipes")
-    ingredients = relationship(
+    ingredients: Mapped[list[RecipeIngredient]] = relationship(
         "RecipeIngredient",
         back_populates="recipe",
         cascade="all, delete-orphan",
-        lazy="raise"
+        passive_deletes=True,
+        lazy="selectin"
     )
+
 
 class RecipeIngredient(Base):
     """Represents single ingredient in a given Recipe (list)"""
@@ -331,18 +345,9 @@ class RecipeIngredient(Base):
         ),
     )
 
-    recipe_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("recipes.id"), nullable=False
-    )
-
-    product_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("products.id"), nullable=False
-    )
-
     amount_value: Mapped[Decimal] = mapped_column(
         Numeric(12, 3), nullable=False
     )
-
     amount_units: Mapped[UnitEnum] = mapped_column(
         SAEnum(
             UnitEnum, name="unit_enum", values_callable=lambda x: [e.value for e in x]
@@ -352,8 +357,19 @@ class RecipeIngredient(Base):
         server_default="g"
     )
 
-    recipe = relationship("Recipe", back_populates="ingredients")
-    product = relationship("Product", lazy="joined")
+    recipe_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False
+    )
+    product_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("products.id"), nullable=False
+    )
+
+    recipe: Mapped[Recipe] = relationship("Recipe", back_populates="ingredients")
+    product: Mapped[Product] = relationship("Product", lazy="joined")
+
+    @property
+    def product_name(self) -> str:
+        return self.product.name
 
     @property
     def grams(self) -> Decimal:
@@ -424,11 +440,6 @@ class NutritionLog(Base):
         Index("ix_nutrition_logs_user_entry_datetime", "user_id", "entry_datetime"),
     )
 
-    # Optionally tied to a given recipe, for "cooking" meals
-    # ondelete:  NutritionLogs don't depend on Recipes in the same way that Transactions do Products
-    # recipe_id is simply lineage, so SET NULL should work here
-    recipe_id: Mapped[int | None] = mapped_column(ForeignKey("recipes.id", ondelete="SET NULL"), nullable=True)
-
     entry_datetime: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
@@ -452,6 +463,9 @@ class NutritionLog(Base):
 
     sodium: Mapped[float | None] = mapped_column(Float, nullable=True)
     potassium: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Optionally tied to a given recipe, for "cooking" meals
+    recipe_id: Mapped[int | None] = mapped_column(ForeignKey("recipes.id", ondelete="SET NULL"), nullable=True)
 
     def __repr__(self) -> str:
         return f"<NutritionLog id={self.id} entry={self.entry_datetime} calories={self.calories} meal={self.meal}"
@@ -480,20 +494,7 @@ class InventoryLedger(Base):
     )
 
     entry_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-
-    # TODO:
-    # set null, bc the moment delete_txn tries to delete a txn that has linked ledger rows,
-    #    the db would refuse with an FK violation?
-    # ondelete="SET NULL" = "when the ref'ed txns row is deleted, set this col to NULL on every
-    #   row that pointed at it."
-    transaction_id: Mapped[int | None] = mapped_column(ForeignKey("transactions.id", ondelete="SET NULL"), nullable=True)
-    # product_id fkey
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
-    product: Mapped[Product] = relationship(back_populates="ledger_entries", lazy="joined")
-    # qty_delta (negative for consumption)
-    # This now becomes a Decimal - we're storing qty_delta in master base units
-    #  of the given product (either g or ml) (changing net_weight on products later then
-    # wouldn't invalidate the ledger values)
+    # Stored in base units (g/ml)
     qty_delta: Mapped[Decimal] = mapped_column(Numeric(QTY_PRECISION, QTY_SCALE), nullable=False)
     # event_type (enum: purchase, correction, waste, consumption)
     event_type: Mapped[InventoryLedgerEventTypeEnum] = mapped_column(
@@ -505,6 +506,11 @@ class InventoryLedger(Base):
     # note (optional obv, "expired" for waste events)
     note: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
+    transaction_id: Mapped[int | None] = mapped_column(ForeignKey("transactions.id", ondelete="SET NULL"), nullable=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+
+    product: Mapped[Product] = relationship(lazy="joined")
+
 
 class ProductInventory(Base):
     # Cached current inventory state
@@ -512,11 +518,11 @@ class ProductInventory(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "product_id", name="uq_product_inventory_user_product"),
     )
-    # product_id fkkey, unique per user
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False) # unique so each product has ONE inventory record ofc
-    product: Mapped[Product] = relationship(back_populates="inventory", lazy="joined") # one-to-one, sqlalchemy infers cardinality from the type annotation: thing vs list[thing]
-    # qty_on_hand (current stock ofc)
-    # Needs to mirror InventoryLedger's qty_delta being in "200g" form, NOT count
-    # So this'll become a Numeric, same at InventoryLedger's qty_delta,
-    #  as it is to be a cached SUM(qty_delta)
+
+    # Stored in base units (g/ml)
     qty_on_hand: Mapped[Decimal] = mapped_column(Numeric(QTY_PRECISION, QTY_SCALE), nullable=False)
+
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+
+    product: Mapped[Product] = relationship(back_populates="inventory", lazy="joined")
+
