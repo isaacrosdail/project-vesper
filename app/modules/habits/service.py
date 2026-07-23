@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.modules.habits.schemas import HabitPatch as HabitUpdate
 
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from itertools import pairwise
 from zoneinfo import ZoneInfo
 
@@ -94,12 +94,12 @@ class HabitsService:
         habit.pillars = self.pillar_repo.get_by_ids(pillar_ids)
 
 
-    def save_completion(self, habit_id: int, completed_at: datetime) -> tuple[HabitCompletion, dict[str, Any]]:
+    def save_completion(self, habit_id: int, completed_on: date) -> tuple[HabitCompletion, dict[str, Any]]:
         habit = self.habit_repo.get_by_id(habit_id)
         if not habit:
             raise ServiceError("Habit not found", 404)
 
-        completion = self.completion_repo.create_habit_completion(habit.id, completed_at)
+        completion = self.completion_repo.create_habit_completion(habit.id, completed_on)
         self.session.flush()
 
         self.check_promotion(habit)
@@ -108,16 +108,16 @@ class HabitsService:
 
     def delete_completion(self, habit_id: int, date_str: str) -> dict[str, Any]:
         if date_str == "today":
-            start_utc, end_utc = dth.today_range_utc(self.user_tz)
+            day = datetime.now(ZoneInfo(self.user_tz)).date()
         else:
-            parsed_date = date.fromisoformat(date_str)
-            start_utc, end_utc = dth.day_range_utc(parsed_date, self.user_tz)
+            day = date.fromisoformat(date_str)
+            # start_utc, end_utc = dth.day_range_utc(parsed_date, self.user_tz)
 
-        completion = self.completion_repo.get_habit_completion_in_window(habit_id, start_utc, end_utc)
+        completion = self.completion_repo.get_in_window(day, day + timedelta(days=1), habit_id=habit_id)
         if not completion:
             raise ServiceError("No completion found", 404)
 
-        self.completion_repo.delete(completion)
+        self.completion_repo.delete(completion[0])
         # self.check_promotion(habit) # would we un-promote a habit?
         return self.calculate_all_habits_percentage_this_week()
 
@@ -132,8 +132,7 @@ class HabitsService:
         completions = self.completion_repo.get_all_habit_completions(
             habit_id, order_desc=True
         )
-        tz = ZoneInfo(self.user_tz)
-        dates = [c.completed_at.astimezone(tz).date() for c in completions]
+        dates = [c.completed_on for c in completions]
         return self.streak_calc.current_streak(dates)
 
         # if not habit_completions:
@@ -166,10 +165,8 @@ class HabitsService:
 
         # Group by habit_id
         by_habit = defaultdict(list)
-        tz = ZoneInfo(self.user_tz)
         for c in completions:
-            # local_date = c.created_at_local.date()
-            by_habit[c.habit_id].append(c.completed_at.astimezone(tz).date())
+            by_habit[c.habit_id].append(c.completed_on)
 
         return {
             habit_id: self.streak_calc.current_streak(sorted(dates, reverse=True))
@@ -240,11 +237,11 @@ class HabitsService:
         """
         Return True if the user completed the given habit today (according to local timezone).
         """
-        start_utc, end_utc = dth.today_range_utc(self.user_tz)
-        completion = self.completion_repo.get_habit_completion_in_window(
-            habit_id, start_utc, end_utc
+        day = dth.user_today(self.user_tz)
+        completions = self.completion_repo.get_in_window(
+            day, day + timedelta(days=1), habit_id=habit_id
         )
-        return completion is not None
+        return bool(completions)
 
     # NOTE: "Percent completion habits this week" - Mon to Sun
     # TODO: Fix this up
@@ -256,19 +253,12 @@ class HabitsService:
         total expected completions based on each habit's target frequency, and the resulting completion percentage.
         """
         # Determine current day in the week
-        today = datetime.now(ZoneInfo(self.user_tz))
-        days_into_week = today.weekday() + 1  # offset: incl today as day # 1
-
-        # start_of_week = today - timedelta(days=today.weekday())
-        start_of_week_utc, end_of_today_utc = dth.last_n_days_range(
-            days_into_week, self.user_tz
-        )
+        today = dth.user_today(self.user_tz)
+        start_of_week = today - timedelta(days=today.weekday())
 
         # Fetch completions in that time range
         total_completions = len(
-            self.completion_repo.get_all_completions_in_window(
-                start_of_week_utc, end_of_today_utc
-            )
+            self.completion_repo.get_in_window(start_of_week, today + timedelta(days=1))
         )
 
         # Expected_completions is sum of target_frequency for all
@@ -292,11 +282,8 @@ class HabitsService:
         # TODO: fetches all completion records for user
         completion_records = self.completion_repo.get_all()
 
-        # convert completed_at's to local date -> list of completion counts per date
-        completion_records_local = [
-            dth.convert_to_timezone(self.user_tz, entry.completed_at).date()
-            for entry in completion_records
-        ]
+        # convert completed_on's to local date -> list of completion counts per date
+        completion_records_local = [entry.completed_on for entry in completion_records]
 
         # group by local date + count completions per day, make dataframe from list:
         df = pd.DataFrame({ "date": completion_records_local })

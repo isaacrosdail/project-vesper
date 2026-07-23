@@ -64,12 +64,12 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
         super().__init__(session, user_id, model_cls=HabitCompletion)
 
     def create_habit_completion(
-        self, habit_id: int, completed_at: datetime
+        self, habit_id: int, completed_on: date
     ) -> HabitCompletion:
         habit_completion = HabitCompletion(
             user_id=self.user_id,
             habit_id=habit_id,
-            completed_at=completed_at
+            completed_on=completed_on
         )
         return self.add(habit_completion)
 
@@ -80,76 +80,44 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             HabitCompletion.habit_id == habit_id
         )
         if order_desc:
-            stmt = stmt.order_by(HabitCompletion.completed_at.desc())
+            stmt = stmt.order_by(HabitCompletion.completed_on.desc())
         return list(self.session.scalars(stmt).all())
 
-    def get_habit_completion_in_window(
-        self, habit_id: int, start_utc: datetime, end_utc: datetime
-    ) -> HabitCompletion | None:
-        """Return HabitCompletion for a given habit on a given day, scoped to current user."""
-        stmt = (
-            select(HabitCompletion)
-            .join(Habit, Habit.id == HabitCompletion.habit_id)
-            .where(
-                HabitCompletion.habit_id == habit_id,
-                HabitCompletion.completed_at >= start_utc,
-                HabitCompletion.completed_at < end_utc,
-                Habit.user_id == self.user_id,
-            )
+    def get_in_window(
+        self,
+        start_date: date,
+        end_date: date,
+        *,
+        habit_id: int | None = None
+    ) -> list[HabitCompletion]:
+        """Return all completions on [start_date, end_date) interval."""
+        stmt = self._user_select(HabitCompletion).where(
+            HabitCompletion.completed_on >= start_date,
+            HabitCompletion.completed_on < end_date,
         )
-        return self.session.scalars(stmt).first()
+        if habit_id is not None:
+            stmt = stmt.where(
+                HabitCompletion.habit_id == habit_id
+            )
+        return list(self.session.scalars(stmt).all())
 
-    def get_completion_counts_in_window(self, start_utc: datetime, end_utc: datetime) -> list[dict[str, Any]]:
+
+    def get_completion_counts_in_window(self, start_date: date, end_date: date) -> list[dict[str, Any]]:
         stmt = (
-                select(func.date(HabitCompletion.completed_at).label("date"), func.count().label("count"))
+                select(HabitCompletion.completed_on.label("date"), func.count().label("count"))
                 .where(
                     HabitCompletion.user_id == self.user_id,
-                    HabitCompletion.completed_at >= start_utc,
-                    HabitCompletion.completed_at < end_utc
+                    HabitCompletion.completed_on >= start_date,
+                    HabitCompletion.completed_on < end_date
                 )
-                .group_by(func.date(HabitCompletion.completed_at))
+                .group_by(HabitCompletion.completed_on)
             )
         results = self.session.execute(stmt).all()
         return [{ "date": str(row.date), "count": row.count } for row in results]
 
-    ## All for a given habit
-    def get_all_single_habit_completions_in_window(
-        self, habit_id: int, start_utc: datetime, end_utc: datetime
-    ) -> list[HabitCompletion]:
-        stmt = (
-            select(HabitCompletion)
-            .join(Habit, Habit.id == HabitCompletion.habit_id)
-            .where(
-                Habit.id == habit_id,
-                Habit.user_id == self.user_id,
-                HabitCompletion.completed_at >= start_utc,
-                HabitCompletion.completed_at < end_utc,
-            )
-        )
-        return list(self.session.scalars(stmt).all())
-
-    ## ALL habits in general
-    ## TODO: Even necessary? or should use the generic in window now?
-    def get_all_completions_in_window(
-        self, start_utc: datetime, end_utc: datetime
-    ) -> list[HabitCompletion]:
-        # stmt = (
-        #     select(HabitCompletion)
-        #     .join(Habit, Habit.id == HabitCompletion.habit_id) # TODO: stupid join?
-        #     .where(
-        #         Habit.user_id == self.user_id,
-        #         HabitCompletion.created_at >= start_utc,
-        #         HabitCompletion.created_at < end_utc,
-        #     )
-        # )
-        stmt = self._user_select(HabitCompletion).where(
-            HabitCompletion.completed_at >= start_utc,
-            HabitCompletion.completed_at < end_utc,
-        )
-        return list(self.session.scalars(stmt).all())
 
     def get_completion_counts_by_habit_in_window(
-        self, start_utc: datetime, end_utc: datetime
+        self, start_date: date, end_date: date
     ) -> list[dict[str, str | int]]:
         """Returns a list of (habit_name, count, target_frequency) dicts for completions in datetime range.
         Grouped by habit name, and in descending order by completion count.
@@ -164,8 +132,8 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             .join(Habit)
             .where(
                 Habit.user_id == self.user_id,
-                HabitCompletion.completed_at >= start_utc,
-                HabitCompletion.completed_at < end_utc,
+                HabitCompletion.completed_on >= start_date,
+                HabitCompletion.completed_on < end_date,
             )
             .group_by(Habit.name, Habit.target_frequency)
             .order_by(func.count(HabitCompletion.id).desc())
@@ -176,19 +144,19 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             for row in result
         ]  # unwrap each SQLAlchemy Row into a list of dicts
 
-    def get_completion_counts_by_week_in_window(self, habit_id: int, start_utc: datetime, end_utc: datetime) -> list[tuple[int, int]]:
+    def get_completion_counts_by_week_in_window(self, habit_id: int, start_date: date, end_date: date) -> list[tuple[datetime, int]]:
         # filter by habit_id and date range, group by (week, count)
         stmt = (
             select(
-                func.extract("week", HabitCompletion.completed_at),
+                func.date_trunc("week", HabitCompletion.completed_on),
                 func.count()
             )
             .where(
                 HabitCompletion.user_id == self.user_id,
                 HabitCompletion.habit_id == habit_id,
-                HabitCompletion.completed_at >= start_utc,
-                HabitCompletion.completed_at < end_utc
+                HabitCompletion.completed_on >= start_date,
+                HabitCompletion.completed_on < end_date
             )
-            .group_by(func.extract("week", HabitCompletion.completed_at))
+            .group_by(func.date_trunc("week", HabitCompletion.completed_on))
         )
         return list(self.session.execute(stmt).all())

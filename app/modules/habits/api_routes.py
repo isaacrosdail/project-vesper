@@ -80,9 +80,9 @@ def add_completion(session: Session, habit_id: int) -> tuple[Response, int]:
     habits_service = create_habits_service(
         session, current_user.id, current_user.timezone
     )
-    completed_at = dth.parse_js_instant(request.get_json()["completed_at"])
+    completed_on = date.fromisoformat(request.get_json()["completed_on"])
 
-    completion, progress = habits_service.save_completion(habit_id, completed_at)
+    completion, progress = habits_service.save_completion(habit_id, completed_on)
     return api_response(
         success=True,
         message="Habit marked complete",

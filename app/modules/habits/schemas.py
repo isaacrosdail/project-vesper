@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import Field, field_validator, AwareDatetime
@@ -44,12 +44,12 @@ class HabitRead(APIReadSchema):
 
 
 class HabitCompletionCreate(APISchema):
-    completed_at: AwareDatetime
+    completed_on: date
 
 class HabitCompletionRead(APIReadSchema):
     id: int
     habit_id: int
-    completed_at: datetime
+    completed_on: date
     created_at: datetime
     subtype: Literal['habit_completions']
 

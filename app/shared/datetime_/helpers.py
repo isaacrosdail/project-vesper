@@ -22,6 +22,8 @@ def now_utc() -> datetime:
     """Return the current UTC datetime."""
     return datetime.now(ZoneInfo("UTC"))
 
+def user_today(tz_str: str) -> date:
+    return datetime.now(ZoneInfo(tz_str)).date()
 
 def now_in_timezone(tz_str: str) -> datetime:
     """Return the current datetime in the given timezone."""

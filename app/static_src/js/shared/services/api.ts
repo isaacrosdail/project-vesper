@@ -132,13 +132,11 @@ class ApiClient {
     }
 
     habitCompletions = {
-        post: (habitId: number) => this.request<HabitCompletion>('POST', `/habits/${habitId}/completions`, {
-            completed_at: getJSInstant()
+        post: (habitId: number) => this.request<HabitCompletionRead>('POST', `/habits/${habitId}/completions`, {
+            completed_on: todayUser().toString()
         }),
         deleteToday: (habitId: string) => {
-            const today = new Intl.DateTimeFormat('en-CA', {
-                timeZone: userStore.data.timezone
-            }).format(new Date());
+            const today = todayUser().toString();
             return this.request('DELETE', `/habits/${habitId}/completions?date=${today}`);
         },
         summary: (params: URLSearchParams) => this.request('GET', `/habits/habit_completions/summary?${params}`),

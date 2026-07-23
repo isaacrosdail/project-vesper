@@ -81,20 +81,20 @@ class HabitCompletion(Base):
     """Stores each completion as a new entry, enabling better analytics."""
 
     __table_args__ = (
-        Index("ix_habit_completions_user_habit_completed_at", "user_id", "habit_id", "completed_at"),
-    )
-    habit_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("habits.id"), nullable=False
+        Index("ix_habit_completions_user_habit_completed_on", "user_id", "habit_id", "completed_on"),
+        UniqueConstraint("habit_id", "completed_on", name="uq_habit_completions_habit_id_completed_on"),
     )
 
-    completed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+    completed_on: Mapped[date] = mapped_column(
+        Date,
         nullable=False,
-        server_default=func.now()
     )
 
-    user = relationship("User", back_populates="habit_completion")
-    habit = relationship("Habit", back_populates="habit_completions")
+    habit_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("habits.id", ondelete="CASCADE"), nullable=False
+    )
+
+    habit: Mapped[Habit] = relationship("Habit", back_populates="completions")
 
     def __repr__(self) -> str:
         return f"<HabitCompletion id={self.id} habit_id={self.habit_id}>"
