@@ -1,102 +1,73 @@
+import { Temporal } from 'temporal-polyfill';
 import { userStore } from './services/userStore';
 
+// TODO(dt): How to use hour_cycle to inform these too?
+
+const _userTZ = (): string => 
+    userStore.data.timezone;
 
 // For UTC now -> backend primarily
-export const getJSInstant = (): string =>
-    new Date().toISOString(); // Always UTC "..Z"
+// rename -> nowISO
+export const nowISO = (): string =>
+    Temporal.Now.instant().toString();
 
 
-export function getUserTodayDate(): string {
-    return new Intl.DateTimeFormat('en-CA', {
-        timeZone: userStore.data.timezone
-    }).format(new Date());
-}
-
+export const todayUser = (): Temporal.PlainDate =>
+    Temporal.Now.plainDateISO(_userTZ());
 
 // UTC ISO string -> user's date - for comparisons
-export function isoToUserDate(iso: string): string {
-    return formatToUserTimeString(new Date(iso), {
-        year: 'numeric', month: '2-digit', day: '2-digit'
-    });
-}
-
-export function isoDaysAgo(n: number): string {
-    const d = new Date();
-    d.setDate(d.getDate() - n); // NOTE: local date math
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
+// rename -> userDay
+// Callers now do toString() as needed.
+export const userDay = (iso: string | Date): Temporal.PlainDate => {
+    const d = typeof iso === 'string' ? iso : Temporal.Instant.fromEpochMilliseconds(iso.getTime())
+    return Temporal.Instant.from(d).toZonedDateTimeISO(_userTZ()).toPlainDate()
 }
 
 // Rolling [today - (rangeDays - 1), today]
 export function rangeLabel(rangeDays: number): string {
-    const tz = userStore.data.timezone;
-    const [end, start] = [new Date(), new Date()];
-    start.setDate(start.getDate() - (rangeDays - 1));
-
-    const md = (d: Date) => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', timeZone: tz }).format(d);
-    const year = new Intl.DateTimeFormat(undefined, { year: 'numeric', timeZone: tz }).format(end);
-
-    return `${md(start)} - ${md(end)}, ${year}`;
+    const start = todayUser().subtract({ days: rangeDays });
+    const end = todayUser();
+    return `${fmtDate(start)} - ${fmtDate(end)}, ${end.year}`;
 }
 
 // UTC ISO string -> display "Mar 18"
-export function displayDate(iso: string) {
-    return formatToUserTimeString(new Date(iso), {
-        month: 'short', day: 'numeric'
-    });
+// rename -> fmtDate(iso | PlainDate) => "Mar 18"
+export const fmtDate = (d: string | Temporal.PlainDate): string => {
+    const day = typeof d === 'string' ? userDay(d) : d;
+    return day.toLocaleString(undefined, { month: 'short', day: 'numeric' }) // undefned - browser's locale
 }
 
 // UTC ISO string -> display "Mar 18, 3:45 PM"
-export function displayDateTime(iso: string): string {
-    return formatToUserTimeString(new Date(iso), {
+export const fmtDateTime = (iso: string): string =>
+    Temporal.Instant.from(iso).toZonedDateTimeISO(_userTZ()).toLocaleString(undefined, {
         month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+        hour: 'numeric', minute: '2-digit'
+    });
+
+// "15:45"
+export const fmtTime = (d: string | Date): string => {
+    const t = typeof d === 'string' ? d : Temporal.Instant.fromEpochMilliseconds(d.getTime());
+    return Temporal.Instant.from(t).toZonedDateTimeISO(_userTZ()).toLocaleString(undefined, {
+        timeStyle: 'short'
     });
 }
 
-
-function fromISO(iso: string): Date {
-    if (!iso.endsWith('Z') && !iso.match(/[+-]\d{2}:\d{2}$/)) {
-        throw new Error(`Invalid ISO string (missing timezone): ${iso}`);
-    }
-    return new Date(iso);
+// "Mar 18, 2026"
+export const fmtDateYear = (d: string | Temporal.PlainDate): string => {
+    const date = typeof d === 'string' ? userDay(d) : d;
+    return date.toLocaleString(undefined, {
+        month: 'short', day: 'numeric', year: 'numeric'
+    })
 }
 
-/**
- * Validates an ISO 8601 string includes timezone information.
- *
- * @param isoString - ISO 8601 datetime string to validate.
- * @returns True if string has 'Z' or explicit offset (eg, '-5:00')
- */
-function isTZAwareISO(isoString: string): boolean {
-    // Note: Still learning RegEx, so this is firmly a work-in-progress point
-    const hasUTCIndicator = /Z$/;
-    const hasExplicitOffset = /[+-]\d{2}:\d{2}$/;
-
-    return hasUTCIndicator.test(isoString) || hasExplicitOffset.test(isoString);
-}
-
-
-/**
- * Formats a Date object to be in the current user's timezone.
- *
- * @param date - Date to format
- * @param opts - Intl formatting options (defaults to HH:MM format)
- * @param hour12 - Use 12h format instead of 24h (default: 12h)
- */
-export function formatToUserTimeString(
-    date: Date,
-    opts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' }, // default to "HH:MM"
-    hour12: boolean = false // could override with user region? OR possible userTimeFormat setting
-): string {
-    // format using userStore.data.timezone
-    const formatter = new Intl.DateTimeFormat('en-CA', { // gives ISO -> "2025-10-04"
-        ...opts, // spread operator - takes every key-value pair in opts, copy them into new object, then override/add timeZone
-        hour12,
-        timeZone: (userStore.state === 'loaded' && userStore.data?.timezone) ? userStore.data.timezone : 'UTC',
+// "2026-07-22T15:45"
+export const toDateTimeLocalValue = (iso: string): string =>
+    Temporal.Instant.from(iso).toZonedDateTimeISO(_userTZ()).toPlainDateTime().toString({
+        smallestUnit: 'minute'
     });
-    return formatter.format(date); // eg, "03:45"
-}
 
+
+export const toTypeTimeInputValue = (iso: string): string =>
+    Temporal.Instant.from(iso).toZonedDateTimeISO(_userTZ()).toPlainTime().toString({
+        smallestUnit: 'minute'
+    });
