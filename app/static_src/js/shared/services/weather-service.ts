@@ -1,12 +1,13 @@
+import { Temporal } from 'temporal-polyfill';
+import type { WeatherResult } from '../../types';
+import { fmtTime } from '../datetime';
 import { makeToast } from '../ui/toast';
-import { WeatherResult } from '../../types';
-import { formatToUserTimeString } from '../datetime';
 
 export async function fetchWeatherData(city: string, country: string, units: string): Promise<WeatherResult> {
 
     try {
         const response = await fetch(`/api/weather/${city}/${country}/${units}`);
-        const weatherData = await response.json();
+        const { data: weatherData } = await response.json();
 
         if (!response.ok) {
             throw new Error(`Weather API failed: ${response.status}`);
@@ -33,11 +34,9 @@ export async function fetchWeatherData(city: string, country: string, units: str
             tornado: 'icon-weather-tornado',
             "clear sky": 'icon-weather-clear'
         }
-        const emoji = weatherIcons[desc] ?? '🌡️'; // TODO: fix, use svg instead or just nothing?
-        
-        // Convert sunset time to date & local (TODO: Use helpers?)
-        const sunsetTime = new Date(sunset * 1000); // Unix-style, so convert first
-        const sunsetFormatted = formatToUserTimeString(sunsetTime);
+        const emoji = weatherIcons[desc] ?? '🌡️'; // TODO: fix, use svg instead or just nothing?        
+        const sunsetTime = Temporal.Instant.fromEpochMilliseconds(sunset * 1000);
+        const sunsetFormatted = fmtTime(sunsetTime.toString());
 
         return { temp, emoji, sunsetFormatted, sunrise, sunset };
 
