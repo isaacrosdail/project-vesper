@@ -1,4 +1,4 @@
-// Entrypoint for esbuild
+// Entrypoint for builds
 
 import { initMain } from './main';
 

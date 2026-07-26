@@ -71,12 +71,23 @@ def create_app(config_name: str | None = None) -> Flask:
 
     return app
 
+
 def _read_manifest(app: Flask) -> dict[str, str]:
-    path = Path(app.static_folder) / "manifest.json"
+    if app.config["APP_ENV"] == "dev":
+        return {} ## dev serves assets from vite dev server; manifest is for builds
+    path = Path(app.static_folder) / ".vite" / "manifest.json"
     try:
-        return json.loads(path.read_text())
+        raw = json.loads(path.read_text())
     except FileNotFoundError:
         return {}
+    entry = raw["app/static_src/js/app.ts"]
+    flat = {
+        "js/app": entry["file"],
+        "css/app": raw["app/static_src/css/app.css"]["file"],
+    }
+    if entry.get("css"):
+        flat["js/app.css"] = entry["css"][0] # svelte component styles
+    return flat
 
 
 def _load_asset_manifest(app: Flask) -> None:
@@ -211,6 +222,7 @@ def _setup_request_hooks(app: Flask) -> None:
         return {
             "has_dev_tools": g.has_dev_tools,
             "nonce": getattr(g, "nonce", ""),
+            "vite_dev": app.config["APP_ENV"] == "dev" ## for vite stuff
         }
 
     # Apply CSP headers
@@ -232,11 +244,15 @@ def _setup_request_hooks(app: Flask) -> None:
         nonce = getattr(g, "nonce", "")
 
         if current_app.config["APP_ENV"] == "dev":
+            vite = current_app.config["VITE_DEV_SERVER"]
+            vite_ws = vite.replace("http://", "ws://", 1)
+            
             # Lax dev
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline'; "
-                "style-src 'self' 'unsafe-inline'; "
+                f"script-src 'self' 'unsafe-inline' {vite};" # 5173 links for Vite
+                f"connect-src 'self' {vite} {vite_ws};"
+                f"style-src 'self' 'unsafe-inline' {vite};"
                 "img-src 'self' data:; "
                 "object-src 'none'; "
                 "base-uri 'self';"

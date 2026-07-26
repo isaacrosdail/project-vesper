@@ -42,6 +42,7 @@ class DevConfig(BaseConfig):
         "DEV_DATABASE_URI", "postgresql://user:password@localhost:5432/dbname"
     )
     SQLALCHEMY_ECHO = False  # flip to True to see SQL sent by SQLAlchemy
+    VITE_DEV_SERVER = "http://localhost:5173"
 
 
 class ProdConfig(BaseConfig):

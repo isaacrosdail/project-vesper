@@ -16,8 +16,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vesper{% endblock %}</title>
-    <link rel="stylesheet" href="{{ asset('css/app') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename = 'img/favicons/favicon.png') }}">
+    {% if vite_dev %}
+        <link rel="stylesheet" href="{{ config['VITE_DEV_SERVER'] }}/app/static_src/css/app.css">
+        <script type="module" src="{{ config['VITE_DEV_SERVER'] }}/@vite/client"></script>
+    {% else %}
+        <link rel="stylesheet" href="{{ asset('css/app') }}">
+        <link rel="stylesheet" href="{{ asset('js/app.css') }}">
+    {% endif %}
+
     {# Set data-theme value so CSS can apply theme from cookie #}
     {# Waiting on JS elsewhere results in "flash" of incorrect theme on page load #}
     <script nonce="{{ nonce }}">
@@ -61,8 +68,11 @@
         </footer>
     </div>
 
-    {# Site-wide scripts BEFORE the script block -> run everywhere #}
-    <script type="module" src="{{ asset('js/app' )}}"></script>
+    {% if vite_dev %}
+        <script type="module" src="{{ config['VITE_DEV_SERVER'] }}/app/static_src/js/app.ts"></script>
+    {% else %}
+        <script type="module" src="{{ asset('js/app') }}"></script>
+    {% endif %}
     {% block scripts %}{% endblock %}
     
 </body>
