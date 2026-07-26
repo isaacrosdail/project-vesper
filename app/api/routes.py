@@ -1,5 +1,5 @@
 """API routes for:
-- /profile/me: User profile data for frotend (userStore)
+- /profile/me: User profile data for frotend (userState)
 - /weather: External OpenWeatherMap integration (rate-limited)
 """
 

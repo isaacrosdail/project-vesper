@@ -1,6 +1,5 @@
 // App root module to act as app's bootstrapper
 
-import { userStore } from './shared/services/userStore';
 import { makeToast } from './shared/ui/toast';
 
 // Load shared components
@@ -31,7 +30,9 @@ import { init as initTasksWebPage } from './tasks_web';
 import { init as initPillarsPage } from './pillars';
 import { init as initProfileSidebar } from './shared/ui/profile-sidebar';
 import { initLeftSidebar } from './shared/ui/left-sidebar';
-
+import { ApiError } from './shared/services/api';
+import { handleApiError } from './shared/ui/toast';
+import { refreshMe } from './shared/services/userState.svelte';
 
 const initRegistry = {
     "main.home": () => initCore(),
@@ -50,8 +51,17 @@ const initRegistry = {
     "main.pillars": () => initPillarsPage(),
 };
 
+window.addEventListener('unhandledrejection', (e) => {
+    if (e.reason instanceof ApiError) {
+        handleApiError(e.reason);
+        e.preventDefault();
+    } else {
+        console.warn(`unhandledRejection: ${e.reason.message}`);
+    }
+});
+
 export async function initMain() {
-    await initUserStore();
+    await initUserState();
     showToastsFromFlask();
 
     const page = document.documentElement.dataset['page'];
@@ -64,17 +74,9 @@ export async function initMain() {
     initLeftSidebar();
 }
 
-async function initUserStore() {
+async function initUserState() {
     if (document.documentElement.dataset['authenticated'] !== 'true') return;
-    try {
-        await userStore.fetch();
-        if (!userStore.data?.timezone) {
-            throw new Error('User store loaded without timezone. Invalid state');
-        }
-    } catch (error) {
-        console.error('Failed to load userStore:', error);
-        throw new Error('Failure: could not load userStore.');
-    }
+    await refreshMe();
 }
 
 /**

@@ -1,3 +1,4 @@
+import { ApiError } from "../services/api";
 
 // Define the type alias
 type ToastType = 'info' | 'success' | 'error' | 'warning';
@@ -73,4 +74,18 @@ export function makeToast(message: string, type: ToastType = 'info', duration: n
     const toast = new Toast(message, duration, type).show();
     setTimeout(() => toast.hide(), duration); // auto-hide/fade
     return toast; // so the caller can do something with it if desired
+}
+
+export function handleApiError(err: unknown) {
+    if (err instanceof ApiError) {
+        if (err.errors) {
+            for (const [field, messages] of Object.entries(err.errors)) {
+                messages.forEach(message => makeToast(`${field}: ${message}`, 'error'));
+            }
+        } else {
+            makeToast(err.message, 'error');
+        }
+    } else {
+        makeToast("Unexpected error", 'error');
+    }
 }

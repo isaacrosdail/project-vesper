@@ -1,10 +1,10 @@
 import { Temporal } from 'temporal-polyfill';
-import { userStore } from './services/userStore';
+import { userState } from './services/userState.svelte';
 
 // TODO(dt): How to use hour_cycle to inform these too?
 
 const _userTZ = (): string => 
-    userStore.data.timezone;
+    userState.me!.timezone;
 
 // For UTC now -> backend primarily
 // rename -> nowISO

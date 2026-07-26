@@ -3,8 +3,8 @@ import * as d3 from 'd3';
 import { D3_TRANSITION_DURATION_MS, getChartDimensions } from './shared/charts';
 import { api } from './shared/services/api';
 import { createTooltip, removeTooltip } from './shared/ui/tooltip';
-import { userStore, getNumPref } from './shared/services/userStore';
-import { DailyMetrics } from './types';
+import { userState } from './shared/services/userState.svelte';
+import type { DailyMetricsRead } from './apiTypes';
 
 
 // NOTE: All target values are per day, can easily multiply up from there as needed
@@ -72,12 +72,12 @@ function scoreHealthMetrics(metricsValues: MetricsAggregates) {
     //     "calories": { target: 2_700, weight: 0.25, type: "closer", tolerance: 600 },
     //     "weight": { target: 76, weight: 0.20, type: "closer", tolerance: 5 },
     // }
-    // Get targets from userStore preferences
+    // Get targets
     const healthConfig: HealthConfig = {
-        "sleep_duration_minutes": { target: getNumPref('sleep_duration_minutes_target', 480), weight: 0.40, type: "closer", tolerance: 90 },
-        "steps": { target: getNumPref('steps_target' , 10_000), weight: 0.15, type: "more" },
-        "calories": { target: getNumPref('calories_target', 2_700), weight: 0.25, type: "closer", tolerance: 600 },
-        "weight": { target: getNumPref('weight_target', 76), weight: 0.20, type: "closer", tolerance: 5 },
+        "sleep_duration_minutes": { target: userState.me?.goals.sleep_duration_minutes || 480, weight: 0.40, type: "closer", tolerance: 90 },
+        "steps": { target: userState.me?.goals.steps || 10_000, weight: 0.15, type: "more" },
+        "calories": { target: userState.me?.goals.calories || 2_700, weight: 0.25, type: "closer", tolerance: 600 },
+        "weight": { target: userState.me?.goals.weight || 76, weight: 0.20, type: "closer", tolerance: 5 },
     }
 
     // idk?

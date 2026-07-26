@@ -1,8 +1,21 @@
-// For commonly-reused API-related functions, fetch for now
-import { getJSInstant } from "../datetime";
-import { userStore } from "./userStore";
-import { Task, Habit, HabitCompletion, DailyMetrics, TimeEntry, Transaction, Product, ShoppingListItem, Recipe, LCRecord } from '../../types';
-import { makeToast } from "../ui/toast";
+/**
+ * API client.
+ * Ensures base URL prefix /api, CSRF/Auth headers, and body encoding.
+ * 
+ */
+
+import type {
+    DailyMetricsRead, DailyMetricsCreate, HabitRead, HabitCompletionCreate, HabitCreate, HabitPatch, MealEnum,
+    ProductRead, ProductCreate, RecipeRead, RecipeCreate, ShoppingListItemRead, TaskRead, TaskCreate, TaskLink,
+    TaskPatch, TimeEntryRead, TimeEntryCreate, TransactionRead, TransactionCreate, TransactionPatch,
+    PillarRead, TaskStatRead,
+    HabitOverviewItemRead,
+    HabitCompletionProgressRead,
+    HabitCompletionRead,
+    MacrosSummaryRead,
+    UserMeRead
+} from '../../apiTypes';
+import { nowISO, todayUser } from "../datetime";
 
 
 // Top-level
@@ -21,55 +34,40 @@ type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 type ApiSuccessResponse<T = unknown> = {
     success: true;
-    msg: string;
+    message: string;
     data: T;
-    // errors?: Record<string, string[]>;
 };
 
 type ApiErrorResponse = {
     success: false;
     code: string;
-    msg: string;
+    message: string;
     errors: Record<string, string[]> | null;
 }
 
 type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
-class ApiError extends Error {
+export class ApiError extends Error {
     code: string;
     status: number;
     errors: Record<string, string[]> | null;
 
     constructor(response: ApiErrorResponse, status: number) {
-        super(response.msg);
+        super(response.message);
         this.code = response.code;
         this.status = status;
         this.errors = response.errors;
     }
 }
 
-export function handleApiError(err: unknown) {
-    if (err instanceof ApiError) {
-        if (err.errors) {
-            for (const [field, messages] of Object.entries(err.errors)) {
-                messages.forEach(msg => makeToast(`${field}: ${msg}`, 'error'));
-            }
-            // Object.values(err.errors).flat().forEach(msg => makeToast(msg, 'error'));
-        } else {
-            makeToast(err.message, 'error');
-        }
-        // makeToast(err.msg, 'error');
-    } else {
-        makeToast("Unexpected error", 'error');
-    }
-}
+
 
 class ApiClient {
     private async request<T = unknown>(
         method: HTTPMethod,
         path: string,
         data?: RequestData
-    ): Promise<ApiResponse<T>> {
+    ): Promise<ApiSuccessResponse<T>> {
         if (!window.csrfToken) {
             throw new Error('CSRF token not found');
         }
@@ -85,50 +83,53 @@ class ApiClient {
             headers,
             body: isFormData ? data : (data ? JSON.stringify(data) : null),
         });
-        const responseData: ApiResponse<T> = await response.json();
+
+        let responseData: ApiResponse<T>;
+        try {
+            responseData = await response.json();
+        } catch (err) {
+            throw new ApiError({
+                success: false,
+                code: 'INVALID_RESPONSE',
+                message: 'Server returned an unexpected response',
+                errors: null
+            }, response.status);
+        }
 
         if (!responseData.success) {
-            // // If .errors -> validation error from Pydantic?
-            // if (responseData.errors) {
-            //     responseData.errors.forEach(e => makeToast(`${e.loc}: ${e.msg}`, 'error'));
-            // // Otherwise -> it's a service/app error more generally
-            // } else {
-            //     makeToast(responseData.message || 'Something went wrong', 'error');
-            // }
-            // throw new Error(responseData.message);
-            const apiErr = new ApiError(responseData as ApiErrorResponse, response.status);
-            handleApiError(apiErr);
-            throw apiErr;
+            throw new ApiError(responseData as ApiErrorResponse, response.status);
         }
-        return responseData as ApiSuccessResponse<T>;
+        return responseData;
     }
 
-    private resource<T>(path: string) {
+    private resource<T, TCreate, TPatch = Partial<TCreate>>(path: string) {
         return {
             getAll: (params?: URLSearchParams) => this.request<T[]>('GET', `${path}${params ? '?' + params : ''}`),
             getById: (id: string) => this.request<T>('GET', `${path}/${id}`),
-            post: (data: any) => this.request<T>('POST', path, data),
+            post: (data: TCreate) => this.request<T>('POST', path, data),
             // put: (id: string, data: any) => this.request('PUT', `${path}/${id}`, data),
-            patch: (id: string, data: any) => this.request<T>('PATCH', `${path}/${id}`, data),
+            patch: (id: string, data: TPatch) => this.request<T>('PATCH', `${path}/${id}`, data),
             delete: (id: string) => this.request<T>('DELETE', `${path}/${id}`),
         };
     }
 
     tasks = {
-        ...this.resource<Task>('/tasks/tasks'),
+        ...this.resource<TaskRead, TaskCreate, TaskPatch>('/tasks/tasks'),
         toggleComplete: (id: string, isDone: boolean) =>
-            this.request<Task>('PATCH', `/tasks/tasks/${id}`, {
-                completed_at: isDone ? getJSInstant() : null
+            this.request<TaskPatch>('PATCH', `/tasks/tasks/${id}`, {
+                completed_at: isDone ? nowISO() : null
             }),
+        stats: () => this.request<{ overdue: TaskStatRead, frog: TaskStatRead }>('GET', '/tasks/stats')
     };
 
     taskLinks = {
         // TODO: Dbl check this one
-        post: (data) => this.request<Task>('POST', '/tasks/task_links', data) 
+        post: (data: TaskLink) => this.request<TaskRead>('POST', '/tasks/task_links', data) 
     }
 
     habits = {
-        ...this.resource<Habit>('/habits/habits')
+        ...this.resource<HabitRead, HabitCreate, HabitPatch>('/habits/habits'),
+        overview: () => this.request<{ habits: HabitOverviewItemRead[]; progress: HabitCompletionProgressRead }>('GET', '/habits/overview'),
     }
 
     habitCompletions = {
@@ -144,41 +145,60 @@ class ApiClient {
     }
 
     daily_metrics = {
-        ...this.resource<DailyMetrics>('/metrics/daily_metrics'),
-        aggregate: (params: URLSearchParams) => this.request<DailyMetrics[]>('GET', `/metrics/daily_metrics/aggregate?${params}`)
+        ...this.resource<DailyMetricsRead, DailyMetricsCreate>('/metrics/daily_metrics'),
+        aggregate: (params: URLSearchParams) => this.request<DailyMetricsRead[]>('GET', `/metrics/daily_metrics/aggregate?${params}`),
+        compare: (params: URLSearchParams) => this.request('GET', `/metrics/daily_metrics/compare?${params}`)
         // etc
     };
 
     time_entries = {
-        ...this.resource<TimeEntry>('/time_tracking/time_entries'),
-        summary: (params: URLSearchParams) => this.request<TimeEntry>('GET', `/time_tracking/time_entries/summary?${params}`),
-        aggregate: (params: URLSearchParams) => this.request<TimeEntry>('GET', `/time_tracking/time_entries/aggregate?${params}`),
-    }
-
-    preferences = {
-        patch: (data: Record<string, string>) => this.request('PATCH', '/user_preferences/user_preference', data)
+        ...this.resource<TimeEntryRead, TimeEntryCreate>('/time_tracking/time_entries'),
+        summary: (params: URLSearchParams) => this.request<TimeEntryRead[]>('GET', `/time_tracking/time_entries/summary?${params}`),
+        aggregate: (params: URLSearchParams) => this.request<TimeEntryRead>('GET', `/time_tracking/time_entries/aggregate?${params}`),
     }
 
     shopping_list = {
-        addItem: (productId: string, quantity: number = 1) => this.request<ShoppingListItem>('POST', '/groceries/shopping_list_items', {
+        addItem: (productId: string, quantity: number = 1) => this.request<ShoppingListItemRead>('POST', '/groceries/shopping_list_items', {
             product_id: productId, quantity_wanted: quantity
         }),
-        patchItem: (id: string, data) => this.request<ShoppingListItem>('PATCH', `/groceries/shopping_list_items/${id}`, data),
-        deleteItem: (id: string) => this.request<ShoppingListItem>('DELETE', `/groceries/shopping_list_items/${id}`),
+        addShortfalls: (recipeId: string) => this.request<ShoppingListItemRead[]>('POST', `/groceries/recipes/${recipeId}/shortfalls_to_list`),
+        patchItem: (id: string, data) => this.request<ShoppingListItemRead>('PATCH', `/groceries/shopping_list_items/${id}`, data),
+        deleteItem: (id: string) => this.request<ShoppingListItemRead>('DELETE', `/groceries/shopping_list_items/${id}`),
+        get: (id: string) => this.request<ShoppingListItemRead[]>('GET', `/groceries/shopping_list`),
     }
 
-    products = this.resource<Product>('/groceries/products');
-    transactions = this.resource<Transaction>('/groceries/transactions');
-    recipes = this.resource<Recipe>('/groceries/recipes');
+    products = this.resource<ProductRead, ProductCreate>('/groceries/products');
+    transactions = this.resource<TransactionRead, TransactionCreate, TransactionPatch>('/groceries/transactions');
+    recipes = {
+        ...this.resource<RecipeRead, RecipeCreate>('/groceries/recipes'),
+        cook: (recipeId: string, meal: MealEnum, entryDatetime: string) => this.request('POST', `/groceries/recipes/${recipeId}/cook`, {
+            meal: meal,
+            entry_datetime: entryDatetime,
+        }),
+        slots: () => this.request<RecipeSlot[]>('GET', '/groceries/recipe_slots')
+    }
 
     profile = {
-        patch: (data) => this.request('PATCH', '/profile/me', data)
+        patch: (data: Record<string, string>) => this.request('PATCH', '/profile/me', data)
+    }
+    user = { patch: (data: Record<string, string>) => this.request('PATCH', '/users/me', data) };
+    me = { get: () => this.request<UserMeRead>('GET', '/profile/me') };
+    goals = { patch: (data: Record<string, string>) => this.request('PATCH', '/goals/me', data) };
+    pillars = { // TODO(api): fixup
+        getAll: () => this.request<PillarRead[]>('GET', '/pillars')
     }
 
     nutrition_log = {
         summary: (params: URLSearchParams) => this.request('GET', `/groceries/nutrition_logs/daily_totals?${params}`)
     }
 
+    groceries_dashboard = {
+        get: (params: URLSearchParams) => this.request('GET', `/groceries/dashboard?${params}`),
+    };
+
+    macros = {
+        summary: (params: URLSearchParams) => this.request<MacrosSummaryRead>('GET', `/groceries/macros_summary?${params}`),
+    };
 }
 
 export const api = new ApiClient();

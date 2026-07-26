@@ -376,6 +376,22 @@ export interface UserGoalsRead {
   potassium: number | null;
   sodium: number | null;
 }
+export interface UserMeRead {
+  timezone: string;
+  profile: UserProfileRead;
+  goals: UserGoalsRead;
+}
+export interface UserProfileRead {
+  city: string | null;
+  country: string | null;
+  unit_system: UnitSystemEnum;
+  hour_cycle: HourCycleEnum;
+  sex: SexEnum | null;
+  birth_date: string | null;
+  height_cm: number | null;
+  latitude: number | null;
+  longitude: number | null;
+}
 export interface UserPatch {
   name?: string | null;
   timezone?: string | null;
@@ -389,17 +405,6 @@ export interface UserProfilePatch {
   sex?: SexEnum | null;
   birth_date?: string | null;
   height_cm?: number | null;
-}
-export interface UserProfileRead {
-  city: string | null;
-  country: string | null;
-  unit_system: UnitSystemEnum;
-  hour_cycle: HourCycleEnum;
-  sex: SexEnum | null;
-  birth_date: string | null;
-  height_cm: number | null;
-  latitude: number | null;
-  longitude: number | null;
 }
 export interface UserRegister {
   username: string;
