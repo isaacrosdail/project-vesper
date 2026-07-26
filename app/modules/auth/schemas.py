@@ -132,3 +132,7 @@ class UserGoalsRead(APIReadSchema):
     sodium: int | None
 
 
+class UserMeRead(APIReadSchema):
+    timezone: str
+    profile: UserProfileRead
+    goals: UserGoalsRead

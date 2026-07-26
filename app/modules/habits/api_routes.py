@@ -12,7 +12,7 @@ from flask_login import current_user
 
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
-from app.api.responses import api_response
+from app.api.responses import success_response
 from app.modules.habits.schemas import (
     HabitCompletionProgressRead,
     HabitCompletionRead,
@@ -30,7 +30,7 @@ def habits(session: Session) -> tuple[Response, int]:
     validated = HabitCreate(**request.json)
     habits_service = create_habits_service(session, current_user.id, current_user.timezone)
     habit = habits_service.create_habit(validated)
-    return api_response(success=True, message="Habit created", data=HabitRead.dump(habit)), 201
+    return success_response(message="Habit created", data=HabitRead.dump(habit)), 201
 
 
 @api_bp.patch("/habits/habits/<int:habit_id>")
@@ -39,7 +39,7 @@ def patch_habit(session: Session, habit_id: int) -> tuple[Response, int]:
     validated = HabitPatch(**request.json)
     habit_svc = create_habits_service(session, current_user.id, current_user.timezone)
     habit = habit_svc.update_habit(validated, habit_id)
-    return api_response(success=True, message="Habit updated", data=HabitRead.dump(habit)), 200
+    return success_response(message="Habit updated", data=HabitRead.dump(habit)), 200
 
 
 @api_bp.get("/habits/habits")
@@ -55,7 +55,7 @@ def habits_list(session: Session) -> tuple[Response, int]:
         results = habits_service.habit_repo.get_all()
     data = [HabitRead.dump(h) for h in results]
 
-    return api_response(success=True, message=f"Retrieved {len(results)} habits", data=data), 200
+    return success_response(message=f"Retrieved {len(results)} habits", data=data), 200
 
 
 @api_bp.get("/habits/habits/<int:habit_id>")
@@ -63,7 +63,7 @@ def habits_list(session: Session) -> tuple[Response, int]:
 def get_habit(session: Session, habit_id: int) -> tuple[Response, int]:
     habits_service = create_habits_service(session, current_user.id, current_user.timezone)
     habit = habits_service.get_habit(habit_id)
-    return api_response(success=True, message="Habit retrieved", data=HabitRead.dump(habit)), 200
+    return success_response(message="Habit retrieved", data=HabitRead.dump(habit)), 200
 
 
 @api_bp.delete("/habits/habits/<int:habit_id>")
@@ -71,7 +71,7 @@ def get_habit(session: Session, habit_id: int) -> tuple[Response, int]:
 def delete_habit(session: Session, habit_id: int) -> tuple[Response, int]:
     habits_service = create_habits_service(session, current_user.id, current_user.timezone)
     habits_service.delete_habit(habit_id)
-    return api_response(success=True, message="Habit deleted"), 200
+    return success_response(message="Habit deleted"), 200
 
 
 @api_bp.post("/habits/<int:habit_id>/completions")
@@ -83,8 +83,7 @@ def add_completion(session: Session, habit_id: int) -> tuple[Response, int]:
     completed_on = date.fromisoformat(request.get_json()["completed_on"])
 
     completion, progress = habits_service.save_completion(habit_id, completed_on)
-    return api_response(
-        success=True,
+    return success_response(
         message="Habit marked complete",
         data = HabitCompletionRead.dump(completion)
             | { "progress": HabitCompletionProgressRead.dump(progress) }
@@ -100,8 +99,7 @@ def delete_completion(session: Session, habit_id: int) -> tuple[Response, int]:
     date_str = request.args.get("date", "today")
 
     progress = habits_service.delete_completion(habit_id, date_str)
-    return api_response(
-        success=True,
+    return success_response(
         message="Habit unmarked as complete",
         data={ "progress": HabitCompletionProgressRead.dump(progress) },
     ), 200
@@ -124,8 +122,7 @@ def horizontal_barchart(session: Session) -> tuple[Response, int]:
         )
     )
 
-    return api_response(
-        success=True,
+    return success_response(
         message=f"Retrieved completion counts for {len(aggregate_data)} habits",
         data=aggregate_data,
     ), 200
@@ -143,8 +140,7 @@ def completions_heatmap(session: Session) -> tuple[Response, int]:
     )
     heatmap_data = habits_service.completion_repo.get_completion_counts_in_window(start_utc, end_utc)
 
-    return api_response(
-        success=True,
+    return success_response(
         message=f"Retrieved {len(heatmap_data)} entries for heatmap",
         data=heatmap_data
     ), 200

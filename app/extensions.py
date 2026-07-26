@@ -7,11 +7,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from app.errors import error_response
+
 if TYPE_CHECKING:
     from flask import Flask
 
     from app.modules.auth.models import User
 
+from flask import request
 from flask_caching import Cache
 from flask_login import LoginManager
 
@@ -36,6 +39,11 @@ def _setup_extensions(app: Flask) -> None:
         the User object, even between requests.
         """
         return db_session.get(User, int(user_id))
+    
+    @login_manager.unauthorized_handler
+    def unauthorized() -> Response | None:
+        if request.path.startswith("/api"):
+            return error_response(message="Authentication required", code="AUTH_REQUIRED", status_code=401)
 
     # Init Flask-Caching
     app.config.from_mapping(

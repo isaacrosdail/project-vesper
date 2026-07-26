@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from app.api import api_bp
-from app.api.responses import api_response
+from app.api.responses import success_response
 from app.modules.auth.schemas import UserGoalsPatch, UserGoalsRead, UserPatch, UserProfilePatch, UserProfileRead
 from app.shared.repository.pillar import PillarRepository
 from app.shared.schemas import PillarRead
@@ -20,15 +20,15 @@ from app.shared.decorators import login_plus_session
 
 @api_bp.get("/profile/me")
 @login_plus_session
-def get_my_profile(session: Session) -> Response:
+def get_my_profile(session: Session) -> tuple[Response, int]:
     """Internal API for fetching profile information used in JS."""
-    return jsonify(
-        {
+    return success_response(
+        message="Profile retrieved",
+        data={
             "timezone": current_user.timezone,
             "profile": UserProfileRead.dump(current_user.profile),
             "goals": UserGoalsRead.dump(current_user.goals),
-        }
-    )
+        }), 200
 
 @api_bp.patch("/users/me")
 @login_plus_session
@@ -36,7 +36,7 @@ def update_user(session: Session) -> tuple[Response, int]:
     validated = UserPatch(**request.json)
     auth_service = create_auth_service(session, current_user.id)
     auth_service.update_user(validated, current_user.id)
-    return jsonify({"success": True, "message": "User updated" }), 200
+    return success_response(message="User updated"), 200
 
 @api_bp.patch("/profile/me")
 @login_plus_session
@@ -44,7 +44,7 @@ def update_profile(session: Session) -> tuple[Response, int]:
     validated = UserProfilePatch(**request.json)
     auth_service = create_auth_service(session, current_user.id)
     auth_service.update_profile(validated, current_user.id)
-    return jsonify({"success": True, "message": "User profile updated"}), 200
+    return success_response(message="User profile updated"), 200
 
 @api_bp.patch("/goals/me")
 @login_plus_session
@@ -52,7 +52,7 @@ def update_goals(session: Session) -> tuple[Response, int]:
     validated = UserGoalsPatch(**request.json)
     auth_service = create_auth_service(session, current_user.id)
     auth_service.update_goals(validated, current_user.id)
-    return jsonify({"success": True, "message": "User goals updated" }), 200
+    return success_response(message="User goals updated"), 200
 
 
 ## TODO(api): Putting this here for now since it IS account-wide.
@@ -62,4 +62,4 @@ def get_pillars(session: Session) -> tuple[Response, int]:
     pillar_repo = PillarRepository(session, current_user.id)
     pillars = pillar_repo.get_all()
 
-    return api_response(success=True, message="gotcha", data=[PillarRead.dump(p) for p in pillars]), 200
+    return success_response(message="Pillars retrieved", data=[PillarRead.dump(p) for p in pillars]), 200

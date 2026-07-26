@@ -12,8 +12,8 @@ from flask_login import current_user
 
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
-from app.api.responses import api_response
 from app.modules.auth.models import UnitSystemEnum
+from app.api.responses import success_response
 from app.modules.metrics.models import MetricType
 from app.modules.metrics.schemas import DailyMetricsCreate
 from app.modules.metrics.service import create_metrics_service
@@ -35,8 +35,8 @@ def daily_metrics(session: Session, entry_id: int | None = None) -> tuple[Respon
     status_code = 201 if is_new else 200
     message = "created" if is_new else "updated"
 
-    return api_response(
-        success=True, message=f"Daily metrics entry {message}", data=DailyMetricsRead.dump(metrics)), status_code
+    return success_response(
+        message=f"Daily metrics entry {message}", data=DailyMetricsRead.dump(metrics)), status_code
 
 
 
@@ -68,8 +68,7 @@ def daily_metrics_list(session: Session) -> tuple[Response, int]:
     else:
         data = [DailyMetricsRead.dump(e) for e in entries]
 
-    return api_response(
-        success=True,
+    return success_response(
         message=f"Retrieved {len(data)} entries",
         data=data,
     ), 200
@@ -80,7 +79,7 @@ def daily_metrics_list(session: Session) -> tuple[Response, int]:
 def get_daily_metrics_entry(session: Session, entry_id: int) -> tuple[Response, int]:
     metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
     entry = metrics_service.get_daily_metrics_entry(entry_id)
-    return api_response(success=True, message="Daily metrics retrieved", data=DailyMetricsRead.dump(entry)), 200
+    return success_response(message="Daily metrics retrieved", data=DailyMetricsRead.dump(entry)), 200
 
 
 @api_bp.delete("/metrics/daily_metrics/<int:daily_metrics_id>")
@@ -88,7 +87,7 @@ def get_daily_metrics_entry(session: Session, entry_id: int) -> tuple[Response, 
 def delete_daily_metrics(session: Session, daily_metrics_id: int) -> tuple[Response, int]:
     metrics_service = create_metrics_service(session, current_user.id, current_user.timezone)
     metrics_service.delete_daily_metrics(daily_metrics_id)
-    return api_response(success=True, message="Daily metrics entry deleted"), 200
+    return success_response(message="Daily metrics entry deleted"), 200
 
 
 @api_bp.get("/metrics/daily_metrics/aggregate")
@@ -108,5 +107,6 @@ def daily_metrics_aggregate(session: Session) -> tuple[Response, int]:
     else:
         data = metrics_service.daily_metrics_repo.get_aggregates_in_window(start_utc, end_utc)
     if not data:
-        return api_response(success=True, message="No data for this window", data=[]), 200
-    return api_response(success=True, message=f"Retrieved {len(data)} buckets", data=data), 200
+        return success_response(message="No data for this window", data=[]), 200
+    return success_response(message=f"Retrieved {len(data)} buckets", data=data), 200
+

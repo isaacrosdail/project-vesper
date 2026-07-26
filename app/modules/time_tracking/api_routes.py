@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from app.errors import ErrorResponse, error_response
+
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
@@ -12,7 +14,7 @@ from flask_login import current_user
 
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
-from app.api.responses import api_response
+from app.api.responses import success_response
 from app.modules.time_tracking.schemas import (
     TimeEntryCreate,
     TimeEntryPatch,
@@ -32,7 +34,7 @@ def post_time_entry(session: Session) -> tuple[Response, int]:
 
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_entry = time_service.create_time_entry(validated)
-    return api_response(success=True, message="Time entry created", data=TimeEntryRead.dump(time_entry)), 201
+    return success_response(message="Time entry created", data=TimeEntryRead.dump(time_entry)), 201
 
 
 @api_bp.patch("/time_tracking/time_entries/<int:entry_id>")
@@ -42,7 +44,7 @@ def patch_time_entry(session: Session, entry_id: int) -> tuple[Response, int]:
 
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_entry = time_service.update_time_entry(entry_id, validated)
-    return api_response(success=True, message="Time entry updated", data=TimeEntryRead.dump(time_entry)), 200
+    return success_response(message="Time entry updated", data=TimeEntryRead.dump(time_entry)), 200
 
 
 @api_bp.get("/time_tracking/time_entries")
@@ -58,7 +60,7 @@ def time_entries_list(session: Session) -> tuple[Response, int]:
         results = time_service.time_entry_repo.get_all()
     data = [TimeEntryRead.dump(e) for e in results]
 
-    return api_response(success=True, message=f"Retrieved {len(results)} time_entries", data=data), 200
+    return success_response(message=f"Retrieved {len(results)} time_entries", data=data), 200
 
 
 @api_bp.get("/time_tracking/time_entries/<int:time_entry_id>")
@@ -66,7 +68,7 @@ def time_entries_list(session: Session) -> tuple[Response, int]:
 def get_time_entry(session: Session, time_entry_id: int) -> tuple[Response, int]:
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_entry = time_service.get_time_entry(time_entry_id)
-    return api_response(success=True, message="Time entry retrieved", data=TimeEntryRead.dump(time_entry)), 200
+    return success_response(message="Time entry retrieved", data=TimeEntryRead.dump(time_entry)), 200
 
 
 @api_bp.delete("/time_tracking/time_entries/<int:time_entry_id>")
@@ -74,7 +76,7 @@ def get_time_entry(session: Session, time_entry_id: int) -> tuple[Response, int]
 def delete_time_entry(session: Session, time_entry_id: int) -> tuple[Response, int]:
     time_service = create_time_tracking_service(session, current_user.id, current_user.timezone)
     time_service.delete_time_entry(time_entry_id)
-    return api_response(success=True, message="Time entry deleted"), 200
+    return success_response(message="Time entry deleted"), 200
 
 
 @api_bp.get("/time_tracking/time_entries/summary")
@@ -92,15 +94,14 @@ def time_entries_summary(session: Session) -> tuple[Response, int]:
         start_utc, end_utc
     )
 
-    return api_response(
-        success=True,
+    return success_response(
         message=f"Retrieved {len(results)} time entries",
         data=[TimeEntryRead.dump(entry) for entry in results],
     ), 200
 
 @api_bp.get("/time_tracking/time_entries/aggregate")
 @login_plus_session
-def time_entries_aggregate(session: Session) -> tuple[Response, int]:
+def time_entries_aggregate(session: Session) -> tuple[Response | ErrorResponse, int]:
     last_n_days = request.args.get("lastNDays", type=int)
     if not last_n_days:
         raise ServiceError("lastNDays is required")
@@ -111,10 +112,9 @@ def time_entries_aggregate(session: Session) -> tuple[Response, int]:
     start_utc, _ = dth.last_n_days_range(last_n_days, current_user.timezone)
     data = time_service.time_entry_repo.get_aggregates_in_window(start_utc)
     if data is None:
-        return api_response(success=False, message="No matches?"), 404
+        return error_response(message="No matches?", status_code=404, code="NOT_FOUND")
 
-    return api_response(
-        success=True,
+    return success_response(
         message="Retrieved aggregate",
         data=data,
     ), 200

@@ -10,7 +10,7 @@ from flask_login import current_user
 
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
-from app.api.responses import api_response
+from app.api.responses import success_response
 from app.modules.tasks.schemas import (
     TaskCreate,
     TaskLink,
@@ -33,7 +33,7 @@ def create_task(session: Session) -> tuple[Response, int]:
     session.commit()
     progress = tasks_service.calculate_tasks_progress_today()
 
-    return api_response(success=True, message="Task created",
+    return success_response(message="Task created",
         data=TaskRead.dump(task)
             | { "progress": TaskProgressRead.dump(progress) }
     ), 201
@@ -48,7 +48,7 @@ def patch_task(session: Session, task_id: int) -> tuple[Response, int]:
     session.commit()
     progress = tasks_service.calculate_tasks_progress_today()
 
-    return api_response(success=True, message="Task updated",
+    return success_response(message="Task updated",
         data=TaskRead.dump(task)
             | { "progress": TaskProgressRead.dump(progress) }
     ), 200
@@ -71,8 +71,7 @@ def tasks_list(session: Session) -> tuple[Response, int]:
     else:
         tasks = tasks_service.task_repo.get_all()
 
-    return api_response(
-        success=True,
+    return success_response(
         message=f"Retrieved {len(tasks)} tasks",
         data = [ TaskRead.dump(t) for t in tasks ]
     ), 200
@@ -83,7 +82,7 @@ def tasks_list(session: Session) -> tuple[Response, int]:
 def get_task(session: Session, task_id: int) -> tuple[Response, int]:
     tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
     task = tasks_service.get_task(task_id)
-    return api_response(success=True, message="Task retrieved", data=TaskRead.dump(task)), 200
+    return success_response(message="Task retrieved", data=TaskRead.dump(task)), 200
 
 
 @api_bp.delete("/tasks/tasks/<int:task_id>")
@@ -91,7 +90,7 @@ def get_task(session: Session, task_id: int) -> tuple[Response, int]:
 def delete_task(session: Session, task_id: int) -> tuple[Response, int]:
     tasks_service = create_tasks_service(session, current_user.id, current_user.timezone)
     tasks_service.delete_task(task_id)
-    return api_response(success=True, message="Task deleted"), 200
+    return success_response(message="Task deleted"), 200
 
 
 @api_bp.post("/tasks/task_links")
@@ -102,7 +101,7 @@ def create_task_link(session: Session) -> tuple[Response, int]:
         session, current_user.id, current_user.timezone
     )
     tasks_service.save_link(link.subtask_id, link.supertask_id)
-    return api_response(success=True, message="Link created",
+    return success_response(message="Link created",
         data={ "subtask_id": link.subtask_id, "supertask_id": link.supertask_id }), 201
 
 
@@ -114,4 +113,5 @@ def delete_task_link(session: Session) -> tuple[Response, int]:
         session, current_user.id, current_user.timezone
     )
     tasks_service.delete_link(link.subtask_id, link.supertask_id)
-    return api_response(success=True, message="Link deleted"), 200
+    return success_response(message="Link deleted"), 200
+
