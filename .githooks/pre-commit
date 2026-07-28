@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+
+[ "${HOOKS-}" = "0" ] && exit 0
+export PATH="node_modules/.bin:$PATH"
+
+npm run check

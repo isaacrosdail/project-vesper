@@ -52,6 +52,8 @@ def authenticated_client(client: FlaskClient, auth, logged_in_user):
 @pytest.fixture(scope="session")
 def app():
     app = create_app("testing")
+    if "test" not in app.config["SQLALCHEMY_DATABASE_URI"]:
+        pytest.exit("Aborting: not the test DB", returncode=1)
     with app.app_context():
         # prevent objs being expired after commit
         db_session.remove()

@@ -1,11 +1,8 @@
-# Custom .gitignore for Vesper project
 
 # ==========================
 # Python build artifacts
 # ==========================
 __pycache__/
-# *.py[cod]
-# *$py.class
 
 # ==========================
 # Tools & Scratch
@@ -21,11 +18,6 @@ db_backups/
 # ==========================
 *.env
 .venv
-# env/
-# venv/
-# ENV/
-# env.bak/
-# venv.bak/
 
 # ==========================
 # Test / coverage reports
@@ -38,11 +30,6 @@ htmlcov/
 # Node / front-end artifacts
 # ==========================
 node_modules/
-app/static/css/**
-app/static/js/**
-manifest.json
+app/static/assets/**
+app/static/.vite/**
 
-# ==========================
-# Docker scripts
-# ==========================
-get-docker.sh

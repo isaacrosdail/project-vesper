@@ -1,51 +1,39 @@
+import css from "@eslint/css";
 import js from "@eslint/js";
-import globals from "globals";
-import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
-
+import globals from "globals";
+import svelte from 'eslint-plugin-svelte';
+import prettier from 'eslint-config-prettier';
+import tseslint from "typescript-eslint";
 
 export default defineConfig([
-  // === Ignores ===
   {
-    ignores: [
-      ".venv/**",
-      "**/site-packages/**",
-      "**/werkzeug/**",
-      "**/coverage/**",
-      "htmlcov/**",
-      "node_modules/**",
-      "*.config.js",
-      "*.config.ts",
-    ]
+    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
+    plugins: { js },
+    extends: ["js/recommended"],
+    languageOptions: { globals: globals.browser },
   },
-
-  // === Base JS + TS ===
-  js.configs.recommended,
   tseslint.configs.recommended,
 
-  { 
-    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    languageOptions: { globals: { ...globals.browser, ...globals.node } },
-    rules: {  // Adding rules to make ESLint respect the _ prefix
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "varsIgnorePattern": "^_", // Ignores unused variables & functions (like our bubbleSort for now)
-          "argsIgnorePattern": "^_"  // Ignores unused function parameters
-        }
-      ],
-      "eqeqeq": "error", // enforces strict equality (=== and !==) instead of looser equality operators (== and !==)
-      "no-console": "off"
-    }
+  {
+    files: ["**/*.svelte", "**/*.svelte.{js,ts}"],
+    extends: [svelte.configs.recommended],
+    languageOptions: { parserOptions: { parser: tseslint.parser } },
+  },
+  {
+    files: ["**/*.css"],
+    plugins: { css },
+    language: "css/css",
+    extends: ["css/recommended"],
+    rules: {
+        "css/use-baseline": ["warn", { available: "newly" }],
+        "css/no-invalid-properties": ["error", { allowUnknownVariables: true }],
+    },
   },
 
-  // === Tests ===
+  prettier,
   {
-    files: ["**/*.test.{js,ts}", "tests/**/*.{js,ts}"],
-    languageOptions: {
-      globals: {
-        ...globals.node   // Add Node.js globals (includes require, module, etc.)
-      }
-    }
+    files: ["**/*.svelte", "**/*.svelte.{js,ts}"],
+    extends: [svelte.configs.prettier],
   }
 ]);

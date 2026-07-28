@@ -1,10 +1,53 @@
+[project]
+name = "project-vesper"
+version = "0.2.0"
+requires-python = ">=3.13.3"
+dependencies = [
+    "alembic>=1.18.2",
+    "click>=8.3.1",
+    "flask>=3.1.2",
+    "flask-caching>=2.3.1",
+    "flask-login>=0.6.3",
+    "gunicorn>=24.1.1",
+    "numpy>=2.4.2",
+    "pandas>=3.0.1",
+    "psycopg2-binary>=2.9.11",
+    "pycountry>=26.2.16",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.2",
+    "regex>=2026.1.15",
+    "requests>=2.32.5",
+    "sqlalchemy>=2.0.46",
+    "tzdata>=2025.3",
+    "werkzeug>=3.1.5",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.14.14",
+    "types-regex>=2026.1.15.20260116",
+    "types-requests>=2.32.4.20260107",
+    "pydantic-to-typescript2>=1.0.6",
+    "pipdeptree>=2.30.0",
+    "time-machine>=3.2.0",
+    "djlint>=1.43.1",
+]
+
+[tool.djlint]
+profile = "jinja"
+extension = "html"
+
 [tool.mypy]
 incremental = true  # only checks changed files (how is this not the default?)
 cache_dir = ".mypy_cache"
 strict = true
-ignore_missing_imports = true
+# ignore_missing_imports = true
+mypy_path = "stubs"
 exclude = [
-    '^_playground/',
     '^tests/',
     '^alembic/',
 ]
@@ -18,10 +61,11 @@ ignore_errors = true
 module = "_sandbox.*"
 ignore_errors = true
 
+[[tool.mypy.overrides]]
+module = "app.shared.fractional_indexing"
+ignore_errors = true
+
 [tool.pytest.ini_options]
-env_files = [
-    "APP_ENV=testing",
-]
 pythonpath = ["."]
 testpaths = ["tests"]
 
@@ -47,14 +91,14 @@ extend-exclude=[
 [tool.ruff.lint.per-file-ignores]
 "app/api/generic_routes.py" = ["D103", "C901", "PLR0912"]
 "*_routes.py" = ["D103"]
-# "tests/**/*.py" = [
-#     "S101",      # allow asserts in tests
-#     "ANN001",
-#     "ANN201",    # suppress return type for pub func warning
-#     "E501",
-#     "PLR2004",   # allow magic numbers in tests (that's...kind of the point isn't it?)
-#     "F405",      # TODO: TEMP Remove
-# ]
-"tests/**/*.py" = ["ALL"]
+"tests/**/*.py" = [
+     "S101",      # allow asserts in tests
+     "ANN001",
+     "ANN201",    # suppress return type for pub func warning
+     "E501",
+     "PLR2004",   # allow magic numbers in tests (that's...kind of the point isn't it?)
+     "F405",      # TODO: TEMP Remove
+ ]
+#"tests/**/*.py" = ["ALL"]
 "alembic/**" = ["ALL"]
 "**/*repository.py" = ["PLR0913"] # Too many function args

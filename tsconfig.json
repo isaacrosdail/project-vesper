@@ -3,9 +3,9 @@
         "target": "es2024",                 // Use modern JS syntax/features (eg, Map?)
         "lib": ["dom", "es2024"],           // Include browser & latest JS stdlib defs (eg, DOM, Array, Promise)
         "module": "esnext",                 // Let bundler handle imports/exports?
-        "moduleResolution": "node",         // Resolve node_modules-style imports (eg, import ... from 'd3')
-        "outDir": "./app/static/js",        // compiled JS destination
-        "rootDir": "./app/static_src/js",   // TS source files location
+        "moduleResolution": "bundler",      // Resolve node_modules-style imports (eg, import ... from 'd3')
+        "outDir": "./app/static/js",
+        "rootDir": "./app/static_src/js",
         "moduleDetection": "force",         // will consider everything to be a module
         "strict": true,                     // enables all the strict type checks: null checks, implicit any, etc.?
         "esModuleInterop": true,            // lets us import CommonJS modules ('require') with ES-style import?
@@ -15,9 +15,11 @@
         "alwaysStrict": true,
         "useUnknownInCatchVariables": true,
         "strictFunctionTypes": true,
-        "noPropertyAccessFromIndexSignature": true,
+        "noPropertyAccessFromIndexSignature": false,
         "noUncheckedIndexedAccess": true,
+        "noUncheckedSideEffectImports": true,
         "exactOptionalPropertyTypes": true,
+        "erasableSyntaxOnly": true,
         // Linter Checks
         "noImplicitReturns": true,
         "noImplicitOverride": true,
