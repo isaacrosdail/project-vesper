@@ -100,7 +100,7 @@
 
 
   /* =============== LIGHT THEME DEFINITIONS ============== */
-  color-scheme: light;
+  color-scheme: light dark;
 
   /* Background Hierarchy */
   --light-bg-dark: oklch(0.898 0.004 286);
