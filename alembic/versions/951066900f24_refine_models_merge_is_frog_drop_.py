@@ -23,7 +23,10 @@ def upgrade() -> None:
 
     # 1. Drop constraints that ref cols we're about to drop
     op.drop_constraint('ck_frog_priority_mutually_exclusive', 'tasks', type_='check')
-    op.drop_constraint('ck_frog_requires_due_date', 'tasks', type_='check')
+    # NOTE: the initial-schema baseline created this as ck_tasks_ck_task_frog_requires_due_date
+    # (legacy 'task' singular fragment). op.f() passes the real name through verbatim so the
+    # naming_convention doesn't re-prefix it to the wrong ck_tasks_ck_frog_... name.
+    op.drop_constraint(op.f('ck_tasks_ck_task_frog_requires_due_date'), 'tasks', type_='check')
     op.drop_constraint('ck_promotion_threshold_range_0_1', 'habits', type_='check')
 
     # 2. Enum shuffle + backfill
@@ -87,7 +90,8 @@ def downgrade() -> None:
 
     # Restore old constraints
     op.create_check_constraint('ck_promotion_threshold_range_0_1', 'habits', 'promotion_threshold IS NULL OR (promotion_threshold >= 0 AND promotion_threshold <= 1.0)')
-    op.create_check_constraint('ck_frog_requires_due_date', 'tasks', 'NOT is_frog OR due_date IS NOT NULL')
+    # Restore under the real baseline name (see upgrade note) so a re-upgrade drops it cleanly.
+    op.create_check_constraint(op.f('ck_tasks_ck_task_frog_requires_due_date'), 'tasks', 'NOT is_frog OR due_date IS NOT NULL')
     op.create_check_constraint('ck_frog_priority_mutually_exclusive', 'tasks', '(is_frog = true AND priority IS NULL) OR (NOT is_frog AND priority IS NOT NULL)')
 
     # Enum shuffle back (remove 'frog')
