@@ -1,70 +1,37 @@
-// Auto-runner, attaches DOM listeners on DOMContentLoaded at top level
+import { required } from "./dom";
 
-function setMobileNavOpen(shouldBeOpen: boolean, navMobileContainer: HTMLElement, hamburgerBtn: HTMLElement): void {
-    navMobileContainer.classList.toggle('is-open', shouldBeOpen);
-    hamburgerBtn.classList.toggle('is-open', shouldBeOpen);
-    hamburgerBtn.setAttribute('aria-expanded', String(shouldBeOpen)); // toggle aria-expanded value
+const navMobileContainer = required(document.querySelector<HTMLElement>('#nav-mobile-container'), '#nav-mobile-container');
+const hamburgerBtn = required(document.querySelector<HTMLButtonElement>('.hamburger-btn'), '.hamburger-btn');
+const backdrop = required(document.querySelector<HTMLElement>('#nav-backdrop'), '#nav-backdrop');
+const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
 
-    if (shouldBeOpen) {
+let isMenuOpen = false;
+
+function setMobileNav(open: boolean): void {
+    if (open === isMenuOpen) return;
+    isMenuOpen = open;
+    navMobileContainer.classList.toggle('is-open', isMenuOpen);
+    hamburgerBtn.classList.toggle('is-open', isMenuOpen);
+    backdrop.classList.toggle('is-open', isMenuOpen);
+    hamburgerBtn.setAttribute('aria-expanded', String(isMenuOpen)); // toggle aria-expanded value
+
+    if (isMenuOpen) {
         navMobileContainer.removeAttribute('inert');
         navMobileContainer.querySelector('a')?.focus();
     } else {
         navMobileContainer.setAttribute('inert', '');
+        hamburgerBtn.focus();
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    const navMobileContainer = document.querySelector<HTMLElement>('#nav-mobile-container');
-    const hamburgerBtn = document.querySelector<HTMLButtonElement>('.hamburger-btn');
-    const profileModal = document.querySelector<HTMLDialogElement>('.profile-modal');
-    const mq = window.matchMedia('(max-width: 768px)'); // uses a media query obj in JS, syncs JS state with CSS breakpoint
+hamburgerBtn.addEventListener('click', () => setMobileNav(!isMenuOpen));
+backdrop.addEventListener('click', () => setMobileNav(false));
 
-    document.addEventListener('click', (e) => {
-        if (!(e.target instanceof HTMLElement)) return;
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isMenuOpen) setMobileNav(false);
+});
 
-        // // Profile button MOVED TO profile-sidebar.ts
-        // if (profileModal) {
-        //     const profileSidebar = document.querySelector('.profile-sidebar');
-        //     const profileBackdrop = document.querySelector('.profile-sidebar-backdrop');
-        //     // if (e.target.matches('.profile-btn')) profileModal.showModal();
-        //     if (e.target.matches('.profile-btn')) {
-        //         profileSidebar.classList.add('open');
-        //         profileBackdrop.classList.add('open');
-        //     }
-        //     if (e.target.matches('.profile-sidebar-backdrop')) {
-        //         profileSidebar.classList.remove('open');
-        //         profileBackdrop.classList.remove('open');
-        //     }
-        //     // if (e.target.matches('#close-profile-modal-btn')) profileModal.close();
-        // }
-
-        // Mobile nav
-        if (!navMobileContainer || !hamburgerBtn) return;
-        const isOpen = navMobileContainer.classList.contains('is-open');
-
-        if (e.target.matches('.hamburger-btn')) {
-            setMobileNavOpen(!isOpen, navMobileContainer, hamburgerBtn);
-            return;
-        }
-        if (isOpen && !e.target.closest('.nav-mobile')) {
-            setMobileNavOpen(false, navMobileContainer, hamburgerBtn);
-            return;
-        }
-
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            profileModal?.close();
-        }
-    });
-
-    // Reset nav state when switching to desktop
-    mq.addEventListener('change', (e) => {
-        if (!navMobileContainer || !hamburgerBtn) return;
-        // True when window <= 768px
-        if (!e.matches && navMobileContainer.classList.contains('is-open')) {
-            setMobileNavOpen(false, navMobileContainer, hamburgerBtn);
-        }
-    });
+// Close if viewport crosses into desktop layout
+mq.addEventListener('change', (e) => {
+    if (!e.matches && isMenuOpen) setMobileNav(false);
 });

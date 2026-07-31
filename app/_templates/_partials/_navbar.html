@@ -1,13 +1,6 @@
 {# Navbar template used across site. Note: nav_link macro at bottom of this file #}
 {# === NAV COMPONENTS === #}
 
-{% macro profile_btn() %}
-<button class="btn-icon btn-round profile-btn js-profile-btn" aria-label="Profile settings">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-    </svg>
-</button>
-{% endmacro %}
 
 {% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
     {% if not required_role or (current_user.is_authenticated and current_user.role == required_role) %}
@@ -57,20 +50,9 @@
 
             {# Right: Profile settings modal & theme select #}
             <div class="nav-right">
-                {% if current_user.is_authenticated %}
-                    {{ profile_btn() }}
-                {% endif %}
-
                 <form>
                     <fieldset>
                         <legend class="sr-only">Pick a theme</legend>
-
-                        <!-- <label for="theme" class="sr-only">Theme</label>
-                        <select id="theme" name="theme">
-                            <option value="laptop">System</option>
-                            <option value="sun">Light</option>
-                            <option value="moon">Dark</option>
-                        </select> -->
                         <div>
                             <label for="theme-toggle" class="sr-only">Toggle theme</label>
                             <input type="checkbox" class="toggle-input" id="theme-toggle">
@@ -78,42 +60,23 @@
                         </div>
                     </fieldset>
                 </form>
+
+                {% if current_user.is_authenticated %}
+                    <button class="btn-icon btn-round profile-btn js-profile-btn" popovertarget="profile-sidebar" aria-label="Profile settings">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        </svg>
+                    </button>
+                {% endif %}
             </div>
         </div>
     </nav>
 
+    <div id="nav-backdrop"></div>
     <div id="nav-mobile-container" class="nav-mobile-container" inert>
         <div class="nav-mobile">
             {{ nav_links_list() }}
         </div>
     </div>
 </div>
-
-{#
-<dialog class="profile-modal">
-    <h3>User Account Settings</h3>
-    <button id="close-profile-modal-btn" class="btn-icon btn-round modal-close" type="button">&times;</button>
-
-    <form action="{{ url_for('auth.logout') }}" method="post" data-form-type="action">
-        <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
-        <button class="btn btn-destructive" type="submit">Log out</button>
-    </form>
-
-    {% if g.has_dev_tools %}
-        <h3>Dev Tools</h3>
-        <div class="stack-md">
-            <a class="btn btn-primary" href="{{ url_for('main.pillars')}}">DRAFT: PILLARS</a>
-            <a class="btn btn-primary" href="{{ url_for('main.tasks_web')}}">DRAFT: Tasks Web Visualizer</a>
-            <a class="btn btn-secondary" href="{{ url_for('devtools.style_reference')}}">Style Reference Page</a>
-            <a class="btn btn-secondary" href="{{ url_for('devtools.show_routes')}}">Show Routes</a>
-            <a class="btn btn-primary" href="/my-fake/route">Test 404</a>
-            <form action="{{ url_for('auth.reset_dev') }}" method="post" data-form-type="action">
-                <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
-                <button class="btn btn-destructive" type="submit">
-                    Reset Dev
-                </button>
-            </form>
-        </div>
-    {% endif %}
-</dialog>
-#}

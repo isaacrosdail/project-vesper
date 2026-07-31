@@ -1,7 +1,8 @@
-
 /* Hamburger button -> X animation */
 .hamburger-btn {
-  & .line1, & .line2, & .line3 {
+  & .line1,
+  & .line2,
+  & .line3 {
     /* Use fill-box so each line rotates around its own bounding box, not the SVG ViewBox */
     transform-box: fill-box;
     transition: transform 0.2s ease-out;
@@ -18,9 +19,25 @@
       opacity: 0;
     }
     & .line3 {
-      transform: rotate(calc(-1 * var(--hamburger-angle))) scaleX(var(--hamburger-scale));
+      transform: rotate(calc(-1 * var(--hamburger-angle)))
+        scaleX(var(--hamburger-scale));
       transform-origin: left bottom;
     }
+  }
+}
+
+#nav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  background: rgb(0 0 0 / 40%);
+
+  &.is-open { display: block; }
+}
+@media (width > 768px) {
+  #nav-backdrop {
+    display: none;
   }
 }
 
@@ -65,7 +82,7 @@
 
 nav {
   position: relative; /* positioning context for z-index, force nav to participate in stacking context */
-  z-index: 250;       /* above mobile nav */
+  z-index: 250; /* above mobile nav */
   min-height: var(--min-navbar-height);
   padding: var(--space-md);
   background: var(--bg);
@@ -82,7 +99,8 @@ nav {
   margin: 0 auto;
 }
 
-.nav-left, .nav-right {
+.nav-left,
+.nav-right {
   display: flex;
   gap: clamp(var(--space-sm), 1.5vw, var(--space-md));
   align-items: center;
@@ -100,10 +118,9 @@ nav {
   pointer-events: none;
   background: var(--bg);
   opacity: 0;
-  transform: translateY(-300px) scaleY(0.95); /* start above viewport & slightly compressed */
+  transform: translateY(-300px) scaleY(0.95);
   transform-origin: top center;
-  transition:
-      transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 
   &.is-open {
     display: flex;
@@ -123,7 +140,7 @@ nav {
   width: 100%;
 
   & a {
-    display: block; /* each line fills parent's width */
+    display: block;
     width: 100%;
     padding: var(--space-md) var(--space-md);
     text-align: center;
@@ -132,16 +149,16 @@ nav {
 
 @media (width <= 768px) {
   .nav-desktop {
-      display: none;
+    display: none;
   }
 
   /* Suppress underline effect on mobile nav, use bg again */
   .nav-link {
-
     &:after {
       display: none;
     }
-    &[aria-current="page"], &:hover {
+    &[aria-current="page"],
+    &:hover {
       background: var(--bg-light);
       border-left: 6px solid var(--accent-subtle);
     }
@@ -149,15 +166,21 @@ nav {
 }
 
 @media (width > 768px) {
-  .hamburger-btn { display: none; }
-  .nav-mobile-container { display: none; }
+  .hamburger-btn {
+    display: none;
+  }
+  .nav-mobile-container {
+    display: none;
+  }
 
   .nav-link:hover::after,
   .nav-link[aria-current="page"]::after {
-      transform: scaleX(1);
+    transform: scaleX(1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nav-desktop { transition: none; }
+  .nav-desktop {
+    transition: none;
+  }
 }
