@@ -4,7 +4,8 @@ Repository layer for Habits module.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from datetime import date
+from typing import TYPE_CHECKING, Any, override
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -17,7 +18,8 @@ from sqlalchemy.orm import selectinload
 from app.modules.habits.models import (
     Habit,
     HabitCompletion,
-    StatusEnum,
+    HabitTypeEnum,
+    TargetKind,
 )
 from app.shared.repository.base import BaseRepository
 
@@ -29,14 +31,22 @@ class HabitRepository(BaseRepository[Habit]):
     def create_habit(
         self,
         name: str,
-        status: StatusEnum | None,
-        target_frequency: int,
+        weekly_frequency: int,
+        type: HabitTypeEnum,
+        units: str | None,
+        target_kind: TargetKind | None,
+        target_value: float | None,
+        target_tolerance: float | None,
     ) -> Habit:
         habit = Habit(
             user_id=self.user_id,
             name=name,
-            status=status,
-            target_frequency=target_frequency,
+            weekly_frequency=weekly_frequency,
+            type=type,
+            units=units,
+            target_kind=target_kind,
+            target_value=target_value,
+            target_tolerance=target_tolerance,
         )
         return self.add(habit)
 
@@ -64,12 +74,20 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
         super().__init__(session, user_id, model_cls=HabitCompletion)
 
     def create_habit_completion(
-        self, habit_id: int, completed_on: date
+        self, habit_id: int, entry_date: date, *,
+        value: float | None = None,
+        target_kind_snapshot: TargetKind | None = None,
+        target_value_snapshot: float | None = None,
+        target_tolerance_snapshot: float | None = None,
     ) -> HabitCompletion:
         habit_completion = HabitCompletion(
             user_id=self.user_id,
             habit_id=habit_id,
-            completed_on=completed_on
+            entry_date=entry_date,
+            value=value,
+            target_kind_snapshot=target_kind_snapshot,
+            target_value_snapshot=target_value_snapshot,
+            target_tolerance_snapshot=target_tolerance_snapshot,
         )
         return self.add(habit_completion)
 
@@ -80,7 +98,7 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
             HabitCompletion.habit_id == habit_id
         )
         if order_desc:
-            stmt = stmt.order_by(HabitCompletion.completed_on.desc())
+            stmt = stmt.order_by(HabitCompletion.entry_date.desc())
         return list(self.session.scalars(stmt).all())
 
     def get_in_window(
@@ -92,8 +110,8 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
     ) -> list[HabitCompletion]:
         """Return all completions on [start_date, end_date) interval."""
         stmt = self._user_select(HabitCompletion).where(
-            HabitCompletion.completed_on >= start_date,
-            HabitCompletion.completed_on < end_date,
+            HabitCompletion.entry_date >= start_date,
+            HabitCompletion.entry_date < end_date,
         )
         if habit_id is not None:
             stmt = stmt.where(
@@ -102,16 +120,18 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
         return list(self.session.scalars(stmt).all())
 
 
-    def get_completion_counts_in_window(self, start_date: date, end_date: date) -> list[dict[str, Any]]:
+    def get_completion_counts_in_window(self, start_date: date, end_date: date, habit_id: int | None = None) -> list[dict[str, Any]]:
         stmt = (
-                select(HabitCompletion.completed_on.label("date"), func.count().label("count"))
+                select(HabitCompletion.entry_date.label("date"), func.count().label("count"))
                 .where(
                     HabitCompletion.user_id == self.user_id,
-                    HabitCompletion.completed_on >= start_date,
-                    HabitCompletion.completed_on < end_date
+                    HabitCompletion.entry_date >= start_date,
+                    HabitCompletion.entry_date < end_date
                 )
-                .group_by(HabitCompletion.completed_on)
+                .group_by(HabitCompletion.entry_date)
             )
+        if habit_id is not None:
+            stmt = stmt.where(HabitCompletion.habit_id == habit_id)
         results = self.session.execute(stmt).all()
         return [{ "date": str(row.date), "count": row.count } for row in results]
 
@@ -119,44 +139,44 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
     def get_completion_counts_by_habit_in_window(
         self, start_date: date, end_date: date
     ) -> list[dict[str, str | int]]:
-        """Returns a list of (habit_name, count, target_frequency) dicts for completions in datetime range.
+        """Returns a list of (habit_name, count, weekly_frequency) dicts for completions in datetime range.
         Grouped by habit name, and in descending order by completion count.
         """
         stmt = (
             select(
                 Habit.name,
                 func.count(HabitCompletion.id).label("completion_count"),
-                Habit.target_frequency
+                Habit.weekly_frequency
             )
             .select_from(HabitCompletion)
             .join(Habit)
             .where(
                 Habit.user_id == self.user_id,
-                HabitCompletion.completed_on >= start_date,
-                HabitCompletion.completed_on < end_date,
+                HabitCompletion.entry_date >= start_date,
+                HabitCompletion.entry_date < end_date,
             )
-            .group_by(Habit.name, Habit.target_frequency)
+            .group_by(Habit.name, Habit.weekly_frequency)
             .order_by(func.count(HabitCompletion.id).desc())
         )
         result = self.session.execute(stmt).all()
         return [
-            {"name": row.name, "count": row.completion_count, "target_frequency": row.target_frequency }
+            {"name": row.name, "count": row.completion_count, "weekly_frequency": row.weekly_frequency }
             for row in result
-        ]  # unwrap each SQLAlchemy Row into a list of dicts
+        ]
 
     def get_completion_counts_by_week_in_window(self, habit_id: int, start_date: date, end_date: date) -> list[tuple[datetime, int]]:
         # filter by habit_id and date range, group by (week, count)
         stmt = (
             select(
-                func.date_trunc("week", HabitCompletion.completed_on),
+                func.date_trunc("week", HabitCompletion.entry_date),
                 func.count()
             )
             .where(
                 HabitCompletion.user_id == self.user_id,
                 HabitCompletion.habit_id == habit_id,
-                HabitCompletion.completed_on >= start_date,
-                HabitCompletion.completed_on < end_date
+                HabitCompletion.entry_date >= start_date,
+                HabitCompletion.entry_date < end_date
             )
-            .group_by(func.date_trunc("week", HabitCompletion.completed_on))
+            .group_by(func.date_trunc("week", HabitCompletion.entry_date))
         )
         return list(self.session.execute(stmt).all())

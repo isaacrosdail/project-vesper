@@ -6,6 +6,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from app.modules.habits.schemas import HabitCompletionCreate
+from app.modules.habits.streaks import StreakCalculator
+
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
@@ -15,13 +18,10 @@ if TYPE_CHECKING:
 
 from collections import defaultdict
 from datetime import date, datetime, timedelta
-from itertools import pairwise
 from zoneinfo import ZoneInfo
 
-import pandas as pd
-
 import app.shared.datetime_.helpers as dth
-from app.modules.habits.models import PROMOTION_THRESHOLD, StatusEnum
+from app.modules.habits.models import HabitTypeEnum, TargetKind
 from app.modules.habits.repository import (
     HabitCompletionRepository,
     HabitRepository,
@@ -51,24 +51,44 @@ class HabitsService:
         if not habit:
             raise ServiceError("Habit not found", 404)
 
-        for field in validated.model_fields_set:
-            if field == "pillar_ids":
+        fields = validated.model_fields_set
+        if habit.type == HabitTypeEnum.BINARY and ("target" in fields or "units" in fields):
+            raise ServiceError("Binary habits have no target or units", 422)
+        if habit.type == HabitTypeEnum.DURATION and "units" in fields:
+            raise ServiceError("Duration habits have fixed units", 422)
+
+        for field in fields:
+            if field in {"pillar_ids", "target"}:
                 continue
             setattr(habit, field, getattr(validated, field))
 
-        if "pillar_ids" in validated.model_fields_set:
+        if "target" in fields:
+            t = validated.target
+            habit.target_kind = TargetKind(t.kind) if t else None
+            habit.target_value = t.value if t else None
+            habit.target_tolerance = getattr(t, "tolerance", None) if t else None
+
+        if "pillar_ids" in fields:
             self._sync_pillars(habit, validated.pillar_ids)
 
         return habit
 
     def create_habit(self, validated: HabitCreate) -> Habit:
-        # do the is_promotable thing
-        status = self._resolve_status(validated.is_promotable)
+        type = validated.type
+        units=getattr(validated, "units", None)
+        target = getattr(validated, "target", None)
+        target_kind=target.kind if target else None
+        target_value=target.value if target else None
+        target_tolerance=getattr(target, "tolerance", None) if target else None
 
         habit = self.habit_repo.create_habit(
             name=validated.name,
-            status=status,
-            target_frequency=validated.target_frequency,
+            weekly_frequency=validated.weekly_frequency,
+            type=type,
+            units=units,
+            target_kind=target_kind or None,
+            target_value=target_value or None,
+            target_tolerance=target_tolerance or None,
         )
         self._sync_pillars(habit, validated.pillar_ids)
         self.session.flush()
@@ -87,22 +107,35 @@ class HabitsService:
             raise ServiceError("Habit not found", 404)
         return habit
 
-    def _resolve_status(self, is_promotable: bool) -> StatusEnum | None:
-        return StatusEnum.EXPERIMENTAL if is_promotable else None
-
     def _sync_pillars(self, habit: Habit, pillar_ids: list[int]) -> None:
         habit.pillars = self.pillar_repo.get_by_ids(pillar_ids)
 
 
-    def save_completion(self, habit_id: int, completed_on: date) -> tuple[HabitCompletion, dict[str, Any]]:
-        habit = self.habit_repo.get_by_id(habit_id)
-        if not habit:
-            raise ServiceError("Habit not found", 404)
+    def save_completion(self, habit_id: int, validated: HabitCompletionCreate) -> tuple[HabitCompletion, dict[str, Any]]:
+        habit = self.get_habit(habit_id)
 
-        completion = self.completion_repo.create_habit_completion(habit.id, completed_on)
+        if validated.entry_date > dth.user_today(self.user_tz):
+            raise ServiceError("Cannot log a future date", 422)
+        if habit.type == HabitTypeEnum.BINARY and validated.value is not None:
+            raise ServiceError("Binary habits do not take a value", 422)
+        if habit.type != HabitTypeEnum.BINARY and validated.value is None:
+            raise ServiceError("This habit requires a value", 422)
+
+        day = validated.entry_date
+        existing = self.completion_repo.get_in_window(day, day + timedelta(days=1), habit_id=habit_id)
+        if existing:
+            completion = existing[0]
+            completion.value = validated.value  # snapshot columns untouched!
+        else:
+            target = habit.target
+            completion = self.completion_repo.create_habit_completion(
+                habit_id, validated.entry_date, value=validated.value,
+                target_kind_snapshot=target.kind if target else None,
+                target_value_snapshot=target.value if target else None,
+                target_tolerance_snapshot=getattr(target, "tolerance", None),
+            )
         self.session.flush()
 
-        self.check_promotion(habit)
         progress = self.calculate_all_habits_percentage_this_week()
         return completion, progress
 
@@ -111,82 +144,41 @@ class HabitsService:
             day = datetime.now(ZoneInfo(self.user_tz)).date()
         else:
             day = date.fromisoformat(date_str)
-            # start_utc, end_utc = dth.day_range_utc(parsed_date, self.user_tz)
 
         completion = self.completion_repo.get_in_window(day, day + timedelta(days=1), habit_id=habit_id)
         if not completion:
             raise ServiceError("No completion found", 404)
 
         self.completion_repo.delete(completion[0])
-        # self.check_promotion(habit) # would we un-promote a habit?
         return self.calculate_all_habits_percentage_this_week()
 
 
-    # Streak calc: scan completion dates looking for consecutive days
-    #  Similar pattern to LC#121 (Best Time to Buy/Sell Stock) - one-pass scan with invariant
-    # prices[i] <-> completion_dates[i]
-    # min_price <-> anchor date (most recent valid completion)
-    # max_profit <-> streak length
     def calculate_habit_streak(self, habit_id: int) -> int:
         """Calculate current streak for given habit."""
+        habit = self.habit_repo.get_by_id(habit_id)
+        if not habit:
+            raise ServiceError("no such habit?")
         completions = self.completion_repo.get_all_habit_completions(
             habit_id, order_desc=True
         )
-        dates = [c.completed_on for c in completions]
-        return self.streak_calc.current_streak(dates)
+        dates = [c.entry_date for c in completions if c.satisfied]
+        return self.streak_calc.streak(dates, habit.weekly_frequency)
 
-        # if not habit_completions:
-        #     return 0
 
-        # # Convert to user timezone for calendar day logic
-        # user_timezone = ZoneInfo(self.user_tz)
-        # today_date = datetime.now(user_timezone).date()
-        # local_completion_dates = [
-        #     c.created_at.astimezone(user_timezone).date() for c in habit_completions
-        # ]
-
-        # if (today_date - local_completion_dates[0]).days >= STREAK_GRACE_DAYS:
-        #     return 0
-        # streak = 1
-        # for curr_date, prev_date in pairwise(local_completion_dates):
-        #     if (curr_date - prev_date).days == 1:
-        #         streak += 1
-        #     else:
-        #         break
-
-        # return streak
-
-    # TODO: De-dupe? idk
     def get_all_streaks(self) -> dict[int, int]:
         completions = self.completion_repo.get_all()
-
-        # user_timezone = ZoneInfo(self.user_tz)
-        # today_date = datetime.now(user_timezone).date()
+        habits = self.habit_repo.get_all()
 
         # Group by habit_id
-        by_habit = defaultdict(list)
+        by_habit: dict[int, list[date]] = defaultdict(list)
         for c in completions:
-            by_habit[c.habit_id].append(c.completed_on)
+            if c.satisfied:
+                by_habit[c.habit_id].append(c.entry_date)
 
         return {
-            habit_id: self.streak_calc.current_streak(sorted(dates, reverse=True))
-            for habit_id, dates in by_habit.items()
+            h.id: self.streak_calc.streak(by_habit.get(h.id, []), h.weekly_frequency)
+            for h in habits
         }
-        # streaks = {}
-        # for habit_id, dates in by_habit.items():
-        #     dates.sort(reverse=True)
-        #     if (today_date - dates[0]).days >= STREAK_GRACE_DAYS:
-        #         streaks[habit_id] = 0
-        #         continue
-        #     streak = 1
-        #     for curr, prev in pairwise(dates):
-        #         if (curr - prev).days == 1:
-        #             streak += 1
-        #         else:
-        #             break
-        #     streaks[habit_id] = streak
-
-        # return streaks
 
     def get_streak_summary(self) -> dict[str, dict[str, Any] | None]:
         """Highest and lowest current streaks across user's habits.
@@ -207,31 +199,6 @@ class HabitsService:
             "lowest": {"name": names[worst_id], "days": worst_days},
         }
 
-    def check_promotion(self, habit: Habit) -> Any:
-        ## Over the last N weeks, what % of the target did user actually hit?
-        # range for completions, fetch records for this habit_id
-        # DEBUG: Testing emit/on system actually fires:
-        start_utc, end_utc = dth.last_n_days_range(days_ago=63, tz_str=self.user_tz)
-        completions = self.completion_repo.get_completion_counts_by_week_in_window(habit.id, start_utc, end_utc)
-
-        # target = this habit's target_freq * 63
-        # habit = self.habit_repo.get_by_id(habit_id)
-        target = habit.target_frequency
-
-        # For each week, we wanna ask:
-        # is num_completions >= this_habit.target_frequency?
-        # if yes -> success, else -> subpar week
-        successful_weeks = 0
-        for week, count in completions:
-            if count >= target:
-                successful_weeks += 1
-
-        # We now have both num_weeks and successful_weeks
-        # rate = successful_weeks / 9
-        rate = successful_weeks / 9
-        if rate >= PROMOTION_THRESHOLD: # if we hit wkly target in at least 70% of the last 9 weeks, promote
-            habit.status = StatusEnum.ESTABLISHED
-
 
     def check_if_completed_today(self, habit_id: int) -> bool:
         """
@@ -241,59 +208,43 @@ class HabitsService:
         completions = self.completion_repo.get_in_window(
             day, day + timedelta(days=1), habit_id=habit_id
         )
-        return bool(completions)
+        return any(c.satisfied for c in completions)
 
-    # NOTE: "Percent completion habits this week" - Mon to Sun
-    # TODO: Fix this up
+
     def calculate_all_habits_percentage_this_week(self) -> dict[str, Any]:
+        """Aggregate weekly progress: distinct satisfied days per habit,
+        capped at each habit's weekly_frequency,
+        against the summed weekly expected.
         """
-        Calculate aggregate habit completion progress for the current week.
-
-        Computes total number of recorded habit completions from Mon. through today (inclusive), the
-        total expected completions based on each habit's target frequency, and the resulting completion percentage.
-        """
-        # Determine current day in the week
-        today = dth.user_today(self.user_tz)
-        start_of_week = today - timedelta(days=today.weekday())
-
-        # Fetch completions in that time range
-        total_completions = len(
-            self.completion_repo.get_in_window(start_of_week, today + timedelta(days=1))
-        )
-
-        # Expected_completions is sum of target_frequency for all
-        habits = self.habit_repo.get_all_habits_and_tags()
-        expected_completions = sum(h.target_frequency or 0 for h in habits)
-
-        # Calculate completion percentage
-        percent_completed = (
-            round((total_completions / expected_completions) * 100, 2)
-            if expected_completions > 0
-            else 0
-        )
-
-        return {
-            "completed": total_completions,
-            "total": expected_completions,
-            "percent": percent_completed,
+        grouped = self.get_week_completions_by_habit()
+        days_done = {
+            habit_id: len({c.entry_date for c in completions if c.satisfied})
+            for habit_id, completions in grouped.items()
         }
 
-    def get_daily_completion_counts(self) -> pd.DataFrame:
-        # TODO: fetches all completion records for user
-        completion_records = self.completion_repo.get_all()
+        # Expected_completions is sum of weekly_frequency for all
+        habits = self.habit_repo.get_all()
+        completed = sum(min(days_done.get(h.id, 0), h.weekly_frequency) for h in habits)
+        expected = sum(h.weekly_frequency for h in habits)
 
-        # convert completed_on's to local date -> list of completion counts per date
-        completion_records_local = [entry.completed_on for entry in completion_records]
+        percent = round(completed / expected * 100) if expected > 0 else 0
+        return {
+            "completed": completed,
+            "total": expected,
+            "percent": percent,
+        }
 
-        # group by local date + count completions per day, make dataframe from list:
-        df = pd.DataFrame({ "date": completion_records_local })
+    def get_week_completions_by_habit(self) -> dict[int, list[HabitCompletion]]:
+        """Current week's completions (Monday thru today) grouped by habit id."""
+        today = dth.user_today(self.user_tz)
+        start_of_week = today - timedelta(days=today.weekday())
+        completions = self.completion_repo.get_in_window(start_of_week, today + timedelta(days=1))
 
-        # count occurrences of each val in a col:
-        # groupby("date") groups rows by unique date values
-        # size() counts how many rows are in each group
-        # .reset_index(name="completion_count") turns it back into a clean two-col DataFrame:
-        # date and completion_count
-        return df.groupby("date").size().reset_index(name="completion_count")
+        grouped: dict[int, list[HabitCompletion]] = {}
+        for c in completions:
+            grouped.setdefault(c.habit_id, []).append(c)
+        return grouped
+
 
 
 def create_habits_service(
@@ -307,29 +258,3 @@ def create_habits_service(
         completion_repo=HabitCompletionRepository(session, user_id),
         pillar_repo=PillarRepository(session, user_id)
     )
-
-class StreakCalculator:
-    GRACE_DAYS = 2
-
-    def __init__(self, today: date):
-        self.today = today
-
-    def current_streak(self, dates: list[date]) -> int:
-        """Dates must be in descending order"""
-        if not dates:
-            return 0
-
-        # Check if streak exists (must be within 2 days of today)
-        if (self.today - dates[0]).days >= self.GRACE_DAYS:
-            return 0
-
-        # Count consecutive days using pairwise()
-        # pairwise() = lazy iterator, no list allocation: O(n) time, O(1) extra space
-        # Stil O(n) like zip(seq, seq[1:]) would be
-        streak = 1
-        for curr, prev in pairwise(dates):
-            if (curr - prev).days == 1:
-                streak += 1
-            else:
-                break
-        return streak
