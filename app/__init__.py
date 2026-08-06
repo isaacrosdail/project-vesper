@@ -112,8 +112,7 @@ def _setup_database(app: Flask) -> None:
     Inits database with `app.app_context()`. If app.config's `AUTO_MIGRATE` flag is set to true, then runs
     Alembic migration(s) as well, using `SQLALCHEMY_DATABASE_URI`'s value as `sqlalchemy.url`.
 
-    Note: When running migrations using command.upgrade(), we need to explicitly set `sqlalchemy.url` because
-    programmatic calls don't use `alembic/env.py` (unlike CLI commands).
+    Note: When running migrations using command.upgrade(), we need to explicitly set `sqlalchemy.url`.
 
     Registers a teardown handler to clean up database sessions after each request.
     """
@@ -124,10 +123,8 @@ def _setup_database(app: Flask) -> None:
             alembic_cfg.set_main_option(
                 "sqlalchemy.url", app.config["SQLALCHEMY_DATABASE_URI"]
             )
+            alembic_cfg.attributes["configure_logger"] = False
             command.upgrade(alembic_cfg, "head")
-
-        # TODO: fix? Set logging level back after Alembic borks it
-        logging.getLogger().setLevel(app.config["LOGGING_LEVEL"])
 
     # Hook db_session.remove() into teardown
     # Prevents sessions leaking between requests
