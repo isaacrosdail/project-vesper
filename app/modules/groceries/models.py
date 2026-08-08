@@ -166,6 +166,13 @@ class Product(Base):
 
     inventory: Mapped[ProductInventory] = relationship(back_populates="product")
 
+    def nutrition_for(self, grams: Decimal) -> dict[str, Decimal]:
+        per_100 = grams / 100
+        return {
+            name: per_100 * Decimal(str(getattr(self, f"{name}_per_100g") or 0))
+            for name in _NUTRITION_FIELDS
+        }
+
     def __repr__(self) -> str:
         return f"<Product id={self.id} name='{self.name}' barcode='{self.barcode}'>"
 
@@ -377,12 +384,7 @@ class RecipeIngredient(Base):
 
     @property
     def nutrition_contribution(self) -> dict[str, Decimal]:
-        per_100 = self.grams / 100
-        # return dict of "calories": VAL, etc for NutritionLog to consume?
-        return {
-            name: per_100 * Decimal(str(getattr(self.product, f"{name}_per_100g") or 0))
-            for name in _NUTRITION_FIELDS
-        }
+        return self.product.nutrition_for(self.grams)
 
 
 class MealEnum(StrEnum):
@@ -437,6 +439,10 @@ class NutritionLog(Base):
         CheckConstraint(
             _non_negative_sql(_NUTRITION_FIELDS), name="nutrition_non_negative",
         ),
+        CheckConstraint(
+            "NOT (recipe_id IS NOT NULL AND product_id IS NOT NULL)",
+            name="single_log_entry_source",
+        ),
         Index("ix_nutrition_logs_user_entry_datetime", "user_id", "entry_datetime"),
     )
 
@@ -464,8 +470,9 @@ class NutritionLog(Base):
     sodium: Mapped[float | None] = mapped_column(Float, nullable=True)
     potassium: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    # Optionally tied to a given recipe, for "cooking" meals
+    # Optionally tied to a given recipe (for "cooking" meals) OR product, for individual item consumption
     recipe_id: Mapped[int | None] = mapped_column(ForeignKey("recipes.id", ondelete="SET NULL"), nullable=True)
+    product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id", ondelete="SET NULL"), nullable=True)
 
     def __repr__(self) -> str:
         return f"<NutritionLog id={self.id} entry={self.entry_datetime} calories={self.calories} meal={self.meal}"
