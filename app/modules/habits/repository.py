@@ -13,13 +13,12 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import InstrumentedAttribute, selectinload
 
 from app.modules.habits.models import (
     Habit,
     HabitCompletion,
     HabitTypeEnum,
-    TargetKind,
 )
 from app.shared.repository.base import BaseRepository
 
@@ -34,9 +33,8 @@ class HabitRepository(BaseRepository[Habit]):
         weekly_frequency: int,
         type: HabitTypeEnum,
         units: str | None,
-        target_kind: TargetKind | None,
-        target_value: float | None,
-        target_tolerance: float | None,
+        target_low: float | None,
+        target_high: float | None,
     ) -> Habit:
         habit = Habit(
             user_id=self.user_id,
@@ -44,9 +42,8 @@ class HabitRepository(BaseRepository[Habit]):
             weekly_frequency=weekly_frequency,
             type=type,
             units=units,
-            target_kind=target_kind,
-            target_value=target_value,
-            target_tolerance=target_tolerance,
+            target_low=target_low,
+            target_high=target_high
         )
         return self.add(habit)
 
@@ -76,18 +73,16 @@ class HabitCompletionRepository(BaseRepository[HabitCompletion]):
     def create_habit_completion(
         self, habit_id: int, entry_date: date, *,
         value: float | None = None,
-        target_kind_snapshot: TargetKind | None = None,
-        target_value_snapshot: float | None = None,
-        target_tolerance_snapshot: float | None = None,
+        target_low_snapshot: float | None = None,
+        target_high_snapshot: float | None = None,
     ) -> HabitCompletion:
         habit_completion = HabitCompletion(
             user_id=self.user_id,
             habit_id=habit_id,
             entry_date=entry_date,
             value=value,
-            target_kind_snapshot=target_kind_snapshot,
-            target_value_snapshot=target_value_snapshot,
-            target_tolerance_snapshot=target_tolerance_snapshot,
+            target_low_snapshot=target_low_snapshot,
+            target_high_snapshot=target_high_snapshot,
         )
         return self.add(habit_completion)
 

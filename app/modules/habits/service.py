@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 from app.modules.habits.schemas import HabitCompletionCreate
 from app.modules.habits.streaks import StreakCalculator
+from app.shared.schemas import TargetCreate
+from app.shared.target import Target
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -21,7 +23,7 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import app.shared.datetime_.helpers as dth
-from app.modules.habits.models import HabitTypeEnum, TargetKind
+from app.modules.habits.models import HabitTypeEnum
 from app.modules.habits.repository import (
     HabitCompletionRepository,
     HabitRepository,
@@ -63,10 +65,9 @@ class HabitsService:
             setattr(habit, field, getattr(validated, field))
 
         if "target" in fields:
-            t = validated.target
-            habit.target_kind = TargetKind(t.kind) if t else None
-            habit.target_value = t.value if t else None
-            habit.target_tolerance = getattr(t, "tolerance", None) if t else None
+            t = validated.target.to_domain() if validated.target else None
+            habit.target_low = t.low if t else None
+            habit.target_high = t.high if t else None
 
         if "pillar_ids" in fields:
             self._sync_pillars(habit, validated.pillar_ids)
@@ -75,20 +76,17 @@ class HabitsService:
 
     def create_habit(self, validated: HabitCreate) -> Habit:
         type = validated.type
-        units=getattr(validated, "units", None)
-        target = getattr(validated, "target", None)
-        target_kind=target.kind if target else None
-        target_value=target.value if target else None
-        target_tolerance=getattr(target, "tolerance", None) if target else None
+        units: str | None = getattr(validated, "units", None)
+        target: TargetCreate | None = getattr(validated, "target", None)
+        t = target.to_domain() if target else Target()
 
         habit = self.habit_repo.create_habit(
             name=validated.name,
             weekly_frequency=validated.weekly_frequency,
             type=type,
             units=units,
-            target_kind=target_kind or None,
-            target_value=target_value or None,
-            target_tolerance=target_tolerance or None,
+            target_low=t.low,
+            target_high=t.high,
         )
         self._sync_pillars(habit, validated.pillar_ids)
         self.session.flush()
@@ -127,12 +125,10 @@ class HabitsService:
             completion = existing[0]
             completion.value = validated.value  # snapshot columns untouched!
         else:
-            target = habit.target
             completion = self.completion_repo.create_habit_completion(
                 habit_id, validated.entry_date, value=validated.value,
-                target_kind_snapshot=target.kind if target else None,
-                target_value_snapshot=target.value if target else None,
-                target_tolerance_snapshot=getattr(target, "tolerance", None),
+                target_low_snapshot=habit.target_low,
+                target_high_snapshot=habit.target_high,
             )
         self.session.flush()
 

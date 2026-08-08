@@ -80,6 +80,7 @@ class HabitDayRead(APIReadSchema):
     entry_date: date
     value: float | None
     target: TargetRead | None
+    satisfied: bool
 
 class HabitOverviewItemRead(HabitRead):
     completed_today: bool
