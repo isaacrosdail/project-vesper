@@ -24,6 +24,7 @@ from app.modules.groceries.schemas import (
     ShoppingListItemCreate,
     ShoppingListItemPatch,
     ShoppingListItemRead,
+    TransactionCreate,
     TransactionPatch,
     TransactionRead,
 )
@@ -93,7 +94,7 @@ def patch_transaction(session: Session, transaction_id: int) -> tuple[Response, 
 @api_bp.post("/groceries/transactions")
 @login_plus_session
 def create_transaction(session: Session) -> tuple[Response, int]:
-    data = request.json
+    validated = TransactionCreate(**request.json)
     groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
     transaction = groceries_service.create_transaction(validated)
     return success_response(message="Transaction created", data=TransactionRead.dump(transaction)), 201
