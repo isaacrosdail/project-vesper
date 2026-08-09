@@ -338,29 +338,20 @@ class GroceriesService:
         self.nutrition_log_repo.session.add_all(entries)
         return len(entries)
 
-    def macros_summary(self, targets: dict[str, str]) -> dict[str, float]:
-        # query today's nutrition logs and sum protein/fat/carbs
-        start_utc, end_utc = dth.last_n_days_range(days_ago=1, tz_str=self.user_tz) # TODO: change to 1 again
-        logs = self.nutrition_log_repo.get_all_in_window(start_utc, end_utc, date_col="entry_datetime")
-        fields = ["calories", "protein", "carbs", "fat", "sodium", "potassium"]
-        # For each of the fields, get {field}_target from our targets dict, cast to ints
-        # TODO: Need to fix this: using 0's will of course bork avg calculations
-        targets_dict = {field: int(targets.get(f"{field}_target", 0)) for field in fields}
-        result = {}
-        for field in fields:
-            vals = [getattr(log, field) for log in logs if getattr(log, field)]
-            actual = sum(vals)
-            target = targets_dict[field]
-            result[field] = {
-                "actual": round(actual),
-                "target": target,
-                "pct": round(actual / target * 100) if target else 0,
-            }
-        meals = {}
-        for log in logs:
-            meals.setdefault(log.meal, 0)
-            meals[log.meal] += log.calories or 0
-        return result, meals
+    def macros_summary(self, start_utc: datetime, end_utc: datetime) -> tuple[dict[str, MacroLine], dict[MealEnum, int]]:
+        logs = self.nutrition_log_repo.get_all_in_window(start_utc, end_utc, date_col=NutritionLog.entry_datetime)
+        logged_days = len({dth.convert_to_timezone(self.user_tz, log.entry_datetime).date() for log in logs})
+
+        user = self.session.execute(select(User).where(User.id==self.user_id)).scalar_one() # TODO(jank): fix
+
+        targets_dict: dict[str, Target | None] = {
+            f: MACRO_POLICIES[f](v) if (v := getattr(user.goals, f)) is not None else None
+            for f in MACRO_POLICIES
+        }
+        result = summarize_macros(logs, targets_dict, logged_days=logged_days)
+        cals_by_meal = calories_by_meal(logs)
+        return result, cals_by_meal
+
 
     def cook_recipe(self, recipe_id: int, meal: MealEnum, entry_datetime: datetime) -> None:
         """Logs a cooked recipe as one NutritionLog and consumes its ingredients.
@@ -491,6 +482,54 @@ class IngredientShortfall:
     unit: UnitEnum
     packages_needed: int  # for ShoppingListItem.quantity_wanted
 
+
+## TODO(service): Clean this system/pipeline up
+class MacroLine(TypedDict):
+    actual: int
+    target: Target | None
+    pct: int | None
+    target_status: TargetStatus | None
+
+MACRO_POLICIES: dict[str, Callable[[int], Target]] = {
+    "calories": lambda t: Target.within(value=t, tolerance=0.2 * t),
+    "protein": lambda t: Target.at_least(t),
+    "carbs": lambda t: Target.at_most(t),
+    "fat": lambda t: Target.at_most(t),
+    "sodium": lambda t: Target.at_most(t),
+    "potassium": lambda t: Target.at_least(t),
+}
+
+def summarize_macros(
+    logs: list[NutritionLog],
+    targets_dict: dict[str, Target | None],
+    logged_days: int
+) -> dict[str, MacroLine]:
+    """Actual values are per-logged-day averages. logged_days is computed by caller (distinct local dates)."""
+    result: dict[str, MacroLine] = {}
+    for field, target in targets_dict.items():
+        vals = [getattr(log, field) or 0 for log in logs]
+        actual = sum(vals)
+        avg_over_window = actual / logged_days if logged_days else 0
+        if target is None:
+            pct, status = None, None
+        else:
+            pct = round(avg_over_window / target.nominal * 100) if target.nominal else 0
+            status = target.status(avg_over_window)
+        result[field] = {
+            "actual": round(avg_over_window),
+            "target": target,
+            "pct": pct,
+            "target_status": status,
+        }
+    return result
+
+
+## TODO: this belongs in ORM-land
+def calories_by_meal(logs: list[NutritionLog]) -> dict[MealEnum, int]:
+    meals: Counter[MealEnum] = Counter()
+    for log in logs:
+        meals[log.meal] += int(log.calories or 0)
+    return meals
 
 
 def create_groceries_service(

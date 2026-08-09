@@ -14,6 +14,7 @@ from app.api.responses import success_response
 from app.modules.groceries.schemas import (
     CookRequest,
     LogProductRequest,
+    MacrosSummaryRead,
     ProductCreate,
     ProductPatch,
     ProductRead,
@@ -245,7 +246,15 @@ def cook_recipe(session: Session, recipe_id: int) -> tuple[Response, int]:
     return success_response(message="Recipe cooked"), 200
 
 
+@api_bp.get("/groceries/macros_summary")
+@login_plus_session
+def get_macros_summary(session: Session) -> tuple[Response, int]:
+    last_n_days = request.args.get("lastNDays", type=int)
+    service = create_groceries_service(session, current_user.id, current_user.timezone)
+    start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
+    macros, _  = service.macros_summary(start_utc, end_utc)
 
+    return success_response(message="Summary generated", data=MacrosSummaryRead.dump(macros)), 200
 
 
 @api_bp.get("/groceries/recipe_slots")

@@ -14,7 +14,8 @@ from app.modules.groceries.models import (
     ProductCategoryEnum,
     UnitEnum,
 )
-from app.shared.schemas import APIReadSchema, APISchema
+from app.shared.schemas import APIReadSchema, APISchema, TargetRead
+from app.shared.target import TargetStatus
 
 
 class ProductCreate(APISchema):
@@ -238,4 +239,19 @@ class RecipeSlotRead(APIReadSchema):
     yields: float | None
     yields_units: UnitEnum | None
     missing: list[ShortfallRead]
+
+
+class MacroLineRead(APIReadSchema):
+    actual: int
+    target: TargetRead | None
+    pct: int | None
+    target_status: TargetStatus | None
+
+class MacrosSummaryRead(APIReadSchema):
+    calories: MacroLineRead
+    protein: MacroLineRead
+    carbs: MacroLineRead
+    fat: MacroLineRead
+    sodium: MacroLineRead
+    potassium: MacroLineRead
 
