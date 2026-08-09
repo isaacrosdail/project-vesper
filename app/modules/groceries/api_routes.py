@@ -13,6 +13,7 @@ from app.api import api_bp
 from app.api.responses import success_response
 from app.modules.groceries.schemas import (
     CookRequest,
+    LogProductRequest,
     ProductCreate,
     ProductPatch,
     ProductRead,
@@ -191,6 +192,15 @@ def delete_recipe(session: Session, recipe_id: int) -> tuple[Response, int]:
     groceries_service.delete_recipe(recipe_id)
     return success_response(message="Recipe deleted"), 200
 
+
+
+@api_bp.post("/groceries/nutrition_logs")
+@login_plus_session
+def log_product(session: Session) -> tuple[Response, int]:
+    validated = LogProductRequest(**request.json)
+    service = create_groceries_service(session, current_user.id, current_user.timezone)
+    service.log_product_consumption(validated.product_id, validated.grams, validated.meal, validated.entry_datetime)
+    return success_response(message="Product entry logged"), 200
 
 
 # TODO: Rough, fix

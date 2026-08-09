@@ -205,6 +205,12 @@ class NutritionLogCreate(APISchema):
     sodium: float | None = Field(default=None, ge=0)
     potassium: float | None = Field(default=None, ge=0)
 
+class LogProductRequest(APISchema):
+    product_id: int
+    grams: Decimal = Field(gt=0)
+    meal: MealEnum
+    entry_datetime: datetime
+
 class InventoryLedgerCreate(APISchema):
     # product_id: int
     qty_delta: int

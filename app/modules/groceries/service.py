@@ -336,6 +336,23 @@ class GroceriesService:
             meals[log.meal] += log.calories or 0
 
         return result, meals
+    def log_product_consumption(self, product_id: int, grams: Decimal, meal: MealEnum, entry_datetime: datetime) -> None:
+        product = self.product_repo.get_active_by_id(product_id)
+        if not product:
+            raise ServiceError(f"product id {product_id} not found")
+
+        nutritionlog_entry = NutritionLog(
+            user_id=self.user_id,
+            recipe_id=None,
+            entry_datetime=entry_datetime,
+            meal=meal,
+            **product.nutrition_for(grams)
+        )
+        self.session.add(nutritionlog_entry)
+        self._record_inventory_event(
+            product_id, -grams, InventoryLedgerEventTypeEnum.CONSUMPTION, entry_datetime
+        )
+
 
     def _record_inventory_event(
         self, product_id: int, qty_delta: Decimal,

@@ -189,7 +189,9 @@ class ApiClient {
     }
 
     nutrition_log = {
-        summary: (params: URLSearchParams) => this.request('GET', `/groceries/nutrition_logs/daily_totals?${params}`)
+        summary: (params: URLSearchParams) => this.request('GET', `/groceries/nutrition_logs/daily_totals?${params}`),
+        logProduct: (data: { product_id: number; grams: number; meal: MealEnum; entry_datetime: string }) =>
+            this.request('POST', '/groceries/nutrition_logs', data),
     }
 
     groceries_dashboard = {
