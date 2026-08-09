@@ -5,6 +5,7 @@ Service layer for Groceries module.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from decimal import Decimal
 
 if TYPE_CHECKING:
     import io
@@ -26,12 +27,17 @@ import app.shared.datetime_.helpers as dth
 from app.modules.groceries.models import (
     MEAL_TIMES,
     NUMERIC_MAPPINGS,
+    InventoryLedger,
+    InventoryLedgerEventTypeEnum,
     MealEnum,
     NutritionLog,
+    ProductInventory,
     Recipe,
 )
 from app.modules.groceries.repository import (
+    InventoryLedgerRepository,
     NutritionLogRepository,
+    ProductInventoryRepository,
     ProductRepository,
     RecipeIngredientRepository,
     RecipeRepository,
@@ -57,6 +63,7 @@ class GroceriesService:
         self,
         session: Session,
         user_tz: str,
+        user_id: int,
         product_repo: ProductRepository,
         transaction_repo: TransactionRepository,
         shopping_list_repo: ShoppingListRepository,
@@ -65,6 +72,8 @@ class GroceriesService:
         recipe_ingredient_repo: RecipeIngredientRepository,
         nutrition_log_repo: NutritionLogRepository,
         shopping_trip_repo: ShoppingTripRepository,
+        product_inventory_repo: ProductInventoryRepository,
+        inventory_ledger_repo: InventoryLedgerRepository,
     ) -> None:
         self.session = session
         self.product_repo = product_repo
@@ -75,6 +84,9 @@ class GroceriesService:
         self.recipe_ingredient_repo = recipe_ingredient_repo
         self.nutrition_log_repo = nutrition_log_repo
         self.shopping_trip_repo = shopping_trip_repo
+        self.product_inventory_repo = product_inventory_repo
+        self.inventory_ledger_repo = inventory_ledger_repo
+        self.user_id = user_id
         self.user_tz = user_tz
 
 
@@ -126,49 +138,58 @@ class GroceriesService:
         transaction = self.transaction_repo.get_by_id(transaction_id)
         if not transaction:
             raise ServiceError("Transaction not found", 404)
-        transaction.price_at_scan = validated.price_at_scan
-        transaction.quantity = validated.quantity
+        if validated.price_at_scan is not None:
+            transaction.price_at_scan = validated.price_at_scan
+        old_quantity = transaction.quantity
+        # qty_delta rejects deltas of 0 - guard:
+
+        if validated.quantity is not None and old_quantity != validated.quantity:
+            per_unit = self.inventory_ledger_repo.sum_deltas_for_transaction(transaction.id) / old_quantity
+            qty_delta = (validated.quantity - old_quantity) * per_unit
+            self._record_inventory_event(transaction.product.id, qty_delta, event_type=InventoryLedgerEventTypeEnum.CORRECTION,
+                entry_datetime=dth.now_utc(), transaction_id=transaction.id)
+            transaction.quantity = validated.quantity
         return transaction
 
-    def create_transaction(self, data: dict[str, Any]) -> Transaction:
-        product_id = data["product_id"]
-
-        # Resolve product id
-        if product_id == "__new__":
-            validated_product = ProductCreate(**data)
-            product = self.create_product(validated_product)
-            product_id = product.id
+    def create_transaction(self, validated: TransactionCreate) -> Transaction:
+        # product_id = data["product_id"]
+        if validated.product is not None:
+            product = self.create_product(validated.product)
         else:
-            product_id = int(product_id)
-
-        validated = TransactionCreate(
-            product_id=product_id,
-            price_at_scan=data["price_at_scan"],
-            quantity=data["quantity"]
-        )
+            product = self.product_repo.get_by_id(validated.product_id)
+            if product is None:
+                raise ServiceError("Product not found", 404)
 
         # Increment quantity if existing txn exists for same day at same price
         start_utc, end_utc = dth.today_range_utc(self.user_tz)
         existing_transaction = self.transaction_repo.get_transaction_in_window(
-            product_id, start_utc, end_utc
+            product.id, start_utc, end_utc
         )
 
         if existing_transaction and (
             existing_transaction.price_at_scan == validated.price_at_scan
         ):
             existing_transaction.quantity += validated.quantity
-            return existing_transaction
+            transaction = existing_transaction
+        else:
+            transaction = self.transaction_repo.create_transaction(
+                product.id, price_at_scan=validated.price_at_scan, quantity=validated.quantity
+            )
+        self.session.flush() # transaction.id must exist before the ledger link
 
-        transaction = self.transaction_repo.create_transaction(
-            product_id, price_at_scan=validated.price_at_scan, quantity=validated.quantity
-        )
-        self.session.flush()
+        qty_delta = validated.quantity * product.net_weight * product.unit_type.factor
+        self._record_inventory_event(product.id, qty_delta, event_type=InventoryLedgerEventTypeEnum.PURCHASE,
+            entry_datetime=dth.now_utc(), transaction_id=transaction.id)
         return transaction
 
     def delete_transaction(self, transaction_id: int) -> Transaction:
         txn = self.transaction_repo.get_by_id(transaction_id)
         if txn is None:
             raise ServiceError("Transaction not found", 404)
+        # Ledger correction prior to deleting transaction
+        qty_delta = -1 * self.inventory_ledger_repo.sum_deltas_for_transaction(txn.id)
+        self._record_inventory_event(txn.product.id, qty_delta, event_type=InventoryLedgerEventTypeEnum.CORRECTION,
+            entry_datetime=dth.now_utc(), transaction_id=txn.id)
         self.transaction_repo.delete(txn)
         return txn
 
@@ -316,6 +337,28 @@ class GroceriesService:
 
         return result, meals
 
+    def _record_inventory_event(
+        self, product_id: int, qty_delta: Decimal,
+        event_type: InventoryLedgerEventTypeEnum, entry_datetime: datetime, transaction_id: int | None = None
+    ) -> None:
+        """Helper to record inventory event for any given event."""
+        # Guard: Price-only txn edits, deleting txns which pre-date the addition of the ledger, &
+        #  stock corrections which match what we already have.
+        if qty_delta == 0:
+            return
+        self.session.add(InventoryLedger(
+            user_id=self.user_id, product_id=product_id,
+            event_type=event_type, qty_delta=qty_delta, entry_datetime=entry_datetime,
+            transaction_id=transaction_id
+        ))
+        stock = self.product_inventory_repo.get_by_product_id(product_id)
+        if stock:
+            stock.qty_on_hand += qty_delta
+        else:
+            self.session.add(ProductInventory(
+                user_id=self.user_id, product_id=product_id, qty_on_hand=qty_delta
+            ))
+
 
 def create_groceries_service(
     session: Session, user_id: int, user_tz: str
@@ -324,6 +367,7 @@ def create_groceries_service(
     return GroceriesService(
         session=session,
         user_tz=user_tz,
+        user_id=user_id,
         product_repo=ProductRepository(session, user_id),
         transaction_repo=TransactionRepository(session, user_id),
         shopping_list_repo=ShoppingListRepository(session, user_id),
@@ -331,5 +375,7 @@ def create_groceries_service(
         recipe_repo=RecipeRepository(session, user_id),
         recipe_ingredient_repo=RecipeIngredientRepository(session, user_id),
         nutrition_log_repo=NutritionLogRepository(session, user_id),
-        shopping_trip_repo=ShoppingTripRepository(session, user_id)
+        shopping_trip_repo=ShoppingTripRepository(session, user_id),
+        product_inventory_repo=ProductInventoryRepository(session, user_id),
+        inventory_ledger_repo=InventoryLedgerRepository(session, user_id),
     )

@@ -16,9 +16,12 @@ from sqlalchemy import Date, cast, func, select, delete
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.modules.groceries.models import (
+    InventoryLedger,
+    InventoryLedgerEventTypeEnum,
     NutritionLog,
     Product,
     ProductCategoryEnum,
+    ProductInventory,
     Recipe,
     RecipeIngredient,
     ShoppingList,
@@ -267,3 +270,50 @@ class ShoppingTripRepository(BaseRepository[ShoppingTrip]):
             .limit(1)
         )
         return self.session.scalars(stmt).first()
+
+class ProductInventoryRepository(BaseRepository[ProductInventory]):
+    def __init__(self, session: Session, user_id: int) -> None:
+        super().__init__(session, user_id, model_cls=ProductInventory)
+
+    def get_by_product_id(self, product_id: int) -> ProductInventory | None:
+        stmt = self._user_select(ProductInventory).where(
+            ProductInventory.product_id == product_id,
+        )
+        return self.session.scalars(stmt).one_or_none()
+
+    def get_qty_map(self) -> dict[int, Decimal]:
+        stmt = select(
+            ProductInventory.product_id, ProductInventory.qty_on_hand
+        ).where(ProductInventory.user_id == self.user_id)
+        return dict(self.session.execute(stmt).all())
+    
+
+class InventoryLedgerRepository():
+    def __init__(self, session: Session, user_id: int) -> None:
+        self.session = session
+        self.user_id = user_id
+
+    def get_sum_deltas_for_product(self, product_id: int) -> Decimal:
+        stmt = select(func.coalesce(func.sum(InventoryLedger.qty_delta), 0)).where(
+            InventoryLedger.user_id == self.user_id,
+            InventoryLedger.product_id == product_id,
+        )
+        return self.session.scalar(stmt)
+    
+    def sum_deltas_for_transaction(self, transaction_id: int) -> Decimal:
+        stmt = select(func.coalesce(func.sum(InventoryLedger.qty_delta), 0)).where(
+            InventoryLedger.user_id == self.user_id,
+            InventoryLedger.transaction_id == transaction_id,
+        )
+        return self.session.scalar(stmt)
+
+    def append(self, entry: InventoryLedger) -> InventoryLedger:
+        self.session.add(entry)
+        return entry
+
+    def get_all_for_product(self, product_id: int) -> list[InventoryLedger]:
+        stmt = select(InventoryLedger).where(
+            InventoryLedger.user_id == self.user_id,
+            InventoryLedger.product_id == product_id,
+        )
+        return self.session.scalars(stmt).all()
