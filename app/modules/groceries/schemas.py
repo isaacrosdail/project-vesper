@@ -224,3 +224,18 @@ class ProductInventoryCreate(APISchema):
 class CookRequest(APISchema):
     meal: MealEnum
     entry_datetime: datetime
+
+
+class ShortfallRead(APIReadSchema):
+    product_id: int
+    product_name: str
+    deficit_value: float  # Decimal on the dataclass; float here so JSON gets a number, not a string
+    unit: UnitEnum
+
+class RecipeSlotRead(APIReadSchema):
+    id: int
+    name: str
+    yields: float | None
+    yields_units: UnitEnum | None
+    missing: list[ShortfallRead]
+

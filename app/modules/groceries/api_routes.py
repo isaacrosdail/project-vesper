@@ -20,6 +20,7 @@ from app.modules.groceries.schemas import (
     RecipeCreate,
     RecipePatch,
     RecipeRead,
+    RecipeSlotRead,
     ShoppingListItemCreate,
     ShoppingListItemPatch,
     ShoppingListItemRead,
@@ -132,6 +133,13 @@ def delete_transaction(session: Session, transaction_id: int) -> tuple[Response,
     return success_response(message="Transaction deleted"), 200
 
 
+@api_bp.get("/groceries/shopping_list")
+@login_plus_session
+def get_shopping_list(session: Session) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    shopping_list, _ = groceries_service.get_or_create_shopping_list()
+    return success_response(message="Shopping list retrieved", data=[ShoppingListItemRead.dump(i) for i in shopping_list.items]), 200
+
 @api_bp.post("/groceries/shopping_list_items")
 @login_plus_session
 def post_shopping_list_item(session: Session) -> tuple[Response, int]:
@@ -193,6 +201,17 @@ def delete_recipe(session: Session, recipe_id: int) -> tuple[Response, int]:
     return success_response(message="Recipe deleted"), 200
 
 
+@api_bp.post("/groceries/recipes/<int:recipe_id>/shortfalls_to_list")
+@login_plus_session
+def post_recipe_shortfalls_to_list(session: Session, recipe_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    items = groceries_service.add_recipe_shortfalls_to_list(recipe_id)
+    message = (
+        f"Added {len(items)} items to shopping list"
+        if items else "Recipe is ready; nothing to add"
+    )
+    return success_response(message=message, data=[ShoppingListItemRead.dump(i) for i in items]), 200
+
 
 @api_bp.post("/groceries/nutrition_logs")
 @login_plus_session
@@ -214,3 +233,32 @@ def daily_totals(session: Session) -> tuple[Response, int]:
 
     return success_response(message="gotcha", data=results), 200
 
+
+
+@api_bp.post("/groceries/recipes/<int:recipe_id>/cook")
+@login_plus_session
+def cook_recipe(session: Session, recipe_id: int) -> tuple[Response, int]:
+    validated = CookRequest(**request.json)
+    service = create_groceries_service(session, current_user.id, current_user.timezone)
+    service.cook_recipe(recipe_id, validated.meal, validated.entry_datetime)
+    return success_response(message="Recipe cooked"), 200
+
+
+
+
+
+@api_bp.get("/groceries/recipe_slots")
+@login_plus_session
+def get_recipe_slots(session: Session) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id,
+current_user.timezone)
+    pairs = groceries_service.get_recipes_with_shortfalls()
+    data = [
+        RecipeSlotRead(
+            id=recipe.id, name=recipe.name,
+            yields=recipe.yields, yields_units=recipe.yields_units,
+            missing=shortfalls,
+        ).model_dump(mode="json")
+        for recipe, shortfalls in pairs
+    ]
+    return success_response(message=f"Retrieved {len(data)} recipe slots", data=data), 200

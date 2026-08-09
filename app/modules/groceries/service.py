@@ -4,8 +4,18 @@ Service layer for Groceries module.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+import math
+from collections import Counter
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any, TypedDict
+
+from sqlalchemy import select
+
+from app.modules.auth.models import User
+from app.shared.target import Target, TargetStatus
 
 if TYPE_CHECKING:
     import io
@@ -33,6 +43,8 @@ from app.modules.groceries.models import (
     NutritionLog,
     ProductInventory,
     Recipe,
+    RecipeIngredient,
+    UnitEnum,
 )
 from app.modules.groceries.repository import (
     InventoryLedgerRepository,
@@ -242,7 +254,18 @@ class GroceriesService:
             return product, False
         return self.product_repo.create_product(**typed_product_data), True
 
+    def _validate_ingredients(self, ingredients: list[RecipeIngredient]) -> None:
+        products = self.product_repo.get_by_ids([i.product_id for i in ingredients])
+        products_by_id = {p.id: p for p in products}
+        for ing in ingredients:
+            product = products_by_id.get(ing.product_id)
+            if product is None:
+                raise ServiceError(f"unknown product id {ing.product_id}")
+            if product.unit_type.dimension != ing.amount_units.dimension:
+                raise ServiceError(f"ingredient {product.name}: {ing.amount_units} is {ing.amount_units.dimension}, product is {product.unit_type.dimension}")
+
     def create_recipe(self, validated: RecipeCreate) -> Recipe:
+        self._validate_ingredients(validated.ingredients)
         recipe = self.recipe_repo.create_recipe(validated.name, validated.yields, validated.yields_units)
         self.recipe_repo.session.flush()
         for ingredient in validated.ingredients:
@@ -258,6 +281,9 @@ class GroceriesService:
         recipe = self.recipe_repo.get_by_id(recipe_id)
         if not recipe:
             raise ServiceError("Recipe not found", 404)
+
+        if "ingredients" in validated.model_fields_set:
+            self._validate_ingredients(validated.ingredients)
 
         for field in validated.model_fields_set:
             if field == "ingredients":
@@ -275,7 +301,7 @@ class GroceriesService:
 
     def delete_recipe(self, recipe_id: int) -> Recipe:
         """Deletes Recipe. Eager-loads with ingredients, as those cascade delete."""
-        recipe = self.recipe_repo.get_recipe_with_ingredients(recipe_id)
+        recipe = self.recipe_repo.get_by_id(recipe_id)
         if recipe is None:
             raise ServiceError("Recipe not found", 404)
         self.recipe_repo.delete(recipe)
@@ -334,8 +360,43 @@ class GroceriesService:
         for log in logs:
             meals.setdefault(log.meal, 0)
             meals[log.meal] += log.calories or 0
-
         return result, meals
+
+    def cook_recipe(self, recipe_id: int, meal: MealEnum, entry_datetime: datetime) -> None:
+        """Logs a cooked recipe as one NutritionLog and consumes its ingredients.
+        
+        Raises 409 if stock is short: recipes are all-or-nothing.
+        """
+        recipe = self.recipe_repo.get_by_id(recipe_id)
+        if not recipe:
+            raise ServiceError(f"recipe id {recipe_id} not found", 404)
+
+        shortfalls = compute_shortfalls(
+            recipe.ingredients, self.product_inventory_repo.get_qty_map()
+        )
+        if shortfalls:
+            raise ServiceError("Not enough ingredients", 409)
+
+        totals: dict[str, Decimal] = {}
+        for ing in recipe.ingredients:
+            for macro, val in ing.nutrition_contribution.items():
+                totals[macro] = totals.get(macro, Decimal(0)) + val
+
+        entry = NutritionLog(
+            user_id=self.user_id,
+            recipe_id=recipe_id,
+            entry_datetime=entry_datetime,
+            meal=meal,
+            **totals
+        )
+        self.session.add(entry)
+
+        for ing in recipe.ingredients:
+            self._record_inventory_event(
+                ing.product_id, -ing.grams,
+                InventoryLedgerEventTypeEnum.CONSUMPTION, entry_datetime
+            )
+
     def log_product_consumption(self, product_id: int, grams: Decimal, meal: MealEnum, entry_datetime: datetime) -> None:
         product = self.product_repo.get_active_by_id(product_id)
         if not product:
@@ -353,6 +414,30 @@ class GroceriesService:
             product_id, -grams, InventoryLedgerEventTypeEnum.CONSUMPTION, entry_datetime
         )
 
+
+    def get_recipes_with_shortfalls(self) -> list[tuple[Recipe, list[IngredientShortfall]]]:
+        """Pairs each recipe with what's missing from inventory, sorted ready-first.
+
+        Readiness is determined per recipe against current stock: two ready recipes sharing
+        an ingredient do not reserve it from each other.
+        """
+        recipes = self.recipe_repo.get_all()
+        qty_map = self.product_inventory_repo.get_qty_map()
+
+        pairs = [(r, compute_shortfalls(r.ingredients, qty_map)) for r in recipes]
+        pairs.sort(key=lambda pair: len(pair[1]))
+        return pairs
+
+    def add_recipe_shortfalls_to_list(self, recipe_id: int) -> list[ShoppingListItem]:
+        recipe = self.recipe_repo.get_by_id(recipe_id)
+        if recipe is None:
+            raise ServiceError("Recipe not found", 404)
+        qty_map = self.product_inventory_repo.get_qty_map()
+        shortfalls = compute_shortfalls(recipe.ingredients, qty_map)
+        return [
+            self.add_item_to_shopping_list(sf.product_id, sf.packages_needed)
+            for sf in shortfalls
+        ]
 
     def _record_inventory_event(
         self, product_id: int, qty_delta: Decimal,
@@ -375,6 +460,37 @@ class GroceriesService:
             self.session.add(ProductInventory(
                 user_id=self.user_id, product_id=product_id, qty_on_hand=qty_delta
             ))
+
+def compute_shortfalls(ingredients: Iterable[RecipeIngredient], qty_map: dict[int, Decimal]) -> list[IngredientShortfall]:
+    """Compares recipe requirements against stock.
+    
+    All math is done in base units (g for mass, ml for volume) to match ProductInventory.qty_on_hand.
+    Only IngredientShortfall.deficit_value is converted back to the recipe's own units, for display.
+    """
+    shortfalls = []
+    for ing in ingredients:
+        amount_on_hand = qty_map.get(ing.product_id, Decimal(0))
+        needed = ing.grams
+        if needed > amount_on_hand:
+            deficit = needed - amount_on_hand
+            package_grams = ing.product.net_weight * ing.product.unit_type.factor
+            shortfalls.append(IngredientShortfall(
+                product_id=ing.product_id,
+                product_name=ing.product.name,
+                deficit_value=deficit / ing.amount_units.factor,
+                unit=ing.amount_units,
+                packages_needed=math.ceil(deficit / package_grams)
+            ))
+    return shortfalls
+
+@dataclass(frozen=True, slots=True)
+class IngredientShortfall:
+    product_id: int
+    product_name: str
+    deficit_value: Decimal
+    unit: UnitEnum
+    packages_needed: int  # for ShoppingListItem.quantity_wanted
+
 
 
 def create_groceries_service(
