@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
@@ -185,11 +185,11 @@ class TasksService:
         supertask.subtasks.remove(subtask)
 
 
-    def _rate(self, tasks: list[Task], predicate: Callable[[Task], bool], *, subset_key: str) -> dict[str, Any]:
+    def _rate(self, tasks: list[Task], predicate: Callable[[Task], bool]) -> dict[str, int]:
         total = len(tasks)
         subset = sum(1 for t in tasks if predicate(t))
         rate = round((subset / total) * 100) if total > 0 else 0
-        return { "rate": rate, subset_key: subset, "total": total }
+        return { "rate": rate, "count": subset, "total": total }
 
     # TODO: we could use created_at_local :/
     def calculate_tasks_progress_today(self) -> dict[str, int]:
@@ -232,7 +232,7 @@ class TasksService:
         now = dth.now_utc()
         start_utc, _ = dth.last_n_days_range(days, self.user_tz)
         tasks = self.task_repo.get_all_in_window(start_utc, now, date_col=Task.due_date)
-        return self._rate(tasks, lambda t: t.is_overdue(now), subset_key="overdue")
+        return self._rate(tasks, lambda t: t.is_overdue(now))
 
 
     def calc_frog_adherence_rate(self, *, days: int) -> dict[str, int]:
@@ -250,8 +250,11 @@ class TasksService:
         ]
         return self._rate(
             frogs,
-            lambda t: t.completed_at is not None and t.completed_at <= t.due_date,
-            subset_key="done"
+            lambda t: (
+                t.completed_at is not None
+                and t.due_date is not None
+                and t.completed_at <= t.due_date
+            ),
         )
 
 

@@ -77,3 +77,8 @@ class TaskLink(APISchema):
         if self.subtask_id == self.supertask_id:
             raise ValueError("Self-links are invalid")
         return self
+
+class TaskStatRead(APIReadSchema):
+    rate: int
+    count: int
+    total: int

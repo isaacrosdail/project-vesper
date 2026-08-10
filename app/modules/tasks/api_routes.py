@@ -19,6 +19,7 @@ from app.modules.tasks.schemas import (
     TaskPatch,
     TaskProgressRead,
     TaskRead,
+    TaskStatRead,
 )
 from app.modules.tasks.service import create_tasks_service
 from app.shared.decorators import login_plus_session
@@ -114,3 +115,18 @@ def delete_task_link(session: Session) -> tuple[Response, int]:
     tasks_service.delete_link(link.subtask_id, link.supertask_id)
     return success_response(message="Link deleted"), 200
 
+
+@api_bp.get("/tasks/stats")
+@login_plus_session
+def get_tasks_stats(session: Session) -> tuple[Response, int]:
+    last_n_days = request.args.get("lastNDays", type=int)
+    tasks_service = create_tasks_service(
+        session, current_user.id, current_user.timezone
+    )
+    overdue_stat = tasks_service.calc_overdue_rate(days=last_n_days)
+    frog_stat = tasks_service.calc_frog_adherence_rate(days=last_n_days)
+
+    return success_response(message="", data={
+        "overdue": TaskStatRead.dump(overdue_stat),
+        "frog": TaskStatRead.dump(frog_stat)
+    }), 200
