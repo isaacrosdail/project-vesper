@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 
     from sqlalchemy.orm import Session
 
-from sqlalchemy import Date, cast, func, select, delete
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy import Date, cast, delete, func, select
+from sqlalchemy.orm import selectinload
 
 from app.modules.groceries.models import (
     InventoryLedger,
@@ -208,16 +208,6 @@ class RecipeRepository(BaseRepository[Recipe]):
         )
 
         return self.add(recipe)
-
-    def get_recipe_with_ingredients(
-        self, recipe_id: int
-    ) -> Recipe | None:
-        stmt = (
-            self._user_select(Recipe)
-            .where(Recipe.id==recipe_id)
-            .options(selectinload(Recipe.ingredients))
-        )
-        return self.session.scalars(stmt).one_or_none()
 
 
 class RecipeIngredientRepository(BaseRepository[RecipeIngredient]):

@@ -188,7 +188,7 @@ def get_recipe_detail(session: Session, recipe_id: int) -> tuple[Response, int]:
     groceries_service = create_groceries_service(
         session, current_user.id, current_user.timezone
     )
-    recipe = groceries_service.recipe_repo.get_recipe_with_ingredients(recipe_id)
+    recipe = groceries_service.recipe_repo.get_by_id(recipe_id)
     if not recipe:
         raise ServiceError("Recipe not found", 404)
     return success_response(
