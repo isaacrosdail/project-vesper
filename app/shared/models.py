@@ -1,4 +1,12 @@
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.modules.habits.models import Habit
+    from app.modules.tasks.models import Task
+    from app.modules.time_tracking.models import TimeEntry
 
 from sqlalchemy import Column, ForeignKey, String, Table, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,7 +17,7 @@ TAG_NAME_MAX_LENGTH = 50
 TAG_SCOPE_MAX_LENGTH = 20
 
 
-# Tasks association table (many-to-many link between tasks & tags)
+# Tasks association table
 task_tags = Table(
     "task_tags",
     Base.metadata,
@@ -27,6 +35,8 @@ habit_tags = Table(
 
 
 class Tag(Base):
+    """A user-defined label attachable to tasks and habits."""
+
     __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_tag_name"),)
 
     name: Mapped[str] = mapped_column(String(TAG_NAME_MAX_LENGTH), nullable=False)
@@ -35,12 +45,8 @@ class Tag(Base):
         String(TAG_SCOPE_MAX_LENGTH), default="universal"
     )
 
-    # Reciprocal relationships for many-to-many
-    tasks = relationship("Task", secondary="task_tags", back_populates="tags")
-    habits = relationship("Habit", secondary="habit_tags", back_populates="tags")
-
-    def __str__(self) -> str:
-        return self.name
+    tasks: Mapped[list[Task]] = relationship("Task", secondary="task_tags", back_populates="tags")
+    habits: Mapped[list[Habit]] = relationship("Habit", secondary="habit_tags", back_populates="tags")
 
     def __repr__(self) -> str:
         return f"<Tag id={self.id} name='{self.name}'>"
@@ -68,13 +74,15 @@ time_entry_pillars = Table(
 )
 
 class Pillar(Base):
+    """A core life-domain (Health, Career, etc) that activities roll up into."""
+
     __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_pillar_name"),)
 
     name: Mapped[str] = mapped_column(String(30), nullable=False)
 
-    habits = relationship("Habit", secondary=habit_pillars, back_populates="pillars")
-    tasks = relationship("Task", secondary=task_pillars, back_populates="pillars")
-    time_entries = relationship("TimeEntry", secondary=time_entry_pillars, back_populates="pillars")
+    habits: Mapped[list[Habit]] = relationship("Habit", secondary=habit_pillars, back_populates="pillars")
+    tasks: Mapped[list[Task]] = relationship("Task", secondary=task_pillars, back_populates="pillars")
+    time_entries: Mapped[list[TimeEntry]] = relationship("TimeEntry", secondary=time_entry_pillars, back_populates="pillars")
 
     def __repr__(self) -> str:
         return f"<Pillar id={self.id} name='{self.name}'>"
