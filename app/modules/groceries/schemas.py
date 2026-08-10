@@ -50,10 +50,14 @@ class ProductCreate(APISchema):
                 raise ValueError(f'Carb subtypes ({sub_carbs}g) exceed total carbs ({self.carbs_per_100g})')
 
         # Calories sanity check
-        if all(v is not None for v in [self.protein_per_100g, self.fat_per_100g, self.carbs_per_100g, self.calories_per_100g]):
-            computed = (self.protein_per_100g * 4) + (self.carbs_per_100g * 4) + (self.fat_per_100g * 9)
-            if abs(computed - self.calories_per_100g) > self.calories_per_100g * 0.15:
-                raise ValueError(f'Calories ({self.calories_per_100g}) inconsistent with macros (computed: {computed:.0f})')
+        protein = self.protein_per_100g
+        fat = self.fat_per_100g
+        carbs = self.carbs_per_100g
+        cals = self.calories_per_100g
+        if protein is not None and fat is not None and carbs is not None and cals is not None: # for mypy
+            computed = (protein * 4) + (carbs * 4) + (fat * 9)
+            if abs(computed - cals) > cals * 0.15:
+                raise ValueError(f"Calories ({cals}) inconsistent with macros (computed: {computed:.0f})")
 
         return self
 
