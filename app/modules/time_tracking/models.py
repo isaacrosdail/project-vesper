@@ -4,7 +4,6 @@ from sqlalchemy import CheckConstraint, DateTime, Integer, String, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
-from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.models import Pillar, time_entry_pillars
 
 CATEGORY_MAX_LENGTH = 50
@@ -36,14 +35,6 @@ class TimeEntry(Base):
 
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
 
-
-    @property
-    def started_at_local(self) -> datetime:
-        return convert_to_timezone(self.user.timezone, self.started_at)
-
-    @property
-    def ended_at_local(self) -> datetime:
-        return convert_to_timezone(self.user.timezone, self.ended_at)
     pillars: Mapped[list[Pillar]] = relationship("Pillar", secondary=time_entry_pillars, back_populates="time_entries", lazy="selectin")
 
     def __repr__(self) -> str:

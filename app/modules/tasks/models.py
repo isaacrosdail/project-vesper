@@ -23,7 +23,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base, CustomBaseTaskMixin
-from app.shared.datetime_.helpers import convert_to_timezone
 from app.shared.models import task_pillars, task_tags
 
 TASK_NAME_MAX_LENGTH = 150
@@ -109,14 +108,6 @@ class Task(Base, CustomBaseTaskMixin):
     def is_frog(self) -> bool:
         return self.priority is PriorityEnum.FROG
 
-    @property
-    def due_date_local(self) -> datetime | None:
-        return (
-            convert_to_timezone(self.user.timezone, self.due_date)
-            if self.due_date
-            else None
-        )
-
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
     def is_overdue(self, now: datetime) -> bool:
@@ -127,3 +118,4 @@ class Task(Base, CustomBaseTaskMixin):
 
     def __repr__(self) -> str:
         return f"<Task id={self.id} name='{self.name}'>"
+

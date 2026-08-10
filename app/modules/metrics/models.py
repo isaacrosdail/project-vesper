@@ -2,10 +2,9 @@ from datetime import datetime
 from enum import StrEnum, auto
 
 from sqlalchemy import CheckConstraint, DateTime, Float, Index, Integer
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app._infra.db_base import Base
-from app.shared.datetime_.helpers import convert_to_timezone
 
 
 class WeightUnitsEnum(StrEnum):
@@ -51,26 +50,6 @@ class DailyMetrics(Base):
     sleep_datetime: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     sleep_duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
-
-    @property
-    def entry_datetime_local(self) -> datetime:
-        return convert_to_timezone(self.user.timezone, self.entry_datetime)
-
-    @property
-    def wake_datetime_local(self) -> datetime | None:
-        return (
-            convert_to_timezone(self.user.timezone, self.wake_datetime)
-            if self.wake_datetime
-            else None
-        )
-
-    @property
-    def sleep_datetime_local(self) -> datetime | None:
-        return (
-            convert_to_timezone(self.user.timezone, self.sleep_datetime)
-            if self.sleep_datetime
-            else None
-        )
 
 
     def __repr__(self) -> str:

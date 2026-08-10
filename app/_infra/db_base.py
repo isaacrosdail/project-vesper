@@ -2,15 +2,10 @@
 
 from datetime import datetime, timezone
 from typing import Any
-from zoneinfo import ZoneInfo
 
 import regex
-from flask import current_app
-from flask_login import current_user
 from sqlalchemy import DateTime, ForeignKey, Integer, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
-
-from app.shared.datetime_.helpers import convert_to_timezone
 
 # Auto-assigns constraint names when we don't explicitly name them
 metadata = MetaData(
@@ -39,22 +34,6 @@ class TimestampMixin:
         nullable=True,
     )
 
-    @property
-    def created_at_local(self) -> datetime:
-        """Returns `created_at` in user's local timezone."""
-        # tzname = current_app.config.get(current_user.timezone, "America/Chicago")
-        # return self.created_at.astimezone(ZoneInfo(tzname))
-        if hasattr(self, "user") and self.user:
-            tz = self.user.timezone
-        else:
-            tz = "America/Chicago"
-        return convert_to_timezone(tz, self.created_at)
-
-    @property
-    def updated_at_local(self) -> datetime | None:
-        """Returns `updated_at` in user's local timezone (or `None`)."""
-        tzname = current_app.config.get(current_user.timezone, "America/Chicago")
-        return self.updated_at.astimezone(ZoneInfo(tzname)) if self.updated_at else None
 
 # TODO: Address this - remove?
 class CustomBaseTaskMixin:
@@ -63,15 +42,6 @@ class CustomBaseTaskMixin:
     completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-
-    @property
-    def completed_at_local(self) -> datetime | None:
-        tzname = current_app.config.get(current_user.timezone, "America/Chicago")
-        return (
-            self.completed_at.astimezone(ZoneInfo(tzname))
-            if self.completed_at
-            else None
-        )
 
 
 class Base(TimestampMixin, DeclarativeBase):
