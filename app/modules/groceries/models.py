@@ -166,8 +166,8 @@ class Product(Base):
 
     inventory: Mapped[ProductInventory] = relationship(back_populates="product")
 
-    def nutrition_for(self, grams: Decimal) -> dict[str, Decimal]:
-        per_100 = grams / 100
+    def nutrition_for(self, base_units: Decimal) -> dict[str, Decimal]:
+        per_100 = base_units / 100
         return {
             name: per_100 * Decimal(str(getattr(self, f"{name}_per_100g") or 0))
             for name in _NUTRITION_FIELDS
