@@ -186,7 +186,7 @@ class HabitsService:
         if not streaks:
             return {"highest": None, "lowest": None}
 
-        names = {h.id: h.name for h in self.habit_repo.get_all_habits_and_tags()}
+        names = {h.id: h.name for h in self.habit_repo.get_all()}
         best_id, best_days = max(streaks.items(), key=lambda kv: kv[1])
         worst_id, worst_days = min(streaks.items(), key=lambda kv: kv[1])
 

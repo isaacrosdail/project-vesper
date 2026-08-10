@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import InstrumentedAttribute, selectinload
+from sqlalchemy.orm import InstrumentedAttribute
 
 from app.modules.habits.models import (
     Habit,
@@ -46,24 +46,6 @@ class HabitRepository(BaseRepository[Habit]):
             target_high=target_high
         )
         return self.add(habit)
-
-    def get_all_habits_and_tags(self) -> list[Habit]:
-        """Return all habits, eager-loading their tags, too."""
-        stmt = self._user_select(Habit).options(selectinload(Habit.tags))
-        return list(self.session.scalars(stmt).all())
-
-    def get_all_habits_and_tags_in_window(
-        self, start_utc: datetime, end_utc: datetime
-    ) -> list[Habit]:
-        stmt = (
-            self._user_select(Habit)
-            .where(
-                Habit.created_at >= start_utc,
-                Habit.created_at < end_utc,
-            )
-            .options(selectinload(Habit.tags))
-        )
-        return list(self.session.scalars(stmt).all())
 
 
 class HabitCompletionRepository(BaseRepository[HabitCompletion]):
