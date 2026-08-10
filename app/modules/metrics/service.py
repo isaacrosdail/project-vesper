@@ -40,22 +40,16 @@ class MetricsService:
         the adjusted timestamps.
         """
         user_tz_obj = ZoneInfo(self.user_tz)
-        # entry_date: datetime = typed_data.pop("entry_date")
         entry_datetime = datetime(
             validated.entry_date.year, validated.entry_date.month, validated.entry_date.day,
             0, 0, 0,
             tzinfo=user_tz_obj
         )
-        # typed_data["entry_datetime"] = entry_datetime
 
         # Making sleep/wake tz-aware, if they exist in validated
         wake = validated.wake_datetime.replace(tzinfo=user_tz_obj) if validated.wake_datetime else None
         sleep = validated.sleep_datetime.replace(tzinfo=user_tz_obj) if validated.sleep_datetime else None
         sleep_duration_minutes = int((wake - sleep).total_seconds() / 60) if sleep and wake else None
-        # If both sleep and wake, find sleep duration
-        # # sleep_duration_minutes = None
-        # if sleep and wake:
-        #     sleep_duration_minutes = int((wake - sleep).total_seconds() / 60)
 
         # Always store weight in kg
         weight = validated.weight
@@ -63,7 +57,7 @@ class MetricsService:
             weight = lbs_to_kg(weight)
 
         # Find or create entry
-        start_utc, end_utc = dth.day_range_utc(entry_datetime, self.user_tz)
+        start_utc, end_utc = dth.day_range_utc(entry_datetime.date(), self.user_tz)
         entry = (self.daily_metrics_repo.get_by_id(entry_id) if entry_id
                 else self.daily_metrics_repo.query_one(start=start_utc, end=end_utc))
 
@@ -73,8 +67,8 @@ class MetricsService:
                 entry_datetime=entry_datetime,
                 weight=weight,
                 steps=validated.steps,
-                wake_datetime=validated.wake_datetime,
-                sleep_datetime=validated.sleep_datetime,
+                wake_datetime=wake,
+                sleep_datetime=sleep,
                 sleep_duration_minutes=sleep_duration_minutes,
                 calories=validated.calories,
             )
@@ -85,9 +79,16 @@ class MetricsService:
             raise ServiceError("Error: no entry found")
         # Update only sent fields
         entry.entry_datetime = entry_datetime
-        entry.wake_datetime = wake
-        entry.sleep_datetime = sleep
-        entry.sleep_duration_minutes = sleep_duration_minutes
+        if "wake_datetime" in validated.model_fields_set:
+            entry.wake_datetime = wake
+        if "sleep_datetime" in validated.model_fields_set:
+            entry.sleep_datetime = sleep
+
+        entry.sleep_duration_minutes = (
+            int((entry.wake_datetime - entry.sleep_datetime).total_seconds() / 60)
+            if entry.wake_datetime and entry.sleep_datetime
+            else None
+        )
 
         for field in validated.model_fields_set:
             if field in {"entry_date", "weight_units", "wake_datetime", "sleep_datetime"}:
