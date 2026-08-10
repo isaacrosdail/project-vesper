@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from zoneinfo import ZoneInfo
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from sqlalchemy.orm import Session
 
-    from app.modules.tasks.schemas import Task as TaskCreate
+    from app.modules.tasks.schemas import TaskCreate
     from app.modules.tasks.schemas import TaskPatch
 
 from app.modules.tasks.models import Task
@@ -39,7 +40,8 @@ class TasksService:
     def create_task(self, validated: TaskCreate) -> Task:
         due_datetime = None
         if validated.due_date is not None:
-            due_datetime = dth.to_eod_datetime(validated.due_date, self.user_tz)
+            converted = validated.due_date.astimezone(ZoneInfo(self.user_tz)).date()
+            due_datetime = dth.to_eod_datetime(converted, self.user_tz)
 
         self._validate_frog_rule(validated)
 
@@ -67,7 +69,8 @@ class TasksService:
         new_priority = validated.priority if "priority" in validated.model_fields_set else task.priority
         new_due_date = validated.due_date if "due_date" in validated.model_fields_set else task.due_date
         if new_due_date is not None and "due_date" in validated.model_fields_set:
-            new_due_date = dth.to_eod_datetime(new_due_date, self.user_tz)
+            converted = new_due_date.astimezone(ZoneInfo(self.user_tz)).date()
+            new_due_date = dth.to_eod_datetime(converted, self.user_tz)
 
         self._validate_frog_rule_for_values(
             priority=new_priority,
@@ -80,7 +83,8 @@ class TasksService:
                 continue
             value = getattr(validated, field)
             if field == "due_date" and value is not None:
-                value = dth.to_eod_datetime(value, self.user_tz)
+                converted = value.astimezone(ZoneInfo(self.user_tz)).date()
+                value = dth.to_eod_datetime(converted, self.user_tz)
             setattr(task, field, value)
 
         if "pillar_ids" in validated.model_fields_set:
@@ -116,13 +120,16 @@ class TasksService:
         self,
         *,
         priority: PriorityEnum | None,
-        due_date: datetime,
+        due_date: datetime | None,
         current_task_id: int | None,
     ) -> None:
-        if priority is not PriorityEnum.FROG or due_date is None:
+        if priority is not PriorityEnum.FROG:
             return
+        if due_date is None:
+            raise ServiceError("Frog tasks must have a due date")
 
-        start_utc, end_utc = dth.day_range_utc(due_date.date(), self.user_tz)
+        converted = due_date.astimezone(ZoneInfo(self.user_tz)).date()
+        start_utc, end_utc = dth.day_range_utc(converted, self.user_tz)
         existing_frog = self.task_repo.get_frog_task_in_window(start_utc, end_utc)
 
         if existing_frog and existing_frog.id != current_task_id:
