@@ -110,12 +110,12 @@ class Task(Base, CustomBaseTaskMixin):
 
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
-    def is_overdue(self, now: datetime) -> bool:
-        return self.due_date is not None and self.due_date < now and not self.is_done
+    def __repr__(self) -> str:
+        return f"<Task id={self.id} name='{self.name}'>"
 
     def __str__(self) -> str:
         return str(self.name)
 
-    def __repr__(self) -> str:
-        return f"<Task id={self.id} name='{self.name}'>"
+    def is_overdue(self, now: datetime) -> bool:
+        return not self.is_done and self.due_date is not None and self.due_date < now
 

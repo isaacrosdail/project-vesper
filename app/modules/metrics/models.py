@@ -51,10 +51,6 @@ class DailyMetrics(Base):
 
     sleep_duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-
-    def __repr__(self) -> str:
-        return f"<DailyMetrics id={self.id} created_at={self.created_at}>"
-
     @property
     def populated_metrics(self) -> list[str]:
         """Returns list of daily metrics which have entries."""
@@ -69,3 +65,6 @@ class DailyMetrics(Base):
     def has_sleep_data(self) -> bool:
         """True if both sleep & wake times are stored."""
         return self.sleep_datetime is not None and self.wake_datetime is not None
+
+    def __repr__(self) -> str:
+        return f"<DailyMetrics id={self.id} created_at={self.created_at}>"
