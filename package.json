@@ -51,6 +51,7 @@
     "gen-types": "PYTHONPATH=. uv run pydantic2ts --module ./app/api/schemas.py --exclude APISchema --exclude APIReadSchema --output ./app/static_src/js/apiTypes.ts"
   },
   "dependencies": {
+    "@tanstack/svelte-hotkeys": "^0.10.0",
     "d3": "^7.9.0",
     "temporal-polyfill": "^1.0.1"
   }
