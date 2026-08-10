@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from app.modules.tasks.models import PriorityEnum, Task, task_links
 from app.shared.repository.base import BaseRepository
@@ -43,18 +42,6 @@ class TaskRepository(BaseRepository[Task]):
     def get_all_regular_tasks(self) -> list[Task]:
         # stmt = self._user_select(Task).where(~Task.is_frog)
         stmt = self._user_select(Task).where(Task.priority != PriorityEnum.FROG)
-        return list(self.session.scalars(stmt).all())
-
-    def get_all_tasks_with_links(self) -> list[Task]:
-        """TODO: For tasks web visualization. Prune comments here"""
-        stmt = (
-            self._user_select(Task)
-            # .options(joinedload(Task.supertasks), joinedload(Task.subtasks)) #
-            .options(selectinload(Task.supertasks), selectinload(Task.subtasks)) # with selectinload
-        )
-        # .unique() = With joinedload + many-to-many, it can produce duplicate
-        # rows (task is there once for each link it's part of)
-        # unique just de-dupes these back into unique Task objs
         return list(self.session.scalars(stmt).all())
 
     def get_all_links(self) -> list[tuple[int, int]]:

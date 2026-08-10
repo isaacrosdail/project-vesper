@@ -28,9 +28,6 @@ from app.shared.models import task_pillars, task_tags
 TASK_NAME_MAX_LENGTH = 150
 
 
-# Association table for task_links
-# PKey for each means the link itself forms a composite key:
-# (subtask_id, supertask_id)
 task_links = Table(
     "task_links",
     Base.metadata,
@@ -78,21 +75,21 @@ class Task(Base, CustomBaseTaskMixin):
     # No index due to scale; if large N, add composite (user_id, sort_key), inherits C from the column.
     sort_key: Mapped[str] = mapped_column(String(collation="C"), nullable=False)
 
-    # Facilitates relationships to multiple super/subtasks
-    supertasks = relationship(
+    supertasks: Mapped[list[Task]] = relationship(
         "Task",
         secondary=task_links,
         primaryjoin=lambda: Task.id == task_links.c.subtask_id,
         secondaryjoin=lambda: Task.id == task_links.c.supertask_id,
         back_populates="subtasks",
+        lazy="selectin",
     )
-
-    subtasks = relationship(
+    subtasks: Mapped[list[Task]] = relationship(
         "Task",
         secondary=task_links,
         primaryjoin=lambda: Task.id == task_links.c.supertask_id,
         secondaryjoin=lambda: Task.id == task_links.c.subtask_id,
         back_populates="supertasks",
+        lazy="selectin",
     )
 
     pillars = relationship("Pillar", secondary=task_pillars, back_populates="tasks", lazy="selectin")

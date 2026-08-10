@@ -59,15 +59,12 @@ def patch_task(session: Session, task_id: int) -> tuple[Response, int]:
 @api_bp.get("/tasks/tasks")
 @login_plus_session
 def tasks_list(session: Session) -> tuple[Response, int]:
-    include_links = request.args.get("include_links", "false") == "true"
     last_n_days = request.args.get("lastNDays", type=int)
     tasks_service = create_tasks_service(
         session, current_user.id, current_user.timezone
     )
 
-    if include_links:
-        tasks = tasks_service.task_repo.get_all_tasks_with_links()
-    elif last_n_days:
+    if last_n_days:
         start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
         tasks = tasks_service.task_repo.get_all_in_window(start_utc, end_utc, date_col=Task.due_date)
     else:
