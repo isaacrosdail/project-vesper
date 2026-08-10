@@ -198,7 +198,7 @@ class RecipeRepository(BaseRepository[Recipe]):
         super().__init__(session, user_id, model_cls=Recipe)
 
     def create_recipe(
-            self, name: str, yields: float, yields_units: UnitEnum
+            self, name: str, yields: Decimal, yields_units: UnitEnum
     ) -> Recipe:
         recipe = Recipe(
             user_id=self.user_id,
@@ -215,7 +215,7 @@ class RecipeIngredientRepository(BaseRepository[RecipeIngredient]):
         super().__init__(session, user_id, model_cls=RecipeIngredient)
 
     def create_recipe_ingredient(
-            self, recipe_id: int, product_id: int, amount_value: float, amount_units: UnitEnum
+            self, recipe_id: int, product_id: int, amount_value: Decimal, amount_units: UnitEnum
     ) -> RecipeIngredient:
         recipe_ingredient = RecipeIngredient(
             user_id=self.user_id,
