@@ -128,7 +128,8 @@ class TransactionRepository(BaseRepository[Transaction]):
             .order_by(func.sum(Transaction.quantity).desc())
             .limit(limit)
         )
-        return list(self.session.execute(stmt).all())
+        rows = self.session.execute(stmt).all()
+        return [(name, int(total)) for name, total in rows]
 
 
     def get_transaction_in_window(
@@ -257,6 +258,26 @@ class NutritionLogRepository(BaseRepository[NutritionLog]):
         results = self.session.execute(stmt).all()
         return [{"date": row.date.isoformat(), "value": row.total} for row in results]
 
+    def get_top_cooked_recipes(
+        self, start_utc: datetime, end_utc: datetime, limit: int = 5,
+    ) -> list[tuple[int, str, int]]:
+        stmt = (
+            select(Recipe.id, Recipe.name, func.count().label("times"))
+            .select_from(NutritionLog)
+            .join(Recipe, Recipe.id == NutritionLog.recipe_id)
+            .where(
+                NutritionLog.user_id == self.user_id,
+                NutritionLog.entry_datetime >= start_utc,
+                NutritionLog.entry_datetime < end_utc,
+            )
+            .group_by(Recipe.id, Recipe.name)
+            .order_by(func.count().desc(), Recipe.name)
+            .limit(limit)
+        )
+        return [
+            (rid, name, int(times))
+            for rid, name, times in self.session.execute(stmt).all()
+        ]
 
 class ShoppingTripRepository(BaseRepository[ShoppingTrip]):
     def __init__(self, session: Session, user_id: int) -> None:

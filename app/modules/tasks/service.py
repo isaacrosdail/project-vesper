@@ -7,10 +7,10 @@ if TYPE_CHECKING:
 
     from sqlalchemy.orm import Session
 
-    from app.modules.tasks.models import Task
     from app.modules.tasks.schemas import Task as TaskCreate
     from app.modules.tasks.schemas import TaskPatch
 
+from app.modules.tasks.models import Task
 
 from datetime import datetime
 
@@ -224,7 +224,7 @@ class TasksService:
         """
         now = dth.now_utc()
         start_utc, _ = dth.last_n_days_range(days, self.user_tz)
-        tasks = self.task_repo.get_all_in_window(start_utc, now, date_col="due_date")
+        tasks = self.task_repo.get_all_in_window(start_utc, now, date_col=Task.due_date)
         return self._rate(tasks, lambda t: t.is_overdue(now), subset_key="overdue")
 
 
@@ -238,7 +238,7 @@ class TasksService:
         now = dth.now_utc()
         start_utc, _ = dth.last_n_days_range(days, self.user_tz)
         frogs = [
-            t for t in self.task_repo.get_all_in_window(start_utc, now, date_col="due_date")
+            t for t in self.task_repo.get_all_in_window(start_utc, now, date_col=Task.due_date)
             if t.is_frog
         ]
         return self._rate(

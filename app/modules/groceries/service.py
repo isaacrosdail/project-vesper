@@ -41,9 +41,11 @@ from app.modules.groceries.models import (
     InventoryLedgerEventTypeEnum,
     MealEnum,
     NutritionLog,
+    ProductCategoryEnum,
     ProductInventory,
     Recipe,
     RecipeIngredient,
+    ShoppingTrip,
     UnitEnum,
 )
 from app.modules.groceries.repository import (
@@ -59,6 +61,7 @@ from app.modules.groceries.repository import (
     TransactionRepository,
 )
 from app.modules.groceries.schemas import (
+    GroceriesDashboardPayload,
     ProductCreate,
     ProductPatch,
     RecipeCreate,
@@ -352,6 +355,89 @@ class GroceriesService:
         cals_by_meal = calories_by_meal(logs)
         return result, cals_by_meal
 
+    def groceries_dashboard(self, start_utc: datetime, end_utc: datetime) -> dict[str, Any]:
+        logs = self.nutrition_log_repo.get_all_in_window(start_utc, end_utc, date_col=NutritionLog.entry_datetime)
+        txns = self.transaction_repo.get_all_in_window(start_utc, end_utc)
+
+        num_transactions = len(txns)
+        num_products = len({t.product_id for t in txns})
+        num_trips = self.shopping_trip_repo.count_in_window(start_utc, end_utc, date_col=ShoppingTrip.entry_datetime)
+
+        top_products = self.transaction_repo.get_top_purchased_products(start_utc, end_utc, limit=5)
+        macros_targets, cals_by_meal = self.macros_summary(start_utc, end_utc)
+        num_meals_logged = len(logs)
+        cals_by_day: dict[date, int] = {}
+        for log in logs:
+            day = dth.convert_to_timezone(self.user_tz, log.entry_datetime).date()
+            cals_by_day[day] = cals_by_day.get(day, 0) + int(log.calories or 0)
+
+        # For spend per-category breakdowns:
+        spend_by_category: dict[ProductCategoryEnum, Decimal] = {}
+        for t in txns:
+            spend_by_category[t.product.category] = spend_by_category.get(t.product.category, 0) + t.price_at_scan * t.quantity
+
+        class CategorySpend(TypedDict):
+            category: ProductCategoryEnum
+            spent: Decimal
+            pct: int
+
+        category_spends: list[CategorySpend] = []
+        total_spend = sum(spend_by_category.values())
+        for category, spent in spend_by_category.items():
+            new_entry: CategorySpend = {
+                "category": category,
+                "spent": spent,
+                "pct": round(spent / total_spend * 100) if total_spend else 0,
+            }
+            category_spends.append(new_entry)
+        # Sort desc by spent
+        category_spends.sort(key=lambda r: r["spent"], reverse=True)
+
+        avg_daily_cals = macros_targets["calories"]["actual"] or 0
+        if (target := macros_targets["calories"]["target"]) is None:
+            status = None
+            days_on_target = None
+        else:
+            days_on_target = sum(1 for v in cals_by_day.values() if target.satisfied(v))
+            status = target.status(avg_daily_cals)
+
+        last_shopping_trip = self.shopping_trip_repo.get_most_recent_trip()
+
+        top_five_recipes_cooked = [
+            {"id": rid, "name": name, "count": n}
+            for rid, name, n in self.nutrition_log_repo.get_top_cooked_recipes(start_utc, end_utc)
+        ]
+
+        shopping_list_items = self.shopping_list_item_repo.get_all()
+
+        return {
+            "intake": {
+                "targets": macros_targets,
+                "cals_avg_daily": avg_daily_cals,
+                "days_on_target": days_on_target,
+                "total_cals_over_period": sum(cals_by_day.values()),
+                "num_meals_logged": num_meals_logged,
+                "days_logged": len(cals_by_day),
+                "status": status,
+                "meals_today": cals_by_meal,
+            },
+            "purchase_insights": {
+                "top_products": top_products,
+                "num_transactions": num_transactions,
+                "num_products": num_products,
+                "total_spent": total_spend,
+                "num_trips": num_trips,
+                "last_shopping_trip": last_shopping_trip,
+            },
+            "midsection": {
+                "num_meals_logged": num_meals_logged,
+                "top_five_recipes_cooked": top_five_recipes_cooked,
+                "total_spent": total_spend,
+                # Per-macro OR per-category breakdowns
+                "category_spends": category_spends,
+                "shopping_list_items": shopping_list_items,
+            },
+        }
 
     def cook_recipe(self, recipe_id: int, meal: MealEnum, entry_datetime: datetime) -> None:
         """Logs a cooked recipe as one NutritionLog and consumes its ingredients.

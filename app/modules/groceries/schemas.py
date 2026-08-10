@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Literal, Self, cast
 
-from pydantic import Field, model_validator
+from pydantic import Field, computed_field, model_validator
 
 from app.modules.groceries.models import (
     BARCODE_REGEX,
@@ -241,6 +241,49 @@ class RecipeSlotRead(APIReadSchema):
     missing: list[ShortfallRead]
 
 
+class LastShoppingTripRead(APIReadSchema):
+    id: int
+    store_name: str
+    entry_datetime: datetime
+    total_price: float
+    # Loaded by get_most_recent_trip's selectinload; excluded from output, only counted.
+    transactions: list[TransactionRead] = Field(exclude=True)
+
+    @computed_field # type: ignore[prop-decorator]
+    @property
+    def num_transactions(self) -> int:
+        return len(self.transactions)
+
+
+class CategorySpendRead(APIReadSchema):
+    category: ProductCategoryEnum
+    spent: float
+    pct: int
+
+
+class RecipeCookedRead(APIReadSchema):
+    id: int
+    name: str
+    count: int
+
+
+class DashboardPurchaseInsightsRead(APIReadSchema):
+    top_products: list[tuple[str, int]]
+    num_transactions: int
+    num_products: int
+    total_spent: float
+    num_trips: int
+    last_shopping_trip: LastShoppingTripRead | None
+
+
+class DashboardMidsectionRead(APIReadSchema):
+    num_meals_logged: int
+    top_five_recipes_cooked: list[RecipeCookedRead]
+    total_spent: float
+    category_spends: list[CategorySpendRead]
+    shopping_list_items: list[ShoppingListItemRead]
+
+
 class MacroLineRead(APIReadSchema):
     actual: int
     target: TargetRead | None
@@ -255,3 +298,17 @@ class MacrosSummaryRead(APIReadSchema):
     sodium: MacroLineRead
     potassium: MacroLineRead
 
+class DashboardIntakeRead(APIReadSchema):
+    targets: MacrosSummaryRead
+    cals_avg_daily: int
+    days_on_target: int | None
+    total_cals_over_period: int
+    num_meals_logged: int
+    days_logged: int
+    status: TargetStatus | None
+    meals_today: dict[MealEnum, int]
+
+class GroceriesDashboardPayload(APIReadSchema):
+    intake: DashboardIntakeRead
+    purchase_insights: DashboardPurchaseInsightsRead
+    midsection: DashboardMidsectionRead

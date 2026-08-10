@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from sqlalchemy import Select
-    from sqlalchemy.orm import Session
+    from sqlalchemy.orm import Session, InstrumentedAttribute
 
 from sqlalchemy import func, select
 
@@ -45,8 +45,16 @@ class BaseRepository(Generic[T]):
         return list(self.session.scalars(stmt).all())
 
     @log_queries()
-    def get_all_in_window(self, start_utc: datetime, end_utc: datetime, *, date_col: str = "created_at") -> list[T]:
-        col = getattr(self.model_cls, date_col)
+    def get_all_in_window(
+        self,
+        start_utc: datetime,
+        end_utc: datetime,
+        *,
+        date_col: InstrumentedAttribute[datetime] | InstrumentedAttribute[datetime | None] | None = None,
+    ) -> list[T]:
+        if date_col is not None and date_col.parent.class_ is not self.model_cls:
+            raise ValueError(f"{date_col} does not belong to {self.model_cls.__name__}")
+        col = date_col if date_col is not None else self.model_cls.created_at
         stmt = self._user_select(self.model_cls).where(
             col >= start_utc,
             col < end_utc
@@ -58,7 +66,25 @@ class BaseRepository(Generic[T]):
         stmt = select(func.count(self.model_cls.id)).where(
             self.model_cls.user_id == self.user_id
         )
-        return self.session.execute(stmt).scalar() or 0
+        return self.session.execute(stmt).scalar_one()
+
+    def count_in_window(
+        self,
+        start_utc: datetime,
+        end_utc: datetime,
+        *,
+        date_col: InstrumentedAttribute[datetime] | InstrumentedAttribute[datetime | None] | None = None,
+    ) -> int:
+        if date_col is not None and date_col.parent.class_ is not self.model_cls:
+            raise ValueError(f"{date_col} does not belong to {self.model_cls.__name__}")
+        col = date_col if date_col is not None else self.model_cls.created_at
+        stmt = select(func.count(self.model_cls.id)).where(
+            self.model_cls.user_id == self.user_id,
+            col >= start_utc,
+            col < end_utc,
+        )
+        return self.session.execute(stmt).scalar_one()
+
 
     def get_by_id(self, item_id: int) -> T | None:
         stmt = select(self.model_cls).where(

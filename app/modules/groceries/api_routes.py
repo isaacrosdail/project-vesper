@@ -13,6 +13,7 @@ from app.api import api_bp
 from app.api.responses import success_response
 from app.modules.groceries.schemas import (
     CookRequest,
+    GroceriesDashboardPayload,
     LogProductRequest,
     MacrosSummaryRead,
     ProductCreate,
@@ -236,6 +237,15 @@ def daily_totals(session: Session) -> tuple[Response, int]:
     return success_response(message="gotcha", data=results), 200
 
 
+@api_bp.get("/groceries/dashboard")
+@login_plus_session
+def dashboard(session: Session) -> tuple[Response, int]:
+    last_n_days = request.args.get("timeframe", type=int)
+    service = create_groceries_service(session, current_user.id, current_user.timezone)
+    start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
+    result = service.groceries_dashboard(start_utc, end_utc)
+
+    return success_response(message="here", data=GroceriesDashboardPayload.dump(result)), 200
 
 @api_bp.post("/groceries/recipes/<int:recipe_id>/cook")
 @login_plus_session

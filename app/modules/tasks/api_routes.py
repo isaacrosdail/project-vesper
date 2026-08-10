@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from app.modules.tasks.models import Task
+
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
@@ -67,7 +69,7 @@ def tasks_list(session: Session) -> tuple[Response, int]:
         tasks = tasks_service.task_repo.get_all_tasks_with_links()
     elif last_n_days:
         start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
-        tasks = tasks_service.task_repo.get_all_in_window(start_utc, end_utc, date_col="due_date")
+        tasks = tasks_service.task_repo.get_all_in_window(start_utc, end_utc, date_col=Task.due_date)
     else:
         tasks = tasks_service.task_repo.get_all()
 
