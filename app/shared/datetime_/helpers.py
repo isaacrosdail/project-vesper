@@ -50,6 +50,8 @@ def convert_to_timezone(tz_str: str, dt: datetime) -> datetime:
 
 def day_range_utc(date: date, tz_str: str) -> tuple[datetime, datetime]:
     """Return UTC `[start, end)` datetimes for the calendar given day in the specified timezone."""
+    if isinstance(date, datetime):
+        raise TypeError("Expected a calendar date, got a datetime.")
     tz = ZoneInfo(tz_str)
     # Extract date, make midnight in target timezone
     start_local = datetime.combine(date, time.min, tzinfo=tz)
@@ -80,6 +82,8 @@ def last_n_days_range(days_ago: int, tz_str: str) -> tuple[datetime, datetime]:
 
 def parse_time_to_datetime(time_str: str, date: date, tz_str: str) -> datetime:
     """Parse HH:MM and attach to specific date in given timezone."""
+    if isinstance(date, datetime):
+        raise TypeError("Expected a calendar date, got a datetime.")
     h, m = map(int, time_str.split(":"))
     tz = ZoneInfo(tz_str)
     return datetime(date.year, date.month, date.day, h, m, tzinfo=tz)
@@ -87,6 +91,8 @@ def parse_time_to_datetime(time_str: str, date: date, tz_str: str) -> datetime:
 
 def to_eod_datetime(date: date, tz_str: str) -> datetime:
     """Convert a date to exclusive EOD datetime in given timezone."""
+    if isinstance(date, datetime):
+        raise TypeError("Expected a calendar date, got a datetime.")
     tz = ZoneInfo(tz_str)
     start_of_day = datetime.combine(date, time.min, tzinfo=tz)
     eod_midnight = start_of_day + timedelta(days=1)
