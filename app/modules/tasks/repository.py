@@ -40,7 +40,6 @@ class TaskRepository(BaseRepository[Task]):
         return self.add(task)
 
     def get_all_regular_tasks(self) -> list[Task]:
-        # stmt = self._user_select(Task).where(~Task.is_frog)
         stmt = self._user_select(Task).where(Task.priority != PriorityEnum.FROG)
         return list(self.session.scalars(stmt).all())
 
@@ -55,7 +54,6 @@ class TaskRepository(BaseRepository[Task]):
     ) -> Task | None:
         """Return frog task in given window, or None."""
         stmt = self._user_select(Task).where(
-            # Task.is_frog,
             Task.priority == PriorityEnum.FROG,
             Task.due_date >= start_utc,
             Task.due_date < end_utc

@@ -164,7 +164,7 @@ class TasksService:
         subtask = self.task_repo.get_by_id(subtask_id)
         supertask = self.task_repo.get_by_id(supertask_id)
         if not subtask or not supertask:
-            raise ServiceError("Task not found", 404)
+            raise ServiceError("Sub/super task not found", 404)
         if subtask in supertask.subtasks or supertask in subtask.subtasks:
             raise ServiceError("Link already exists")
 
@@ -266,15 +266,3 @@ def create_tasks_service(session: Session, user_id: int, user_tz: str) -> TasksS
         task_repo=TaskRepository(session, user_id),
         pillar_repo=PillarRepository(session, user_id)
     )
-
-
-# @register_patch_hook("tasks")
-# def tasks_patch_hook(
-#     item: Any, data: Any, session: Session, current_user: User
-# ) -> dict[str, Any]:
-#     """Invoked by generalized PATCH route to re-calculate tasks progress upon changes."""
-#     tasks_service = create_tasks_service(
-#         session, current_user.id, current_user.timezone
-#     )
-#     progress = tasks_service.calculate_tasks_progress_today()
-#     return {"progress": progress}
