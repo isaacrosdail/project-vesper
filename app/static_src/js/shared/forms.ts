@@ -1,7 +1,6 @@
 
 import { formatToUserTimeString } from "../shared/datetime";
 import { api } from '../shared/services/api';
-import { handleModalFormSubmit } from '../shared/ui/modal-manager';
 import { handleErrorMessages, initValidation, makeValidator } from '../shared/validators';
 import { FormDialog, Task, TaskPriority, Unit } from '../types';
 import { visibleSubtaskIds } from "../tasks/subtask_dropdown";
@@ -70,28 +69,6 @@ export function initPasswordToggles() {
         })
     })
 }
-
-document.addEventListener('submit', (e) => {
-    const submittedForm = e.target as HTMLFormElement;
-    e.preventDefault();
-
-    // Route to appropriate handler
-    const formType = submittedForm.dataset['formType'];
-    if (!formType) {
-        console.warn('forms.ts: No formType attr found for submitted form')
-        return
-    }
-
-    switch (formType) {
-        case 'modal':
-            const modal = submittedForm.closest<FormDialog>('dialog');
-            handleModalFormSubmit(submittedForm, modal);
-            break;
-        case 'page':
-        case 'action':
-            submittedForm.submit();
-    }
-});
 
 /**
  * Making my own type=number field.

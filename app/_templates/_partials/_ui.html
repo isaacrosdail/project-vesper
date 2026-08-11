@@ -119,51 +119,6 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {% endmacro %}
 
 
-{# === MODALS === #}
-
-{#
-    Entry form modal
-    Endpoint built from module + subtype (eg, /tasks/tasks)
-#}
-{% macro modal(module, subtype, id, title, form_class='form-column') %}
-<dialog 
-    class="form-modal"
-    id="{{ id }}-modal"
-    data-module="{{ module }}"
-    data-resource="{{ subtype }}"
-    >
-    <div class="modal-header">
-        <h2>{{ title }}</h2>
-        <button type="button" class="btn-icon btn-round modal-close" id="{{ id }}-modal-close-btn" aria-label="Close">{{ x_svg() }}</button>
-    </div>
-    <div class="modal-body">
-        <form class="{{ form_class if form_class else '' }}" id="{{ subtype }}-form" data-form-type="modal">
-            <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
-            {{ caller() }}
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Save</button>
-            </div>
-        </form>
-    </div>
-</dialog>
-{% endmacro %}
-
-
-{# Confirmation Modal #}
-
-{% macro confirmation_modal() %}
-<dialog id="confirmation-modal">
-  <div class="confirmation-content">
-    <p class="confirmation-message">Are you sure?</p>
-    <div class="confirmation-actions">
-      <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
-      <button id="confirm-ok" class="btn btn-primary">OK</button>
-    </div>
-  </div>
-</dialog>
-{% endmacro %}
-
-
 {# === LINKS === #}
 
 {# Link for returning from error page(s) #}
