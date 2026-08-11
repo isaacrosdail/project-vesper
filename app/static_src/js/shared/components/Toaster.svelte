@@ -1,30 +1,24 @@
-
 <script module lang="ts">
     import ToastItem, { type Toast, type ToastType } from './Toast.svelte';
 
     let toasts = $state<Toast[]>([]);
     const toastToTimeoutMap = new Map<string, number>();
 
-    export function addToast(
-        title: string,
-        message: string,
-        type: ToastType,
-        durationMS = 4000
-    ){
+    export function addToast(title: string, message: string, type: ToastType, durationMS = 4000) {
         const id = crypto.randomUUID();
         toasts.push({
             id,
             title,
             message,
             type,
-            durationMS
+            durationMS,
         });
 
         toastToTimeoutMap.set(
             id,
             setTimeout(() => {
                 removeToast(id);
-            }, durationMS)
+            }, durationMS),
         );
     }
 

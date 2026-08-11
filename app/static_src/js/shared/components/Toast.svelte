@@ -1,4 +1,3 @@
-
 <script module lang="ts">
     export type Toast = {
         id: string;
@@ -11,20 +10,21 @@
 </script>
 
 <script lang="ts">
-    let { toast, onDismiss }: {
+    let {
+        toast,
+        onDismiss,
+    }: {
         toast: Toast;
         onDismiss: () => void;
     } = $props();
-
 </script>
 
-
-<div class={["toast", toast.type]} style:--toast-duration="{toast.durationMS}ms">
+<div class={['toast', toast.type]} style:--toast-duration="{toast.durationMS}ms">
     {#if toast.title}
         <span>{toast.title}</span>
     {/if}
     <span>{toast.message}</span>
-    <button class="toast-dismiss" onclick={() => onDismiss() }>
+    <button class="toast-dismiss" onclick={() => onDismiss()}>
         <span class="sr-only">Close toast</span>
         <svg class="icon"><use href="#icon-x"></use></svg>
     </button>
@@ -33,15 +33,26 @@
 <style>
     /* TODO: remove comment here - lets us interpolate this value? */
     @property --countdown {
-        syntax: "<angle>";
+        syntax: '<angle>';
         inherits: false;
         initial-value: 360deg;
     }
     @keyframes countdown {
-        from { --countdown: 360deg; }
-        to { --countdown: 0deg; }
+        from {
+            --countdown: 360deg;
+        }
+        to {
+            --countdown: 0deg;
+        }
     }
-    @keyframes toast-countdown { from { scale: 1 1; } to { scale: 0 1; } }
+    @keyframes toast-countdown {
+        from {
+            scale: 1 1;
+        }
+        to {
+            scale: 0 1;
+        }
+    }
     .toast {
         --toast-color: var(--text-muted);
         background-color: color-mix(in srgb, var(--toast-color) 30%, var(--bg));
@@ -68,7 +79,8 @@
         cursor: pointer;
 
         &:hover {
-            color: var(--clr-error); stroke: var(--clr-error);
+            color: var(--clr-error);
+            stroke: var(--clr-error);
         }
 
         & svg {
@@ -88,8 +100,16 @@
     .toast-exit {
         animation: slide-out 0.2s ease forwards;
     }
-    .info    { --toast-color: blue; }
-    .success { --toast-color: var(--clr-success); }
-    .warning { --toast-color: var(--clr-warning); }
-    .error   { --toast-color: var(--clr-error); }
+    .info {
+        --toast-color: blue;
+    }
+    .success {
+        --toast-color: var(--clr-success);
+    }
+    .warning {
+        --toast-color: var(--clr-warning);
+    }
+    .error {
+        --toast-color: var(--clr-error);
+    }
 </style>
