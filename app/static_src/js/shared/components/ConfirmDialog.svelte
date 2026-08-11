@@ -36,25 +36,24 @@
     </div>
 </dialog>
 
-
 <style>
     /* Confirmation modal variant's content */
     #confirmation-modal[open] {
-    display: grid;
-    grid-template-columns: 1fr;
-    place-items: center;
-    margin: auto;
-    inset: 0;
+        display: grid;
+        grid-template-columns: 1fr;
+        place-items: center;
+        margin: auto;
+        inset: 0;
     }
     .confirmation-content {
-    text-align: center;
+        text-align: center;
     }
     .confirmation-message {
         padding: var(--space-sm);
     }
     .confirmation-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-md);
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
     }
 </style>
