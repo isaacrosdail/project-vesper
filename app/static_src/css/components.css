@@ -1094,50 +1094,6 @@ td {
   }
 }
 
-/* =========================================
-   Stats Info Card
-   ========================================= */
-
-.stats-subtitle {
-  font-size: var(--font-size-md);
-  color: var(--accent-strong);
-  grid-area: subtitle;
-  place-self: end; /* put at...end? bottom? */
-}
-
-@property --progress {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 0%;
-}
-
-.card-stats {
-  display: flex;
-  flex-direction: column;
-  position: relative; /* so stat-progress bar takes full width */
-  /* Pct bar across bottom of card */
-  .stat-progress {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 4px;
-    background: rgba(255,255,255,.07);
-    overflow: hidden;
-    --p: 0;
-
-    & .stat-progress__fill {
-      height: 100%;
-      width: 100%;
-      transform: scaleX(var(--p));
-      transform-origin: left center;
-      background: var(--accent-strong);
-      transition: transform 0.2s cubic-bezier(.22,.61,.36,1);
-    }
-  }
-}
-
-
 .segmented { --count: 3; }
 .segmented[data-count="2"] { --count: 2; }
 .segmented[data-count="4"] { --count: 4; }

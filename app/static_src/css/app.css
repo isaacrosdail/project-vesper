@@ -1265,49 +1265,6 @@ svg {
   border-radius: calc(0.8 * var(--border-radius));
 }
 
-.progress-bar,
-.progress-bar-fill {
-  height: 1.25rem;
-}
-.progress-bar {
-  width: 80%;
-  max-width: 300px;
-  overflow: hidden; /* make rounded edges clean on lower percentages, effectively 'clips' overlap */
-  background-color: var(--progress-bar-bg);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-}
-.progress-bar-fill {
-  position: relative; /* positioning context for progress-bar-fill::after */
-  overflow: hidden; /* clips our ::after's pulsing effect cleanly */
-  background: var(--progress-bar-fill);
-  transform: scaleX(0); /* JS can set scaleX using our percent progress directly this way */
-  transform-origin: left; /* fill acts as a mask, 'peels back' to reveal gradient of progress-bar */
-  transition: transform 0.2s ease-in-out;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50%;
-    height: 100%;
-  }
-  &.surging {
-    animation: pulse 1.5s ease-in-out infinite;
-
-    &::after {
-      background: linear-gradient(
-          to right,
-          transparent,
-          rgb(255 255 255 / 40%),
-          transparent
-      );
-      animation: surge 1.5s ease-in-out infinite;
-    }
-  }
-}
-
 /* NOTE: confetti-layer is a z-index/overflow container only.
  * Particle positions are calculated via JS getBoundingClientRect(), not relative to this element's position.
  */

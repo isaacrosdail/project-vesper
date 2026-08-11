@@ -12,18 +12,6 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 #}
 
 
-{% macro stats_info(label, value, detail, key, stat_progress=none) %}
-<div class="card-stats surface" id="{{ label|replace(' ', '_')|lower }}">
-    <span class="stats-label secondary">{{ label }}</span>
-    <span class="stats-value">{{ value }}</span>
-    <span class="stats-detail secondary">{{ detail }}</span>
-    <div class="stat-progress">
-        <div class="stat-progress__fill"></div>
-    </div>
-</div>
-{% endmacro %}
-
-
 <!-- options as [(value, label)] -->
 {% macro segmented(name, options, label=None) %}
 <fieldset class="segmented" id="{{ name }}-fieldset" data-count="{{ options|length }}">
