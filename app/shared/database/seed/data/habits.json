@@ -1,8 +1,8 @@
 [
-    { "name": "Morning Walk", "pillars": ["Health"] },
-    { "name": "30m Coding Drills", "pillars": ["Career"] },
-    { "name": "Tidy workspace", "pillars": [] },
-    { "name": "Journal 5mins", "pillars": ["Purpose"] },
-    { "name": "Review weekly goals", "pillars": ["Purpose"] },
-    { "name": "Jogging", "pillars": ["Health"] }
+    { "name": "Morning Walk", "pillars": ["Health"], "tags": ["fitness", "outdoors"] },
+    { "name": "30m Coding Drills", "pillars": ["Career"], "tags": ["work"] },
+    { "name": "Tidy workspace", "pillars": [], "tags": ["home"] },
+    { "name": "Journal 5mins", "pillars": ["Purpose"], "tags": ["reflection"] },
+    { "name": "Review weekly goals", "pillars": ["Purpose"], "tags": ["reflection"] },
+    { "name": "Jogging", "pillars": ["Health"], "tags": ["fitness"] }
 ]

@@ -5,6 +5,7 @@
         "completed_at_offset": null,
         "due_date_offset": -2,
         "pillars": ["Career"],
+        "tags": ["work", "urgent"],
         "subtasks": ["Write tests"]
     },
     {
@@ -12,14 +13,16 @@
         "priority": "medium",
         "completed_at_offset": -3,
         "due_date_offset": -4,
-        "pillars": ["Career"]
+        "pillars": ["Career"],
+        "tags": ["work"]
     },
     {
         "name": "Update resume",
         "priority": "low",
         "completed_at_offset": null,
         "due_date_offset": -1,
-        "pillars": ["Career"]
+        "pillars": ["Career"],
+        "tags": ["work"]
     },
     {
         "name": "Run marathon",
@@ -27,6 +30,7 @@
         "completed_at_offset": null,
         "due_date_offset": 14,
         "pillars": ["Health"],
+        "tags": ["fitness"],
         "subtasks": ["Buy running shoes"]
     },
     {
@@ -34,35 +38,40 @@
         "priority": "medium",
         "completed_at_offset": -5,
         "due_date_offset": null,
-        "pillars": ["Health"]
+        "pillars": ["Health"],
+        "tags": ["errand", "fitness"]
     },
     {
         "name": "Get birthday present for brother",
         "priority": "high",
         "completed_at_offset": null,
         "due_date_offset": 7,
-        "pillars": ["Relationships"]
+        "pillars": ["Relationships"],
+        "tags": ["errand", "family"]
     },
     {
         "name": "Meal prep",
         "priority": "medium",
         "completed_at_offset": null,
         "due_date_offset": 3,
-        "pillars": ["Health"]
+        "pillars": ["Health"],
+        "tags": ["home"]
     },
     {
         "name": "Sign up to volunteer at church",
         "priority": "medium",
         "completed_at_offset": null,
         "due_date_offset": null,
-        "pillars": ["Purpose", "Relationships"]
+        "pillars": ["Purpose", "Relationships"],
+        "tags": ["community"]
     },
     {
         "name": "Pick up dry cleaning",
         "priority": "low",
         "completed_at_offset": -1,
         "due_date_offset": 5,
-        "pillars": []
+        "pillars": [],
+        "tags": ["errand"]
     },
     {
         "name": "Plan weekend camping trip",
@@ -70,6 +79,7 @@
         "completed_at_offset": null,
         "due_date_offset": null,
         "pillars": ["Rest"],
+        "tags": ["outdoors"],
         "subtasks": ["Hiking with friends"]
     },
     {
@@ -78,27 +88,30 @@
         "completed_at_offset": null,
         "due_date_offset": 8,
         "pillars": ["Health", "Relationships"],
-        "subtasks": ["Pack camping gear"]
+        "tags": ["outdoors", "fitness"]
     },
     {
         "name": "Pack camping gear",
         "priority": "low",
         "completed_at_offset": null,
         "due_date_offset": null,
-        "pillars": []
+        "pillars": [],
+        "tags": ["outdoors"]
     },
     {
         "name": "Read new book in hammock on the beach",
         "priority": "low",
         "completed_at_offset": null,
         "due_date_offset": null,
-        "pillars": ["Rest"]
+        "pillars": ["Rest"],
+        "tags": []
     },
     {
         "name": "Journal about weekly goals",
         "priority": "frog",
         "completed_at_offset": null,
         "due_date_offset": 6,
-        "pillars": ["Purpose"]
+        "pillars": ["Purpose"],
+        "tags": ["reflection"]
     }
 ]
