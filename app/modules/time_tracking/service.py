@@ -12,9 +12,6 @@ if TYPE_CHECKING:
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-import pandas as pd
-
-import app.shared.datetime_.helpers as dth
 from app.modules.time_tracking.repository import TimeEntryRepository
 from app.shared.exceptions import ServiceError
 from app.shared.repository.pillar import PillarRepository
@@ -118,22 +115,6 @@ class TimeTrackingService:
         if entry is None:
             raise ServiceError("Time entry not found", 404)
         return entry
-
-    def get_time_stuff(self) -> pd.DataFrame:
-        time_entries = self.time_entry_repo.get_all()
-
-        # build df
-        rows = [
-            {
-                "date": dth.convert_to_timezone(self.user_tz, entry.started_at).date(),
-                "duration_minutes": entry.duration_minutes
-            }
-            for entry in time_entries
-        ]
-        df = pd.DataFrame(rows)
-        # we don't use name= here in reset_index because ["duration_minutes"].sum() produces
-        # a Series already named "duration_minutes" (inherits the column name)
-        return df.groupby("date")["duration_minutes"].sum().reset_index() # sum duration_mins col per date?
 
 
 def create_time_tracking_service(
