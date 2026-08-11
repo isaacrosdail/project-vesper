@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -101,25 +101,15 @@ class MetricsService:
         return entry, is_new
 
 
-
-    def get_daily_metrics(self, *, start: datetime | None = None, end: datetime | None = None, metric: MetricType | None = None, limit: int | None = None) -> list[dict[str, Any]]:
-        entries = self.daily_metrics_repo.query(start=start, end=end, metric=metric, limit=limit)
-        if metric:
-            return [
-                {
-                    "date": e.entry_datetime.isoformat(timespec="seconds"),
-                    "value": getattr(e, metric)
-                }
-                for e in entries
-            ]
-        return [e.to_api_dict() for e in entries]
+    def get_daily_metrics(self, *, start: datetime | None = None, end: datetime | None = None, metric: MetricType | None = None, limit: int | None = None) -> list[DailyMetrics]:
+        return self.daily_metrics_repo.query(start=start, end=end, metric=metric, limit=limit)
 
     def get_daily_metrics_entry(self, entry_id: int) -> DailyMetrics:
         entry = self.daily_metrics_repo.get_by_id(entry_id)
         if entry is None:
             raise ServiceError("Daily metrics not found", 404)
         return entry
-    
+
     def delete_daily_metrics(self, daily_metrics_id: int) -> DailyMetrics:
         daily_metrics = self.daily_metrics_repo.get_by_id(daily_metrics_id)
         if daily_metrics is None:

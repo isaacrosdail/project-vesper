@@ -12,14 +12,16 @@ from flask_login import current_user
 
 import app.shared.datetime_.helpers as dth
 from app.api import api_bp
-from app.modules.auth.models import UnitSystemEnum
 from app.api.responses import success_response
 from app.modules.metrics.models import MetricType
-from app.modules.metrics.schemas import DailyMetricsCreate
+from app.modules.metrics.schemas import (
+    DailyMetricsCreate,
+    DailyMetricsPointRead,
+    DailyMetricsRead,
+)
 from app.modules.metrics.service import create_metrics_service
 from app.shared.decorators import login_plus_session
 from app.shared.exceptions import ServiceError
-from app.shared.utils import kg_to_lbs
 
 logger = logging.getLogger(__name__)
 
