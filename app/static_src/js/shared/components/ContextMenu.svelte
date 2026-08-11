@@ -1,4 +1,3 @@
-
 <script module lang="ts">
     type MenuItem = { label: string; action: () => void };
 
@@ -7,7 +6,9 @@
     export function openContextMenu(x: number, y: number, items: MenuItem[]) {
         menu = { x, y, items };
     }
-    function close() { menu = null; }
+    function close() {
+        menu = null;
+    }
 </script>
 
 <script lang="ts">
@@ -15,15 +16,24 @@
 </script>
 
 <svelte:window
-    onpointerdown={(e) => { if (menu && !menuEl.contains(e.target as Node)) close(); }}
+    onpointerdown={(e) => {
+        if (menu && !menuEl.contains(e.target as Node)) close();
+    }}
     onkeydown={(e) => e.key === 'Escape' && close()}
-    onscroll={close}
-/>
+    onscroll={close} />
 
 {#if menu}
-    <div class="context-menu" bind:this={menuEl} style:left={`${menu.x}px`} style:top={`${menu.y}px`}>
+    <div
+        class="context-menu"
+        bind:this={menuEl}
+        style:left={`${menu.x}px`}
+        style:top={`${menu.y}px`}>
         {#each menu.items as i (i.label)}
-            <button onclick={() => { i.action(); close(); }}>{i.label}</button>
+            <button
+                onclick={() => {
+                    i.action();
+                    close();
+                }}>{i.label}</button>
         {/each}
     </div>
 {/if}
