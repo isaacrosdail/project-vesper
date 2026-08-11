@@ -423,27 +423,6 @@ tr[data-is-done="True"] .name-span {
     PAGE-SPECIFIC: Time Tracking Dashboard
    =================================== */
 
-.pagination-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-
-  & .count { align-self: center; }
-}
-.pagination-controls {
-  display: flex;
-  justify-content: space-between;
-
-  & .page-buttons {
-    /* width: 50px; */
-  }
-
-  & .active {
-    background: var(--accent-strong);
-    color: var(--text-inverse);
-  }
-}
-
 .page-header {
   display: flex;
   justify-content: space-between;
