@@ -3,7 +3,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator, AwareDatetime
 
-from app.modules.metrics.models import WeightUnitsEnum
+from app.modules.metrics.models import MetricType, WeightUnitsEnum
 from app.shared.schemas import APIReadSchema, APISchema
 
 
@@ -47,3 +47,8 @@ class DailyMetricsRead(APIReadSchema):
 class DailyMetricsPointRead(APISchema):
     date: datetime
     value: float | None
+
+
+class MetricsWindowQuery(APISchema):
+    lastNDays: int = Field(gt=0)
+    metric_type: MetricType | None = None

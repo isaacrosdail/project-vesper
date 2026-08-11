@@ -18,6 +18,7 @@ from app.modules.metrics.schemas import (
     DailyMetricsCreate,
     DailyMetricsPointRead,
     DailyMetricsRead,
+    MetricsWindowQuery,
 )
 from app.modules.metrics.service import create_metrics_service
 from app.shared.decorators import login_plus_session
@@ -112,3 +113,21 @@ def daily_metrics_aggregate(session: Session) -> tuple[Response, int]:
         return success_response(message="No data for this window", data=[]), 200
     return success_response(message=f"Retrieved {len(data)} buckets", data=data), 200
 
+
+@api_bp.get("/metrics/daily_metrics/compare")
+@login_plus_session
+def daily_metrics_compare(session: Session) -> tuple[Response, int]:
+    q = MetricsWindowQuery(**request.args)
+
+    metrics_service = create_metrics_service(
+        session, current_user.id, current_user.timezone
+    )
+    compare_range = q.lastNDays * 2
+    start_utc, end_utc = dth.last_n_days_range(compare_range, current_user.timezone)
+    buckets = metrics_service.daily_metrics_repo.get_bucketed_aggregates(start_utc, end_utc, num_buckets=2)
+    if not buckets:
+        return success_response(message="No data for this window", data=[]), 200
+    return success_response(message=f"Retrieved {len(buckets)} buckets", data={
+        "previous": buckets[0],
+        "current": buckets[1]
+    }), 200
