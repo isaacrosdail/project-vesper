@@ -198,9 +198,3 @@ export function parseFormData(formData: FormData): Record<string, unknown> {
     }
     return result;
 }
-
-// Assert required; used for element collections per-feature in pages
-export function required<T extends Element>(el: T | null, name: string): T {
-    if (!el) throw new Error(`tasks dashboard: "${name}" not found`);
-    return el;
-}

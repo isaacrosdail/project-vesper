@@ -47,15 +47,6 @@ export function enableStats() {
     })
 }
 
-// ...or this.
-export function hourMinsDisplay(total_minutes: number) {
-    const hours = Math.floor(total_minutes / 60)
-    const minutes = Math.round(total_minutes % 60);
-    const str = hours >= 1
-        ? `${hours}h${minutes}m`
-        : `${minutes}m`
-    return str
-}
 
 export function applyXAxisRotation(axis: d3.Selection<SVGGElement, unknown, HTMLElement, unknown>): void {
     axis.selectAll("text")
