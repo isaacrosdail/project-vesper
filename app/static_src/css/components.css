@@ -1206,35 +1206,6 @@ td {
   }
 }
 
-/* =========================================
-   Context Menu
-   ========================================= */
-.context-menu {
-  position: fixed;
-  z-index: 200;
-  max-width: 50%;
-  background-color: var(--bg);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-
-  & > li {
-    padding: var(--space-sm) var(--space-md);
-  }
-  & > li:hover {
-    cursor: pointer;
-    background-color: var(--accent-subtle);
-  }
-  & > li:first-child:hover {
-    border-radius: var(--border-radius) var(--border-radius) 0 0; /* top-left, top-right only */
-  }
-  & > li:last-child:hover {
-    border-radius: 0 0 var(--border-radius) var(--border-radius); /* bottom-left, bottom-right only */
-  }
-  & > li:only-child:hover {
-    border-radius: var(--border-radius);
-  }
-}
-
 .segmented { --count: 3; }
 .segmented[data-count="2"] { --count: 2; }
 .segmented[data-count="4"] { --count: 4; }

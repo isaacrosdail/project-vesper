@@ -7,7 +7,6 @@ import './shared/charts';
 import './shared/forms';
 import './shared/navbar';
 import './shared/tables';
-import './shared/ui/context-menu';
 import './shared/ui/dropdown';
 import './shared/ui/modal-manager';
 import './shared/ui/theme-manager';
@@ -32,6 +31,7 @@ import { initLeftSidebar } from './shared/ui/left-sidebar';
 import { ApiError } from './shared/services/api';
 import { refreshMe } from './shared/services/userState.svelte';
 import { mount } from 'svelte';
+import ContextMenu from './shared/components/ContextMenu.svelte';
 import Toaster from './shared/components/Toaster.svelte';
 
 const initRegistry = {
@@ -76,6 +76,7 @@ function handleApiError(err: unknown) {
 
 export async function initMain() {
     await initUserState();
+    mount(ContextMenu, { target: document.body });
     mount(Toaster, { target: document.body });
     showToastsFromFlask();
 
