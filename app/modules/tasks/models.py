@@ -23,7 +23,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base, CustomBaseTaskMixin
-from app.shared.models import task_pillars, task_tags
+from app.shared.models import Pillar, Tag, task_pillars, task_tags
 
 TASK_NAME_MAX_LENGTH = 150
 
@@ -36,7 +36,7 @@ task_links = Table(
 )
 
 class PriorityEnum(StrEnum):
-    LOW =auto()
+    LOW = auto()
     MEDIUM = auto()
     HIGH = auto()
     FROG = auto()
@@ -64,8 +64,8 @@ class Task(Base, CustomBaseTaskMixin):
     name: Mapped[str] = mapped_column(String(TASK_NAME_MAX_LENGTH), nullable=False)
 
     priority: Mapped[PriorityEnum] = mapped_column(
-        SAEnum(PriorityEnum, name="priority_enum", values_callable=lambda x: [e.value for e in x]), # db stores lowercase too
-        nullable=False # now false since we made is_frog not a thing anymore -> thats now a priority
+        SAEnum(PriorityEnum, name="priority_enum", values_callable=lambda x: [e.value for e in x]),
+        nullable=False
     )
 
     due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -91,12 +91,9 @@ class Task(Base, CustomBaseTaskMixin):
         back_populates="supertasks",
         lazy="selectin",
     )
+    pillars: Mapped[list[Pillar]] = relationship("Pillar", secondary=task_pillars, back_populates="tasks", lazy="selectin")
+    tags: Mapped[list[Tag]] = relationship("Tag", secondary=task_tags, back_populates="tasks", lazy="selectin")
 
-    pillars = relationship("Pillar", secondary=task_pillars, back_populates="tasks", lazy="selectin")
-
-    # Works as a Python property on instances AND as an SQL expression in queries:
-    # task.is_done rets True/False, and Task.is_done == True in a .where() generates completed_at IS NOT NULL in SQL
-    # can't desync
     @hybrid_property
     def is_done(self) -> bool:
         return self.completed_at is not None
@@ -104,8 +101,6 @@ class Task(Base, CustomBaseTaskMixin):
     @property
     def is_frog(self) -> bool:
         return self.priority is PriorityEnum.FROG
-
-    tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
     def __repr__(self) -> str:
         return f"<Task id={self.id} name='{self.name}'>"
