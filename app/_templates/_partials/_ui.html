@@ -24,19 +24,6 @@ If we're defining reusable COMPONENTS (with structure/behavior/logic) → here (
 {% endmacro %}
 
 
-{% macro dropdown(text, id, replaceable=True) %}
-<button class="dropdown-toggle surface" popovertarget="{{ id }}"
-    {% if replaceable %}data-replaceable{% endif %}>
-    <span class="dropdown-toggle-label">{{ text }}</span>
-    <span class="dropdown-toggle-chevron">
-        <svg class="icon"><use href="#icon-chevron"></use></svg>
-    </span>
-</button>
-<div popover id="{{ id }}" class="dropdown-menu surface">
-    {{ caller() }}
-</div>
-{% endmacro %}
-
 <!-- options as [(value, label)] -->
 {% macro segmented(name, options, label=None) %}
 <fieldset class="segmented" id="{{ name }}-fieldset" data-count="{{ options|length }}">

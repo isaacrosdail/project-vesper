@@ -7,7 +7,6 @@ import './shared/charts';
 import './shared/forms';
 import './shared/navbar';
 import './shared/tables';
-import './shared/ui/dropdown';
 import './shared/ui/modal-manager';
 import './shared/ui/theme-manager';
 import './shared/ui/tooltip';

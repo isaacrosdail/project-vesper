@@ -1156,56 +1156,6 @@ td {
 }
 
 
-/* =========================================
-   Dropdown Menu
-   ========================================= */
-.dropdown {
-  position: relative;
-}
-
-.dropdown-toggle {
-  anchor-name: --dropdown;
-  display: inline-flex;
-  gap: var(--space-sm);
-  align-items: center;
-  padding: var(--space-xs) var(--space-sm);
-  white-space: nowrap;
-  background-color: var(--bg-light);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-}
-.dropdown-toggle-chevron,
-.dropdown-toggle-label {
-    pointer-events: none;
-}
-.dropdown-toggle-chevron svg {
-  transition: transform 0.2s ease;
-
-  &.flip { transform: rotate(180deg); }
-}
-.dropdown-menu {
-  position-anchor: --dropdown;
-  width: anchor-size(width); /* reads anchor el's width and applies it */
-  /* also anchor-size(height) if we need it! */
-  top: anchor(bottom);
-  left: anchor(left);
-  position: fixed; /* required for anchor positioning */
-    /* Popover handles show/hide and top-layer */
-  margin: 0;
-  padding: 0;
-  box-shadow: var(--shadow-md);
-
-  & > button {
-    display: block;
-    width: 100%;
-    padding: var(--space-sm) var(--space-md);
-    text-align: left;
-  }
-  & > button:hover {
-    background-color: var(--accent-subtle);
-  }
-}
-
 .segmented { --count: 3; }
 .segmented[data-count="2"] { --count: 2; }
 .segmented[data-count="4"] { --count: 4; }
