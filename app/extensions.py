@@ -14,9 +14,10 @@ if TYPE_CHECKING:
 
     from app.modules.auth.models import User
 
-from flask import request
+from flask import flash, redirect, request
+from flask.typing import ResponseReturnValue
 from flask_caching import Cache
-from flask_login import LoginManager
+from flask_login import LoginManager, login_url
 
 from app._infra.database import db_session
 from app.modules.auth.models import User
@@ -25,12 +26,13 @@ from app.modules.auth.models import User
 cache = Cache()
 login_manager = LoginManager()
 
+LOGIN_VIEW = "auth.login"
 
 def _setup_extensions(app: Flask) -> None:
     login_manager.init_app(app)
-    login_manager.login_view = "auth.login"  # <- where @login_required redirects
+    login_manager.login_view = LOGIN_VIEW
 
-    @login_manager.user_loader  # type: ignore[misc]
+    @login_manager.user_loader  # type: ignore[untyped-decorator]
     def load_user(user_id: int) -> User | None:
         """
         Callback required for Flask-Login.
@@ -39,11 +41,15 @@ def _setup_extensions(app: Flask) -> None:
         the User object, even between requests.
         """
         return db_session.get(User, int(user_id))
-    
+
     @login_manager.unauthorized_handler
-    def unauthorized() -> Response | None:
+    def unauthorized() -> ResponseReturnValue:
         if request.path.startswith("/api"):
-            return error_response(message="Authentication required", code="AUTH_REQUIRED", status_code=401)
+            return error_response(
+                message="Authentication required", code="AUTH_REQUIRED", status_code=401
+            )
+        flash("Please log in to access this page", "message")
+        return redirect(login_url(LOGIN_VIEW, request.url))
 
     # Init Flask-Caching
     app.config.from_mapping(
