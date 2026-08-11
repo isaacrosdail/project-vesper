@@ -33,22 +33,11 @@ class DailyMetrics(Base):
     entry_datetime: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
-
     weight: Mapped[float | None] = mapped_column(Float, nullable=True)
-
-    # weight_units: Mapped[WeightUnitsEnum | None] = mapped_column(
-    #     SAEnum(WeightUnitsEnum, name="weight_units_enum", values_callable=lambda x: [e.value for e in x]),
-    #     nullable=True
-    # )
-
     steps: Mapped[int | None] = mapped_column(Integer, nullable=True)
-
     calories: Mapped[int | None] = mapped_column(Integer, nullable=True)
-
     wake_datetime: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-
     sleep_datetime: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-
     sleep_duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     @property
