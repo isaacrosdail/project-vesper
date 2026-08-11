@@ -3,6 +3,7 @@
 import logging
 from collections import defaultdict, deque
 from datetime import date
+from enum import StrEnum, auto
 from typing import Any, Literal, TypeVar
 
 from flask import request, session
@@ -12,16 +13,18 @@ T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
+class ToastType(StrEnum):
+    SUCCESS = auto()
+    INFO = auto()
+    WARNING = auto()
+    ERROR = auto()
 
-
-def set_toast(message: str, toast_type: str = "info") -> None:
+def set_toast(title: str, message: str, toast_type: ToastType) -> None:
     """
     Queues a toast for display after redirect.
     JS reads from `data-toast` on body (base.html) and displays it.
-
-    Options for toast_type: `error`, `success`, `info`, `warning` (default: `info`)
     """
-    session["toast"] = {"message": message, "type": toast_type}
+    session["toast"] = {"title": title, "message": message, "type": toast_type}
 
 
 def sort_by_field(items: list[T], field_name: str, order: str) -> list[T]:

@@ -1,6 +1,6 @@
 // App root module to act as app's bootstrapper
 
-import { makeToast } from './shared/ui/toast';
+import { addToast } from './shared/components/Toaster.svelte';
 
 // Load shared components
 import './shared/charts';
@@ -11,7 +11,6 @@ import './shared/ui/context-menu';
 import './shared/ui/dropdown';
 import './shared/ui/modal-manager';
 import './shared/ui/theme-manager';
-import './shared/ui/toast';
 import './shared/ui/tooltip';
 
 // Import page-specific modules
@@ -31,8 +30,9 @@ import { init as initPillarsPage } from './pillars';
 import { init as initProfileSidebar } from './shared/ui/profile-sidebar';
 import { initLeftSidebar } from './shared/ui/left-sidebar';
 import { ApiError } from './shared/services/api';
-import { handleApiError } from './shared/ui/toast';
 import { refreshMe } from './shared/services/userState.svelte';
+import { mount } from 'svelte';
+import Toaster from './shared/components/Toaster.svelte';
 
 const initRegistry = {
     "main.home": () => initCore(),
@@ -60,8 +60,23 @@ window.addEventListener('unhandledrejection', (e) => {
     }
 });
 
+function handleApiError(err: unknown) {
+    if (err instanceof ApiError) {
+        if (err.errors) {
+            for (const [field, messages] of Object.entries(err.errors)) {
+                messages.forEach(message => addToast(`${field}: ${message}`, '', 'error'));
+            }
+        } else {
+            addToast(err.message, '', 'error');
+        }
+    } else {
+        addToast("Unexpected error", '', 'error');
+    }
+}
+
 export async function initMain() {
     await initUserState();
+    mount(Toaster, { target: document.body });
     showToastsFromFlask();
 
     const page = document.documentElement.dataset['page'];
@@ -86,6 +101,6 @@ function showToastsFromFlask(): void {
     const toastRaw = document.body.dataset['toast'];
     if (toastRaw && toastRaw !== 'null') {
         const toast = JSON.parse(toastRaw);
-        makeToast(toast.message, toast.type, 3000);
+        addToast(toast.title, toast.message, toast.type);
     }
 }

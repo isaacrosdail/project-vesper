@@ -21,7 +21,7 @@ from app.modules.groceries.viewmodels import (
     TransactionViewModel,
 )
 from app.shared.decorators import login_plus_session
-from app.shared.utils import set_toast
+from app.shared.utils import ToastType, set_toast
 
 groceries_bp = Blueprint(
     "groceries", __name__, template_folder="templates", url_prefix="/groceries"
@@ -114,7 +114,7 @@ def nutrition_logs(session: Session) -> Response:
         session, current_user.id, current_user.timezone
     )
     count = groceries_service.import_nutrition_csv(text_stream)
-    set_toast(f"CSV imported! Received {count} new entries", "success")
+    set_toast("CSV imported", f"Received {count} new entries", ToastType.SUCCESS)
 
     return redirect(url_for("groceries.dashboard"))
 
