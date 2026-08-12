@@ -25,7 +25,7 @@ from alembic.config import Config as AlembicConfig
 from flask import Flask, abort, current_app, g, request, url_for
 from flask import session as fsession
 from flask_caching import Cache
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from alembic import command
@@ -35,16 +35,6 @@ from app.extensions import _setup_extensions
 from app.shared.debug import setup_dev_debugging
 from app.shared.serialization import CustomJSONProvider
 from app.shared.setup_logging import setup_logging
-
-
-def has_dev_tools() -> bool:
-    """Dev tools visible to anyone in dev, owner-only in prod."""
-    if current_app.testing:
-        return False
-    if current_app.config["APP_ENV"] == "dev":
-        return True
-
-    return bool(current_user.is_authenticated and current_user.is_owner)
 
 
 # Global cache instance? Docs unclear
@@ -195,7 +185,6 @@ def _setup_request_hooks(app: Flask) -> None:
     @app.before_request
     def generate_nonce() -> None:
         g.nonce = secrets.token_urlsafe(16)
-        g.has_dev_tools = has_dev_tools()
 
         if "csrf_token" not in fsession:
             fsession["csrf_token"] = secrets.token_urlsafe(32)
@@ -217,7 +206,6 @@ def _setup_request_hooks(app: Flask) -> None:
     @app.context_processor
     def inject_globals() -> dict[str, Any]:
         return {
-            "has_dev_tools": g.has_dev_tools,
             "nonce": getattr(g, "nonce", ""),
             "vite_dev": app.config["APP_ENV"] == "dev" ## for vite stuff
         }
