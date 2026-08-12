@@ -10,6 +10,7 @@
         {% set data_page = "main.landing_page" %}
     {% endif %}
     data-page="{{ data_page }}"
+    data-dev="{{ 'true' if config['APP_ENV'] == 'dev' else 'false' }}"
     data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
     >
 <head>
@@ -55,7 +56,7 @@
 
         {% block sidebar_left %}{% endblock %}
         {% block sidebar_right %}
-        {% include '_partials/_profile_sidebar.html' %}
+        <div id="profile-sidebar-root"></div>
         {% endblock %}
         <main class="content {% block content_mod %}{% endblock %}">
             {% block content %}{% endblock %}

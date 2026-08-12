@@ -74,7 +74,9 @@ function handleApiError(err: unknown) {
 }
 
 export async function initMain() {
-    await initUserState();
+    const authenticated = document.documentElement.dataset['authenticated'] === 'true';
+    if (authenticated) await refreshMe();
+
     mount(ConfirmDialog, { target: document.body });
     mount(ContextMenu, { target: document.body });
     mount(Toaster, { target: document.body });
@@ -85,14 +87,8 @@ export async function initMain() {
         initRegistry[page as keyof typeof initRegistry]();
     }
 
-    // Sidebar outright (depends on userStore)
-    initProfileSidebar();
+    if (authenticated) initProfileSidebar();
     initLeftSidebar();
-}
-
-async function initUserState() {
-    if (document.documentElement.dataset['authenticated'] !== 'true') return;
-    await refreshMe();
 }
 
 /**

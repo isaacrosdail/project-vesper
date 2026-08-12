@@ -1049,36 +1049,6 @@ svg {
   grid-area: footer;
 }
 
-/* Override to fit text */
-#units-fieldset {
-  width: 150px;
-}
-/* Override to not be sooo big */
-#default-timeframe {
-  width: 50px;
-}
-
-
-.timezone-group select {
-  width: 180px;
-}
-
-.setting-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: var(--space-sm);
-
-  & > :last-child {
-    justify-self: end;
-    font-size: var(--font-size-sm);
-  }
-  & input, & select {
-    margin: 0; padding: var(--space-xs);
-    width: 70px; height: 30px;
-  }
-}
-
 /* For each group in sidebar ofc */
 .sidebar-section {
   display: grid;

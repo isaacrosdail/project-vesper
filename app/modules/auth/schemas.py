@@ -151,6 +151,7 @@ class UserGoalsRead(APIReadSchema):
 
 
 class UserMeRead(APIReadSchema):
+    is_owner: bool
     timezone: str
     profile: UserProfileRead
     goals: UserGoalsRead

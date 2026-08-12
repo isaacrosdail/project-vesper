@@ -197,4 +197,7 @@ export function parseFormData(formData: FormData): Record<string, unknown> {
         current[path[path.length - 1]] = finalValue;
     }
     return result;
+export const divmod = (a: number, b: number): [quotient: number, remainder: number] => {
+    if (b === 0) throw new Error(`Div by zero: a: ${a}, b: ${b}`);
+    return [Math.floor(a/b), Math.abs(a % b)];
 }

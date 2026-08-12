@@ -25,6 +25,7 @@ def get_my_profile(session: Session) -> tuple[Response, int]:
     return success_response(
         message="Profile retrieved",
         data={
+            "is_owner": current_user.is_owner,
             "timezone": current_user.timezone,
             "profile": UserProfileRead.dump(current_user.profile),
             "goals": UserGoalsRead.dump(current_user.goals),
