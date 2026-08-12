@@ -38,25 +38,6 @@ def login_plus_session(
     return decorated_function
 
 
-def owner_required(
-    func: Callable[P, ResponseReturnValue],
-) -> Callable[P, ResponseReturnValue]:
-    """
-    Decorator that ensures current_user is authenticaed and has OWNER role.
-
-    Returns 403 Forbidden if user lacks owner permissions.
-    """
-
-    @wraps(func)
-    @typed_login_required
-    def decorated_view(*args: P.args, **kwargs: P.kwargs) -> ResponseReturnValue:
-        if not current_user.is_owner:
-            return abort(403, description="Owner privileges required")
-        return func(*args, **kwargs)
-
-    return decorated_view
-
-
 EXEMPT_METHODS = {"OPTIONS"}  # copied from Flask-Login's source
 
 def typed_login_required(
