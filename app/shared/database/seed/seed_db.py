@@ -95,9 +95,9 @@ def seed_user_goals(session: Session, user_id: int) -> None:
         goals = UserGoals(user_id=user_id)
         session.add(goals)
     goals.calories = 2400
-    goals.protein = 140
-    goals.carbs = 250
-    goals.fat = 70
+    goals.protein_pct = 30
+    goals.carbs_pct = 45
+    goals.fat_pct = 25
     goals.steps = 8000
     goals.sleep_duration_minutes = 480
     goals.weight = 75.0

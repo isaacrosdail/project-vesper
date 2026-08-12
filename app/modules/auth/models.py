@@ -172,8 +172,21 @@ class UserProfile(Base):
     user: Mapped[User] = relationship("User", back_populates="profile")
 
 
+CAL_PER_GRAM = {"protein": 4, "carbs": 4, "fat": 9}
+
 class UserGoals(Base):
     __tablename__ = "user_goals"
+
+    __table_args__ = (
+        CheckConstraint(
+            "num_nonnulls(protein_pct, carbs_pct, fat_pct) = 0 "
+            "OR (num_nonnulls(protein_pct, carbs_pct, fat_pct) = 3 AND protein_pct + carbs_pct + fat_pct = 100)",
+            name="macro_split_complete",
+        ),
+        CheckConstraint("protein_pct BETWEEN 0 AND 100", name="protein_pct_range"),
+        CheckConstraint("carbs_pct   BETWEEN 0 AND 100", name="carbs_pct_range"),
+        CheckConstraint("fat_pct     BETWEEN 0 AND 100", name="fat_pct_range"),
+    )
 
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
@@ -183,11 +196,29 @@ class UserGoals(Base):
     calories: Mapped[int | None] = mapped_column(Integer, nullable=True)
     steps: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sleep_duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    protein: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    fat: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    carbs: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    protein_pct: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    fat_pct: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    carbs_pct: Mapped[int | None] = mapped_column(Integer, nullable=True)
     potassium: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sodium: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    @property
+    def protein(self) -> int | None:
+        if self.calories is None or self.protein_pct is None:
+            return None
+        return round(self.calories * self.protein_pct / 100 / CAL_PER_GRAM["protein"])
+
+    @property
+    def carbs(self) -> int | None:
+        if self.calories is None or self.carbs_pct is None:
+            return None
+        return round(self.calories * self.carbs_pct / 100 / CAL_PER_GRAM["carbs"])
+
+    @property
+    def fat(self) -> int | None:
+        if self.calories is None or self.fat_pct is None:
+            return None
+        return round(self.calories * self.fat_pct / 100 / CAL_PER_GRAM["fat"])
 
     user: Mapped[User] = relationship("User", back_populates="goals")
 

@@ -1,4 +1,6 @@
-from pydantic import Field, field_validator, BaseModel
+from typing import Any, Self
+
+from pydantic import Field, field_validator, BaseModel, model_validator
 from app.shared.schemas import APIReadSchema, APISchema
 from pycountry import countries
 from datetime import date
@@ -114,19 +116,35 @@ class UserGoalsPatch(APISchema):
     calories: int | None = Field(None, gt=0)
     steps: int | None = Field(None, gt=0)
     sleep_duration_minutes: int | None = Field(None, gt=0)
-    protein: int | None = Field(None, gt=0)
-    fat: int | None = Field(None, gt=0)
-    carbs: int | None = Field(None, gt=0)
+    protein_pct: int | None = Field(None, ge=0, le=100)
+    fat_pct: int | None = Field(None, ge=0, le=100)
+    carbs_pct: int | None = Field(None, ge=0, le=100)
     potassium: int | None = Field(None, gt=0)
     sodium: int | None = Field(None, gt=0)
+
+
+    @model_validator(mode="after")
+    def validate_macro_split(self) -> Self:
+        # if all 3 fat/carbs/protein are sent, ensure they total 100
+        split = [self.protein_pct, self.carbs_pct, self.fat_pct]
+        if all(v is None for v in split):
+            return self
+        if any(v is None for v in split):
+            raise ValueError("Macro percentages must be sent together")
+        if (total := sum(split)) != 100:
+            raise ValueError(f"Macro percentages must total 100, got {total}")
+        return self
 
 class UserGoalsRead(APIReadSchema):
     weight: float | None
     calories: int | None
     steps: int | None
     sleep_duration_minutes: int | None
+    protein_pct: int | None
     protein: int | None
+    fat_pct: int | None
     fat: int | None
+    carbs_pct: int | None
     carbs: int | None
     potassium: int | None
     sodium: int | None

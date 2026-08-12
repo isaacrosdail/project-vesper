@@ -359,9 +359,9 @@ export interface UserGoalsPatch {
   calories?: number | null;
   steps?: number | null;
   sleep_duration_minutes?: number | null;
-  protein?: number | null;
-  fat?: number | null;
-  carbs?: number | null;
+  protein_pct?: number | null;
+  fat_pct?: number | null;
+  carbs_pct?: number | null;
   potassium?: number | null;
   sodium?: number | null;
 }
@@ -370,8 +370,11 @@ export interface UserGoalsRead {
   calories: number | null;
   steps: number | null;
   sleep_duration_minutes: number | null;
+  protein_pct: number | null;
   protein: number | null;
+  fat_pct: number | null;
   fat: number | null;
+  carbs_pct: number | null;
   carbs: number | null;
   potassium: number | null;
   sodium: number | null;
