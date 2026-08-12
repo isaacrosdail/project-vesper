@@ -1,8 +1,8 @@
 [
-    { "name": "Morning Walk", "pillars": ["Health"], "tags": ["fitness", "outdoors"] },
-    { "name": "30m Coding Drills", "pillars": ["Career"], "tags": ["work"] },
-    { "name": "Tidy workspace", "pillars": [], "tags": ["home"] },
-    { "name": "Journal 5mins", "pillars": ["Purpose"], "tags": ["reflection"] },
-    { "name": "Review weekly goals", "pillars": ["Purpose"], "tags": ["reflection"] },
-    { "name": "Jogging", "pillars": ["Health"], "tags": ["fitness"] }
+    { "name": "Morning Walk", "pillars": ["Health"], "tags": ["fitness", "outdoors"], "type": "duration", "target_low": 20, "target_high": 45 },
+    { "name": "30m Coding Drills", "pillars": ["Career"], "tags": ["work"], "type": "duration", "target_low": 30 },
+    { "name": "Tidy workspace", "pillars": [], "tags": ["home"], "type": "binary" },
+    { "name": "Journal 5mins", "pillars": ["Purpose"], "tags": ["reflection"], "type": "duration", "target_low": 5 },
+    { "name": "Review weekly goals", "pillars": ["Purpose"], "tags": ["reflection"], "type": "binary" },
+    { "name": "Jogging", "pillars": ["Health"], "tags": ["fitness"], "type": "numeric_value", "units": "km", "target_low": 3, "target_high": 8 }
 ]

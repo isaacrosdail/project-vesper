@@ -35,7 +35,7 @@ from app.modules.groceries.models import (
     Transaction,
     UnitEnum,
 )
-from app.modules.habits.models import Habit, HabitCompletion
+from app.modules.habits.models import Habit, HabitCompletion, HabitTypeEnum
 from app.modules.metrics.models import DailyMetrics
 from app.modules.tasks.models import PriorityEnum, Task
 from app.modules.time_tracking.models import TimeEntry
@@ -204,10 +204,31 @@ def create_habit_completions(day: datetime, tier: Tier, habits: list[Habit], use
 
     hour = random.randint(6, 22)
     created_at = day.replace(hour=hour, minute=0, second=0, microsecond=0)
-    return [
-        HabitCompletion(habit=h, created_at=created_at, completed_on=created_at.date(), user_id=user_id)
-        for h in random.sample(habits, n)
-    ]
+
+    completions = []
+    for h in random.sample(habits, n):
+        value = None
+        if h.type != HabitTypeEnum.BINARY:
+            low = h.target_low or 1
+            high = h.target_high or low * 2
+            lo, hi = {
+                Tier.HIGH: (low, high),
+                Tier.MED: (low * 0.8, high),
+                Tier.LOW: (low * 0.5, high * 0.8),
+            }[tier]
+            value = round(random.uniform(lo, hi), 1)
+        completions.append(
+            HabitCompletion(
+                habit=h,
+                created_at=created_at,
+                entry_date=created_at.date(),
+                value=value,
+                target_low_snapshot=h.target_low,
+                target_high_snapshot=h.target_high,
+                user_id=user_id,
+            )
+        )
+    return completions
 
 def seed_rich_data(pillars: Any, user_id: int, level: Level, performance: Performance) -> list[Any]:
     # Accumulate, don't session.add!
@@ -235,7 +256,15 @@ def seed_rich_data(pillars: Any, user_id: int, level: Level, performance: Perfor
 
     habits = []
     for h in habit_data:
-        habit = Habit(name=h["name"], user_id=user_id, target_frequency=random.randint(1, 7))
+        habit = Habit(
+            name=h["name"],
+            user_id=user_id,
+            weekly_frequency=random.randint(1, 7),
+            type=HabitTypeEnum(h["type"]),
+            units=h.get("units"),
+            target_low=h.get("target_low"),
+            target_high=h.get("target_high"),
+        )
         habit.pillars = [pillars[name] for name in h["pillars"]]
         habit.tags = [tags[name] for name in h.get("tags", [])]
         habits.append(habit)
