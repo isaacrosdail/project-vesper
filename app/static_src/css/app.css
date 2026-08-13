@@ -134,22 +134,6 @@ details::after {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .icon-wiggle {
-        transition: none;
-        animation: none;
-    }
-
-    /* Disable both surging effect & gradient itself */
-    .progress-bar-fill.surging,
-    .progress-bar-fill.surging::after {
-        animation: none !important;
-    }
-    .progress-bar-fill.surging::after {
-        background: none !important;
-    }
-}
-
 /* ===================================
     PAGE-SPECIFIC: Tasks Dashboard
    =================================== */

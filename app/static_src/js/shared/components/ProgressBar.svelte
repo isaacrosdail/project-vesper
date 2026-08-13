@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { prefersReducedMotion } from 'svelte/motion';
     import { randFloat, randInt } from '../utils';
 
     let {
@@ -24,8 +25,7 @@
     });
 
     function triggerConfetti(el: HTMLElement) {
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) return;
+        if (prefersReducedMotion.current) return;
 
         const progressBarBox = el.getBoundingClientRect();
         const confettiLayer = document.querySelector('#confetti-layer');

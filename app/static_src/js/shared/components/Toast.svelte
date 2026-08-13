@@ -97,6 +97,18 @@
         transform-origin: left;
         animation: toast-countdown var(--toast-duration) linear forwards;
     }
+
+    /* Dismissal is a setTimeout in Toaster.svelte, not this animation.
+        The global reduced-motion rule limits it to 0.01ms,
+        making the bar drain immediately while the toast
+        stays active for its full duration, so we'll just drop the indicator entirely.
+    */
+    @media (prefers-reduced-motion: reduce) {
+        .toast::after {
+            display: none;
+        }
+    }
+
     .toast-exit {
         animation: slide-out 0.2s ease forwards;
     }

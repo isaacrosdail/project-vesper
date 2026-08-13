@@ -108,3 +108,15 @@ a {
   border: 0;
   padding: 0;
 }
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+    /* eslint-disable css/no-important */
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+    /* eslint-enable css/no-important */
+}
