@@ -1,53 +1,42 @@
-{# Navbar template used across site. Note: nav_link macro at bottom of this file #}
-{# === NAV COMPONENTS === #}
-
-
-{% macro nav_link(text, endpoint, current_endpoint, required_role=None) %}
-    {% if not required_role or (current_user.is_authenticated and current_user.role == required_role) %}
-        <a
-        class="nav-link {% if current_endpoint == endpoint %}active{% endif %}"
-        href="{{ url_for(endpoint) }}"
-        {% if current_endpoint == endpoint %}aria-current="page"{% endif %}
-        >
-            {{ text }}
-        </a>
-    {% endif %}
+{% macro nav_link(text, endpoint, section=False) %}
+    {% set current = request.endpoint == endpoint %}
+    {% set within = section and not current and request.blueprint == endpoint.split('.')[0] %}
+    <a class="nav-link {{ 'within' if within }}"
+       href="{{ url_for(endpoint) }}"
+       {% if current %}aria-current="page"{% endif %}>{{ text }}</a>
 {% endmacro %}
-
 {% macro nav_links_list() %}
-    {% if current_user.is_authenticated %}
-        {{ nav_link('Tasks', 'tasks.dashboard', request.endpoint) }}
-        {{ nav_link('Habits', 'habits.dashboard', request.endpoint) }}
-        {{ nav_link('Groceries', 'groceries.dashboard', request.endpoint) }}
-        {{ nav_link('Metrics', 'metrics.dashboard', request.endpoint) }}
-        {{ nav_link('Time Tracking', 'time_tracking.dashboard', request.endpoint) }}
-    {% endif %}
-    
-    {% if current_user.is_anonymous %}
-        {{ nav_link('Log in', 'auth.login', request.endpoint) }}
-        {{ nav_link('Register', 'auth.register', request.endpoint) }}
-    {% endif %}
+    <ul class="nav-list">
+        {% if current_user.is_authenticated %}
+            <li class="nav-group">{{ nav_link('Tasks', 'tasks.dashboard') }}</li>
+            <li class="nav-group">{{ nav_link('Habits', 'habits.dashboard') }}</li>
+            <li class="nav-group">
+                {{ nav_link('Groceries', 'groceries.dashboard', section=True) }}
+                <ul class="nav-sublist">
+                    <li>{{ nav_link('Data', 'groceries.data') }}</li>
+                    <li>{{ nav_link('Recipes', 'groceries.recipes') }}</li>
+                </ul>
+            </li>
+            <li class="nav-group">{{ nav_link('Metrics', 'metrics.dashboard') }}</li>
+            <li class="nav-group">{{ nav_link('Time Tracking', 'time_tracking.dashboard') }}</li>
+        {% else %}
+            <li class="nav-group">{{ nav_link('Log in', 'auth.login') }}</li>
+            <li class="nav-group">{{ nav_link('Register', 'auth.register') }}</li>
+        {% endif %}
+    </ul>
 {% endmacro %}
-
 <div class="nav-anchor">
     <nav aria-label="Main navigation">
         <div class="navbar-content">
             {# LEFT: Branding & Links #}
             <div class="nav-left">
                 <a href="{{ url_for('main.home') }}" class="branding">Vesper</a>
-
                 <button class="btn-icon btn-square hamburger-btn"
-                        aria-controls="nav-mobile-container" 
-                        aria-expanded="false" 
-                        aria-label="Toggle navigation menu">
-                    {{ ui.hamburger_svg() }}
-                </button>
-                
-                <div class="nav-desktop">
-                    {{ nav_links_list() }}
-                </div>
+                        aria-controls="nav-mobile-container"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation menu">{{ ui.hamburger_svg() }}</button>
+                <div class="nav-desktop">{{ nav_links_list() }}</div>
             </div>
-
             {# Right: Profile settings modal & theme select #}
             <div class="nav-right">
                 <form>
@@ -60,23 +49,23 @@
                         </div>
                     </fieldset>
                 </form>
-
                 {% if current_user.is_authenticated %}
-                    <button class="btn-icon btn-round profile-btn js-profile-btn" popovertarget="profile-sidebar" aria-label="Profile settings">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <button class="btn-icon btn-round profile-btn"
+                            popovertarget="profile-sidebar"
+                            aria-label="Profile settings">
+                        <svg class="icon"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         </svg>
                     </button>
                 {% endif %}
             </div>
         </div>
     </nav>
-
     <div id="nav-backdrop"></div>
     <div id="nav-mobile-container" class="nav-mobile-container" inert>
-        <div class="nav-mobile">
-            {{ nav_links_list() }}
-        </div>
+        <div class="nav-mobile" role="navigation" aria-label="Mobile navigation">{{ nav_links_list() }}</div>
     </div>
 </div>
