@@ -12,7 +12,7 @@ class TaskRead(APIReadSchema):
     id: int
     name: str
     priority: PriorityEnum
-    due_date: datetime | None
+    due_datetime: datetime | None
     sort_key: str
     completed_at: datetime | None
     created_at: datetime
@@ -39,21 +39,21 @@ class TaskProgressRead(APIReadSchema):
 class TaskCreate(APISchema):
     name: str = Field(min_length=1, max_length=TASK_NAME_MAX_LENGTH)
     priority: PriorityEnum
-    due_date: AwareDatetime | None = None
+    due_datetime: AwareDatetime | None = None
     subtask_ids: list[int] = []
     supertask_ids: list[int] = []
     pillar_ids: list[int] = []
 
     @model_validator(mode="after")
-    def validate_frog_has_due_date(self) -> Self:
-        if self.priority is PriorityEnum.FROG and self.due_date is None:
+    def validate_frog_has_due_datetime(self) -> Self:
+        if self.priority is PriorityEnum.FROG and self.due_datetime is None:
             raise ValueError("Frog tasks must have a due date")
         return self
 
 class TaskPatch(APISchema):
     name: str | None = Field(None, min_length=1, max_length=TASK_NAME_MAX_LENGTH)
     priority: PriorityEnum | None = None
-    due_date: AwareDatetime | None = None
+    due_datetime: AwareDatetime | None = None
     subtask_ids: list[int] | None = None
     supertask_ids: list[int] | None = None
     pillar_ids: list[int] | None = None

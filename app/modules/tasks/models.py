@@ -50,7 +50,7 @@ class Task(Base, CustomBaseTaskMixin):
 
     __table_args__ = (
         CheckConstraint(
-            "priority != 'frog' OR due_date IS NOT NULL", name="frog_requires_due_date"
+            "priority != 'frog' OR due_datetime IS NOT NULL", name="frog_requires_due_datetime"
         ),
         Index(
             "uq_user_task_name",
@@ -58,7 +58,7 @@ class Task(Base, CustomBaseTaskMixin):
             unique=True,
             postgresql_where=text("completed_at IS NULL"),
         ),
-        Index("ix_tasks_user_due_date", "user_id", "due_date"),
+        Index("ix_tasks_user_due_datetime", "user_id", "due_datetime"),
     )
 
     name: Mapped[str] = mapped_column(String(TASK_NAME_MAX_LENGTH), nullable=False)
@@ -68,7 +68,7 @@ class Task(Base, CustomBaseTaskMixin):
         nullable=False
     )
 
-    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    due_datetime: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # collation="C" ensures sort_key comparisons/sorting always use C collation rules by Postgres/DB.
     # collate("C") so postgres uses bytewise collation (to align with JS)
@@ -109,5 +109,5 @@ class Task(Base, CustomBaseTaskMixin):
         return str(self.name)
 
     def is_overdue(self, now: datetime) -> bool:
-        return not self.is_done and self.due_date is not None and self.due_date < now
+        return not self.is_done and self.due_datetime is not None and self.due_datetime < now
 

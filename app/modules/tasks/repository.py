@@ -26,7 +26,7 @@ class TaskRepository(BaseRepository[Task]):
         *,
         name: str,
         priority: PriorityEnum | None,
-        due_date: datetime | None = None,
+        due_datetime: datetime | None = None,
         sort_key: str
     ) -> Task:
         """Create & add a new task. Returns said task."""
@@ -34,7 +34,7 @@ class TaskRepository(BaseRepository[Task]):
             user_id=self.user_id,
             name=name,
             priority=priority,
-            due_date=due_date,
+            due_datetime=due_datetime,
             sort_key=sort_key
         )
         return self.add(task)
@@ -55,8 +55,8 @@ class TaskRepository(BaseRepository[Task]):
         """Return frog task in given window, or None."""
         stmt = self._user_select(Task).where(
             Task.priority == PriorityEnum.FROG,
-            Task.due_date >= start_utc,
-            Task.due_date < end_utc
+            Task.due_datetime >= start_utc,
+            Task.due_datetime < end_utc
         )
         return self.session.scalars(stmt).first()
 

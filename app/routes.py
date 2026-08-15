@@ -43,7 +43,7 @@ def home() -> tuple[str, int]:
         tasks = tasks_service.task_repo.get_all_regular_tasks()
         filtered_tasks = [
             t for t in tasks
-            if (t.due_date is None) or dth.is_same_local_date(t.due_date, user_tz)
+            if (t.due_datetime is None) or dth.is_same_local_date(t.due_datetime, user_tz)
         ]
 
         todays_completions = habits_service.completion_repo.get_all_in_window(start_utc, end_utc)

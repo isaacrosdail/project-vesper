@@ -238,7 +238,7 @@ def seed_rich_data(pillars: Any, user_id: int, level: Level, performance: Perfor
     with Path(f"{SEED_DIR}/habits.json").open() as f:
         habit_data = json.load(f)
 
-    ### TASKS: name, is_done, is_frog OR priority (enum), due_date (mix: some needed for frogs, some optional for tasks)
+    ### TASKS: name, is_done, is_frog OR priority (enum), due_datetime (mix: some needed for frogs, some optional for tasks)
     ## ~12-15 tasks total
     now = datetime.now(ZoneInfo("UTC"))
     with Path(f"{SEED_DIR}/tasks.json").open() as f:
@@ -309,7 +309,7 @@ def create_tasks(
             name=t["name"],
             priority=PriorityEnum(t["priority"]),
             completed_at=now + timedelta(days=t["completed_at_offset"]) if t["completed_at_offset"] is not None else None,
-            due_date=now + timedelta(days=t["due_date_offset"]) if t["due_date_offset"] is not None else None,
+            due_datetime=now + timedelta(days=t["due_datetime_offset"]) if t["due_datetime_offset"] is not None else None,
             user_id=user_id,
             created_at=now - timedelta(days=14),
             sort_key=sort_key
