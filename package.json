@@ -48,7 +48,7 @@
     "check": "npm run lint && npm run lint:py && npm run lint:templates && npm run type-check && npm run type-check:py && npm run type-check:svelte",
     "audit": "npm audit --audit-level=high",
     "prepare": "git config core.hooksPath .githooks",
-    "gen-types": "PYTHONPATH=. uv run pydantic2ts --module ./app/api/schemas.py --exclude APISchema --exclude APIReadSchema --output ./app/static_src/js/apiTypes.ts"
+    "gen-types": "PYTHONPATH=. uv run pydantic2ts --module ./app/api/schemas.py --exclude APISchema --exclude APIReadSchema --output ./app/static_src/js/apiTypes.ts && PYTHONPATH=. uv run python scripts/gen_enum_labels.py"
   },
   "dependencies": {
     "@tanstack/svelte-hotkeys": "^0.10.0",
