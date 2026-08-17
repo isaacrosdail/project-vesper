@@ -22,7 +22,6 @@ import { init as initTasks } from './tasks/dashboard';
 import { init as initTimeTracking } from './time_tracking/dashboard';
 
 import { init as initRecipesPage } from './groceries/recipes';
-import { init as initTasksWebPage } from './tasks_web';
 import { init as initPillarsPage } from './pillars';
 import { init as initProfileSidebar } from './shared/ui/profile-sidebar';
 import { initLeftSidebar } from './shared/ui/left-sidebar';
@@ -46,7 +45,6 @@ const initRegistry = {
 
     // Prototyping stuff
     "groceries.recipes": () => initRecipesPage(),
-    "main.tasks_web": () => initTasksWebPage(),
     "main.pillars": () => initPillarsPage(),
 };
 

@@ -138,161 +138,6 @@ details::after {
     PAGE-SPECIFIC: Tasks Dashboard
    =================================== */
 
-.task.drop-above {
-  border-top: 3px solid var(--accent-subtle);
-  margin-top: -1px;
-  box-shadow: 0 -3px 0 0 var(--accent-subtle);
-}
-.task.drop-below {
-  border-bottom: 3px solid var(--accent-subtle);
-  margin-bottom: -1px;
-  box-shadow: 0 3px 0 0 var(--accent-subtle);
-}
-
-/* Unify list controls styling */
-.time-window,
-.js-filter-btn,
-#sort-by,
-.sort-order-toggle {
-  background: var(--bg-light);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-}
-
-.task-list-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-sm);
-
-  & .controls-left,
-  & .controls-right {
-    display: flex;
-    gap: var(--space-sm);
-  }
-
-  & button:hover {
-    background: var(--bg-hover);
-  }
-}
-
-.sort-order-toggle {
-  & svg {
-    transition: transform 0.2s ease;
-  }
-
-  &.flip svg {
-    transform: rotate(180deg);
-  }
-}
-/* for dropdown */
-#sort-by .active {
-  background: var(--accent-subtle);
-}
-
-/* TODO: Sketching conversion for tasks from table to ul */
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-/* Let a showCompleted toggle control visibility for tasks: */
-.task-list:not(.show-completed) .task:has(input:checked) {
-  display: none;
-}
-/* Disallow drag-n-drop when 'sortable' class is active */
-.task-list:not(.sortable) .task__drag-handle {
-  cursor: default;
-  opacity: 0;
-}
-/* Have completed tasks recede visually */
-.task:has(input:checked) {
-
-  & .task__name {
-    text-decoration: line-through;
-    opacity: 0.5;
-  }
-  & input:checked { opacity: 0.5; }
-}
-
-.task {
-  background: var(--bg-light);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-  padding: var(--space-xs);
-
-  &:hover {
-    background: var(--accent-subtle);
-  }
-  display: grid;
-  grid-template-columns: [gutter] 3rem [content] 1fr;
-  cursor: pointer;
-  & .task__main, & .task__meta, & .task__subtask-count {
-    grid-column: content;
-  }
-
-  /* Gutter: fixed lane so rows never jitter, opacity fades in on hover/focus */
-  & .task__gutter {
-    grid-column: gutter;
-    grid-row: 1; /* aligns with .task__main row, not full height? */
-    display: flex;
-    gap: var(--space-xs);
-    opacity: 0;
-    transition: opacity 120ms ease;
-  }
-  &:hover .task__gutter,
-  &:focus-within .task__gutter {
-    opacity: 1;
-  }
-  & .task__gutter > button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    padding: 0;
-    gap: var(--space-sm);
-    background: transparent;
-    border: none;
-    border-radius: var(--border-radius);
-    color: var(--text-muted);
-
-    &:hover {
-      background: var(--bg-hover);
-    }
-  }
-
-  & .task__main {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-
-  & .task__due-date {
-    grid-column: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    color: var(--clr-error);
-  }
-  & .task__meta {
-    display: flex;
-    gap: var(--space-sm);
-    align-items: center;
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-
-    & .task__pillars { grid-column: 2; }
-
-    /* Separator between pillars */
-    & .task__pillars > span + span::before {
-      content: " · ";
-      color: var(--text-muted);
-    }
-  }
-}
-
 
 /* For search popover & task details popover */
 .popover-overlay:popover-open {
@@ -313,94 +158,6 @@ details::after {
 }
 .popover-overlay::backdrop {
   background: rgb(0 0 0 / 0.4);
-}
-
-/* TODO: remove/clean up */
-#icon-pillars {
-  fill: red;
-}
-.task-details-popover {
-  & > * {
-    outline: dashed red;
-  }
-  padding: var(--space-md);
-  gap: var(--space-lg); /* bigger gap between sections */
-
-  & .task-details__header { display: inline-flex; gap: var(--space-sm); }
-
-  & .pillars-row { display: inline-flex; color: var(--text-muted); font-size: var(--font-size-sm); }
-}
-
-.task-details__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  & .task-details__actions { display: flex; gap: var(--space-xs); }
-}
-
-.task-details__props {
-  display: flex;
-  gap: var(--space-md);
-  /* flex-wrap: wrap; */
-  /* column-gap: var(--space-sm); */
-  align-items: center;
-  /* font-size: var(--font-size-sm); */
-
-  & .label {
-    color: var(--text-muted);
-  }
-  & .value {
-    color: var(--text);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-  }
-}
-
-.subtasks-plus-add {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-
-  & .add-subtask {
-    justify-content: start;
-    padding-block: var(--space-xs);
-  }
-}
-
-.subtasks-container {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-
-  &:empty { display: none; }
-
-  & .subtask-group { display: inline-flex; gap: var(--space-sm); }
-
-  & .subtask-group {
-    padding-left: var(--space-md);
-  }
-}
-
-.results-container {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-
-/* TODO: replacing above, scrap checkmark svg, just strikethrough/opacity dip completed tasks */
-tr[data-is-done="True"] .name-span {
-  text-decoration: line-through;
-  opacity: 0.4;
-}
-
-.progress {
-  display: flex;
-  gap: var(--space-lg);
 }
 
 /* ===================================
@@ -682,74 +439,6 @@ tr[data-is-done="True"] .name-span {
 }
 
 /* ===================================
-PAGE-SPECIFIC: Tasks Web
-=================================== */
-
-body:has(#web) {
-  overflow: hidden;
-
-  & footer {
-    display: none;
-  }
-}
-/* #web {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-} */
-
-/* node, link */
-/* D3 drag handlers cover changing from grab -> grabbing -> grab */
-.node:hover {
-  cursor: grab;
-}
-
-.node-details {
-  fill: var(--text-muted);
-  text-anchor: start;
-  pointer-events: none;
-}
-[class^="node-"] {
-  border: 11px solid red;
-}
-.node-default {
-  fill: oklch(0.6493 0.11 251.78);
-  /* opacity: 1; */
-}
-.node-dimmed {
-  opacity: 0.5;
-}
-.node-highlighted {
-  fill: var(--accent-strong);
-  opacity: 1;
-}
-
-
-.node-label,
-.node-label-full,
-.node-details {
-  transition: opacity 0.2s ease;
-}
-
-.node-hover-dim .node-circle,
-.node-hover-dim .node-label {
-  opacity: 0.5;
-}
-.node-hover-dim .node-label-full {
-  opacity: 0;
-}
-.node-done .node-circle,
-.node-done .node-label,
-.node-done .node-badge-priority { opacity: 0.4; }
-
-.node-focused .node-label { opacity: 0; }
-.node-focused .node-label-full { opacity: 1; }
-
-/* Shows details + swaps truncated/full labels */
-.node-zoomed .node-label { opacity: 0; }
-.node-zoomed .node-label-full { opacity: 0; }
-.node-zoomed .node-details { opacity: 1; }
-/* ===================================
     D3 Charts: Habits, Metrics, Time Tracking
   =================================== */
 
@@ -1023,6 +712,13 @@ svg {
 /* For pages using our content_mod Jinja block to provide narrower styling for content */
 .content--narrow {
   max-width: clamp(35rem, 90vw, 50rem);
+}
+/* For pages consisting of Svelte + a single mount div */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
 }
 
 
