@@ -133,15 +133,18 @@ class ApiClient {
     }
 
     habitCompletions = {
-        post: (habitId: number) => this.request<HabitCompletionRead>('POST', `/habits/${habitId}/completions`, {
-            completed_on: todayUser().toString()
+        post: (habitId: number, entryDate: string, value: number | null) => this.request<HabitCompletionRead>('POST', `/habits/${habitId}/completions`, {
+            entry_date: entryDate,
+            value,
         }),
-        deleteToday: (habitId: string) => {
-            const today = todayUser().toString();
-            return this.request('DELETE', `/habits/${habitId}/completions?date=${today}`);
-        },
-        summary: (params: URLSearchParams) => this.request('GET', `/habits/habit_completions/summary?${params}`),
-        heatmap: () => this.request('GET', '/habits/habit_completions/heatmap')
+        delete: (habitId: number, date: string) =>
+            this.request('DELETE', `/habits/${habitId}/completions?date=${date}`),
+        summary: (params: URLSearchParams) => this.request<BarData[]>('GET', `/habits/habit_completions/summary?${params}`),
+        heatmap: (params?: URLSearchParams) => this.request<HeatmapApiEntry[]>('GET', `/habits/habit_completions/heatmap?${params ?? ''}`),
+        get: (habitId: number, { start, end }: { start: string; end: string; }) => {
+            const params = new URLSearchParams({ start, end });
+            return this.request<HabitDayRead[]>('GET', `/habits/${habitId}/completions?${params}`);
+        }
     }
 
     daily_metrics = {

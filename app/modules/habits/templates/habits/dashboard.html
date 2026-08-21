@@ -1,48 +1,6 @@
 {% extends "base.html" %}
-
 {% block title %}Habits{% endblock %}
-
 {% block content %}
-
-{{ forms.habit_entry_modal(pillars=pillars) }}
-
-<div id="habits-stats-container">
-    <div class="heatmap-group">Completion Activity</div>
-    <div class="tiles-group">
-        {{ ui.stats_info("Completed this week", 45,2,3) }}
-        {{ ui.stats_info("Highest streak", highest_streak.days, highest_streak.name) }}
-        {{ ui.stats_info("Lowest streak", lowest_streak.days, lowest_streak.name) }}
-    </div>
-    <details class="breakdown-group">
-        <summary>Completions by Habit</summary>
-        <div class="breakdown-content">
-            {{ ui.timeframe_pills("habits-chart") }}
-            <div id="habits-hbar-chart-container"></div>
-        </div>
-    </details>
-</div>
-
-<div class="card-dashboard surface">
-    <div class="card-title">
-        <h2>Habits</h2>
-        {{ ui.plus_btn('habits-entry-dashboard-btn') }}
-    </div>
-    
-    {% call(item, headers) ui.responsive_table('Habits', habits_headers, habits, 'habits', 'habits') %}
-        <td class="{{ headers[0].priority}} editable-cell"
-            data-item-id="{{ item.id }}" data-module="habits" data-subtype="habits"
-            data-field="name" data-tip="Double-click to edit field."
-        >
-            <span>{{ item.name }}</span>
-            {% if item.status %}
-            <svg class="icon"><use href="#badge-{{ item.status }}"></use></svg>
-            {% endif %}
-        </td>
-        <td class="{{ headers[1].priority}}">{{ item.status_label }}</td>
-        <td class="{{ headers[2].priority}}">{{ item.created_at_label }}</td>
-    {% endcall %}
-</div>
-
+    <div id="habits-dashboard-root" class="page"></div>
 {% endblock %}
-
 {% block scripts %}{% endblock %}
