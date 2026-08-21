@@ -3,8 +3,11 @@ Model definitions for Habits module.
 """
 from __future__ import annotations
 
-from datetime import date  # noqa: TC003
+from collections.abc import Iterator
+from dataclasses import dataclass
+from datetime import date, timedelta
 from enum import StrEnum, auto
+from itertools import takewhile
 
 from sqlalchemy import (
     CheckConstraint,
@@ -17,6 +20,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
@@ -30,6 +34,68 @@ class HabitTypeEnum(StrEnum):
     NUMERIC_VALUE = auto()
     DURATION = auto()
 
+
+class ScheduleTypeEnum(StrEnum):
+    FREQUENCY = auto()
+    WEEKLY = auto()
+    MONTHLY = auto()
+    INTERVAL = auto()
+
+
+class DatedSchedule:
+    __slots__ = ()
+
+    def intended_dates(self, start: date, end: date) -> Iterator[date]:
+        raise NotImplementedError
+
+    def intended_in_window(self, start_date: date, window_start: date, window_end: date) -> set[date]:
+        return set(takewhile(lambda d: d >= window_start, self.intended_dates(start_date, window_end)))
+
+@dataclass(frozen=True, slots=True)
+class WeeklySchedule(DatedSchedule):
+    scheduled_days: list[int]
+
+    def intended_dates(self, start: date, end: date) -> Iterator[date]:
+        d = end
+        while d >= start:
+            if d.isoweekday() in self.scheduled_days:
+                yield d
+            d -= timedelta(days=1)
+
+@dataclass(frozen=True, slots=True)
+class IntervalSchedule(DatedSchedule):
+    interval_days: int
+
+    def intended_dates(self, start: date, end: date) -> Iterator[date]:
+        # Snap down to most recent interval'd date, walk back from there
+        remainder = (end - start).days % self.interval_days
+        snapped_date = end - timedelta(days=remainder)
+        d = snapped_date
+        while d >= start:
+            yield d
+            d -= timedelta(days=self.interval_days)
+
+@dataclass(frozen=True, slots=True)
+class MonthlySchedule(DatedSchedule):
+    monthly_days: list[int]
+
+    def intended_dates(self, start: date, end: date) -> Iterator[date]:
+        d = end
+        while d >= start:
+            if (d.day in self.monthly_days) or (-1 in self.monthly_days and (d + timedelta(days=1)).day == 1):
+                yield d
+            d -= timedelta(days=1)
+
+@dataclass(frozen=True, slots=True)
+class FrequencySchedule:
+    weekly_frequency: int
+
+Schedule = WeeklySchedule | IntervalSchedule | MonthlySchedule | FrequencySchedule
+
+def _required[T](val: T | None, field: str) -> T:
+    if val is None:
+        raise ValueError(f"habit missing {field} for its schedule_type")
+    return val
 
 class Habit(Base):
 
@@ -47,12 +113,31 @@ class Habit(Base):
         ),
         CheckConstraint("target_low > 0 AND target_high > 0", name="target_positive"),
         CheckConstraint("target_low <= target_high", name="low_le_high"),
+        CheckConstraint("end_date >= start_date", name="end_date_after_start_date"),
+        CheckConstraint(
+            "num_nonnulls(weekly_frequency, scheduled_days, monthly_days, interval_days) = 1 "
+            "AND ((schedule_type = 'frequency' AND weekly_frequency IS NOT NULL) "
+            "OR (schedule_type = 'weekly' AND scheduled_days IS NOT NULL) "
+            "OR (schedule_type = 'monthly' AND monthly_days IS NOT NULL) "
+            "OR (schedule_type = 'interval' AND interval_days IS NOT NULL))",
+            name="schedule_shapes",
+        ),
     )
 
     name: Mapped[str] = mapped_column(String(HABIT_NAME_MAX_LENGTH), nullable=False)
 
-    # Represents target completion rate per week
-    weekly_frequency: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Default to user's today in service if not given
+    start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+
+    schedule_type: Mapped[ScheduleTypeEnum] = mapped_column(
+        SAEnum(ScheduleTypeEnum, name="schedule_type_enum", values_callable=lambda x: [e.value for e in x]),
+        nullable=False
+    )
+    scheduled_days: Mapped[list[int] | None] = mapped_column(ARRAY(Integer), nullable=True)
+    monthly_days: Mapped[list[int] | None] = mapped_column(ARRAY(Integer), nullable=True)
+    weekly_frequency: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    interval_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     target_low: Mapped[float | None] = mapped_column(Float, nullable=True)
     target_high: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -72,6 +157,18 @@ class Habit(Base):
         "HabitCompletion", back_populates="habit", cascade="all, delete-orphan", lazy="raise",
         passive_deletes=True
     )
+
+    @property
+    def schedule(self) -> Schedule:
+        match self.schedule_type:
+            case ScheduleTypeEnum.INTERVAL:
+                return IntervalSchedule(interval_days=_required(self.interval_days, "interval_days"))
+            case ScheduleTypeEnum.WEEKLY:
+                return WeeklySchedule(scheduled_days=_required(self.scheduled_days, "scheduled_days"))
+            case ScheduleTypeEnum.MONTHLY:
+                return MonthlySchedule(monthly_days=_required(self.monthly_days, "monthly_days"))
+            case ScheduleTypeEnum.FREQUENCY:
+                return FrequencySchedule(weekly_frequency=_required(self.weekly_frequency, "weekly_frequency"))
 
     @property
     def target(self) -> Target | None:

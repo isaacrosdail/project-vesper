@@ -1,55 +1,62 @@
+from collections import Counter
+from collections.abc import Iterable
 from datetime import date, timedelta
 from itertools import pairwise
-from collections import Counter
+from typing import assert_never
+
+import app.shared.datetime_.helpers as dth
+from app.modules.habits.models import (
+    FrequencySchedule,
+    Habit,
+    IntervalSchedule,
+    MonthlySchedule,
+    WeeklySchedule,
+)
+
 
 class StreakCalculator:
-
     def __init__(self, today: date):
         self.today = today
 
-    def streak(self, dates: list[date], weekly_frequency: int) -> int:
-        dates = sorted(dates, reverse=True) # must be in desc order
-        if weekly_frequency == 7:
-            return self._daily_scan(dates)
-        return self._weekly_scan(dates, weekly_frequency)
-
-    def _daily_scan(self, dates: list[date]) -> int:
-        """TODO"""
-        if not dates:
-            return 0
-
-        # Anchor test: streak is alive is the head is today or yesterday
-        if (self.today - dates[0]).days > 1:
-            return 0
-
-        # Count consecutive days using pairwise()
-        # pairwise() = lazy iterator, no list allocation: O(n) time, O(1) extra space
-        # Stil O(n) like zip(seq, seq[1:]) would be
-        streak = 1
-        for curr, prev in pairwise(dates):
-            if (curr - prev).days == 1:
+    def _scan(self, satisfied: set[date], intended: Iterable[date]) -> int:
+        streak = 0
+        for i, day in enumerate(intended):
+            if day in satisfied:
                 streak += 1
+            elif i == 0 and day == self.today:
+                continue
             else:
                 break
         return streak
 
-    def _weekly_scan(self, dates: list[date], weekly_frequency: int) -> int:
+    def streak(self, habit: Habit, satisfied_dates: set[date]) -> int:
+        match habit.schedule:
+            case IntervalSchedule(interval_days=interval_days):
+                return self._scan(satisfied_dates, habit.schedule.intended_dates(habit.start_date, self.today))
+            case WeeklySchedule(scheduled_days=sd):
+                return self._scan(satisfied_dates, habit.schedule.intended_dates(habit.start_date, self.today))
+            case MonthlySchedule(monthly_days=md):
+                return self._scan(satisfied_dates, habit.schedule.intended_dates(habit.start_date, self.today))
+            case FrequencySchedule(weekly_frequency=freq):
+                return self._weekly_scan(satisfied_dates, freq)
+            case _:
+                assert_never(habit.schedule)
+
+    def _weekly_scan(self, dates: set[date], weekly_frequency: int) -> int:
         if not dates:
             return 0
 
         # head week is this week or last week
-        # first we need to turn dates -> weeks, anchored on mondays?
-        #   so per-week tallies? dict[date, int]
-        # in: [Jan 9, Jan 8, Jan 6]
-        # we need: {Jan 5: 3}  5 is that week's Monday, 3 days that week
-        tally = Counter(d - timedelta(days=d.weekday()) for d in dates)
-
+        # Get per-week tallies with weeks anchored on Mondays
+        # in: [Jan 9, Jan 8, Jan 6] --> out: {Jan 5: 3}
+        tally = Counter(dth.week_start(d) for d in dates)
         # Keep only weeks that hit weekly_frequency
         filtered: list[date] = sorted([k for k, v in tally.items() if v >= weekly_frequency], reverse=True)
 
-        # anchor check
-        # Streak is 0 if filtered is empty
-        if len(filtered) == 0:
+        # Anchor check
+        # filtered[0] is this week OR last week's monday
+        this_monday = dth.week_start(self.today)
+        if len(filtered) == 0 or filtered[0] not in (this_monday, this_monday - timedelta(days=7)):
             return 0
 
         streak = 1
@@ -59,3 +66,6 @@ class StreakCalculator:
             else:
                 break
         return streak
+
+
+

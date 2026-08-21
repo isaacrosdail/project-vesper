@@ -121,15 +121,10 @@ def horizontal_barchart(session: Session) -> tuple[Response, int]:
     if last_n_days is None:
         abort(400, description="Query parameter 'lastNDays' is required and must be an integer.")
 
-    start_utc, end_utc = dth.last_n_days_range(last_n_days, current_user.timezone)
     habits_service = create_habits_service(
         session, current_user.id, current_user.timezone
     )
-    aggregate_data = (
-        habits_service.completion_repo.get_completion_counts_by_habit_in_window(
-            start_utc, end_utc
-        )
-    )
+    aggregate_data = habits_service.completions_summary(last_n_days)
 
     return success_response(
         message=f"Retrieved completion counts for {len(aggregate_data)} habits",
@@ -169,12 +164,16 @@ def get_habits_overview(session: Session) -> tuple[Response, int]:
     start_utc, end_utc = dth.today_range_utc(current_user.timezone)
     todays_completions = habits_service.completion_repo.get_all_in_window(start_utc, end_utc)
     completed_today_ids = {c.habit_id for c in todays_completions if c.satisfied}
+    consistencies = habits_service.calc_consistency_all()
 
     week = habits_service.get_week_completions_by_habit()
+    week_intended = habits_service.week_intended_by_habit()
     items = [HabitOverviewItemRead(**HabitRead.dump(h),
                 completed_today=h.id in completed_today_ids,
                 streak_count=streaks.get(h.id, 0),
-                data=[HabitDayRead.dump(c) for c in week.get(h.id, [])])
+                consistency=consistencies.get(h.id),
+                week_intended=week_intended.get(h.id),
+                data=[HabitDayRead.model_validate(c) for c in week.get(h.id, [])])
                 for h in habits
             ]
     progress = habits_service.calculate_all_habits_percentage_this_week()
