@@ -145,7 +145,7 @@ class HabitRead(APIReadSchema):
     scheduled_days: list[int] | None
     monthly_days: list[int] | None
     interval_days: int | None
-    start_date: date | None
+    start_date: date
     end_date: date | None
 
 class HabitCompletionCreate(APISchema):
