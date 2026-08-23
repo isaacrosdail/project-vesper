@@ -72,7 +72,7 @@ class StreakCalculator:
                 assert_never(habit.schedule)
 
         current = self.streak(habit, satisfied)
-        return best, current
+        return current, best
 
     def days_missed(self, habit: Habit, satisfied: set[date]) -> int:
         match habit.schedule:
