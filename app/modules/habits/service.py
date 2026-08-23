@@ -337,6 +337,16 @@ class HabitsService:
             )
         return result
 
+    def get_habit_stats(self, habit_id: int) -> tuple[Habit, int, int]:
+        """Finds days_missed and best_streak for a given habit."""
+        habit = self.get_habit(habit_id)
+        completions = self.completion_repo.get_all_habit_completions(
+            habit.id, order_desc=True
+        )
+        satisfied = {c.entry_date for c in completions if c.satisfied}
+        _, best_streak = self.streak_calc.streaks(habit, satisfied)
+        days_missed = self.streak_calc.days_missed(habit, satisfied)
+        return habit, days_missed, best_streak
 
 
 def create_habits_service(

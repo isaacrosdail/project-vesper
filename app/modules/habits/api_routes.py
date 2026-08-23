@@ -24,6 +24,7 @@ from app.modules.habits.schemas import (
     HabitOverviewItemRead,
     HabitPatch,
     HabitRead,
+    HabitStatsRead,
 )
 from app.modules.habits.service import create_habits_service
 from app.shared.decorators import login_plus_session
@@ -82,6 +83,13 @@ def delete_habit(session: Session, habit_id: int) -> tuple[Response, int]:
     habits_service.delete_habit(habit_id)
     return success_response(message="Habit deleted"), 200
 
+@api_bp.get("/habits/habits/<int:habit_id>/stats")
+@login_plus_session
+def get_habit_stats(session: Session, habit_id: int) -> tuple[Response, int]:
+    habits_service = create_habits_service(session, current_user.id, current_user.timezone)
+    habit, days_missed, best_streak = habits_service.get_habit_stats(habit_id)
+    data = HabitStatsRead(**HabitRead.dump(habit), days_missed=days_missed, best_streak=best_streak)
+    return success_response(message="Habit stats retrieved", data=HabitStatsRead.dump(data)), 200
 
 @api_bp.post("/habits/<int:habit_id>/completions")
 @login_plus_session
@@ -130,6 +138,26 @@ def horizontal_barchart(session: Session) -> tuple[Response, int]:
         message=f"Retrieved completion counts for {len(aggregate_data)} habits",
         data=aggregate_data,
     ), 200
+
+
+@api_bp.get("/habits/<int:habit_id>/completions")
+@login_plus_session
+def get_completions(session: Session, habit_id: int) -> tuple[Response, int]:
+    try:
+        start = date.fromisoformat(request.args["start"])
+        end = date.fromisoformat(request.args["end"])
+    except (KeyError, ValueError):
+        abort(400, description="Query params 'start' and 'end' are required ISO dates (YYYY-MM-DD)")
+
+    habits_service = create_habits_service(
+        session, current_user.id, current_user.timezone
+    )
+    completions = habits_service.completion_repo.get_in_window(start, end, habit_id=habit_id)
+    return success_response(
+        message=f"Retrieved {len(completions)} completions",
+        data=[HabitDayRead.dump(c) for c in completions],
+    ), 200
+
 
 @api_bp.get("/habits/habit_completions/heatmap")
 @login_plus_session

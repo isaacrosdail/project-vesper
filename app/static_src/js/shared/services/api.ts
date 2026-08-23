@@ -5,7 +5,7 @@
  */
 
 import type {
-    DailyMetricsRead, DailyMetricsCreate, HabitRead, HabitCompletionCreate, HabitCreate, HabitPatch, MealEnum,
+    DailyMetricsRead, DailyMetricsCreate, HabitRead, BinaryHabitCreate, NumericHabitCreate, DurationHabitCreate, HabitPatch, MealEnum,
     ProductRead, ProductCreate, RecipeRead, RecipeCreate, ShoppingListItemRead, TaskRead, TaskCreate, TaskLink,
     TaskPatch, TimeEntryRead, TimeEntryCreate, TransactionRead, TransactionCreate, TransactionPatch,
     PillarRead, TaskStatRead,
@@ -13,8 +13,14 @@ import type {
     HabitCompletionProgressRead,
     HabitCompletionRead,
     MacrosSummaryRead,
-    UserMeRead
+    UserMeRead,
+    LastShoppingTripRead,
+    ShoppingTripCreate,
+    HabitDayRead,
+    HabitStatsRead
 } from '../../apiTypes';
+import type { BarData } from '../../habits/barchart';
+import type { HeatmapApiEntry } from '../../habits/heatmap';
 import { nowISO, todayUser } from "../datetime";
 
 
@@ -128,8 +134,9 @@ class ApiClient {
     }
 
     habits = {
-        ...this.resource<HabitRead, HabitCreate, HabitPatch>('/habits/habits'),
+        ...this.resource<HabitRead, BinaryHabitCreate | NumericHabitCreate | DurationHabitCreate, HabitPatch>('/habits/habits'),
         overview: () => this.request<{ habits: HabitOverviewItemRead[]; progress: HabitCompletionProgressRead }>('GET', '/habits/overview'),
+        stats: (habitId: number) => this.request<HabitStatsRead>('GET', `/habits/habits/${habitId}/stats`),
     }
 
     habitCompletions = {

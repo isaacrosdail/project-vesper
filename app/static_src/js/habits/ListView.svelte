@@ -346,7 +346,7 @@
         border-radius: var(--border-radius);
 
         &.partial {
-            color: var(--text-inverse);
+            color: var(--text-muted);
             background: linear-gradient(
                 to top,
                 color-mix(in srgb, var(--clr-success) 45%, var(--bg-light)) var(--fill),

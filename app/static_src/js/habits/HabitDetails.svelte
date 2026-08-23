@@ -1,13 +1,14 @@
 <script lang="ts">
     import { Temporal } from 'temporal-polyfill';
-    import type { HabitOverviewItemRead } from '../apiTypes';
-    import { fmtDateTime, nowUser, todayUser } from '../shared/datetime';
+    import type { HabitDayRead, HabitOverviewItemRead } from '../apiTypes';
+    import { fmtDate, fmtDateTime, nowUser, todayUser } from '../shared/datetime';
     import { api } from '../shared/services/api';
     import { habitsState } from './habitsState.svelte';
     import type { HeatmapApiEntry } from './heatmap';
     import Heatmap from './Heatmap.svelte';
     import { asUserDT } from '../shared/datetime';
     import { targetDesc } from './utils';
+    import StatsTile from '../shared/components/StatsTile.svelte';
 
     // TODO(svelte):
     // 1. Make heatmap cells bigger, and try to sequeeze int he date in the corners
@@ -27,6 +28,7 @@
     const habit = $derived(habitsState.habits.find((h) => h.id === habitId));
     if (!habit) throw new Error(`habit ${habitId} not in habitsState`);
 
+    const { data: stats } = await api.habits.stats(habitId);
     let heatmapData = $state<HeatmapApiEntry[] | null>(null);
     await api.habitCompletions
         .heatmap(new URLSearchParams({ habit_id: String(habitId) }))
@@ -35,7 +37,7 @@
         });
 
     const { data: habitCompletionData } = await api.habitCompletions.get(habitId, {
-        start: habit.start_date,
+        start: habit.start_date, // TODO: backend fulfills this in service
         end: todayUser().add({ days: 1 }).toString(),
     });
     const daysSatisfied = $derived(
@@ -43,6 +45,21 @@
     );
     const numDone = $derived(
         habitCompletionData.reduce((sum, d) => (d.value ? sum + d.value : sum), 0),
+    );
+    const rhythm = $derived.by(() => {
+        const counts = Array(7).fill(0);
+        for (const c of habitCompletionData) {
+            if (c.satisfied) counts[Temporal.PlainDate.from(c.entry_date).dayOfWeek - 1]++;
+        }
+        return counts;
+    });
+    const rhythmMax = $derived(Math.max(...rhythm));
+
+    const bestSingleDay = $derived(
+        habitCompletionData.reduce<HabitDayRead | null>(
+            (best, d) => ((best?.value ?? 0) > (d?.value ?? 0) ? best : d),
+            null,
+        ),
     );
 
     // [created_at, tomorrow)
@@ -65,30 +82,89 @@
 {#if view === 'progress'}
     {@const map = { frequency: 'weeks', weekly: 'days', monthly: 'months', interval: 'times' }}
     <section>
-        <span>Current streak: {habit.streak_count} {map[habit.schedule_type]}</span>
+        <span>Streak: {habit.streak_count} {map[habit.schedule_type]}</span>
+
+        <div class="stats">
+            <p>TODO: add? -> consistency trend</p>
+
+            <StatsTile
+                label="Best Streak"
+                value={stats.best_streak}
+                detail={map[habit.schedule_type]} />
+            <StatsTile label="Days completed" value={daysSatisfied} />
+            {#if habit.type !== 'binary'}
+                {@const units = habit.type === 'numeric_value' ? habit.units : 'mins'}
+                <StatsTile label="Total" value={numDone} detail={units} />
+                {#if bestSingleDay}
+                    <StatsTile label="Best" value={bestSingleDay.value} detail={units} />
+                {/if}
+            {/if}
+            <!-- days where there are NO completions whatsoever OR where target wasn't satisfied? -->
+            <StatsTile label="Days missed" value={stats.days_missed} />
+
+            <!-- Weekday rhythm: count completions by isoweekday, render as 7 tiny bars -->
+            <div class="rhythm-cells">
+                {#each rhythm as n, i}
+                    <span class="rhythm-cell">
+                        <span class="rhythm">
+                            <span
+                                class="rhythm-fill"
+                                style:height="{rhythmMax ? (n / rhythmMax) * 100 : 0}%"></span>
+                        </span>
+                        <span>{'MTWTFSS'[i]}</span>
+                    </span>
+                {/each}
+            </div>
+        </div>
 
         <div class="heatmap-group">
             Completion Activity
             <Heatmap data={heatmapData} />
         </div>
-
-        <!-- So we have .data as [date, count] -->
-        <!-- sum where each day with non-zero count = 1 -->
-        <p>Days completed: {daysSatisfied} days</p>
-        {#if habit.type !== 'binary'}
-            <p>Total: {numDone} {habit.type === 'numeric_value' ? habit.units : 'mins'}</p>
-        {/if}
-        <!-- days where there are NO completions whatsoever OR where target wasn't satisfied? -->
-        <p>Days missed: {habitCompletionData.length - daysSatisfied} days</p>
     </section>
 {:else if view === 'about'}
     <section>
-        Info
-        <span>Created at: {fmtDateTime(habit.created_at)} ({daysRange}d ago)</span>
+        <h2>Info</h2>
+        <p>Created at: {fmtDateTime(habit.created_at)} ({daysRange}d ago)</p>
+
+        <p>Start date: {fmtDate(habit.start_date)}</p>
+        {#if habit.end_date}
+            <p>End date: {fmtDate(habit.end_date)}</p>
+        {/if}
     </section>
 {/if}
 
 <style>
+    .rhythm-cells {
+        display: flex;
+    }
+    .rhythm-cell {
+        height: 40px;
+        width: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .rhythm {
+        flex: 1;
+        display: flex;
+        align-items: flex-end;
+        align-self: stretch;
+        background: var(--surface-3);
+        border-radius: var(--border-radius);
+    }
+    .rhythm-fill {
+        width: 100%;
+        background: var(--clr-success);
+    }
+
+    /* TODO: WIP display, maybe should use statstiles once dust settles? */
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-sm);
+    }
+
     .header {
         position: relative;
         display: flex;

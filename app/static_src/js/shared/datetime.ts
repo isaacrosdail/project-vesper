@@ -11,6 +11,8 @@ const _userTZ = (): string =>
 export const nowISO = (): string =>
     Temporal.Now.instant().toString();
 
+export const nowUser = (): Temporal.ZonedDateTime =>
+    Temporal.Now.zonedDateTimeISO(_userTZ());
 
 export const todayUser = (): Temporal.PlainDate =>
     Temporal.Now.plainDateISO(_userTZ());
@@ -23,6 +25,9 @@ export const userDay = (iso: string | Date): Temporal.PlainDate => {
     return Temporal.Instant.from(d).toZonedDateTimeISO(_userTZ()).toPlainDate()
 }
 
+export const asUserDT = (str: string): Temporal.ZonedDateTime =>
+    Temporal.Instant.from(str).toZonedDateTimeISO(_userTZ())
+
 // Rolling [today - (rangeDays - 1), today]
 export function rangeLabel(rangeDays: number): string {
     const start = todayUser().subtract({ days: rangeDays });
@@ -33,8 +38,12 @@ export function rangeLabel(rangeDays: number): string {
 // UTC ISO string -> display "Mar 18"
 // rename -> fmtDate(iso | PlainDate) => "Mar 18"
 export const fmtDate = (d: string | Temporal.PlainDate): string => {
-    const day = typeof d === 'string' ? userDay(d) : d;
-    return day.toLocaleString(undefined, { month: 'short', day: 'numeric' }) // undefned - browser's locale
+    // if string is a plain YYYY-MM-DD already, take it as-is (dont pass thru userDay())
+    const pattern = /^\d{4}-\d{2}-\d{2}$/;
+    const day = typeof d === 'string'
+        ? pattern.test(d) ? Temporal.PlainDate.from(d) : userDay(d)
+        : d;
+    return day.toLocaleString(undefined, { month: 'short', day: 'numeric' }) // undefined - browser's locale
 }
 
 // UTC ISO string -> display "Mar 18, 3:45 PM"

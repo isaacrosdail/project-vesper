@@ -178,3 +178,7 @@ class HabitOverviewItemRead(HabitRead):
     consistency: int | None
     week_intended: list[date] | None  # this week's intended dates; None for frequency mode
 
+
+class HabitStatsRead(HabitRead):
+    days_missed: int
+    best_streak: int
