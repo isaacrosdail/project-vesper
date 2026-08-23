@@ -242,6 +242,31 @@ class HabitsService:
         return grouped
 
 
+    def completions_summary(self, last_n_days: int) -> list[dict[str, Any]]:
+        """Per-habit completion counts vs expected over the last N days.
+
+        Zero-count habits included (left outer join by design: a neglected
+        habit should show as 0/expected). Sorted by count descending.
+        """
+        today = dth.user_today(self.user_tz)
+        window_start = today - timedelta(days=last_n_days - 1)
+        counts = self.completion_repo.get_completion_counts_by_habit_in_window(
+            window_start, today + timedelta(days=1)
+        )
+
+        rows: list[dict[str, Any]] = []
+        for h in self.habit_repo.get_all():
+            match h.schedule:
+                case FrequencySchedule(weekly_frequency=freq):
+                    expected = freq * last_n_days / 7
+                case DatedSchedule() as s:
+                    expected = len(s.intended_in_window(h.start_date, window_start, today))
+            rows.append({"name": h.name, "count": counts.get(h.id, 0), "expected": expected})
+
+        rows.sort(key=lambda r: r["count"], reverse=True)
+        return rows
+
+
 
 def create_habits_service(
     session: Session, user_id: int, user_tz: str
