@@ -34,6 +34,12 @@ class HabitTypeEnum(StrEnum):
     NUMERIC_VALUE = auto()
     DURATION = auto()
 
+    @property
+    def label(self) -> str:
+        MAPPING = {
+            "binary": "Yes/No", "numeric_value": "Numeric Value", "duration": "Duration"
+        }
+        return MAPPING[self]
 
 class ScheduleTypeEnum(StrEnum):
     FREQUENCY = auto()
