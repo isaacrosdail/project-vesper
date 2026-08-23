@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from app.modules.habits.schemas import HabitCompletionCreate
+from app.modules.habits.schemas import PARAM_BY_MODE, HabitCompletionCreate
 from app.modules.habits.streaks import StreakCalculator
 from app.shared.schemas import TargetCreate
 from app.shared.target import Target
@@ -16,14 +16,14 @@ if TYPE_CHECKING:
 
     from app.modules.habits.models import Habit, HabitCompletion
     from app.modules.habits.schemas import HabitCreate
-    from app.modules.habits.schemas import HabitPatch as HabitUpdate
+    from app.modules.habits.schemas import HabitPatch
 
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import app.shared.datetime_.helpers as dth
-from app.modules.habits.models import HabitTypeEnum
+from app.modules.habits.models import DatedSchedule, FrequencySchedule, HabitTypeEnum
 from app.modules.habits.repository import (
     HabitCompletionRepository,
     HabitRepository,
@@ -31,6 +31,7 @@ from app.modules.habits.repository import (
 from app.shared.exceptions import ServiceError
 from app.shared.repository.pillar import PillarRepository
 
+SCHEDULE_FIELDS = {"schedule_type", *PARAM_BY_MODE.values()}
 
 class HabitsService:
     def __init__(
@@ -46,11 +47,11 @@ class HabitsService:
         self.habit_repo = habit_repo
         self.completion_repo = completion_repo
         self.pillar_repo = pillar_repo
-        self.streak_calc = StreakCalculator(today=datetime.now(ZoneInfo(user_tz)).date())
+        self.streak_calc = StreakCalculator(today=dth.user_today(user_tz))
 
-    def update_habit(self, validated: HabitUpdate, habit_id: int) -> Habit:
+    def update_habit(self, validated: HabitPatch, habit_id: int) -> Habit:
         habit = self.habit_repo.get_by_id(habit_id)
-        if not habit:
+        if habit is None:
             raise ServiceError("Habit not found", 404)
 
         fields = validated.model_fields_set
@@ -60,7 +61,7 @@ class HabitsService:
             raise ServiceError("Duration habits have fixed units", 422)
 
         for field in fields:
-            if field in {"pillar_ids", "target"}:
+            if field in {"pillar_ids", "target"} | SCHEDULE_FIELDS:
                 continue
             setattr(habit, field, getattr(validated, field))
 
@@ -69,8 +70,12 @@ class HabitsService:
             habit.target_low = t.low if t else None
             habit.target_high = t.high if t else None
 
-        if "pillar_ids" in fields:
+        if validated.pillar_ids is not None:
             self._sync_pillars(habit, validated.pillar_ids)
+
+        if validated.schedule_type is not None:
+            for f in SCHEDULE_FIELDS:
+                setattr(habit, f, getattr(validated, f))
 
         return habit
 
@@ -79,14 +84,22 @@ class HabitsService:
         units: str | None = getattr(validated, "units", None)
         target: TargetCreate | None = getattr(validated, "target", None)
         t = target.to_domain() if target else Target()
+        start_date = validated.start_date or dth.user_today(self.user_tz)
 
         habit = self.habit_repo.create_habit(
             name=validated.name,
-            weekly_frequency=validated.weekly_frequency,
             type=type,
+            schedule_type=validated.schedule_type,
+            start_date=start_date,
+            weekly_frequency=validated.weekly_frequency,
+            scheduled_days=validated.scheduled_days,
+            monthly_days=validated.monthly_days,
+            interval_days=validated.interval_days,
             units=units,
             target_low=t.low,
             target_high=t.high,
+            end_date=validated.end_date,
+
         )
         self._sync_pillars(habit, validated.pillar_ids)
         self.session.flush()
@@ -157,8 +170,8 @@ class HabitsService:
         completions = self.completion_repo.get_all_habit_completions(
             habit_id, order_desc=True
         )
-        dates = [c.entry_date for c in completions if c.satisfied]
-        return self.streak_calc.streak(dates, habit.weekly_frequency)
+        dates = {c.entry_date for c in completions if c.satisfied}
+        return self.streak_calc.streak(habit, dates)
 
 
     def get_all_streaks(self) -> dict[int, int]:
@@ -166,13 +179,13 @@ class HabitsService:
         habits = self.habit_repo.get_all()
 
         # Group by habit_id
-        by_habit: dict[int, list[date]] = defaultdict(list)
+        by_habit: dict[int, set[date]] = defaultdict(set)
         for c in completions:
             if c.satisfied:
-                by_habit[c.habit_id].append(c.entry_date)
+                by_habit[c.habit_id].add(c.entry_date)
 
         return {
-            h.id: self.streak_calc.streak(by_habit.get(h.id, []), h.weekly_frequency)
+            h.id: self.streak_calc.streak(h, by_habit.get(h.id, set()))
             for h in habits
         }
 
@@ -214,14 +227,26 @@ class HabitsService:
         """
         grouped = self.get_week_completions_by_habit()
         days_done = {
-            habit_id: len({c.entry_date for c in completions if c.satisfied})
+            habit_id: {c.entry_date for c in completions if c.satisfied}
             for habit_id, completions in grouped.items()
         }
 
         # Expected_completions is sum of weekly_frequency for all
         habits = self.habit_repo.get_all()
-        completed = sum(min(days_done.get(h.id, 0), h.weekly_frequency) for h in habits)
-        expected = sum(h.weekly_frequency for h in habits)
+        monday = dth.week_start(dth.user_today(self.user_tz))
+        sunday = monday + timedelta(days=6)
+
+        expected = 0
+        completed = 0
+        for h in habits:
+            match h.schedule:
+                case FrequencySchedule(weekly_frequency=freq):
+                    expected += freq
+                    completed += min(len(days_done.get(h.id, set())), freq)
+                case _:
+                    intended = {d for d in h.schedule.intended_dates(h.start_date, sunday) if d >= monday}
+                    expected += len(list(intended))
+                    completed += len(days_done.get(h.id, set()) & set(intended))
 
         percent = round(completed / expected * 100) if expected > 0 else 0
         return {
@@ -233,14 +258,27 @@ class HabitsService:
     def get_week_completions_by_habit(self) -> dict[int, list[HabitCompletion]]:
         """Current week's completions (Monday thru today) grouped by habit id."""
         today = dth.user_today(self.user_tz)
-        start_of_week = today - timedelta(days=today.weekday())
-        completions = self.completion_repo.get_in_window(start_of_week, today + timedelta(days=1))
+        completions = self.completion_repo.get_in_window(dth.week_start(today), today + timedelta(days=1))
 
         grouped: dict[int, list[HabitCompletion]] = {}
         for c in completions:
             grouped.setdefault(c.habit_id, []).append(c)
         return grouped
 
+    def week_intended_by_habit(self) -> dict[int, list[date] | None]:
+        """Current week's (Mon-Sun) intended dates per habit; None for frequency mode."""
+        today = dth.user_today(self.user_tz)
+        monday = dth.week_start(today)
+        result: dict[int, list[date] | None] = {}
+        for h in self.habit_repo.get_all():
+            match h.schedule:
+                case FrequencySchedule():
+                    result[h.id] = None
+                case DatedSchedule() as s:
+                    result[h.id] = sorted(
+                        s.intended_in_window(h.start_date, monday, monday + timedelta(days=6))
+                    )
+        return result
 
     def completions_summary(self, last_n_days: int) -> list[dict[str, Any]]:
         """Per-habit completion counts vs expected over the last N days.
@@ -265,6 +303,39 @@ class HabitsService:
 
         rows.sort(key=lambda r: r["count"], reverse=True)
         return rows
+
+    def calc_consistency_all(self) -> dict[int, int | None]:
+        today = dth.user_today(self.user_tz)
+        this_monday = dth.week_start(today)
+        window_start = this_monday - timedelta(days=28)
+        window_mondays = [this_monday - timedelta(days=n) for n in (28,21,14,7)]
+
+        completions = self.completion_repo.get_in_window(
+            this_monday - timedelta(days=28), this_monday
+        )
+        satisfied_days: dict[int, set[date]] = {}
+        for c in completions:
+            if c.satisfied:
+                satisfied_days.setdefault(c.habit_id, set()).add(c.entry_date)
+
+        result: dict[int, int | None] = {}
+        for h in self.habit_repo.get_all():
+            done_days = satisfied_days.get(h.id, set())
+            match h.schedule:
+                case FrequencySchedule(weekly_frequency=freq):
+                    weeks_since = sum(1 for m in window_mondays if m >= h.start_date)
+                    num_expected = freq * weeks_since
+                    done = len(done_days)
+                case _:
+                    intended = h.schedule.intended_in_window(h.start_date, window_start, this_monday - timedelta(days=1))
+                    num_expected = len(intended)
+                    done = len(done_days & intended)
+
+            result[h.id] = (
+                None if num_expected == 0
+                else min(100, round(100 * done / num_expected))
+            )
+        return result
 
 
 
