@@ -75,6 +75,10 @@ export const toDateTimeLocalValue = (iso: string): string =>
         smallestUnit: 'minute'
     });
 
+// "2026-08-15T17:30" (local wall-clock) -> aware UTC ISO instant
+export const toAwareISO = (localDateTime: string): string =>
+    Temporal.PlainDateTime.from(localDateTime).toZonedDateTime(_userTZ())
+        .toInstant().toString();
 
 export const toTypeTimeInputValue = (iso: string): string =>
     Temporal.Instant.from(iso).toZonedDateTimeISO(_userTZ()).toPlainTime().toString({
