@@ -25,17 +25,9 @@ import { nowISO, todayUser } from "../datetime";
 
 
 // Top-level
-type RequestData =
-    | { [key: string]: JsonValue }
-    | FormData
-    | null;
-
-// Inside obj
-type JsonValue = 
-    | string | number | boolean | null
-    | { [key: string]: JsonValue }
-    | JsonValue[];
-
+type RequestData = { [key: string]: JsonValue } | FormData | null;
+type JsonValue = string | number | boolean | null
+    | { [key: string]: JsonValue } | JsonValue[];
 type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 type ApiSuccessResponse<T = unknown> = {
@@ -125,7 +117,7 @@ class ApiClient {
             this.request<TaskPatch>('PATCH', `/tasks/tasks/${id}`, {
                 completed_at: isDone ? nowISO() : null
             }),
-        stats: () => this.request<{ overdue: TaskStatRead, frog: TaskStatRead }>('GET', '/tasks/stats')
+        stats: (params: URLSearchParams) => this.request<{ overdue: TaskStatRead, frog: TaskStatRead }>('GET', `/tasks/stats?${params}`)
     };
 
     taskLinks = {
@@ -174,8 +166,12 @@ class ApiClient {
         addShortfalls: (recipeId: string) => this.request<ShoppingListItemRead[]>('POST', `/groceries/recipes/${recipeId}/shortfalls_to_list`),
         patchItem: (id: string, data) => this.request<ShoppingListItemRead>('PATCH', `/groceries/shopping_list_items/${id}`, data),
         deleteItem: (id: string) => this.request<ShoppingListItemRead>('DELETE', `/groceries/shopping_list_items/${id}`),
-        get: (id: string) => this.request<ShoppingListItemRead[]>('GET', `/groceries/shopping_list`),
+        get: () => this.request<ShoppingListItemRead[]>('GET', `/groceries/shopping_list`),
     }
+
+    shopping_trip = {
+        post: (data: ShoppingTripCreate) => this.request<LastShoppingTripRead>('POST', '/groceries/shopping_trips', data),
+    };
 
     products = this.resource<ProductRead, ProductCreate>('/groceries/products');
     transactions = this.resource<TransactionRead, TransactionCreate, TransactionPatch>('/groceries/transactions');

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, Integer, String, Index
+from sqlalchemy import CheckConstraint, DateTime, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app._infra.db_base import Base
@@ -26,13 +26,11 @@ class TimeEntry(Base):
         String(CATEGORY_MAX_LENGTH),
         nullable=False,
     )
-
     description: Mapped[str | None] = mapped_column(String(DESCRIPTION_MAX_LENGTH), nullable=True)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
     ended_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-
     duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
 
     pillars: Mapped[list[Pillar]] = relationship("Pillar", secondary=time_entry_pillars, back_populates="time_entries", lazy="selectin")

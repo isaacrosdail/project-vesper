@@ -27,11 +27,10 @@ using CSS tokens.
     - Testing with pytest
     - Development: Docker, NGINX
     - Linting: `ruff` (Python), `eslint` (TS/JS), `stylelint` (CSS)
-    - Build: `esbuild` (minifies CSS/JS for deployment)
     - Type Checking: `mypy` (Python), TypeScript (strict)
 **Frontend**: 
     - HTML, CSS (token-based theming), TypeScript
-    - Custom UI toolkit (no frameworks)
+    - Svelte
     - Charts: D3.js
 
 ## How to Get Running Locally:
@@ -122,3 +121,4 @@ Weather data provided by [OpenWeatherMap](https://openweathermap.org/), licensed
   - Moon Zzz SVG Vector
   - Tracking Shoe SVG
   - Construction SVG
+  - checklist-svgrepo-com.svg

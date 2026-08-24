@@ -1,5 +1,5 @@
 <script module lang="ts">
-    type MenuItem = { label: string; action: () => void };
+    export type MenuItem = { label: string; action: () => void };
 
     let menu = $state<{ x: number; y: number; items: MenuItem[] } | null>(null);
 
@@ -45,7 +45,7 @@
         flex-direction: column;
         z-index: 200;
         max-width: 50%;
-        background-color: var(--bg);
+        background-color: var(--surface-2);
         border: var(--border-default);
         border-radius: var(--border-radius);
 

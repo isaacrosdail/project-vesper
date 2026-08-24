@@ -1,5 +1,6 @@
-// Bundler => auto-runner
 // Custom tooltip behavior
+
+import { required } from "../dom";
 
 /**
  * Create & display a tooltip anchored under a given element.
@@ -13,7 +14,7 @@
  * Styling via `.tooltip` class, behavior via `data-tip` attribute
  */
 
-const tooltip = document.querySelector<HTMLElement>('#tooltip');
+const tooltip = required(document.querySelector<HTMLElement>('#tooltip'), '#tooltip');
 
 export function createTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: string): void {
     const text = tooltipText || targetEl.getAttribute('data-tip');
@@ -21,95 +22,32 @@ export function createTooltip(targetEl: HTMLElement | SVGElement, tooltipText?: 
         console.warn('No tooltip text provided');
         return;
     }
-    console.log(targetEl);
-    console.log(typeof targetEl);
-    console.log(targetEl instanceof SVGElement);
-    console.log(targetEl.style);
-    console.log(tooltip)
-    console.log(targetEl)
     // targetEl.style.anchorName = '--tooltip-anchor';
     targetEl.style.setProperty('anchor-name', '--tooltip-anchor')
-    tooltip.textContent = targetEl.dataset.tip ?? tooltipText;
+    tooltip.textContent = text;
     targetEl.setAttribute('aria-describedby', 'tooltip');
     tooltip.showPopover();
-
-    console.log("hit")
-
-
-    // // const tooltip = document.createElement('div');
-    // tooltip.id = 'tooltip';
-    // tooltip.className = 'tooltip';
-    // tooltip.setAttribute('role', 'tooltip'); // For a11y
-    // tooltip.setAttribute('aria-hidden', 'false');
-    // targetEl.setAttribute('aria-describedby', tooltip.id); // Must be on trigger, not tooltip itself
-
-    // tooltip.textContent = text;
-
-    // const targetElRect = targetEl.getBoundingClientRect();
-    // const isTall = targetElRect.height > 80;
-    // const centerX = (targetElRect.left + targetElRect.right) / 2; // gives us dist from end to center for caret
-    // // const y = isTall
-    // //     ? (targetElRect.top + 2 * (targetElRect.height / 3))
-    // //     : targetElRect.bottom;
-
-    // // tooltip.style.zIndex = '1000';
-
-    // // Tooltips in dialogs need dialog parent to avoid stacking context issues
-    // const parentDialogEl = targetEl.closest('dialog');
-    // const isInDialog = parentDialogEl && parentDialogEl instanceof HTMLDialogElement;
-
-    // if (isInDialog) {
-    //     parentDialogEl.appendChild(tooltip);
-    //     tooltip.style.position = 'absolute';
-    // } else {
-    //     document.body.appendChild(tooltip);
-    //     tooltip.style.position = 'fixed';
-    // }
-
-    // const tooltipRect = tooltip.getBoundingClientRect(); // gives tooltips curr size and position 
-    // const tooltipCenterOffset = (tooltipRect.width / 2); // calc caret position inside tooltip
-    // const y = isTall
-    //     ? (targetElRect.top + 2 * (targetElRect.height / 3))
-    //     : targetElRect.top;
-
-    // if (isInDialog) {
-    //     const dialogRect = parentDialogEl.getBoundingClientRect();
-        
-    //     tooltip.style.top = `${y - dialogRect.top}px`;
-    //     tooltip.style.left = `${centerX - dialogRect.left - tooltipCenterOffset}px`;
-
-    // } else {
-    //     const tooltipRectNew = tooltip.getBoundingClientRect(); // Must measure after position: fixed since element width changes when removed from document flow
-
-    //     tooltip.style.top = `${y - tooltipRectNew.height - 6}px`;
-    //     tooltip.style.left = `${centerX - (tooltipRectNew.width/2)}px`;
-    // }
-    // tooltip.style.setProperty('--caret-pos', '50%');
 }
 
 export function removeTooltip(targetEl: HTMLElement | SVGElement) {
-    // document.querySelector<HTMLElement>('#tooltip')?.remove();
-    if (targetEl) {
-        // targetEl.style.anchorName = '';
-        targetEl.style.setProperty('anchor-name', '');
-        tooltip.hidePopover();
-    }
+    targetEl.style.setProperty('anchor-name', '');
     tooltip.hidePopover();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const tooltipTriggers = document.querySelectorAll<HTMLElement>('[data-tip]');
-
-    // Add listener to each targetEl
-    tooltipTriggers.forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            const tooltipText = el.getAttribute('data-tip');
-            if (!tooltipText) {
-                console.warn('Tooltip element missing data-tip attribute: ', el);
-                return;
-            }
-            createTooltip(el, tooltipText);
-        });
-        el.addEventListener('mouseleave', () => removeTooltip(el));
-    });
-});
+/** Svelte action: <button use:tip={'Delete habit'}> */
+export function tip(node: HTMLElement, text: string) {
+    const enter = () => createTooltip(node, text);
+    const leave = () => removeTooltip(node);
+    node.addEventListener('mouseenter', enter);
+    node.addEventListener('mouseleave', leave);
+    return {
+        update(newText: string) {
+            text = newText;
+        },
+        destroy() {
+            node.removeEventListener('mouseenter', enter);
+            node.removeEventListener('mouseleave', leave);
+            removeTooltip(node);
+        },
+    };
+}

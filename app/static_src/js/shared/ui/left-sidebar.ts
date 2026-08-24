@@ -1,5 +1,4 @@
 
-
 export function initLeftSidebar() {
     const sidebar = document.querySelector('.left-sidebar');
     if (!sidebar) {

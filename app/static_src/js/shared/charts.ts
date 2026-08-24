@@ -1,51 +1,48 @@
+import { createTooltip, removeTooltip } from "./ui/tooltip";
 
-export interface ChartDimensions {
+export type ChartDimensions = {
     width: number;
     height: number;
     innerWidth: number;
     innerHeight: number;
     margin: { top: number; right: number; bottom: number; left: number; }
-}
+};
 
-export const D3_TRANSITION_DURATION_MS = 200;
-export const D3_COLOR = "var(--accent-strong)";
+export const D3_GRIDLINES_DASHARR_VALS = "2,4";
+export const D3_GRIDLINES_OPACITY = 0.7;
+export const D3_OTHER_DIM_OPACITY = 0.4;
+export const D3_TICKS = 7;
+export const D3_TRANSITION_DURATION_MS =
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 200;
 
-/**
- * Helper to get/set up chart dimensions for D3 charts.
- * @param containerSelector 
- * @param margin 
- */
-export function getChartDimensions(
-    containerSelector: string,
+export function getDims(
+    height: number,
+    width: number,
     margin = { top: 20, right: 20, bottom: 30, left: 40 }
-): ChartDimensions {
-    const container = document.querySelector(containerSelector) as HTMLElement;
-
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    if (width === 0 || height === 0) {
-        throw new Error('getChartDimensions: container height/width of 0')
+) {
+    return {
+        width,
+        height,
+        innerWidth: width - margin.left - margin.right,
+        innerHeight: height - margin.top - margin.bottom,
+        margin
     }
-
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    return { width, height, innerWidth, innerHeight, margin };
 }
+
 
 // TODO: Unsure where to put this
-export function enableStats() {
-    document.querySelectorAll<HTMLDivElement>('.stats-ring').forEach(statsCircle => {
-        const progress = Number(statsCircle.dataset.progress ?? 50); // we'll need to update this value to update the visual progress
+// export function enableStats() {
+//     document.querySelectorAll<HTMLDivElement>('.stats-ring').forEach(statsCircle => {
+//         const progress = Number(statsCircle.dataset.progress ?? 50); // we'll need to update this value to update the visual progress
 
-        statsCircle.setAttribute("role", "progressbar");
-        statsCircle.setAttribute("aria-valuenow", progress); // this value is grabbed by our stats-progress
-        // content to show the percentage/value
-        statsCircle.style.setProperty('--progress', progress + "%"); // set visual ring val
-        statsCircle.setAttribute("aria-live", "polite")
+//         statsCircle.setAttribute("role", "progressbar");
+//         statsCircle.setAttribute("aria-valuenow", progress); // this value is grabbed by our stats-progress
+//         // content to show the percentage/value
+//         statsCircle.style.setProperty('--progress', progress + "%"); // set visual ring val
+//         statsCircle.setAttribute("aria-live", "polite")
 
-    })
-}
+//     })
+// }
 
 
 export function applyXAxisRotation(axis: d3.Selection<SVGGElement, unknown, HTMLElement, unknown>): void {
@@ -71,37 +68,15 @@ export function getTickValues<T>(data: T[], range: number, xScale: d3.ScaleTime<
     return tickValues;
 }
 
-export function showEmptyChartMessage(container: HTMLElement, message: string, width: number, height: number): void {
-    container.selectAll("text.empty-message")
-        .data([1])
-        .join("text")
-        .attr("class", "empty-message")
-        .attr("text-anchor", "middle")
-        .attr("x", width/2)
-        .attr("y", height/2)
-        .text(message)
-}
-
-export function initChartRangeButtons(
-    chartState: { range: number },
-    onRangeChange: () => Promise<void>,
-    defaultRange = 7
-): void {
-    const defaultBtn = document.querySelector(`[data-range="${defaultRange}"]`)
-    defaultBtn?.classList.add('active')
-
-    document.addEventListener('click', async (e) => {
-        const target = e.target as HTMLElement;
-        if (!target.matches('.chart-range')) {
-            return;
-        }
-
-        chartState.range = parseInt(target.dataset['range']!, 10)
-        document.querySelectorAll('.chart-range').forEach(btn => {
-            btn.classList.remove('active')
-        });
-        target.classList.add('active')
-
-        await onRangeChange();
-    })
+// TODO(d3): type this?
+// (local function)(this:  | SVGRectElement, _event: any, d: Point): void
+export function withTooltip<D>(label: (d: D) => string | null) {
+    return (selection: d3.Selection<any, unknown, any, unknown>) => {
+        selection
+            .on('mouseenter', function(_e, d: D) {
+                const text = label(d);
+                if (text !== null) createTooltip(this, text);
+            })
+            .on('mouseleave', function() { removeTooltip(this); });
+    }
 }

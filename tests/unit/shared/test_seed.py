@@ -76,7 +76,7 @@ def test_create_tasks():
     for i in range(len(tasks)):
         assert tasks[i]
 
-ALLOWED_KEYS = {"name", "priority", "completed_at_offset", "due_date_offset", "pillars", "tags", "subtasks"}
+ALLOWED_KEYS = {"name", "priority", "completed_at_offset", "due_datetime_offset", "pillars", "tags", "subtasks"}
 def test_real_tasks_json_is_valid():
     user_id = 1
     data = json.loads(Path(f"{SEED_DIR}/tasks.json").read_text())
@@ -92,7 +92,7 @@ def test_real_tasks_json_is_valid():
     assert {t.name for task in tasks for t in task.tags} == set(make_tags(data, user_id))
 
 SEED_HANDLED_COLS = {
-    "id", "name", "priority", "completed_at", "due_date",
+    "id", "name", "priority", "completed_at", "due_datetime",
     "created_at", "updated_at", "sort_key", "user_id",
 }
 

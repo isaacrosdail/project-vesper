@@ -26,13 +26,6 @@ def home() -> tuple[str, int]:
 
     with database_connection() as session:
         user_tz: str = current_user.timezone
-        now = dth.now_in_timezone(user_tz)
-        NOON, EVENING = 12, 18
-        greeting = (
-            "Good morning" if now.hour < NOON
-            else "Good afternoon" if now.hour < EVENING
-            else "Good evening"
-        )
         start_utc, end_utc = dth.today_range_utc(user_tz)
 
         habits_service = create_habits_service(session, current_user.id, user_tz)
@@ -60,14 +53,6 @@ def home() -> tuple[str, int]:
         # Progress bars
         habits_progress = habits_service.calculate_all_habits_percentage_this_week()
         tasks_progress = tasks_service.calculate_tasks_progress_today()
-
-        # DEBUG:
-        analytics_svc = create_analytics_service(
-            session, current_user.id, current_user.timezone
-        )
-        result = analytics_svc.correlation_method()
-        # completions = habits_service.get_daily_completion_counts()
-
         # TODO: pillars
         pillars = habits_service.pillar_repo.get_all()
 
@@ -78,9 +63,6 @@ def home() -> tuple[str, int]:
             "habits": habits,
             "today_frog": today_frog,
             "habit_info": habit_info,
-            "now": now,
-            "greeting": greeting,
-            "completions": result,
             "pillars": pillars,
         }
         return render_template("index.html", **ctx), 200

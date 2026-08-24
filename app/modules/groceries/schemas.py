@@ -17,6 +17,7 @@ from app.modules.groceries.models import (
 from app.shared.schemas import APIReadSchema, APISchema, TargetRead
 from app.shared.target import TargetStatus
 
+QUANTITY_MAX = 999
 
 class ProductCreate(APISchema):
     name: str = Field(max_length=PRODUCT_NAME_MAX_LENGTH)
@@ -36,18 +37,18 @@ class ProductCreate(APISchema):
     sodium_per_100g: float | None = Field(default=None, ge=0)
     potassium_per_100g: float | None = Field(default=None, ge=0)
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_nutrition(self) -> Self:
         # Macro subtypes can't exceed their parent
         if self.fat_per_100g is not None:
             sub_fat = sum(filter(None, [self.fat_mono_per_100g, self.fat_poly_per_100g, self.fat_sat_per_100g]))
             if sub_fat > self.fat_per_100g:
-                raise ValueError(f'Fat subtypes ({sub_fat}g) exceed total fat ({self.fat_per_100g})')
+                raise ValueError(f"Fat subtypes ({sub_fat}g) exceed total fat ({self.fat_per_100g})")
 
         if self.carbs_per_100g is not None:
             sub_carbs = sum(filter(None, [self.carbs_fiber_per_100g, self.carbs_sugar_per_100g]))
             if sub_carbs > self.carbs_per_100g:
-                raise ValueError(f'Carb subtypes ({sub_carbs}g) exceed total carbs ({self.carbs_per_100g})')
+                raise ValueError(f"Carb subtypes ({sub_carbs}g) exceed total carbs ({self.carbs_per_100g})")
 
         # Calories sanity check
         protein = self.protein_per_100g
@@ -123,7 +124,7 @@ class TransactionPatch(APISchema):
 class TransactionRead(APIReadSchema):
     id: int
     product_id: int
-    product_name: str | None
+    product_name: str
     shopping_trip_id: int | None
     price_at_scan: float
     quantity: int
@@ -140,21 +141,23 @@ class ShoppingListCreate(APISchema):
 
 class ShoppingListItemCreate(APISchema):
     product_id: int
-    quantity_wanted: int = Field(gt=0)
+    quantity_wanted: int = Field(gt=0, le=QUANTITY_MAX)
 
 class ShoppingListItemPatch(APISchema):
-    quantity_wanted: int | None = Field(default=None, gt=0)
+    quantity_wanted: int | None = Field(default=None, gt=0, le=QUANTITY_MAX)
 
 class ShoppingListItemRead(APIReadSchema):
     id: int
     shopping_list_id: int
     product_id: int
-    product_name: str | None
+    product_name: str
+    category: ProductCategoryEnum
     quantity_wanted: int
     net_weight: float
     unit_type: UnitEnum
     created_at: datetime
     subtype: Literal['shopping_list_items']
+    last_price: float | None
 
 
 class RecipeIngredientCreate(APISchema):
@@ -164,7 +167,7 @@ class RecipeIngredientCreate(APISchema):
 
 class RecipeIngredientRead(APIReadSchema):
     product_id: int
-    product_name: str | None
+    product_name: str
     amount_value: float
     amount_units: UnitEnum
 
@@ -242,6 +245,15 @@ class RecipeSlotRead(APIReadSchema):
     yields_units: UnitEnum | None
     missing: list[ShortfallRead]
 
+class ShoppingTripLine(APISchema):
+    product_id: int
+    price_at_scan: Decimal = Field(gt=0, decimal_places=2, le=10_000)
+    quantity: int = Field(gt=0, le=QUANTITY_MAX)
+
+class ShoppingTripCreate(APISchema):
+    store_name: str = Field(min_length=1, max_length=50)
+    entry_datetime: datetime
+    lines: list[ShoppingTripLine] = Field(min_length=1)
 
 class LastShoppingTripRead(APIReadSchema):
     id: int

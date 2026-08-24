@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-import { D3_TRANSITION_DURATION_MS, getChartDimensions } from './shared/charts';
+import { D3_TRANSITION_DURATION_MS, getDims } from './shared/charts';
 import { api } from './shared/services/api';
 import { createTooltip, removeTooltip } from './shared/ui/tooltip';
 import { userState } from './shared/services/userState.svelte';
@@ -25,6 +25,14 @@ import type { DailyMetricsRead } from './apiTypes';
 // Rest: 5h/week → ~0.7h/day
 // Relationships: 7h/week → 1h/day
 
+// TODO: Refine typing in this file
+// EX:
+// Record earns it when K is a closed, finite union you control. Then is can force exhaustiveness at compile time.
+const MM: Record<PillarEnum, number> = {
+    health: 0.6, career: 0.3, relationships: 0.35, rest: 0.5,
+    // forget 'purpose' -> compiler error: missing key
+}
+
 type HealthConfig = Record<keyof MetricsAggregates, MetricConfig>;
 
 type MoreIsBetter = {
@@ -43,7 +51,7 @@ type CloserIsBetter = {
 type MetricConfig = MoreIsBetter | CloserIsBetter;
 
 type MetricsAggregates = Pick<
-    DailyMetrics,
+    DailyMetricsRead,
     "calories" | "steps" | "weight" | "sleep_duration_minutes"
 >;
 
@@ -222,8 +230,7 @@ async function fetchPillarData() {
             { axis: "Purpose", value: 0.2 },
         ],
     ]
-    chartData.push(baselineData)
-    chartData.push(recentData)
+    chartData.push(baselineData, recentData)
     return chartData;
 }
 
@@ -252,7 +259,7 @@ function renderRadarChart(radarLayers: RadarLayer[]) {
     const angleSlice = (2 * Math.PI) / numAxes;
     const MAX_SCORE = 1;
 
-    const dims = getChartDimensions('#radar-chart-container');
+    const dims = getDims('#radar-chart-container');
     const radius = dims.height / 2.5;
 
     // Helpers
@@ -409,9 +416,6 @@ function renderRadarChart(radarLayers: RadarLayer[]) {
         .attr("stroke-linejoin", "round")
 
     // Red = Maslow minimum, Yellow = trend?, Blue = current.
-    const color = d3.scaleOrdinal()
-        .range(["#CC333F","#6eb2ba","var(--accent-subtle)"])
-    // #00A0B0
 
     const legendItems = [
         {label: "Minimum", color: "var(--radar-minimum)", style: "dashed"},

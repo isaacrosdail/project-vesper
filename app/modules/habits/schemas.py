@@ -136,7 +136,7 @@ class HabitRead(APIReadSchema):
     name: str
     created_at: datetime
     pillars: list[PillarRead]
-    subtype: Literal['habits']
+    subtype: Literal["habits"]
     type: HabitTypeEnum
     units: str | None
     target: TargetRead | None
@@ -158,7 +158,7 @@ class HabitCompletionRead(APIReadSchema):
     entry_date: date
     value: float | None
     created_at: datetime
-    subtype: Literal['habit_completions']
+    subtype: Literal["habit_completions"]
 
 class HabitCompletionProgressRead(APIReadSchema):
     completed: int

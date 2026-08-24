@@ -104,3 +104,6 @@ def is_same_local_date(dt: datetime, tz_str: str) -> bool:
     local_dt = dt.astimezone(ZoneInfo(tz_str))
     today_local = now_utc().astimezone(ZoneInfo(tz_str)).date()
     return local_dt.date() == today_local
+
+def week_start(date: date) -> date:
+    return date - timedelta(days=date.weekday())

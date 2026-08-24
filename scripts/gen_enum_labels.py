@@ -17,7 +17,6 @@ for info in pkgutil.iter_modules(app.modules.__path__):
     for name, obj in vars(models).items():
         if isinstance(obj, type) and issubclass(obj, StrEnum) and obj.__module__ == models.__name__ and hasattr(obj, "label"):
             with_labels.append(obj)
-            print(obj)
 
 # Walk the members
 my_dicts = {enum_cls.__name__: {m.value: m.label for m in enum_cls} for enum_cls in with_labels}
@@ -35,9 +34,10 @@ with open(OUT, "w", encoding="utf-8") as file:
 
     for name, things in my_dicts.items():
         type_body = json.dumps(things, indent=2)
-        print(type_body)
         # strip suffix then insert "_" before each capital letter?
         const_name = re.sub(r"(?<!^)(?=[A-Z])", "_", name.removesuffix("Enum")).upper()
         type_line = f"export const {const_name}_LABELS: Record<{name}, string> = "
         together = f"{type_line}{type_body};\n"
         file.write(together)
+
+print(f"Saved typescript definitions to {OUT}")

@@ -19,25 +19,25 @@ class AnalyticsService:
         self.habits_service = habits_service
         self.time_service = time_service
 
-    def correlation_method(self) -> float:
-        completion_counts = self.habits_service.get_daily_completion_counts()
-        time_totals = self.time_service.get_time_stuff()
+    # def correlation_method(self) -> float:
+    #     completion_counts = self.habits_service.get_daily_completion_counts()
+    #     time_totals = self.time_service.get_time_stuff()
 
-        # merge the two dataframes on date and return the correlation
-        # pandas' version of None is NaN: .fillna(0) takes any NaN results and replaces with 0?
-        # how="outer" keeps all dates from both DataFrames
-        # This means for dates with a completion but no time tracked => it'll just fill
-        # duration_minutes in as 0
-        merged = completion_counts.merge(time_totals, on="date", how="outer").fillna(0)
-        #corr = merged.corr()
-        # merged.corr() computes full correlation matrix between every numeric column pair?
-        #                   completion_count    duration_minutes
-        # completion_count          1.0                0.73
-        # duration_minutes          0.73               1.0
-        # diagonal is always 1 (a col correlates perfectly with itself)
+    #     # merge the two dataframes on date and return the correlation
+    #     # pandas' version of None is NaN: .fillna(0) takes any NaN results and replaces with 0?
+    #     # how="outer" keeps all dates from both DataFrames
+    #     # This means for dates with a completion but no time tracked => it'll just fill
+    #     # duration_minutes in as 0
+    #     merged = completion_counts.merge(time_totals, on="date", how="outer").fillna(0)
+    #     #corr = merged.corr()
+    #     # merged.corr() computes full correlation matrix between every numeric column pair?
+    #     #                   completion_count    duration_minutes
+    #     # completion_count          1.0                0.73
+    #     # duration_minutes          0.73               1.0
+    #     # diagonal is always 1 (a col correlates perfectly with itself)
 
-        # single num is cleaner for returning/displaying:
-        return merged["completion_count"].corr(merged["duration_minutes"])
+    #     # single num is cleaner for returning/displaying:
+    #     return merged["completion_count"].corr(merged["duration_minutes"])
 
 
 
@@ -51,3 +51,22 @@ def create_analytics_service(
         time_service=create_time_tracking_service(session, user_id, user_tz)
     )
 
+
+## Previously in habits service. Find what we're doing with this analytics stuff generally :/
+    # TODO: purge
+    def get_daily_completion_counts(self) -> pd.DataFrame:
+        # TODO: fetches all completion records for user
+        completion_records = self.completion_repo.get_all()
+
+        # convert entry_date's to local date -> list of completion counts per date
+        completion_records_local = [entry.entry_date for entry in completion_records]
+
+        # group by local date + count completions per day, make dataframe from list:
+        df = pd.DataFrame({ "date": completion_records_local })
+
+        # count occurrences of each val in a col:
+        # groupby("date") groups rows by unique date values
+        # size() counts how many rows are in each group
+        # .reset_index(name="completion_count") turns it back into a clean two-col DataFrame:
+        # date and completion_count
+        return df.groupby("date").size().reset_index(name="completion_count")

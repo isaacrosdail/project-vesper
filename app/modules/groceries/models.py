@@ -17,9 +17,10 @@ from sqlalchemy import (
     Numeric,
     String,
     UniqueConstraint,
+    select,
 )
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, column_property, declared_attr, mapped_column, relationship
 
 from app._infra.db_base import Base
 
@@ -288,6 +289,19 @@ class ShoppingListItem(Base):
     shopping_list: Mapped[ShoppingList] = relationship("ShoppingList", back_populates="items")
     product: Mapped[Product] = relationship("Product", lazy="joined")
 
+    @declared_attr
+    def last_price(cls) -> Mapped[Decimal | None]:
+        return column_property(
+            select(Transaction.price_at_scan)
+            .where(
+                Transaction.product_id == cls.product_id,
+                Transaction.user_id == cls.user_id,
+            )
+            .order_by(Transaction.created_at.desc())
+            .limit(1)
+            .scalar_subquery()
+        )
+
     @property
     def product_name(self) -> str:
         return self.product.name
@@ -299,6 +313,10 @@ class ShoppingListItem(Base):
     @property
     def unit_type(self) -> UnitEnum:
         return self.product.unit_type
+
+    @property
+    def category(self) -> str:
+        return self.product.category
 
     def __repr__(self) -> str:
         return f"<ShoppingListItem id={self.id} product_id={self.product_id} qty={self.quantity_wanted}>"

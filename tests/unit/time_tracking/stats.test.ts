@@ -9,7 +9,7 @@ import {
     totalsBy,
     type StatsEntry,
 } from '../../../app/static_src/js/time_tracking/stats';
-import type { TimeEntry } from '../../../app/static_src/js/types';
+import type { TimeEntryRead } from '../../../app/static_src/js/apiTypes';
 
 const entries: StatsEntry[] = [
     { date: '2026-06-11', category: 'Coding', duration: 60 },
@@ -37,7 +37,7 @@ describe('toStatsShape', () => {
             started_at: '2026-06-11T14:30:00Z',
             category: 'Coding',
             duration_minutes: 60,
-        } as TimeEntry;                            // only 3 fields read
+        } as TimeEntryRead;                            // only 3 fields read
         expect(toStatsShape(t)).toEqual({ date: '2026-06-11', category: 'Coding', duration: 60 });
     });
 });
@@ -99,7 +99,7 @@ describe('deltaLabel', () => {
 
 describe('deriveStatsView (integration)', () => {
     it('picks the top category by total', () => {
-        expect(deriveStatsView(entries, []).topCategory).toBe('Coding');
+        expect(deriveStatsView(entries, []).top_category.value).toBe('Coding');
     });
     it('counts active days into the label path', () => {
         expect(numActiveDays(entries)).toBe(2); // just assert computed count, not the formatted string
@@ -108,6 +108,6 @@ describe('deriveStatsView (integration)', () => {
 
 describe('mostActiveDayView', () => {
     it('most active day picks highest-total date', () => {
-        expect(deriveStatsView(entries, []).mostActiveLabel).toContain('Jun 11')
+        expect(deriveStatsView(entries, []).most_active_day.detail).toContain('Jun 11')
     })
 });

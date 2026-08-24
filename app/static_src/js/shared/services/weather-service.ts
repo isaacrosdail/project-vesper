@@ -1,7 +1,7 @@
 import { Temporal } from 'temporal-polyfill';
 import type { WeatherResult } from '../../types';
 import { fmtTime } from '../datetime';
-import { makeToast } from '../ui/toast';
+import { addToast } from '../components/Toaster.svelte';
 
 export async function fetchWeatherData(city: string, country: string, units: string): Promise<WeatherResult> {
 
@@ -42,7 +42,7 @@ export async function fetchWeatherData(city: string, country: string, units: str
 
     } catch (error) {
         console.error('Weather fetch failed:', error);
-        makeToast('Issue fetching weather data', 'error', 2000);
+        addToast('Issue fetching weather data', '', 'error');
 
         // Return fallbacks for UI
         return {

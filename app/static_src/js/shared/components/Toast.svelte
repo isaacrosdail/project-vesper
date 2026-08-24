@@ -55,7 +55,7 @@
     }
     .toast {
         --toast-color: var(--text-muted);
-        background-color: color-mix(in srgb, var(--toast-color) 30%, var(--bg));
+        background-color: color-mix(in srgb, var(--toast-color) 30%, var(--surface-2));
         border-color: color-mix(in srgb, var(--toast-color) 30%, var(--bg));
         padding: var(--space-xs) var(--space-sm);
         border: solid 1px transparent;

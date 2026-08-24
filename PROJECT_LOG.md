@@ -18,6 +18,329 @@
 - Installed MMM-Remote-Control via `npm install` in `~/modules/MMM-Remote-Control`
 - Whitelisted all local IPs for access from laptop/etc
 
+
+## 8-15-26
+1. 
+
+## 8-14-26
+1. Add scripts/gen_enum_labels.py for code-gen'ing enum labels to enumLabels.ts
+2. Components: QuantityStepper and CurrencyInput
+3. 
+
+## 8-8-26
+1. Add nullable product_id column to NutritionLog, mirroring the recipe_id FKey column, so that we can trace individual "ate this product" log entries similarly to how we do for recipe nutrition log entries.
+2. Add quicklog form for entering a nutrition log for products (eg "ate 200g of product X for lunch")
+
+## 8-7-26
+1. Target.py: Instead of multiple dataclasses in a discriminated union to form Target, we'll use
+    a Target class instead, with classmethod constructors & methods status/satisfied directly on it insteead. We'll also use a "bounds" approach since Atleast/Atmost/within is just a more complicated way to express (low, any)/(any, high)/(low, high). Infinity will serve as the "any" bounds so we don't need an "is not None" check cluttering stuff either. Pydantic field_serializer turns +/-inf into null for the frontend. Create then remains a discriminated union, with each having a to_domain() method to convert into the backend Target shape.
+
+## 8-6-26
+1. Fix habit streak logic: delineate week streaks vs daily streaks depending on whether weekly_frequency for habit == 7
+2. Purge promotion stuff
+    - models fields: remove established_date, status,  established_requires_established_status constraint
+    - same as above for schemas.py
+    - Also in models: promotion_threshold, StatusEnum, is_promotable property, 
+    - service: check_promotion
+
+## 8-5-26
+1. Habits: updating from basic "completion for today means done" setup to multiple habit types:
+    - Binary: same as before, simple done/not done for given day
+    - Numeric_value: has units + value + target_value etc
+    - Duration: basically just numeric_value but ...??
+
+## thoughts:
+1. Repo's: Make more generalized methods:
+    `def _sum_by(self, value: InstrumentedAttribute, group: InstrumentedAttribute):`
+->  `def calories_by_day(self):  return self._sum_by(Macro.calories, Macro.date)`
+        Also: group_by, but that one's a bit tougher
+        fill_gaps
+        sum | avg | count
+    hybrid_property
+2. Deciding layers for computations (pandas/ml vs backend vs frontend)
+    1. SQL: group-bys, rolling avgs, running totals, rank-within-group, period-over-period deltas:
+        these are all `window functions`
+    2. Python: domain decisions on already-reduced data: gap filling, evaluate(), derived flags
+    2. Pandas: reshaping, interpolation, correlation matrices; only what SQL genuinely can't express, on already-reduced data; pandas is ideal for time series resampling, reshaping (`pivot` and `melt`) converting btwn wide and long format, merging heterogenous sources (CSV plus an API response plus a DB query?), messy data cleaning, 
+    3. Svelte: render + formatting, plus interaction on what's already fetched
+
+3. ML for determining whether tasks sit in the Eisenhower matrix: assign a label and have user confirm?
+    - Urgency doesnt need ML, that's just due_date - today.
+    - Importance is the real question: ML earns its place when the rule is hard to write but easy to demonstrate by example.
+
+## 7-28-26
+1. Replaced confirmation dialog stuff with ConfirmDialog - a singleton component mounted to document.body in main.ts
+    - From there we just import "confirm()" where we need it and use almost identically to before.
+2. Scrapping: modal-manager.ts, most of forms.ts, 
+
+## 7-26-26
+1. Add Toast/Toaster, move toast stylings into these components.
+2. Switch from esbuild to Vite for Svelte HMR
+
+## 7-25-26
+1. Replacing userStore with userState.me
+2. Fixing up api.ts and backend:
+    - Replaced api_response(success=False...) sites with error_response() and api_response(success=True,.) with success_response (changed api_response)
+        Now assigns success=True internally so I can't mess it up
+
+## 7-23-26
+1. 
+
+## ??? 7-22-26
+1. Simplify/prune repository methods
+    - Make tasks and habits tags relationships lazy=selectin to collapse "*_with_tags" methods.
+
+## Mon 7-13-26
+TODOs:
+    1. Add "Retry" affordance to toast for the "userStore failed to load" thing?
+    2. 
+
+1. Add tests for userStore, fix backend idk
+
+ALSO: Gonna wanna fix up fixtures/tests - sprawl is coming :P
+## Sun 7-12-26
+1. Patching for the UserGoals & UserProfile changes
+    - Need tests for: goals patch persistence, geocode, location constraint path (ensure country/city is real?), macros pulling
+    targets from goals, profile/me's payload shape for userStore.
+    - Need to update: api.ts references to preferences + frontend ones.
+2. Fleshed out test_auth.py, covering geocode stuff
+
+## Fri 7-10-26
+1. 
+
+## Thurs 7-9-26
+1. Fixing API issues
+    - Read path: model -> to_api_dict() -> JSONProvider -> TS read types.
+    - Write path: TS create/patch types -> Pydantic -> service.
+    A. Serialization -> what fields
+    B. CustomJSONProvider -> how 'this' field should be typed/formatted (rounded, cast, etc)
+    Solution: Embrace Pydantic, make ENTITYRead(APISchema) classes, and have those be used in conjunction with the other APISchema types to
+       auto-gen a new apiTypes.ts.
+        - Many "magic" bolt-on properties in serialization.py are now just plain fields in
+           the Pydantic models as they should be.
+
+2. Scrap Leetcode records - stupid, and not worth the maintenance.
+    - Migrated, purged all mentions/usages.
+
+TO DOUBLE-CHECK:
+1. removed 'name="pillar_checkbox"' from 3 forms - ensure they work.
+Used to be:
+    `<input type="checkbox" name="pillar_checkbox" id="pillar-{{ pillar.id }}" value="{{ pillar.id }}">`
+Also removed the hidden csrf token baked into all form modals from ui.html. Our api.ts already sends the window.csrfToken, so this is vestigial - only needed for classic HTML form posts.
+    `<input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">`
+
+## Wed 7-8-26
+
+2?. Move update_prefs and update_profile endpoints into new auth/api_routes.py
+3. Add api.test.ts to cover basic cases,  and test_api.py. Adjust errors.py + errors.html; remove 500.html error page
+4. auditing contracts between models, schemas, and types.ts.
+
+## Tues 7-6-26
+TODO:
+1. Write cook_recipe itself — every piece is on the bench: fetch with selectinload, fold
+contributions, build log with **totals, N ledger appends, N inventory upserts, return, no commit.
+The skeleton you owe me.
+3. Wire `_validate_ingredients` into create/update recipe if not already done
+
+4. Route + endpoint for cook; hook up Quick Log stub button
+5. The original goal: GROUP BY top-recipes-cooked query -> dashboard payload -> the mid-section card
+6. Tests: the two properties with real data, cook end-to-end, constraints actually firing
+        Future slices, noted not started: purchase->PURCHASE inflow events, correction flow + UI, recipe
+            soft-delete, the Collection[int] signature pass, per_100g naming honesty.
+
+
+0. Ledger -> source of truth for inventory. ProductInventory -> rebuildable cache; corrections measure against SUM(ledger) and _set_ the cache rather than inc it.
+- Canonical stock unit: base measure (g/ml/ea.), signed deltas, converted at every write site via unit.factor
+- Dimension-match rule: product's unit dimension gates ingredient units (TODO: Need to reflect this on frontend); enforced in service, not Pydantic, since it required DB state.
+- DimensionEnum, UnitEnum.factor/.dimension + mappings, completeness check
+- `_validate_ingredients` batch fetch, unknown-id, dimension check
+- InventoryLedger: building  out the repository methods, NOT inheriting from Base repo as it's append-only.
+
+1. Models changes (migration done)
+    - Recipe.yields and RecipeIngredient.amount_value now in Decimal/Numeric(12, 3) to match inventory ledger
+    - InventoryLedger.qty_delta and ProductInventory.qty_on_hand now in Decimal/Numeric(12, 3) since we'll
+       store these in "amount value in base units of given product" rather than # packges / count. This
+       means any changes to product's net_weight value WON'T break ledger history?
+    - NutritionLog now has an FKey to recipe_id so logs can be tied to a Recipe. Unlike Txn -> Product, though,
+       here we set ondelete="SET NULL", since recipes only provide "where it came from" information (ie nutritionlogs are "complete" without the referenced recipe - it's extra info)
+    - InventoryLedger.entry_datetime was added: This allows for proper ledger accounting when adding entries like "Yesterday, I cooked X".
+    - Product.net_weight got a constraint s.t. it has to be > 0: avoids div/0 errors, and makes sense anyway.
+    - Fixed mistaken `unique=True` on ProductInventory with UniqueConstraint user->product.
+
+## Mon 7-6-26
+1. Wiring groceries stuff
+    - "Target" class/serialization, add some tests for that
+    - Need to "link" Recipes and NutritionLog to facilitate "cooking" a recipe.
+2. Working out ProductInventory + InventoryLedger
+    - InventoryLedger is an append-only ledger - our source of truth for what we have/don't have in stock.
+    - ProductInventory is essentially a cache of the qty_on_hand tally, making product.inventory.qty_on_hand
+      a cheaper read than having to do a SUM(delta) GROUP BY product on the InventoryLedger each and every time.
+    - This means every append must also bump the cache, and the two need to never disagree.
+        ie, each must happen within the same transaction (.commit() block) so that it's atomic
+3. 2 raises a question: What is the ledger stored in? Units or count? (ie, "200g" OR "2" packages)
+    A. Implications of storing in "200g":
+        1. Purchase: transaction says quantity: 2 -> we have to convert to `quantity * net_weight`.
+        2. Cook: ingredient says 100ml -> no conversion needed.
+        3. Corrections: Count is generally more human-friendly here.
+        4. Stock display: Count, again, is generally more human-friendly here.
+        5. Shopping list gen: "Do I have enough for this recipe?" is better done in units, no conversion needed.
+        Z. Density, though, is a key issue. Conversions volume-based units <-> mass units means storing density
+            PER product. So, instead we can make products have ONE dimension and stick to it.
+            Either mass or volume, decreed by its `net_weight` unit.
+
+
+## Thurs 7-2-26
+1. Recipes page:
+    - Concept: Recipes -> LEAVE the stock, Shopping list -> ENTERS new stock.
+    - Layout is 2-col grid w/ recipes on left, shopping list on right.
+
+
+
+## Wed 7-1-26
+1. Metrics
+    - Implement correlation panel stuff
+    - Start/do the "Goal and Streaks" section
+
+## Tues 6-30-26
+1. Metrics: delineating roles between Stats and ViewModels for my sanity. Also distilling the flow of data updates (range/type listeners) -> viewmodels (syncUI) -> table/chart re-render
+    - Marking 'All' view as a WIP: hid the option/pill from view in the markup, but left MultiChart/'all' branches in JS.
+
+## Sat 6-27-26
+1. Should distill/figure out formatters and such
+
+## Fri 6-26-26
+Loose ends:
+1. --metric-color custom property using bare hex vals -> should tokenize
+2. added api route "compare" + added compare to api.ts - name sucks, should clean up.
+3. Should ideally make bmrValue derive directly from height + latest weight, then store in DB ourselves. Also: should do something similar with the defaults - having in-mem defaults directly hardcoded feels wrong.
+4. Give a better name to `newGetDims` lol
+5. Lots of styling cleanup: reference-lines, etc.
+
+Done?
+1. Metrics charts now use viewBox to resize automatically, instead of setting the <svg> to width/height
+
+# REVIEW for Fri 6-26 later:
+  2026-06-26 — Metrics dashboard: focus view + consistency heatmap
+
+  Goal: Rework metrics page toward the "one metric at a time, page themes to its color"
+  reference. Socratic design session + implementation.
+
+  Decisions made:
+  - Keep the All view but defer its tuning; build single-metric focus views first. All
+  shares the hero/card body shape.
+  - Color = CSS single source of truth. data-metric attribute on .whole, --metric-color
+  cascades to pills/chart/cards. JS sets the attribute only, never colors.
+  - Metric config stays as discrete maps (TYPE_LABELS, TYPE_UNITS, TARGET_DEFAULTS) — not
+  one mega-config. Color in CSS, targets dynamic from prefs.
+  - viewBox vs natural-pixel sizing: line/bar/multi charts use viewBox (fill container
+  responsively); heatmap uses natural pixel size so cell size stays constant across ranges.
+  - Delta = window-over-window (avg this period vs avg last period), via a backend
+  aggregate/compare route. Headline = most-recent value (stable across range pills).
+
+  Built:
+  - syncUI (state-only chrome) + cached UIEls; data stats on the fetch path. computeStats
+  made pure + sync (was async -> caused an unawaited-Promise bug).
+  - Line chart gradient area fill (d3.area + linearGradient + CSS stops).
+  - Bar chart under-target shading (color-mix + .under-target class), rounded bars (rx).
+  - Reference lines: rect->line for dashing, grouped <g> with line + "Goal"/"BMR" labels.
+  - Multichart legend moved in-SVG -> HTML buttons (toggleLine/isHidden, syncUI drives
+  dimming).
+  - New consistency.ts — weekday-aligned heatmap adapted from habits: getDay->row,
+  timeWeek.count->col, zero-fill via d3.timeDays, window derived from range (not data),
+  natural-px sizing, constructor=shells / renderGrid=data.
+  - Naming pass: hero-chart->hero-card (vs #hero-chart), timeframe-selector->metric-selector,
+  data-type/.chart-type->data-metric/.metric-pill, MultiChart.refresh, sleep-target-line.
+
+  Open / next session:
+  - dashboard.ts first-pass tidy: fix .chart-type->.metric-pill in syncUI; guard consistency
+  for 'all' + reuse series; drop redundant init render; remove console.log; dedupe toggles
+  query; guard toggle click; type HeroStats.
+  - Triple-fetch -> fetch-once-pass-in (charts take data instead of fetching). Biggest rock.
+  - lower-is-better vs higher-is-better handling — affects hit-test, delta color, vs-goal
+  (weight especially).
+  - Consistency: three-state fill (no-entry ≠ missed), real hit-rate (currently hardcoded
+  3%), legend "Hit goal" x/y swap.
+  - Backend compare route: proper service method + bucket relabel + null guard + tz
+  boundaries; add tests (computeStats is the easy first one).
+  - Weight kg/lbs display conversion; central numberFormat/locale (Intl) as its own pass.
+
+
+
+## Wed 6-24-26 & Thurs 6-25-26
+1. Finish up Tasks page mostly
+    - Split dashboard.ts into list.ts + detail.ts + trimmed down dashboard.ts.
+    - Add web + trash symboldefs to _ui.html.
+2. Time Tracking page revamp work
+    - Add rangeLabel to datetime.ts for this page (NEED TESTS)
+    - Simplify renderStats function using new setStat helper
+    - Added JS-side pagination for the new client-rendered table. Detangled sorting from the tables.ts catch-all listener, table here now has its own header listener that uses the sortByField helper.
+    - Table itself is now rendered client-side from a template clone, replacing the old server-side responsive_table.
+    - New layout: stats-row + charts-row
+    - Open TODOs: per-category breakdown list, daily bar chart, fetch-one-and-filter caching.
+3. Pare down stats_info/circle macros into a single stats_info card w/ progress bar on bottom.
+    - Makes for simpler CSS/handling for no real loss.
+    - Updated all call sites to prevent crashing for now
+
+## Mon 6-22-26
+1. Fingerprint JS/CSS build outputs with a content hash so the filename changes only if the btyes of said file(s) change.
+    - esbuild emits `app-[hash].{js,css}` and a manifest.json mapping the logical name to the hashed name.
+    - Flask reads manifest once at startup into ASSET_MANIFEST and HASHED_ASSETS (a frozenset for O(1) membership check).
+    - Templates call `asset('js/app')` and resolves through the manifest.
+    - An after_request hook puts Cache-Control: immutable on anything in HASHED_ASSETS, which is safe because the URL changes when content changes.
+    - Dev skips all of this via APP_ENV gate.
+    - HTML needs to stay no-cache so that it always references the latest hashed names.
+
+
+## Thurs 6-18-26
+1. Further CSS cleanup
+2. Build changes:
+## Asset fingerprinting + cache headers — STATUS
+
+### Done
+- esbuild hashes JS + CSS: outdir + entryNames '[name]-[hash]' + metafile
+- manifestPlugin writes app/static/manifest.json  { css/app, js/app -> hashed names }
+- Flask asset() helper + manifest load (asset('js/app') resolving correctly)
+- base.html JS line uses {{ asset('js/app') }}
+
+### Left to do
+1. base.html:19 — CSS still hardcoded url_for('static','css/app.css')
+    -> change to {{ asset('css/app') }}  (currently serving STALE orphan app.css)
+2. Wipe stale build outputs in app/static/js + css
+    (app.css, bundle.js, app.js, main.js, old core/ groceries/ … subdirs — all dead)
+3. Gate hashing on prod: entryNames: isProd ? '[name]-[hash]' : '[name]' on BOTH options
+    (stable names in dev = no hash accumulation during watch)
+4. Add clean step before build (rmSync js+css dirs, or rm -rf in npm build script)
+    — esbuild never cleans outdir; new hash piles up every build
+5. Cache-Control in after_request (flip the existing apply_csp static skip):
+    - hashed (filename in manifest values) -> public, max-age=31536000, immutable
+    - other static (img/fonts)            -> public, max-age=604800
+    - HTML pages                          -> no-cache  (must stay fresh to carry hashes)
+    - gate on APP_ENV != 'dev'
+    - precompute HASHED_ASSETS = set(manifest.values()) at boot, NOT per-request
+6. Extract _setup_jinja(app) — move inject_globals + asset OUT of _setup_request_hooks
+    (neither is a request-lifecycle hook)
+7. Decide: commit manifest.json or gitignore (artifact -> deploy must build before boot)
+
+### Verify (prove it)
+- Network tab, PROD: hashed asset repeat-load -> (disk cache) 0ms  (dev stays 304, expected)
+- Edit file -> rebuild -> hash changes -> normal reload fetches new = cache-bust works
+- Lighthouse "efficient cache policy" audit goes from fail -> pass
+
+### Key principle
+immutable-forever is earned by fingerprinting, NOT by file type.
+Un-hashed images get a moderate window (ETag still backs revalidation), never immutable.
+
+
+
+
+## Wed 6-17-26
+1. Disallow drag-n-drop via 'sortable' class as a DOM flag. CSS sets opacity for drag handler to 0 when this is present.
+    - dbl check
+2. Revamping/improving TS and html for time tracking - need to distill and actually commit.
+TO CONTINUE:
+    - Distill radio-tabs macro + tabbed thing (the one that metrics form uses) into new segmented+segment+s-glider thing (also has a macro - in _ui.html)
+    - Cleaning up a ton of other css
+
 ## Tues 6-16-26 - Wiring 'Add Subtask'
 1. Update tasksStore to itself be a Map<taskId, Task>
 2. handleModalFormSubmit: For success case, added a new DispatchEvent for 'modal:success' to facilitate live-updates for task views when editing/creating/etc a task.

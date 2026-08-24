@@ -8,19 +8,6 @@
    Base button shapes/ergonomics
    ========================================= */
 
-/* TODO: Sketching the "plus_btn with label inside" styling: */
-/*.btn-with-label {
-  border: 1px solid red;
-  border-radius: var(--border-radius);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-sm);
-
-  &:hover {
-    background: var(--bg-light);
-  }
-}*/
-
 .icon {
   display: inline-block;
   width: 1lh;
@@ -99,19 +86,20 @@
 /* Hover states (skip on touchscreen) */
 @media (hover: hover) {
   .btn-primary:hover {
-    filter: brightness(1.1);
+    background: var(--accent-hover);
   }
   .btn-secondary:hover {
-    background-color: var(--bg-hover);
+    background-color: var(--surface-3);
     border-color: var(--accent-subtle);
   }
   .btn-ghost:hover {
-    background: var(--bg-hover);
+    background: var(--surface-3);
     color: var(--text);
   }
   .btn-destructive:hover {
-    color: var(--bg-light);
-    background-color: var(--text-destructive);
+    color: var(--clr-error);
+    background: color-mix(in oklab, var(--clr-error) 16%, var(--surface-1));
+    border-color: color-mix(in oklab, var(--clr-error) 55%, transparent);
   }
 }
 
@@ -129,154 +117,45 @@
   background-color: var(--accent-strong);
   color: var(--text);
 }
-@property --angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-@property --stop-pos {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 0;
-}
-/* Container queries look up the tree to find nearest ancestor with container-type */
-@container (max-width: 40px) {
-  .left-sidebar .sidebar-label {
-    display: none;
-  }
-  .sidebar-option { width: 36px; }
-  .btn-primary--gradient1 {
-    width: 30px;
-    height: 30px;
-    
-    & .label {
-      display: none;
-    }
-  }
-}
+
 /* Each "button > thing + span" pair in our left-sidebar */
 .sidebar-option {
   display: flex;
   gap: var(--space-sm);
   align-items: center;
   width: 100%;
-  height: 36px;
+  height: 32px;
   padding-left: 5px; /* centers icon position in sidebar in closed mode, stable in open */
   /* width is natural/full in open mode ofc */
-}
-.btn-primary--gradient {
-  --angle: 135deg;
-  background-image: linear-gradient(
-    in oklch var(--angle),
-    color-mix(in oklch, white 35%, var(--accent-strong)),
-    var(--accent-strong)
-  );
-  color: var(--text);
-  transition: --angle 0.2s ease, filter 0.2s ease;
+  border-radius: var(--border-radius-mild);
 
-  &:hover {
-    --angle: 160deg;
-    filter: brightness(1.1);
+  @container (max-width: 40px) {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
   }
 }
-.btn-primary--gradient1 {
-  --angle: 135deg;
-  --stop-pos: 35%;
-  --lighter-clr: color-mix(in oklch, white var(--stop-pos), var(--accent-strong));
-  background-image: linear-gradient(
-    in oklch var(--angle),
-    var(--lighter-clr) 0%, var(--lighter-clr) 45%,
-    var(--accent-strong) 55%, var(--accent-strong) 100%
-  );
-  color: var(--text);
-  transition: --angle 0.2s ease-out, --stop-pos 0.2s ease,
-    filter 0.2s ease, background-position 0.2s ease;
-  background-size: 250% 100%;
-  background-position: left;
-
-  &:hover {
-    background-position: right;
-    /* --angle: 150deg; */
-    /* --stop-pos: 45%; */
-    /* filter: brightness(1.05); */
+.sidebar-label {
+  @container (max-width: 40px) {
+    display: none;
   }
 }
-.btn-primary--gradient2 {
-  --angle: 135deg;
-  background-image: linear-gradient(
-    in oklch var(--angle),
-    color-mix(in oklch, white 35%, var(--accent-strong)),
-    var(--accent-strong)
-  );
-  color: var(--text);
-  transition: --angle 0.4s ease, filter 0.2s ease;
 
-  &:hover {
-    --angle: 150deg;
-    filter: brightness(1.1);
-  }
-}
-.btn-primary--gradient3 {
-  --angle: 135deg;
-  background-image: linear-gradient(
-    in oklch var(--angle),
-    color-mix(in oklch, white 35%, var(--accent-strong)),
-    var(--accent-strong)
-  );
-  color: var(--text);
-  transition: --angle 0.5s ease, filter 0.2s ease;
-
-  &:hover {
-    --angle: 150deg;
-    filter: brightness(1.1);
-  }
-}
-.btn-primary--gradient4 {
-  --angle: 135deg;
-  background-image: linear-gradient(
-    in oklch var(--angle),
-    color-mix(in oklch, white 35%, var(--accent-strong)),
-    var(--accent-strong)
-  );
-  color: var(--text);
-  transition: --angle 0.6s ease, filter 0.2s ease;
-
-  &:hover {
-    --angle: 150deg;
-    filter: brightness(1.1);
-  }
-}
-.btn-primary--gradient5 {
-  --angle: 135deg;
-  --stop-pos: 35%;
-  background-image: linear-gradient(
-    in oklch var(--angle),
-    red 0%, red 45%,
-    white 55%, white 100%
-  );
-  color: var(--text);
-  transition: background-position 2s ease;
-  background-size: 400% 100%;
-  background-position: left;
-
-  &:hover {
-    background-position: right;
-    /* --angle: 150deg; */
-    /* --stop-pos: 45%; */
-    /* filter: brightness(1.05); */
-  }
-}
 
 .btn-secondary {
-  background-color: var(--bg-light);
+  background-color: var(--surface-3);
   border: 1px solid transparent; /* prevent layout shift on hover */
   transition:
     border-color var(--transition-hover),
     background-color var(--transition-hover);
 }
+/* Faint error-tinted fill + muted error border; hover deepens the tint
+    (depth from value steps, not a solid-fill flip) */
 .btn-destructive {
-  color: var(--text-destructive);
-  border-color: var(--text-destructive);
+  color: var(--clr-error);
+  background: color-mix(in oklab, var(--clr-error) 8%, var(--surface-1));
+  border-color: color-mix(in oklab, var(--clr-error) 35%, transparent);
 }
 
 /* =========================================
@@ -304,14 +183,12 @@ dialog {
   width: clamp(20rem, 90vw, 30rem);
   max-height: 90vh;
   padding: var(--space-xl);
-  background-color: var(--bg);
-  border: none;
+  background-color: var(--surface-2);
+  border: 1px solid var(--line-strong);
   border-radius: var(--border-radius);
-  /* box-shadow: 0 4px 20px rgb(0 0 0 / 30%); */
   box-shadow: var(--shadow-lg);
 }
-.form-modal,
-#recipe-detail-modal {
+.form-modal {
   top: 5%;
   margin: 0 auto;
   overflow: hidden;
@@ -386,7 +263,7 @@ dialog::backdrop {
   transform: translate(-50%, -40%);
 }
 
-/* Card itself: border-radius, shadow, card bg, internal padding, & verical spacing between its children */
+/* Card itself: border-radius, shadow, internal padding, & verical spacing between its children */
 .card-dashboard {
   position: relative; /* positioning context for .card-title */
   container-type: inline-size; /* TODO: this declares containment for container queries on field-pair/weighted? */
@@ -417,7 +294,7 @@ dialog::backdrop {
     top: var(--space-md);
     right: 0;
     translate: 100% 0;
-    background: var(--bg-light);
+    background: transparent;
     cursor: pointer;
   }
 }
@@ -428,7 +305,7 @@ dialog::backdrop {
     intrinsic width
   */
   container-type: inline-size;
-  background: var(--bg-light);
+  background: var(--surface-1);
   transition: transform 0.2s ease;
   text-wrap: whitespace;
   height: 100%;
@@ -537,12 +414,12 @@ form :is(input, select, textarea).invalid {
   gap: 0.75rem;
 }
 :root {
-  --toggle-checkbox-size: 30px;
+  --toggle-checkbox-size: 18px;
 }
 /* The "track" */
 .toggle {
   position: relative;
-  display: inline-block;
+  display: block;
   outline: var(--border-default);
   width: calc(var(--toggle-checkbox-size) * 2);
   height: calc(var(--toggle-checkbox-size));
@@ -567,7 +444,7 @@ form :is(input, select, textarea).invalid {
 }
 /* Knob */
 .toggle::before {
-  background-color: color-mix(in oklch, var(--bg-hover) 70%, white);
+  background-color: var(--text-muted);
   box-shadow: inset 0 0 2px rgba(0,0,0,0.4);
   transition: transform 0.2s ease, background-image 0.4s ease;
 }
@@ -589,7 +466,7 @@ form :is(input, select, textarea).invalid {
     filter: drop-shadow(0 0 6px var(--accent-subtle));
   }
   &:checked + .toggle::before {
-    background-color: color-mix(in oklch, var(--bg-hover) 10%, white);
+    background-color: var(--text);
     transform: scale(1.1) translateX(var(--toggle-checkbox-size));
   }
   &:checked + .toggle::after {
@@ -633,60 +510,20 @@ form :is(input, select, textarea).invalid {
   display: inline-block;
   padding: 0.35rem 0.85rem;
   border: 1px solid transparent; /* prevent border shift when checked */
-  border-radius: 999px;
-  background: var(--bg-light);
+  border-radius: var(--border-radius);
+  background: var(--surface-1);
   color: var(--text-muted);
-  font-size: var(--font-sm);
+  font-size: var(--font-size-sm);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
+/* Selected = flat blue-900 tint + accent border (spec: selected tint, not a fill) */
 .pill input:checked + span {
-  background: var(--bg-active);
-  color: var(--text-active);
+  background: var(--bg-selected);
+  border-color: var(--accent-strong);
+  color: var(--text);
 }
-.pill input:checked + span {
-  background-color: var(--bg-active);
-  background-image: linear-gradient(135deg, var(--accent-strong), color-mix(in oklch, var(--accent-strong) 60%, white));
-    /* linear-gradient(135deg, var(--accent-strong), white) border-box; */
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  border: 1px solid transparent;
-  /* color: var(--text-active); */
-  color: white;
-}
-/* .pill input:checked + span::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, var(--accent-strong),
-    color-mix(in oklch, var(--accent-strong) 60%, white));
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-} */
-
-
-
-
-/* DRAFT: trying out anchor positioning */
-.trigger {
-  anchor-name: --my-trigger;
-  border: 1px solid cyan;
-  background: var(--bg);
-}
-/* thing that positions itself */
-.test-tip {
-  position: fixed;
-  position-anchor: --my-trigger;
-  /* place tooltip's top-center at triggers bottom-center */
-  top: anchor(bottom);
-  left: anchor(center);
-  /* translate: -50% 0; */
-}
-
-
 
 
 /* =========================================
@@ -697,8 +534,8 @@ input, select, textarea {
   padding: var(--space-xs) var(--space-sm);
   color: var(--text);
   accent-color: var(--accent-subtle);
-  background-color: var(--bg-light);
-  border: var(--border-default);
+  background-color: var(--surface-2);
+  border: 1px solid var(--line-strong);
   border-radius: var(--border-radius);
 
   &[disabled]:hover {
@@ -730,24 +567,12 @@ input:not([type="checkbox"], [type="radio"]) {
    Tables
    ========================================= */
 
+   /* TODO(css): purge? */
 /* Needed higher specificity here to override so delete-cell properly blends in to card */
 td {
   font-size: small;
 }
-/* TODO: BUG: Fix this & sort out why table-cell class is required for delete-btn's to style properly */
-.table-cell.delete-cell {
-  width: 0; /* prevent us from consuming extra table width */
-  padding: 0;
-  background-color: var(--bg);
-  border: none;
-}
 
-.table-empty {
-  padding: var(--space-sm) 0;
-  font-style: italic;
-  color: var(--text-muted);
-  text-align: center;
-}
 .table-standard {
   width: 100%;
   font-size: 0.875rem;
@@ -784,7 +609,7 @@ td {
 .table-header {
   & th {
     font-weight: var(--font-weight-semibold);
-    background-color: var(--bg);
+    background-color: var(--surface-1);
     border-bottom: 2px solid var(--accent-strong);
     color: var(--accent-strong);
     cursor: pointer;
@@ -812,10 +637,10 @@ td {
       visibility: visible;
     }
     &:nth-child(even) {
-      background-color: var(--bg-light);
+      background-color: var(--surface-2);
     }
     &:hover {
-      background-color: var(--accent-subtle);
+      background-color: var(--accent-strong);
     }
   }
 }
@@ -834,10 +659,12 @@ td {
   gap: var(--space-sm);
   align-items: center;
   padding: 0 0.05rem;
+  /* Halves must match what's behind: page ground above the card edge,
+      card surface below (pairs with .card-dashboard getting --surface-1) */
   background: linear-gradient(
       to bottom,
-      var(--bg-dark) 48%,
-      var(--bg) 52%
+      var(--bg) 48%,
+      var(--surface-1) 52%
   );
 
   & h2 {
@@ -874,7 +701,7 @@ td {
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-xs);
   padding: var(--space-xs);
-  background-color: var(--bg-light);
+  background-color: var(--surface-1);
   border-radius: var(--border-radius);
 }
 .tab {
@@ -890,25 +717,21 @@ td {
     height: 1em;
   }
   &:hover {
-    background-color: var(--bg-hover);
+    background-color: var(--surface-3);
     filter: brightness(0.9);
   }
   &:active {
-    background-color: var(--bg-hover);
+    background-color: var(--surface-3);
     filter: brightness(0.9);
     transform: translateY(1px);
   }
+  /* Active tab = accent-strong (spec: brand blue, interaction only) */
   &.active {
-    background-color: var(--bg-active);
-    color: var(--text-active);
+    background-color: var(--accent-strong);
+    color: var(--text);
     border: 1px solid var(--accent-strong);
-    filter: brightness(1.2);
-    transform: translateY(1px);
   }
 }
-
-
-
 
 
 /* =========================================
@@ -927,19 +750,12 @@ td {
       border-right: 1px solid var(--border-color);
     }
     &:hover {
-      background: var(--bg-hover);
+      background: var(--surface-3);
     }
-    /* TODO: trying it out */
     &.active {
-      color: var(--text-active);
-      background: var(--bg-active);
+      color: var(--text);
+      background: var(--accent-strong);
     }
-
-/* 
-    &.active {
-      color: var(--accent-subtle);
-      background: var(--bg-light);
-    } */
     &:first-child {
       border-top-left-radius: var(--border-radius);
       border-bottom-left-radius: var(--border-radius);
@@ -958,12 +774,13 @@ td {
 .segmented {
   position: relative; /* 1. glider's anchor */
   display: grid;
-  grid-template-columns: repeat(var(--count), 1fr);
-  padding: var(--space-xs);
-  background-color: var(--bg-light);
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  background-color: var(--surface-1);
   border-radius: var(--border-radius);
+
   & input { display: none; }  /* hide the radios */
 }
+
 .segment:nth-of-type(1):has(input:checked) ~ .s-glider { --selected: 0; }
 .segment:nth-of-type(2):has(input:checked) ~ .s-glider { --selected: 1; }
 .segment:nth-of-type(3):has(input:checked) ~ .s-glider { --selected: 2; }
@@ -973,11 +790,12 @@ td {
 .segment {
   display: flex;
   justify-content: center;
+  align-items: center;
   border-radius: var(--border-radius);
   cursor: pointer;
 
   &:hover {
-    background-color: var(--bg-hover);
+    background-color: var(--surface-3);
   }
 }
 
@@ -995,8 +813,21 @@ td {
   width: calc(100% / var(--count)); /* 2. one cell wide */
   transform: translateX(calc(var(--selected) * 100%));  /* 3. Slide to selected */
   z-index: 1;
-  background-color: var(--bg-active);
+  background-color: var(--accent-strong);
   border: 1px solid var(--accent-strong);
   border-radius: var(--border-radius);
   transition: transform 0.2s cubic-bezier(0.2, 1.9, 0.5, 0.56);
+}
+
+/* =========================================
+   Typography primitives
+   ========================================= */
+
+/* Mono section label: "SURFACES — DEPTH COMES FROM VALUE STEPS" */
+.eyebrow {
+  font-family: var(--font-family-data);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
 }

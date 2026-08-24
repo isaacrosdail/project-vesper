@@ -180,30 +180,4 @@ def query_counter(app):
     return count_queries
 
 
-@pytest.fixture
-def sample_products(logged_in_user):
-    session = db_session()
-    from app.modules.groceries.models import Product
-
-    products = [
-        Product(user_id=logged_in_user["id"], name="Apples", category="fruits", net_weight=500, unit_type="g"),
-        Product(user_id=logged_in_user["id"], name="Bread", category="grains", net_weight=700, unit_type="g"),
-    ]
-    session.add_all(products)
-    session.flush()
-    return products
-
-
-@pytest.fixture
-def sample_transactions(logged_in_user, sample_products):
-    session = db_session()
-    from app.modules.groceries.models import Transaction
-
-    transactions = [
-        Transaction(user_id=logged_in_user["id"], product_id=sample_products[0].id, price_at_scan=3.50, quantity=2),
-        Transaction(user_id=logged_in_user["id"], product_id=sample_products[1].id, price_at_scan=4.00, quantity=1),
-    ]
-    session.add_all(transactions)
-    session.flush()
-    return transactions
 

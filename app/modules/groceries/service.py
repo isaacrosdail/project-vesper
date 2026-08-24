@@ -67,6 +67,7 @@ from app.modules.groceries.schemas import (
     RecipeCreate,
     RecipePatch,
     ShoppingListItemPatch,
+    ShoppingTripCreate,
     TransactionCreate,
     TransactionPatch,
 )
@@ -238,6 +239,12 @@ class GroceriesService:
             setattr(item, field, getattr(validated, field))
         return item
 
+    def delete_shopping_list_item(self, item_id: int) -> ShoppingListItem:
+        item = self.shopping_list_item_repo.get_by_id(item_id)
+        if not item:
+            raise ServiceError("Shopping list item not found", 404)
+        self.shopping_list_item_repo.delete(item)
+        return item
 
     def get_or_create_shopping_list(self) -> tuple[ShoppingList, bool]:
         """Return ShoppingList from database, else create new and return that."""
@@ -309,6 +316,24 @@ class GroceriesService:
             raise ServiceError("Recipe not found", 404)
         self.recipe_repo.delete(recipe)
         return recipe
+
+    def create_shopping_trip(self, validated: ShoppingTripCreate) -> ShoppingTrip:
+        txns = [
+            self.create_transaction(TransactionCreate(
+                product_id=line.product_id,
+                price_at_scan=line.price_at_scan,
+                quantity=line.quantity,
+            ))
+            for line in validated.lines
+        ]
+        trip = self.shopping_trip_repo.create_shopping_trip(
+            store_name=validated.store_name,
+            entry_datetime=validated.entry_datetime,
+            total_price=sum(l.price_at_scan * l.quantity for l in validated.lines),
+        )
+        for txn in txns:
+            txn.shopping_trip = trip
+        return trip
 
 
     def import_nutrition_csv(self, file_stream: io.TextIOWrapper) -> int:

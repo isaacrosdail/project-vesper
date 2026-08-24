@@ -19,7 +19,9 @@
   /* --font-family-primary: system-ui, "Segoe UI", roboto, helvetica, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; */
   --font-weight-default: 400;
   /* --font-family-primary: "DM Sans"; */
-  --font-family-primary: "Montserrat";
+  /* --font-family-primary: "Montserrat"; */
+  --font-family-primary: "Manrope", system-ui, sans-serif; /* Labels, titles, body, names */
+  --font-family-data: "JetBrains Mono", ui-monospace, monospace; /* Numbers, dates, units, eyebrows */
   --font-weight-semibold: 600;
 
   --font-size-xs: 0.75rem;
@@ -32,22 +34,21 @@
   /* TODO: Make line height = icon height/width */
   --icon-size: 1.5rem;
   --line-height-default: 1.5rem;
-  /* --icon-scale: 0.6; for button to SVG icon ratio sizing for btn-icon */
-
-
-  --container-lg: 72rem;
-  --container-xl: 80rem;
+  --icon-scale: 0.8; /* for button to SVG icon ratio sizing for btn-icon */
 
   --border-default: 1px solid var(--border-color);
-  --border-radius: 0.5rem;
+  --border-radius: 2px;
   --border-radius-mild: 0.3rem;
-  --border-radius-top: 0.5rem 0.5rem 0 0;
 
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
+  --space-hair: 0.125rem; /*  2px */
+  --space-xs: 0.25rem;    /*  4px */
+  --space-sm: 0.5rem;     /*  8px */
+  --space-md: 0.75rem;    /* 12px */
+  --space-lg: 1rem;       /* 16px */
+  --space-xl: 1.25rem;    /* 20px */
+  --space-2xl: 2rem;      /* 32px */
+  --space-3xl: 2.75rem;   /* 44px */
+  --space-section: 4.75rem; /* 76px */
 
   --transition-fade: 0.2s ease;
   --transition-hover: 120ms ease;
@@ -55,21 +56,12 @@
   --hamburger-angle: 38deg;
   --hamburger-scale: 1.27;
 
-  --focus-ring: 2px solid var(--accent-subtle);
+  --focus-ring: 2px solid var(--accent-strong);
   --focus-offset: 0px; /* TODO */
 
-  --btn-size-sm: 1.5rem;
   --btn-size-md: 2rem;
-  --btn-size-lg: 2.5rem;
-
 
   --progress-bar-bg: oklch(85% 0 0deg);
-
-  /* TODO: Fix, trying this out */
-  --light-bg-active: oklch(0.48 0.2 267);
-  --light-text-active: oklch(1.0 0 0);
-  --dark-bg-active: var(--dark-bg-light);
-  --dark-text-active: var(--dark-accent-subtle);
 
   --radar-minimum: oklch(0.5611 0.1888 21.87);
   --radar-baseline: oklch(0.7213 0.0698 205.29);
@@ -82,7 +74,7 @@
   --chart-width: 400px;
   --chart-height: 300px;
 
-  --node-color: oklch(0.6493 0.11 251.78);
+  --node-color: var(--surface-3); /* nodes are data; brand blue is interaction-only */
 
   /* Shadows: light mode's are more subtle  */
   --shadow-sm: light-dark(
@@ -103,8 +95,6 @@
   color-scheme: light dark;
 
   /* Background Hierarchy */
-  --light-bg-dark: oklch(0.898 0.004 286);
-
   --light-bg: oklch(0.965 0.001 286);
   --light-bg-light: oklch(0.99 0 0);
   --light-bg-hover: oklch(0.93 0.003 286);
@@ -120,6 +110,18 @@
   /* Accent Colors */
   --light-accent-strong: oklch(0.5438 0.191 267.01);
   --light-accent-subtle: oklch(0.72 0.12 267);
+
+  /* New-vocabulary twins: light theme hasn't been redesigned yet,
+      so these borrow the nearest existing light value. Tune later. */
+  --light-surface-1: var(--light-bg-light);
+  --light-surface-2: var(--light-bg-light);
+  --light-surface-3: var(--light-bg-hover);
+  --light-line: var(--light-border-color);
+  --light-line-strong: var(--light-border-color);
+  --light-text-faint: var(--light-text-muted);
+  --light-text-disabled: var(--light-text-muted);
+  --light-accent-hover: var(--light-accent-strong);
+  --light-bg-selected: var(--light-bg-hover);
 
   /* Selection TODO: Needs work obv / consider scrapping since we declare in base.css? OR actually scrap in base.css, keep here */
   --light-bg-selection: oklch(68% 0.15 48deg);                  /* Selection background */
@@ -138,31 +140,36 @@
 
   /* =============== DARK THEME DEFINITIONS =============== */
 
-  /* Background Hierarchy */
-  --dark-bg-dark: oklch(0.1785 0.0041 285.98); /* slate 1 */
-  --dark-bg: oklch(0.2521 0.0058 271.18); /* slate 4 */
-  --dark-bg-light: oklch(0.3118 0.0083 255.56); /* slate 5 */
-  --dark-bg-hover: oklch(40% 0 0deg);
+  /* Surfaces */
+  --dark-bg: #14161b; /* app background */
+  --dark-surface-1: #1b1e25; /* panels, rows, cards, navbar */
+  --dark-surface-2: #22262e; /* inputs, modals, menus */
+  --dark-surface-3: #2c313b; /* hover, selected, secondary btn */
+
+  /* Lines */
+  --dark-line: #272b33; /* row hairlines */
+  --dark-line-strong: #3f4653; /* input & overlay borders */
 
   /* Text Hierarchy */
-  --dark-text: oklch(0.9489 0.0029 264.54);
-  --dark-text-muted: oklch(0.7686 0.0096 258.34);
+  --dark-text: #eceef1;
+  --dark-text-muted: #8b9099;
+  --dark-text-faint: #55585f; /* eyebrow labels */
+  --dark-text-disabled: #45484f;
   --dark-text-destructive: var(--dark-clr-error);
 
-  /* Borders */
-  --dark-border-color: oklch(0.3993 0.0121 252.94); /* slate 7 */
-
   /* Accent Colors */
-  --dark-accent-strong: oklch(0.6493 0.193 251.78); /* indigo 5 */
-  --dark-accent-subtle: oklch(0.6493 0.14 251.78); /* indigo 5? */
+  --dark-accent-strong: #3f6bd4; /* blue-500: primary button, active tab */
+  --dark-accent-hover: #4d79e2; /* blue-400: hover on primary */
+  --dark-accent-subtle: #7d9ee8; /* blue-300: links, inline actions, focus ring */
+  --dark-bg-selected: #16244a; /* blue-900: selected row tint */
 
   /* Selection */
   --dark-bg-selection: oklch(68% 0.15 48deg);
   --dark-text-selection: oklch(30% 0.15 250deg);
 
-  --dark-clr-success: oklch(0.6406 0.1329 157.68); /* Green 9 */
-  --dark-clr-warning: oklch(0.8537 0.1572 84.13);
-  --dark-clr-error: oklch(0.6256 0.1933 23.03);
+  --dark-clr-success: #4e9e73;
+  --dark-clr-warning: #cf9247;
+  --dark-clr-error: #d9605a;
 
   --dark-progress-bar-fill: linear-gradient(
       to right in oklch,
@@ -173,28 +180,33 @@
 
   /* === ACTIVE THEME MAPPINGS === */
 
-  /* Background Hierarchy */
-  --bg-dark: light-dark(var(--light-bg-dark), var(--dark-bg-dark));
-  --bg-light: light-dark(var(--light-bg-light), var(--dark-bg-light));
+  /* Surfaces & lines (the minted vocabulary — source of truth) */
   --bg: light-dark(var(--light-bg), var(--dark-bg));
-  --bg-hover: light-dark(var(--light-bg-hover), var(--dark-bg-hover));
-  --bg-active: light-dark(var(--light-bg-active), var(--dark-bg-active));
+  --surface-1: light-dark(var(--light-surface-1), var(--dark-surface-1)); /* panels, rows, cards, navbar */
+  --surface-2: light-dark(var(--light-surface-2), var(--dark-surface-2)); /* inputs, modals, menus */
+  --surface-3: light-dark(var(--light-surface-3), var(--dark-surface-3)); /* hover, selected, secondary btn */
+  --line: light-dark(var(--light-line), var(--dark-line)); /* row hairlines */
+  --line-strong: light-dark(var(--light-line-strong), var(--dark-line-strong)); /* input & overlay borders */
+  --bg-selected: light-dark(var(--light-bg-selected), var(--dark-bg-selected)); /* selected row tint */
+
+  /* Legacy aliases — delete each once the sweep migrates its consumers */
+  --bg-light: var(--surface-1);
+  --border-color: var(--line);
 
   /* Text */
   --text: light-dark(var(--light-text), var(--dark-text));
   --text-muted: light-dark(var(--light-text-muted), var(--dark-text-muted));
+  --text-faint: light-dark(var(--light-text-faint), var(--dark-text-faint));
+  --text-disabled: light-dark(var(--light-text-disabled), var(--dark-text-disabled));
   --text-destructive: light-dark(var(--light-text-destructive), var(--dark-text-destructive));
   --text-inverse: light-dark(var(--dark-text), var(--light-text));
-  --text-active: light-dark(var(--light-text-active), var(--dark-text-active));
-
-  /* Borders */
-  --border-color: light-dark(var(--light-border-color), var(--dark-border-color));
 
   /* Gradient */
   --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
 
   /* Accents */
   --accent-strong: light-dark(var(--light-accent-strong), var(--dark-accent-strong));
+  --accent-hover: light-dark(var(--light-accent-hover), var(--dark-accent-hover));
   --accent-subtle: light-dark(var(--light-accent-subtle), var(--dark-accent-subtle));
 
   /* Selection */

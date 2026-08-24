@@ -27,7 +27,6 @@ USERNAME_MAX_LENGTH = 30
 # Username: 3-30, Unicode letters, numbers, & underscores
 USERNAME_REGEX = rf"^[\p{{L}}0-9_]{{{USERNAME_MIN_LENGTH},{USERNAME_MAX_LENGTH}}}$"
 
-# CONSTANTS
 PASSWORD_HASH_MAX_LENGTH = 256
 TIMEZONE_MAX_LENGTH = 50
 
@@ -43,17 +42,17 @@ class UnitSystemEnum(StrEnum):
 
 
 class User(Base, UserMixin):  # type: ignore[misc]
+    """A user account: identity, credentials, and role."""
+
     username: Mapped[str] = mapped_column(
         String(USERNAME_MAX_LENGTH), nullable=False, unique=True
     )
-
     name: Mapped[str | None] = mapped_column(String(NAME_MAX_LENGTH), nullable=True)
 
     # Werkzeug's default uses pbkdf2:sha256 = ~95 chars
     password_hash: Mapped[str] = mapped_column(
         String(PASSWORD_HASH_MAX_LENGTH), nullable=False
     )
-
     role: Mapped[UserRoleEnum] = mapped_column(
         SAEnum(UserRoleEnum, name="user_role_enum", values_callable=lambda x: [e.value for e in x]),
         nullable=False,
@@ -112,6 +111,7 @@ class SexEnum(StrEnum):
     F = auto()
 
 class UserProfile(Base):
+    """A per-user profile: locale, unit-system, hour cycle, and location."""
 
     __table_args__ = (
         CheckConstraint(
@@ -147,13 +147,9 @@ class UserProfile(Base):
         nullable=False,
     )
 
-    # At save, ping OpenWeatherAPI's Geocodign API if city,country resolves.
-    #   if yes, store what it returns, if not, reject input.
     city: Mapped[str | None] = mapped_column(String(200), nullable=True)
-
     # country: ISO 3166-1 alpha-2
     country: Mapped[str | None] = mapped_column(String(2), nullable=True)
-
     # For WeatherAPI pings; derived from geocode
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -164,9 +160,7 @@ class UserProfile(Base):
         ),
         nullable=True
     )
-
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-
     height_cm: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     user: Mapped[User] = relationship("User", back_populates="profile")
@@ -175,6 +169,8 @@ class UserProfile(Base):
 CAL_PER_GRAM = {"protein": 4, "carbs": 4, "fat": 9}
 
 class UserGoals(Base):
+    """Per-user target values for tracked metrics (weight, cals, steps, macros, etc)."""
+
     __tablename__ = "user_goals"
 
     __table_args__ = (

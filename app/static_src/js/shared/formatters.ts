@@ -9,6 +9,8 @@ export function hourMinsDisplay(total_minutes: number) {
     return str
 }
 
+export const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+export const formatCents = (cents: number) => money.format(cents / 100);
 
 /**
  * Title-cases each word in a string using whitespace and underscores as delimiters.

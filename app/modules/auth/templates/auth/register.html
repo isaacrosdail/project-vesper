@@ -6,19 +6,19 @@
 {% block content %}
 
 <div class="card-dashboard card--narrower">
-    <form action="{{ url_for('auth.register') }}" id="register-form" method="post" spellcheck="false" data-form-type="page">
+    <form action="{{ url_for('auth.register') }}" id="register-form" method="post" spellcheck="false">
         <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
         <div class="form-column">
             <h3>Register:</h3>
-            <div class="faded-field" data-tip="3-30 characters, letters/numbers/underscores allowed">
+            <div class="faded-field">
                 <label for="username">Username:</label>
-                <input type="text" id="username" name="username" 
-                        required
-                        autocomplete="username"
-                        placeholder="johndoe">
+                <input type="text" id="username" name="username"
+                    autocomplete="username"
+                    placeholder="johndoe"
+                    required>
                 <small class="error-inline-username"></small>
             </div>
-            <div class="faded-field" data-tip="Must be 5-128 characters">
+            <div class="faded-field">
                 <label for="password">Password:</label>
                 <div class="password-input-group">
                     <input type="password" id="password" name="password"
@@ -32,6 +32,7 @@
                 <label for="name">Name (optional):</label>
                 <input type="text" id="name" name="name" placeholder="John">
             </div>
+            <input type="hidden" name="timezone" id="timezone">
             <div class="form-actions">
                 <button class="btn btn-primary" type="submit">Register</button>
                 <a href="{{ url_for('main.home') }}" class="btn btn-secondary">Back</a>

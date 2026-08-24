@@ -29,14 +29,6 @@
     type CanvasMode = { mode: 'idle' } | { mode: 'linking'; sourceId: number };
     let canvasState: CanvasMode = $state<CanvasMode>({ mode: 'idle' });
 
-    // drag -> move it -> attachment DONE
-    // wheel -> zoom -> attachment   DONE
-    // esc -> cancel linking mode
-    // zoom pass 1.5 -> reveal labels/details
-    // space/d with a node hovered -> toggle complete
-    // L with a node hovered -> enter linking from hoveredId
-    //
-
     let hoveredId = $state<number | null>(null);
 
     let legendOpen = $state<boolean>(false);

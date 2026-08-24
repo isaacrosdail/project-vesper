@@ -72,6 +72,11 @@ class UserProfilePatch(APISchema):
     birth_date: date | None = None
     height_cm: int | None = Field(None, gt=0, lt=300)
 
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v: Any) -> Any:
+        return None if v == "" else v
+
     @field_validator("birth_date")
     @classmethod
     def reject_invalid_range(cls, v: date | None) -> date | None:
@@ -122,6 +127,10 @@ class UserGoalsPatch(APISchema):
     potassium: int | None = Field(None, gt=0)
     sodium: int | None = Field(None, gt=0)
 
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v: Any) -> Any:
+        return None if v == "" else v
 
     @model_validator(mode="after")
     def validate_macro_split(self) -> Self:

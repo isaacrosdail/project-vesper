@@ -1,12 +1,12 @@
-<script lang="ts">
+<script lang="ts" generics="T extends string">
     let {
         opts,
         label,
         onSelect,
     }: {
-        opts: [label: string, value: string][];
+        opts: readonly [label: string, value: T][];
         label: string;
-        onSelect: (value: string) => void;
+        onSelect: (value: T) => void;
     } = $props();
 
     const uid = $props.id();
@@ -38,7 +38,7 @@
         align-items: center;
         padding: var(--space-xs) var(--space-sm);
         white-space: nowrap;
-        background-color: var(--bg-light);
+        background-color: var(--surface-2);
         border: var(--border-default);
         border-radius: var(--border-radius);
     }

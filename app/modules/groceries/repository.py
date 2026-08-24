@@ -273,6 +273,15 @@ class ShoppingTripRepository(BaseRepository[ShoppingTrip]):
     def __init__(self, session: Session, user_id: int) -> None:
         super().__init__(session, user_id, model_cls=ShoppingTrip)
 
+    def create_shopping_trip(self, store_name: str, entry_datetime: datetime, total_price: Decimal) -> ShoppingTrip:
+        trip = ShoppingTrip(
+            user_id=self.user_id,
+            store_name=store_name,
+            entry_datetime=entry_datetime,
+            total_price=total_price,
+        )
+        return self.add(trip)
+
     def get_most_recent_trip(self) -> ShoppingTrip | None:
         stmt = (
             self._user_select(ShoppingTrip)

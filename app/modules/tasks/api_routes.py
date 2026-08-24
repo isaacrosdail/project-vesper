@@ -57,6 +57,7 @@ def patch_task(session: Session, task_id: int) -> tuple[Response, int]:
     ), 200
 
 
+## TODO(links): check 
 @api_bp.get("/tasks/tasks")
 @login_plus_session
 def tasks_list(session: Session) -> tuple[Response, int]:

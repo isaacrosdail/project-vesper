@@ -11,17 +11,19 @@ import './shared/ui/theme-manager';
 import './shared/ui/tooltip';
 
 // Import page-specific modules
-import { init as initCore } from './core/index';
-import { init as initGroceries } from './groceries/dashboard';
-import { init as initGroceriesData } from './groceries/data';
+import { init as initCore } from './home/index';
+import { init as initGroceries } from './groceries/dashboard/dashboard';
+import { init as initGroceriesData } from './groceries/data/data';
 import { init as initHabits } from './habits/dashboard';
 import { init as initMetrics } from './metrics/dashboard';
 import { init as initRegisterPage } from './register';
-import { init as initStyleRef } from './style-reference';
+import { init as initLoginPage } from './login';
+import { init as initStyleRef } from './style-reference/style-reference';
 import { init as initTasks } from './tasks/dashboard';
 import { init as initTimeTracking } from './time_tracking/dashboard';
 
-import { init as initRecipesPage } from './groceries/recipes';
+import { init as initRecipesPage } from './groceries/recipes/recipes';
+import { init as initShoppingPage } from './groceries/shopping/shopping';
 import { init as initPillarsPage } from './pillars';
 import { init as initProfileSidebar } from './shared/ui/profile-sidebar';
 import { initLeftSidebar } from './shared/ui/left-sidebar';
@@ -31,17 +33,20 @@ import { mount } from 'svelte';
 import ConfirmDialog from './shared/components/ConfirmDialog.svelte';
 import ContextMenu from './shared/components/ContextMenu.svelte';
 import Toaster from './shared/components/Toaster.svelte';
+import HotkeysHelp from './HotkeysHelp.svelte';
 
 const initRegistry = {
     "main.home": () => initCore(),
     "devtools.style_reference": () => initStyleRef(),
     "groceries.dashboard": () => initGroceries(),
     "groceries.data": () => initGroceriesData(),
+    "groceries.shopping": () => initShoppingPage(),
     "habits.dashboard": () => initHabits(),
     "tasks.dashboard": () => initTasks(),
     "time_tracking.dashboard": () => initTimeTracking(),
     "metrics.dashboard": () => initMetrics(),
-    "auth.register": () => initRegisterPage(),
+    "auth.register_form": () => initRegisterPage(),
+    "auth.login_form": () => initLoginPage(),
 
     // Prototyping stuff
     "groceries.recipes": () => initRecipesPage(),
@@ -75,6 +80,7 @@ export async function initMain() {
     const authenticated = document.documentElement.dataset['authenticated'] === 'true';
     if (authenticated) await refreshMe();
 
+    mount(HotkeysHelp, { target: document.body });
     mount(ConfirmDialog, { target: document.body });
     mount(ContextMenu, { target: document.body });
     mount(Toaster, { target: document.body });
@@ -83,6 +89,8 @@ export async function initMain() {
     const page = document.documentElement.dataset['page'];
     if (page && page in initRegistry) {
         initRegistry[page as keyof typeof initRegistry]();
+    } else {
+        console.warn(`data-page "${page}" has no init registered`);
     }
 
     if (authenticated) initProfileSidebar();

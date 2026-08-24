@@ -14,6 +14,7 @@ from app.api.responses import success_response
 from app.modules.groceries.schemas import (
     CookRequest,
     GroceriesDashboardPayload,
+    LastShoppingTripRead,
     LogProductRequest,
     MacrosSummaryRead,
     ProductCreate,
@@ -26,6 +27,7 @@ from app.modules.groceries.schemas import (
     ShoppingListItemCreate,
     ShoppingListItemPatch,
     ShoppingListItemRead,
+    ShoppingTripCreate,
     TransactionCreate,
     TransactionPatch,
     TransactionRead,
@@ -161,6 +163,20 @@ def patch_shopping_list_item(session: Session, item_id: int) -> tuple[Response, 
     item = groceries_service.update_shopping_list_item(item_id, validated)
     return success_response(message="Item updated", data=ShoppingListItemRead.dump(item)), 200
 
+@api_bp.delete("/groceries/shopping_list_items/<int:item_id>")
+@login_plus_session
+def delete_shopping_list_item(session: Session, item_id: int) -> tuple[Response, int]:
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    item = groceries_service.delete_shopping_list_item(item_id)
+    return success_response(message="Item deleted", data=ShoppingListItemRead.dump(item)), 200
+
+@api_bp.post("/groceries/shopping_trips")
+@login_plus_session
+def post_shopping_trip(session: Session) -> tuple[Response, int]:
+    validated = ShoppingTripCreate(**request.json)
+    groceries_service = create_groceries_service(session, current_user.id, current_user.timezone)
+    trip = groceries_service.create_shopping_trip(validated)
+    return success_response(message="Trip logged", data=LastShoppingTripRead.dump(trip)), 201
 
 @api_bp.post("/groceries/recipes")
 @login_plus_session

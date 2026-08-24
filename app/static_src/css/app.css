@@ -28,10 +28,6 @@
  * 1000    - Tooltips
 */
 
-.hide {
-  display: none !important;
-}
-
 ::selection {
   background-color: var(--bg-selection);
 }
@@ -79,44 +75,6 @@ footer {
   text-align: center;
 }
 
-/* currently just on habits dashboard for the "completions by habit" chart */
-details {
-  padding: var(--space-md);
-  position: relative;
-
-  &:not([open]) span {
-  }
-
-  & summary {
-    cursor: pointer;
-  }
-}
-
-/* summary::marker {
-  color: var(--accent-strong);
-} */
-
-/* details[open] > summary {
-  font-weight: 600;
-} */
-details::after {
-  position: absolute;
-  content: "";
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 3px;
-  background: var(--accent-strong);
-  transition: width 0.1s ease;
-}
-
-
-/* @media (width <= 600px) {
-  .field-pair,
-  .field-pair--weighted {
-      grid-template-columns: 1fr;
-  }
-} */
 @container (width <= 400px) {
   /* Containers: card-dashboard, modal-body */
   .field-pair,
@@ -139,7 +97,7 @@ details::after {
    =================================== */
 
 
-/* For search popover & task details popover */
+/* For search popover & task details popover, and CookColumn.svelte's meal popover */
 .popover-overlay:popover-open {
   display: flex;
   flex-direction: column;
@@ -148,369 +106,78 @@ details::after {
   inset: 0;
   top: -30%; /* pull up from center of view */
   width: clamp(300px, 60vw, 450px);
-  /* height: 300px; */
   max-height: min(70vh, 500px);
 
-  background: var(--bg-light);
+  background: var(--surface-2);
   padding: var(--space-sm);
   border-radius: var(--border-radius);
-  border: 2px solid var(--accent-subtle);
+  border: 1px solid var(--line-strong);
 }
 .popover-overlay::backdrop {
   background: rgb(0 0 0 / 0.4);
 }
 
 /* ===================================
-    PAGE-SPECIFIC: Time Tracking Dashboard
+    PAGE-SPECIFIC: Metrics Dashboard
    =================================== */
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-}
-
-
-
-.stats-row {
-  display: flex;
-  gap: var(--space-sm);
-  width: 100%;
-  justify-content: space-between;
-
-  & > * {
-    padding: var(--space-sm);
+  /* For both line and bar charts in Metrics dashboard */
+  .reference-line line {
+    stroke: var(--metric-color);
+    stroke-width: 2;
+    stroke-dasharray: 4 4; /* 4px dash, 4px gap */
   }
-}
-.charts-row {
-  display: flex;
-  justify-content: space-between;
-
-  & .chart-categories {
-    display: grid;
-    grid-template-areas:
-      "header header"
-      "chart breakdown";
-
-    & .chart-categories__header { grid-area: header; }
-    & .chart { grid-area: chart; }
-    & .breakdown { grid-area: breakdown; }
+  .reference-line text {
+    fill: var(--metric-color);
   }
-}
 
 
 /* ===================================
     PAGE-SPECIFIC: Groceries Dashboard
    =================================== */
 
-/* NEW: */
-.shopping-list-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  position: relative;
-
-  & input {
-    width: 7ch;
-    padding: 0 var(--space-xs);
-    border-radius: 0;
-  }
-  & span {
-    font-weight: 400;
-  }
-  & .item-detail {
-    opacity: 0.7;
-  }
-
-  & .inline-delete {
-    position: absolute;
-    right: -1rem;
-
-  }
-  &:hover .inline-delete {
-    opacity: 1;
-  }
-}
-.shopping-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-.shopping-list:empty::after {
-  content: "No items yet.";
-  font-style: italic;
-  color: var(--text-muted);
-}
-
-.inline-delete {
-  position: absolute;
-  top: 50%; /* position button's top edge at middle of container */
-  left: -1.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--clr-error);
-  opacity: 0;
-  transform: translateY(-50%); /* then shift up by half its own height to center it vertically */
-  transition: opacity var(--transition-fade);
-}
-
-/* ===================================
-    PAGE-SPECIFIC: Recipes Page
-   =================================== */
-
-/* form stuff, tbd where this ought to go */
-#ingredients-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-sm);
-}
-
-.ingredient-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 2fr 1fr auto;
-  gap: var(--space-sm);
-  border-left: 2px solid var(--border-color);
-  border-radius: var(--border-radius);
-  /* background: var(--bg-hover); */
-  padding: var(--space-md);
-  align-items: end;
-
-  &:only-of-type .js-remove-ingredient {
-    display: none;
-  }
-}
-/* .ingredient-row:only-of-type .js-remove-ingredient {
-  display: none;
-} */
-/* .ingredient-row:has(.btn-remove-ingredient:hover, .btn-remove-ingredient:focus-visible) {
-  outline: thin solid var(--clr-error);
-  box-shadow: 0px 0px 5px var(--clr-error);
-} */
-.btn-remove-ingredient {
-  position: absolute;
-  /* top: 0; */
-  right: -20px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-muted);
-  opacity: 0;
-  transition: opacity 0.15s ease;
+.card-link {
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  /* transition: text-decoration 0.2s ease; */
 }
-.ingredient-row:hover .btn-remove-ingredient {
-  opacity: 1;
+.card-link::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
 }
-.btn-remove-ingredient:hover {
-  color: var(--clr-error);
-  border-color: var(--clr-error);
+.card-link:hover::before {
+  transform: scaleX(1);
 }
-
-/* ====== ACTUAL RECIPES PAGE STUFF BELOW ======  */
-.all-recipes-grid {
-  display: grid;
-  /* grid-template-columns: 1fr 1fr; */
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  padding: var(--space-lg);
-  gap: var(--space-md);
-}
-.all-recipes-header {
-  grid-column: 1 / -1;
-}
-
-/* Note: Using for both recipe preview cards in 
-  grid AND recipe modal display
-*/
-.recipe-metadata {
-  color: var(--text-muted);
-  font-size: 0.9em;
+.card-link::after {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-left: var(--space-xs);
+  background: currentColor;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3' /></svg>");
 }
 
-.recipe-card {
-  position: relative; /* context for ellipsis_svg button */
-  border-left: 5px solid var(--accent-subtle);
-  min-height: 10vh;
-  background: var(--bg-dark);
-  border-radius: var(--border-radius);
-  padding: var(--space-sm);
 
-  & button {
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
-  & button:hover {
-    background: var(--accent-subtle);
-    border-radius: 50%;
-  }
-  &:hover {
-    transform: translateY(-2px);
-    cursor: pointer;
-    /* box-shadow: 1px 1px 10px var(--accent-strong); */
-  }
-}
+/* Color coding fat/protein/carbs */
+/* TODO(svelte): Purge? */
+[data-macro="Cals"]       { --macro-color: #e0975a; }
+[data-macro="Protein"]    { --macro-color: #e0975a; }
+[data-macro="Carbs"]      { --macro-color: #7cb98c; }
+[data-macro="Fat"]        { --macro-color: #a48fce; }
 
-/* inside each recipe card: */
-/* Also: has styling in components.css, should centralize */
-#recipe-detail-modal[open] {
-  display: grid;
-  grid-template-columns: 1fr 2fr; /* ingr: directions = 1:2 */
-  grid-template-rows: 1fr 2fr;    /* top : bottom = 1:2 */
-  gap: var(--space-sm);
-  width: clamp(300px, 80vw, 700px);
-  height: 80vh;
-}
-.top-section {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.ingredients-col {
-  border-right: 2px solid var(--text-muted);
-
-  & ul {
-    padding: 0.5rem;
-  }
-  & li {
-    position: relative;
-    padding: var(--space-sm);
-    padding-left: var(--space-md);
-  }
-}
-
-.ingredients-col,
-.directions-col {
-  padding: var(--space-md);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-
-  & h2 {
-    text-align: center;
-  }
-}
-
-.directions-col {
-  & ol {
-    /* flex container all our li's */
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-
-    counter-reset: li-counter;
-    padding: var(--space-sm);
-
-    & li {
-      /* flex container for EACH li (circle + text) */
-      display: flex;
-      gap: var(--space-md);
-      align-items: flex-start; /* Aligns number to top if text wraps */
-      counter-increment: li-counter;
-    }
-    & li:before {
-      content: counter(li-counter);
-      
-      /* Circle styling */
-      background-color: var(--accent-subtle);
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      
-      /* flex container for each circle/bullet point + number */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      flex-shrink: 0;
-      font-weight: bold;
-      font-size: 0.9em;
-    }
-  }
-}
 
 /* ===================================
     D3 Charts: Habits, Metrics, Time Tracking
   =================================== */
-
-/* habits page drafting */
-#habits-stats-container {
-  display: grid;
-  grid-template-areas:
-    "heatmap"
-    "tiles"
-    "breakdown";
-  gap: var(--space-sm);
-  grid-template-rows: 220px auto auto;
-  align-self: center;
-}
-@media ( width >= 768px) {
-  #habits-stats-container {
-    grid-template-columns: 1fr 220px;
-    grid-template-areas:
-      "heatmap tiles"
-      "breakdown tiles";
-    grid-template-rows: 220px auto;
-  }
-}
-
-.heatmap-group {
-  grid-area: heatmap;
-  overflow-x: scroll;
-  overflow-y: hidden;
-}
-
-.tiles-group {
-  grid-area: tiles;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--space-sm);
-
-  & > * {
-    height: 100%; /* to make card-stats inside take up their "grid spots"? */
-    width: 100%;
-  }
-}
-
-.breakdown-group {
-  grid-area: breakdown;
-  position: relative;
-  padding: var(--space-sm);
-
-  & summary {
-    grid-area: details;
-    white-space: nowrap;
-  }
-
-  & .timeframe-selector {
-    grid-area: controls;
-    justify-self: end;
-  }
-
-  & #habits-hbar-chart-container {
-    grid-area: chart;
-    /* width: 600px; */
-    width: clamp(350px, 70vw, 600px);
-    height: 400px;
-  }
-}
-.breakdown-content {
-  display: grid;
-  grid-template-areas:
-    "details controls"
-    "chart chart";
-  grid-template-columns: auto 1fr;
-}
-/* END HABITS PAGE DRAFTING */
 
 /* DRAFT: should prob condense this */
 .chart-controls {
@@ -537,7 +204,7 @@ details::after {
 .axis-x {
   & text {
     fill: var(--text-muted);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-family: inherit;
   }
   & :is(path, line) {
@@ -568,29 +235,8 @@ svg text {
   height: 300px;
 }
 
-
-#metrics-stats {
-  /* align-self: center; */
-}
-/* #metrics-multi-chart-container {
-  width: 600px;
-  height: 300px;
-} */
-
 .multi-chart-legend:hover {
   opacity: 0.5;
-}
-
-#metrics-multi-chart-container,
-#metrics-bar-chart-container,
-#metrics-line-chart-container {
-  width: 500px;
-  height: 300px;
-}
-
-/* Target lines: bmr-target-line & sleep-target-line */
-[class$="-target-line"] {
-  fill: red;
 }
 
 /* TODO: Figure this out. Removed broad 'text' selector because our pillars chart should have axes with red/green text */
@@ -606,9 +252,9 @@ svg text {
   stroke: var(--text-muted); /* TODO: make blue? */
 }
 /* for metrics chart? all of em? idk */
-.empty-message {
+/* .empty-message {
   fill: var(--text-muted);
-}
+} */
 .chart-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -633,27 +279,11 @@ svg {
   overflow: visible; /* for hovering pie chart slices */
 }
 
-/* TODO: Gonna centrally size our D3 charts here as well to prevent pop-in/down on render */
-[id$="chart-container"] {
-  align-self: center;
-  /* width: var(--chart-width);
-  height: var(--chart-height); */
-}
-
 /* ===================================
     APP LAYOUT / PAGE SHELL
    =================================== */
 
 /* .wrapper & .content stylings below give us the "sticky footer" at the bottom */
-
-/* Flex container for header/content/footer */
-/* .wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: calc(1.5 * var(--space-lg));
-  min-height: 100vh;
-  background-color: var(--bg-dark);
-} */
 
 .wrapper {
   display: grid;
@@ -663,13 +293,13 @@ svg {
     "left footer footer";
   --sidebar-collapsed-width: 40px;
   /* Lets us make the sidebar opening reflow/push content in */
-  grid-template-columns: var(--sidebar-width, var(--sidebar-collapsed-width)) 1fr auto;
+  grid-template-columns: var(--sidebar-width, var(--sidebar-collapsed-width)) minmax(0, 1fr) auto;
   transition: grid-template-columns 0.2s ease;
   /* grid-template-columns: auto 1fr auto; */
   grid-template-rows: auto 1fr auto;
   min-height: 100vh;
   column-gap: calc(1.5 * var(--space-lg));
-  background-color: var(--bg-dark);
+  background-color: var(--bg);
 
   &.sidebar-open {
     --sidebar-width: 250px;
@@ -735,30 +365,6 @@ svg {
   gap: var(--space-sm);
 }
 
-
-
-[data-table] {
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-}
-[data-table]:hover {
-    background: var(--bg-hover);
-}
-[data-table].active {
-    background: var(--bg-active);
-    color: var(--text-active);
-}
-
-.table-controls {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--font-size-sm);
-}
-
-
 .card--narrower {
   align-self: center;
   width: clamp(15rem, 90vw, 25rem);
@@ -791,109 +397,6 @@ svg {
     PAGE-SPECIFIC: Homepage
    =================================== */
 
-@keyframes flicker {
-    0%, 100% { transform: scaleY(1) scaleX(1); }
-    25% { transform: scaleY(1.05) scaleX(0.95); }
-    50% { transform: scaleY(0.95) scaleX(1.05); }
-    75% { transform: scaleY(1.03) scaleX(0.97); }
-}
-/* Completion flare */
-@keyframes flare {
-    0% { transform: scale(1); filter: brightness(1); }
-    30% { transform: scale(1.6); filter: brightness(1.5); }
-    100% { transform: scale(1); filter: brightness(1); }
-}
-.streak-icon.flare {
-    animation: flare 0.4s ease-out forwards, flicker 2s ease-in-out infinite 0.4s;
-}
-/* TODO: Fix up, for fire thing :/ */
-.habit-streak {
-  display: inline-flex;
-  align-items: center;
-
-  &.completed .streak-icon { display: none; }
-  &:has(.streak-count:empty) .streak-icon { display: none; }
-
-  & .streak-icon {
-    transition: transform 0.1s ease;
-    fill: orange;
-    color: orange;
-    width: 1em;
-    height: 1em;
-    transform-origin: bottom center;
-    animation: flicker 1.5s ease-in-out infinite;
-
-    &.pop {
-      transform: scale(1.4);
-    }
-  }
-}
-
-
-#greeting-card {
-  position: relative;
-  height: clamp(150px, 15vh, 300px);
-
-  & canvas {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    width: 100%;
-  }
-
-  & .greeting-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: space-between;
-    /* width: 100%; */
-  }
-
-  & .weather-info {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-
-  & .weather-temp {
-    display: flex;
-    align-items: center;
-  }
-}
-
-#greeting-card::before {
-  content: '';
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--celestial-color, gold);
-  left: var(--celestial-x, 50%);
-  bottom: var(--celestial-y, 50%);
-  box-shadow: 0 0 20px var(--celestial-color, gold);
-  transition: left 1s ease, bottom 1s ease;
-}
-
-/* Styling for text of today's frog to subtly emphasize them */
-.highlight-label { 
-  font-weight: var(--font-weight-semibold);
-}
-
-/* Vertical stack for frog + task list */
-.tasks-section {
-  display: grid;
-  gap: var(--space-sm);
-}
-
-/* Accent 'card' to highlight priority items (accent lborder + bg-light) used for today's frog */
-.highlight-item {
-  padding: var(--space-xs);
-  padding-left: var(--space-sm);
-  background: var(--bg-light);
-  border-left: 4px solid var(--accent-subtle);
-  border-radius: calc(0.8 * var(--border-radius));
-}
-
 /* NOTE: confetti-layer is a z-index/overflow container only.
  * Particle positions are calculated via JS getBoundingClientRect(), not relative to this element's position.
  */
@@ -906,7 +409,7 @@ svg {
   overflow: visible;
   pointer-events: none;
 }
-.dot {
+.confetti-dot {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1082,7 +585,7 @@ label[for="remember_user"] {
 .error-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   align-items: center;
   text-align: center;
 
@@ -1101,80 +604,9 @@ label[for="remember_user"] {
     PAGE-SPECIFIC: Style-reference Page
    =================================== */
 
+
 .dragover-target {
   outline: thin solid cyan;
-}
-
-.component-catalog {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 1.5rem;
-}
-
-/* Token swatches */
-.swatch-strip {
-  display: flex;
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  border: var(--border-default);
-}
-
-.swatch {
-  flex: 1;
-  padding: var(--space-sm) var(--space-md);
-  font-size: var(--font-size-sm);
-}
-
-.swatch-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: var(--space-sm);
-}
-
-.swatch-sm {
-  padding: var(--space-sm);
-  border-radius: var(--border-radius-mild);
-  font-size: var(--font-size-sm);
-  text-align: center;
-  border: var(--border-default);
-}
-
-.control-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.control-row--spaced {
-  gap: var(--space-lg);
-}
-
-.control-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--space-md);
-}
-
-.control-label {
-  display: block;
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-  margin-bottom: var(--space-xs);
-}
-
-.confirmation-confined {
-    max-width: 400px;
-    background: var(--bg);
-    border: var(--border-default);
-    border-radius: var(--border-radius);
-    padding: var(--space-md);
-}
-
-
-/* Override stylng to position dummy context menu */
-.context-menu-positioning {
-    position: relative;
 }
 
 /* Override btn-icon styling to show borders for debug/tuning */
@@ -1188,86 +620,6 @@ html[data-page="devtools.style_reference"] {
   }
 }
 
-/* Base grid styles, shared by all demo containers */
-.demo-section,
-.demo-subsection,
-.demo-grid-container {
-  display: grid;
-  gap: var(--space-md);
-}
-
-/* Overall section-level grids */
-.demo-section {
-    grid-template-rows: auto 1fr; /* Headers + "rest" */
-}
-
-/* Subsections within said section grids (per component) */
-.demo-subsection {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-
-/* Grid defaults for token tiles */
-.demo-grid-container { 
-    /* Creates as many columns as will fit, each a min of 40px but grows evenly to fill space */
-    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-    align-items: center; /* controls vertical alignment of content inside each grid cell */
-}
-
-/* To make border-color clearly visible for tuning */
-.token-container {
-    border: 4px solid var(--border-color);
-}
-.tile,
-.stepped-bg,
-.stepped-accents {
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-}
-
-/* Design token tiles - smaller */
-.tile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 100px;
-  aspect-ratio: 1;
-}
-
-/* Stepped gradient tiles for bg/accents */
-.stepped-bg,
-.stepped-accents {
-  display: flex;
-  grid-column: 1 / -1; /* span the whole row */
-  align-items: center;
-  justify-content: space-evenly; /* distribute labels evenly across */
-  height: 80px;
-}
-
-/* Stepped gradient backgrounds */
-.stepped-bg {
-  background: linear-gradient(
-      to right in oklch,
-      var(--bg-dark)   0%, var(--bg-dark)  25%,
-      var(--bg)       25%, var(--bg)       50%,
-      var(--bg-light) 50%, var(--bg-light) 75%,
-      var(--bg-hover) 75%, var(--bg-hover) 100%
-  );
-}
-.stepped-accents {
-  background: linear-gradient(
-      to right in oklch,
-      var(--accent-strong)   0%, var(--accent-strong)  50%,
-      var(--accent-subtle)  50%, var(--accent-subtle)  100%,
-  );
-}
-.progbar {
-  grid-column: 1 / -1;
-  align-items: center;
-  height: 60px;
-  background: var(--progress-bar-fill);
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-}
 
 
 /* PILLARS DRAFTING */
@@ -1363,15 +715,7 @@ html[data-page="main.pillars"] li {
 }
 
 
-
-/* TODO: Groceries 2x2 grid mockup */
-/* style="width: 500px; height: 500px;" */
-.card-groceries {
-  padding: var(--space-sm);
-  align-content: start;
-  gap: var(--space-sm);
-}
-
+/* TODO: Move first 2 into utilities.css, btn-soft either collapse into btn or at least move into components.css */
 .tertiary { /* links, labels, metadata */
   font-size: var(--font-size-xs);
   color: var(--text-muted);
@@ -1380,6 +724,7 @@ html[data-page="main.pillars"] li {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
+/* TODO: Collapse into btn-ghost? */
 .btn-soft {
   border: var(--border-default);
   border-radius: var(--border-radius);
@@ -1388,7 +733,7 @@ html[data-page="main.pillars"] li {
   cursor: pointer;
 
   &:hover {
-    background: var(--bg-hover);
+    background: var(--surface-3);
     color: var(--text);
   }
 }
@@ -1396,37 +741,6 @@ html[data-page="main.pillars"] li {
   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
 </svg> */
 
-.card-link {
-  cursor: pointer;
-  position: relative;
-  /* transition: text-decoration 0.2s ease; */
-}
-.card-link::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.2s ease;
-}
-.card-link:hover::before {
-  /* text-decoration: underline; */
-  transform: scaleX(1);
-}
-.card-link::after {
-  content: "";
-  display: inline-block;
-  width: 0.75em;
-  height: 0.75em;
-  margin-left: var(--space-xs);
-  background: currentColor;
-  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3' /></svg>");
-  /* transition: transform 0.2s ease; */
-}
 .another-pill {
   border: var(--border-default);
   /* border-radius: var(--border-radius); */
@@ -1442,125 +756,6 @@ html[data-page="main.pillars"] li {
   align-items: center;
 }
 
-.groceries-grid {
-  width: 600px;
-  height: 800px;
-  display: grid;
-  grid-template-areas:
-  "nutrition logging"
-  "shoppinglist tables";
-  gap: var(--space-sm);
-    /* By default, grid cells stretch to fit their
-  row height (align-items: stretch)
-  to make this, and the other "pills" take up less
-  vert space, we ned to constraint the alignment,
-  NOT the height:
-  */
-  /* & > * { align-items: start; } */
-}
-.nutrition {
-  grid-area: nutrition;
-  display: grid;
-  grid-template-areas:
-    "card-header card-header card-header card-header"
-    "xofygoal xofygoal xofygoal xofygoal"
-    "calsprog  calsprog  calsprog  calsprog"
-    "cals     protein  carbs    fat"
-    "sparkline sparkline sparkline sparkline"
-    "meals    meals    meals    meals";
-
-    & .macro-card {
-      text-align: center;
-      border: var(--border-default);
-      border-radius: var(--border-radius);
-
-      & .pct {
-        font-weight: 600;
-      }
-    }
-    & .xofygoal {
-      grid-area: xofygoal;
-      justify-self: center;
-      align-self: end;
-      
-      display: flex;
-      flex-direction: column;
-    }
-
-    & .calsprog {
-      --prog: 1;
-      grid-area: calsprog;
-      height: 15px;
-      background: var(--clr-success); /* try a gradient? */
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      transform: scaleX(1.005); /* compensating for ?? */
-      /* transform: scaleX(var(--prog));
-      transform-origin: left;
-      transition: transform 0.2s ease; */
-
-      & .mask {
-        background: var(--bg-light);
-        transform: scaleX(var(--prog));
-        transform-origin: right;
-        height: 100%;
-        width: calc(100% + 1px); /* sub-pixel rendering */
-        /* transition: transform 0.2s ease; */
-        animation: reveal 3s linear forwards;
-      }
-    }
-
-    & .cals {
-      grid-area: cals;
-    }
-    & .protein {
-      grid-area: protein;
-    }
-    & .carbs {
-      grid-area: carbs;
-    }
-    & .fat {
-      grid-area: fat;
-    }
-    & .sparkline {
-      grid-area: sparkline;
-      display: grid;
-      grid-template-areas:
-        "sparkline-chart sparkline-chart"
-        "sparkline-chart sparkline-chart"
-        "days avg";
-      /* justify-content: space-between; */
-      /* justify-items: space-between; */
-
-      & .sparkline-chart {
-        grid-area: sparkline-chart;
-        border: 1px solid red;
-        height: 40px;
-        min-width: 0;
-
-        &:empty {
-          height: 40px;
-          /* background: linear-gradient(90deg, var(--bg-light) 25%, var(--bg-hover) 50%, var(--bg-light) 75%); */
-          background: linear-gradient(90deg, blue 25%, red 50%, var(--bg-light) 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
-          border-radius: var(--border-radius);
-        }
-      }
-      & .days {
-        grid-area: days;
-        justify-self: start;
-      }
-      & .avg {
-        grid-area: avg;
-        justify-self: end;
-      }
-    }
-    & .meals {
-      grid-area: meals;
-    }
-}
-
 /* todo: for our loading text we swap in when d3 sparkline renders */
 .loading {
   position: relative;
@@ -1571,12 +766,12 @@ html[data-page="main.pillars"] li {
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: var(--bg-light);
+    background: var(--surface-1);
     background-image: linear-gradient(
         90deg,
-        var(--bg-light) 0%,
-        var(--bg-hover) 50%,
-        var(--bg-light) 100%
+        var(--surface-1) 0%,
+        var(--surface-3) 50%,
+        var(--surface-1) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
@@ -1584,6 +779,7 @@ html[data-page="main.pillars"] li {
   }
 }
 
+/* TODO(css): use this for hydrating visual now with Svelte? */
 @keyframes shimmer {
   from { background-position: 200% 0 }
   to { background-position: -200% 0 }
@@ -1594,104 +790,10 @@ html[data-page="main.pillars"] li {
   to { transform: scaleX(0); }
 }
 
-/* TODO: move this as we go */
-.list-row {
-  display: flex;
-  justify-content: space-between;
-  border: var(--border-default);
-  border-radius: var(--border-radius);
-  padding: var(--space-xs) var(--space-sm);
-}
 
-.logging {
-  grid-area: logging;
-  display: grid;
-  grid-template-areas:
-    "card-header card-header"
-    "quicklog quicklog"
-    "plan plan"
-    "openplan openplan";
-
-  & .quicklog {
-    grid-area: quicklog;
-    display: flex;
-    flex-direction: column;
-
-    & .logentry {
-      font-size: small;
-    }
-    & .logentry-add {
-      font-size: small;
-      align-self: center;
-      width: 100%;
-      border-style: dashed;
-    }
-  }
-  & .plan {
-    grid-area: plan;
-    display: flex;
-    flex-direction: column;
-  }
-  & .openplan { grid-area: openplan; }
-}
-.shoppinglist {
-  grid-area: shoppinglist;
-  display: grid;
-  grid-template-areas:
-    "card-header card-header"
-    "listitems listitems"
-    "cta cta"
-    "lowstock lowstock";
-
-  & .listitems {
-    grid-area: listitems;
-
-    & .listitem {
-      display: flex;
-      justify-content: space-between;
-    }
-  }
-  & .cta {
-    grid-area: cta;
-    display: flex;
-    gap: var(--space-sm);
-  }
-  & .lowstock {
-    grid-area: lowstock;
-  }
-}
-.tables {
-  grid-area: tables;
-  display: grid;
-  grid-template-areas:
-    "card-header card-header"
-    "recentlyused recentlyused"
-    "lastbuy lastbuy"
-    "csv-other csv-other"
-    "info info";
-
-  & .txns {
-    grid-area: txns;
-  }
-  & .linkto {
-    grid-area: linkto;
-  }
-  & .recentlyused {
-    grid-area: recentlyused;
-  }
-  & .lastbuy { grid-area: lastbuy; }
-  & .csv-other {
-    grid-area: csv-other;
-    display: flex;
-    gap: var(--space-sm);
-  }
-  & .info { grid-area: info; }
-}
-
-
-/* WIP area: */
+/* TODO: fix as part of new tokens/design stuff */
 .surface {
   border: var(--border-default);
   border-radius: var(--border-radius);
-  background: var(--bg);
+  background: var(--surface-1);
 }

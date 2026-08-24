@@ -100,13 +100,14 @@ def test_user_wipe_expires_loaded_state(session, logged_in_user):
     # Remove expire_all() from delete_user_activity_data and this fails.
     user = session.get(User, logged_in_user.id)
     habit = make_habit(logged_in_user.id)
-    user.habits.append(habit)
+    session.add(habit)
     session.flush()
-    assert user.habits == [habit] # relationship collection is loaded in memory
+    assert inspect(habit).persistent
+    # assert user.habits == [habit] # relationship collection is loaded in memory
 
     delete_user_activity_data(session, user.id)
     # Without expire_all(), the loaded collection would still be [habit]
-    assert user.habits == []
+    assert inspect(habit).expired
 
 def test_sequences_reset_for_empty_tables(session, logged_in_user):
     delete_all_db_data(session, include_users=False, reset_sequences=True)

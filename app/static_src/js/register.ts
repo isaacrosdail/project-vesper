@@ -4,6 +4,11 @@ import { initValidation, makeValidator } from './shared/validators';
 export function init() {
     const form = document.querySelector<HTMLFormElement>('#register-form')!;
 
+    // Get user tz
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tzInput = document.querySelector<HTMLInputElement>('#timezone');
+    tzInput.value = tz;
+
     const validateUsername = makeValidator('username', {
         minLength: 3,
         maxLength: 30,

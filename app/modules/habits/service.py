@@ -195,6 +195,7 @@ class HabitsService:
         Each value is {"name": str, "days": int}, or None when no habit has any
         completions yet (nothing to compare).
         """
+        # "argmax/argmin" reduction over the keyed aggregate, joined against a name lookup.
         streaks = self.get_all_streaks()
         if not streaks:
             return {"highest": None, "lowest": None}

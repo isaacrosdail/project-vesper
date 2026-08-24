@@ -69,7 +69,7 @@
     content: "";
     position: absolute;
     inset: 0 -100vw;
-    background: var(--bg);
+    background: var(--surface-1);
     border-top: var(--border-default);
     border-bottom: var(--border-default);
     z-index: -1;
@@ -106,7 +106,7 @@
   &::before {
     position: absolute;
     bottom: -9px;
-    left: 50%;
+  left: 50%;
     z-index: 1;
     content: "";
     border: 5px solid transparent;
@@ -137,7 +137,7 @@ nav {
   position: relative; /* positioning context for z-index, force nav to participate in stacking context */
   z-index: 250;       /* above mobile nav */
   padding: var(--space-xs) var(--space-md);
-  background: var(--bg);
+  background: var(--surface-1);
 }
 .nav-anchor {
   position: relative; /* positioning context for mobile nav slidedown */
@@ -213,7 +213,7 @@ nav {
     }
     &[aria-current="page"],
     &:hover {
-      background: var(--bg-light);
+      background: var(--surface-1);
       border-left: 6px solid var(--accent-subtle);
     }
   }

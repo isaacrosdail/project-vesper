@@ -1,8 +1,8 @@
 
 import * as d3 from 'd3';
 
-import { D3_TRANSITION_DURATION_MS, getChartDimensions, hourMinsDisplay } from '../shared/charts';
-
+import { D3_TRANSITION_DURATION_MS, getDims } from '../shared/charts';
+import { hourMinsDisplay } from '../shared/formatters';
 
 export type PieDatum = {
     category: string;
@@ -19,10 +19,14 @@ export class TimeEntriesChart {
     private pie; arc;
     private color;
     private gRoot; gChart; gLegend;
-    private centerLabel; totalMins; highest; countOther; idleTimeout;
+    private centerLabel;
+    private totalMins!: number;
+    private highest!: PieDatum;
+    countOther!: number | null;
+    idleTimeout!: number;
 
     constructor(containerSelector: string) {
-        this.dims = getChartDimensions(containerSelector, { top: 20, right: 20, bottom: 20, left: 20 });
+        this.dims = getDims(300, 400, { top: 40, right: 20, bottom: 10, left: 20 });
 
         this.radius = Math.min(this.dims.innerWidth, this.dims.innerHeight) / 2;
 
@@ -57,20 +61,6 @@ export class TimeEntriesChart {
         this.color = d3.scaleOrdinal(d3.schemeTableau10);
     }
 
-    showEmptyChart() {
-        this.gLegend.selectAll('g.legend-item').remove();
-        this.gChart.selectAll('g.slice').remove();
-
-        const _emptyMessage = this.gChart.selectAll('text.empty-message')
-            .data([1])
-            .join("text")
-            .attr("class", "empty-message")
-            .attr("text-anchor", "middle")
-            .attr("x", 0)
-            .attr("y", 0)
-            .text(`No time entry data for this period.`)
-    }
-
     // Adjust text label positions for each slice to show at appropriate locations
     private labelTransform(d): string {
         const mid = (d.startAngle + d.endAngle) / 2;
@@ -94,7 +84,7 @@ export class TimeEntriesChart {
             .attr("x", 0)
             .attr("dy", "1.6em")
             .attr("font-size", "0.8rem")
-            .text(`Top: ${this.highest.category}`)
+            .text(this.highest ? `Top: ${this.highest.category}` : '')
 
         // find count of "other":
         this.centerLabel
@@ -124,11 +114,6 @@ export class TimeEntriesChart {
     }
 
     updatePieChart(data: PieDatum[]) {
-        if (data.length === 0) {
-            this.showEmptyChart();
-            return
-        }
-
         this.gRoot.selectAll('.empty-message').remove();
 
         const sorted = [...data].toSorted((a, b) => b.value - a.value);
@@ -136,7 +121,8 @@ export class TimeEntriesChart {
 
         // Re-calc totalMins and highest for center label
         this.totalMins = data.reduce((a, b) => a + b.value, 0);
-        this.highest = data.reduce((a, b) => a.value > b.value ? a : b);
+        // this.highest = data.reduce((a, b) => a.value > b.value ? a : b);
+        this.highest = sorted[0] ?? null;
         this.countOther = data.length > 1 ? data.length - 1 : null;
 
         const groups = this.gChart.selectAll<SVGGElement, d3.PieArcDatum<PieDatum>>("g.slice")
