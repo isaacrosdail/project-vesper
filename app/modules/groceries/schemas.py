@@ -144,7 +144,6 @@ class ShoppingListItemCreate(APISchema):
 
 class ShoppingListItemPatch(APISchema):
     quantity_wanted: int | None = Field(default=None, gt=0)
-    is_checked: bool | None = None
 
 class ShoppingListItemRead(APIReadSchema):
     id: int
@@ -152,7 +151,6 @@ class ShoppingListItemRead(APIReadSchema):
     product_id: int
     product_name: str | None
     quantity_wanted: int
-    is_checked: bool
     net_weight: float
     unit_type: UnitEnum
     created_at: datetime

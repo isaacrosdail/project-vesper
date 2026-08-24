@@ -277,9 +277,6 @@ class ShoppingListItem(Base):
         nullable=False,
     )
 
-    # TODO: Currently for UI state, will inform future "Complete shopping list" calculations
-    is_checked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
-
     shopping_list_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("shopping_lists.id", ondelete="CASCADE"), nullable=False
     )
